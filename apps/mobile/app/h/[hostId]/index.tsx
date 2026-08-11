@@ -1,3 +1,4 @@
+import type { RuntimeMobileSessionClientTab } from '@yiru/runtime-protocol/contract'
 import type { RepoIcon } from '@yiru/workbench-model/workspace'
 import type { WorkspaceStatusDefinition } from '@yiru/workbench-model/workspace'
 import { cn } from 'cnfast'
@@ -33,6 +34,7 @@ import { leaveHostRoute } from '~/host-route/exit'
 import { translate } from '~/i18n/translate'
 import { useResponsiveLayout } from '~/layout/responsive-layout'
 import { floatingWorkspaceSessionPath } from '~/session/floating-workspace'
+import { activateMobileSessionTab } from '~/session/tab-activation'
 import { loadPinnedIds, savePinnedIds } from '~/storage/preferences'
 import { useHostClient, useCloseHost, useForceReconnect } from '~/transport/client-context'
 import {
@@ -64,6 +66,7 @@ import { DEFAULT_MOBILE_WORKSPACE_STATUSES } from '~/workspace/statuses'
 import { useActiveWorktreeScroll } from '~/workspace/use-active-scroll'
 import { useWorkspaceSections } from '~/workspace/use-list-sections'
 import { useNow } from '~/workspace/use-now'
+import { useWorkspaceOpenTabs } from '~/workspace/use-open-tabs'
 import {
   applyDesktopViewSettings,
   type MobileSortMode,
@@ -77,6 +80,7 @@ function isErrorVerdict(v: ConnectionVerdict): boolean {
 }
 
 const REPO_METADATA_REFRESH_MS = 60_000
+const EMPTY_WORKSPACE_OPEN_TABS: RuntimeMobileSessionClientTab[] = []
 
 // Why: a worktree.ps snapshot in flight predates a pin/unpin the user just made,
 // so pending intents win until their worktree.set RPC settles.
@@ -182,6 +186,11 @@ export function HostScreen({
     createInitialHostRouteActionState(action)
   )
   const [sleptIds, setSleptIds] = useState<Set<string>>(new Set())
+  const openTabsByWorktree = useWorkspaceOpenTabs({
+    client,
+    connected: connState === 'connected',
+    hostId
+  })
 
   const leaveHost = useCallback(() => {
     leaveHostRoute(router)
@@ -725,16 +734,32 @@ export function HostScreen({
   }, [hostId, navigateFromHostList])
 
   const openWorktreeSession = useCallback(
-    (item: Worktree) => {
+    (item: Worktree, selectedTab?: RuntimeMobileSessionClientTab) => {
       // Highlight the row immediately; the next worktree.ps poll confirms it.
       setOptimisticActiveWorktreeId(item.worktreeId)
       if (client && connState === 'connected') {
         // Why: opening a mobile session should hydrate host-owned tabs without
         // pulling other paired clients, especially desktop, into this worktree.
-        void callRuntimeOrpc(client, (runtime) => runtime.worktree.activate, {
+        const activation = callRuntimeOrpc(client, (runtime) => runtime.worktree.activate, {
           worktree: `id:${item.worktreeId}`,
           notifyClients: false
-        }).catch(() => null)
+        })
+        if (selectedTab) {
+          void activation
+            .then(() =>
+              activateMobileSessionTab(client, {
+                worktree: `id:${item.worktreeId}`,
+                tabId: selectedTab.id,
+                ...(selectedTab.type === 'terminal' && selectedTab.leafId
+                  ? { leafId: selectedTab.leafId }
+                  : {}),
+                notifyClients: false
+              })
+            )
+            .catch(() => null)
+        } else {
+          void activation.catch(() => null)
+        }
       }
       const target = `/h/${hostId}/session/${encodeURIComponent(item.worktreeId)}?name=${encodeURIComponent(item.displayName || item.repo)}`
       navigateFromHostList(target)
@@ -758,9 +783,6 @@ export function HostScreen({
       connState === 'disconnected' || connState === 'reconnecting' || connState === 'auth-failed'
         ? lastKnownWorktrees
         : worktrees
-    if (sleptIds.size === 0 && optimisticActiveWorktreeId === null) {
-      return base
-    }
     return base.map((w) => {
       const slept = sleptIds.has(w.worktreeId)
         ? { liveTerminalCount: 0, hasAttachedPty: false, status: 'inactive' as const }
@@ -771,9 +793,17 @@ export function HostScreen({
         optimisticActiveWorktreeId !== null
           ? { isActive: w.worktreeId === optimisticActiveWorktreeId }
           : null
-      return slept || active ? { ...w, ...slept, ...active } : w
+      const openTabs = openTabsByWorktree.get(w.worktreeId) ?? EMPTY_WORKSPACE_OPEN_TABS
+      return { ...w, ...slept, ...active, openTabs }
     })
-  }, [connState, worktrees, lastKnownWorktrees, sleptIds, optimisticActiveWorktreeId])
+  }, [
+    connState,
+    worktrees,
+    lastKnownWorktrees,
+    sleptIds,
+    optimisticActiveWorktreeId,
+    openTabsByWorktree
+  ])
 
   const toggleCollapsed = useCallback(
     (key: string) => {
@@ -970,6 +1000,7 @@ export function HostScreen({
               nestedUnderProject={section.icon !== 'pin'}
               endsProjectRail={section.icon !== 'pin' && index === section.data.length - 1}
               onPress={openWorktreeSession}
+              onTabPress={openWorktreeSession}
               onLongPress={item.workspaceKind === 'folder-workspace' ? undefined : setActionTarget}
               onToggleLineage={(row) =>
                 toggleCollapsed(getMobileWorkspaceLineageGroupKey(row.worktreeId))

@@ -1,3 +1,4 @@
+import type { RuntimeMobileSessionClientTab } from '@yiru/runtime-protocol/contract'
 import type { RuntimeWorktreeAgentRow } from '@yiru/runtime-protocol/mobile-runtime-types'
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 
@@ -46,6 +47,7 @@ export type Worktree = {
   comment?: string
   status?: 'working' | 'active' | 'permission' | 'done' | 'inactive'
   agents?: RuntimeWorktreeAgentRow[]
+  openTabs?: RuntimeMobileSessionClientTab[]
 }
 
 export type FilterState = {

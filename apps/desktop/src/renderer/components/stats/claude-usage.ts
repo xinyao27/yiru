@@ -134,12 +134,19 @@ export const createClaudeUsageSlice: StateCreator<AppState, [], [], ClaudeUsageS
             opts?.forceRefresh === true
               ? { ...snapshot.scanState, isScanning: true }
               : snapshot.scanState,
+          claudeUsageSnapshotReady: opts?.forceRefresh !== true,
           claudeUsageSummary: snapshot.summary,
           claudeUsageDaily: snapshot.daily,
           claudeUsageModelBreakdown: snapshot.modelBreakdown,
           claudeUsageProjectBreakdown: snapshot.projectBreakdown,
           claudeUsageRecentSessions: snapshot.recentSessions
         })
+        // Why: entering Home should restore persisted analytics without
+        // turning navigation into a transcript scan. The refresh action owns
+        // explicit rescans once a usable snapshot exists.
+        if (opts?.forceRefresh !== true) {
+          return
+        }
       } else {
         set({
           claudeUsageScanState: {

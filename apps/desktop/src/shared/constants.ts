@@ -284,7 +284,6 @@ export function getDefaultSettings(homedir: string): GlobalSettings {
     electronHttp1CompatibilityMode: false,
     openLinksInApp: false,
     localhostWorktreeLabelsEnabled: false,
-    openLinksInAppPreferencePrompted: false,
     openAgentTabsInChatByDefault: false,
     experimentalNativeChat: false,
     nativeChatSessionOptions: {},

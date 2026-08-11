@@ -378,6 +378,16 @@
     border-radius: 0 !important;
   }
 
+  /* Why: a hardware preview must preserve the physical device silhouette while
+     the containing workbench pane and controls remain rectilinear. */
+  :root:root [data-yiru-emulator-frame='true'] {
+    border-radius: var(--yiru-emulator-frame-outer-radius, 0) !important;
+  }
+
+  :root:root [data-yiru-emulator-screen='true'] {
+    border-radius: var(--yiru-emulator-frame-inner-radius, 0) !important;
+  }
+
   /* Why: the theme picker visualizes color geometry, so its field, samples,
      and direct manipulation controls retain the round shapes sanctioned by DESIGN.md. */
   :root:root [data-theme-color-picker] {

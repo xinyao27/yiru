@@ -92,6 +92,11 @@ export type KeybindingActionId =
   | 'sourceControl.sendReviewNotes'
   | 'fileExplorer.undo'
   | 'fileExplorer.redo'
+  | 'fileExplorer.rename'
+  | 'fileExplorer.copy'
+  | 'fileExplorer.cut'
+  | 'fileExplorer.paste'
+  | 'fileExplorer.selectAll'
   | 'fileExplorer.copyPath'
   | 'fileExplorer.copyRelativePath'
   | 'fileExplorer.delete'
@@ -860,6 +865,47 @@ export const KEYBINDING_DEFINITIONS: readonly KeybindingDefinition[] = [
       linux: ['Mod+Shift+Z', 'Ctrl+Y'],
       win32: ['Mod+Shift+Z', 'Ctrl+Y']
     }
+  },
+  {
+    id: 'fileExplorer.rename',
+    title: 'Rename file',
+    group: 'File Explorer',
+    scope: 'fileExplorer',
+    searchKeywords: ['shortcut', 'file explorer', 'rename'],
+    defaultBindings: platformBindings(['Enter', 'F2']),
+    allowBareKeybindings: true
+  },
+  {
+    id: 'fileExplorer.copy',
+    title: 'Copy file',
+    group: 'File Explorer',
+    scope: 'fileExplorer',
+    searchKeywords: ['shortcut', 'file explorer', 'copy', 'file'],
+    defaultBindings: platformBindings(['Mod+C'])
+  },
+  {
+    id: 'fileExplorer.cut',
+    title: 'Cut file',
+    group: 'File Explorer',
+    scope: 'fileExplorer',
+    searchKeywords: ['shortcut', 'file explorer', 'cut', 'move', 'file'],
+    defaultBindings: platformBindings(['Mod+X'])
+  },
+  {
+    id: 'fileExplorer.paste',
+    title: 'Paste file',
+    group: 'File Explorer',
+    scope: 'fileExplorer',
+    searchKeywords: ['shortcut', 'file explorer', 'paste', 'file'],
+    defaultBindings: platformBindings(['Mod+V'])
+  },
+  {
+    id: 'fileExplorer.selectAll',
+    title: 'Select all files',
+    group: 'File Explorer',
+    scope: 'fileExplorer',
+    searchKeywords: ['shortcut', 'file explorer', 'select all', 'file'],
+    defaultBindings: platformBindings(['Mod+A'])
   },
   {
     id: 'fileExplorer.copyPath',

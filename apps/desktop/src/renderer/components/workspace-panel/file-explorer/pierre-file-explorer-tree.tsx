@@ -315,15 +315,20 @@ export const PierreFileExplorerTree = forwardRef<
       className="yiru-pierre-file-tree bg-sidebar block h-full min-h-0 w-full"
       style={PIERRE_FILE_TREE_STYLE}
       onClickCapture={(event) => {
+        const eventPath = event.nativeEvent.composedPath()
+        const button = eventPath.find(
+          (entry): entry is HTMLButtonElement => entry instanceof HTMLButtonElement
+        )
+        // Why: Pierre selects rows without moving document focus into its Shadow DOM,
+        // so explorer-scoped shortcuts otherwise still belong to the previous surface.
+        button?.focus({ preventScroll: true })
         if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
           return
         }
-        const row = event.nativeEvent
-          .composedPath()
-          .find(
-            (entry): entry is HTMLElement =>
-              entry instanceof HTMLElement && entry.dataset.type === 'item'
-          )
+        const row = eventPath.find(
+          (entry): entry is HTMLElement =>
+            entry instanceof HTMLElement && entry.dataset.type === 'item'
+        )
         const canonicalPath = row?.dataset.itemPath
         const node = canonicalPath ? treeData.nodeByCanonicalPath.get(canonicalPath) : null
         if (node && !node.isDirectory) {
@@ -332,7 +337,7 @@ export const PierreFileExplorerTree = forwardRef<
       }}
       onDragOverCapture={nativeDropHandlers.onDragOverCapture}
       onDragLeaveCapture={nativeDropHandlers.onDragLeaveCapture}
-      onDragStartCapture={dragPayloadHandlers.onDragStartCapture}
+      onDragStart={dragPayloadHandlers.onDragStart}
       onDragEndCapture={dragPayloadHandlers.onDragEndCapture}
       onDoubleClickCapture={(event) => {
         const row = event.nativeEvent

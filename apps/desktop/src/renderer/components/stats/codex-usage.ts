@@ -131,12 +131,19 @@ export const createCodexUsageSlice: StateCreator<AppState, [], [], CodexUsageSli
             opts?.forceRefresh === true
               ? { ...snapshot.scanState, isScanning: true }
               : snapshot.scanState,
+          codexUsageSnapshotReady: opts?.forceRefresh !== true,
           codexUsageSummary: snapshot.summary,
           codexUsageDaily: snapshot.daily,
           codexUsageModelBreakdown: snapshot.modelBreakdown,
           codexUsageProjectBreakdown: snapshot.projectBreakdown,
           codexUsageRecentSessions: snapshot.recentSessions
         })
+        // Why: entering Home should restore persisted analytics without
+        // turning navigation into a transcript scan. The refresh action owns
+        // explicit rescans once a usable snapshot exists.
+        if (opts?.forceRefresh !== true) {
+          return
+        }
       } else {
         set({
           codexUsageScanState: {

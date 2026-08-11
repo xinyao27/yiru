@@ -54,7 +54,7 @@ export function LocalWorkspacePortSection({
   onToggle: () => void
   onStopPort: (port: WorkspacePort) => void
   onShowDetails: (port: WorkspacePort) => void
-  onOpenInBrowser: (port: WorkspacePort, event?: React.MouseEvent<HTMLButtonElement>) => void
+  onOpenInBrowser: (port: WorkspacePort) => void
 }): React.JSX.Element | null {
   if (ports.length === 0 && !emptyText) {
     return null
@@ -115,10 +115,7 @@ function LocalWorkspacePortRow({
   const handleCopy = useCallback(() => {
     void shellClient.ui.writeClipboardText(addressForPort(port))
   }, [port])
-  const handleOpenBrowser = useCallback(
-    (event?: React.MouseEvent<HTMLButtonElement>) => void onOpenInBrowser(port, event),
-    [onOpenInBrowser, port]
-  )
+  const handleOpenBrowser = useCallback(() => void onOpenInBrowser(port), [onOpenInBrowser, port])
   const handleCopyButtonClick = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
       handleCopy()
@@ -130,8 +127,7 @@ function LocalWorkspacePortRow({
   )
   const handleOpenBrowserButtonClick = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
-      // Why: only pointer activations carry modifier intent for the system-browser escape hatch.
-      handleOpenBrowser(event.detail > 0 ? event : undefined)
+      handleOpenBrowser()
       if (event.detail > 0) {
         event.currentTarget.blur()
       }

@@ -17,9 +17,7 @@ import { installWindowsCtrlAltChordRepair } from './terminal-windows-ctrl-alt-ch
 import type { ManagedPaneInternal, PaneManagerOptions } from './types'
 
 function getTerminalUrlOpenHint(): string {
-  return navigator.userAgent.includes('Mac')
-    ? '⌘+click for system browser or ⇧⌘+click for Yiru browser'
-    : 'Ctrl+click for system browser or Shift+Ctrl+click for Yiru browser'
+  return navigator.userAgent.includes('Mac') ? '⌘+click to open link' : 'Ctrl+click to open link'
 }
 
 function defaultLinkTooltipText(uri: string, openLinkHint: string): string {

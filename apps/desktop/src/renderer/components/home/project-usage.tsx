@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react'
 import type { TokenValueMetric } from '~renderer/components/contribution-heatmap/metric'
 import { Card, CardContent, CardHeader } from '~renderer/components/ui/card'
 import { Input } from '~renderer/components/ui/input'
+import { ScrollArea } from '~renderer/components/ui/scroll-area'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
 import type { ProjectUsageValue, ProviderUsageValue } from '~shared/stats/usage-breakdown'
@@ -109,11 +110,11 @@ function ProjectUsage({ metric, projects }: ProjectUsageProps): React.JSX.Elemen
 
       <CardContent className="mt-4">
         {visibleProjects.length > 0 ? (
-          <div className="scrollbar-sleek border-border max-h-[34rem] overflow-y-auto border-y">
+          <ScrollArea className="border-border border-y" viewportClassName="max-h-[34rem]">
             {visibleProjects.map((project) => (
               <ProjectUsageRow key={project.key} metric={metric} project={project} />
             ))}
-          </div>
+          </ScrollArea>
         ) : (
           <div className="border-border text-muted-foreground border border-dashed px-4 py-8 text-center text-sm">
             {projects.length === 0
@@ -172,19 +173,7 @@ function ProjectUsageRow({
         )}
       </p>
 
-      {providerTotal > 0 ? (
-        <div className="bg-muted mt-3 flex h-1 overflow-hidden" aria-hidden="true">
-          {project.providers.map((usage) => (
-            <span
-              key={usage.provider}
-              className={providerClassName(usage.provider)}
-              style={{ width: `${(providerMetric(usage, metric) / providerTotal) * 100}%` }}
-            />
-          ))}
-        </div>
-      ) : null}
-
-      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
         {project.providers.map((usage) => (
           <ProviderShare
             key={usage.provider}

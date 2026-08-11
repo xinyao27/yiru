@@ -38,7 +38,7 @@ const WORKTREE_CARD_METADATA_OPTIONS: WorktreeCardPropertyOption[] = [
     get label() {
       return translate(
         'auto.components.sidebar.SidebarWorkspaceOptionsMenu.65a9820bd1',
-        'Agent statuses'
+        'Open tabs'
       )
     }
   }

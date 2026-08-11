@@ -4,12 +4,12 @@ import {
   ArrowSquareOut as ExternalLink
 } from '@phosphor-icons/react'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { openHttpLink } from '~renderer/components/editor/http-link-routing'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
-import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 import { useActiveWorktree } from '~renderer/store/selectors'
 import type { PRCheckDetail, PRCheckRunDetails } from '~shared/types'
@@ -322,7 +322,7 @@ export function ChecksList({
                                 )}
                                 onClick={(event) => {
                                   event.stopPropagation()
-                                  shellClient.shell.openUrl(openUrl)
+                                  openHttpLink(openUrl, { worktreeId: resolvedWorktreeId })
                                 }}
                               >
                                 <ExternalLink className="size-3" />

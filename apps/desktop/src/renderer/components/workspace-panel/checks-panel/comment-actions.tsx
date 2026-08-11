@@ -9,6 +9,7 @@ import {
   Trash
 } from '@phosphor-icons/react'
 import React, { useCallback, useRef, useState } from 'react'
+import { openHttpLink } from '~renderer/components/editor/http-link-routing'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import {
@@ -234,7 +235,7 @@ export function CommentMoreMenu({
         ) : null}
         {hasQueue && (hasGoToComment || hasEdit || hasDelete) ? <DropdownMenuSeparator /> : null}
         {hasGoToComment && (
-          <DropdownMenuItem onClick={() => shellClient.shell.openUrl(comment.url)}>
+          <DropdownMenuItem onClick={() => openHttpLink(comment.url)}>
             <ExternalLink />
             {translate(
               'auto.components.right.sidebar.checks.panel.content.d3923d18fe',

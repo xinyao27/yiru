@@ -1,3 +1,4 @@
+import { isWslUncPath } from '@yiru/workbench-model/platform'
 import { toast } from 'sonner'
 import { translate } from '~renderer/i18n/i18n'
 import { getConnectionId } from '~renderer/lib/connection-context'
@@ -18,6 +19,7 @@ import { captureTerminalDropTarget } from './target'
 import { resolveTerminalDropWorktreePath } from './worktree-path'
 import { showTerminalDropWriteFailure } from './write-failure'
 import type { TerminalDropWriteFailureReason } from './write-failure'
+import { isWorktreeUsingLocalWslRuntime, toLocalWslDropPath } from './wsl-path'
 
 export { handleTerminalFileDrop }
 
@@ -91,12 +93,18 @@ export async function handleInternalTerminalFileDrop({
     // shell semantics must come from the remote session, not the client OS.
     connectionId
   })
+  const resolvedPaths =
+    !runtimeEnvironmentId &&
+    connectionId === null &&
+    (isWslUncPath(worktreePath) || isWorktreeUsingLocalWslRuntime(state, worktreeId))
+      ? paths.map(toLocalWslDropPath)
+      : paths
 
   const writeResult = await writeTerminalDropPathsToCapturedTarget({
     dropTarget: dropTargetSnapshot,
     manager,
     paneTransports,
-    paths,
+    paths: resolvedPaths,
     targetShell
   })
   showTerminalDropWriteFailure(writeResult.failureReason)

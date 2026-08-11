@@ -23,9 +23,9 @@ import { priceCodexAggregateUsage } from './pricing'
 import { createWorktreeRefs, scanCodexUsageFiles } from './scanner'
 import type { CodexUsagePersistedState } from './types'
 
-// Why: v8 aligns raw token normalization with CodexBar and recomputes totals
-// from input + cache-read + output. Older rows may retain duplicate wire totals.
-const SCHEMA_VERSION = 9
+// Why: v10 drops aggregates created before Codex fork copies were suppressed
+// and cached input stopped being counted twice. Those rows cannot be migrated safely.
+const SCHEMA_VERSION = 10
 const STALE_MS = 5 * 60_000
 const AUTOMATION_ATTRIBUTION_WINDOW_MS = 5 * 60_000
 

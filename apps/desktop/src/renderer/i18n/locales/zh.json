@@ -2814,7 +2814,7 @@
           "631b97eea9": "主机范围",
           "8d62c68b35": "笔记",
           "2d74665a56": "端口",
-          "65a9820bd1": "Agent 状态",
+          "65a9820bd1": "已打开的标签页",
           "219ebf1961": "分支名称",
           "automation": "自动化",
           "folderPathIdentity": "分支 / 文件夹路径"
@@ -3405,6 +3405,9 @@
           "error": "Could not update discovered worktrees. Try again.",
           "keepHidden": "Keep hidden",
           "show": "Show in workspace list"
+        },
+        "WorktreeCardTabs": {
+          "openTabs": "已打开的标签页"
         }
       },
       "coworking": {
@@ -6198,6 +6201,8 @@
             "82ba1c80ea": "本地主机",
             "bea27bac4b": "链接",
             "44d14df30d": "预览",
+            "linkRoutingSystemBrowser": "系统浏览器",
+            "linkRoutingBrowseTab": "浏览标签页",
             "5cb082b3e3": "链路路由",
             "95944898e0": "百分比",
             "483a0eb5e0": "新标签",
@@ -6227,7 +6232,8 @@
             "a942905148": "创建新浏览器选项卡时打开的 URL。留空以打开空白选项卡。",
             "c3903322d2": "默认主页",
             "19ea5607cf": "本地主机工作区标签",
-            "4e0fdf0a3f": "将工作区端口打开为特定于工作区的 Yiru localhost URL，便于区分浏览器标签页。"
+            "4e0fdf0a3f": "将工作区端口打开为特定于工作区的 Yiru localhost URL，便于区分浏览器标签页。",
+            "linkRoutingDescription": "选择 Yiru 各处的 HTTP(S) 链接打开位置，包括终端、代码评审、Markdown、编辑器、端口和浏览标签页。"
           },
           "use": {
             "search": {
@@ -6267,6 +6273,15 @@
               "85fab5e12c": "CLI",
               "890ddf943d": "注册 Yiru CLI，以便 Agent 可以驱动浏览器。",
               "50f0860e18": "启用 Yiru CLI"
+            }
+          },
+          "link": {
+            "routing": {
+              "setting": {
+                "title": "网页链接打开方式",
+                "systemBrowser": "系统默认浏览器",
+                "browseTab": "Yiru 浏览标签页"
+              }
             }
           }
         },
@@ -8943,6 +8958,12 @@
           },
           "PierreFileExplorerTree": {
             "copied": "已复制"
+          },
+          "fileExplorerClipboard": {
+            "uniqueName": "无法为“{{value0}}”找到可用的名称。",
+            "sameWorkspace": "文件只能粘贴到复制它们的同一工作区中。",
+            "insideItself": "不能将文件夹粘贴到其自身内部。",
+            "failed": "无法粘贴所选文件。"
           }
         }
       },
@@ -11298,7 +11319,8 @@
           "oneFailing": "1 个失败",
           "failingCount": "{{value0}} 个失败",
           "onePending": "1 个等待中",
-          "pendingCount": "{{value0}} 个等待中"
+          "pendingCount": "{{value0}} 个等待中",
+          "openReview": "打开 {{value0}} 链接"
         },
         "parentPrChecks": {
           "rowSummary": {

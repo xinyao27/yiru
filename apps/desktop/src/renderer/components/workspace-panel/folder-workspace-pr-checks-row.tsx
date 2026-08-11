@@ -49,9 +49,9 @@ export function FolderWorkspacePrChecksRow({
         'Show {{value0}} PR check details',
         { value0: row.worktree.displayName }
       )
-  const openExternalLabel = translate(
-    'auto.components.rightSidebar.FolderWorkspacePrChecksPanel.openReviewExternally',
-    'Open {{value0}} externally',
+  const openReviewLabel = translate(
+    'auto.components.rightSidebar.FolderWorkspacePrChecksPanel.openReview',
+    'Open {{value0}} link',
     { value0: reviewProviderLabel }
   )
   return (
@@ -109,10 +109,10 @@ export function FolderWorkspacePrChecksRow({
                   size="xs"
                   type="button"
                   className="h-auto border-0 p-1 opacity-80 group-hover:opacity-100"
-                  aria-label={openExternalLabel}
+                  aria-label={openReviewLabel}
                   onClick={(event) => {
                     event.stopPropagation()
-                    void openHttpLink(row.reviewUrl!)
+                    openHttpLink(row.reviewUrl!, { worktreeId: row.worktree.id })
                   }}
                   onKeyDown={(event) => event.stopPropagation()}
                 >
@@ -120,7 +120,7 @@ export function FolderWorkspacePrChecksRow({
                 </Button>
               }
             />
-            <TooltipContent side="left">{openExternalLabel}</TooltipContent>
+            <TooltipContent side="left">{openReviewLabel}</TooltipContent>
           </Tooltip>
         ) : null}
       </div>

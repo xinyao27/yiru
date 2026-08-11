@@ -14,6 +14,10 @@ type ServeSimHelperProcessLookupOptions = {
   includeOrphaned?: boolean
 }
 
+const LEGACY_HELPER_COMMAND_RE = /(^|\/)serve-sim-bin(?:\s|$)/
+const IN_PROCESS_SERVER_COMMAND_RE = /(^|\/)serve-sim\.js(?:\s|$)/
+const CONTROL_COMMAND_RE = /(^|\s)--(?:detach|kill|list)(?:\s|$)/
+
 function execFileText(command: string, args: string[]): Promise<string> {
   return new Promise((resolve, reject) => {
     execFile(command, args, { timeout: 5_000, maxBuffer: 1024 * 1024 }, (error, stdout) => {
@@ -35,7 +39,12 @@ export function parseServeSimHelperProcesses(psOutput: string): ServeSimHelperPr
     }
     const pid = Number(match[1])
     const command = match[2] ?? ''
-    if (!Number.isInteger(pid) || !/(^|\/)serve-sim-bin(?:\s|$)/.test(command)) {
+    // Why: serve-sim 0.1.45 moved the long-lived stream server into serve-sim.js;
+    // control invocations use the same entry point but must never count as sessions.
+    const isSessionProcess =
+      LEGACY_HELPER_COMMAND_RE.test(command) ||
+      (IN_PROCESS_SERVER_COMMAND_RE.test(command) && !CONTROL_COMMAND_RE.test(command))
+    if (!Number.isInteger(pid) || !isSessionProcess) {
       continue
     }
     helpers.push({ pid, command })

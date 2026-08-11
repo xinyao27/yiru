@@ -1,4 +1,5 @@
 import React from 'react'
+import { openHttpLink } from '~renderer/components/editor/http-link-routing'
 
 export function isGitHubUserAttachmentUrl(href: string | undefined): href is string {
   if (!href) {
@@ -19,6 +20,12 @@ export function isGitHubUserAttachmentUrl(href: string | undefined): href is str
 function isBareAutolink(children: React.ReactNode, href: string): boolean {
   const text = React.Children.toArray(children).join('').trim()
   return text === href
+}
+
+function openAttachmentLink(event: React.MouseEvent<HTMLAnchorElement>, href: string): void {
+  event.preventDefault()
+  event.stopPropagation()
+  openHttpLink(href)
 }
 
 export function isGitHubUserAttachmentVideoLink(
@@ -43,7 +50,7 @@ function AttachmentFallbackLink({
       target="_blank"
       rel="noreferrer"
       className="text-primary hover:text-primary/80 focus-visible:text-primary/80 focus-visible:bg-accent break-all underline underline-offset-2 outline-none"
-      onClick={(e) => e.stopPropagation()}
+      onClick={(event) => openAttachmentLink(event, href)}
     >
       {children}
     </a>
@@ -78,6 +85,7 @@ export function GitHubUserAttachmentVideo({
         target="_blank"
         rel="noreferrer"
         className="focus-visible:bg-accent outline-none"
+        onClick={(event) => openAttachmentLink(event, href)}
       >
         {children}
       </a>
@@ -108,7 +116,7 @@ export function GitHubUserAttachmentImage({
       target="_blank"
       rel="noreferrer"
       className="focus-visible:bg-accent inline-block max-w-full outline-none"
-      onClick={(e) => e.stopPropagation()}
+      onClick={(event) => openAttachmentLink(event, src)}
     >
       <img
         src={src}

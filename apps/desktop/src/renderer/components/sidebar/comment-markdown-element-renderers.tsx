@@ -1,5 +1,6 @@
 import React from 'react'
 import type { Components } from 'react-markdown'
+import { openHttpLink } from '~renderer/components/editor/http-link-routing'
 import { cn } from '~renderer/lib/class-names'
 
 import {
@@ -33,7 +34,13 @@ function handleMarkdownAnchorClick(
   // Why: link clicks should not also trigger an outer row/card click handler;
   // images only claim the click when an image handler is wired below.
   event.stopPropagation()
-  if (href?.trim().toLowerCase().startsWith('file:')) {
+  const normalizedHref = href?.trim() ?? ''
+  if (/^https?:/i.test(normalizedHref)) {
+    event.preventDefault()
+    openHttpLink(normalizedHref)
+    return
+  }
+  if (normalizedHref.toLowerCase().startsWith('file:')) {
     event.preventDefault()
   }
   onLinkClick?.(event, href)
@@ -57,7 +64,6 @@ export function createCompactCommentMarkdownComponents(
   return {
     // Strip <p> wrappers to avoid double margins in the tight card layout.
     p: ({ children }) => <span className="comment-md-p">{children}</span>,
-    // Open links externally — sidebar is not a navigation context.
     a: ({ href, children }) => (
       <a
         href={href || undefined}

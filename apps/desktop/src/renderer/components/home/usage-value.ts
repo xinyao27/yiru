@@ -18,6 +18,8 @@ import {
   type UsageValueSupplementalInput
 } from '~shared/stats/usage-value'
 
+import { buildAddedProjectUsage } from './added-project-usage'
+
 export type ModelUsageValue = UsageValueModel
 
 export type UsageValue = {
@@ -33,6 +35,13 @@ export type UsageValue = {
   range: StatsUsageBoundedRange
   meteredValueUsd?: number | null
 }
+
+type UsagePreparation = {
+  promise: Promise<void>
+  range: StatsUsageBoundedRange
+}
+
+let activeUsagePreparation: UsagePreparation | null = null
 
 export function useUsageValue(range: StatsUsageBoundedRange): UsageValue {
   const claudeScanState = useAppStore((state) => state.claudeUsageScanState)
@@ -53,6 +62,7 @@ export function useUsageValue(range: StatsUsageBoundedRange): UsageValue {
   const openCodeDaily = useAppStore((state) => state.openCodeUsageDaily)
   const openCodeModels = useAppStore((state) => state.openCodeUsageModelBreakdown)
   const openCodeProjects = useAppStore((state) => state.openCodeUsageProjectBreakdown)
+  const repos = useAppStore((state) => state.repos)
   const supplementalUsage = useAppStore((state) => state.statsSummary?.supplementalUsage)
 
   useEffect(() => {
@@ -105,7 +115,10 @@ export function useUsageValue(range: StatsUsageBoundedRange): UsageValue {
     }),
     [claudeDaily, claudeProjects, codexDaily, codexProjects, openCodeDaily, openCodeProjects]
   )
-  const projects = useMemo(() => buildProjectUsage(aggregationInput), [aggregationInput])
+  const projects = useMemo(
+    () => buildAddedProjectUsage(buildProjectUsage(aggregationInput), repos),
+    [aggregationInput, repos]
+  )
   const dailyByProvider = useMemo(
     () => buildDailyProviderUsage(aggregationInput),
     [aggregationInput]
@@ -173,16 +186,35 @@ function mapSupplementalUsage(
   }
 }
 
-async function prepareUsageSnapshots(range: StatsUsageBoundedRange): Promise<void> {
-  await Promise.all([
+function prepareUsageSnapshots(range: StatsUsageBoundedRange): Promise<void> {
+  if (activeUsagePreparation?.range === range) {
+    return activeUsagePreparation.promise
+  }
+
+  const promise = Promise.all([
     prepareClaudeUsage(range),
     prepareCodexUsage(range),
     prepareOpenCodeUsage(range)
-  ])
+  ]).then(() => undefined)
+  activeUsagePreparation = { promise, range }
+  const clearPreparation = (): void => {
+    if (activeUsagePreparation?.promise === promise) {
+      activeUsagePreparation = null
+    }
+  }
+  void promise.then(clearPreparation, clearPreparation)
+  return promise
 }
 
 async function prepareClaudeUsage(range: StatsUsageBoundedRange): Promise<void> {
   let state = useAppStore.getState()
+  if (
+    state.claudeUsageScope === 'yiru' &&
+    state.claudeUsageRange === range &&
+    state.claudeUsageSnapshotReady
+  ) {
+    return
+  }
   if (state.claudeUsageScope !== 'yiru') {
     await state.setClaudeUsageScope('yiru')
   }
@@ -195,11 +227,21 @@ async function prepareClaudeUsage(range: StatsUsageBoundedRange): Promise<void> 
     await state.setClaudeUsageRange(range)
     return
   }
+  if (state.claudeUsageSnapshotReady) {
+    return
+  }
   await useAppStore.getState().fetchClaudeUsage()
 }
 
 async function prepareCodexUsage(range: StatsUsageBoundedRange): Promise<void> {
   let state = useAppStore.getState()
+  if (
+    state.codexUsageScope === 'yiru' &&
+    state.codexUsageRange === range &&
+    state.codexUsageSnapshotReady
+  ) {
+    return
+  }
   if (state.codexUsageScope !== 'yiru') {
     await state.setCodexUsageScope('yiru')
   }
@@ -212,11 +254,21 @@ async function prepareCodexUsage(range: StatsUsageBoundedRange): Promise<void> {
     await state.setCodexUsageRange(range)
     return
   }
+  if (state.codexUsageSnapshotReady) {
+    return
+  }
   await useAppStore.getState().fetchCodexUsage()
 }
 
 async function prepareOpenCodeUsage(range: StatsUsageBoundedRange): Promise<void> {
   let state = useAppStore.getState()
+  if (
+    state.openCodeUsageScope === 'yiru' &&
+    state.openCodeUsageRange === range &&
+    state.openCodeUsageSnapshotReady
+  ) {
+    return
+  }
   if (state.openCodeUsageScope !== 'yiru') {
     await state.setOpenCodeUsageScope('yiru')
   }
@@ -227,6 +279,9 @@ async function prepareOpenCodeUsage(range: StatsUsageBoundedRange): Promise<void
   state = useAppStore.getState()
   if (state.openCodeUsageRange !== range) {
     await state.setOpenCodeUsageRange(range)
+    return
+  }
+  if (state.openCodeUsageSnapshotReady) {
     return
   }
   await useAppStore.getState().fetchOpenCodeUsage()

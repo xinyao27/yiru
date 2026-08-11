@@ -10,8 +10,6 @@ import type { WorkspacePort, WorkspacePortScanResult } from '~shared/workspace/p
 
 export type OpenHttpLinkOptions = {
   worktreeId?: string | null
-  forceSystemBrowser?: boolean
-  forceInAppBrowser?: boolean
   sourceOwner?: HttpLinkSourceOwner
 }
 
@@ -30,6 +28,7 @@ type StoreAccessor = () => {
   > | null
   setActiveWorktree: (worktreeId: string) => void
   createBrowserTab: (worktreeId: string, url: string, opts: { activate: boolean }) => unknown
+  activeWorktreeId?: string | null
   repos?: LocalhostLinkRepo[]
   projects?: LocalhostLinkProject[]
   worktreesByRepo?: Record<string, LocalhostLinkWorktree[]>
@@ -64,23 +63,30 @@ export function registerHttpLinkStoreAccessor(fn: StoreAccessor): void {
 // Scope: http(s) URLs only. file: URIs and in-worktree markdown targets are
 // owned by resolveMarkdownLinkTarget and must stay on that path — this helper
 // is only invoked on target.kind === 'external' (and for the terminal's http
-// branch). Callers can pass forceSystemBrowser to bypass in-app routing or
-// forceInAppBrowser to select the Yiru browser explicitly.
+// branch). Every caller uses the same saved destination.
 export function openHttpLink(url: string, opts: OpenHttpLinkOptions = {}): void {
-  const { forceInAppBrowser, forceSystemBrowser, sourceOwner, worktreeId } = opts
+  const { sourceOwner } = opts
   if (sourceOwner?.kind === 'unknown') {
     return
   }
   const state = storeAccessor?.()
-  const remoteRuntimeActive = Boolean(state?.settings?.activeRuntimeEnvironmentId?.trim())
-  const sourceIsLocal = sourceOwner ? sourceOwner.kind === 'local' : !remoteRuntimeActive
-  const routeToYiru =
-    sourceIsLocal &&
-    !forceSystemBrowser &&
-    Boolean(worktreeId) &&
-    (forceInAppBrowser || state?.settings?.openLinksInApp === true)
+  const worktreeId = opts.worktreeId ?? state?.activeWorktreeId ?? null
+  const activeRuntimeEnvironmentId = state?.settings?.activeRuntimeEnvironmentId?.trim() || null
+  const runtimeEnvironmentId =
+    sourceOwner?.kind === 'runtime'
+      ? sourceOwner.runtimeEnvironmentId
+      : sourceOwner
+        ? null
+        : activeRuntimeEnvironmentId
+  const sourceIsLocal = sourceOwner ? sourceOwner.kind === 'local' : !activeRuntimeEnvironmentId
+  const routeToYiru = Boolean(worktreeId) && state?.settings?.openLinksInApp === true
 
-  if (routeToYiru && worktreeId && state) {
+  if (routeToYiru && worktreeId && runtimeEnvironmentId) {
+    void openRuntimeBrowserLink(url, worktreeId, runtimeEnvironmentId)
+    return
+  }
+
+  if (routeToYiru && sourceIsLocal && worktreeId && state) {
     // Why: http clicks from inside a worktree should not push a worktree-switch
     // history entry — the user isn't changing worktrees, they're opening a tab
     // in the one they're already in. activateAndRevealWorktree is reserved for
@@ -109,6 +115,28 @@ export function openHttpLink(url: string, opts: OpenHttpLinkOptions = {}): void 
   void openLabeledLocalhostLink(url, localhostRoute, (labeledUrl) => {
     void shellClient.shell.openUrl(labeledUrl)
   })
+}
+
+async function openRuntimeBrowserLink(
+  url: string,
+  worktreeId: string,
+  runtimeEnvironmentId: string
+): Promise<void> {
+  try {
+    const { createWebRuntimeSessionBrowserTab } =
+      await import('~renderer/runtime/web-runtime-session')
+    const opened = await createWebRuntimeSessionBrowserTab({
+      worktreeId,
+      environmentId: runtimeEnvironmentId,
+      url
+    })
+    if (opened) {
+      return
+    }
+  } catch {
+    // Why: the runtime can disconnect between the click and the create request.
+  }
+  await shellClient.shell.openUrl(url)
 }
 
 function localhostLabelRouteForHttpLink(

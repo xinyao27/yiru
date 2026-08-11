@@ -844,20 +844,17 @@ export class BrowserManager {
       }
 
       if (isClickedLink) {
-        if (browserTabId && browserUrl && this.openLinkInYiruTab(browserTabId, browserUrl)) {
-          this.forwardOrQueuePopupEvent(guest.id, {
-            origin: safeOrigin(browserUrl),
-            action: 'opened-in-yiru'
-          })
+        if (browserTabId && browserUrl) {
+          this.forwardClickedLink(browserTabId, browserUrl)
         }
         // Why: a recognized user gesture must never fall through to a native
         // popup merely because its renderer disappeared during the click.
         return { action: 'deny' }
       }
 
-      // Why: file URLs are valid for user-opened in-pane previews, but remote
-      // content must not create native child windows targeting local paths.
-      const canOpenAsChild = Boolean(externalUrl || browserUrl === YIRU_BROWSER_BLANK_URL)
+      // Why: guarded OAuth children need a validated external destination.
+      // Blank and local-file popups must never create a child window.
+      const canOpenAsChild = Boolean(externalUrl)
       if (browserTabId && canOpenAsChild) {
         // Why: OAuth may request ordinary size/position features, but browser
         // content must not create deceptive or inescapable native chrome.
@@ -2432,17 +2429,17 @@ export class BrowserManager {
     })
   }
 
-  private openLinkInYiruTab(browserTabId: string, rawUrl: string): boolean {
+  private forwardClickedLink(browserTabId: string, rawUrl: string): void {
     const renderer = this.resolveRendererForBrowserTab(browserTabId)
     if (!renderer) {
-      return false
+      return
     }
     const normalizedUrl = normalizeBrowserNavigationUrl(rawUrl)
     if (!normalizedUrl || normalizedUrl === YIRU_BROWSER_BLANK_URL) {
-      return false
+      return
     }
-    // Why: only the renderer owns Yiru's worktree/tab model. Main forwards a
-    // validated URL instead of letting arbitrary guest content mutate it.
+    // Why: the renderer owns both the saved link destination and Yiru's tab
+    // model. Main forwards only a validated URL and never creates a blank popup.
     this.publishGuestEvent({
       type: 'openLinkInYiruTab',
       browserPageId: browserTabId,
@@ -2452,7 +2449,6 @@ export class BrowserManager {
       browserPageId: browserTabId,
       url: normalizedUrl
     })
-    return true
   }
 }
 

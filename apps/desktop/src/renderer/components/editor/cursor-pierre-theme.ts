@@ -11,6 +11,9 @@ let cursorThemesRegistered = false
 
 export const CURSOR_PIERRE_UNSAFE_CSS = `
   * { border-radius: 0 !important; }
+  /* Why: Pierre omits inherited letter spacing and centers its caret across the insertion edge. */
+  [data-content] { letter-spacing: 0; }
+  [data-caret] { translate: 1px 0; }
   [data-line-type="change-addition"] {
     --diffs-line-bg: var(--editor-diff-inserted-line-background) !important;
   }

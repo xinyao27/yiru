@@ -76,7 +76,6 @@ export async function buildStatsSummary(
   if (usageStores) {
     try {
       const usageStats = await buildUsageStats(usageStores, range, refreshUsage)
-      refreshUsageInBackground(usageStores, refreshUsage)
       return {
         ...activitySummary,
         ...usageStats
@@ -116,8 +115,10 @@ async function buildUsageStats(
   range: StatsUsageRange,
   forceSupplementalScan: boolean
 ): Promise<UsageStats> {
-  const supplementalUsage = await scanSupplementalUsage(usageStores, forceSupplementalScan)
-  await enableUsageScans(usageStores)
+  const [supplementalUsage] = await Promise.all([
+    scanSupplementalUsage(usageStores, forceSupplementalScan),
+    prepareAttributedUsage(usageStores, forceSupplementalScan)
+  ])
   const snapshots = {
     claude: usageStores.claude.getSnapshot('yiru', range),
     codex: usageStores.codex.getSnapshot('yiru', range),
@@ -157,6 +158,25 @@ async function buildUsageStats(
     usageValueAvailable: usage.hasValue,
     hasUnpricedUsage: usage.hasUnpricedUsage
   }
+}
+
+async function prepareAttributedUsage(
+  usageStores: StatsUsageStores,
+  force: boolean
+): Promise<void> {
+  await enableUsageScans(usageStores)
+  if (!force) {
+    return
+  }
+
+  // Why: an explicit refresh must finish before its summary is built. The old
+  // background pass returned stale data and made desktop refresh every provider twice.
+  await refreshModelsDevPricing()
+  await Promise.all([
+    usageStores.claude.refresh(true),
+    usageStores.codex.refresh(true),
+    usageStores.openCode.refresh(true)
+  ])
 }
 
 // Why: a headless host has no Home page to activate provider scanning, so asking
@@ -239,20 +259,6 @@ function mergeMeteredValue(
     return null
   }
   return left + right
-}
-
-function refreshUsageInBackground(usageStores: StatsUsageStores, force: boolean): void {
-  void refreshModelsDevPricing()
-    .then((pricingChanged) =>
-      Promise.all([
-        usageStores.claude.refresh(force || pricingChanged),
-        usageStores.codex.refresh(force || pricingChanged),
-        usageStores.openCode.refresh(force)
-      ])
-    )
-    .catch((error: unknown) => {
-      console.error('[stats] Failed to refresh attributed usage:', error)
-    })
 }
 
 function aggregateDailyTokens(

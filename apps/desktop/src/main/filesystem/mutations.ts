@@ -1,5 +1,6 @@
 import { constants } from 'node:fs'
 import {
+  cp,
   copyFile,
   lstat,
   mkdir,
@@ -126,9 +127,17 @@ export function registerFilesystemMutationHandlers(
         preserveSymlink: true
       })
       await mkdir(dirname(destinationPath), { recursive: true })
-      // Why: duplicate/copy callers deconflict before copying. COPYFILE_EXCL
-      // keeps a late race from silently overwriting an existing file.
-      await copyFile(sourcePath, destinationPath, constants.COPYFILE_EXCL)
+      const sourceStat = await lstat(sourcePath)
+      // Why: Explorer clipboard copy includes folders and links. Preserve
+      // links instead of following them, and keep every destination no-clobber.
+      await (sourceStat.isDirectory() || sourceStat.isSymbolicLink()
+        ? cp(sourcePath, destinationPath, {
+            recursive: sourceStat.isDirectory(),
+            dereference: false,
+            errorOnExist: true,
+            force: false
+          })
+        : copyFile(sourcePath, destinationPath, constants.COPYFILE_EXCL))
     }
   )
 

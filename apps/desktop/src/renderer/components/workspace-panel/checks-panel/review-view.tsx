@@ -97,12 +97,6 @@ export function ChecksPanelReviewView({
     activeReview.state === 'open' ||
     activeReview.state === 'closed' ||
     activeReview.state === 'merged'
-  // Why: mirror openHttpLink's global routing inputs so the hint only appears
-  // when the actual plain-click path would open inside Yiru.
-  const showHostedReviewSystemBrowserHint =
-    Boolean(activeWorktreeId) &&
-    settings?.openLinksInApp === true &&
-    !settings.activeRuntimeEnvironmentId
   return (
     <div className="flex h-full min-h-0 flex-col">
       {/* Hosted review header */}
@@ -112,7 +106,6 @@ export function ChecksPanelReviewView({
           review={activeReview}
           isRefreshing={isRefreshing}
           canUnlinkPullRequest={linkedPR !== null}
-          showSystemBrowserHint={showHostedReviewSystemBrowserHint}
           onRefresh={() => void handleRefresh()}
           onOpenReview={handleOpenPR}
           onUnlinkPullRequest={handleUnlinkPullRequest}

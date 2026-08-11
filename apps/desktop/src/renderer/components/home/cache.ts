@@ -6,7 +6,7 @@ import type { StatsSummary } from '~shared/types'
 import type { ModelUsageValue, UsageValue } from './usage-value'
 
 const HOME_DATA_CACHE_KEY = 'yiru.home.data-cache.v1'
-const HOME_DATA_CACHE_SCHEMA_VERSION = 3
+const HOME_DATA_CACHE_SCHEMA_VERSION = 4
 
 export type HomeCachedUsageValue = Pick<
   UsageValue,

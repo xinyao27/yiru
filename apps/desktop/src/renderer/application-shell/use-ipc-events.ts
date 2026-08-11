@@ -14,6 +14,7 @@ import {
   nextEditorFontZoomLevel,
   computeEditorFontSize
 } from '~renderer/components/editor/font-zoom'
+import { openHttpLink } from '~renderer/components/editor/http-link-routing'
 import {
   isManualSimulatorLaunchPending,
   rememberPrelaunchedSimulatorSession
@@ -1055,12 +1056,19 @@ export function useIpcEvents(): void {
         if (!sourcePage) {
           return
         }
-        if (getRuntimeEnvironmentIdForWorktree(store, sourcePage.worktreeId)) {
-          return
-        }
-        // Why: only the renderer owns Yiru's tab model. Creating the tab with
-        // the default activation behavior brings the clicked link forward.
-        store.createBrowserTab(sourcePage.worktreeId, url, { title: url })
+        const runtimeEnvironmentId = getRuntimeEnvironmentIdForWorktree(
+          store,
+          sourcePage.worktreeId
+        )
+        // Why: the legacy event name describes its original behavior. Route
+        // through the shared preference now so Browser guests match every
+        // other user-content link without ever staging a blank tab.
+        openHttpLink(url, {
+          worktreeId: sourcePage.worktreeId,
+          sourceOwner: runtimeEnvironmentId
+            ? { kind: 'runtime', runtimeEnvironmentId }
+            : { kind: 'local' }
+        })
       })
     )
 

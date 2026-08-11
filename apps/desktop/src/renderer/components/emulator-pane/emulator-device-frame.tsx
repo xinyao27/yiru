@@ -4,6 +4,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type CSSProperties,
   type PointerEvent,
   type WheelEvent
 } from 'react'
@@ -65,6 +66,11 @@ type ScreenCoordinateEvent = Pick<
 // lets stale values from a prior device or stream refresh be discarded during
 // render, so no reset effect is needed to clear them on prop change.
 type StreamGeometryState = { identity: string; size: StreamSize | null; error: boolean }
+
+type EmulatorDeviceFrameStyle = CSSProperties & {
+  '--yiru-emulator-frame-inner-radius': string
+  '--yiru-emulator-frame-outer-radius': string
+}
 
 export function EmulatorDeviceFrame({
   previewUrl,
@@ -367,6 +373,14 @@ export function EmulatorDeviceFrame({
     () => fitDeviceFrameToPane(paneSize, screenAspectRatio, frameKind),
     [frameKind, screenAspectRatio, paneSize]
   )
+  const frameStyle = {
+    left: frameLayout ? `${frameLayout.hardwareOutset}px` : undefined,
+    width: frameLayout ? `${frameLayout.shellWidth}px` : '100%',
+    height: frameLayout ? `${frameLayout.shellHeight}px` : undefined,
+    padding: frameLayout ? undefined : '10px',
+    '--yiru-emulator-frame-inner-radius': frameLayout ? `${frameLayout.innerRadius}px` : '44px',
+    '--yiru-emulator-frame-outer-radius': frameLayout ? `${frameLayout.outerRadius}px` : '54px'
+  } satisfies EmulatorDeviceFrameStyle
 
   return (
     <div
@@ -385,13 +399,7 @@ export function EmulatorDeviceFrame({
         <div
           data-yiru-emulator-frame="true"
           className="relative overflow-hidden bg-black"
-          style={{
-            left: frameLayout ? `${frameLayout.hardwareOutset}px` : undefined,
-            width: frameLayout ? `${frameLayout.shellWidth}px` : '100%',
-            height: frameLayout ? `${frameLayout.shellHeight}px` : undefined,
-            padding: frameLayout ? undefined : '10px',
-            borderRadius: frameLayout ? `${frameLayout.outerRadius}px` : '54px'
-          }}
+          style={frameStyle}
         >
           <EmulatorScreenSurface
             frameLayout={frameLayout}

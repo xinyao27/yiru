@@ -62,6 +62,7 @@ export function EmulatorScreenSurface({
 }: EmulatorScreenSurfaceProps) {
   return (
     <div
+      data-yiru-emulator-screen="true"
       className={cn(
         'outline-none',
         frameLayout
@@ -71,8 +72,7 @@ export function EmulatorScreenSurface({
       )}
       style={{
         inset: frameLayout ? `${frameLayout.bezel}px` : undefined,
-        aspectRatio: frameLayout ? undefined : `${screenAspectRatio}`,
-        borderRadius: frameLayout ? `${frameLayout.innerRadius}px` : '44px'
+        aspectRatio: frameLayout ? undefined : `${screenAspectRatio}`
       }}
       onPointerCancel={onPointerCancel}
       onPointerDown={onPointerDown}

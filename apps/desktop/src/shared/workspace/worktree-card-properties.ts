@@ -7,8 +7,8 @@ export const DEFAULT_WORKTREE_CARD_PROPERTIES: WorktreeCardProperty[] = [
   'automation',
   'comment',
   'ports',
-  // Why: live agent activity is a primary card signal. Users who prefer a
-  // quieter sidebar can hide it from the Card display menu.
+  // Why: retain the persisted key while the surface now means canonical open
+  // tabs. Existing profiles keep their display preference across the migration.
   'inline-agents'
 ]
 

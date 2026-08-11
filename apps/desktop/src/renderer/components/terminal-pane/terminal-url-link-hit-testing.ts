@@ -12,19 +12,13 @@ import { buildWrappedLogicalLine, rangeForParsedFileLink } from './wrapped-termi
 
 type UrlLinkHitTestDeps = {
   worktreeId: string
-  forceSystemBrowser?: boolean
-  forceInAppBrowser?: boolean
-  requestOpenLinksInAppPreference?: TerminalLinkRoutingPreferenceRequester
+  runtimeEnvironmentId?: string | null
 }
 
 type UrlLinkClickFallbackDeps = {
   worktreeId: string
-  requestOpenLinksInAppPreference?: TerminalLinkRoutingPreferenceRequester
+  getRuntimeEnvironmentId?: () => string | null
 }
-
-export type TerminalLinkRoutingPreferenceRequester = (
-  url: string
-) => boolean | Promise<boolean> | null | undefined
 
 type ParsedTerminalHttpLink = {
   url: string
@@ -227,11 +221,7 @@ export function installHttpLinkClickFallback(
     // never established, while defaultPrevented avoids duplicate opens.
     const opened = openHttpLinkAtTerminalMouseEvent(terminal, event, {
       worktreeId: deps.worktreeId,
-      // Why: the fallback must match WebLinksAddon's Command/Ctrl+click path,
-      // including when the link was not hovered before the click.
-      forceSystemBrowser: !event.shiftKey,
-      forceInAppBrowser: event.shiftKey,
-      requestOpenLinksInAppPreference: deps.requestOpenLinksInAppPreference
+      runtimeEnvironmentId: deps.getRuntimeEnvironmentId?.() ?? null
     })
     if (opened) {
       event.preventDefault()
@@ -308,33 +298,10 @@ function rangeContainsBufferPosition(
 }
 
 export function openTerminalHttpLink(url: string, deps: UrlLinkHitTestDeps): void {
-  if (deps.forceInAppBrowser) {
-    openHttpLink(url, { worktreeId: deps.worktreeId, forceInAppBrowser: true })
-    return
-  }
-
-  if (deps.forceSystemBrowser) {
-    openHttpLink(url, { worktreeId: deps.worktreeId, forceSystemBrowser: true })
-    return
-  }
-
-  const preferenceDecision = deps.requestOpenLinksInAppPreference?.(url)
-  if (preferenceDecision === null || preferenceDecision === undefined) {
-    openHttpLink(url, { worktreeId: deps.worktreeId })
-    return
-  }
-
-  // Why: the first terminal link click may need an async preference dialog.
-  // Suppress the browser's default link handling first, then route after the
-  // persisted choice is available.
-  void Promise.resolve(preferenceDecision)
-    .then((openInYiru) => {
-      openHttpLink(url, {
-        worktreeId: deps.worktreeId,
-        forceSystemBrowser: !openInYiru
-      })
-    })
-    .catch(() => {
-      openHttpLink(url, { worktreeId: deps.worktreeId, forceSystemBrowser: true })
-    })
+  openHttpLink(url, {
+    worktreeId: deps.worktreeId,
+    sourceOwner: deps.runtimeEnvironmentId
+      ? { kind: 'runtime', runtimeEnvironmentId: deps.runtimeEnvironmentId }
+      : undefined
+  })
 }

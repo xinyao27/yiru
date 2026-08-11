@@ -85,7 +85,9 @@ section labels. Truncate metadata before shrinking primary text.
 
 ### Spacing and geometry
 
-- Desktop radius is zero. `rounded-*` is drift even when global CSS neutralizes it.
+- Desktop radius is zero. `rounded-*` is drift even when global CSS neutralizes it. A preview
+  of physical hardware may use calculated radii only for the device shell and its clipped screen;
+  that exception does not extend to the containing pane or its controls.
 - Use the 4px spacing scale. Typical gaps are 4px inside compact metadata, 8px between sibling
   controls, 12px within a section, and 16px between regions.
 - Match a primitive's named size to its surrounding row. Do not override its dimensions at the

@@ -1724,9 +1724,6 @@ export type GlobalSettings = {
    *  in external browsers. Opt-in (default off): serving the app under a different
    *  host can break dev apps that bind cookies/sessions to localhost. */
   localhostWorktreeLabelsEnabled?: boolean
-  /** Why: terminal link routing asks once at first use instead of silently
-   *  changing where links open for new users. */
-  openLinksInAppPreferencePrompted: boolean
   /** Opt-in: open newly launched coding-agent tabs directly in the native chat
    *  view instead of the raw terminal. Off by default so existing workflows are
    *  unchanged. Optional for legacy-settings compatibility; defaults applied. */
