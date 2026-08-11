@@ -13,9 +13,9 @@ import { Pressable, Text, View } from 'react-native'
 import Svg, { Rect } from 'react-native-svg'
 import { useCSSVariable } from 'uniwind'
 
-import { MobileContentSection } from '../../components/content-section'
-import { translate } from '../../i18n/translate'
-import { resolveCssString } from '../../style/resolve-css-variable'
+import { MobileContentSection } from '~/components/content-section'
+import { translate } from '~/i18n/translate'
+import { resolveCssString } from '~/style/resolve-css-variable'
 import { formatMetricValue, nextTokenValueMetric, type TokenValueMetric } from '../chart-data'
 import { HOME_USAGE_PROVIDERS, providerLabel, providerOpacity } from './provider-presentation'
 
