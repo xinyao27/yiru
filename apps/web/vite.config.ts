@@ -2,6 +2,7 @@ import { resolve } from 'node:path'
 
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
+import { createClientVitePreset } from '@yiru/client/vite'
 import type { Plugin } from 'vite-plus'
 import { defineConfig } from 'vite-plus'
 
@@ -26,6 +27,12 @@ function renderDocumentInDev(): Plugin {
     transformIndexHtml: {
       order: 'pre',
       async handler(_html, ctx) {
+        // Why: app.html bootstraps the standalone workbench document. Sending it
+        // through the landing SSR renderer replaces it with the Not Found route.
+        if (ctx.filename?.endsWith('app.html')) {
+          return undefined
+        }
+
         const pathname = new URL(ctx.originalUrl ?? ctx.path, 'http://localhost').pathname
         const entry = await ctx.server!.ssrLoadModule('/src/prerender-entry.tsx')
         // Why: the shell renders the client entry script itself in dev, so the tag
@@ -40,16 +47,38 @@ function renderDocumentInDev(): Plugin {
   }
 }
 
-export default defineConfig({
-  plugins: [react(), tailwindcss(), renderDocumentInDev()],
-  resolve: {
-    alias: {
-      '@': resolve(import.meta.dirname, 'src')
-    }
-  },
-  server: {
-    // Why: electron-vite claims 5173 during root `pnpm dev`, and the whole
-    // 517x-53xx band is churned by strictPort benchmark preview servers.
-    port: 4180
+export default defineConfig(({ isSsrBuild }) => {
+  const clientVitePreset = createClientVitePreset({ featureWallEnabled: true })
+
+  return {
+    // Why: prerender.mjs reuses this config with an SSR entry, and Rollup input
+    // overrides build.ssr. Only the browser build should emit both HTML documents.
+    build: isSsrBuild
+      ? undefined
+      : {
+          rollupOptions: {
+            input: {
+              app: resolve(import.meta.dirname, 'app.html'),
+              index: resolve(import.meta.dirname, 'index.html')
+            }
+          }
+        },
+    // Why: @yiru/client carries the source paths for its ~renderer and ~shared
+    // imports. This host keeps its own React and Tailwind plugin instances so the
+    // landing and workbench CSS graphs remain separate HTML-entry assets.
+    define: clientVitePreset.define,
+    plugins: [react(), tailwindcss(), renderDocumentInDev()],
+    resolve: {
+      alias: {
+        ...clientVitePreset.resolve.alias,
+        '@': resolve(import.meta.dirname, 'src')
+      }
+    },
+    server: {
+      // Why: electron-vite claims 5173 during root `pnpm dev`, and the whole
+      // 517x-53xx band is churned by strictPort benchmark preview servers.
+      port: 4180
+    },
+    worker: clientVitePreset.worker
   }
 })

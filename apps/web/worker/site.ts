@@ -21,6 +21,7 @@ const TEMPORARY_REDIRECT = 302
 const DOWNLOAD_PATH = '/download'
 const DOCUMENTATION_PREFIX = '/docs'
 const DOCUMENTATION_PATHS = new Set(['/privacy'])
+const PRODUCT_APP_PATH = '/app'
 
 type SiteEnv = {
   ASSETS: Fetcher
@@ -52,6 +53,15 @@ export default {
 
     if (isDocumentationPath(pathname)) {
       return Response.redirect(YIRU_GITHUB_REPOSITORY_URL, TEMPORARY_REDIRECT)
+    }
+
+    if (pathname === PRODUCT_APP_PATH || pathname.startsWith(`${PRODUCT_APP_PATH}/`)) {
+      // Why: not_found_handling is 404-page, so product deep links need an explicit
+      // SPA fallback. Its target is /app, not /app.html, because automatic HTML
+      // handling redirects the latter back to /app with a 307.
+      const appEntryUrl = new URL(PRODUCT_APP_PATH, url)
+      appEntryUrl.search = url.search
+      return env.ASSETS.fetch(new Request(appEntryUrl, request))
     }
 
     return env.ASSETS.fetch(request)
