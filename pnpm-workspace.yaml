@@ -22,7 +22,7 @@ catalog:
   '@orpc/server': 1.14.14
   '@parcel/watcher': ^2.5.6
   '@phosphor-icons/react': ^2.1.10
-  '@pierre/diffs': 1.3.0
+  '@pierre/diffs': 1.3.5
   '@pierre/trees': 1.0.0-beta.6
   '@react-native-async-storage/async-storage': ^3.1.1
   '@sanity/diff-match-patch': ^3.2.0
@@ -248,7 +248,7 @@ overrides:
   vite: 'catalog:'
 patchedDependencies:
   '@expo/ui@57.0.9': apps/mobile/config/patches/@expo__ui@57.0.9.patch
-  '@pierre/diffs@1.3.0': apps/desktop/config/patches/@pierre__diffs@1.3.0.patch
+  '@pierre/diffs@1.3.5': apps/desktop/config/patches/@pierre__diffs@1.3.5.patch
   '@xterm/addon-ligatures@0.11.0-beta.287': apps/desktop/config/patches/@xterm__addon-ligatures@0.11.0-beta.287.patch
   '@xterm/addon-serialize@0.15.0-beta.287': apps/desktop/config/patches/@xterm__addon-serialize@0.15.0-beta.287.patch
   '@xterm/addon-webgl@0.20.0-beta.286': apps/desktop/config/patches/@xterm__addon-webgl@0.20.0-beta.286.patch
@@ -271,7 +271,7 @@ supportedArchitectures:
 # Why: this explicitly requested package is exact-pinned while it is newer than the supply-chain age gate.
 minimumReleaseAgeExclude:
   - thinking-orbs@0.1.1
-  - '@pierre/diffs@1.3.0'
+  - '@pierre/diffs@1.3.5'
   - '@tanstack/history@1.162.1'
   - '@tanstack/react-router@1.170.21'
   - '@tanstack/router-core@1.171.18'
