@@ -1,5 +1,5 @@
-// Why: keep these shapes in lockstep with src/shared/types.ts and
-// src/shared/rate-limit-types.ts. We don't import from desktop here because
+// Why: keep these shapes in lockstep with packages/shared/src/types.ts and
+// packages/shared/src/rate-limit-types.ts. We don't import from desktop here because
 // the mobile bundle must not pull in Electron-coupled type files.
 //
 // Pure state/selectors live here (no React Native imports) so they can be

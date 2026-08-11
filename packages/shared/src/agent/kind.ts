@@ -3,7 +3,7 @@
 // shipped agent maps to a concrete telemetry value so dashboards can
 // distinguish launch interest instead of collapsing the long tail to `other`.
 //
-// Lives in `src/shared/` (not the renderer) because main-side telemetry
+// Lives in `@yiru/shared` (not the renderer) because main-side telemetry
 // emission (`agent_started` from the `pty:spawn` IPC handler) needs the
 // same mapping. Centralizing here means a new TuiAgent member is one edit,
 // not a sweep across renderer + main.

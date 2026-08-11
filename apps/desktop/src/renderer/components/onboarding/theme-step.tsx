@@ -32,7 +32,7 @@ export function applyOnboardingThemeSelection(
 // The two UI-only states (`'idle'`, `'detecting'`) never fire telemetry. The
 // remaining states are exactly `DiscoveryStatusEmitted`, which is the
 // schema-side enum the compile-time guard in
-// `src/shared/telemetry-events.ts` locks against.
+// `packages/shared/src/telemetry-events.ts` locks against.
 export type DiscoveryState =
   | { status: 'idle' }
   | { status: 'detecting' }

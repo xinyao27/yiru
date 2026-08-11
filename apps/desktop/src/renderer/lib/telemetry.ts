@@ -16,7 +16,7 @@ import type { TelemetryConsentState } from '~shared/telemetry-consent-types'
 import type { EventName, EventProps } from '~shared/telemetry-events'
 
 // Re-exported so renderer call sites can import the mapper from this lib
-// alongside `track`. The implementation lives in `src/shared/agent/kind.ts`
+// alongside `track`. The implementation lives in `packages/shared/src/agent/kind.ts`
 // because main-process telemetry emission needs the same mapping when it
 // receives a `TuiAgent`-derived agent kind through the spawn IPC.
 export { tuiAgentToAgentKind } from '~shared/agent/kind'

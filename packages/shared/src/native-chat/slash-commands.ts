@@ -1,7 +1,7 @@
 // Single source of truth for native chat slash-command behavior, shared by the
 // desktop renderer and the mobile app. This is pure data + string helpers (no
 // DOM, no RN-only imports), so both platforms import the SAME values — no
-// mirrored copy to drift, unlike the agent-specific parsers in src/shared that
+// mirrored copy to drift, unlike the agent-specific parsers elsewhere in this package that
 // Metro forces us to duplicate.
 
 import type { AgentType } from '@yiru/workbench-model/agent'

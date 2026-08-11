@@ -1,9 +1,9 @@
-/* GitLab-specific shared types. Split out of `src/shared/types.ts` so
+/* GitLab-specific shared types. Split out of `packages/shared/src/types.ts` so
    adding or changing a GitLab type doesn't surface as a merge conflict
    on every upstream sync of the much larger central types file.
    Imports the small base types (CheckStatus, ClassifiedError,
    PRConflictSummary) it depends on; re-exported from `./types` for
-   import-stability — existing call sites (`from '../shared/types'`)
+   import-stability — existing call sites (`from '~shared/types'`)
    continue to work without changes. */
 import type { CheckStatus, ClassifiedError, PRConflictSummary } from './review-types'
 

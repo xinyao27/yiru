@@ -28,7 +28,10 @@ export class DedicatedRemoteRuntimeOrpcPeer {
     private readonly onTerminalBinary: (frame: Uint8Array<ArrayBufferLike>) => void
   ) {}
 
-  readonly addEventListener: DedicatedOrpcWebsocket['addEventListener'] = (type, listener) => {
+  readonly addEventListener: DedicatedOrpcWebsocket['addEventListener'] = (
+    type: string,
+    listener: EventListenerOrEventListenerObject
+  ) => {
     if (type !== 'message' && type !== 'close') {
       return
     }
@@ -41,8 +44,8 @@ export class DedicatedRemoteRuntimeOrpcPeer {
   }
 
   readonly removeEventListener: DedicatedOrpcWebsocket['removeEventListener'] = (
-    type,
-    listener
+    type: string,
+    listener: EventListenerOrEventListenerObject
   ) => {
     if (type === 'message' || type === 'close') {
       this.listeners.get(type)?.delete(listener)

@@ -8,7 +8,7 @@ import { withAccess, type RuntimeProcedureMeta } from './access-meta.js'
 // limit banner it observed in a pane's output; the host resolves the reset
 // time, persists a schedule, and (desktop-only, see api-types.ts) dispatches
 // the resume back to the renderer that owns the pane once the window rolls
-// over. Mirrors apps/desktop/src/shared/rate-limit-resume/types.ts.
+// over. Mirrors packages/shared/src/rate-limit-resume/types.ts.
 
 export type RateLimitResumeProvider =
   | 'claude'
