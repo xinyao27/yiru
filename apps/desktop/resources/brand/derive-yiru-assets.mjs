@@ -13,11 +13,13 @@ import {
 const brandDir = import.meta.dirname
 const desktopDir = dirname(dirname(brandDir))
 const repoRoot = dirname(dirname(desktopDir))
+const clientDir = join(repoRoot, 'packages', 'client')
+const clientBrandDir = join(clientDir, 'src', 'assets', 'brand')
 const mobileAssetsDir = join(repoRoot, 'apps', 'mobile', 'assets')
 const resourcesDir = join(desktopDir, 'resources')
 const appIconsDir = join(resourcesDir, 'app-icons')
 const trayDir = join(resourcesDir, 'tray')
-const rendererPublicDir = join(desktopDir, 'src', 'renderer', 'public')
+const rendererPublicDir = join(clientDir, 'src', 'public')
 const docsAssetsDir = join(repoRoot, 'docs', 'assets')
 const landingPublicDir = join(repoRoot, 'apps', 'landing', 'public')
 
@@ -211,7 +213,7 @@ const uiMask = createMask(fitOnCanvas(cleanWordmark, 1024, 640, 28), [255, 255, 
 const mobileIcon = readPng(join(mobileAssetsDir, 'adaptive-icon-background.png'))
 composite(mobileIcon, adaptiveWordmark, 0, 0)
 
-writePng(join(resourcesDir, 'yiru-wordmark.png'), uiMask)
+writePng(join(clientBrandDir, 'yiru-wordmark.png'), uiMask)
 writePng(join(mobileAssetsDir, 'wordmark.png'), resizeImage(uiMask, 512, 320))
 writePng(join(mobileAssetsDir, 'icon.png'), mobileIcon)
 writePng(join(mobileAssetsDir, 'adaptive-icon.png'), adaptiveWordmark)

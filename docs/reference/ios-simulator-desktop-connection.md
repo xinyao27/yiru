@@ -149,7 +149,7 @@ In the desktop app:
    code shown below it.
 
 The UI supports manually advertising an IPv4 address or hostname, optionally with a port:
-[`apps/desktop/src/renderer/components/mobile/network-interface-picker.tsx:8-14`](../../apps/desktop/src/renderer/components/mobile/network-interface-picker.tsx#L8-L14),
+[`packages/client/src/components/mobile/network-interface-picker.tsx:8-14`](../../packages/client/src/components/mobile/network-interface-picker.tsx#L8-L14),
 [`apps/desktop/src/shared/network/manual-address.ts:21-58`](../../apps/desktop/src/shared/network/manual-address.ts#L21-L58).
 Generating the QR uses the chosen address but preserves the server's actual bound port:
 [`apps/desktop/src/main/ipc/mobile.ts`](../../apps/desktop/src/main/ipc/mobile.ts),
@@ -356,7 +356,7 @@ The endpoint was reachable, but the device token or pinned desktop public key wa
 may be stale, the device may have been revoked, or it may belong to another desktop profile. Regenerate
 the QR and pair again. A regenerated QR intentionally rotates the pending credential:
 [`apps/desktop/src/main/ipc/mobile.ts`](../../apps/desktop/src/main/ipc/mobile.ts),
-[`apps/desktop/src/renderer/components/settings/mobile/pane.tsx:86-104`](../../apps/desktop/src/renderer/components/settings/mobile/pane.tsx#L86-L104).
+[`packages/client/src/components/settings/mobile/pane.tsx:86-104`](../../packages/client/src/components/settings/mobile/pane.tsx#L86-L104).
 
 ### Pairing remains on “Connecting…”
 

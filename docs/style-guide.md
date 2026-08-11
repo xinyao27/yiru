@@ -11,14 +11,14 @@ disagrees with a platform contract, resolve both documents in the same change; d
 one-off implementation. `AGENTS.md` owns code structure and quality, so those rules are not repeated
 here.
 
-Scope: `apps/desktop/src/renderer/` and `apps/mobile/`, which share one semantic token vocabulary.
+Scope: `packages/client/src/` and `apps/mobile/`, which share one semantic token vocabulary.
 
 | Source | File |
 | --- | --- |
 | Desktop visual contract | `apps/desktop/DESIGN.md` |
 | Mobile visual contract | `apps/mobile/DESIGN.md` |
-| Tokens, base layer, global chrome | `apps/desktop/src/renderer/assets/main.css` |
-| Primitives | `apps/desktop/src/renderer/components/ui/` |
+| Tokens, base layer, global chrome | `packages/client/src/assets/main.css` |
+| Primitives | `packages/client/src/components/ui/` |
 | Primitive catalog and layering | `components/ui/README.md` |
 | Mobile token mirror (Uniwind) | `apps/mobile/global.css` |
 | Mobile headers, controls, and tabs | §12 of this guide |

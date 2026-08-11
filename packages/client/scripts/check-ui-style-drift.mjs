@@ -3,15 +3,15 @@ import path from 'node:path'
 import process from 'node:process'
 import { pathToFileURL } from 'node:url'
 
-const RENDERER_ROOT = 'src/renderer'
+const RENDERER_ROOT = 'src'
 const UI_ROOT = path.join(RENDERER_ROOT, 'components/ui')
 
 const SKIP_DIR_NAMES = new Set(['node_modules', 'dist', '.git'])
 
-/** Paths (posix, relative to apps/desktop) that may keep native hosts. */
+/** Paths (posix, relative to packages/client) that may keep native hosts. */
 const NATIVE_BUTTON_ALLOWLIST = new Set([
   // Why: Base UI Switch requires a native button host element.
-  'src/renderer/components/ui/switch.tsx'
+  'src/components/ui/switch.tsx'
 ])
 
 /**
@@ -19,9 +19,9 @@ const NATIVE_BUTTON_ALLOWLIST = new Set([
  * Each path must keep an in-file Why comment explaining the exception.
  */
 const NATIVE_FORM_ALLOWLIST = new Set([
-  'src/renderer/components/browser-pane/markup/overlay.tsx',
-  'src/renderer/components/editor/rich-markdown/code-block.tsx',
-  'src/renderer/components/native-chat/composer/field.tsx'
+  'src/components/browser-pane/markup/overlay.tsx',
+  'src/components/editor/rich-markdown/code-block.tsx',
+  'src/components/native-chat/composer/field.tsx'
 ])
 
 /**
@@ -29,17 +29,17 @@ const NATIVE_FORM_ALLOWLIST = new Set([
  * use black/white alpha (not interactive accent washes).
  */
 const BLACK_WHITE_ALPHA_ALLOWLIST = new Set([
-  'src/renderer/components/onboarding/theme-chrome-preview.tsx',
-  'src/renderer/components/onboarding/flow.tsx',
-  'src/renderer/components/onboarding/skip-confirmation-dialog.tsx',
-  'src/renderer/components/worktree-jump-palette/panel.tsx',
-  'src/renderer/components/emulator-pane/emulator-phone-hardware-buttons.tsx',
-  'src/renderer/components/settings/mobile/pairing-qr-section.tsx',
-  'src/renderer/components/browser-pane/grab-confirmation-sheet.tsx'
+  'src/components/onboarding/theme-chrome-preview.tsx',
+  'src/components/onboarding/flow.tsx',
+  'src/components/onboarding/skip-confirmation-dialog.tsx',
+  'src/components/worktree-jump-palette/panel.tsx',
+  'src/components/emulator-pane/emulator-phone-hardware-buttons.tsx',
+  'src/components/settings/mobile/pairing-qr-section.tsx',
+  'src/components/browser-pane/grab-confirmation-sheet.tsx'
 ])
 
 const PRIVATE_STYLE_IMPORT_RE =
-  /from\s+['"]@\/components\/ui\/(?:floating-surface-styles|menu-item-styles|popover-content-ref)['"]/
+  /from\s+['"]~renderer\/components\/ui\/(?:floating-surface-styles|menu-item-styles|popover-content-ref)['"]/
 /** Matches Tailwind black/white alpha utilities including fractional forms. */
 const BLACK_WHITE_ALPHA_RE = /\b(?:bg|text|border)-(?:black|white)\/(?:\d+|\[[^\]]+\])/
 /** Matches any rounded-* utility, including directional and arbitrary values. */
@@ -105,7 +105,7 @@ export function findUiStyleDrift(filePath, source) {
   /** @type {string[]} */
   const warnings = []
   const code = stripComments(source)
-  const underUi = filePath.startsWith('src/renderer/components/ui/')
+  const underUi = filePath.startsWith('src/components/ui/')
 
   if (!underUi && PRIVATE_STYLE_IMPORT_RE.test(code)) {
     errors.push(

@@ -2,12 +2,10 @@
   "files": [],
   "references": [
     { "path": "./config/tsconfig.node.json" },
-    { "path": "./config/tsconfig.web.json" },
     { "path": "./config/tsconfig.relay.json" }
   ],
   "compilerOptions": {
     "paths": {
-      "~renderer/*": ["./src/renderer/*"],
       "~shared/*": ["../../packages/shared/src/*"],
       "~main/*": ["./src/main/*"],
       "~preload/*": ["./src/preload/*"]
