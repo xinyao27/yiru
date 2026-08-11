@@ -1,3 +1,4 @@
+import { getNativeFiles } from './file/native-files'
 import { repoHostClient } from './repo-host-client'
 import { worktreeHostClient } from './worktree-host-client'
 
@@ -14,7 +15,7 @@ export const workspaceHostClient: WorkspaceHostClient = {
   // Why: the web entry installs its preload-compatible adapter after static
   // modules evaluate, so resolve the filesystem member only when it is used.
   get fileHost() {
-    return window.api.fileHost
+    return getNativeFiles()
   },
   repos: repoHostClient,
   worktrees: worktreeHostClient
