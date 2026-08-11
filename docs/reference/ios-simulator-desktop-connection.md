@@ -150,7 +150,7 @@ In the desktop app:
 
 The UI supports manually advertising an IPv4 address or hostname, optionally with a port:
 [`packages/client/src/components/mobile/network-interface-picker.tsx:8-14`](../../packages/client/src/components/mobile/network-interface-picker.tsx#L8-L14),
-[`apps/desktop/src/shared/network/manual-address.ts:21-58`](../../apps/desktop/src/shared/network/manual-address.ts#L21-L58).
+[`packages/runtime-protocol/src/mobile-development-pairing.ts:61-84`](../../packages/runtime-protocol/src/mobile-development-pairing.ts#L61-L84).
 Generating the QR uses the chosen address but preserves the server's actual bound port:
 [`apps/desktop/src/main/ipc/mobile.ts`](../../apps/desktop/src/main/ipc/mobile.ts),
 [`apps/desktop/src/main/runtime/rpc.ts:64-81`](../../apps/desktop/src/main/runtime/rpc.ts#L64-L81).
