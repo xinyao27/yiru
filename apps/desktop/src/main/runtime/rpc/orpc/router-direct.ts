@@ -19,6 +19,7 @@ import { portableHostToolingRuntimeHandlers } from './router-direct/portable-hos
 import { providerToolingRuntimeHandlers } from './router-direct/provider-tooling'
 import { providerUsageRuntimeHandlers } from './router-direct/provider-usage'
 import { runtimeEventsRuntimeHandlers } from './router-direct/runtime-events'
+import { shellRuntimeHandlers } from './router-direct/shell'
 import { sourceControlRuntimeHandlers } from './router-direct/source-control'
 import { statusRuntimeHandlers } from './router-direct/status'
 import { terminalRuntimeHandlers } from './router-direct/terminal'
@@ -126,6 +127,7 @@ export const directRuntimeOrpcHandlers = {
   ...providerUsageRuntimeHandlers,
   ...runtimeEventsRuntimeHandlers,
   ...sourceControlRuntimeHandlers,
+  ...shellRuntimeHandlers,
   ...statusRuntimeHandlers,
   ...terminalRuntimeHandlers,
   ...workspaceRuntimeHandlers

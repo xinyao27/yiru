@@ -122,6 +122,10 @@ export type RpcContext = {
   // WebContents handshake, while authenticated web clients derive it from the
   // E2EE WebSocket connection. Missing or disconnected ids degrade normally.
   shellConnectionId?: string
+  // Why: shell procedures are scoped to the BrowserWindow that opened the
+  // local MessagePort. Other transports omit this identity and therefore
+  // cannot target Electron window state accidentally.
+  renderingWebContentsId?: number
 }
 
 export type RpcHandler<TParams, TResult = unknown> = (

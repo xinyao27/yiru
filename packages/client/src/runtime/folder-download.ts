@@ -10,6 +10,7 @@ import {
   type RuntimeFileDownloadResult,
   type RuntimeFileOperationArgs
 } from './file-client'
+import { shellFilesClient } from './file/shell-files'
 
 function validateRemoteEntryName(name: string): void {
   if (!name || name === '.' || name === '..' || name.includes('/') || name.includes('\\')) {
@@ -58,7 +59,7 @@ async function downloadRuntimeEntry(
   const remotePath = `${normalizedDirectory.replace(/\/+$/g, '')}/${entry.name}`
   const pathSegments = [...localPathSegments, entry.name]
   if (entry.isDirectory) {
-    await window.api.fileHost.createDownloadedFolderDirectory({ transferId, pathSegments })
+    await shellFilesClient.createDownloadedFolderDirectory({ transferId, pathSegments })
     await downloadRuntimeDirectoryTree(
       context,
       remotePath,
@@ -69,7 +70,7 @@ async function downloadRuntimeEntry(
     return
   }
   await streamRuntimeFileDownloadChunks(context, remotePath, async (chunk) => {
-    await window.api.fileHost.appendDownloadedFolderFileChunk({
+    await shellFilesClient.appendDownloadedFolderFileChunk({
       transferId,
       pathSegments,
       contentBase64: chunk.contentBase64,
@@ -84,7 +85,7 @@ export async function downloadRuntimeFolder(
   dirPath: string,
   suggestedName: string
 ): Promise<RuntimeFileDownloadResult> {
-  const download = await window.api.fileHost.startDownloadedFolder({ suggestedName })
+  const download = await shellFilesClient.startDownloadedFolder({ suggestedName })
   if (download.canceled) {
     return download
   }
@@ -97,14 +98,14 @@ export async function downloadRuntimeFolder(
       download.transferId,
       isWindowsAbsolutePathLike(dirPath)
     )
-    const result = await window.api.fileHost.finishDownloadedFolder({
+    const result = await shellFilesClient.finishDownloadedFolder({
       transferId: download.transferId
     })
     finished = true
     return result
   } finally {
     if (!finished) {
-      await window.api.fileHost
+      await shellFilesClient
         .cancelDownloadedFolder({ transferId: download.transferId })
         .catch(() => {})
     }

@@ -106,6 +106,20 @@ export async function callRuntimeOrpc<TInput, TResult>(
   }
 }
 
+// Why: shell procedures always address the OS host rendering this window.
+// They must never follow the selected runtime environment, which could point
+// at WSL, SSH, or a relay-connected machine with a different window/clipboard.
+export function callShellOrpc<TInput, TResult>(
+  selectProcedure: (client: RuntimeOrpcClient) => RuntimeOrpcProcedure<TInput, TResult>,
+  input: TInput,
+  options: RuntimeOrpcCallOptions = {}
+): Promise<TResult> {
+  if (isWebRuntimeClient()) {
+    return Promise.reject(new ORPCError('unavailable_on_host', { status: 501 }))
+  }
+  return callRuntimeOrpc({ kind: 'local' }, selectProcedure, input, options)
+}
+
 export async function createRuntimeOrpcClient(
   target: RuntimeClientTarget,
   options: Pick<

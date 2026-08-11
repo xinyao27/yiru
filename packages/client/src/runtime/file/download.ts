@@ -9,6 +9,7 @@ import {
   type RuntimeFileOperationArgs
 } from './context'
 import { readRuntimeFilePreview } from './read'
+import { shellFilesClient } from './shell-files'
 
 const REMOTE_DOWNLOAD_CHUNK_BYTES = 384 * 1024
 const REMOTE_DOWNLOAD_UPDATE_REQUIRED_MESSAGE =
@@ -25,7 +26,7 @@ export async function downloadRuntimeFile(
       throw new Error('Remote file is outside the owning runtime worktree')
     }
     const result = await readRuntimeFilePreview(context, filePath)
-    return window.api.fileHost.saveDownloadedFile({
+    return shellFilesClient.saveDownloadedFile({
       suggestedName,
       content: result.content,
       encoding: result.isBinary ? 'base64' : 'utf8'
@@ -36,7 +37,7 @@ export async function downloadRuntimeFile(
     return downloadRemoteFileViaPreview(runtimeArgs, suggestedName)
   }
 
-  const download = await window.api.fileHost.startDownloadedFile({ suggestedName })
+  const download = await shellFilesClient.startDownloadedFile({ suggestedName })
   if (download.canceled) {
     return download
   }
@@ -47,7 +48,7 @@ export async function downloadRuntimeFile(
     for (;;) {
       const chunk = await readRemoteDownloadChunk(runtimeArgs, offset)
       if (chunk.bytesRead > 0) {
-        await window.api.fileHost.appendDownloadedFileChunk({
+        await shellFilesClient.appendDownloadedFileChunk({
           transferId: download.transferId,
           contentBase64: chunk.contentBase64
         })
@@ -60,14 +61,14 @@ export async function downloadRuntimeFile(
         throw new Error('Remote download stalled before reaching EOF')
       }
     }
-    const result = await window.api.fileHost.finishDownloadedFile({
+    const result = await shellFilesClient.finishDownloadedFile({
       transferId: download.transferId
     })
     finished = true
     return result
   } finally {
     if (!finished) {
-      await window.api.fileHost
+      await shellFilesClient
         .cancelDownloadedFile({ transferId: download.transferId })
         .catch(() => {})
     }
@@ -154,7 +155,7 @@ async function downloadRemoteFileViaPreview(
     if (result.isBinary && !result.content && !result.isImage && !result.mimeType) {
       throw new Error(REMOTE_DOWNLOAD_UPDATE_REQUIRED_MESSAGE)
     }
-    return window.api.fileHost.saveDownloadedFile({
+    return shellFilesClient.saveDownloadedFile({
       suggestedName,
       content: result.content,
       encoding: result.isBinary ? 'base64' : 'utf8'

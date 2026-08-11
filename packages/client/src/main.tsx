@@ -14,8 +14,10 @@ import {
   recordRendererCrashBreadcrumb
 } from './lib/crash-diagnostics'
 import { shouldEnableReactGrab } from './react-grab-dev-gate'
+import { startShellEventStream } from './runtime/shell-events-client'
 
 recordRendererCrashBreadcrumb('renderer_bootstrap_started', { dev: import.meta.env.DEV })
+startShellEventStream()
 installRendererCrashDiagnostics()
 
 if (

@@ -49,7 +49,8 @@ export function registerRuntimeOrpcMessagePortHandler(runtime: YiruRuntimeServic
         connectionId,
         // Why: lets forward handlers (e.g. notifications.report) reverse-call
         // back into this same shell via shell-services-reverse-link.ts.
-        shellConnectionId: electronShellServicesConnectionId(event.sender.id)
+        shellConnectionId: electronShellServicesConnectionId(event.sender.id),
+        renderingWebContentsId: event.sender.id
       })
     })
     port.once('close', () => runtime.cleanupSubscriptionsForConnection(connectionId))

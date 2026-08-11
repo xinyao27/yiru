@@ -1,7 +1,11 @@
 type RuntimeStreamFanOutOptions<TClient, TEvent> = {
   resolveClient: () => Promise<TClient>
   open: (client: TClient, signal: AbortSignal) => Promise<AsyncIterable<TEvent>>
+  retryDelayMs?: (attempt: number) => number
+  onConnectionStateChange?: (state: RuntimeStreamConnectionState) => void
 }
+
+export type RuntimeStreamConnectionState = 'idle' | 'connecting' | 'connected' | 'disconnected'
 
 export type RuntimeStreamFanOut<TEvent> = {
   subscribe: (listener: (event: TEvent) => void) => () => void
@@ -17,6 +21,11 @@ export function createRuntimeStreamFanOut<TClient, TEvent>(
   let stopUpstream: (() => void) | null = null
   let retryTimer: ReturnType<typeof setTimeout> | null = null
   let generation = 0
+  let retryAttempt = 0
+
+  const setConnectionState = (state: RuntimeStreamConnectionState): void => {
+    options.onConnectionStateChange?.(state)
+  }
 
   const openUpstream = (): void => {
     if (retryTimer) {
@@ -26,6 +35,7 @@ export function createRuntimeStreamFanOut<TClient, TEvent>(
     const currentGeneration = ++generation
     const controller = new AbortController()
     stopUpstream = () => controller.abort()
+    setConnectionState('connecting')
     void (async () => {
       try {
         const client = await options.resolveClient()
@@ -33,10 +43,12 @@ export function createRuntimeStreamFanOut<TClient, TEvent>(
           return
         }
         const stream = await options.open(client, controller.signal)
+        setConnectionState('connected')
         for await (const event of stream) {
           if (controller.signal.aborted) {
             return
           }
+          retryAttempt = 0
           for (const listener of Array.from(listeners)) {
             try {
               listener(event)
@@ -52,7 +64,11 @@ export function createRuntimeStreamFanOut<TClient, TEvent>(
         if (generation === currentGeneration) {
           stopUpstream = null
           if (listeners.size > 0 && !controller.signal.aborted) {
-            retryTimer = setTimeout(openUpstream, 1_000)
+            setConnectionState('disconnected')
+            retryAttempt++
+            retryTimer = setTimeout(openUpstream, options.retryDelayMs?.(retryAttempt) ?? 1_000)
+          } else {
+            setConnectionState('idle')
           }
         }
       }
@@ -75,6 +91,8 @@ export function createRuntimeStreamFanOut<TClient, TEvent>(
             clearTimeout(retryTimer)
             retryTimer = null
           }
+          retryAttempt = 0
+          setConnectionState('idle')
         }
       }
     }

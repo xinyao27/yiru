@@ -1,9 +1,5 @@
 import { ORPCError } from '@orpc/client'
-import type {
-  ContractRouterClient,
-  RuntimeBrowserGuestEvent,
-  runtimeContract
-} from '@yiru/runtime-protocol/contract'
+import type { ContractRouterClient, runtimeContract } from '@yiru/runtime-protocol/contract'
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 import { STATUS_GET_CONTRACT } from '@yiru/runtime-protocol/status'
 /* eslint-disable max-lines -- Why: the web preload adapter is the browser-side
@@ -108,23 +104,6 @@ const runtimeClientEvents = createRuntimeStreamFanOut({
   open: (client, signal) => client.runtime.clientEvents.subscribe(undefined, { signal })
 })
 
-const runtimeBrowserGuestEvents = createRuntimeStreamFanOut({
-  resolveClient: resolveFanOutClient,
-  open: (client, signal) => client.browser.guestEvents.subscribe(undefined, { signal })
-})
-
-// Narrows the shared guest-event feed to one event kind, so each preload `on*`
-// keeps its original single-payload callback signature.
-function onBrowserGuestEvent<TType extends RuntimeBrowserGuestEvent['type']>(
-  type: TType,
-  callback: (event: Extract<RuntimeBrowserGuestEvent, { type: TType }>) => void
-): () => void {
-  return runtimeBrowserGuestEvents.subscribe((event) => {
-    if (event.type === type) {
-      callback(event as Extract<RuntimeBrowserGuestEvent, { type: TType }>)
-    }
-  })
-}
 let cachedDetectedWorktrees: { loadedAt: number; worktrees: Worktree[] } | null = null
 const runtimeCallQueuePool = new WebRuntimeCallQueuePool()
 
@@ -398,9 +377,7 @@ function createWebPreloadApi(): Partial<PreloadApi> {
     },
     runtimeEnvironments: createRuntimeEnvironmentsApi(),
     repoHost: createRepoHostAdapter(),
-    fileHost: createFileHostApi(),
     git: createGitApi(),
-    browser: createBrowserApi(),
     emulator: createEmulatorApi(),
     gh: createGitHubApi(),
     aiVault: createAiVaultApi(),
@@ -892,166 +869,6 @@ function createRepoHostAdapter(): PreloadApi['repoHost'] {
       )
       return getDefaultCreateProjectParent(result.resolvedPath)
     }
-  }
-}
-
-function createFileHostApi(): NonNullable<Partial<PreloadApi>['fileHost']> {
-  return {
-    readFile: async ({ filePath }) => {
-      const file = await resolveRuntimeFilePath(filePath)
-      return callRuntimeProcedure((client, options) =>
-        client.files.readPreview(
-          {
-            worktree: toRuntimeWorktreeSelector(file.worktree.id),
-            relativePath: file.relativePath
-          },
-          options
-        )
-      )
-    },
-    saveDownloadedFile: async () => {
-      throw new Error('Remote file download is unavailable in paired web clients.')
-    },
-    startDownloadedFile: async () => {
-      throw new Error('Remote file download is unavailable in paired web clients.')
-    },
-    appendDownloadedFileChunk: async () => {
-      throw new Error('Remote file download is unavailable in paired web clients.')
-    },
-    finishDownloadedFile: async () => {
-      throw new Error('Remote file download is unavailable in paired web clients.')
-    },
-    cancelDownloadedFile: async () => {
-      throw new Error('Remote file download is unavailable in paired web clients.')
-    },
-    startDownloadedFolder: async () => {
-      throw new Error('Remote folder download is unavailable in paired web clients.')
-    },
-    createDownloadedFolderDirectory: async () => {
-      throw new Error('Remote folder download is unavailable in paired web clients.')
-    },
-    appendDownloadedFolderFileChunk: async () => {
-      throw new Error('Remote folder download is unavailable in paired web clients.')
-    },
-    finishDownloadedFolder: async () => {
-      throw new Error('Remote folder download is unavailable in paired web clients.')
-    },
-    cancelDownloadedFolder: async () => {
-      throw new Error('Remote folder download is unavailable in paired web clients.')
-    },
-    writeFile: async ({ filePath, content }) => {
-      const file = await resolveRuntimeFilePath(filePath)
-      await callRuntimeProcedure((client, options) =>
-        client.files.write(
-          {
-            worktree: toRuntimeWorktreeSelector(file.worktree.id),
-            relativePath: file.relativePath,
-            content
-          },
-          options
-        )
-      )
-    },
-    createFile: async ({ filePath }) => {
-      const file = await resolveRuntimeFilePath(filePath)
-      await callRuntimeProcedure((client, options) =>
-        client.files.createFile(
-          {
-            worktree: toRuntimeWorktreeSelector(file.worktree.id),
-            relativePath: file.relativePath
-          },
-          options
-        )
-      )
-    },
-    createDir: async ({ dirPath }) => {
-      const file = await resolveRuntimeFilePath(dirPath)
-      await callRuntimeProcedure((client, options) =>
-        client.files.createDir(
-          {
-            worktree: toRuntimeWorktreeSelector(file.worktree.id),
-            relativePath: file.relativePath
-          },
-          options
-        )
-      )
-    },
-    rename: async ({ oldPath, newPath }) => {
-      const oldFile = await resolveRuntimeFilePath(oldPath)
-      const newFile = await resolveRuntimeFilePath(newPath)
-      await callRuntimeProcedure((client, options) =>
-        client.files.rename(
-          {
-            worktree: toRuntimeWorktreeSelector(oldFile.worktree.id),
-            oldRelativePath: oldFile.relativePath,
-            newRelativePath: newFile.relativePath
-          },
-          options
-        )
-      )
-    },
-    copy: async ({ sourcePath, destinationPath }) => {
-      const source = await resolveRuntimeFilePath(sourcePath)
-      const destination = await resolveRuntimeFilePath(destinationPath)
-      await callRuntimeProcedure((client, options) =>
-        client.files.copy(
-          {
-            worktree: toRuntimeWorktreeSelector(source.worktree.id),
-            sourceRelativePath: source.relativePath,
-            destinationRelativePath: destination.relativePath
-          },
-          options
-        )
-      )
-    },
-    deletePath: async ({ targetPath, recursive }) => {
-      const file = await resolveRuntimeFilePath(targetPath)
-      await callRuntimeProcedure((client, options) =>
-        client.files.delete(
-          {
-            worktree: toRuntimeWorktreeSelector(file.worktree.id),
-            relativePath: file.relativePath,
-            recursive
-          },
-          options
-        )
-      )
-    },
-    authorizeExternalPath: () => Promise.resolve(),
-    stat: async ({ filePath }) => {
-      const file = await resolveRuntimeFilePath(filePath)
-      return callRuntimeProcedure((client, options) =>
-        client.files.stat(
-          {
-            worktree: toRuntimeWorktreeSelector(file.worktree.id),
-            relativePath: file.relativePath
-          },
-          options
-        )
-      )
-    },
-    pathExists: async ({ filePath }) => {
-      try {
-        const file = await resolveRuntimeFilePath(filePath)
-        await callRuntimeProcedure((client, options) =>
-          client.files.stat(
-            {
-              worktree: toRuntimeWorktreeSelector(file.worktree.id),
-              relativePath: file.relativePath
-            },
-            options
-          )
-        )
-        return true
-      } catch (error) {
-        if (isMissingPathError(error)) {
-          return false
-        }
-        throw error
-      }
-    },
-    stageExternalPathsForRuntimeUpload: async () => ({ sources: [] }),
-    resolveDroppedPathsForAgent: async () => ({ resolvedPaths: [], skipped: [], failed: [] })
   }
 }
 
@@ -1549,36 +1366,6 @@ function createGitApi(): NonNullable<Partial<PreloadApi>['git']> {
   }
 }
 
-function createBrowserApi(): NonNullable<Partial<PreloadApi>['browser']> {
-  const browserApi = {
-    onGuestLoadFailed: (callback) => onBrowserGuestEvent('guestLoadFailed', callback),
-    onCertificateFailureChanged: (callback) =>
-      onBrowserGuestEvent('certificateFailureChanged', callback),
-    onPermissionDenied: (callback) => onBrowserGuestEvent('permissionDenied', callback),
-    onPopup: (callback) => onBrowserGuestEvent('popup', callback),
-    onDownloadRequested: (callback) => onBrowserGuestEvent('downloadRequested', callback),
-    onDownloadProgress: (callback) => onBrowserGuestEvent('downloadProgress', callback),
-    onDownloadFinished: (callback) => onBrowserGuestEvent('downloadFinished', callback),
-    onContextMenuRequested: () => noopUnsubscribe,
-    onContextMenuDismissed: () => noopUnsubscribe,
-    onNavigationUpdate: (callback) => onBrowserGuestEvent('navigationUpdate', callback),
-    onActivateView: () => noopUnsubscribe,
-    onPaneFocus: () => noopUnsubscribe,
-    onOpenLinkInYiruTab: (callback) => onBrowserGuestEvent('openLinkInYiruTab', callback),
-    onGrabModeToggle: () => noopUnsubscribe,
-    onGrabActionShortcut: () => noopUnsubscribe,
-    sessionImportCookies: () =>
-      Promise.resolve({
-        ok: false,
-        reason: translate(
-          'auto.web.web.preload.api.67ec964791',
-          'Cookie import is unavailable in the web client.'
-        )
-      })
-  } satisfies Partial<NonNullable<Partial<PreloadApi>['browser']>>
-  return browserApi as unknown as NonNullable<Partial<PreloadApi>['browser']>
-}
-
 function createEmulatorApi(): NonNullable<Partial<PreloadApi>['emulator']> {
   return {
     startFrameStream: () => Promise.reject(new Error('Mobile emulator is unavailable on web.')),
@@ -1836,7 +1623,6 @@ function getClientForEnvironment(environment: StoredWebRuntimeEnvironment): WebR
     // environments must reopen it against the new host, or listeners keep
     // waiting on a stream that belongs to the previous pairing.
     runtimeClientEvents.reset()
-    runtimeBrowserGuestEvents.reset()
   }
   return activeClient
 }
@@ -1846,7 +1632,6 @@ function closeActiveRuntimeClients(): void {
   activeClient = null
   activeClientEnvironmentId = null
   runtimeClientEvents.reset()
-  runtimeBrowserGuestEvents.reset()
   invalidateRuntimeWorktreeCaches()
 }
 
@@ -2204,13 +1989,6 @@ function toLegacyDetectedWorktreeResult(
       visible: true
     }))
   }
-}
-
-function isMissingPathError(error: unknown): boolean {
-  if (!(error instanceof Error)) {
-    return false
-  }
-  return /\bENOENT\b|not found|no such file/i.test(error.message)
 }
 
 async function resolveRuntimeWorktreeByPath(worktreePath: string): Promise<Worktree> {

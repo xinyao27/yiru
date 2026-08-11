@@ -16,7 +16,6 @@ import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'nod
 authorization and external import behavior remain audited together. */
 import { assertNoClobberRenameDestinationAvailable } from '~shared/filesystem-rename-collision'
 
-import type { MainIpcRegistration } from '../ipc-registration'
 import type { Store } from '../persistence'
 import { authorizeExternalPath, resolveAuthorizedPath, isENOENT } from './auth'
 import { resolveLocalDroppedPathsForAgent } from './dropped-path-resolution'
@@ -61,17 +60,9 @@ async function assertNotExists(targetPath: string): Promise<void> {
   }
 }
 
-/**
- * IPC handlers for file/folder creation and renaming.
- * Deletion is handled separately via `file-host:deletePath` (shell.trashItem).
- */
-export function registerFilesystemMutationHandlers(
-  ipcMain: MainIpcRegistration,
-  store: Store
-): void {
-  ipcMain.handle(
-    'file-host:createFile',
-    async (_event, args: { filePath: string; connectionId?: string }): Promise<void> => {
+export function createFilesystemMutationService(store: Store) {
+  return {
+    createFile: async (args: { filePath: string }): Promise<void> => {
       const filePath = await resolveAuthorizedPath(args.filePath, store)
       await mkdir(dirname(filePath), { recursive: true })
       try {
@@ -80,27 +71,14 @@ export function registerFilesystemMutationHandlers(
       } catch (error) {
         rethrowWithUserMessage(error, filePath)
       }
-    }
-  )
+    },
+    createDirectory: async (args: { directoryPath: string }): Promise<void> => {
+      const directoryPath = await resolveAuthorizedPath(args.directoryPath, store)
+      await assertNotExists(directoryPath)
+      await mkdir(directoryPath, { recursive: true })
+    },
 
-  ipcMain.handle(
-    'file-host:createDir',
-    async (_event, args: { dirPath: string; connectionId?: string }): Promise<void> => {
-      const dirPath = await resolveAuthorizedPath(args.dirPath, store)
-      await assertNotExists(dirPath)
-      await mkdir(dirPath, { recursive: true })
-    }
-  )
-
-  // Note: fs.rename throws EXDEV if old and new paths are on different
-  // filesystems/volumes. This is unlikely since both paths are under the same
-  // workspace root, but a cross-drive rename would surface as an IPC error.
-  ipcMain.handle(
-    'file-host:rename',
-    async (
-      _event,
-      args: { oldPath: string; newPath: string; connectionId?: string }
-    ): Promise<void> => {
+    rename: async (args: { oldPath: string; newPath: string }): Promise<void> => {
       // Why: rename() operates on directory entries, not file contents. If
       // oldPath is a symlink, we must rename the link itself rather than
       // resolving it to its target — following the link would rename the
@@ -111,15 +89,9 @@ export function registerFilesystemMutationHandlers(
       const newPath = await resolveAuthorizedPath(args.newPath, store, { preserveSymlink: true })
       await assertNoClobberRenameDestinationAvailable(oldPath, newPath)
       await rename(oldPath, newPath)
-    }
-  )
+    },
 
-  ipcMain.handle(
-    'file-host:copy',
-    async (
-      _event,
-      args: { sourcePath: string; destinationPath: string; connectionId?: string }
-    ): Promise<void> => {
+    copy: async (args: { sourcePath: string; destinationPath: string }): Promise<void> => {
       const sourcePath = await resolveAuthorizedPath(args.sourcePath, store, {
         preserveSymlink: true
       })
@@ -138,45 +110,31 @@ export function registerFilesystemMutationHandlers(
             force: false
           })
         : copyFile(sourcePath, destinationPath, constants.COPYFILE_EXCL))
-    }
-  )
+    },
 
-  ipcMain.handle(
-    'file-host:stageExternalPathsForRuntimeUpload',
-    async (
-      _event,
-      args: { sourcePaths: string[] }
-    ): Promise<{ sources: StagedExternalImportSource[] }> => {
+    stageExternalPathsForRuntimeUpload: async (args: {
+      sourcePaths: string[]
+    }): Promise<{ sources: StagedExternalImportSource[] }> => {
       const sources: StagedExternalImportSource[] = []
       for (const sourcePath of args.sourcePaths) {
         sources.push(await stageOneSourceForRuntimeUpload(sourcePath))
       }
       return { sources }
-    }
-  )
+    },
 
-  // Why: terminal drag-and-drop resolver. Local worktrees pass paths through
-  // unchanged (reference-in-place; preserves zero-latency drop). Kept as a
-  // separate IPC from file-host:importExternalPaths because terminal semantics differ
-  // from the explorer's "copy into user-picked destDir".
-  ipcMain.handle(
-    'file-host:resolveDroppedPathsForAgent',
-    async (
-      _event,
-      args: { paths: string[]; worktreePath: string; connectionId?: string }
-    ): Promise<ResolveDroppedPathsResult> => {
-      // Why: `== null` (not `!args.connectionId`) so an empty string is
-      // treated as a renderer error, not silently routed to the local branch.
-      if (args.connectionId != null) {
-        throw new Error('Uploading dropped files to a remote host is no longer supported')
-      }
+    // Why: local shell drops reference paths in place. Remote upload staging
+    // is a separate explicit procedure and never changes this result shape.
+    resolveDroppedPathsForAgent: async (args: {
+      paths: string[]
+      worktreePath: string
+    }): Promise<ResolveDroppedPathsResult> => {
       return {
         resolvedPaths: resolveLocalDroppedPathsForAgent(args.paths, args.worktreePath),
         skipped: [],
         failed: []
       }
     }
-  )
+  }
 }
 
 export type ImportSkipReason = 'missing' | 'symlink' | 'permission-denied' | 'unsupported'

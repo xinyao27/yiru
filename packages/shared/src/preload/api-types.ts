@@ -11,15 +11,6 @@ import type { ReadClipboardTextOptions } from '@yiru/workbench-model/ui'
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 
 import type { AppIdentity } from '../app-identity'
-import type {
-  BrowserContextMenuDismissedEvent,
-  BrowserContextMenuRequestedEvent,
-  BrowserDownloadFinishedEvent,
-  BrowserDownloadProgressEvent,
-  BrowserDownloadRequestedEvent,
-  BrowserPermissionDeniedEvent,
-  BrowserPopupEvent
-} from '../browser/guest-events'
 import type { StartupCommandDelivery } from '../codex-startup-delivery'
 import type {
   CommitMessageAgentCapability,
@@ -79,9 +70,6 @@ import type { SourceControlAiSettings } from '../source-control/ai-types'
 import type { TerminalSideEffectBatch } from '../terminal/side-effect-facts'
 import type { TerminalViewAttributes } from '../terminal/view-attributes'
 import type {
-  BrowserCookieImportResult,
-  BrowserCertificateFailure,
-  BrowserLoadError,
   BrowserSessionProfileSource,
   ClaudeRateLimitAccountsState,
   CodexRateLimitAccountsState,
@@ -194,56 +182,6 @@ import type {
 } from '../opencode-usage-types'
 import type { TelemetryConsentState } from '../telemetry-consent-types'
 import type { AgentKind, LaunchSource, RequestKind } from '../telemetry-events'
-
-export type BrowserApi = {
-  // Why: host-state events also flow through `browser.guestEvents.subscribe`;
-  // these callbacks are the Electron shell's local guest-UI delivery adapter.
-  onGuestLoadFailed: (
-    callback: (args: { browserPageId: string; loadError: BrowserLoadError }) => void
-  ) => () => void
-  onCertificateFailureChanged: (
-    callback: (event: { browserPageId: string; failure: BrowserCertificateFailure | null }) => void
-  ) => () => void
-  onPermissionDenied: (callback: (event: BrowserPermissionDeniedEvent) => void) => () => void
-  onPopup: (callback: (event: BrowserPopupEvent) => void) => () => void
-  onDownloadRequested: (callback: (event: BrowserDownloadRequestedEvent) => void) => () => void
-  onDownloadProgress: (callback: (event: BrowserDownloadProgressEvent) => void) => () => void
-  onDownloadFinished: (callback: (event: BrowserDownloadFinishedEvent) => void) => () => void
-  // Why: shell-only — Electron's native right-click menu, positioned with
-  // screen coordinates. Only meaningful for a window the OS is drawing.
-  onContextMenuRequested: (
-    callback: (event: BrowserContextMenuRequestedEvent) => void
-  ) => () => void
-  onContextMenuDismissed: (
-    callback: (event: BrowserContextMenuDismissedEvent) => void
-  ) => () => void
-  /** already covered: navigationUpdate flows via `browser.guestEvents.subscribe`; this stays as the shell's local IPC delivery. */
-  onNavigationUpdate: (
-    callback: (event: { browserPageId: string; url: string; title: string }) => void
-  ) => () => void
-  // Why: shell-only — view activation and browser-pane focus are Electron
-  // window/pane concerns dispatched by the shell (see 附录 A.2 in
-  // docs/runtime-orpc-migration.md); they carry no host state of their own.
-  onActivateView: (
-    callback: (data: { worktreeId?: string; browserPageId?: string }) => void
-  ) => () => void
-  onPaneFocus: (
-    callback: (data: { worktreeId: string | null; browserPageId: string }) => void
-  ) => () => void
-  /** already covered: openLinkInYiruTab flows via `browser.guestEvents.subscribe`; this stays as the shell's local IPC delivery. */
-  onOpenLinkInYiruTab: (
-    callback: (event: { browserPageId: string; url: string }) => void
-  ) => () => void
-  // Why: shell-only — grab-mode toggle and the c/s action keys are Electron
-  // global keyboard shortcuts forwarded from the OS to the focused window.
-  onGrabModeToggle: (callback: (browserPageId: string) => void) => () => void
-  onGrabActionShortcut: (
-    callback: (args: { browserPageId: string; key: 'c' | 's' }) => void
-  ) => () => void
-  // Why: the native picker and selected absolute path remain confined to main;
-  // only the completed import result crosses this shell adapter.
-  sessionImportCookies: (args: { profileId: string }) => Promise<BrowserCookieImportResult>
-}
 
 export type EmulatorApi = {
   // Why: startFrameStream/stopFrameStream (+ onFrameStreamFrame/
@@ -1152,7 +1090,6 @@ export type PreloadApi = {
     read: (id: string, fileName: string, kind?: 'image' | 'bundle') => Promise<ArrayBuffer | null>
     delete: (id: string, fileName: string, kind?: 'image' | 'bundle') => Promise<void>
   }
-  browser: BrowserApi
   emulator: EmulatorApi
   // Why: shell-only — this is the renderer's own client-side cache of GitHub
   // PR info it already fetched, persisted so it survives a restart. The web
@@ -1248,113 +1185,6 @@ export type PreloadApi = {
   // route through `files.*`. This adapter is limited to native downloads and
   // explicitly authorized absolute paths that cannot use worktree-relative
   // addressing, including OS drag-and-drop sources.
-  fileHost: {
-    readFile: (args: {
-      filePath: string
-      connectionId?: string
-      includeLocalLogMetadata?: boolean
-    }) => Promise<{
-      content: string
-      isBinary: boolean
-      isImage?: boolean
-      mimeType?: string
-      fileIdentity?: string
-    }>
-    saveDownloadedFile: (args: {
-      suggestedName: string
-      content: string
-      encoding: 'utf8' | 'base64'
-    }) => Promise<{ canceled: true } | { canceled: false; destinationPath: string }>
-    startDownloadedFile: (args: {
-      suggestedName: string
-    }) => Promise<
-      { canceled: true } | { canceled: false; transferId: string; destinationPath: string }
-    >
-    appendDownloadedFileChunk: (args: {
-      transferId: string
-      contentBase64: string
-    }) => Promise<{ ok: true }>
-    finishDownloadedFile: (args: {
-      transferId: string
-    }) => Promise<{ canceled: false; destinationPath: string }>
-    cancelDownloadedFile: (args: { transferId: string }) => Promise<{ ok: true }>
-    startDownloadedFolder: (args: {
-      suggestedName: string
-    }) => Promise<
-      { canceled: true } | { canceled: false; transferId: string; destinationPath: string }
-    >
-    createDownloadedFolderDirectory: (args: {
-      transferId: string
-      pathSegments: string[]
-    }) => Promise<{ ok: true }>
-    appendDownloadedFolderFileChunk: (args: {
-      transferId: string
-      pathSegments: string[]
-      contentBase64: string
-      first: boolean
-      last: boolean
-    }) => Promise<{ ok: true }>
-    finishDownloadedFolder: (args: {
-      transferId: string
-    }) => Promise<{ canceled: false; destinationPath: string }>
-    cancelDownloadedFolder: (args: { transferId: string }) => Promise<{ ok: true }>
-    writeFile: (args: { filePath: string; content: string; connectionId?: string }) => Promise<void>
-    createFile: (args: { filePath: string; connectionId?: string }) => Promise<void>
-    createDir: (args: { dirPath: string; connectionId?: string }) => Promise<void>
-    rename: (args: { oldPath: string; newPath: string; connectionId?: string }) => Promise<void>
-    copy: (args: {
-      sourcePath: string
-      destinationPath: string
-      connectionId?: string
-    }) => Promise<void>
-    deletePath: (args: {
-      targetPath: string
-      connectionId?: string
-      recursive?: boolean
-    }) => Promise<void>
-    authorizeExternalPath: (args: { targetPath: string }) => Promise<void>
-    stat: (args: {
-      filePath: string
-      connectionId?: string
-    }) => Promise<{ size: number; isDirectory: boolean; mtime: number }>
-    pathExists: (args: { filePath: string; connectionId?: string }) => Promise<boolean>
-    stageExternalPathsForRuntimeUpload: (args: { sourcePaths: string[] }) => Promise<{
-      sources: (
-        | {
-            sourcePath: string
-            status: 'staged'
-            name: string
-            kind: 'file' | 'directory'
-            entries: (
-              | { relativePath: string; kind: 'directory' }
-              | { relativePath: string; kind: 'file'; contentBase64: string }
-            )[]
-          }
-        | {
-            sourcePath: string
-            status: 'skipped'
-            reason: 'missing' | 'symlink' | 'permission-denied' | 'unsupported'
-          }
-        | {
-            sourcePath: string
-            status: 'failed'
-            reason: string
-          }
-      )[]
-    }>
-    resolveDroppedPathsForAgent: (args: {
-      paths: string[]
-      worktreePath: string
-      connectionId?: string
-    }) => Promise<{
-      resolvedPaths: string[]
-      skipped: {
-        sourcePath: string
-        reason: 'missing' | 'symlink' | 'permission-denied' | 'unsupported'
-      }[]
-      failed: { sourcePath: string; reason: string }[]
-    }>
-  }
   git: {
     status: (args: {
       worktreePath: string

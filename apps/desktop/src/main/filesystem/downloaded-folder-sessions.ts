@@ -5,7 +5,6 @@ import { dirname, join } from 'node:path'
 
 import type { RuntimeRendererTarget } from '~main/runtime/host/renderer-target'
 
-import type { MainIpcRegistration } from '../ipc-registration'
 import { sanitizeLocalDownloadFilename } from '../local-download-filename'
 import { promoteLocalDownloadedFolder } from '../local-downloaded-folder-promotion'
 import { isENOENT } from './auth'
@@ -87,8 +86,8 @@ async function cleanupTransferDirectory(dirPath: string): Promise<void> {
   }
 }
 
-function senderIdForEvent(event: { sender: { id: number } }): number {
-  return typeof event.sender.id === 'number' ? event.sender.id : Number.NaN
+function senderId(sender: RuntimeRendererTarget): number {
+  return typeof sender.id === 'number' ? sender.id : Number.NaN
 }
 
 function requireOwnedSession(
@@ -127,10 +126,7 @@ async function writeFileChunk(
   session.activeFile.position += written
 }
 
-export function registerDownloadedFolderSessionHandlers(
-  ipcMain: MainIpcRegistration,
-  nativePathServices: NativePathServices
-): void {
+export function createDownloadedFolderSessionService(nativePathServices: NativePathServices) {
   const sessions = new Map<string, DownloadedFolderSession>()
 
   const closeSession = async (transferId: string, cleanupTemp: boolean) => {
@@ -157,13 +153,15 @@ export function registerDownloadedFolderSessionHandlers(
     }
   }
 
-  ipcMain.handle(
-    'file-host:startDownloadedFolder',
-    async (event, args: { suggestedName?: string }) => {
+  return {
+    startFolderDownload: async (
+      sender: RuntimeRendererTarget,
+      args: { suggestedName?: string }
+    ) => {
       const suggestedName = sanitizeLocalDownloadFilename(
         validateRequiredString(args?.suggestedName, 'suggestedName')
       )
-      const destinationParent = await nativePathServices.chooseDownloadDirectory(event.sender.id)
+      const destinationParent = await nativePathServices.chooseDownloadDirectory(sender.id)
       if (!destinationParent) {
         return { canceled: true as const }
       }
@@ -173,36 +171,36 @@ export function registerDownloadedFolderSessionHandlers(
       const transferId = randomUUID()
       try {
         await mkdir(tempPath, { recursive: false })
-        const senderId = senderIdForEvent(event)
+        const ownerId = senderId(sender)
         const cleanupTimer = setTimeout(
           () => void closeSession(transferId, true),
           DOWNLOAD_SESSION_TTL_MS
         )
         cleanupTimer.unref?.()
-        const onSenderDestroyed = (): void => cleanupSessionsForSender(senderId)
+        const onSenderDestroyed = (): void => cleanupSessionsForSender(ownerId)
         sessions.set(transferId, {
           destinationPath,
           tempPath,
-          senderId,
+          senderId: ownerId,
           cleanupTimer,
           activeFile: null,
-          sender: event.sender,
+          sender,
           onSenderDestroyed
         })
-        event.sender.once('destroyed', onSenderDestroyed)
+        sender.once('destroyed', onSenderDestroyed)
         return { canceled: false as const, destinationPath, transferId }
       } catch (error) {
         await cleanupTransferDirectory(tempPath)
         throw error
       }
-    }
-  )
+    },
 
-  ipcMain.handle(
-    'file-host:createDownloadedFolderDirectory',
-    async (event, args: { transferId?: string; pathSegments?: unknown }) => {
+    createFolderDownloadDirectory: async (
+      sender: RuntimeRendererTarget,
+      args: { transferId?: string; pathSegments?: unknown }
+    ) => {
       const transferId = validateRequiredString(args?.transferId, 'transferId')
-      const session = requireOwnedSession(sessions, transferId, senderIdForEvent(event))
+      const session = requireOwnedSession(sessions, transferId, senderId(sender))
       if (session.activeFile) {
         throw new Error('Finish the active downloaded file before creating a directory')
       }
@@ -210,13 +208,10 @@ export function registerDownloadedFolderSessionHandlers(
         recursive: false
       })
       return { ok: true as const }
-    }
-  )
+    },
 
-  ipcMain.handle(
-    'file-host:appendDownloadedFolderFileChunk',
-    async (
-      event,
+    appendFolderDownloadFileChunk: async (
+      sender: RuntimeRendererTarget,
       args: {
         transferId?: string
         pathSegments?: unknown
@@ -226,7 +221,7 @@ export function registerDownloadedFolderSessionHandlers(
       }
     ) => {
       const transferId = validateRequiredString(args?.transferId, 'transferId')
-      const session = requireOwnedSession(sessions, transferId, senderIdForEvent(event))
+      const session = requireOwnedSession(sessions, transferId, senderId(sender))
       const sanitizedSegments = validatePathSegments(args?.pathSegments)
       const key = JSON.stringify(sanitizedSegments)
       if (args?.first === true) {
@@ -254,14 +249,11 @@ export function registerDownloadedFolderSessionHandlers(
         throw error
       }
       return { ok: true as const }
-    }
-  )
+    },
 
-  ipcMain.handle(
-    'file-host:finishDownloadedFolder',
-    async (event, args: { transferId?: string }) => {
+    finishFolderDownload: async (sender: RuntimeRendererTarget, args: { transferId?: string }) => {
       const transferId = validateRequiredString(args?.transferId, 'transferId')
-      const owned = requireOwnedSession(sessions, transferId, senderIdForEvent(event))
+      const owned = requireOwnedSession(sessions, transferId, senderId(sender))
       if (owned.activeFile) {
         throw new Error('Downloaded folder still has an active file')
       }
@@ -275,16 +267,13 @@ export function registerDownloadedFolderSessionHandlers(
       } finally {
         await cleanupTransferDirectory(session.tempPath)
       }
-    }
-  )
+    },
 
-  ipcMain.handle(
-    'file-host:cancelDownloadedFolder',
-    async (event, args: { transferId?: string }) => {
+    cancelFolderDownload: async (sender: RuntimeRendererTarget, args: { transferId?: string }) => {
       const transferId = validateRequiredString(args?.transferId, 'transferId')
-      requireOwnedSession(sessions, transferId, senderIdForEvent(event))
+      requireOwnedSession(sessions, transferId, senderId(sender))
       await closeSession(transferId, true)
       return { ok: true as const }
     }
-  )
+  }
 }

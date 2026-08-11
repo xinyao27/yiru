@@ -4,15 +4,16 @@ import type { FileHandle } from 'node:fs/promises'
 import { dirname, extname, join } from 'node:path'
 /* eslint-disable max-lines */
 
+import type { RuntimeRendererTarget } from '~main/runtime/host/renderer-target'
+
 import { localLogFileIdentity } from '../ai-vault/local-log-tail-reader'
-import type { MainIpcRegistration } from '../ipc-registration'
 import { sanitizeLocalDownloadFilename } from '../local-download-filename'
 import type { Store } from '../persistence'
 import { tryDeleteWslUncPath } from '../wsl-unc-delete'
 import { resolveAuthorizedPath, isENOENT, authorizeExternalPath } from './auth'
-import { registerDownloadedFolderSessionHandlers } from './downloaded-folder-sessions'
+import { createDownloadedFolderSessionService } from './downloaded-folder-sessions'
 import { initializeLocalLogTailAuthorization } from './local-log-tail'
-import { registerFilesystemMutationHandlers } from './mutations'
+import { createFilesystemMutationService } from './mutations'
 import type { NativePathServices } from './native-path-services'
 
 // Why: Monaco has large-file optimizations like VS Code; blocking at 5MB makes
@@ -186,12 +187,10 @@ async function isBinaryFilePrefix(filePath: string): Promise<boolean> {
   }
 }
 
-export function registerFilesystemHandlers(
-  ipcMain: MainIpcRegistration,
-  store: Store,
-  nativePathServices: NativePathServices
-): void {
+export function createFilesystemService(store: Store, nativePathServices: NativePathServices) {
   const downloadSessions = new Map<string, DownloadSession>()
+  const folderDownloads = createDownloadedFolderSessionService(nativePathServices)
+  const mutations = createFilesystemMutationService(store)
 
   async function closeDownloadSession(
     transferId: string,
@@ -218,13 +217,13 @@ export function registerFilesystemHandlers(
     }
   }
 
-  // ─── Filesystem ─────────────────────────────────────────
-  ipcMain.handle(
-    'file-host:readFile',
-    async (
-      _event,
-      args: { filePath: string; connectionId?: string; includeLocalLogMetadata?: boolean }
-    ): Promise<{
+  initializeLocalLogTailAuthorization(store)
+
+  return {
+    read: async (args: {
+      filePath: string
+      includeLocalLogMetadata?: boolean
+    }): Promise<{
       content: string
       isBinary: boolean
       isImage?: boolean
@@ -270,15 +269,10 @@ export function registerFilesystemHandlers(
       }
 
       return { content: buffer.toString('utf-8'), isBinary: false }
-    }
-  )
+    },
 
-  registerDownloadedFolderSessionHandlers(ipcMain, nativePathServices)
-
-  ipcMain.handle(
-    'file-host:saveDownloadedFile',
-    async (
-      event,
+    saveDownload: async (
+      sender: RuntimeRendererTarget,
       args: { suggestedName?: string; content?: string; encoding?: 'utf8' | 'base64' }
     ): Promise<DownloadFileResult> => {
       const suggestedName = sanitizeLocalDownloadFilename(
@@ -289,10 +283,7 @@ export function registerFilesystemHandlers(
       }
       const content = args.content
       const encoding = args?.encoding === 'base64' ? 'base64' : 'utf8'
-      const destinationPath = await nativePathServices.chooseDownloadFile(
-        event.sender.id,
-        suggestedName
-      )
+      const destinationPath = await nativePathServices.chooseDownloadFile(sender.id, suggestedName)
       if (!destinationPath) {
         return { canceled: true }
       }
@@ -309,13 +300,10 @@ export function registerFilesystemHandlers(
           await cleanupLocalTransferPath(tempPath)
         }
       }
-    }
-  )
+    },
 
-  ipcMain.handle(
-    'file-host:startDownloadedFile',
-    async (
-      event,
+    startDownload: async (
+      sender: RuntimeRendererTarget,
       args: { suggestedName?: string }
     ): Promise<
       | { canceled: true }
@@ -328,10 +316,7 @@ export function registerFilesystemHandlers(
       const suggestedName = sanitizeLocalDownloadFilename(
         validateRequiredString(args?.suggestedName, 'suggestedName')
       )
-      const destinationPath = await nativePathServices.chooseDownloadFile(
-        event.sender.id,
-        suggestedName
-      )
+      const destinationPath = await nativePathServices.chooseDownloadFile(sender.id, suggestedName)
       if (!destinationPath) {
         return { canceled: true }
       }
@@ -340,7 +325,7 @@ export function registerFilesystemHandlers(
       const transferId = randomUUID()
       try {
         const handle = await open(tempPath, 'wx')
-        const senderId = typeof event.sender.id === 'number' ? event.sender.id : Number.NaN
+        const senderId = typeof sender.id === 'number' ? sender.id : Number.NaN
         const cleanupTimer = setTimeout(() => {
           void closeDownloadSession(transferId, true)
         }, DOWNLOAD_SESSION_TTL_MS)
@@ -355,21 +340,18 @@ export function registerFilesystemHandlers(
           cleanupTimer,
           senderId
         })
-        event.sender.once?.('destroyed', () => cleanupDownloadSessionsForSender(senderId))
+        sender.once?.('destroyed', () => cleanupDownloadSessionsForSender(senderId))
         return { canceled: false, transferId, destinationPath }
       } catch (error) {
         await cleanupLocalTransferPath(tempPath)
         throw error
       }
-    }
-  )
+    },
 
-  ipcMain.handle(
-    'file-host:appendDownloadedFileChunk',
-    async (
-      _event,
-      args: { transferId?: string; contentBase64?: string }
-    ): Promise<{ ok: true }> => {
+    appendDownloadChunk: async (args: {
+      transferId?: string
+      contentBase64?: string
+    }): Promise<{ ok: true }> => {
       const transferId = validateRequiredString(args?.transferId, 'transferId')
       const contentBase64 = validateRequiredString(args?.contentBase64, 'contentBase64')
       const session = downloadSessions.get(transferId)
@@ -378,15 +360,11 @@ export function registerFilesystemHandlers(
       }
       await session.handle.writeFile(Buffer.from(contentBase64, 'base64'))
       return { ok: true }
-    }
-  )
+    },
 
-  ipcMain.handle(
-    'file-host:finishDownloadedFile',
-    async (
-      _event,
-      args: { transferId?: string }
-    ): Promise<{ canceled: false; destinationPath: string }> => {
+    finishDownload: async (args: {
+      transferId?: string
+    }): Promise<{ canceled: false; destinationPath: string }> => {
       const transferId = validateRequiredString(args?.transferId, 'transferId')
       const session = await closeDownloadSession(transferId, false)
       if (!session) {
@@ -406,24 +384,15 @@ export function registerFilesystemHandlers(
           await cleanupLocalTransferPath(session.tempPath)
         }
       }
-    }
-  )
+    },
 
-  ipcMain.handle(
-    'file-host:cancelDownloadedFile',
-    async (_event, args: { transferId?: string }): Promise<{ ok: true }> => {
+    cancelDownload: async (args: { transferId?: string }): Promise<{ ok: true }> => {
       const transferId = validateRequiredString(args?.transferId, 'transferId')
       await closeDownloadSession(transferId, true)
       return { ok: true }
-    }
-  )
+    },
 
-  ipcMain.handle(
-    'file-host:writeFile',
-    async (
-      _event,
-      args: { filePath: string; content: string; connectionId?: string }
-    ): Promise<void> => {
+    write: async (args: { filePath: string; content: string }): Promise<void> => {
       const filePath = await resolveAuthorizedPath(args.filePath, store)
 
       try {
@@ -438,15 +407,9 @@ export function registerFilesystemHandlers(
       }
 
       await writeFile(filePath, args.content, 'utf-8')
-    }
-  )
+    },
 
-  ipcMain.handle(
-    'file-host:deletePath',
-    async (
-      _event,
-      args: { targetPath: string; connectionId?: string; recursive?: boolean }
-    ): Promise<void> => {
+    delete: async (args: { targetPath: string; recursive?: boolean }): Promise<void> => {
       // Why: deleting must operate on the symlink itself, not its target.
       // Following the link with realpath() would trash the real file — which
       // could be another file inside the worktree, or a path outside all
@@ -474,24 +437,15 @@ export function registerFilesystemHandlers(
         }
         throw error
       }
-    }
-  )
+    },
 
-  registerFilesystemMutationHandlers(ipcMain, store)
-
-  ipcMain.handle(
-    'file-host:authorizeExternalPath',
-    (_event, args: { targetPath: string }): void => {
+    authorizeExternalPath: (args: { targetPath: string }): void => {
       authorizeExternalPath(args.targetPath)
-    }
-  )
+    },
 
-  ipcMain.handle(
-    'file-host:stat',
-    async (
-      _event,
-      args: { filePath: string; connectionId?: string }
-    ): Promise<{ size: number; isDirectory: boolean; mtime: number }> => {
+    stat: async (args: {
+      filePath: string
+    }): Promise<{ size: number; isDirectory: boolean; mtime: number }> => {
       const filePath = await resolveAuthorizedPath(args.filePath, store)
       const stats = await stat(filePath)
       return {
@@ -499,12 +453,9 @@ export function registerFilesystemHandlers(
         isDirectory: stats.isDirectory(),
         mtime: stats.mtimeMs
       }
-    }
-  )
+    },
 
-  ipcMain.handle(
-    'file-host:pathExists',
-    async (_event, args: { filePath: string; connectionId?: string }): Promise<boolean> => {
+    pathExists: async (args: { filePath: string }): Promise<boolean> => {
       try {
         const filePath = await resolveAuthorizedPath(args.filePath, store)
         await stat(filePath)
@@ -515,8 +466,8 @@ export function registerFilesystemHandlers(
         }
         throw error
       }
-    }
-  )
-
-  initializeLocalLogTailAuthorization(store)
+    },
+    ...folderDownloads,
+    ...mutations
+  }
 }

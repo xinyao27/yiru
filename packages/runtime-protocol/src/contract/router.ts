@@ -48,6 +48,7 @@ import { rateLimitResumeContract } from './rate-limit-resume.js'
 import { repoContract } from './repo.js'
 import { markdownContract, sessionContract } from './session-tabs.js'
 import { settingsContract } from './settings.js'
+import { shellContract } from './shell/shell.js'
 import { skillsContract } from './skills.js'
 import { speechContract } from './speech.js'
 import { statsContract } from './stats.js'
@@ -104,6 +105,7 @@ export const runtimeContract = {
   runtime: runtimeNamespaceContract,
   session: sessionContract,
   settings: settingsContract,
+  shell: shellContract,
   skills: skillsContract,
   speech: speechContract,
   stats: statsContract,
@@ -166,6 +168,7 @@ export * from './rate-limit-resume.js'
 export * from './repo.js'
 export * from './session-tabs.js'
 export * from './settings.js'
+export * from './shell/shell.js'
 export * from './shell-services-browser.js'
 export * from './shell-services-pty.js'
 export * from './shell-services-platform.js'

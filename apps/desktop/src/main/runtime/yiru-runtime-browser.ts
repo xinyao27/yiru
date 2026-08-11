@@ -87,6 +87,7 @@ import type { BrowserPageHandle } from '../browser/page/handle'
 import { startBrowserScreencast, type BrowserScreencastSession } from '../browser/screencast-stream'
 import { requireBrowserSession } from '../browser/session'
 import { browserSessionRegistry } from '../browser/session-registry'
+import { publishShellEvent } from '../shell/events'
 import {
   BrowserRemoteScreencastAuthority,
   type BrowserRemoteScreencastStartResult
@@ -539,7 +540,10 @@ export class RuntimeBrowserCommands {
       return
     }
     const win = this.host.getAuthoritativeWindow()
-    win.webContents.send('browser:activateView', worktreeId ? { worktreeId } : {})
+    publishShellEvent(win.webContents.id, {
+      type: 'browserActivateView',
+      ...(worktreeId ? { worktreeId } : {})
+    })
     // Why: hidden/restored browser panes become operable only after the
     // renderer's webview mounts and calls registerGuest. Waiting on that IPC is
     // both faster and less flaky than sleeping for an arbitrary fixed delay.
@@ -554,10 +558,11 @@ export class RuntimeBrowserCommands {
       return
     }
     const win = this.host.getAuthoritativeWindow()
-    win.webContents.send(
-      'browser:activateView',
-      worktreeId ? { worktreeId, browserPageId } : { browserPageId }
-    )
+    publishShellEvent(win.webContents.id, {
+      type: 'browserActivateView',
+      ...(worktreeId ? { worktreeId } : {}),
+      browserPageId
+    })
     await this.shellAdapter.waitForTabRegistration(browserPageId)
   }
 
@@ -568,12 +573,6 @@ export class RuntimeBrowserCommands {
   // any navigation-causing command so the UI stays in sync.
   private notifyRendererNavigation(browserPageId: string, url: string, title: string): void {
     this.host.emitBrowserGuestEvent({ type: 'navigationUpdate', browserPageId, url, title })
-    try {
-      const win = this.host.getAuthoritativeWindow()
-      win.webContents.send('browser:navigation-update', { browserPageId, url, title })
-    } catch {
-      // Window may not exist during shutdown
-    }
   }
 
   // Why: `tabSwitch` only flips the bridge's `activeWebContentsId` — it
@@ -594,7 +593,8 @@ export class RuntimeBrowserCommands {
   ): void {
     try {
       const win = this.host.getAuthoritativeWindow()
-      win.webContents.send('browser:pane-focus', {
+      publishShellEvent(win.webContents.id, {
+        type: 'browserPaneFocus',
         worktreeId: worktreeId ?? null,
         browserPageId
       })

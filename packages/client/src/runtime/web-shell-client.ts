@@ -71,7 +71,7 @@ const webShellApi: WebShellApi = {
   openUrl: async (url) => openBrowserTarget(url),
   openFilePath: () => Promise.resolve(false),
   openFileUri: async (uri) => openBrowserTarget(uri),
-  pathExists: (path) => window.api.fileHost.pathExists({ filePath: path }),
+  pathExists: () => Promise.reject(new Error('Local shell paths are unavailable on web.')),
   // Why: these signatures can only return native absolute paths. A browser
   // FileSystemHandle cannot be represented without lying about its identity.
   pickAttachment: () => Promise.resolve(null),

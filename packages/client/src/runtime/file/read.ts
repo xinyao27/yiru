@@ -13,7 +13,7 @@ import {
   type RuntimeFileReadArgs,
   type RuntimeReadableFileContent
 } from './context'
-import { getNativeFiles } from './native-files'
+import { shellFilesClient } from './shell-files'
 
 export async function readRuntimeFileContent({
   settings,
@@ -28,7 +28,7 @@ export async function readRuntimeFileContent({
     if (worktreeId && target.kind === 'environment') {
       throw new Error('Remote file is outside the owning runtime worktree')
     }
-    return getNativeFiles().readFile({ filePath, connectionId, includeLocalLogMetadata })
+    return shellFilesClient.readFile({ filePath, connectionId, includeLocalLogMetadata })
   }
 
   const worktree = toRuntimeWorktreeSelector(worktreeId)
@@ -73,7 +73,7 @@ export async function readRuntimeFilePreview(
     if (hasRemoteRuntimeOwner(context)) {
       throw new Error('Remote file is outside the owning runtime worktree')
     }
-    return getNativeFiles().readFile({ filePath, connectionId: context.connectionId })
+    return shellFilesClient.readFile({ filePath, connectionId: context.connectionId })
   }
   return callRuntimeOrpc(
     runtimeArgs.target,
@@ -107,7 +107,7 @@ export async function statRuntimePath(
   const runtimeArgs = getRuntimeFileArgs(context, absolutePath)
   if (!runtimeArgs) {
     assertNativeFileFallbackAllowed(context)
-    return getNativeFiles().stat({ filePath: absolutePath, connectionId: context.connectionId })
+    return shellFilesClient.stat({ filePath: absolutePath, connectionId: context.connectionId })
   }
   return callRuntimeOrpc(
     runtimeArgs.target,
@@ -124,7 +124,7 @@ export async function runtimePathExists(
   const runtimeArgs = getRuntimeFileArgs(context, absolutePath)
   if (!runtimeArgs) {
     assertNativeFileFallbackAllowed(context)
-    return getNativeFiles().pathExists({
+    return shellFilesClient.pathExists({
       filePath: absolutePath,
       connectionId: context.connectionId
     })

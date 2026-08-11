@@ -22,6 +22,7 @@ import {
   type WindowShortcutInput
 } from '~shared/window-shortcut-policy'
 
+import { publishShellEvent } from '../shell/events'
 import { readGuestNavigationState } from './guest-navigation-state'
 
 type ResolveRenderer = (browserTabId: string) => Electron.WebContents | null
@@ -121,7 +122,8 @@ export function setupGuestContextMenu(args: {
     // guest coords if the screen API is unavailable.
     const cursor = screen.getCursorScreenPoint()
     const navigationState = readGuestNavigationState(guest)
-    renderer.send('browser:context-menu-requested', {
+    publishShellEvent(renderer.id, {
+      type: 'browserContextMenuRequested',
       browserPageId: browserTabId,
       x: params.x,
       y: params.y,
@@ -172,7 +174,10 @@ export function setupGuestContextMenu(args: {
       }
       const renderer = resolveRenderer(browserTabId)
       if (renderer) {
-        renderer.send('browser:context-menu-dismissed', { browserPageId: browserTabId })
+        publishShellEvent(renderer.id, {
+          type: 'browserContextMenuDismissed',
+          browserPageId: browserTabId
+        })
       }
       removeDismissListener()
     }
@@ -229,7 +234,11 @@ export function setupGrabShortcutForwarding(args: {
       // While grab mode is actively awaiting a pick, plain C/S belong to Yiru's
       // copy/screenshot shortcuts rather than the page's typing behavior.
       event.preventDefault()
-      renderer.send('browser:grabActionShortcut', { browserPageId: browserTabId, key: bareKey })
+      publishShellEvent(renderer.id, {
+        type: 'browserGrabActionShortcut',
+        browserPageId: browserTabId,
+        key: bareKey
+      })
       return
     }
 
@@ -266,7 +275,10 @@ export function setupGrabShortcutForwarding(args: {
         if (!renderer) {
           return
         }
-        renderer.send('browser:grabModeToggle', browserTabId)
+        publishShellEvent(renderer.id, {
+          type: 'browserGrabModeToggle',
+          browserPageId: browserTabId
+        })
       })
       .catch(() => {
         // Why: shortcut forwarding is best-effort. Guest teardown or a

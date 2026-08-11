@@ -52,6 +52,7 @@ type RuntimeOrpcConnectionState = Pick<
   | 'registerBinaryStreamHandler'
   | 'authenticatedCallerFingerprint'
   | 'shellConnectionId'
+  | 'renderingWebContentsId'
 >
 
 export type RuntimeOrpcInvocationDetails = {
@@ -195,7 +196,8 @@ export async function invokeRuntimeOrpcOperation<TInput, TOutput>(
               authenticatedCallerFingerprint: context.authenticatedCallerFingerprint,
               sendBinary,
               registerBinaryStreamHandler: context.registerBinaryStreamHandler,
-              shellConnectionId: context.shellConnectionId
+              shellConnectionId: context.shellConnectionId,
+              renderingWebContentsId: context.renderingWebContentsId
             },
             featureInteractionInput
           ),

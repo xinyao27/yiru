@@ -9,7 +9,6 @@ import {
 import type { AiVaultSessionRuntimeTarget } from '../ai-vault/session/root-configuration'
 import type { AutomationService } from '../automations/service'
 import { setTrustedBrowserRendererWebContentsId } from '../browser/browser'
-import { registerBrowserHandlers } from '../browser/browser'
 import { setAgentBrowserBridgeRef } from '../browser/page/control'
 import { registerClaudeAccountHandlers } from '../claude/accounts/claude-accounts'
 import type { ClaudeAccountService } from '../claude/accounts/service'
@@ -27,7 +26,6 @@ import { registerDiagnosticsHandlers } from '../diagnostics/diagnostics'
 import { registerEmulatorFrameStreamHandlers } from '../emulator/frame-stream'
 import { registerEmulatorVideoStreamHandlers } from '../emulator/video-stream'
 import { registerExportHandlers } from '../export/export'
-import { registerFilesystemHandlers } from '../filesystem/filesystem'
 import type { KeybindingService } from '../keybindings/keybinding-service'
 import { registerKeybindingHandlers } from '../keybindings/keybindings'
 import { registerMiniMaxCredentialsHandlers } from '../minimax/credentials'
@@ -44,6 +42,7 @@ import { registerWorkspacePortHandlers } from '../ports/workspace-ports'
 import type { RateLimitService } from '../rate-limits/service'
 import { registerRuntimeEnvironmentHandlers } from '../runtime/environments'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'
+import { initializeShellFilesService } from '../shell/files'
 import { registerSpeechHandlers } from '../speech/speech'
 import type { StatsCollector } from '../stats/collector'
 import { registerTelemetryHandlers } from '../telemetry/telemetry'
@@ -57,7 +56,6 @@ import { registerYiruProfileHandlers } from '../yiru-profiles/yiru-profiles'
 import { registerAiVaultHandlers } from './ai-vault'
 import { registerAppHandlers } from './app'
 import { registerAutomationHandlers } from './automations'
-import { electronIpcRegistration } from './electron-ipc-registration'
 import { registerGitHubIpcHandlers } from './github'
 import { registerRuntimeHandlers } from './runtime'
 import { registerSettingsHandlers } from './settings'
@@ -137,7 +135,6 @@ export function registerCoreHandlers(
   }
   registerTelemetryHandlers(store)
   registerYiruProfileHandlers(store, { onBeforeRelaunch: lifecycleOptions.onBeforeRelaunch })
-  registerBrowserHandlers()
   registerShellHandlers()
   registerPetHandlers()
   registerSessionHandlers(store)
@@ -146,7 +143,7 @@ export function registerCoreHandlers(
   registerEmulatorVideoStreamHandlers()
   registerWorkspacePortHandlers(store)
   registerLocalhostWorktreeLabelHandlers(store)
-  registerFilesystemHandlers(electronIpcRegistration, store, {
+  initializeShellFilesService(store, {
     chooseDownloadDirectory: async (rendererId) => {
       const parentWindow = findRendererWindow(rendererId)
       const result = parentWindow

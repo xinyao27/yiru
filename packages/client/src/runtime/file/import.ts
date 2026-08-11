@@ -4,6 +4,7 @@ import { callRuntimeOrpc, type RuntimeClientTarget } from '../orpc-client'
 import { getActiveRuntimeTarget } from '../rpc-client'
 import { getRuntimeFileArgs, type RuntimeFileOperationArgs } from './context'
 import { runtimePathExists } from './read'
+import { shellFilesClient } from './shell-files'
 
 type StagedRuntimeImportEntry =
   | { relativePath: string; kind: 'directory' }
@@ -56,7 +57,7 @@ export async function importExternalPathsToRuntime(
     throw new Error('Destination is outside the active runtime worktree')
   }
 
-  const staged = await window.api.fileHost.stageExternalPathsForRuntimeUpload({ sourcePaths })
+  const staged = await shellFilesClient.stageExternalPathsForRuntimeUpload({ sourcePaths })
   const results: RuntimeImportResult[] = []
   const reservedNames = new Set<string>()
   await ensureRuntimeDirectory(context, destinationDir)

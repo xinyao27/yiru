@@ -20,7 +20,6 @@ import type {
 import type {
   BrowserDownloadFinishedEvent,
   BrowserDownloadProgressEvent,
-  BrowserDownloadRequestedEvent,
   BrowserPermissionDeniedEvent,
   BrowserPopupEvent
 } from '~shared/browser/guest-events'
@@ -1567,8 +1566,6 @@ export class BrowserManager {
       return
     }
     this.publishGuestEvent({ type: 'certificateFailureChanged', browserPageId, failure })
-    const renderer = this.resolveRendererForBrowserTab(browserPageId)
-    renderer?.send('browser:certificate-failure-changed', { browserPageId, failure })
   }
 
   private notifyBrowserGuestStateChanged(webContentsId: number): void {
@@ -2146,14 +2143,6 @@ export class BrowserManager {
 
   private sendPermissionDenied(browserTabId: string, event: PendingPermissionEvent): void {
     this.publishGuestEvent({ type: 'permissionDenied', browserPageId: browserTabId, ...event })
-    const renderer = this.resolveRendererForBrowserTab(browserTabId)
-    if (!renderer) {
-      return
-    }
-    renderer.send('browser:permission-denied', {
-      browserPageId: browserTabId,
-      ...event
-    } satisfies BrowserPermissionDeniedEvent)
   }
 
   private forwardOrQueuePopupEvent(guestWebContentsId: number, event: PendingPopupEvent): void {
@@ -2183,14 +2172,6 @@ export class BrowserManager {
 
   private sendPopupEvent(browserTabId: string, event: PendingPopupEvent): void {
     this.publishGuestEvent({ type: 'popup', browserPageId: browserTabId, ...event })
-    const renderer = this.resolveRendererForBrowserTab(browserTabId)
-    if (!renderer) {
-      return
-    }
-    renderer.send('browser:popup', {
-      browserPageId: browserTabId,
-      ...event
-    } satisfies BrowserPopupEvent)
   }
 
   private bindDownloadToTab(downloadId: string, browserTabId: string): void {
@@ -2257,20 +2238,6 @@ export class BrowserManager {
       savePath: download.savePath,
       status: 'downloading'
     })
-    const renderer = this.resolveRendererForBrowserTab(download.browserTabId)
-    if (!renderer) {
-      return
-    }
-    renderer.send('browser:download-requested', {
-      browserPageId: download.browserTabId,
-      downloadId: download.downloadId,
-      origin: download.origin,
-      filename: download.filename,
-      totalBytes: download.totalBytes,
-      mimeType: download.mimeType,
-      savePath: download.savePath,
-      status: 'downloading'
-    } satisfies BrowserDownloadRequestedEvent)
     download.startedSent = true
   }
 
@@ -2282,11 +2249,6 @@ export class BrowserManager {
       return
     }
     this.publishGuestEvent({ type: 'downloadProgress', ...payload })
-    const renderer = this.resolveRendererForBrowserTab(browserTabId)
-    if (!renderer) {
-      return
-    }
-    renderer.send('browser:download-progress', payload)
   }
 
   private sendDownloadFinished(
@@ -2297,11 +2259,6 @@ export class BrowserManager {
       return
     }
     this.publishGuestEvent({ type: 'downloadFinished', ...payload })
-    const renderer = this.resolveRendererForBrowserTab(browserTabId)
-    if (!renderer) {
-      return
-    }
-    renderer.send('browser:download-finished', payload)
   }
 
   private cancelDownloadInternal(downloadId: string, reason: string): void {
@@ -2412,28 +2369,9 @@ export class BrowserManager {
       browserPageId: browserTabId,
       loadError: { ...loadError, validatedUrl: redactKagiSessionToken(loadError.validatedUrl) }
     })
-    const renderer = this.resolveRendererForBrowserTab(browserTabId)
-    if (!renderer) {
-      return
-    }
-
-    // Why: redact Kagi session tokens before the validated URL is persisted
-    // by the renderer into BrowserPage.loadError (saved to disk via the
-    // workspace session writer).
-    renderer.send('browser:guest-load-failed', {
-      browserPageId: browserTabId,
-      loadError: {
-        ...loadError,
-        validatedUrl: redactKagiSessionToken(loadError.validatedUrl)
-      }
-    })
   }
 
   private forwardClickedLink(browserTabId: string, rawUrl: string): void {
-    const renderer = this.resolveRendererForBrowserTab(browserTabId)
-    if (!renderer) {
-      return
-    }
     const normalizedUrl = normalizeBrowserNavigationUrl(rawUrl)
     if (!normalizedUrl || normalizedUrl === YIRU_BROWSER_BLANK_URL) {
       return
@@ -2442,10 +2380,6 @@ export class BrowserManager {
     // model. Main forwards only a validated URL and never creates a blank popup.
     this.publishGuestEvent({
       type: 'openLinkInYiruTab',
-      browserPageId: browserTabId,
-      url: normalizedUrl
-    })
-    renderer.send('browser:open-link-in-yiru-tab', {
       browserPageId: browserTabId,
       url: normalizedUrl
     })
