@@ -7,9 +7,11 @@ import type { PullRequestGenerationContext } from '~renderer/components/workspac
 import { localizedHostedReviewCopy } from '~renderer/i18n/hosted-review-localized-copy'
 import { translate } from '~renderer/i18n/i18n'
 import { getConnectionId } from '~renderer/lib/connection-context'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import {
+  appendRuntimeGitignore,
+  findRuntimeGitHugeFoldersToIgnore
+} from '~renderer/runtime/git-client'
 import { getRuntimeRepoBaseRefDefault } from '~renderer/runtime/repo-client'
-import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
 
 import {
   resolveSourceControlBaseRef,
@@ -25,7 +27,6 @@ import type { SourceControlInteractionStateController } from './interaction-stat
 
 export function useSourceControlStatusRefresh(scope: SourceControlInteractionStateController) {
   const {
-    activeConnectionId,
     activePrFromQueue,
     activeRepo,
     activeRepoSettings,
@@ -90,20 +91,14 @@ export function useSourceControlStatusRefresh(scope: SourceControlInteractionSta
     }
   }, [refreshActiveGitStatus])
   useEffect(() => {
-    // Why: findHugeFoldersToIgnore/appendGitignore are preload-only (no
-    // runtime contract member exists) and always scan/write *this*
-    // Electron process's filesystem — never the worktree's actual host. Gate
-    // on the repo owner's target so a worktree hosted on a non-local runtime
-    // environment doesn't get warned about, or have its .gitignore edited
-    // from, the wrong machine.
-    if (
-      !repositoryHuge ||
-      !activeWorktreeId ||
-      !worktreePath ||
-      activeConnectionId ||
-      getActiveRuntimeTarget(activeRepoSettings).kind !== 'local'
-    ) {
+    if (!repositoryHuge || !activeWorktreeId || !worktreePath) {
       return
+    }
+    const gitContext = {
+      settings: activeRepoSettings,
+      worktreeId: activeWorktreeId,
+      worktreePath,
+      connectionId: getConnectionId(activeWorktreeId) ?? undefined
     }
     const warningProbe = beginHugeRepoWarningProbe({
       id: activeWorktreeId,
@@ -113,8 +108,7 @@ export function useSourceControlStatusRefresh(scope: SourceControlInteractionSta
       return
     }
     let cancelled = false
-    void rendererHostClient.git
-      .findHugeFoldersToIgnore({ worktreePath })
+    void findRuntimeGitHugeFoldersToIgnore(gitContext)
       .then((folders) => {
         if (cancelled || folders.length === 0 || hasDismissedHugeRepoWarning(warningProbe)) {
           return
@@ -141,8 +135,7 @@ export function useSourceControlStatusRefresh(scope: SourceControlInteractionSta
                 if (!hasDismissedHugeRepoWarning(warningProbe)) {
                   return
                 }
-                void rendererHostClient.git
-                  .appendGitignore({ worktreePath, folderName })
+                void appendRuntimeGitignore(gitContext, folderName)
                   .then(() => refreshActiveGitStatus())
                   .catch((error) => console.warn('[SourceControl] add to .gitignore failed', error))
               }
@@ -160,7 +153,6 @@ export function useSourceControlStatusRefresh(scope: SourceControlInteractionSta
     activeWorktreeId,
     activeWorktreeInstanceId,
     worktreePath,
-    activeConnectionId,
     refreshActiveGitStatus
   ])
   const refreshGitStatusAfterPullRequestGeneration = useCallback(

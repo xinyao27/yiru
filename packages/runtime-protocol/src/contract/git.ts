@@ -27,6 +27,12 @@ export const gitContract = {
   checkIgnored: withAccess(WORKTREE_READ_ACCESS)
     .input(inputs.GitCheckIgnoredInputSchema)
     .output(type<string[]>()),
+  findHugeFoldersToIgnore: withAccess(WORKTREE_READ_ACCESS, MOBILE_CLIENT)
+    .input(inputs.GitWorktreeSelectorInputSchema)
+    .output(type<string[]>()),
+  appendGitignore: withAccess(WORKTREE_CONTROL_ACCESS, MOBILE_CLIENT)
+    .input(inputs.GitAppendGitignoreInputSchema)
+    .output(type<boolean>()),
   submoduleStatus: withAccess(WORKTREE_READ_ACCESS)
     .input(inputs.GitSubmoduleStatusInputSchema)
     .output(type<GitStatusResult>()),

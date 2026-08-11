@@ -14,6 +14,7 @@ import {
   handleGitConflictOperation,
   handleGitDiff,
   handleGitHistory,
+  handleGitFindHugeFoldersToIgnore,
   handleGitLocalBranches,
   handleGitRemoteCommitUrl,
   handleGitRemoteFileUrl,
@@ -41,6 +42,7 @@ import {
   handleGitAbortMerge,
   handleGitAbortRebase,
   handleGitAbortRevert,
+  handleGitAppendGitignore,
   handleGitAddTag,
   handleGitCheckout,
   handleGitCheckoutCommit,
@@ -69,6 +71,12 @@ export const gitRuntimeHandlers = {
     ),
     checkIgnored: runtimeImplementation.git.checkIgnored.handler(
       wireRuntimeMethod('git.checkIgnored', handleGitCheckIgnored)
+    ),
+    findHugeFoldersToIgnore: runtimeImplementation.git.findHugeFoldersToIgnore.handler(
+      wireRuntimeMethod('git.findHugeFoldersToIgnore', handleGitFindHugeFoldersToIgnore)
+    ),
+    appendGitignore: runtimeImplementation.git.appendGitignore.handler(
+      wireRuntimeMethod('git.appendGitignore', handleGitAppendGitignore)
     ),
     submoduleStatus: runtimeImplementation.git.submoduleStatus.handler(
       wireRuntimeMethod('git.submoduleStatus', handleGitSubmoduleStatus)

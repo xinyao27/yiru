@@ -47,7 +47,6 @@ import type { YiruRuntimeService } from '../runtime/yiru-runtime'
 import { registerSpeechHandlers } from '../speech/speech'
 import type { StatsCollector } from '../stats/collector'
 import { registerTelemetryHandlers } from '../telemetry/telemetry'
-import type { CommitMessageAgentEnvironmentResolvers } from '../text-generation/commit-message-agent-environment'
 import { registerUpdaterHandlers } from '../window/attach-main-window-services'
 import {
   registerClipboardHandlers,
@@ -86,7 +85,6 @@ export function registerCoreHandlers(
   rateLimits: RateLimitService,
   mainWindowWebContentsId: number | null = null,
   automations?: AutomationService,
-  commitMessageAgentEnv?: CommitMessageAgentEnvironmentResolvers,
   agentAwakeService?: AgentAwakeService,
   crashReports?: CrashReportStore,
   keybindings?: KeybindingService,
@@ -148,7 +146,7 @@ export function registerCoreHandlers(
   registerEmulatorVideoStreamHandlers()
   registerWorkspacePortHandlers(store)
   registerLocalhostWorktreeLabelHandlers(store)
-  registerFilesystemHandlers(electronIpcRegistration, store, commitMessageAgentEnv, {
+  registerFilesystemHandlers(electronIpcRegistration, store, {
     chooseDownloadDirectory: async (rendererId) => {
       const parentWindow = findRendererWindow(rendererId)
       const result = parentWindow
