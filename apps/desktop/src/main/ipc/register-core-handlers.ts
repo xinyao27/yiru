@@ -43,6 +43,7 @@ import type { RateLimitService } from '../rate-limits/service'
 import { registerRuntimeEnvironmentHandlers } from '../runtime/environments'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'
 import { initializeShellFilesService } from '../shell/files'
+import { initializeShellPlatformService } from '../shell/platform'
 import { registerSpeechHandlers } from '../speech/speech'
 import type { StatsCollector } from '../stats/collector'
 import { registerTelemetryHandlers } from '../telemetry/telemetry'
@@ -59,7 +60,6 @@ import { registerAutomationHandlers } from './automations'
 import { registerGitHubIpcHandlers } from './github'
 import { registerRuntimeHandlers } from './runtime'
 import { registerSettingsHandlers } from './settings'
-import { registerShellHandlers } from './shell'
 
 let registered = false
 
@@ -135,7 +135,7 @@ export function registerCoreHandlers(
   }
   registerTelemetryHandlers(store)
   registerYiruProfileHandlers(store, { onBeforeRelaunch: lifecycleOptions.onBeforeRelaunch })
-  registerShellHandlers()
+  initializeShellPlatformService()
   registerPetHandlers()
   registerSessionHandlers(store)
   registerUIHandlers(store)

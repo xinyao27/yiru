@@ -1,8 +1,9 @@
+import { electronShellPlatformApi, type ShellPlatformApi } from './shell-platform-client'
 import { getWebShellApi } from './web-shell-client'
 import { getWebShellUIApi } from './web-ui-shell-client'
 
 type RendererShellClient = {
-  shell: Window['api']['shell']
+  shell: ShellPlatformApi
   ui: Omit<Window['api']['ui'], 'get' | 'set' | 'recordFeatureInteraction'>
 }
 
@@ -14,7 +15,7 @@ function isWebShellClient(): boolean {
 // Desktop delegates to preload; the web build supplies the same shell shape.
 export const shellClient: RendererShellClient = {
   get shell() {
-    return isWebShellClient() ? getWebShellApi() : window.api.shell
+    return isWebShellClient() ? getWebShellApi() : electronShellPlatformApi
   },
   get ui() {
     return isWebShellClient() ? getWebShellUIApi() : window.api.ui

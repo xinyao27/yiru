@@ -18,6 +18,7 @@ import {
   setBrowserTabProfileViaShell
 } from './browser-tab-shell-requests'
 import { readMobileMarkdownTab, saveMobileMarkdownTab } from './mobile-markdown-bridge'
+import { electronShellPlatformApi, type ShellPlatformApi } from './shell-platform-client'
 import { createTerminalTabViaShell } from './terminal-create-shell-request'
 import { mountTerminalTabViaShell } from './terminal-mount-shell-request'
 import { revealTerminalSessionViaShell } from './terminal-reveal-shell-request'
@@ -33,8 +34,8 @@ function isWebShell(): boolean {
   return (globalThis as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__ === true
 }
 
-function getShellApi(): Window['api']['shell'] {
-  return isWebShell() ? getWebShellApi() : window.api.shell
+function getShellApi(): ShellPlatformApi {
+  return isWebShell() ? getWebShellApi() : electronShellPlatformApi
 }
 
 export function mountShellServicesHandler(): void {

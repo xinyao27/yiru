@@ -60,11 +60,6 @@ import type {
   RuntimeSyncWindowGraph,
   RuntimeTerminalDriverState
 } from '../runtime-types'
-import type {
-  ShellOpenExternalEditorRequest,
-  ShellOpenExternalEditorResult,
-  ShellOpenLocalPathResult
-} from '../shell-open-types'
 import type { ResolvedSourceControlAiGenerationParams } from '../source-control/ai'
 import type { SourceControlAiSettings } from '../source-control/ai-types'
 import type { TerminalSideEffectBatch } from '../terminal/side-effect-facts'
@@ -549,21 +544,6 @@ export type PreloadApi = {
       args: FindYiruProfileProjectsByPathArgs
     ) => Promise<FindYiruProfileProjectsByPathResult>
   }
-  // Why: shell-only — despite the name, this reports the platform of the
-  // machine *rendering* the UI (used for terminal WebGL policy and keyboard-
-  // protocol quirks tied to this window's OS release), not the target host a
-  // worktree's agent runs on. The web adapter independently returns the
-  // browser's own platform rather than calling the contract's `host.platform`
-  // (a different concept: the host a runtime target executes on) — routing
-  // this to `host.platform` for a remote environment would report the wrong
-  // machine's platform to a local rendering decision.
-  platform: {
-    get: () => {
-      platform: NodeJS.Platform
-      osRelease: string
-      displayServer: 'wayland' | 'x11' | null
-    }
-  }
   repoHost: RepoHostAdapter
   // Why: this group's `on*` members (onDeliveryResyncRequest, onData,
   // onReplay, onModelRestoreNeeded, onSideEffect, onExit,
@@ -1038,44 +1018,6 @@ export type PreloadApi = {
   developerPermissions: {
     getStatus: () => Promise<DeveloperPermissionState[]>
     request: (args: { id: DeveloperPermissionId }) => Promise<DeveloperPermissionRequestResult>
-  }
-  /**
-   * shell-only: every member here acts on the machine running the Electron
-   * shell — native pickers, the OS default handler, and the user's own file
-   * manager and browser. None of it is a runtime-host capability, so this
-   * group stays on the preload face rather than moving to the oRPC contract.
-   */
-  shell: {
-    openPath: (path: string) => Promise<void>
-    openInFileManager: (path: string) => Promise<ShellOpenLocalPathResult>
-    /**
-     * Why: the `externalEditor.openRemoteSsh` contract procedure looks like a
-     * migrated remote path, but its caller is gated on `connectionId`, which
-     * nothing has set since remote hosts were removed. Every reachable call
-     * lands here, on the local machine.
-     */
-    openInExternalEditor: {
-      (request: ShellOpenExternalEditorRequest): Promise<ShellOpenExternalEditorResult>
-      (path: string, command?: string): Promise<ShellOpenLocalPathResult>
-    }
-    openUrl: (url: string) => Promise<void>
-    openFilePath: (path: string) => Promise<boolean>
-    openFileUri: (uri: string) => Promise<void>
-    /**
-     * Why: the handler `stat`s this path on the machine running the Electron
-     * shell, with no `target`/host argument — a caller meaning "does this
-     * exist on the paired runtime host" would get the wrong answer. All four
-     * desktop call sites (mcp-config-section.tsx, terminal-link-handlers.ts,
-     * markdown-preview.tsx, editor-click-routing.ts) verified gated on
-     * `isLocalRepo` / `isLocalPathOpenBlocked` before reaching this member,
-     * so the mismatch this shape could cause is not actually reachable today.
-     */
-    pathExists: (path: string) => Promise<boolean>
-    pickAttachment: () => Promise<string | null>
-    pickImage: () => Promise<string | null>
-    pickRepoIconImage: () => Promise<{ dataUrl: string; fileName: string } | null>
-    pickAudio: () => Promise<string | null>
-    pickDirectory: (args: { defaultPath?: string }) => Promise<string | null>
   }
   // Why: shell-only — confirmed. `import`/`importPetBundle` open a native
   // Electron `dialog.showOpenDialog` tied to the sender's `BrowserWindow`;

@@ -1,6 +1,7 @@
 import { importShellBrowserCookies } from '~main/browser/browser'
 import { handleShellEventsSubscribe } from '~main/shell/events'
 import { getShellFilesService, requireShellRenderer } from '~main/shell/files'
+import { getRenderingHost, getShellPlatformService } from '~main/shell/platform'
 
 import { runtimeImplementation } from '../access-middleware'
 import { wireRuntimeStream } from '../registered-stream'
@@ -117,6 +118,47 @@ export const shellRuntimeHandlers = {
         runtimeImplementation.shell.files.resolveDroppedPathsForAgent.handler(({ input }) =>
           getShellFilesService().resolveDroppedPathsForAgent(input)
         )
+    },
+    platform: {
+      renderingHost: runtimeImplementation.shell.platform.renderingHost.handler(() =>
+        getRenderingHost()
+      ),
+      openPath: runtimeImplementation.shell.platform.openPath.handler(({ input }) =>
+        getShellPlatformService().openPath(input.path)
+      ),
+      openInFileManager: runtimeImplementation.shell.platform.openInFileManager.handler(
+        ({ input }) => getShellPlatformService().openInFileManager(input.path)
+      ),
+      openInExternalEditor: runtimeImplementation.shell.platform.openInExternalEditor.handler(
+        ({ input }) => getShellPlatformService().openInExternalEditor(input)
+      ),
+      openUrl: runtimeImplementation.shell.platform.openUrl.handler(({ input }) =>
+        getShellPlatformService().openUrl(input.url)
+      ),
+      openFilePath: runtimeImplementation.shell.platform.openFilePath.handler(({ input }) =>
+        getShellPlatformService().openFilePath(input.path)
+      ),
+      openFileUri: runtimeImplementation.shell.platform.openFileUri.handler(({ input }) =>
+        getShellPlatformService().openFileUri(input.uri)
+      ),
+      pathExists: runtimeImplementation.shell.platform.pathExists.handler(({ input }) =>
+        getShellPlatformService().pathExists(input.path)
+      ),
+      pickAttachment: runtimeImplementation.shell.platform.pickAttachment.handler(() =>
+        getShellPlatformService().pickAttachment()
+      ),
+      pickImage: runtimeImplementation.shell.platform.pickImage.handler(() =>
+        getShellPlatformService().pickImage()
+      ),
+      pickRepoIconImage: runtimeImplementation.shell.platform.pickRepoIconImage.handler(() =>
+        getShellPlatformService().pickRepoIconImage()
+      ),
+      pickAudio: runtimeImplementation.shell.platform.pickAudio.handler(() =>
+        getShellPlatformService().pickAudio()
+      ),
+      pickDirectory: runtimeImplementation.shell.platform.pickDirectory.handler(({ input }) =>
+        getShellPlatformService().pickDirectory(input)
+      )
     }
   }
 } as const

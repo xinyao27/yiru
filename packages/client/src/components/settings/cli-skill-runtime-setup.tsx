@@ -5,7 +5,7 @@ import {
   showYiruCliRegistrationPromptToast
 } from '~renderer/lib/agent-skill-cli-prerequisite'
 import { installWslCliCommand, readWslCliInstallStatus } from '~renderer/runtime/cli-install-client'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { getRenderingHostSnapshot } from '~renderer/runtime/shell-platform-client'
 import { buildAgentFeatureSkillInstallCommand } from '~shared/agent/feature-install-commands'
 import type { CliInstallStatus } from '~shared/cli-install-types'
 import {
@@ -127,8 +127,7 @@ function normalizeWindowsSkillUpdateCommand(
 }
 
 function getSkillCommandPlatform(): NodeJS.Platform {
-  const platform =
-    typeof window === 'undefined' ? undefined : rendererHostClient?.platform?.get?.()?.platform
+  const platform = typeof window === 'undefined' ? undefined : getRenderingHostSnapshot().platform
   if (platform) {
     return platform
   }

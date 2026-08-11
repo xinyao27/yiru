@@ -73,11 +73,6 @@ import type {
   RuntimeSyncWindowGraph,
   RuntimeTerminalDriverState
 } from '~shared/runtime-types'
-import type {
-  ShellOpenExternalEditorRequest,
-  ShellOpenExternalEditorResult,
-  ShellOpenLocalPathResult
-} from '~shared/shell-open-types'
 import {
   SHELL_SERVICES_CONNECT_CHANNEL,
   SHELL_SERVICES_CONNECT_MESSAGE
@@ -150,20 +145,6 @@ type NativeFileDropCallback = (data: NativeFileDropPayload) => void
 
 const nativeFileDropCallbacks: NativeFileDropCallback[] = []
 let nativeFileDropListenerRegistered = false
-
-function getLinuxDisplayServer(): 'wayland' | 'x11' | null {
-  if (process.platform !== 'linux') {
-    return null
-  }
-  if (
-    process.env.WAYLAND_DISPLAY ||
-    process.env.XDG_SESSION_TYPE?.toLowerCase() === 'wayland' ||
-    process.env.ELECTRON_OZONE_PLATFORM_HINT?.toLowerCase() === 'wayland'
-  ) {
-    return 'wayland'
-  }
-  return process.env.DISPLAY ? 'x11' : null
-}
 
 type AppRestartPrepOptions = {
   startedEventName: string
@@ -432,16 +413,6 @@ const api = {
     transferProject: (args) => ipcRenderer.invoke('yiruProfiles:transferProject', args),
     findProjectProfiles: (args) => ipcRenderer.invoke('yiruProfiles:findProjectProfiles', args)
   } satisfies PreloadApi['yiruProfiles'],
-
-  platform: {
-    get: () => ({
-      platform: process.platform,
-      osRelease:
-        (process as NodeJS.Process & { getSystemVersion?: () => string }).getSystemVersion?.() ??
-        '',
-      displayServer: getLinuxDisplayServer()
-    })
-  } satisfies PreloadApi['platform'],
 
   repoHost: {
     pickFolder: () => ipcRenderer.invoke('repo-host:pickFolder'),
@@ -1042,43 +1013,6 @@ const api = {
     getStatus: (): Promise<unknown> => ipcRenderer.invoke('developerPermissions:getStatus'),
     request: (args: { id: string }): Promise<unknown> =>
       ipcRenderer.invoke('developerPermissions:request', args)
-  },
-
-  shell: {
-    openPath: (path: string): Promise<void> => ipcRenderer.invoke('shell:openPath', path),
-
-    openInFileManager: (path: string): Promise<ShellOpenLocalPathResult> =>
-      ipcRenderer.invoke('shell:openInFileManager', path),
-
-    openInExternalEditor: (
-      request: ShellOpenExternalEditorRequest | string,
-      command?: string
-    ): Promise<ShellOpenExternalEditorResult> =>
-      ipcRenderer.invoke(
-        'shell:openInExternalEditor',
-        typeof request === 'string' ? { path: request, command } : request
-      ),
-
-    openUrl: (url: string): Promise<void> => ipcRenderer.invoke('shell:openUrl', url),
-
-    openFilePath: (path: string): Promise<boolean> =>
-      ipcRenderer.invoke('shell:openFilePath', path),
-
-    openFileUri: (uri: string): Promise<void> => ipcRenderer.invoke('shell:openFileUri', uri),
-
-    pathExists: (path: string): Promise<boolean> => ipcRenderer.invoke('shell:pathExists', path),
-
-    pickAttachment: (): Promise<string | null> => ipcRenderer.invoke('shell:pickAttachment'),
-
-    pickImage: (): Promise<string | null> => ipcRenderer.invoke('shell:pickImage'),
-
-    pickRepoIconImage: (): Promise<{ dataUrl: string; fileName: string } | null> =>
-      ipcRenderer.invoke('shell:pickRepoIconImage'),
-
-    pickAudio: (): Promise<string | null> => ipcRenderer.invoke('shell:pickAudio'),
-
-    pickDirectory: (args: { defaultPath?: string }): Promise<string | null> =>
-      ipcRenderer.invoke('shell:pickDirectory', args)
   },
 
   pet: {

@@ -198,13 +198,6 @@ function createWebPreloadApi(): Partial<PreloadApi> {
       showAgentValueMoment: () => Promise.resolve(),
       onboardingCompleted: () => Promise.resolve()
     },
-    platform: {
-      get: () => ({
-        platform: getBrowserPlatform(),
-        osRelease: '',
-        displayServer: null
-      })
-    },
     yiruProfiles: {
       list: () =>
         Promise.resolve({

@@ -64,6 +64,7 @@ import { readCliInstallStatus } from '~renderer/runtime/cli-install-client'
 import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import { runtimeEnvironmentsClient } from '~renderer/runtime/runtime-environments-client'
 import { shellClient } from '~renderer/runtime/shell-client'
+import { getRenderingHostSnapshot } from '~renderer/runtime/shell-platform-client'
 import { getRuntimeUIState, setRuntimeUIState } from '~renderer/runtime/ui-client'
 import {
   canGoBackWorktreeHistory,
@@ -205,8 +206,7 @@ const SLEEPING_AGENT_RESUME_CAPTURE_INTERVAL_MS = 60_000
 const shortcutPlatform = getRendererAppPlatform()
 const isMac = shortcutPlatform === 'darwin'
 const isWebClient = isPairedWebClientWindow()
-const rendererOsRelease =
-  typeof window === 'undefined' ? '' : rendererHostClient?.platform?.get?.().osRelease
+const rendererOsRelease = typeof window === 'undefined' ? '' : getRenderingHostSnapshot().osRelease
 // Why: Electron exposes native sidebar material on macOS and supported Windows
 // builds. Paired web clients and other platforms keep the opaque surface.
 const hasNativeSidebarMaterial =

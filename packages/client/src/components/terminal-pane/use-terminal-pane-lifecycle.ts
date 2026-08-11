@@ -44,6 +44,7 @@ import { getExecutionHostIdForWorktree } from '~renderer/lib/worktree-runtime-ow
 import { acquireWebviewsDragPassthrough } from '~renderer/runtime/browser-webview-registry'
 import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import { shellClient } from '~renderer/runtime/shell-client'
+import { getRenderingHostSnapshot } from '~renderer/runtime/shell-platform-client'
 import {
   registerRuntimeTerminalTab,
   scheduleRuntimeGraphSync
@@ -1442,7 +1443,7 @@ export function useTerminalPaneLifecycle({
         const currentTab = storeState.tabsByWorktree[worktreeId]?.find(
           (candidate) => candidate.id === tabId
         )
-        const platformInfo = rendererHostClient.platform?.get?.()
+        const platformInfo = getRenderingHostSnapshot()
         // Why: launch identity belongs only to the pane consuming this one-shot
         // startup. A tab-wide hint would leak Grok's KKP exception to shell splits.
         const knownTuiAgent = resolvePaneKeyboardProtocolAgent(

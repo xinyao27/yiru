@@ -1,9 +1,9 @@
 {
   "schemaVersion": 2,
-  "methodCount": 595,
+  "methodCount": 608,
   "sourceCounts": {
     "legacy": 0,
-    "orpc": 595
+    "orpc": 608
   },
   "methods": [
     {
@@ -7558,6 +7558,214 @@
         {
           "kind": "orpc",
           "file": "packages/runtime-protocol/src/contract/shell/files.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.platform.openFilePath",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/platform.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.platform.openFileUri",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/platform.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.platform.openInExternalEditor",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/platform.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.platform.openInFileManager",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/platform.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.platform.openPath",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/platform.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.platform.openUrl",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/platform.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.platform.pathExists",
+      "access": {
+        "scope": "host",
+        "tier": "read",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/platform.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.platform.pickAttachment",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/platform.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.platform.pickAudio",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/platform.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.platform.pickDirectory",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/platform.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.platform.pickImage",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/platform.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.platform.pickRepoIconImage",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/platform.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.platform.renderingHost",
+      "access": {
+        "scope": "host",
+        "tier": "read",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/platform.ts"
         }
       ]
     },
