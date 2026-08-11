@@ -28,6 +28,10 @@ export type ShellBrowserEvent =
 export type ShellStateEvent =
   | { type: 'settingsChanged' }
   | { type: 'keybindingsChanged'; snapshot: unknown }
+  | { type: 'starNagShow'; mode?: 'gh' | 'web'; surface?: 'card' | 'toast' }
+  | { type: 'starNagHide' }
+  | { type: 'updaterStatus'; status: unknown }
+  | { type: 'updaterClearDismissal' }
 
 export type ShellEvent = ShellBrowserEvent | ShellStateEvent | ShellUiEvent
 

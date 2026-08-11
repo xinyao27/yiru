@@ -43,6 +43,7 @@ import {
 } from '../components/tab-bar/group-tab-order'
 import { getEagerPtyBufferHandle } from '../components/terminal-pane/pty/dispatcher'
 import { resolveTerminalLayoutRoot } from './remote-terminal-layout-resolution'
+import { shellClient } from './shell-client'
 import { parseRemoteRuntimePtyId } from './terminal-stream'
 
 type RegisteredTerminalTab = {
@@ -709,7 +710,7 @@ async function syncRuntimeGraph(): Promise<void> {
   }
 
   try {
-    const result = await window.api.runtime.syncWindowGraph(graph)
+    const result = await shellClient.runtime.syncWindowGraph(graph)
     getStoreState()?.setRuntimeAgentOrchestrationByPaneKey?.(
       result?.agentOrchestrationByPaneKey ?? {}
     )

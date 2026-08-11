@@ -1,4 +1,4 @@
-import { BrowserWindow, ipcMain } from 'electron'
+import { BrowserWindow } from 'electron'
 import { STAR_NAG_INITIAL_THRESHOLD } from '~shared/constants'
 import type {
   StarNagOutcome,
@@ -8,6 +8,7 @@ import type {
 
 import { checkYiruStarred } from '../github/client'
 import type { Store } from '../persistence'
+import { broadcastShellEvent, publishShellEvent } from '../shell/events'
 import type { StatsCollector } from '../stats/collector'
 import { track } from '../telemetry/client'
 import { StarNagAgentValueMoment, type AgentValueMomentPreparation } from './agent-value-moment'
@@ -16,6 +17,7 @@ import { runStarNagDirectStarAttempt } from './direct-star-attempt'
 import { handleStarNagOnboardingCompleted } from './onboarding-completed'
 import { createStarNagPromptContext } from './prompt-context'
 import { type StarNagPromptSession, trackStarNagSessionOutcome } from './prompt-session-telemetry'
+import { registerShellStarNagService } from './shell-service'
 import { ensureStarNagBaseline, shouldShowStarNagThresholdPrompt } from './threshold-trigger'
 import { deferAfterStarNagWebHandoff } from './web-handoff'
 
@@ -75,17 +77,19 @@ export class StarNagService {
     this.disposeStatsListener = null
   }
 
-  registerIpcHandlers(): void {
-    ipcMain.handle('star-nag:dismiss', () => this.dismiss())
-    ipcMain.handle('star-nag:later', () => this.defer('later'))
-    ipcMain.handle('star-nag:complete', () => this.markCompleted())
-    ipcMain.handle('star-nag:disable', () => this.disable())
-    ipcMain.handle('star-nag:openWeb', () => this.openWeb())
-    ipcMain.handle('star-nag:starYiru', () => this.starYiruFromNag())
-    ipcMain.handle('star-nag:forceShow', () => this.forceShow())
-    ipcMain.handle('star-nag:agentValueMoment', () => this.prepareAgentValueMoment())
-    ipcMain.handle('star-nag:showAgentValueMoment', () => this.showPreparedAgentValueMoment())
-    ipcMain.handle('star-nag:onboardingCompleted', () => this.onboardingCompleted())
+  registerShellService(): void {
+    registerShellStarNagService({
+      dismiss: () => this.dismiss(),
+      later: () => this.defer('later'),
+      complete: () => this.markCompleted(),
+      disable: () => this.disable(),
+      openWeb: () => this.openWeb(),
+      starYiru: () => this.starYiruFromNag(),
+      forceShow: () => this.forceShow(),
+      agentValueMoment: () => this.prepareAgentValueMoment(),
+      showAgentValueMoment: () => this.showPreparedAgentValueMoment(),
+      onboardingCompleted: () => this.onboardingCompleted()
+    })
   }
 
   // ── State helpers ─────────────────────────────────────────────────
@@ -182,7 +186,7 @@ export class StarNagService {
       return false
     }
     const context = createStarNagPromptContext(this.store, this.stats, source, mode)
-    win.webContents.send('star-nag:show', { mode, surface })
+    publishShellEvent(win.webContents.id, { type: 'starNagShow', mode, surface })
     this.promptVisible = true
     this.promptSession = context
     this.trackOutcome('shown')
@@ -191,11 +195,7 @@ export class StarNagService {
   }
 
   private broadcastHide(): void {
-    for (const win of BrowserWindow.getAllWindows()) {
-      if (!win.isDestroyed()) {
-        win.webContents.send('star-nag:hide')
-      }
-    }
+    broadcastShellEvent({ type: 'starNagHide' })
   }
 
   private trackOutcome(

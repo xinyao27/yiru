@@ -14,7 +14,6 @@ import {
   app,
   BrowserWindow,
   dialog,
-  ipcMain,
   nativeTheme,
   net,
   powerMonitor,
@@ -199,6 +198,7 @@ import {
   installServeSupervisorDisconnectQuit,
   notifyServeSupervisorReady
 } from './serve-update-handoff'
+import { initializeShellAppStartupService } from './shell/app-startup'
 import { publishShellEvent } from './shell/events'
 import {
   configureSpeechDownloadRequestFactory,
@@ -794,21 +794,19 @@ if (hasSingleInstanceLock) {
   headlessBrowserDisplayAvailable = ensureVirtualDisplayForHeadlessServe({ isServeMode })
 }
 
-ipcMain.handle('app:awaitFirstWindowStartupServices', async () => {
+initializeShellAppStartupService({
   // Why: window rendering and local RPC startup stay independent, but restored
   // WSL terminals get a bounded chance to receive launcher repairs first.
-  await Promise.all([firstWindowStartupServicesReady, managedWslCliStartupBarrierReady])
-})
-
-ipcMain.handle(
-  'app:startupDiagnostic',
-  (_event, event: string, details?: Record<string, unknown>) => {
+  awaitFirstWindowStartupServices: async () => {
+    await Promise.all([firstWindowStartupServicesReady, managedWslCliStartupBarrierReady])
+  },
+  startupDiagnostic: (event, details) => {
     if (!startupDiagnosticsEnabled || !event.startsWith('renderer-')) {
       return
     }
     logStartupMilestone(event, details && typeof details === 'object' ? details : {})
   }
-)
+})
 
 // Why: a PTY that dies while Yiru is down cannot clear its persisted hook state.
 async function reapRestoredSubagentsWithoutLiveAgent(): Promise<void> {
@@ -2321,7 +2319,7 @@ app.whenReady().then(async () => {
   })
   starNag = new StarNagService(store, stats)
   starNag.start()
-  starNag.registerIpcHandlers()
+  starNag.registerShellService()
   runtimeService.setAgentBrowserBridge(
     new AgentBrowserBridge(browserManager, {
       onTabsChanged: (worktreeId) => runtimeService.notifyMobileSessionTabsChanged(worktreeId)
@@ -2513,7 +2511,7 @@ app.whenReady().then(async () => {
     // Why: headless runtimes have no BrowserWindow to initialize updater
     // listeners, so use a silent status sink before advertising control.
     setupAutoUpdater(
-      { webContents: { send: () => undefined } },
+      { webContents: {} },
       {
         getLastUpdateCheckAt: () => store!.getUI().lastUpdateCheckAt,
         onBeforeQuit: () => store!.flush(),

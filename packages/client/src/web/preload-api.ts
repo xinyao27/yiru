@@ -66,6 +66,15 @@ import {
   type TransferYiruProfileProjectArgs
 } from '~shared/yiru-profiles'
 
+import type { ShellNotificationsApi } from '../runtime/shell-notifications-client'
+import type {
+  ShellAppApi,
+  ShellGitHubApi,
+  ShellRepoHostApi,
+  ShellRuntimeStateApi,
+  ShellStarNagApi,
+  ShellUpdaterApi
+} from '../runtime/shell-system-client'
 import { readWebUIState } from '../runtime/web-ui-state'
 import { toRuntimeWorktreeSelector } from '../runtime/worktree-selector'
 import {
@@ -145,7 +154,7 @@ type WebKeybindingsApi = {
   revealFile: () => Promise<KeybindingFileSnapshot>
   onChanged: (callback: (snapshot: KeybindingFileSnapshot) => void) => () => void
 }
-type WebGitHubApi = NonNullable<PreloadApi['gh']>
+type WebGitHubApi = ShellGitHubApi
 type WebRuntimeProcedureSelector = (client: WebRuntimeOrpcClient) => unknown
 type WebKeybindingDocument = {
   version: 1
@@ -278,6 +287,65 @@ export function getWebShellConfigurationApis() {
   return { keybindings: webShellKeybindingsApi, yiruProfiles: webShellYiruProfilesApi }
 }
 
+const webShellAppApi: ShellAppApi = {
+  getIdentity: () =>
+    Promise.resolve({
+      name: 'Yiru',
+      isDev: false,
+      devLabel: null,
+      devBranch: null,
+      devWorktreeName: null,
+      devRepoRoot: null,
+      dockBadgeLabel: null
+    }),
+  relaunch: () => Promise.resolve(window.location.reload()),
+  restart: () => Promise.resolve(window.location.reload()),
+  reload: () => Promise.resolve(window.location.reload()),
+  awaitFirstWindowStartupServices: () => Promise.resolve(),
+  startupDiagnostic: () => Promise.resolve(),
+  getKeyboardInputSourceId: () => Promise.resolve(null),
+  setUnreadDockBadgeCount: () => Promise.resolve(),
+  getFloatingTerminalCwd: () => Promise.resolve(''),
+  getFloatingMarkdownDirectory: () => Promise.resolve(''),
+  pickFloatingMarkdownDocument: () => Promise.resolve(null),
+  pickFloatingWorkspaceDirectory: () => Promise.resolve(null)
+}
+
+const webShellStarNagApi: ShellStarNagApi = {
+  onShow: () => noopUnsubscribe,
+  onHide: () => noopUnsubscribe,
+  dismiss: () => Promise.resolve(),
+  later: () => Promise.resolve(),
+  complete: () => Promise.resolve(),
+  disable: () => Promise.resolve(),
+  openWeb: () => Promise.resolve(),
+  starYiru: () => Promise.resolve(false),
+  forceShow: () => Promise.resolve(),
+  agentValueMoment: () => Promise.resolve({ status: 'skipped' }),
+  showAgentValueMoment: () => Promise.resolve(),
+  onboardingCompleted: () => Promise.resolve()
+}
+
+export function getWebShellSystemApis(): {
+  app: ShellAppApi
+  repoHost: ShellRepoHostApi
+  runtime: ShellRuntimeStateApi
+  gh: ShellGitHubApi
+  notifications: ShellNotificationsApi
+  starNag: ShellStarNagApi
+  updater: ShellUpdaterApi
+} {
+  return {
+    app: webShellAppApi,
+    repoHost: createRepoHostAdapter(),
+    runtime: createRuntimeApi(),
+    gh: createGitHubApi(),
+    notifications: createNotificationsApi(),
+    starNag: webShellStarNagApi,
+    updater: createUpdaterApi()
+  }
+}
+
 export function installWebPreloadApi(): void {
   activeEnvironment = readStoredWebRuntimeEnvironment()
   const webWindow = window as unknown as { __YIRU_WEB_CLIENT__?: boolean }
@@ -288,43 +356,6 @@ export function installWebPreloadApi(): void {
 
 function createWebPreloadApi(): Partial<PreloadApi> {
   return {
-    app: {
-      getIdentity: () =>
-        Promise.resolve({
-          name: 'Yiru',
-          isDev: false,
-          devLabel: null,
-          devBranch: null,
-          devWorktreeName: null,
-          devRepoRoot: null,
-          dockBadgeLabel: null
-        }),
-      relaunch: () => Promise.resolve(window.location.reload()),
-      restart: () => Promise.resolve(window.location.reload()),
-      reload: () => Promise.resolve(window.location.reload()),
-      awaitFirstWindowStartupServices: () => Promise.resolve(),
-      startupDiagnostic: () => Promise.resolve(),
-      getKeyboardInputSourceId: () => Promise.resolve(null),
-      setUnreadDockBadgeCount: () => Promise.resolve(),
-      getFloatingTerminalCwd: () => Promise.resolve(''),
-      getFloatingMarkdownDirectory: () => Promise.resolve(''),
-      pickFloatingMarkdownDocument: () => Promise.resolve(null),
-      pickFloatingWorkspaceDirectory: () => Promise.resolve(null)
-    },
-    starNag: {
-      onShow: () => noopUnsubscribe,
-      onHide: () => noopUnsubscribe,
-      dismiss: () => Promise.resolve(),
-      later: () => Promise.resolve(),
-      complete: () => Promise.resolve(),
-      disable: () => Promise.resolve(),
-      openWeb: () => Promise.resolve(),
-      starYiru: () => Promise.resolve(false),
-      forceShow: () => Promise.resolve(),
-      agentValueMoment: () => Promise.resolve({ status: 'skipped' }),
-      showAgentValueMoment: () => Promise.resolve(),
-      onboardingCompleted: () => Promise.resolve()
-    },
     // Why: `feedback.submit` posts to a PostHog-backed pipeline from the main
     // process (net module has no CORS restrictions there); a paired web
     // client has no equivalent shell to proxy through. Without this entry
@@ -389,7 +420,6 @@ function createWebPreloadApi(): Partial<PreloadApi> {
       discardBundlePreview: () => Promise.resolve(),
       uploadBundle: () => Promise.reject(new Error('Sending diagnostics is unavailable on web.'))
     },
-    runtime: createRuntimeApi(),
     // Why: not a stub awaiting migration — `revealFridayChat` needs a renderer
     // notifier to surface the session as a tab in the local floating
     // workspace, which a paired web client cannot provide on the runtime host.
@@ -398,17 +428,13 @@ function createWebPreloadApi(): Partial<PreloadApi> {
       restart: () => Promise.reject(new Error('Friday is available on desktop.'))
     },
     runtimeEnvironments: createRuntimeEnvironmentsApi(),
-    repoHost: createRepoHostAdapter(),
     git: createGitApi(),
     emulator: createEmulatorApi(),
-    gh: createGitHubApi(),
     aiVault: createAiVaultApi(),
-    notifications: createNotificationsApi(),
     minimaxCredentials: createMiniMaxCredentialsApi(),
     codexAccounts: createAccountsApi(),
     claudeAccounts: createAccountsApi(),
     developerPermissions: createDeveloperPermissionsApi(),
-    updater: createUpdaterApi(),
     pty: createPtyApi(),
     // Why: shell-only — inspecting/repairing the Windows Defender Firewall is
     // an OS-level operation on the machine running the Electron shell, which
@@ -732,7 +758,7 @@ function createWebKeybindingsApi(): WebKeybindingsApi {
 // Why: the web client keeps readSession on its compatibility adapter because
 // it has no local MessagePort. Live tailing uses the typed runtime client from
 // the native-chat feature directly.
-function createRuntimeApi(): NonNullable<Partial<PreloadApi>['runtime']> {
+function createRuntimeApi(): ShellRuntimeStateApi {
   return {
     syncWindowGraph: async (_graph: RuntimeSyncWindowGraph) => getRemoteRuntimeStatus(),
     getTerminalFitOverrides: () => Promise.resolve([]),
@@ -865,7 +891,7 @@ function webAiVaultUnavailableResult(executionHostId: ExecutionHostId): AiVaultL
   }
 }
 
-function createRepoHostAdapter(): PreloadApi['repoHost'] {
+function createRepoHostAdapter(): ShellRepoHostApi {
   return {
     // Why: browser clients have no native filesystem picker. These outcomes
     // preserve cancellation semantics without pretending the runtime picked a path.
@@ -1417,7 +1443,7 @@ function createDeveloperPermissionsApi(): NonNullable<Partial<PreloadApi>['devel
   }
 }
 
-function createNotificationsApi(): NonNullable<Partial<PreloadApi>['notifications']> {
+function createNotificationsApi(): ShellNotificationsApi {
   return {
     // Why: browsers cannot reach Electron's native notification centre. The
     // reverse shell adapter keeps this degradation structured until a browser
@@ -1459,7 +1485,7 @@ function createAccountsApi(): never {
   } as never
 }
 
-function createUpdaterApi(): NonNullable<Partial<PreloadApi>['updater']> {
+function createUpdaterApi(): ShellUpdaterApi {
   return {
     getVersion: () => Promise.resolve('web'),
     getStatus: () => Promise.resolve({ state: 'idle' } as never),

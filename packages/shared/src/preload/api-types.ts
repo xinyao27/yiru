@@ -1,8 +1,3 @@
-import type {
-  ShellServicesNotificationsDismissOutput,
-  ShellServicesNotificationsDisplayInput,
-  ShellServicesNotificationsDisplayOutput
-} from '@yiru/runtime-protocol/contract' with { 'resolution-mode': 'import' }
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
 /* eslint-disable max-lines -- Why: the preload contract is intentionally centralized in one declaration file so renderer and preload stay in lockstep when IPC surfaces change. */
@@ -49,13 +44,7 @@ import type {
   PtyRendererDeliveryStateReport
 } from '../pty-renderer-delivery-health'
 import type { PublicKnownRuntimeEnvironment } from '../runtime-environments'
-import type {
-  RuntimeBrowserDriverState,
-  RuntimeStatus,
-  RuntimeSyncWindowGraphResult,
-  RuntimeSyncWindowGraph,
-  RuntimeTerminalDriverState
-} from '../runtime-types'
+import type { RuntimeStatus } from '../runtime-types'
 import type { ResolvedSourceControlAiGenerationParams } from '../source-control/ai'
 import type { SourceControlAiSettings } from '../source-control/ai-types'
 import type { TerminalSideEffectBatch } from '../terminal/side-effect-facts'
@@ -75,22 +64,13 @@ import type {
   GitStagingArea,
   GitStatusResult,
   GitUpstreamStatus,
-  GitHubViewer,
-  MarkdownDocument,
   FloatingTerminalCwdRequest,
-  GitHubPRRefreshCandidate,
-  GitHubPRRefreshEnqueueResult,
-  GitHubPRRefreshReason,
-  NotificationDeliveryProbeResult,
-  NotificationPermissionStatusResult,
-  NotificationSoundResult,
+  MarkdownDocument,
   PathSource,
   PersistedUIState,
   ShellHydrationFailureReason,
   StatsSummary,
-  TuiAgent,
-  UpdateCheckOptions,
-  UpdateStatus
+  TuiAgent
 } from '../types'
 
 export type {
@@ -142,7 +122,6 @@ import type {
   DeveloperPermissionRequestResult,
   DeveloperPermissionState
 } from '../developer-permissions-types'
-import type { AppStarSource } from '../gh-star-source'
 import type {
   OpenCodeUsageBreakdownKind,
   OpenCodeUsageBreakdownRow,
@@ -507,8 +486,6 @@ export type RepoHostAdapter = {
 }
 
 export type PreloadApi = {
-  app: AppApi
-  repoHost: RepoHostAdapter
   // Why: this group's `on*` members (onDeliveryResyncRequest, onData,
   // onReplay, onModelRestoreNeeded, onSideEffect, onExit,
   // onClearBufferRequest) are never a runtime migration gap.
@@ -735,47 +712,6 @@ export type PreloadApi = {
   // host/target parameter anywhere in the chain and no runtime-host
   // equivalent of "print this window's content to a local PDF file."
   export: ExportApi
-  // Why: this group now contains only shell semantics. `viewer` and the Yiru
-  // star methods use this installation's own `gh` login; paired web clients
-  // deliberately return fallback values. The coordinator calls are keyed by
-  // Electron renderer id so visible-refresh ownership follows the asking
-  // window. Repo-host reads and writes use the `github.*` contract.
-  gh: {
-    viewer: () => Promise<GitHubViewer | null>
-    enqueuePRRefresh: (args: {
-      candidate: GitHubPRRefreshCandidate
-      reason: GitHubPRRefreshReason
-      priority?: number
-    }) => Promise<GitHubPRRefreshEnqueueResult | false>
-    reportVisiblePRRefreshCandidates: (args: {
-      candidates: GitHubPRRefreshCandidate[]
-      generation: number
-    }) => Promise<boolean>
-    checkYiruStarred: () => Promise<boolean | null>
-    starYiru: (source: AppStarSource) => Promise<boolean>
-  }
-  // Why: shell-only — confirmed via `main/star-nag/service.ts`. `StarNagService`
-  // is an in-memory singleton scoped to this Electron process's own
-  // `BrowserWindow`s (agent-spawn counters, cooldown timers, `gh`-CLI star
-  // checks against this machine's credentials); it has no host/multi-client
-  // concept. The web client deliberately no-ops the whole group rather than
-  // routing it anywhere — the growth nudge never surfaces there.
-  starNag: {
-    onShow: (
-      callback: (payload?: { mode?: 'gh' | 'web'; surface?: 'card' | 'toast' }) => void
-    ) => () => void
-    onHide: (callback: () => void) => () => void
-    dismiss: () => Promise<void>
-    later: () => Promise<void>
-    complete: () => Promise<void>
-    disable: () => Promise<void>
-    openWeb: () => Promise<void>
-    starYiru: () => Promise<boolean>
-    forceShow: () => Promise<void>
-    agentValueMoment: () => Promise<{ status: 'ready'; mode: 'gh' | 'web' } | { status: 'skipped' }>
-    showAgentValueMoment: () => Promise<void>
-    onboardingCompleted: () => Promise<void>
-  }
   // Why: shell-only, and the four `telemetry*` members below are one judgment
   // — consent and event emission are properties of *this installation*, not of
   // any runtime host. Routing them through the runtime contract would mean
@@ -886,27 +822,6 @@ export type PreloadApi = {
       workspacePath: string
     }) => Promise<void>
   }
-  notifications: {
-    // Why: Phase 5 slice S3 — the shell's implementation of the
-    // shellServices.notifications.display/.dismiss reverse procedures, called
-    // only from renderer/runtime/shell-services-handler.ts (never from
-    // feature code — go through the runtime's notifications.report/dismiss
-    // for that). Settings/throttle/dedup/mobile-push judgment already
-    // happened on the runtime side; these two do only the OS-native part.
-    displayNative: (
-      args: ShellServicesNotificationsDisplayInput
-    ) => Promise<ShellServicesNotificationsDisplayOutput>
-    dismissNative: (notificationIds: string[]) => Promise<ShellServicesNotificationsDismissOutput>
-    // Why: shell-only — pure OS permission queries (Notification.isSupported,
-    // the System Settings deep-link, the native authorization probe); no
-    // runtime involvement at all.
-    openSystemSettings: () => Promise<void>
-    getPermissionStatus: () => Promise<NotificationPermissionStatusResult>
-    probeDelivery: (args?: { force?: boolean }) => Promise<NotificationDeliveryProbeResult>
-    // Why: shell-only — same reverse-direction family as `dispatch` above;
-    // plays a locally cached sound file through a preload-context `Audio`.
-    playSound: (options?: { force?: boolean; volume?: number }) => Promise<NotificationSoundResult>
-  }
   // Why: shell-only — every check here (systemPreferences, osascript Apple
   // Events probe, a UDP bind for the local-network prompt) targets the OS
   // permission state of the Electron shell bundle running on this machine.
@@ -935,25 +850,6 @@ export type PreloadApi = {
     delete: (id: string, fileName: string, kind?: 'image' | 'bundle') => Promise<void>
   }
   emulator: EmulatorApi
-  // Why: shell-only, confirmed by slice 19 — every member here drives
-  // `electron-updater` checking/downloading/installing a new build of *this*
-  // Electron binary, on *this* machine. Distinct from the runtime contract's
-  // own `updater` namespace (`client.updater.getStatus/check/download/install`,
-  // consumed by `store/slices/remote-server-updates.ts`), which asks a paired
-  // *runtime environment host* whether its `yiru serve` build is current —
-  // same name, unrelated concepts, same shape as the `diagnostics`/`settings`/
-  // `session` over-merges elsewhere in this file. Nothing here should ever
-  // route through the contract.
-  updater: {
-    getVersion: () => Promise<string>
-    getStatus: () => Promise<UpdateStatus>
-    check: (options?: UpdateCheckOptions) => Promise<void>
-    download: () => Promise<void>
-    quitAndInstall: () => Promise<void>
-    dismissNudge: () => Promise<void>
-    onStatus: (callback: (status: UpdateStatus) => void) => () => void
-    onClearDismissal: (callback: () => void) => () => void
-  }
   stats: StatsApi
   claudeUsage: ClaudeUsageApi
   codexUsage: CodexUsageApi
@@ -1281,43 +1177,6 @@ export type PreloadApi = {
     get: () => Promise<PersistedUIState>
     set: (args: Partial<PersistedUIState>) => Promise<void>
     recordFeatureInteraction: (id: FeatureInteractionId) => Promise<PersistedUIState>
-  }
-  // Why: `runtime.driverEvents.subscribe` carries all three live driver
-  // changes, so this shell adapter retains only members with no equivalent
-  // forward procedure. `syncWindowGraph` is
-  // the *only* writer of `TerminalSessionAuthority.graph.leaves`
-  // (`renderer/runtime/sync-runtime-graph.ts`'s `syncRuntimeGraph` walks this
-  // renderer's mounted `PaneManager`s/DOM containers, which exist only in this
-  // process) — there is no contractual ordering guarantee between "pane just
-  // created" and "first keystroke" (slice 53 declined a pty migration over
-  // exactly this gap), so this must not be restructured or routed elsewhere.
-  // `getTerminalFitOverrides` and `getTerminalDrivers` hydrate local PTY
-  // arbitration state after renderer reload. `getBrowserDrivers` does the same
-  // for BrowserViews owned by this Electron process. `restoreTerminalFit`
-  // reclaims a local PTY addressed only by its opaque ptyId, while
-  // `reclaimBrowserForDesktop` reclaims a local BrowserView page id. These are
-  // data-plane ownership operations, not the connected runtime's status. The
-  // remote-terminal branch already uses `client.terminal.restoreFit` with its
-  // runtime handle before falling back to this local member.
-  runtime: {
-    syncWindowGraph: (graph: RuntimeSyncWindowGraph) => Promise<RuntimeSyncWindowGraphResult>
-    getTerminalFitOverrides: () => Promise<
-      { ptyId: string; mode: 'mobile-fit' | 'remote-desktop-fit'; cols: number; rows: number }[]
-    >
-    getTerminalDrivers: () => Promise<
-      {
-        ptyId: string
-        driver: RuntimeTerminalDriverState
-      }[]
-    >
-    getBrowserDrivers: () => Promise<
-      {
-        browserPageId: string
-        driver: RuntimeBrowserDriverState
-      }[]
-    >
-    restoreTerminalFit: (ptyId: string) => Promise<{ restored: boolean }>
-    reclaimBrowserForDesktop: (browserPageId: string) => Promise<{ reclaimed: boolean }>
   }
   // Why: shell-only by construction — this group IS the transport, not a
   // capability a runtime could provide. `list`/`resolve`/`remove`/

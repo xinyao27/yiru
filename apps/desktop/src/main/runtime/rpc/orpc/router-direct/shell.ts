@@ -8,10 +8,12 @@ import { requireShellWindowUi } from '~main/shell/ui'
 import { runtimeImplementation } from '../access-middleware'
 import { wireRuntimeStream } from '../registered-stream'
 import { shellConfigurationRuntimeHandlers } from './shell/configuration'
+import { shellSystemRuntimeHandlers } from './shell/system'
 
 export const shellRuntimeHandlers = {
   shell: {
     ...shellConfigurationRuntimeHandlers,
+    ...shellSystemRuntimeHandlers,
     browser: {
       importCookies: runtimeImplementation.shell.browser.importCookies.handler(
         async ({ input, context }) => {

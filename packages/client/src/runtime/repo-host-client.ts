@@ -2,6 +2,7 @@ import type { RuntimeClientEventSubscriptionEvent } from '@yiru/runtime-protocol
 
 import { onLocalHostProgressEvent } from './host-progress-stream'
 import { callRuntimeOrpc, createLocalRuntimeOrpcClient } from './orpc-client'
+import { shellClient } from './shell-client'
 import { createRuntimeStreamFanOut } from './stream-fan-out'
 import type { RepoWorkspaceApi } from './workspace-host-api'
 
@@ -13,13 +14,13 @@ const localClientEvents = createRuntimeStreamFanOut({
 })
 
 const localRepoClient: RepoWorkspaceApi = {
-  pickFolder: () => window.api.repoHost.pickFolder(),
-  pickFolders: () => window.api.repoHost.pickFolders(),
-  pickDirectory: () => window.api.repoHost.pickDirectory(),
-  removeForHost: (args) => window.api.repoHost.removeForHost(args),
-  reorderForHost: (args) => window.api.repoHost.reorderForHost(args),
-  cloneAbort: () => window.api.repoHost.cloneAbort(),
-  getDefaultCreateProjectParent: () => window.api.repoHost.getDefaultCreateProjectParent(),
+  pickFolder: () => shellClient.repoHost.pickFolder(),
+  pickFolders: () => shellClient.repoHost.pickFolders(),
+  pickDirectory: () => shellClient.repoHost.pickDirectory(),
+  removeForHost: (args) => shellClient.repoHost.removeForHost(args),
+  reorderForHost: (args) => shellClient.repoHost.reorderForHost(args),
+  cloneAbort: () => shellClient.repoHost.cloneAbort(),
+  getDefaultCreateProjectParent: () => shellClient.repoHost.getDefaultCreateProjectParent(),
   list: async () =>
     (await callRuntimeOrpc(LOCAL_TARGET, (client) => client.repo.list, undefined)).repos,
   add: async ({ path, kind }) => {

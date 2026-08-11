@@ -1,9 +1,4 @@
 import { electronAPI } from '@electron-toolkit/preload'
-import type {
-  ShellServicesNotificationsDismissOutput,
-  ShellServicesNotificationsDisplayInput,
-  ShellServicesNotificationsDisplayOutput
-} from '@yiru/runtime-protocol/contract'
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 import type { PreloadApi } from '@yiru/shared/preload/api-types'
 import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
@@ -12,7 +7,6 @@ import type { AiVaultListArgs, AiVaultSubagentListArgs } from '@yiru/workbench-m
 renderer and Electron. Keeping the IPC surface co-located in one file makes security
 review and type drift checks easier than scattering these bindings across modules. */
 import { contextBridge, ipcRenderer, webUtils } from 'electron'
-import type { AppIdentity } from '~shared/app-identity'
 import type {
   AutomationDispatchResult,
   AutomationPrecheckResult,
@@ -27,12 +21,7 @@ import type {
   ReactErrorBoundaryReportArgs,
   ReactErrorBoundaryReportResult
 } from '~shared/crash-reporting'
-import {
-  YIRU_EDITOR_PREPARE_HOT_EXIT_EVENT,
-  type EditorPrepareHotExitDetail
-} from '~shared/editor-save-events'
 import type { FridaySession } from '~shared/friday-types'
-import type { AppStarSource } from '~shared/gh-star-source'
 import type {
   LocalhostWorktreeLabelResult,
   LocalhostWorktreeLabelRoute
@@ -59,13 +48,7 @@ import {
   RUNTIME_ORPC_CONNECT_PORT_CHANNEL,
   parseRuntimeOrpcConnectPortRequest
 } from '~shared/runtime-orpc-message-port'
-import type {
-  RuntimeBrowserDriverState,
-  RuntimeStatus,
-  RuntimeSyncWindowGraphResult,
-  RuntimeSyncWindowGraph,
-  RuntimeTerminalDriverState
-} from '~shared/runtime-types'
+import type { RuntimeStatus } from '~shared/runtime-types'
 import {
   SHELL_SERVICES_CONNECT_CHANNEL,
   SHELL_SERVICES_CONNECT_MESSAGE
@@ -74,26 +57,7 @@ import type { TelemetryConsentState } from '~shared/telemetry-consent-types'
 import type { AgentKind, LaunchSource, RequestKind } from '~shared/telemetry-events'
 import type { TerminalSideEffectBatch } from '~shared/terminal/side-effect-facts'
 import type { TerminalViewAttributes } from '~shared/terminal/view-attributes'
-import type {
-  CustomPet,
-  GitHubPRRefreshCandidate,
-  GitHubPRRefreshReason,
-  NotificationDeliveryProbeResult,
-  NotificationPermissionStatusResult,
-  NotificationSoundDataResult,
-  NotificationSoundPathResult,
-  NotificationSoundResult,
-  FloatingTerminalCwdRequest,
-  MarkdownDocument,
-  TuiAgent,
-  UpdateStatus
-} from '~shared/types'
-import {
-  YIRU_APP_RESTART_ABORTED_EVENT,
-  YIRU_APP_RESTART_STARTED_EVENT,
-  YIRU_UPDATER_QUIT_AND_INSTALL_ABORTED_EVENT,
-  YIRU_UPDATER_QUIT_AND_INSTALL_STARTED_EVENT
-} from '~shared/updater-renderer-events'
+import type { CustomPet, TuiAgent } from '~shared/types'
 
 import { subscribeRuntimeEnvironmentFromPreload } from './runtime-environment-subscriptions'
 import type { RuntimeEnvironmentSubscriptionHandle } from './runtime-environment-subscriptions'
@@ -132,87 +96,6 @@ function forwardShellServicesPort(event: Electron.IpcRendererEvent): void {
 }
 
 ipcRenderer.on(SHELL_SERVICES_CONNECT_CHANNEL, forwardShellServicesPort)
-
-type AppRestartPrepOptions = {
-  startedEventName: string
-  abortedEventName: string
-}
-
-function requestEditorHotExitBackup(): Promise<void> {
-  return new Promise<void>((resolve, reject) => {
-    let claimed = false
-    window.dispatchEvent(
-      new CustomEvent<EditorPrepareHotExitDetail>(YIRU_EDITOR_PREPARE_HOT_EXIT_EVENT, {
-        detail: {
-          claim: () => {
-            claimed = true
-          },
-          resolve,
-          reject: (message) => {
-            reject(new Error(message))
-          }
-        }
-      })
-    )
-
-    // Why: restart paths can run before the editor autosave controller mounts.
-    // With no claimant, there are no renderer-owned dirty buffers to back up.
-    if (!claimed) {
-      resolve()
-    }
-  })
-}
-
-async function prepareRendererForAppRestart({
-  startedEventName,
-  abortedEventName
-}: AppRestartPrepOptions): Promise<void> {
-  window.dispatchEvent(new Event(startedEventName))
-
-  try {
-    await requestEditorHotExitBackup()
-  } catch (error) {
-    window.dispatchEvent(new Event(abortedEventName))
-    throw error
-  }
-
-  // Dispatch beforeunload now so terminal buffers are captured while panes are
-  // still mounted; update installs later bypass the ordinary close sequence.
-  window.dispatchEvent(new Event('beforeunload'))
-}
-
-// Why: one shared HTMLAudioElement per sound file, restarted from t=0 on each
-// play, with an in-flight guard that drops new plays while the sound is still
-// ringing. This mirrors VS Code's AccessibilitySignalService and GNOME's
-// libcanberra: a burst of triggers self-dedupes by the sound's own duration
-// (no magic time constant), while distinct sounds are still allowed to overlap.
-// We also cache the decoded blob URL by path so we don't re-read 10MB from
-// disk and re-transfer it over IPC on every notification.
-let cachedNotificationSound: {
-  path: string
-  blobUrl: string
-  audio: HTMLAudioElement
-} | null = null
-let isNotificationSoundPlaying = false
-// Why: audio.play() can reject before ended/error fires; keep a cleanup hook
-// so failed or replaced plays do not accumulate listeners on the cached Audio.
-let cleanupNotificationSoundPlayback: (() => void) | null = null
-
-function clearNotificationSoundPlaybackState(): void {
-  cleanupNotificationSoundPlayback?.()
-  cleanupNotificationSoundPlayback = null
-  isNotificationSoundPlaying = false
-}
-
-function disposeCachedNotificationSound(): void {
-  if (cachedNotificationSound) {
-    clearNotificationSoundPlaybackState()
-    cachedNotificationSound.audio.pause()
-    cachedNotificationSound.audio.src = ''
-    URL.revokeObjectURL(cachedNotificationSound.blobUrl)
-    cachedNotificationSound = null
-  }
-}
 
 /**
  * Walk the composed event path to classify which UI surface the native OS drop
@@ -323,61 +206,8 @@ document.addEventListener(
   true
 )
 
-const startupDiagnosticsEnabled = process.env.YIRU_STARTUP_DIAGNOSTICS === '1'
-
 // Custom APIs for renderer
 const api = {
-  app: {
-    getIdentity: (): Promise<AppIdentity> => ipcRenderer.invoke('app:getIdentity'),
-    relaunch: (): Promise<void> => ipcRenderer.invoke('app:relaunch'),
-    restart: async (): Promise<void> => {
-      await prepareRendererForAppRestart({
-        startedEventName: YIRU_APP_RESTART_STARTED_EVENT,
-        abortedEventName: YIRU_APP_RESTART_ABORTED_EVENT
-      })
-      try {
-        return await ipcRenderer.invoke('app:restart')
-      } catch (error) {
-        window.dispatchEvent(new Event(YIRU_APP_RESTART_ABORTED_EVENT))
-        throw error
-      }
-    },
-    reload: (): Promise<void> => ipcRenderer.invoke('app:reload'),
-    awaitFirstWindowStartupServices: (): Promise<void> =>
-      ipcRenderer.invoke('app:awaitFirstWindowStartupServices'),
-    startupDiagnostic: (event: string, details?: Record<string, unknown>): Promise<void> =>
-      startupDiagnosticsEnabled
-        ? ipcRenderer.invoke('app:startupDiagnostic', event, details)
-        : Promise.resolve(),
-    // Why: on macOS this returns the active input mode, or the layout ID when
-    // no IME mode is selected, so renderer keyboard workarounds can distinguish
-    // CJK IMEs and compose layouts from plain US QWERTY (see issue #1205).
-    // Returns null on non-Darwin or when the defaults read fails.
-    getKeyboardInputSourceId: (): Promise<string | null> =>
-      ipcRenderer.invoke('app:getKeyboardInputSourceId'),
-    setUnreadDockBadgeCount: (count: number): Promise<void> =>
-      ipcRenderer.invoke('app:setUnreadDockBadgeCount', count),
-    getFloatingTerminalCwd: (args?: FloatingTerminalCwdRequest): Promise<string> =>
-      ipcRenderer.invoke('app:getFloatingTerminalCwd', args),
-    getFloatingMarkdownDirectory: (): Promise<string> =>
-      ipcRenderer.invoke('app:getFloatingMarkdownDirectory'),
-    pickFloatingMarkdownDocument: (): Promise<MarkdownDocument | null> =>
-      ipcRenderer.invoke('app:pickFloatingMarkdownDocument'),
-    pickFloatingWorkspaceDirectory: (): Promise<string | null> =>
-      ipcRenderer.invoke('app:pickFloatingWorkspaceDirectory')
-  },
-
-  repoHost: {
-    pickFolder: () => ipcRenderer.invoke('repo-host:pickFolder'),
-    pickFolders: () => ipcRenderer.invoke('repo-host:pickFolders'),
-    pickDirectory: () => ipcRenderer.invoke('repo-host:pickDirectory'),
-    removeForHost: (args) => ipcRenderer.invoke('repo-host:removeForHost', args),
-    reorderForHost: (args) => ipcRenderer.invoke('repo-host:reorderForHost', args),
-    cloneAbort: () => ipcRenderer.invoke('repo-host:cloneAbort'),
-    getDefaultCreateProjectParent: (): Promise<string> =>
-      ipcRenderer.invoke('repo-host:getDefaultCreateProjectParent')
-  } satisfies PreloadApi['repoHost'],
-
   pty: {
     spawn: (opts: {
       cols: number
@@ -724,52 +554,6 @@ const api = {
     > => ipcRenderer.invoke('export:html-to-pdf', args)
   },
 
-  gh: {
-    viewer: (): Promise<unknown> => ipcRenderer.invoke('gh:viewer'),
-    enqueuePRRefresh: (args: {
-      candidate: GitHubPRRefreshCandidate
-      reason: GitHubPRRefreshReason
-      priority?: number
-    }): Promise<unknown> => ipcRenderer.invoke('gh:enqueuePRRefresh', args),
-
-    reportVisiblePRRefreshCandidates: (args: {
-      candidates: GitHubPRRefreshCandidate[]
-      generation: number
-    }): Promise<unknown> => ipcRenderer.invoke('gh:reportVisiblePRRefreshCandidates', args),
-    checkYiruStarred: (): Promise<boolean | null> => ipcRenderer.invoke('gh:checkYiruStarred'),
-    starYiru: (source: AppStarSource): Promise<boolean> => ipcRenderer.invoke('gh:starYiru', source)
-  },
-
-  starNag: {
-    onShow: (
-      callback: (payload?: { mode?: 'gh' | 'web'; surface?: 'card' | 'toast' }) => void
-    ): (() => void) => {
-      const listener = (
-        _event: Electron.IpcRendererEvent,
-        payload?: { mode?: 'gh' | 'web'; surface?: 'card' | 'toast' }
-      ): void => callback(payload)
-      ipcRenderer.on('star-nag:show', listener)
-      return () => ipcRenderer.removeListener('star-nag:show', listener)
-    },
-    onHide: (callback: () => void): (() => void) => {
-      const listener = (): void => callback()
-      ipcRenderer.on('star-nag:hide', listener)
-      return () => ipcRenderer.removeListener('star-nag:hide', listener)
-    },
-    dismiss: (): Promise<void> => ipcRenderer.invoke('star-nag:dismiss'),
-    later: (): Promise<void> => ipcRenderer.invoke('star-nag:later'),
-    complete: (): Promise<void> => ipcRenderer.invoke('star-nag:complete'),
-    disable: (): Promise<void> => ipcRenderer.invoke('star-nag:disable'),
-    openWeb: (): Promise<void> => ipcRenderer.invoke('star-nag:openWeb'),
-    starYiru: (): Promise<boolean> => ipcRenderer.invoke('star-nag:starYiru'),
-    forceShow: (): Promise<void> => ipcRenderer.invoke('star-nag:forceShow'),
-    agentValueMoment: (): Promise<
-      { status: 'ready'; mode: 'gh' | 'web' } | { status: 'skipped' }
-    > => ipcRenderer.invoke('star-nag:agentValueMoment'),
-    showAgentValueMoment: (): Promise<void> => ipcRenderer.invoke('star-nag:showAgentValueMoment'),
-    onboardingCompleted: (): Promise<void> => ipcRenderer.invoke('star-nag:onboardingCompleted')
-  },
-
   // Why: telemetry uses a loose untyped surface at the preload boundary on
   // purpose — the main-side validator (src/main/telemetry/validator.ts) is
   // the single enforcement point, not the preload types. The renderer gets
@@ -828,95 +612,6 @@ const api = {
       preset: 'cursor' | 'copilot' | 'codex'
       workspacePath: string
     }): Promise<void> => ipcRenderer.invoke('agentTrust:markTrusted', args)
-  },
-
-  notifications: {
-    displayNative: (
-      args: ShellServicesNotificationsDisplayInput
-    ): Promise<ShellServicesNotificationsDisplayOutput> =>
-      ipcRenderer.invoke('notifications:displayNative', args),
-    dismissNative: (notificationIds: string[]): Promise<ShellServicesNotificationsDismissOutput> =>
-      ipcRenderer.invoke('notifications:dismissNative', notificationIds),
-    openSystemSettings: (): Promise<void> => ipcRenderer.invoke('notifications:openSystemSettings'),
-    getPermissionStatus: (): Promise<NotificationPermissionStatusResult> =>
-      ipcRenderer.invoke('notifications:getPermissionStatus'),
-    probeDelivery: (args?: { force?: boolean }): Promise<NotificationDeliveryProbeResult> =>
-      ipcRenderer.invoke('notifications:probeDelivery', args),
-    playSound: async (options?: {
-      force?: boolean
-      volume?: number
-    }): Promise<NotificationSoundResult> => {
-      try {
-        // Why: drop replays while the sound is still ringing. The "test"
-        // button bypasses with force so the user always hears a confirmation.
-        if (!options?.force && isNotificationSoundPlaying) {
-          return { played: false, reason: 'deduped' }
-        }
-
-        const resolved = (await ipcRenderer.invoke(
-          'notifications:resolveSoundPath'
-        )) as NotificationSoundPathResult
-        if (!resolved.ok) {
-          if (cachedNotificationSound) {
-            disposeCachedNotificationSound()
-          }
-          return { played: false, reason: resolved.reason }
-        }
-
-        let entry = cachedNotificationSound
-        if (!entry || entry.path !== resolved.path) {
-          const sound = (await ipcRenderer.invoke(
-            'notifications:loadSound'
-          )) as NotificationSoundDataResult
-          if (!sound.ok) {
-            disposeCachedNotificationSound()
-            return { played: false, reason: sound.reason }
-          }
-          const arrayBuffer = new ArrayBuffer(sound.data.byteLength)
-          new Uint8Array(arrayBuffer).set(sound.data)
-          const blob = new Blob([arrayBuffer], { type: sound.mimeType })
-          disposeCachedNotificationSound()
-          const blobUrl = URL.createObjectURL(blob)
-          entry = { path: sound.path, blobUrl, audio: new Audio(blobUrl) }
-          cachedNotificationSound = entry
-        }
-
-        const audio = entry.audio
-        // Why: restart-from-zero on every play so a burst of triggers replays
-        // the sound from the start instead of stacking overlapping copies.
-        // Matches GNOME canberra and VS Code AccessibilitySignalService.
-        audio.currentTime = 0
-        if (typeof options?.volume === 'number' && Number.isFinite(options.volume)) {
-          audio.volume = Math.min(1, Math.max(0, options.volume / 100))
-        }
-        isNotificationSoundPlaying = true
-        cleanupNotificationSoundPlayback?.()
-        const release = (): void => {
-          cleanup()
-          if (cleanupNotificationSoundPlayback === cleanup) {
-            cleanupNotificationSoundPlayback = null
-          }
-          isNotificationSoundPlaying = false
-        }
-        const cleanup = (): void => {
-          audio.removeEventListener('ended', release)
-          audio.removeEventListener('error', release)
-        }
-        cleanupNotificationSoundPlayback = cleanup
-        audio.addEventListener('ended', release)
-        audio.addEventListener('error', release)
-        try {
-          await audio.play()
-        } catch {
-          release()
-          return { played: false, reason: 'playback-failed' }
-        }
-        return { played: true }
-      } catch {
-        clearNotificationSoundPlaybackState()
-        return { played: false, reason: 'playback-failed' }
-      }
-    }
   },
 
   developerPermissions: {
@@ -1011,36 +706,6 @@ const api = {
     }
   },
 
-  updater: {
-    getStatus: () => ipcRenderer.invoke('updater:getStatus'),
-    getVersion: () => ipcRenderer.invoke('updater:getVersion'),
-    check: (options) => ipcRenderer.invoke('updater:check', options),
-    download: () => ipcRenderer.invoke('updater:download'),
-    dismissNudge: () => ipcRenderer.invoke('updater:dismissNudge'),
-    quitAndInstall: async (): Promise<void> => {
-      await prepareRendererForAppRestart({
-        startedEventName: YIRU_UPDATER_QUIT_AND_INSTALL_STARTED_EVENT,
-        abortedEventName: YIRU_UPDATER_QUIT_AND_INSTALL_ABORTED_EVENT
-      })
-      try {
-        return await ipcRenderer.invoke('updater:quitAndInstall')
-      } catch (error) {
-        window.dispatchEvent(new Event(YIRU_UPDATER_QUIT_AND_INSTALL_ABORTED_EVENT))
-        throw error
-      }
-    },
-    onStatus: (callback) => {
-      const listener = (_event: Electron.IpcRendererEvent, status: UpdateStatus) => callback(status)
-      ipcRenderer.on('updater:status', listener)
-      return () => ipcRenderer.removeListener('updater:status', listener)
-    },
-    onClearDismissal: (callback) => {
-      const listener = (_event: Electron.IpcRendererEvent) => callback()
-      ipcRenderer.on('updater:clearDismissal', listener)
-      return () => ipcRenderer.removeListener('updater:clearDismissal', listener)
-    }
-  } satisfies PreloadApi['updater'],
-
   ui: {
     get: () => ipcRenderer.invoke('ui:get'),
     set: (args) => ipcRenderer.invoke('ui:set', args),
@@ -1116,30 +781,6 @@ const api = {
   friday: {
     getOrCreate: (): Promise<FridaySession> => ipcRenderer.invoke('friday:getOrCreate'),
     restart: (): Promise<FridaySession> => ipcRenderer.invoke('friday:restart')
-  },
-
-  runtime: {
-    syncWindowGraph: (graph: RuntimeSyncWindowGraph): Promise<RuntimeSyncWindowGraphResult> =>
-      ipcRenderer.invoke('runtime:syncWindowGraph', graph),
-    getTerminalFitOverrides: (): Promise<
-      { ptyId: string; mode: 'mobile-fit' | 'remote-desktop-fit'; cols: number; rows: number }[]
-    > => ipcRenderer.invoke('runtime:getTerminalFitOverrides'),
-    getTerminalDrivers: (): Promise<
-      {
-        ptyId: string
-        driver: RuntimeTerminalDriverState
-      }[]
-    > => ipcRenderer.invoke('runtime:getTerminalDrivers'),
-    getBrowserDrivers: (): Promise<
-      {
-        browserPageId: string
-        driver: RuntimeBrowserDriverState
-      }[]
-    > => ipcRenderer.invoke('runtime:getBrowserDrivers'),
-    restoreTerminalFit: (ptyId: string): Promise<{ restored: boolean }> =>
-      ipcRenderer.invoke('runtime:restoreTerminalFit', { ptyId }),
-    reclaimBrowserForDesktop: (browserPageId: string): Promise<{ reclaimed: boolean }> =>
-      ipcRenderer.invoke('runtime:reclaimBrowserForDesktop', { browserPageId })
   },
 
   runtimeEnvironments: {

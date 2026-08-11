@@ -30,7 +30,7 @@ import type { KeybindingService } from '../keybindings/keybinding-service'
 import { initializeShellKeybindingsService } from '../keybindings/keybindings'
 import { registerMiniMaxCredentialsHandlers } from '../minimax/credentials'
 import { initializeNotebookAuthorizedStore } from '../notebook'
-import { registerNotificationHandlers } from '../notifications/notifications'
+import { initializeShellNotificationsService } from '../notifications/notifications'
 import { registerOpenCodeUsageHandlers } from '../opencode/usage/opencode-usage'
 import type { OpenCodeUsageStore } from '../opencode/usage/store'
 import { initializeShellOnboardingService } from '../persisted-state/onboarding'
@@ -42,21 +42,20 @@ import { registerWorkspacePortHandlers } from '../ports/workspace-ports'
 import type { RateLimitService } from '../rate-limits/service'
 import { registerRuntimeEnvironmentHandlers } from '../runtime/environments'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'
+import { initializeShellAppService } from '../shell/app'
 import { initializeShellClipboardService } from '../shell/clipboard'
 import { initializeShellFilesService } from '../shell/files'
+import { initializeShellGitHubWindowService } from '../shell/github'
 import { initializeShellPlatformService } from '../shell/platform'
+import { initializeShellRuntimeStateService } from '../shell/runtime-state'
 import { initializeShellSettingsService } from '../shell/settings'
 import { registerSpeechHandlers } from '../speech/speech'
 import type { StatsCollector } from '../stats/collector'
 import { registerTelemetryHandlers } from '../telemetry/telemetry'
-import { registerUpdaterHandlers } from '../window/attach-main-window-services'
 import { registerUIHandlers } from '../window/ui'
 import { initializeShellYiruProfilesService } from '../yiru-profiles/yiru-profiles'
 import { registerAiVaultHandlers } from './ai-vault'
-import { registerAppHandlers } from './app'
 import { registerAutomationHandlers } from './automations'
-import { registerGitHubIpcHandlers } from './github'
-import { registerRuntimeHandlers } from './runtime'
 
 let registered = false
 
@@ -96,7 +95,7 @@ export function registerCoreHandlers(
   }
   registered = true
 
-  registerAppHandlers(store, { onBeforeRelaunch: lifecycleOptions.onBeforeRelaunch })
+  initializeShellAppService(store, { onBeforeRelaunch: lifecycleOptions.onBeforeRelaunch })
   registerClaudeUsageHandlers(claudeUsage)
   registerCodexUsageHandlers(codexUsage)
   registerOpenCodeUsageHandlers(openCodeUsage)
@@ -104,13 +103,13 @@ export function registerCoreHandlers(
   registerAgentTrustHandlers()
   registerClaudeAccountHandlers(claudeAccounts)
   registerMiniMaxCredentialsHandlers(rateLimits)
-  registerGitHubIpcHandlers(store, stats)
+  initializeShellGitHubWindowService(store, stats)
   registerFeedbackHandlers()
   if (crashReports) {
     registerCrashReportingHandlers(crashReports)
   }
   registerExportHandlers()
-  registerNotificationHandlers(store)
+  initializeShellNotificationsService(store)
   // Why: no more `notebook:*` IPC channels to register — this just hands the
   // store reference the `notebook.runPythonCell` oRPC contract needs.
   initializeNotebookAuthorizedStore(store)
@@ -159,7 +158,7 @@ export function registerCoreHandlers(
     },
     trashPath: (targetPath) => shell.trashItem(targetPath)
   })
-  registerRuntimeHandlers(runtime)
+  initializeShellRuntimeStateService(runtime)
   registerRuntimeEnvironmentHandlers(store)
   registerAiVaultHandlers({
     getAdditionalCodexHomePaths: lifecycleOptions.getAdditionalAiVaultCodexHomePaths,
@@ -170,7 +169,6 @@ export function registerCoreHandlers(
       scanRuntimeAiVaultSessions(app.getPath('userData'), environmentId, args, options)
   })
   initializeShellClipboardService(store)
-  registerUpdaterHandlers(store)
   registerSpeechHandlers()
 }
 

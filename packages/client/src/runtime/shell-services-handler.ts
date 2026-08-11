@@ -18,6 +18,7 @@ import {
   setBrowserTabProfileViaShell
 } from './browser-tab-shell-requests'
 import { readMobileMarkdownTab, saveMobileMarkdownTab } from './mobile-markdown-bridge'
+import { shellClient } from './shell-client'
 import { electronShellPlatformApi, type ShellPlatformApi } from './shell-platform-client'
 import { shellSessionApi } from './shell-state-client'
 import { createTerminalTabViaShell } from './terminal-create-shell-request'
@@ -74,10 +75,10 @@ export function createShellServicesRouter() {
     // reaches the real implementation in main/notifications/notifications.ts.
     notifications: {
       display: implementer.notifications.display.handler(({ input }) =>
-        window.api.notifications.displayNative(input)
+        shellClient.notifications.displayNative(input)
       ),
       dismiss: implementer.notifications.dismiss.handler(({ input }) =>
-        window.api.notifications.dismissNative(input.notificationIds)
+        shellClient.notifications.dismissNative(input.notificationIds)
       )
     },
     ui: {
@@ -102,7 +103,7 @@ export function createShellServicesRouter() {
           return { selections: await pickWebShellDirectories() }
         }
         const paths = input.allowMultiple
-          ? await window.api.repoHost.pickFolders()
+          ? await shellClient.repoHost.pickFolders()
           : [await getShellApi().pickDirectory({ defaultPath: input.defaultPath })].filter(
               (path): path is string => path !== null
             )
