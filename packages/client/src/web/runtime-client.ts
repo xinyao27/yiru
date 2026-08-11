@@ -10,6 +10,7 @@ import type {
   RuntimeMethodParams,
   RuntimeMethodResult
 } from '~shared/runtime-method-contract'
+import { RUNTIME_INBOUND_BINARY_STREAM_CAPABILITY } from '~shared/runtime-orpc-socket'
 
 import {
   decrypt,
@@ -33,6 +34,10 @@ import {
 } from './orpc-channel'
 import type { WebPairingOffer } from './pairing'
 import { WebShellServicesChannel } from './shell-services-channel'
+import {
+  openWebTerminalMultiplexSubscription,
+  type WebTerminalMultiplexSubscription
+} from './terminal-multiplex-subscription'
 
 type WebRuntimeConnectionState =
   | 'disconnected'
@@ -134,6 +139,9 @@ export class WebRuntimeClient {
   private orpcClientPromise: Promise<WebRuntimeOrpcClient> | null = null
   private orpcTransport: 'unknown' | 'legacy' | 'peer' = 'unknown'
   private shellServicesChannel: WebShellServicesChannel | null = null
+  private terminalMultiplexSubscription: WebTerminalMultiplexSubscription | null = null
+  private authenticatedRuntimeId: string | null = null
+  private readonly authenticatedCapabilities = new Set<string>()
   private readonly pairing: WebPairingOffer
   private readonly onRuntimeId: (runtimeId: string) => void
   private readonly options: WebRuntimeClientOptions
@@ -240,7 +248,9 @@ export class WebRuntimeClient {
       // server's WebSocket connection cap in large browser sessions.
       return this.subscribeSharedFileWatch(params, callbacks, options)
     }
-    const client = new WebRuntimeClient(this.pairing, this.onRuntimeId)
+    const client = new WebRuntimeClient(this.pairing, this.onRuntimeId, {
+      enableShellServices: method === 'terminal.multiplex' ? false : undefined
+    })
     this.childClients.add(client)
     const closeChild = (notifySubscriptions = false): void => {
       this.childClients.delete(client)
@@ -440,6 +450,9 @@ export class WebRuntimeClient {
     options?: SubscribeOptions
   ): Promise<WebRuntimeSubscriptionHandle> {
     await this.waitForConnected(options?.timeoutMs)
+    if (method === 'terminal.multiplex') {
+      return this.subscribeTerminalMultiplexOnCurrentConnection(params, callbacks)
+    }
     const id = this.nextId()
     const subscription: RuntimeSubscription = { id, method, params, callbacks, needsReplay: false }
     this.subscriptions.set(id, subscription)
@@ -468,6 +481,45 @@ export class WebRuntimeClient {
     }
   }
 
+  private async subscribeTerminalMultiplexOnCurrentConnection(
+    params: unknown,
+    callbacks: SubscriptionCallbacks
+  ): Promise<WebRuntimeSubscriptionHandle> {
+    if (!this.authenticatedCapabilities.has(RUNTIME_INBOUND_BINARY_STREAM_CAPABILITY)) {
+      throw new Error('Runtime host does not support inbound terminal multiplex frames.')
+    }
+    const runtimeId = this.authenticatedRuntimeId
+    if (!runtimeId) {
+      throw new Error('Runtime host did not identify the terminal multiplex connection.')
+    }
+    const requestId = this.nextId()
+    let subscription: WebTerminalMultiplexSubscription
+    try {
+      subscription = await openWebTerminalMultiplexSubscription({
+        requestId,
+        params,
+        runtimeId,
+        callbacks,
+        sendText: (frame) => this.sendEncryptedText(frame),
+        sendBinary: (frame) => this.sendEncryptedBinary(frame),
+        onCreated: (created) => {
+          this.terminalMultiplexSubscription = created
+        }
+      })
+    } catch (error) {
+      this.closeTerminalMultiplexSubscription(false)
+      throw error
+    }
+    return {
+      unsubscribe: () => {
+        if (this.terminalMultiplexSubscription === subscription) {
+          this.closeTerminalMultiplexSubscription(false)
+        }
+      },
+      sendBinary: (bytes) => subscription.sendBinary(bytes)
+    }
+  }
+
   close(options: { notifySubscriptions?: boolean } = {}): void {
     const shouldNotifySubscriptions = options.notifySubscriptions ?? true
     this.intentionallyClosed = true
@@ -477,6 +529,7 @@ export class WebRuntimeClient {
     this.childClients.clear()
     this.fileWatchTeardownRetries.clear()
     this.clearTimers()
+    this.closeTerminalMultiplexSubscription(false)
     this.closeOrpcConnection()
     this.closeShellServicesChannel()
     this.rejectAllPending('Runtime host connection closed.')
@@ -510,6 +563,8 @@ export class WebRuntimeClient {
     ws.binaryType = 'arraybuffer'
     this.ws = ws
     this.sharedKey = null
+    this.authenticatedRuntimeId = null
+    this.authenticatedCapabilities.clear()
     this.setState('connecting')
 
     this.connectTimer = window.setTimeout(() => {
@@ -593,8 +648,20 @@ export class WebRuntimeClient {
         const control = JSON.parse(plaintext) as {
           type?: unknown
           error?: { code?: string; message?: string }
+          runtimeId?: unknown
+          capabilities?: unknown
         }
         if (control.type === 'e2ee_authenticated') {
+          if (typeof control.runtimeId === 'string' && control.runtimeId.length > 0) {
+            this.publishRuntimeId(control.runtimeId)
+          }
+          if (Array.isArray(control.capabilities)) {
+            for (const capability of control.capabilities) {
+              if (typeof capability === 'string') {
+                this.authenticatedCapabilities.add(capability)
+              }
+            }
+          }
           this.clearHandshakeTimer()
           this.reconnectAttempt = 0
           if (this.options.enableShellServices !== false) {
@@ -626,6 +693,12 @@ export class WebRuntimeClient {
       if (!plaintext) {
         return
       }
+      if (this.terminalMultiplexSubscription) {
+        if (!this.terminalMultiplexSubscription.receiveBinary(plaintext)) {
+          sourceWs?.close()
+        }
+        return
+      }
       if (this.shellServicesChannel?.receiveBinary(plaintext)) {
         return
       }
@@ -640,6 +713,12 @@ export class WebRuntimeClient {
 
     const plaintext = decrypt(raw, this.sharedKey)
     if (plaintext === null) {
+      return
+    }
+    if (this.terminalMultiplexSubscription) {
+      if (!this.terminalMultiplexSubscription.receiveText(plaintext)) {
+        sourceWs?.close()
+      }
       return
     }
     if (this.shellServicesChannel?.receiveText(plaintext)) {
@@ -775,6 +854,7 @@ export class WebRuntimeClient {
     }
     this.ws = null
     this.sharedKey = null
+    this.closeTerminalMultiplexSubscription(true)
     this.closeOrpcConnection()
     this.closeShellServicesChannel()
     this.legacyOrpcClient = null
@@ -809,6 +889,16 @@ export class WebRuntimeClient {
   private closeOrpcConnection(): void {
     this.orpcConnection?.channel.close()
     this.orpcConnection = null
+  }
+
+  private closeTerminalMultiplexSubscription(transportClosed: boolean): void {
+    const subscription = this.terminalMultiplexSubscription
+    this.terminalMultiplexSubscription = null
+    if (transportClosed) {
+      subscription?.transportClosed()
+    } else {
+      subscription?.close()
+    }
   }
 
   private openShellServicesChannel(): void {
@@ -1084,6 +1174,7 @@ export class WebRuntimeClient {
   }
 
   private publishRuntimeId(runtimeId: string): void {
+    this.authenticatedRuntimeId = runtimeId
     try {
       this.onRuntimeId(runtimeId)
     } catch (error) {

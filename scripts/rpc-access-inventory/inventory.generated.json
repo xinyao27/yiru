@@ -1,9 +1,9 @@
 {
   "schemaVersion": 2,
-  "methodCount": 741,
+  "methodCount": 742,
   "sourceCounts": {
     "legacy": 0,
-    "orpc": 741
+    "orpc": 742
   },
   "methods": [
     {
@@ -10505,6 +10505,21 @@
       },
       "mobile": true,
       "streaming": true,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/terminal.ts"
+        }
+      ]
+    },
+    {
+      "method": "terminal.openMultiplex",
+      "access": {
+        "scope": "host",
+        "tier": "read"
+      },
+      "mobile": false,
+      "streaming": false,
       "sources": [
         {
           "kind": "orpc",

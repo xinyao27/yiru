@@ -3,7 +3,6 @@ import { CLIENT_EVENT_METHODS } from './client-events'
 import { COWORKING_HOST_METHODS } from './coworking-host'
 import { ORCHESTRATION_METHODS } from './orchestration/methods'
 import { SESSION_TAB_METHODS } from './session-tabs'
-import { TERMINAL_METHODS } from './terminal'
 
 // Why: a flat manifest keeps registration order explicit and provides one
 // grep-point for "what methods does the RPC server expose?" — useful when
@@ -259,8 +258,8 @@ import { TERMINAL_METHODS } from './terminal'
 // needed one (the same shape `session`/`runtime` established in 切片 73).
 // `terminal.multiplex`, `terminal.subscribe`, `terminal.send`,
 // `terminal.updateViewport`, and `terminal.unsubscribe` are the five leaves
-// with a real bare-string caller each — see `TERMINAL_METHODS`'s own note in
-// terminal.ts and `TERMINAL_VIEWPORT_METHODS`'s in terminal-viewport-methods.ts
+// with a real bare-string caller each — see the terminal direct wiring and
+// `TERMINAL_VIEWPORT_METHODS`'s note in terminal-viewport-methods.ts
 // for which caller forces which leaf. `send`/`updateViewport`/`unsubscribe`
 // are unary, so slice 110's `RpcDispatcher` fallback into the direct wiring
 // — the same mechanism that let `status.get` drop out of this file entirely
@@ -299,7 +298,6 @@ import { TERMINAL_METHODS } from './terminal'
 // dispatcher.ts's own note on what the dispatcher fallbacks becoming the only
 // path does and does not make dead code.
 export const ALL_RPC_METHODS: readonly RpcAnyMethod[] = [
-  ...TERMINAL_METHODS,
   ...ORCHESTRATION_METHODS,
   ...SESSION_TAB_METHODS,
   ...CLIENT_EVENT_METHODS,

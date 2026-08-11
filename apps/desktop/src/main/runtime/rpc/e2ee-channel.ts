@@ -28,7 +28,7 @@ export type {
 type ChannelState = 'awaiting_hello' | 'awaiting_auth' | 'ready'
 
 const HANDSHAKE_TIMEOUT_MS = 10_000
-const MAX_CONSECUTIVE_DECRYPT_FAILURES = 5
+const MAX_CONSECUTIVE_DECRYPT_FAILURES = 1
 
 type E2EEChannelCommonOptions = {
   serverSecretKey: Uint8Array

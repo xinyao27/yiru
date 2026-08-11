@@ -105,6 +105,9 @@ type ProcessPtyOutputOptions = {
   // must write it LAST, after the post-replay reset, so the next live chunk
   // completes it instead of rendering literally (#7329).
   pendingEscapeTailAnsi?: string
+  snapshotCols?: number
+  snapshotRows?: number
+  onReplayParsed?: () => void
 }
 
 type PendingPtySideEffect = {
@@ -486,7 +489,10 @@ export function createPtyOutputProcessor({
         ...(options.clearBeforeReplay === false ? { clearBeforeReplay: false } : {}),
         ...(options.pendingEscapeTailAnsi
           ? { pendingEscapeTailAnsi: options.pendingEscapeTailAnsi }
-          : {})
+          : {}),
+        ...(options.snapshotCols ? { snapshotCols: options.snapshotCols } : {}),
+        ...(options.snapshotRows ? { snapshotRows: options.snapshotRows } : {}),
+        ...(options.onReplayParsed ? { onParsed: options.onReplayParsed } : {})
       }
       // Why: preserve the bare-data call shape when there is no replay metadata,
       // so eager-buffer replay (which passes neither) is unchanged.

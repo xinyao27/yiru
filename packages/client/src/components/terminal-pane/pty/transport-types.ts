@@ -17,7 +17,7 @@ export type PtyBufferSnapshot = {
    *  are delivered once and in order, so a post-restore chunk at or below
    *  this seq can never be a duplicate the snapshot already covers. */
   pendingDeliveryStartSeq?: number
-  source?: 'headless' | 'renderer'
+  source?: 'headless' | 'renderer' | 'provider'
   /** True when the snapshot captures an alternate-screen TUI (Claude Code,
    *  vim). Restore must NOT clear xterm's buffer in that case — the TUI's
    *  scrollback lives in xterm and a clear destroys scroll-up after a tab
@@ -65,7 +65,13 @@ type PtyCallbacks = {
   onData?: (data: string, meta?: PtyDataMeta) => void
   onReplayData?: (
     data: string,
-    meta?: { clearBeforeReplay?: boolean; pendingEscapeTailAnsi?: string }
+    meta?: {
+      clearBeforeReplay?: boolean
+      pendingEscapeTailAnsi?: string
+      snapshotCols?: number
+      snapshotRows?: number
+      onParsed?: () => void
+    }
   ) => void
   onStatus?: (shell: string) => void
   onError?: (message: string, errors?: string[]) => void

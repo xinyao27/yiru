@@ -4,7 +4,11 @@
 import { randomUUID } from 'node:crypto'
 
 import { createWsOutboundBackpressureQueue } from '@yiru/mobile-relay-protocol/outbound-backpressure'
-import { RUNTIME_ORPC_REQUEST_ID_HEADER } from '@yiru/runtime-protocol/orpc-peer-frame'
+import {
+  encodeRuntimeOrpcSideChannelBinaryFrame,
+  RUNTIME_ORPC_BINARY_SIDE_CHANNEL_HEADER,
+  RUNTIME_ORPC_REQUEST_ID_HEADER
+} from '@yiru/runtime-protocol/orpc-peer-frame'
 import {
   isKeepaliveFrame,
   RuntimeRpcEnvelopeSchema,
@@ -562,6 +566,8 @@ export async function subscribeRemoteRuntimeRequest<TResult>(
       if (state !== 'ready' || !ws || ws.readyState !== WebSocket.OPEN) {
         return false
       }
+      // Why: terminal-multiplex.md OQ-3 keeps the existing mobile secretbox
+      // framing and key schedule; the terminal inner protocol never guesses a suite.
       ensureSendQueue(ws).enqueue(Buffer.from(encryptBytes(bytes, sharedKey)))
       return true
     }
@@ -580,7 +586,16 @@ export async function subscribeRemoteRuntimeRequest<TResult>(
       }
       settled = true
       clearTimeout(timeout)
-      resolve({ requestId, close, sendBinary })
+      resolve({
+        requestId,
+        close,
+        sendBinary: (bytes) =>
+          sendBinary(
+            method === 'terminal.multiplex'
+              ? encodeRuntimeOrpcSideChannelBinaryFrame(requestId, bytes)
+              : bytes
+          )
+      })
     }
 
     const fail = (error: RemoteRuntimeClientError): void => {
@@ -803,8 +818,11 @@ export async function subscribeRemoteRuntimeRequest<TResult>(
           )
           return
         }
-        dedicatedOrpcPeer = new DedicatedRemoteRuntimeOrpcPeer(sendOrpcText, sendBinary, (frame) =>
-          callbacks.onBinary?.(frame)
+        dedicatedOrpcPeer = new DedicatedRemoteRuntimeOrpcPeer(
+          requestId,
+          sendOrpcText,
+          sendBinary,
+          (frame) => callbacks.onBinary?.(frame)
         )
         void startDedicatedOrpcSubscription(runtimeId)
         return
@@ -833,8 +851,15 @@ export async function subscribeRemoteRuntimeRequest<TResult>(
         const { RPCLink } = await import('@orpc/client/websocket')
         const link = new RPCLink<Record<never, never>>({
           websocket: peer,
-          headers: { [RUNTIME_ORPC_REQUEST_ID_HEADER]: requestId }
+          headers: {
+            [RUNTIME_ORPC_BINARY_SIDE_CHANNEL_HEADER]: '1',
+            [RUNTIME_ORPC_REQUEST_ID_HEADER]: requestId
+          }
         })
+        // Why: terminal.multiplex does not yield its first event until the
+        // caller answers the binary epoch offer. Expose sendBinary before
+        // awaiting link.call() so that handshake cannot deadlock.
+        succeed()
         const output = await link.call(method.split('.'), params, {
           context: {},
           signal: streamAbort.signal
@@ -843,7 +868,6 @@ export async function subscribeRemoteRuntimeRequest<TResult>(
           fail(invalidDedicatedOrpcFrame())
           return
         }
-        succeed()
         void consumeDedicatedOrpcSubscription(output, runtimeId)
       } catch (error) {
         if (!streamAbort.signal.aborted && !isSocketClosed) {

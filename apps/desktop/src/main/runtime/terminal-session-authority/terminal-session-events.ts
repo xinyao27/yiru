@@ -1,6 +1,12 @@
 import type { RuntimeTerminalDriverState } from '~shared/runtime-types'
 
-export type TerminalDataMeta = { seq?: number; rawLength?: number; cwd?: string }
+export type TerminalDataMeta = {
+  seq?: number
+  rawLength?: number
+  wireByteSeq?: bigint
+  wireByteLength?: number
+  cwd?: string
+}
 export type TerminalFitMode = 'mobile-fit' | 'remote-desktop-fit' | 'desktop-fit'
 export type TerminalFitEvent = { mode: TerminalFitMode; cols: number; rows: number }
 export type TerminalResizeEvent = {

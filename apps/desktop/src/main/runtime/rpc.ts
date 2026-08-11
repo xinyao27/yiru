@@ -27,10 +27,6 @@ import {
 } from '~shared/remote-runtime/request-cancellation'
 import type { RuntimeMetadata, RuntimeTransportMetadata } from '~shared/runtime-bootstrap'
 import type { DeviceScope } from '~shared/runtime-types'
-import {
-  decodeTerminalStreamFrame,
-  type TerminalStreamFrame
-} from '~shared/terminal/stream-protocol'
 
 import type { CoworkingGrantJournal } from '../coworking/grant-journal'
 import { DeviceRegistry, type CoworkingHostDeviceEntry } from './device-registry'
@@ -56,6 +52,8 @@ import { createRuntimeTransportMetadata } from './rpc/transport-metadata'
 import { UnixSocketTransport } from './rpc/unix-socket-transport'
 import { readWsFallbackPort, writeWsFallbackPort } from './rpc/ws-fallback-port-store'
 import { WebSocketTransport } from './rpc/ws-transport'
+import { TerminalMultiplexConnections } from './terminal-multiplex/connections'
+import { TerminalMultiplexLoopbackServer } from './terminal-multiplex/loopback-server'
 import type { YiruRuntimeService } from './yiru-runtime'
 
 const DEFAULT_WS_PORT = 6768
@@ -158,10 +156,8 @@ export class YiruRuntimeRpcServer {
   private activeTransports: RpcTransport[] = []
   private transports: RuntimeTransportMetadata[] = []
   private mobileSocketWiring: MobileSocketWiring | null = null
-  private readonly binaryStreamHandlers = new Map<
-    string,
-    Map<number, (frame: TerminalStreamFrame) => void>
-  >()
+  private readonly terminalMultiplex = new TerminalMultiplexConnections()
+  private readonly terminalMultiplexLoopback: TerminalMultiplexLoopbackServer
   private readonly wsDispatchAbortStates = new Map<
     WebSocket,
     {
@@ -188,6 +184,15 @@ export class YiruRuntimeRpcServer {
     webClientRoot
   }: YiruRuntimeRpcServerOptions) {
     this.runtime = runtime
+    this.terminalMultiplexLoopback = new TerminalMultiplexLoopbackServer({
+      runtime,
+      router: runtimeOrpcRouter,
+      connections: this.terminalMultiplex,
+      allowedOrigins: terminalMultiplexLoopbackOrigins(),
+      // Why: terminal-multiplex.md §21.1 makes these preferences part of
+      // plaintext admission. create-main-window.ts fixes all three to true.
+      browserSecurity: { contextIsolation: true, sandbox: true, webSecurity: true }
+    })
     this.dispatcher = new RpcDispatcher({
       runtime,
       methods: ALL_RPC_METHODS,
@@ -225,6 +230,19 @@ export class YiruRuntimeRpcServer {
 
   getMobileSocketWiring(): MobileSocketWiring | null {
     return this.mobileSocketWiring
+  }
+
+  copyTerminalMultiplexLoopbackCredentials(): {
+    endpoint: string
+    processToken: Uint8Array<ArrayBuffer>
+  } | null {
+    const endpoint = this.terminalMultiplexLoopback.endpoint
+    return endpoint
+      ? {
+          endpoint,
+          processToken: this.terminalMultiplexLoopback.copyProcessToken()
+        }
+      : null
   }
 
   async revokeMobileDevice(deviceId: string): Promise<boolean> {
@@ -343,27 +361,11 @@ export class YiruRuntimeRpcServer {
   private registerBinaryStreamHandler(
     connectionId: string | undefined,
     streamId: number,
-    handler: (frame: TerminalStreamFrame) => void
+    handler: Parameters<TerminalMultiplexConnections['register']>[2]
   ): () => void {
-    if (!connectionId || !Number.isInteger(streamId) || streamId < 0) {
-      return () => {}
-    }
-    let handlers = this.binaryStreamHandlers.get(connectionId)
-    if (!handlers) {
-      handlers = new Map()
-      this.binaryStreamHandlers.set(connectionId, handlers)
-    }
-    handlers.set(streamId, handler)
-    return () => {
-      const current = this.binaryStreamHandlers.get(connectionId)
-      if (!current || current.get(streamId) !== handler) {
-        return
-      }
-      current.delete(streamId)
-      if (current.size === 0) {
-        this.binaryStreamHandlers.delete(connectionId)
-      }
-    }
+    return connectionId
+      ? this.terminalMultiplex.register(connectionId, streamId, handler)
+      : () => {}
   }
 
   private handleWebSocketBinaryMessage(bytes: Uint8Array<ArrayBufferLike>, ws: WebSocket): void {
@@ -371,11 +373,7 @@ export class YiruRuntimeRpcServer {
     if (!connectionId) {
       return
     }
-    const frame = decodeTerminalStreamFrame(bytes)
-    if (!frame) {
-      return
-    }
-    this.binaryStreamHandlers.get(connectionId)?.get(frame.streamId)?.(frame)
+    this.terminalMultiplex.handle(connectionId, bytes)
   }
 
   private registerWebSocketDispatchAbort(
@@ -502,6 +500,22 @@ export class YiruRuntimeRpcServer {
         }
       }
     }
+    const terminalAdmission = this.terminalMultiplex.admitInvocation(
+      socket.connectionId,
+      invocation.method,
+      invocation.input,
+      device.deviceId,
+      invocation.requestId
+    )
+    if (terminalAdmission !== 'accepted') {
+      return {
+        denial: {
+          code: terminalAdmission,
+          status: 409,
+          message: 'Terminal multiplex admission was rejected'
+        }
+      }
+    }
     const request: RpcRequest = {
       id: invocation.requestId ?? 'orpc',
       authToken: device.token,
@@ -584,6 +598,7 @@ export class YiruRuntimeRpcServer {
       sweepOrphanedRuntimeSockets(this.userDataPath, this.pid)
     }
 
+    await this.terminalMultiplexLoopback.start()
     const transportMeta = createRuntimeTransportMetadata(
       this.userDataPath,
       this.pid,
@@ -599,6 +614,18 @@ export class YiruRuntimeRpcServer {
       runtime: this.runtime,
       authToken: this.authToken,
       mobileDevelopmentPairing: (params) => this.createDevelopmentMobilePairing(params),
+      openTerminalMultiplex: (input) => {
+        const endpoint = this.terminalMultiplexLoopback.endpoint
+        if (!endpoint) {
+          throw new Error('terminal_loopback_unavailable')
+        }
+        return this.terminalMultiplex.issueTicket(
+          'loopback-renderer',
+          input.clientInstanceId,
+          input.environmentId,
+          endpoint
+        )
+      },
       beforeInvocation: (invocation, connection) =>
         this.beforeRuntimeOrpcSocketInvocation(invocation, connection)
     })
@@ -637,9 +664,14 @@ export class YiruRuntimeRpcServer {
         })
     })
 
-    await socketTransport.start()
+    try {
+      await socketTransport.start()
+    } catch (error) {
+      await this.terminalMultiplexLoopback.stop().catch(() => {})
+      throw error
+    }
 
-    const activeTransports: RpcTransport[] = [socketTransport]
+    const activeTransports: RpcTransport[] = [socketTransport, this.terminalMultiplexLoopback]
     const transportsMeta: RuntimeTransportMetadata[] = [transportMeta]
 
     // Why: WebSocket transport is opt-in and starts alongside the Unix socket.
@@ -669,7 +701,18 @@ export class YiruRuntimeRpcServer {
           beforeInvocation: (socket, invocation) =>
             this.beforeRuntimeOrpcInvocation(socket, invocation),
           registerBinaryStreamHandler: (connectionId, streamId, handler) =>
-            this.registerBinaryStreamHandler(connectionId, streamId, handler)
+            this.registerBinaryStreamHandler(connectionId, streamId, handler),
+          openTerminalMultiplex: (socket, input) =>
+            this.terminalMultiplex.issueTicket(
+              socket.device.deviceId,
+              input.clientInstanceId,
+              input.environmentId,
+              `ws://127.0.0.1:${wsTransport.resolvedPort}`
+            ),
+          activateTerminalMultiplexEpoch: (socket) =>
+            this.terminalMultiplex.activateEpoch(socket.connectionId, (code, reason) =>
+              socket.ws.close(code, reason)
+            )
         })
         const mobileSocketWiring = new MobileSocketWiring({
           deviceRegistry: this.deviceRegistry,
@@ -703,7 +746,7 @@ export class YiruRuntimeRpcServer {
             // client disconnect state is device-scoped across both transports.
             this.runtime.cleanupSubscriptionsForConnection(socket.connectionId)
             this.runtime.cancelMobileDictationForConnection(socket.connectionId)
-            this.binaryStreamHandlers.delete(socket.connectionId)
+            this.terminalMultiplex.closeConnection(socket.connectionId)
             if (!hasOtherConnections) {
               this.runtime.onClientDisconnected(socket.device.deviceToken)
             }
@@ -1043,6 +1086,21 @@ export class YiruRuntimeRpcServer {
     }
     writeRuntimeMetadata(this.userDataPath, metadata)
   }
+}
+
+function terminalMultiplexLoopbackOrigins(): string[] {
+  const developmentRendererUrl = process.env.ELECTRON_RENDERER_URL
+  if (developmentRendererUrl) {
+    try {
+      return [new URL(developmentRendererUrl).origin]
+    } catch {
+      return []
+    }
+  }
+  // Why: terminal-multiplex.md OQ-1 requires the actual packaged renderer
+  // origin, never null or a wildcard. Chromium serializes loadFile origins
+  // for WebSocket upgrades as the exact file scheme origin.
+  return ['file://']
 }
 
 /**

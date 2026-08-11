@@ -6,9 +6,9 @@ import {
   encodeRuntimeOrpcBinaryFrame,
   encodeRuntimeOrpcTextFrame
 } from '@yiru/runtime-protocol/orpc-peer-frame'
+import type { TerminalMultiplexFrame } from '@yiru/runtime-protocol/terminal-multiplex/frame'
 import { translateMain } from '~main/i18n/main-i18n'
 import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
-import type { TerminalStreamFrame } from '~shared/terminal/stream-protocol'
 
 import type { AuthenticatedMobileSocket } from '../mobile-socket-wiring'
 import { authenticatedTokenFingerprint } from '../orchestration-mutation-executor'
@@ -45,8 +45,13 @@ type RuntimeOrpcWsHandlerOptions = {
   registerBinaryStreamHandler: (
     connectionId: string,
     streamId: number,
-    handler: (frame: TerminalStreamFrame) => void
+    handler: (frame: TerminalMultiplexFrame) => void
   ) => () => void
+  openTerminalMultiplex?: (
+    socket: AuthenticatedMobileSocket,
+    input: Parameters<NonNullable<RuntimeOrpcContext['openTerminalMultiplex']>>[0]
+  ) => ReturnType<NonNullable<RuntimeOrpcContext['openTerminalMultiplex']>>
+  activateTerminalMultiplexEpoch?: (socket: AuthenticatedMobileSocket) => boolean
   handlerHooks?: RuntimeOrpcHandlerHooks
 }
 
@@ -154,7 +159,15 @@ export class RuntimeOrpcWsHandler {
       },
       sendBinary: socket.sendBinary,
       registerBinaryStreamHandler: (streamId, handler) =>
-        this.options.registerBinaryStreamHandler(socket.connectionId, streamId, handler)
+        this.options.registerBinaryStreamHandler(socket.connectionId, streamId, handler),
+      openTerminalMultiplex: this.options.openTerminalMultiplex
+        ? (input) => this.options.openTerminalMultiplex!(socket, input)
+        : undefined,
+      activateTerminalMultiplexEpoch: this.options.activateTerminalMultiplexEpoch
+        ? () => this.options.activateTerminalMultiplexEpoch!(socket)
+        : undefined,
+      closeTerminalMultiplexConnection: (code, reason) => socket.ws.close(code, reason),
+      terminalMultiplexQueueBytes: () => socket.ws.bufferedAmount
     })
   }
 }

@@ -3605,11 +3605,21 @@ export function registerPtyHandlers(
         if (providerSnapshotRequired && !providerSnapshot) {
           return null
         }
-        const snapshot =
+        const runtimeSnapshot =
           providerSnapshot ??
           (await runtime.serializeHiddenOutputRecoveryBuffer(args.id, {
             scrollbackRows
           }))
+        const snapshot =
+          runtimeSnapshot === null
+            ? null
+            : {
+                ...runtimeSnapshot,
+                source:
+                  runtimeSnapshot.source === 'renderer'
+                    ? ('renderer' as const)
+                    : ('headless' as const)
+              }
         if (!snapshot || typeof snapshot.seq !== 'number') {
           return snapshot
         }

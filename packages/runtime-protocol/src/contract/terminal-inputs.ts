@@ -93,7 +93,16 @@ export const TerminalSubscribeInputSchema = TerminalHandleInputSchema.extend({
     .optional()
 })
 
-export const TerminalMultiplexInputSchema = z.object({})
+export const TerminalMultiplexInputSchema = z
+  .object({ bulkTicket: requiredString('Missing terminal bulk ticket') })
+  .strict()
+
+export const TerminalOpenMultiplexInputSchema = z
+  .object({
+    environmentId: requiredString('Missing environment ID'),
+    clientInstanceId: requiredString('Missing client instance ID')
+  })
+  .strict()
 
 export const TerminalListInputSchema = z.object({
   worktree: OptionalString,
@@ -271,6 +280,7 @@ export type TerminalHandleInput = z.infer<typeof TerminalHandleInputSchema>
 export type TerminalViewportInput = z.infer<typeof TerminalViewportInputSchema>
 export type TerminalSubscribeInput = z.infer<typeof TerminalSubscribeInputSchema>
 export type TerminalMultiplexInput = z.infer<typeof TerminalMultiplexInputSchema>
+export type TerminalOpenMultiplexInput = z.infer<typeof TerminalOpenMultiplexInputSchema>
 export type TerminalListInput = z.infer<typeof TerminalListInputSchema>
 export type TerminalResolveActiveInput = z.infer<typeof TerminalResolveActiveInputSchema>
 export type TerminalResolvePaneInput = z.infer<typeof TerminalResolvePaneInputSchema>

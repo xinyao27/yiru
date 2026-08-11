@@ -36,6 +36,7 @@ type RuntimeOrpcSocketHandlerOptions = {
     invocation: RuntimeOrpcInvocationDetails,
     connection: UnixSocketProtocolConnection
   ) => Promise<RuntimeOrpcSocketInvocationLease | void> | RuntimeOrpcSocketInvocationLease | void
+  openTerminalMultiplex?: NonNullable<RpcContext['openTerminalMultiplex']>
 }
 
 const KEEPALIVE_FRAME = encodeRuntimeOrpcSocketFrame({
@@ -57,6 +58,7 @@ export class RuntimeOrpcSocketHandler implements UnixSocketProtocolHandler {
         createRuntimeOrpcContext(options.runtime, {
           authenticatedCallerFingerprint: authenticatedTokenFingerprint(frame.authToken),
           mobileDevelopmentPairing: options.mobileDevelopmentPairing,
+          openTerminalMultiplex: options.openTerminalMultiplex,
           beforeInvocation: async (invocation) => {
             const lease = await options.beforeInvocation(invocation, connection)
             if (lease?.denial) {

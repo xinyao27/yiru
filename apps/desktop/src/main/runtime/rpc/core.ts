@@ -1,7 +1,12 @@
 import type {
+  TerminalOpenMultiplexInput,
+  TerminalOpenMultiplexResult
+} from '@yiru/runtime-protocol/contract'
+import type {
   MobileDevelopmentPairingInput,
   MobileDevelopmentPairingResult
 } from '@yiru/runtime-protocol/mobile-development-pairing'
+import type { TerminalMultiplexFrame } from '@yiru/runtime-protocol/terminal-multiplex/frame'
 // Why: this is the single boundary between raw RPC frames and the YiruRuntimeService.
 // Keeping the schema, handler, and result type attached to one object makes the
 // CLI-facing contract greppable and lets the dispatcher verify every payload
@@ -13,7 +18,6 @@ import type {
   RuntimeMethodParams,
   RuntimeMethodResult
 } from '~shared/runtime-method-contract'
-import type { TerminalStreamFrame } from '~shared/terminal/stream-protocol'
 
 import type { MobileNotificationChannel } from '../mobile-notification-channel'
 import type { YiruRuntimeService } from '../yiru-runtime'
@@ -110,12 +114,16 @@ export type RpcContext = {
   // responses after the binary terminal cutover. Undefined on Unix/socket
   // transports and non-E2EE WebSocket paths.
   sendBinary?: (bytes: Uint8Array<ArrayBufferLike>) => boolean | void
+  openTerminalMultiplex?: (input: TerminalOpenMultiplexInput) => TerminalOpenMultiplexResult
+  activateTerminalMultiplexEpoch?: () => boolean
+  closeTerminalMultiplexConnection?: (code: number, reason: string) => void
+  terminalMultiplexQueueBytes?: () => number
   // Why: binary terminal input/resize frames arrive outside JSON-RPC after a
   // stream is established. The WebSocket transport owns the connection-scoped
   // stream table; handlers register only the stream IDs they created.
   registerBinaryStreamHandler?: (
     streamId: number,
-    handler: (frame: TerminalStreamFrame) => void
+    handler: (frame: TerminalMultiplexFrame) => void
   ) => () => void
   // Why: reverse shell calls target the renderer paired with this forward
   // connection. The id is transport-neutral: Electron derives it from the

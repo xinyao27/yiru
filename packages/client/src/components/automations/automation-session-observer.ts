@@ -1,9 +1,9 @@
 import type { ParsedAgentStatusPayload } from '@yiru/workbench-model/agent'
 import { isMainTerminalSideEffectAuthorityForPty } from '~renderer/components/terminal-pane/terminal-side-effect-facts-handler'
 import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
-import { getRemoteRuntimeTerminalMultiplexer } from '~renderer/runtime/remote-runtime-terminal-multiplexer'
 import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
 import { isRemoteRuntimePtyId } from '~renderer/runtime/terminal-inspection'
+import { getRemoteRuntimeTerminalMultiplexer } from '~renderer/runtime/terminal-multiplex/registry'
 import {
   getRemoteRuntimePtyEnvironmentId,
   getRemoteRuntimeTerminalHandle
@@ -62,8 +62,11 @@ export async function observeExistingAutomationSession(args: {
       terminal,
       client: { id: `desktop:automation-reuse:${runId}`, type: 'desktop' },
       callbacks: {
-        onData: handleData,
-        onSnapshot: () => {}
+        onData: (data, _meta, onParsed) => {
+          handleData(data)
+          onParsed()
+        },
+        onSnapshot: (_data, _meta, onParsed) => onParsed()
       }
     })
     void callRuntimeOrpc(
