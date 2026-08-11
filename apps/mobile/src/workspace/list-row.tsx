@@ -45,7 +45,6 @@ export type WorkspaceListRowItem = {
 
 type WorktreeRollupStatus = 'working' | 'active' | 'permission' | 'done' | 'inactive'
 
-const PROJECT_RAIL_STATUS_CENTER_TOP_PT = 22
 const PROJECT_RAIL_BASE_ELBOW_WIDTH_PT = 12
 
 type WorkspaceLeadingStatusProps = {
@@ -132,7 +131,7 @@ export function WorkspaceListRow<T extends WorkspaceListRowItem>({
           <View
             pointerEvents="none"
             className={cn('absolute inset-x-0 top-0 items-center', !endsProjectRail && 'bottom-0')}
-            style={endsProjectRail ? { height: PROJECT_RAIL_STATUS_CENTER_TOP_PT } : undefined}
+            style={endsProjectRail ? { height: '50%' } : undefined}
           >
             <View className="bg-foreground/30 w-hairline h-full" />
           </View>
@@ -140,7 +139,9 @@ export function WorkspaceListRow<T extends WorkspaceListRowItem>({
             pointerEvents="none"
             className="bg-foreground/30 h-hairline absolute left-1/2"
             style={{
-              top: PROJECT_RAIL_STATUS_CENTER_TOP_PT,
+              // Why: agent rows are taller than plain rows; the status glyph is
+              // vertically centered by the row, so its rail elbow must be too.
+              top: '50%',
               width: PROJECT_RAIL_BASE_ELBOW_WIDTH_PT + spacing4 * lineageDepth
             }}
           />

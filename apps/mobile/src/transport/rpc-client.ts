@@ -168,6 +168,7 @@ export function connect(
   const pending = new Map<string, PendingRequest>()
   const terminalStreamListeners = new Map<number, StreamingListener>()
   const terminalSnapshots = new Map<number, TerminalSnapshotState>()
+  const pendingTerminalStreamEvents = new Map<number, unknown[]>()
   const stateListeners = new Set<(state: ConnectionState) => void>()
   const connectWaiters: ConnectWaiter[] = []
 
@@ -231,6 +232,9 @@ export function connect(
       orpcTransport.connected()
     } else if (prev === 'connected') {
       orpcTransport.disconnected()
+      terminalStreamListeners.clear()
+      terminalSnapshots.clear()
+      pendingTerminalStreamEvents.clear()
     }
   }
 
@@ -744,6 +748,7 @@ export function connect(
     }
     handleTerminalBinaryFrame(bytes, {
       terminalSnapshots,
+      pendingEvents: pendingTerminalStreamEvents,
       getListener: (streamId) => terminalStreamListeners.get(streamId),
       recordValidatedInboundTraffic
     })
@@ -767,10 +772,16 @@ export function connect(
 
   function registerOrpcTerminalStream(streamId: number, listener: StreamingListener): () => void {
     terminalStreamListeners.set(streamId, listener)
+    const pendingEvents = pendingTerminalStreamEvents.get(streamId)
+    pendingTerminalStreamEvents.delete(streamId)
+    for (const event of pendingEvents ?? []) {
+      listener(event)
+    }
     return () => {
       if (terminalStreamListeners.get(streamId) === listener) {
         terminalStreamListeners.delete(streamId)
         terminalSnapshots.delete(streamId)
+        pendingTerminalStreamEvents.delete(streamId)
       }
     }
   }

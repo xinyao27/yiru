@@ -204,5 +204,12 @@ export function createMobileUiLabRpcClient(hostId: string): RpcClient | null {
     }
   }
 
+  // Why: React Native's development prop profiler enumerates client objects.
+  // The oRPC function Proxy cannot stringify its own `name`, so keep it internal.
+  Object.defineProperty(client, 'orpc', {
+    enumerable: false,
+    get: () => orpc
+  })
+
   return client
 }
