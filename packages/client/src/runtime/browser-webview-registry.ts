@@ -6,10 +6,11 @@ import {
 import { unregisterBrowserGuest } from './browser-client'
 import { clearLiveBrowserUrl } from './browser-live-url'
 import { removeBrowserPageViewport } from './browser-page-viewport'
+import type { BrowserWebviewElement } from './browser-webview-element'
 
 // Why: Electron guests outlive individual React panes, so their registry belongs
 // to the renderer runtime that coordinates view mounts and store cleanup.
-export const webviewRegistry = new Map<string, Electron.WebviewTag>()
+export const webviewRegistry = new Map<string, BrowserWebviewElement>()
 export const registeredWebContentsIds = new Map<string, number>()
 
 export type BrowserWebviewMemoryProfile = {
@@ -21,8 +22,8 @@ const DRAG_LISTENER_KEY = '__yiruBrowserPaneDragListeners'
 let dragListenersAttached = false
 let nativeDragPassthroughRelease: (() => void) | null = null
 const dragPassthroughTokens = new Set<symbol>()
-const dragPassthroughPreviousPointerEvents = new Map<Electron.WebviewTag, string>()
-const webviewDestruction = new Map<Electron.WebviewTag, Promise<void>>()
+const dragPassthroughPreviousPointerEvents = new Map<BrowserWebviewElement, string>()
+const webviewDestruction = new Map<BrowserWebviewElement, Promise<void>>()
 const SESSION_STORAGE_PERSIST_TIMEOUT_MS = 200
 
 type DragListenerRegistry = {
@@ -133,7 +134,7 @@ export function setWebviewsDragPassthrough(passthrough: boolean): void {
   nativeDragPassthroughRelease = null
 }
 
-function applyCurrentDragPassthroughToWebview(webview: Electron.WebviewTag): void {
+function applyCurrentDragPassthroughToWebview(webview: BrowserWebviewElement): void {
   if (dragPassthroughTokens.size === 0) {
     return
   }
@@ -145,7 +146,7 @@ function applyCurrentDragPassthroughToWebview(webview: Electron.WebviewTag): voi
 
 export function registerPersistentWebview(
   browserTabId: string,
-  webview: Electron.WebviewTag
+  webview: BrowserWebviewElement
 ): void {
   webviewRegistry.set(browserTabId, webview)
   applyCurrentDragPassthroughToWebview(webview)
@@ -163,7 +164,7 @@ export function unregisterPersistentWebview(browserTabId: string): void {
   }
 }
 
-function moveFocusToRendererIfWebviewOwnsFocus(webview: Electron.WebviewTag): boolean {
+function moveFocusToRendererIfWebviewOwnsFocus(webview: BrowserWebviewElement): boolean {
   if (typeof document === 'undefined' || typeof window === 'undefined') {
     return false
   }
@@ -189,7 +190,7 @@ export function moveFocusToRendererBeforeFocusedWebviewHidden(): void {
   }
 }
 
-export function moveFocusToRendererBeforeWebviewDetach(webview: Electron.WebviewTag): void {
+export function moveFocusToRendererBeforeWebviewDetach(webview: BrowserWebviewElement): void {
   moveFocusToRendererIfWebviewOwnsFocus(webview)
 }
 
@@ -199,7 +200,7 @@ export async function waitForPendingWebviewDestruction(): Promise<void> {
 
 async function persistSessionStorageBeforeDetach(
   browserTabId: string,
-  webview: Electron.WebviewTag
+  webview: BrowserWebviewElement
 ): Promise<void> {
   let timeoutId: ReturnType<typeof setTimeout> | null = null
   const timeout = new Promise<void>((resolve) => {

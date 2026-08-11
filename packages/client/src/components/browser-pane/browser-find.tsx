@@ -4,11 +4,16 @@ import { Button } from '~renderer/components/ui/button'
 import { Input } from '~renderer/components/ui/input'
 import { translate } from '~renderer/i18n/i18n'
 import { getFindRequestQuery } from '~renderer/lib/find-query-bounds'
+import type {
+  BrowserFindInPageOptions,
+  BrowserFoundInPageEvent,
+  BrowserWebviewElement
+} from '~renderer/runtime/browser-webview-element'
 
 type BrowserFindProps = {
   isOpen: boolean
   onClose: () => void
-  webviewRef: React.RefObject<Electron.WebviewTag | null>
+  webviewRef: React.RefObject<BrowserWebviewElement | null>
 }
 
 export default function BrowserFind({
@@ -24,7 +29,7 @@ export default function BrowserFind({
   const requestQuery = getFindRequestQuery(query)
 
   const safeFindInPage = useCallback(
-    (text: string, opts?: Electron.FindInPageOptions): void => {
+    (text: string, opts?: BrowserFindInPageOptions): void => {
       const webview = webviewRef.current
       if (!webview || !text) {
         return
@@ -105,7 +110,7 @@ export default function BrowserFind({
     if (!webview || !isOpen) {
       return
     }
-    const handleFoundInPage = (event: Electron.FoundInPageEvent): void => {
+    const handleFoundInPage = (event: BrowserFoundInPageEvent): void => {
       const { activeMatchOrdinal, matches } = event.result
       setActiveMatch(activeMatchOrdinal)
       setTotalMatches(matches)

@@ -1,4 +1,8 @@
 import {
+  createBrowserWebviewElement,
+  type BrowserWebviewElement
+} from '~renderer/runtime/browser-webview-element'
+import {
   destroyPersistentWebview,
   registerPersistentWebview,
   webviewRegistry
@@ -17,7 +21,7 @@ export function ensureBrowserPageWebview({
   inputLocked: boolean
   webviewPartition: string
   resolveContainer: () => HTMLDivElement | null
-}): { container: HTMLDivElement; created: boolean; webview: Electron.WebviewTag } | null {
+}): { container: HTMLDivElement; created: boolean; webview: BrowserWebviewElement } | null {
   let webview = webviewRegistry.get(browserTabId)
   let created = false
   let activeContainer = container
@@ -44,7 +48,7 @@ export function ensureBrowserPageWebview({
     return { container: activeContainer, created, webview }
   }
 
-  webview = document.createElement('webview') as Electron.WebviewTag
+  webview = createBrowserWebviewElement()
   webview.setAttribute('partition', webviewPartition)
   webview.setAttribute('allowpopups', '')
   // Why: Electron spreads the webpreferences keys verbatim, so the shared

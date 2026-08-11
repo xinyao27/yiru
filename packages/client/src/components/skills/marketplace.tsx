@@ -2,6 +2,7 @@ import { DownloadSimple } from '@phosphor-icons/react'
 import { useEffect, useRef } from 'react'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
+import { createBrowserWebviewElement } from '~renderer/runtime/browser-webview-element'
 import { SKILLS_MARKETPLACE_PARTITION } from '~shared/constants'
 
 import type { SkillInstallRequest } from './install-dialog'
@@ -25,7 +26,7 @@ export function SkillsMarketplace({ onUrlChange }: SkillsMarketplaceProps): Reac
     if (!container) {
       return
     }
-    const webview = document.createElement('webview') as Electron.WebviewTag
+    const webview = createBrowserWebviewElement()
     webview.setAttribute('partition', SKILLS_MARKETPLACE_PARTITION)
     webview.setAttribute('src', SKILLS_MARKETPLACE_URL)
     // Why: registry pages link out with target=_blank. Main's guest policy sends

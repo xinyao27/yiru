@@ -1196,9 +1196,6 @@ importers:
       dompurify:
         specifier: 'catalog:'
         version: 3.4.12
-      electron:
-        specifier: 'catalog:'
-        version: 43.1.1(supports-color@10.2.2)
       emoji-picker-react:
         specifier: 'catalog:'
         version: 4.19.1(react@19.2.7)
