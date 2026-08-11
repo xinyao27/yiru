@@ -16,6 +16,7 @@ import { useCSSVariable } from 'uniwind'
 import { MobileContentSection } from '~/components/content-section'
 import { translate } from '~/i18n/translate'
 import { resolveCssString } from '~/style/resolve-css-variable'
+
 import { formatMetricValue, nextTokenValueMetric, type TokenValueMetric } from '../chart-data'
 import { HOME_USAGE_PROVIDERS, providerLabel, providerOpacity } from './provider-presentation'
 

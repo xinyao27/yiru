@@ -10,6 +10,7 @@ import { MobileContentSection } from '~/components/content-section'
 import { MobileSearchField } from '~/components/search-field'
 import { translate } from '~/i18n/translate'
 import { resolveCssString } from '~/style/resolve-css-variable'
+
 import { formatMetricValue, type TokenValueMetric } from '../chart-data'
 import { providerLabel, providerOpacity } from './provider-presentation'
 
