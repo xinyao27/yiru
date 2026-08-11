@@ -85,7 +85,7 @@ Any package task is reachable from the repository root with `vp run <package>#<t
 
 ```bash
 vp run yiru#build:mac        # Package the desktop app for macOS
-vp run yiru-landing#deploy   # Build and deploy the landing page
+vp run yiru-web#deploy       # Build and deploy the landing page
 ```
 
 See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for repository conventions, platform setup, and contribution guidance.

@@ -1,8 +1,8 @@
 {
-  "name": "yiru-landing",
+  "name": "yiru-web",
   "version": "0.0.0",
   "private": true,
-  "description": "Yiru landing page",
+  "description": "Yiru landing page and product web app",
   "homepage": "https://github.com/xinyao27/yiru#readme",
   "bugs": {
     "url": "https://github.com/xinyao27/yiru/issues"
@@ -15,7 +15,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/xinyao27/yiru.git",
-    "directory": "apps/landing"
+    "directory": "apps/web"
   },
   "funding": "https://github.com/sponsors/xinyao27",
   "type": "module",

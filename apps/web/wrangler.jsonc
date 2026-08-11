@@ -1,6 +1,9 @@
 {
   "$schema": "../../node_modules/wrangler/config-schema.json",
-  "name": "yiru-landing",
+  // Why: renaming a Worker creates a new Cloudflare Worker. After this PR merges,
+  // do not deploy until the yiru.ai and www.yiru.ai custom domains have been
+  // manually migrated from the old Worker following the cutover runbook.
+  "name": "yiru-web",
   "main": "worker/site.ts",
   "compatibility_date": "2026-08-01",
   // Why: the yiru.ai zone lives in this account, and pinning it keeps a CI

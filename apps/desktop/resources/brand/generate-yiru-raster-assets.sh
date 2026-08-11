@@ -11,7 +11,7 @@ MOBILE_ASSETS_DIR="$REPO_ROOT/apps/mobile/assets"
 APP_ICONS_DIR="$PROJECT_DIR/resources/app-icons"
 TRAY_ASSETS_DIR="$PROJECT_DIR/resources/tray"
 WEB_PUBLIC_DIR="$PROJECT_DIR/src/renderer/public"
-LANDING_PUBLIC_DIR="$REPO_ROOT/apps/landing/public"
+SITE_PUBLIC_DIR="$REPO_ROOT/apps/web/public"
 
 QLMANAGE_BIN=$(command -v qlmanage || true)
 if [ -z "$QLMANAGE_BIN" ]; then
@@ -33,7 +33,7 @@ render_svg() {
 }
 
 mkdir -p "$MOBILE_ASSETS_DIR" "$APP_ICONS_DIR" "$TRAY_ASSETS_DIR" "$WEB_PUBLIC_DIR" \
-  "$LANDING_PUBLIC_DIR"
+  "$SITE_PUBLIC_DIR"
 
 render_svg "$ADAPTIVE_BACKGROUND_SOURCE" 1024 "$MOBILE_ASSETS_DIR/adaptive-icon-background.png"
 node "$DERIVE_ASSETS_SCRIPT"
@@ -44,6 +44,6 @@ node "$DERIVE_ASSETS_SCRIPT"
 # here. Derived from the hero so a brand change reaches yiru.ai instead of
 # leaving a stale card behind.
 sips -s format jpeg -s formatOptions 90 --resampleWidth 1200 "$README_HERO_SOURCE" \
-  --out "$LANDING_PUBLIC_DIR/og.jpg" >/dev/null
+  --out "$SITE_PUBLIC_DIR/og.jpg" >/dev/null
 
 echo "Generated Yiru app, mobile, tray, favicon, landing, and development assets."

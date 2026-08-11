@@ -24,7 +24,7 @@ const REPO_ROOT = path.resolve(import.meta.dirname, '..')
 const CHECKED_ROOT = new RegExp(
   [
     '^src/(main|renderer|preload|shared|relay|cli|types)/',
-    '^apps/(desktop|mobile)/',
+    '^apps/(desktop|mobile|web)/',
     '^packages/[a-z0-9-]+/',
     '^config/',
     '^resources/',
@@ -81,7 +81,7 @@ const SEARCH_GLOBS = [
 // Why: a string may be written relative to the repo root or to the app that
 // owns it (the ui-style-drift allowlist uses app-relative paths, the max-lines
 // baseline uses repo-relative ones). Accept a hit under any of them.
-const RESOLUTION_BASES = ['', 'apps/desktop', 'apps/mobile']
+const RESOLUTION_BASES = ['', 'apps/desktop', 'apps/mobile', 'apps/web']
 
 function listSearchFiles(repoRoot) {
   const output = execFileSync('git', ['ls-files', '--', ...SEARCH_GLOBS], {
