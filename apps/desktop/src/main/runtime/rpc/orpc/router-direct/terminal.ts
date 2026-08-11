@@ -17,11 +17,8 @@ import { terminalViewportLeaves } from './terminal-viewport'
 // a real bare-string caller each (see terminal-stream.ts's and terminal-viewport.ts's own
 // notes for which and why); the other 28 — including all four `management.*` leaves —
 // retired from the legacy registry outright now that `terminal` itself is direct-wired.
-// `terminal.multiplex` (and the binary framing it shares with `terminal.subscribe`) is
-// deliberately untouched: slice 87 confirmed no client-initiated, out-of-band,
-// stream-addressed binary primitive exists in the modern oRPC client/transport stack to
-// replace its dedicated socket, so this slice only adds the direct wiring — it does not
-// change how a single byte of terminal output travels.
+// `terminal.multiplex` owns its dedicated bidirectional binary connection;
+// terminal-stream.ts keeps that transport-specific wiring out of unary leaves.
 export const terminalRuntimeHandlers = {
   terminal: {
     ...terminalReadLeaves(),

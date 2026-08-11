@@ -1129,6 +1129,9 @@ type RuntimeHeadlessTerminal = {
   // Why: serialize can race with newer writes appended to writeChain; return
   // the seq actually painted into this emulator, not the latest PTY seq.
   outputSequence: number
+  // Why: terminal-multiplex.md §11.2 forbids estimating UTF-8 byte position
+  // from the legacy UTF-16 sequence. The authoritative model records both.
+  wireByteSequence: bigint
   writeChain: Promise<void>
 }
 
@@ -1172,6 +1175,9 @@ type RuntimePtyController = {
   hasChildProcesses?(ptyId: string): Promise<boolean>
   clearBuffer?(ptyId: string): Promise<void>
   resize?(ptyId: string, cols: number, rows: number): boolean
+  pauseProducer?(ptyId: string): void
+  resumeProducer?(ptyId: string): void
+  sendSignal?(ptyId: string, signal: string): Promise<void>
   // Why: exact-id Mobile polls should not enumerate every local and SSH PTY.
   hasPty?(ptyId: string): boolean | null
   listProcesses?(): Promise<PtyProcessInfo[]>
@@ -1998,6 +2004,8 @@ export class YiruRuntimeService {
   private setupCompletionTokenByPtyId = new Map<string, string>()
   private titleObservationSequence = 0
   private ptyOutputSequenceById = new Map<string, number>()
+  private ptyWireByteSequenceById = new Map<string, bigint>()
+  private ptyTransportGenerationById = new Map<string, string>()
   private providerSequenceInitializedPtys = new Set<string>()
   private providerSequenceOffsetByPtyId = new Map<string, number>()
   private providerSnapshotPreferredPtys = new Set<string>()
@@ -2092,6 +2100,43 @@ export class YiruRuntimeService {
   private readonly onPtyStopped: ((ptyId: string) => void) | null
   private readonly onTerminalAgentStatus: ((event: RuntimeTerminalAgentStatusEvent) => void) | null
   private readonly onTerminalSideEffects: ((batch: TerminalSideEffectBatch) => void) | null
+  private readonly terminalMultiplexSideEffectListeners = new Map<
+    string,
+    Set<(batch: TerminalSideEffectBatch, wireByteSeq: bigint) => void>
+  >()
+  private readonly terminalMultiplexDeliveryHubs = new Map<
+    string,
+    {
+      transportGeneration: string
+      listeners: Set<
+        (
+          data: string,
+          meta?: {
+            seq?: number
+            rawLength?: number
+            wireByteSeq?: bigint
+            wireByteLength?: number
+            cwd?: string
+          }
+        ) => void
+      >
+      unsubscribe: () => void
+    }
+  >()
+  private readonly terminalMultiplexPressureByPty = new Map<
+    string,
+    Map<string, { participates: boolean; blocked: boolean; pendingRatio: number }>
+  >()
+  private readonly terminalMultiplexPausedProducers = new Set<string>()
+  private readonly terminalMultiplexClearListeners = new Map<
+    string,
+    Set<(seq: bigint, correlationId: number, initiatorClientId: string) => void>
+  >()
+  private readonly terminalMultiplexRestoreListeners = new Map<
+    string,
+    Set<(seq: bigint, reason: 'provider-gap') => void>
+  >()
+  private desktopTerminalSideEffectConsumerAvailable = false
   private terminalSideEffectConsumerAvailable = false
   private readonly getAgentStatusSnapshotFn: (() => AgentStatusIpcPayload[]) | null
   private readonly buildAgentHookPtyEnv: (() => Record<string, string>) | null
@@ -5712,6 +5757,10 @@ export class YiruRuntimeService {
   ): number {
     const outputSequence = (this.ptyOutputSequenceById.get(ptyId) ?? 0) + sequenceChars
     this.ptyOutputSequenceById.set(ptyId, outputSequence)
+    const wireByteLength = new TextEncoder().encode(data).byteLength
+    const wireByteSequence =
+      (this.ptyWireByteSequenceById.get(ptyId) ?? 0n) + BigInt(wireByteLength)
+    this.ptyWireByteSequenceById.set(ptyId, wireByteSequence)
     this.providerModeTrackersByPtyId.get(ptyId)?.scan(data)
     for (const tracker of this.providerModeSnapshotScansByPtyId.get(ptyId) ?? []) {
       tracker.scan(data)
@@ -5747,7 +5796,13 @@ export class YiruRuntimeService {
     // applyTrackedPtyTitle) in byte order, superseding main's inline
     // extractLastOscTitleForPty block (#7880/#7852 title/status semantics are
     // preserved via the tracker + detectAgentStatusFromTitle path).
-    this.trackHeadlessTerminalData(ptyId, data, outputSequence, forwardQueryReplies)
+    this.trackHeadlessTerminalData(
+      ptyId,
+      data,
+      outputSequence,
+      wireByteSequence,
+      forwardQueryReplies
+    )
 
     if (!this.terminalSessions.hasPtyRecord(ptyId)) {
       this.getOrCreatePtyWorktreeRecord(ptyId)
@@ -5928,6 +5983,8 @@ export class YiruRuntimeService {
     this.terminalSessions.emitData(ptyId, data, {
       seq: outputSequence,
       rawLength: data.length,
+      wireByteSeq: wireByteSequence,
+      wireByteLength,
       ...(cwdChanged && cwd !== null ? { cwd } : {})
     })
     return outputSequence
@@ -6127,12 +6184,16 @@ export class YiruRuntimeService {
     this.osc7ScanTailByPtyId.delete(ptyId)
     this.agentStatusOscProcessorsByPtyId.delete(ptyId)
     this.disposeHeadlessTerminal(ptyId)
+    const wireByteSeq = this.getTerminalWireByteSequence(ptyId)
+    for (const listener of this.terminalMultiplexRestoreListeners.get(ptyId) ?? []) {
+      listener(wireByteSeq, 'provider-gap')
+    }
   }
 
   /** Record one derived side-effect fact: batched per chunk while applying
    *  bytes, emitted immediately for between-chunk facts (stale-title timer). */
   private recordTerminalSideEffectFact(ptyId: string, fact: TerminalSideEffectFact): void {
-    if (!this.onTerminalSideEffects || !this.terminalSideEffectConsumerAvailable) {
+    if (!this.terminalSideEffectConsumerAvailable) {
       return
     }
     const entry = this.ptyTitleTrackersByPtyId.get(ptyId)
@@ -6148,11 +6209,7 @@ export class YiruRuntimeService {
     facts: TerminalSideEffectFact[],
     options: { replay?: boolean } = {}
   ): void {
-    if (
-      !this.onTerminalSideEffects ||
-      !this.terminalSideEffectConsumerAvailable ||
-      facts.length === 0
-    ) {
+    if (!this.terminalSideEffectConsumerAvailable || facts.length === 0) {
       return
     }
     const batch: TerminalSideEffectBatch = {
@@ -6162,10 +6219,19 @@ export class YiruRuntimeService {
       ...(options.replay ? { replay: true } : {}),
       ...this.resolveTerminalSideEffectAttribution(ptyId)
     }
-    try {
-      this.onTerminalSideEffects(batch)
-    } catch (err) {
-      console.error('[runtime] terminal side-effect listener threw', { ptyId, err })
+    if (this.desktopTerminalSideEffectConsumerAvailable && this.onTerminalSideEffects) {
+      try {
+        this.onTerminalSideEffects(batch)
+      } catch (err) {
+        console.error('[runtime] terminal side-effect listener threw', { ptyId, err })
+      }
+    }
+    for (const listener of this.terminalMultiplexSideEffectListeners.get(ptyId) ?? []) {
+      try {
+        listener(batch, this.getTerminalWireByteSequence(ptyId))
+      } catch (err) {
+        console.error('[runtime] terminal multiplex side-effect listener threw', { ptyId, err })
+      }
     }
   }
 
@@ -6485,7 +6551,15 @@ export class YiruRuntimeService {
   }
 
   private setTerminalSideEffectConsumerAvailable(available: boolean): void {
-    const nextAvailable = available && this.onTerminalSideEffects !== null
+    this.desktopTerminalSideEffectConsumerAvailable =
+      available && this.onTerminalSideEffects !== null
+    this.refreshTerminalSideEffectConsumerAvailability()
+  }
+
+  private refreshTerminalSideEffectConsumerAvailability(): void {
+    const nextAvailable =
+      this.desktopTerminalSideEffectConsumerAvailable ||
+      this.terminalMultiplexSideEffectListeners.size > 0
     if (nextAvailable === this.terminalSideEffectConsumerAvailable) {
       return
     }
@@ -6750,9 +6824,220 @@ export class YiruRuntimeService {
 
   subscribeToTerminalData(
     ptyId: string,
-    listener: (data: string, meta?: { seq?: number; rawLength?: number; cwd?: string }) => void
+    listener: (
+      data: string,
+      meta?: {
+        seq?: number
+        rawLength?: number
+        wireByteSeq?: bigint
+        wireByteLength?: number
+        cwd?: string
+      }
+    ) => void
   ): () => void {
     return this.terminalSessions.subscribeToData(ptyId, listener)
+  }
+
+  registerTerminalMultiplexDelivery(
+    ptyId: string,
+    transportGeneration: string,
+    listener: (
+      data: string,
+      meta?: {
+        seq?: number
+        rawLength?: number
+        wireByteSeq?: bigint
+        wireByteLength?: number
+        cwd?: string
+      }
+    ) => void
+  ): (() => void) | null {
+    let hub = this.terminalMultiplexDeliveryHubs.get(ptyId)
+    if (hub && hub.transportGeneration !== transportGeneration) {
+      return null
+    }
+    if (!hub) {
+      const listeners = new Set<typeof listener>()
+      const unsubscribe = this.terminalSessions.subscribeToData(ptyId, (data, meta) => {
+        for (const subscriber of listeners) {
+          subscriber(data, meta)
+        }
+      })
+      hub = { transportGeneration, listeners, unsubscribe }
+      this.terminalMultiplexDeliveryHubs.set(ptyId, hub)
+    }
+    hub.listeners.add(listener)
+    return () => {
+      const current = this.terminalMultiplexDeliveryHubs.get(ptyId)
+      current?.listeners.delete(listener)
+      if (current?.listeners.size === 0) {
+        current.unsubscribe()
+        this.terminalMultiplexDeliveryHubs.delete(ptyId)
+      }
+    }
+  }
+
+  reportTerminalMultiplexPressure(
+    ptyId: string,
+    streamKey: string,
+    pressure: { participates: boolean; blocked: boolean; pendingRatio: number } | null
+  ): void {
+    let streams = this.terminalMultiplexPressureByPty.get(ptyId)
+    if (!streams) {
+      if (!pressure) {
+        return
+      }
+      streams = new Map()
+      this.terminalMultiplexPressureByPty.set(ptyId, streams)
+    }
+    if (pressure) {
+      streams.set(streamKey, pressure)
+    } else {
+      streams.delete(streamKey)
+    }
+    if (streams.size === 0) {
+      this.terminalMultiplexPressureByPty.delete(ptyId)
+    }
+    this.reconcileTerminalMultiplexProducerPressure(ptyId, streams)
+  }
+
+  private reconcileTerminalMultiplexProducerPressure(
+    ptyId: string,
+    streams: Map<string, { participates: boolean; blocked: boolean; pendingRatio: number }>
+  ): void {
+    // Why: terminal-multiplex.md OQ-5 lets one progressing interested viewer keep
+    // the producer live; only all-blocked viewers may pause the shared PTY.
+    const interested = Array.from(streams.values()).filter((stream) => stream.participates)
+    const isPaused = this.terminalMultiplexPausedProducers.has(ptyId)
+    const shouldPause =
+      interested.length > 0 &&
+      interested.every((stream) => stream.blocked) &&
+      interested.some((stream) => stream.pendingRatio >= 0.75)
+    const shouldResume =
+      isPaused &&
+      (interested.length === 0 ||
+        interested.some((stream) => !stream.blocked) ||
+        interested.every((stream) => stream.pendingRatio <= 0.25))
+    if (shouldPause && !isPaused && this.pauseTerminalProducer(ptyId)) {
+      this.terminalMultiplexPausedProducers.add(ptyId)
+    } else if (shouldResume) {
+      this.resumeTerminalProducer(ptyId)
+      this.terminalMultiplexPausedProducers.delete(ptyId)
+    }
+  }
+
+  subscribeToTerminalSideEffects(
+    ptyId: string,
+    listener: (batch: TerminalSideEffectBatch, wireByteSeq: bigint) => void
+  ): () => void {
+    let listeners = this.terminalMultiplexSideEffectListeners.get(ptyId)
+    if (!listeners) {
+      listeners = new Set()
+      this.terminalMultiplexSideEffectListeners.set(ptyId, listeners)
+    }
+    listeners.add(listener)
+    this.refreshTerminalSideEffectConsumerAvailability()
+    return () => {
+      const current = this.terminalMultiplexSideEffectListeners.get(ptyId)
+      current?.delete(listener)
+      if (current?.size === 0) {
+        this.terminalMultiplexSideEffectListeners.delete(ptyId)
+        this.refreshTerminalSideEffectConsumerAvailability()
+      }
+    }
+  }
+
+  subscribeToTerminalMultiplexClear(
+    ptyId: string,
+    listener: (seq: bigint, correlationId: number, initiatorClientId: string) => void
+  ): () => void {
+    let listeners = this.terminalMultiplexClearListeners.get(ptyId)
+    if (!listeners) {
+      listeners = new Set()
+      this.terminalMultiplexClearListeners.set(ptyId, listeners)
+    }
+    listeners.add(listener)
+    return () => {
+      const current = this.terminalMultiplexClearListeners.get(ptyId)
+      current?.delete(listener)
+      if (current?.size === 0) {
+        this.terminalMultiplexClearListeners.delete(ptyId)
+      }
+    }
+  }
+
+  subscribeToTerminalMultiplexRestore(
+    ptyId: string,
+    listener: (seq: bigint, reason: 'provider-gap') => void
+  ): () => void {
+    let listeners = this.terminalMultiplexRestoreListeners.get(ptyId)
+    if (!listeners) {
+      listeners = new Set()
+      this.terminalMultiplexRestoreListeners.set(ptyId, listeners)
+    }
+    listeners.add(listener)
+    return () => {
+      const current = this.terminalMultiplexRestoreListeners.get(ptyId)
+      current?.delete(listener)
+      if (current?.size === 0) {
+        this.terminalMultiplexRestoreListeners.delete(ptyId)
+      }
+    }
+  }
+
+  broadcastTerminalMultiplexClear(
+    ptyId: string,
+    seq: bigint,
+    correlationId: number,
+    initiatorClientId: string
+  ): void {
+    for (const listener of this.terminalMultiplexClearListeners.get(ptyId) ?? []) {
+      listener(seq, correlationId, initiatorClientId)
+    }
+  }
+
+  getTerminalWireByteSequence(ptyId: string): bigint {
+    return this.ptyWireByteSequenceById.get(ptyId) ?? 0n
+  }
+
+  getTerminalTransportGeneration(ptyId: string): string {
+    let generation = this.ptyTransportGenerationById.get(ptyId)
+    if (!generation) {
+      generation = randomUUID()
+      this.ptyTransportGenerationById.set(ptyId, generation)
+    }
+    return generation
+  }
+
+  pauseTerminalProducer(ptyId: string): boolean {
+    if (!this.ptyController?.pauseProducer) {
+      return false
+    }
+    this.ptyController.pauseProducer(ptyId)
+    return true
+  }
+
+  resumeTerminalProducer(ptyId: string): void {
+    this.ptyController?.resumeProducer?.(ptyId)
+  }
+
+  async sendTerminalSignal(ptyId: string, signal: string): Promise<boolean> {
+    if (!this.ptyController?.sendSignal) {
+      return false
+    }
+    try {
+      await this.ptyController.sendSignal(ptyId, signal)
+      return true
+    } catch {
+      return false
+    }
+  }
+
+  async stopTerminalTransport(ptyId: string, keepHistory: boolean): Promise<boolean> {
+    if (this.ptyController?.stopAndWait) {
+      return this.ptyController.stopAndWait(ptyId, { keepHistory })
+    }
+    return this.ptyController?.kill(ptyId) ?? false
   }
 
   /** Set by pty IPC: fires when a PTY gains/loses remote view subscribers so
@@ -6840,7 +7125,7 @@ export class YiruRuntimeService {
     seq?: number
     cwd?: string | null
     lastTitle?: string
-    source?: 'headless' | 'renderer'
+    source?: 'headless' | 'renderer' | 'provider'
     oscLinks?: TerminalOscLinkRange[]
     alternateScreen?: boolean
     scrollbackAnsi?: string
@@ -6863,12 +7148,43 @@ export class YiruRuntimeService {
     seq?: number
     cwd?: string | null
     lastTitle?: string
-    source?: 'headless' | 'renderer'
+    source?: 'headless' | 'renderer' | 'provider'
     oscLinks?: TerminalOscLinkRange[]
     alternateScreen?: boolean
     scrollbackAnsi?: string
   } | null> {
     return this.serializeHeadlessTerminalBuffer(ptyId, { ...opts, includeEmpty: true })
+  }
+
+  async serializeTerminalMultiplexBuffer(
+    ptyId: string,
+    scrollbackRows: number
+  ): Promise<{
+    data: string
+    scrollbackAnsi?: string
+    cols: number
+    rows: number
+    cwd?: string | null
+    lastTitle?: string
+    source?: 'headless' | 'renderer' | 'provider'
+    oscLinks?: TerminalOscLinkRange[]
+    alternateScreen?: boolean
+    pendingEscapeTailAnsi?: string
+    wireByteSeq: bigint
+    retainedScrollbackRows: number
+    kittyKeyboardFlags: number
+  } | null> {
+    const snapshot = await this.serializeHiddenOutputRecoveryBuffer(ptyId, {
+      scrollbackRows
+    })
+    return snapshot
+      ? {
+          ...snapshot,
+          wireByteSeq: snapshot.wireByteSeq ?? this.getTerminalWireByteSequence(ptyId),
+          retainedScrollbackRows: snapshot.retainedScrollbackRows ?? 0,
+          kittyKeyboardFlags: snapshot.kittyKeyboardFlags ?? 0
+        }
+      : null
   }
 
   async serializeHiddenOutputRecoveryBuffer(
@@ -6881,11 +7197,14 @@ export class YiruRuntimeService {
     cwd?: string | null
     lastTitle?: string
     seq?: number
-    source?: 'headless' | 'renderer'
+    wireByteSeq?: bigint
+    source?: 'headless' | 'renderer' | 'provider'
     oscLinks?: TerminalOscLinkRange[]
     alternateScreen?: boolean
     scrollbackAnsi?: string
     pendingEscapeTailAnsi?: string
+    retainedScrollbackRows?: number
+    kittyKeyboardFlags?: number
   } | null> {
     const headlessSnapshot = await this.serializeHeadlessTerminalBuffer(ptyId, {
       ...opts,
@@ -7136,6 +7455,7 @@ export class YiruRuntimeService {
     ptyId: string,
     data: string,
     outputSequence: number,
+    wireByteSequence: bigint,
     forwardQueryReplies = false
   ): void {
     const state = this.getOrCreateHeadlessTerminal(ptyId)
@@ -7145,6 +7465,7 @@ export class YiruRuntimeService {
         // chain link; async scheduling cannot retroactively change it.
         await state.emulator.write(data, { forwardQueryReplies })
         state.outputSequence = outputSequence
+        state.wireByteSequence = wireByteSequence
       })
       .catch(() => {
         // Best-effort state tracking; live streaming must continue even if
@@ -7195,7 +7516,12 @@ export class YiruRuntimeService {
     if (viewAttributes) {
       emulator.applyPushedViewAttributes(viewAttributes)
     }
-    state = { emulator, outputSequence: 0, writeChain: Promise.resolve() }
+    state = {
+      emulator,
+      outputSequence: 0,
+      wireByteSequence: this.getTerminalWireByteSequence(ptyId),
+      writeChain: Promise.resolve()
+    }
     return state
   }
 
@@ -7263,7 +7589,7 @@ export class YiruRuntimeService {
     cwd?: string | null
     lastTitle?: string
     seq?: number
-    source?: 'headless' | 'renderer'
+    source?: 'headless' | 'renderer' | 'provider'
     oscLinks?: TerminalOscLinkRange[]
     alternateScreen?: boolean
     pendingEscapeTailAnsi?: string
@@ -7353,7 +7679,7 @@ export class YiruRuntimeService {
   private async serializeProviderTerminalBuffer(
     ptyId: string,
     opts: { scrollbackRows?: number } = {}
-  ): Promise<PtyProviderBufferSnapshot | null> {
+  ): Promise<ProviderTerminalBufferSnapshot | null> {
     const liveModeTracker = new TerminalKittyKeyboardModeTracker()
     let liveModeTrackers = this.providerModeSnapshotScansByPtyId.get(ptyId)
     if (!liveModeTrackers) {
@@ -7381,7 +7707,8 @@ export class YiruRuntimeService {
       const providerOffset = this.providerSequenceOffsetByPtyId.get(ptyId) ?? 0
       return this.preferTrackedLastTitle(ptyId, {
         ...snapshot,
-        seq: providerOffset + snapshot.seq
+        seq: providerOffset + snapshot.seq,
+        source: 'provider' as const
       })
     } catch {
       return null
@@ -7456,10 +7783,13 @@ export class YiruRuntimeService {
     cwd?: string | null
     lastTitle?: string
     seq?: number
+    wireByteSeq?: bigint
     source?: 'headless'
     oscLinks?: TerminalOscLinkRange[]
     alternateScreen?: boolean
     scrollbackAnsi?: string
+    retainedScrollbackRows?: number
+    kittyKeyboardFlags?: number
     // Why: dangling mid-escape tail the restorer must write LAST, after any
     // reset, so the next live chunk completes it instead of rendering it
     // literally (Bug E / #7329).
@@ -7484,8 +7814,11 @@ export class YiruRuntimeService {
           cwd: snapshot.cwd ?? this.terminalCwdByPtyId.get(ptyId),
           lastTitle: snapshot.lastTitle,
           seq: state.outputSequence,
+          wireByteSeq: state.wireByteSequence,
           source: 'headless' as const,
           oscLinks: snapshot.oscLinks,
+          retainedScrollbackRows: Math.min(scrollbackRows, snapshot.scrollbackLines),
+          kittyKeyboardFlags: snapshot.modes.kittyKeyboardFlags ?? 0,
           scrollbackAnsi: snapshot.scrollbackAnsi,
           ...(snapshot.pendingEscapeTailAnsi
             ? { pendingEscapeTailAnsi: snapshot.pendingEscapeTailAnsi }
@@ -8531,6 +8864,8 @@ export class YiruRuntimeService {
     this.clearWaitBlockedCheckState(ptyId)
     this.recentPtyPathCandidatesById.delete(ptyId)
     this.ptyOutputSequenceById.delete(ptyId)
+    this.ptyWireByteSequenceById.delete(ptyId)
+    this.ptyTransportGenerationById.delete(ptyId)
     this.providerSequenceInitializedPtys.delete(ptyId)
     this.providerSequenceOffsetByPtyId.delete(ptyId)
     this.providerSnapshotPreferredPtys.delete(ptyId)
@@ -10213,7 +10548,8 @@ export class YiruRuntimeService {
         leafId: parsePaneKey(pty.pty.paneKey ?? '')?.leafId ?? pty.record.leafId,
         paneRuntimeId: -1,
         ptyId: pty.pty.ptyId,
-        rendererGraphEpoch: this.terminalSessions.getGraphEpoch()
+        rendererGraphEpoch: this.terminalSessions.getGraphEpoch(),
+        transportGeneration: this.getTerminalTransportGeneration(pty.pty.ptyId)
       }
     }
     const graphEpoch = this.captureReadyGraphEpoch()
@@ -10225,7 +10561,10 @@ export class YiruRuntimeService {
       ...summary,
       paneRuntimeId: leaf.paneRuntimeId,
       ptyId: leaf.ptyId,
-      rendererGraphEpoch: this.terminalSessions.getGraphEpoch()
+      rendererGraphEpoch: this.terminalSessions.getGraphEpoch(),
+      transportGeneration: leaf.ptyId
+        ? this.getTerminalTransportGeneration(leaf.ptyId)
+        : randomUUID()
     }
   }
 
@@ -17206,6 +17545,10 @@ export class YiruRuntimeService {
         worktreeId: workspace.id,
         title: launchOpts.title ?? null,
         surface,
+        transportGeneration: this.getTerminalTransportGeneration(result.id),
+        isReattach: false,
+        sessionExpired: false,
+        restore: { kind: 'none', isAlternateScreen: false },
         ...(warning ? { warning } : {})
       }
     }
@@ -17256,12 +17599,19 @@ export class YiruRuntimeService {
     // publishing the authority graph may not have arrived yet. Wait for the leaf to
     // appear so we can return a valid handle the caller can use right away.
     const handle = await this.waitForTerminalHandle(reply.tabId)
+    const createdPtyId = this.resolveLiveLeafForHandle(handle)?.ptyId ?? null
     return {
       handle,
       tabId: reply.tabId,
       worktreeId: worktreeId ?? '',
       title: reply.title,
-      surface: 'visible'
+      surface: 'visible',
+      transportGeneration: createdPtyId
+        ? this.getTerminalTransportGeneration(createdPtyId)
+        : randomUUID(),
+      isReattach: false,
+      sessionExpired: false,
+      restore: { kind: 'none', isAlternateScreen: false }
     }
   }
 
@@ -18071,8 +18421,15 @@ export class YiruRuntimeService {
       { cols: snapshot.cols, rows: snapshot.rows },
       { cwd: snapshot.cwd, oscLinks: snapshot.oscLinks }
     )
-    for (const chunk of trailingOutput) {
-      this.trackHeadlessTerminalData(ptyId, chunk.data, chunk.seq)
+    const trailingBytes = trailingOutput.map(
+      (chunk) => new TextEncoder().encode(chunk.data).byteLength
+    )
+    let wireByteSequence =
+      this.getTerminalWireByteSequence(ptyId) -
+      BigInt(trailingBytes.reduce((total, bytes) => total + bytes, 0))
+    for (const [index, chunk] of trailingOutput.entries()) {
+      wireByteSequence += BigInt(trailingBytes[index]!)
+      this.trackHeadlessTerminalData(ptyId, chunk.data, chunk.seq, wireByteSequence)
     }
     // The seed's write chain already owns subsequent live bytes; suppress the
     // ordinary on-data hydration path from replacing this known-good seed.
@@ -19963,6 +20320,8 @@ export class YiruRuntimeService {
     this.clearWaitBlockedCheckState(ptyId)
     this.recentPtyPathCandidatesById.delete(ptyId)
     this.ptyOutputSequenceById.delete(ptyId)
+    this.ptyWireByteSequenceById.delete(ptyId)
+    this.ptyTransportGenerationById.delete(ptyId)
     this.providerSequenceInitializedPtys.delete(ptyId)
     this.providerSequenceOffsetByPtyId.delete(ptyId)
     this.providerSnapshotPreferredPtys.delete(ptyId)
@@ -24034,4 +24393,7 @@ function compareWorktreePs(
     return right.liveTerminalCount - left.liveTerminalCount
   }
   return left.path.localeCompare(right.path)
+}
+type ProviderTerminalBufferSnapshot = Omit<PtyProviderBufferSnapshot, 'source'> & {
+  source: 'provider'
 }

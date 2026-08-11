@@ -12,12 +12,12 @@ import { MobileSocketWiring } from '../rpc/mobile-socket-wiring'
 import { RuntimeOrpcWsHandler } from '../rpc/orpc/ws-handler'
 import { readWsFallbackPort, writeWsFallbackPort } from '../rpc/ws-fallback-port-store'
 import { WebSocketTransport } from '../rpc/ws-transport'
+import { TerminalMultiplexConnections } from '../terminal-multiplex/connections'
 import type { YiruRuntimeService } from '../yiru-runtime'
 import { createNodeRuntimeHostCoworkingDevices } from './coworking-devices'
 import { createNodeRuntimeHostMobilePairing, resolveMobilePairingEndpoint } from './mobile-pairing'
 import { nodeRuntimeHostOrpcHandlerHooks } from './procedure-availability'
 import { nodeRuntimeHostRouter } from './router'
-import { NodeRuntimeHostTerminalBinaryStreams } from './terminal-binary-streams'
 
 type NodeRuntimeHostWebServiceOptions = {
   deviceName: string
@@ -73,7 +73,8 @@ export async function startNodeRuntimeHostWebService({
     preferPinnedPort,
     staticRoot: findWebClientRoot()
   })
-  const binaryStreams = new NodeRuntimeHostTerminalBinaryStreams()
+  const terminalMultiplex = new TerminalMultiplexConnections()
+  let resolvedEndpoint = ''
   const orpc = new RuntimeOrpcWsHandler({
     runtime,
     router: nodeRuntimeHostRouter,
@@ -105,7 +106,14 @@ export async function startNodeRuntimeHostWebService({
           }
         }
       }
-      if (!binaryStreams.admitInvocation(socket.connectionId, invocation.method)) {
+      const admission = terminalMultiplex.admitInvocation(
+        socket.connectionId,
+        invocation.method,
+        invocation.input,
+        socket.device.deviceId,
+        invocation.requestId
+      )
+      if (admission !== 'accepted') {
         return {
           denial: {
             code: 'binary_terminal_stream_requires_dedicated_connection',
@@ -123,7 +131,18 @@ export async function startNodeRuntimeHostWebService({
     // connection that invoked the procedure; connection admission above prevents
     // that socket from carrying shared control procedures before or after it.
     registerBinaryStreamHandler: (connectionId, streamId, handler) =>
-      binaryStreams.register(connectionId, streamId, handler)
+      terminalMultiplex.register(connectionId, streamId, handler),
+    openTerminalMultiplex: (socket, input) =>
+      terminalMultiplex.issueTicket(
+        socket.device.deviceId,
+        input.clientInstanceId,
+        input.environmentId,
+        resolveMobilePairingEndpoint(resolvedEndpoint, pairingAddress)
+      ),
+    activateTerminalMultiplexEpoch: (socket) =>
+      terminalMultiplex.activateEpoch(socket.connectionId, (code, reason) =>
+        socket.ws.close(code, reason)
+      )
   })
   const wiring = new MobileSocketWiring({
     deviceRegistry,
@@ -149,7 +168,7 @@ export async function startNodeRuntimeHostWebService({
       if (orpc.handleBinary(socket, bytes)) {
         return
       }
-      if (binaryStreams.handle(socket.connectionId, bytes)) {
+      if (terminalMultiplex.handle(socket.connectionId, bytes)) {
         return
       }
       socket.ws.close(
@@ -165,7 +184,7 @@ export async function startNodeRuntimeHostWebService({
         return
       }
       orpc.close(socket)
-      binaryStreams.closeConnection(socket.connectionId)
+      terminalMultiplex.closeConnection(socket.connectionId)
       runtime.cleanupSubscriptionsForConnection(socket.connectionId)
     }
   })
@@ -173,7 +192,6 @@ export async function startNodeRuntimeHostWebService({
 
   const hostDirectory = join(userDataPath, 'rh', String(process.pid))
   const pairingFile = join(hostDirectory, 'web-pairing.json')
-  let resolvedEndpoint = ''
   let resolvedMobilePairing: NodeRuntimeHostMobilePairing | null = null
   try {
     await transport.start()

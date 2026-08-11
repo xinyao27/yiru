@@ -1,6 +1,6 @@
 import { ORPCError, call, type AnyProcedure } from '@orpc/server'
+import type { TerminalMultiplexFrame } from '@yiru/runtime-protocol/terminal-multiplex/frame'
 import type { AuthenticatedRpcPrincipal } from '~shared/rpc-principal'
-import type { TerminalStreamFrame } from '~shared/terminal/stream-protocol'
 
 import type { RpcAccess } from './access'
 import type { RpcContext, RpcEnvelopeMeta, RpcRequest, RpcResponse } from './core'
@@ -134,7 +134,7 @@ export type RpcConnectionState = {
   sendBinary?: (bytes: Uint8Array<ArrayBufferLike>) => boolean | void
   registerBinaryStreamHandler?: (
     streamId: number,
-    handler: (frame: TerminalStreamFrame) => void
+    handler: (frame: TerminalMultiplexFrame) => void
   ) => () => void
 }
 
