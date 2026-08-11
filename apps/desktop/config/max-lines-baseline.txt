@@ -90,7 +90,7 @@ inline apps/desktop/src/main/window/attach-main-window-services.ts
 inline apps/desktop/src/main/window/create-main-window.ts
 inline apps/desktop/src/main/workspace-space-analysis.ts
 inline apps/desktop/src/main/worktree/remote.ts
-inline apps/desktop/src/preload/api-types.ts
+inline packages/shared/src/preload/api-types.ts
 inline apps/desktop/src/preload/index.ts
 inline apps/desktop/src/relay/agent-hook-server.ts
 inline apps/desktop/src/relay/dispatcher.ts

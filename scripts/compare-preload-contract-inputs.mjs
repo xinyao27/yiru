@@ -22,7 +22,7 @@ import { resolve } from 'node:path'
 const HERE = import.meta.dirname
 const REPO_ROOT = resolve(HERE, '..')
 const DESKTOP = resolve(REPO_ROOT, 'apps/desktop')
-const API_TYPES = resolve(DESKTOP, 'src/preload/api-types.ts')
+const API_TYPES = resolve(REPO_ROOT, 'packages/shared/src/preload/api-types.ts')
 
 const require = createRequire(resolve(DESKTOP, 'package.json'))
 // Why: the workspace pins typescript 7 (the native port), whose `typescript`

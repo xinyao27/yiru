@@ -1,5 +1,5 @@
+import type { RepoHostAdapter } from '@yiru/shared/preload/api-types'
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
-import type { RepoHostAdapter } from '~preload/api-types'
 import type {
   CreateWorktreeArgs,
   CreateWorktreeResult,
