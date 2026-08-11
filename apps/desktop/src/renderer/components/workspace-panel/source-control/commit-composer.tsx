@@ -56,8 +56,8 @@ export function SourceControlCommitComposer({
             <TooltipTrigger
               render={
                 <Button
-                  variant="destructive"
-                  size="xs"
+                  variant="ghost"
+                  size="icon-xs"
                   type="button"
                   onClick={onCancelGenerate}
                   title={translate(
@@ -68,7 +68,7 @@ export function SourceControlCommitComposer({
                     'auto.components.right.sidebar.SourceControl.ddc1fbd690',
                     'Stop generating commit message'
                   )}
-                  className="group text-muted-foreground hover:bg-destructive/10 hover:text-destructive focus-visible:bg-destructive/10 focus-visible:text-destructive absolute top-1.5 right-1.5 size-5 border-0 transition-colors"
+                  className="group absolute top-1.5 right-1.5"
                 >
                   <LoadingIndicator className="size-3.5 group-hover:hidden group-focus-visible:hidden" />
                   <Square className="hidden size-3.5 fill-current group-hover:block group-focus-visible:block" />
