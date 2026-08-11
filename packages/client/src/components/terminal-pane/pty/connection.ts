@@ -10,7 +10,8 @@ import {
 import {
   isFreshNonDoneAgentStatus,
   type AgentStatusEntry,
-  type AgentType
+  type AgentType,
+  type ParsedAgentStatusPayload
 } from '@yiru/workbench-model/agent'
 import { isWslUncPath } from '@yiru/workbench-model/platform'
 import { dispatchTerminalCommandFinishedEvent } from '~renderer/hooks/terminal-command-finished-event'
@@ -3076,7 +3077,7 @@ export function connectPanePty(
     // local main, so the renderer remains their status owner for now.
     ...(shouldOwnAgentStatusInRenderer
       ? {
-          onAgentStatus: (payload) => {
+          onAgentStatus: (payload: ParsedAgentStatusPayload) => {
             if (
               shouldSuppressCodexAutoApprovalStatus(payload, {
                 paneKey: cacheKey,
@@ -6446,7 +6447,7 @@ export function connectPanePty(
         // live stream.
         let restoreIterations = 0
         while (!disposed) {
-          const currentPtyId = hiddenOutputRestorePtyId
+          const currentPtyId: string | null = hiddenOutputRestorePtyId
           if (currentPtyId === null) {
             clearHiddenOutputRestoreState()
             return

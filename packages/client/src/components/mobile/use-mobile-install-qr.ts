@@ -1,4 +1,4 @@
-import QRCodeBrowser from 'qrcode/lib/browser'
+import QRCodeBrowser from 'qrcode'
 import { useEffect, useState } from 'react'
 
 import type { MobilePageStage } from './page-stage'

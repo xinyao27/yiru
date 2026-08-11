@@ -2,26 +2,28 @@ const TERMINAL_STREAM_KIND = 0x74
 const TERMINAL_STREAM_VERSION = 1
 const HEADER_BYTES = 16
 
-export enum TerminalStreamOpcode {
-  Output = 1,
-  SnapshotStart = 2,
-  SnapshotChunk = 3,
-  SnapshotEnd = 4,
-  Resized = 5,
-  Error = 6,
-  Input = 7,
-  Resize = 8,
-  Subscribe = 9,
-  Unsubscribe = 10,
-  SnapshotRequest = 11,
-  Metadata = 12,
+export const TerminalStreamOpcode = {
+  Output: 1,
+  SnapshotStart: 2,
+  SnapshotChunk: 3,
+  SnapshotEnd: 4,
+  Resized: 5,
+  Error: 6,
+  Input: 7,
+  Resize: 8,
+  Subscribe: 9,
+  Unsubscribe: 10,
+  SnapshotRequest: 11,
+  Metadata: 12,
   // Why 13: Metadata=12 shipped to mobile clients in v1.4.120; Ack (branch-only
   // remote-multiplex flow control) renumbers to stay wire-compatible.
-  Ack = 13,
+  Ack: 13,
   // Why 14: Ack already occupies 13 on current clients; older runtimes ignore
   // this opcode and still receive the compatibility Resize frame behind it.
-  ClaimViewport = 14
-}
+  ClaimViewport: 14
+} as const
+
+export type TerminalStreamOpcode = (typeof TerminalStreamOpcode)[keyof typeof TerminalStreamOpcode]
 
 export type TerminalStreamFrame = {
   opcode: TerminalStreamOpcode

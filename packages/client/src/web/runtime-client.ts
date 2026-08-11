@@ -134,12 +134,18 @@ export class WebRuntimeClient {
   private orpcClientPromise: Promise<WebRuntimeOrpcClient> | null = null
   private orpcTransport: 'unknown' | 'legacy' | 'peer' = 'unknown'
   private shellServicesChannel: WebShellServicesChannel | null = null
+  private readonly pairing: WebPairingOffer
+  private readonly onRuntimeId: (runtimeId: string) => void
+  private readonly options: WebRuntimeClientOptions
 
   constructor(
-    private readonly pairing: WebPairingOffer,
-    private readonly onRuntimeId: (runtimeId: string) => void = () => {},
-    private readonly options: WebRuntimeClientOptions = {}
+    pairing: WebPairingOffer,
+    onRuntimeId: (runtimeId: string) => void = () => {},
+    options: WebRuntimeClientOptions = {}
   ) {
+    this.pairing = pairing
+    this.onRuntimeId = onRuntimeId
+    this.options = options
     this.serverPublicKey = publicKeyFromBase64(pairing.publicKeyB64)
     this.openConnection()
   }
@@ -752,7 +758,7 @@ export class WebRuntimeClient {
           signal?.removeEventListener('abort', abort)
           resolve()
         },
-        reject: (error) => {
+        reject: (error: Error) => {
           window.clearTimeout(timeout)
           signal?.removeEventListener('abort', abort)
           reject(error)

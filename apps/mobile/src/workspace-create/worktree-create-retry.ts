@@ -15,7 +15,7 @@ import { WORKTREE_CREATE_TIMEOUT_MS } from './timeout'
 // / already has PR #N) can fire even after a pre-flight basename dedupe —
 // branches outlive worktrees in git, and remote branches/PRs aren't visible from
 // worktree.ps. Retry by appending -2, -3, ... mirroring the desktop createWorktree
-// loop in src/renderer/store/slices/worktrees.ts.
+// loop in packages/client/src/store/slices/worktrees.ts.
 export type WorktreeCreateResult = { worktreeId: string; name: string } | { error: string }
 
 // Creates a worktree, retrying with a numeric suffix on a name-collision error.

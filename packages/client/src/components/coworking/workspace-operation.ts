@@ -30,8 +30,11 @@ type CoworkingWorkspaceMutationMethod =
   | 'terminal.create'
 
 export class CoworkingWorkspaceOperationError extends Error {
-  constructor(readonly code: CoworkingRequesterTransportErrorCode | 'stale_route') {
+  readonly code: CoworkingRequesterTransportErrorCode | 'stale_route'
+
+  constructor(code: CoworkingRequesterTransportErrorCode | 'stale_route') {
     super(code)
+    this.code = code
     this.name = 'CoworkingWorkspaceOperationError'
   }
 }

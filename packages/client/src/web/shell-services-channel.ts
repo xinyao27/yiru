@@ -55,17 +55,20 @@ export class WebShellServicesChannel {
 class WebShellServicesPeer {
   private sendQueue = Promise.resolve()
   private isClosed = false
+  private readonly sendText: SendText
+  private readonly sendBinary: SendBinary
+  private readonly onFailure: () => void
 
   readonly addEventListener: MinimalWebsocket['addEventListener'] = () => {}
   readonly send: MinimalWebsocket['send'] = (data) => {
     this.sendQueue = this.sendQueue.then(() => this.sendFrame(data)).catch(() => this.fail())
   }
 
-  constructor(
-    private readonly sendText: SendText,
-    private readonly sendBinary: SendBinary,
-    private readonly onFailure: () => void
-  ) {}
+  constructor(sendText: SendText, sendBinary: SendBinary, onFailure: () => void) {
+    this.sendText = sendText
+    this.sendBinary = sendBinary
+    this.onFailure = onFailure
+  }
 
   sendConnect(): boolean {
     return !this.isClosed && this.sendText(encodeShellServicesOrpcConnectFrame())

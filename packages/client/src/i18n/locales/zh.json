@@ -2211,7 +2211,7 @@
           "c7f9b3f0c1": "关",
           "8b12c0850a": "保存",
           "de8fce5854": "取消",
-          "ddbcaef7be": "src/渲染器包/ui",
+          "ddbcaef7be": "packages/client/src packages/ui",
           "0e9ad9c798": "目录",
           "064c1e2d12": "渲染器用户界面",
           "b3a500c623": "姓名",

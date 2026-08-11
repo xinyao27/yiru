@@ -27,8 +27,11 @@ function createProperties(charKind: number, width: 0 | 1 | 2, shouldJoin: boolea
 
 class YiruUnicodeProvider implements IUnicodeVersionProvider {
   public readonly version = YIRU_UNICODE_VERSION
+  private readonly baseProvider: IUnicodeVersionProvider
 
-  public constructor(private readonly baseProvider: IUnicodeVersionProvider) {}
+  public constructor(baseProvider: IUnicodeVersionProvider) {
+    this.baseProvider = baseProvider
+  }
 
   public wcwidth(codepoint: number): 0 | 1 | 2 {
     return this.baseProvider.wcwidth(codepoint)

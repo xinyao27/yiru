@@ -13,9 +13,12 @@ const METADATA_KEYS = [
   'timestamp'
 ] as const
 
-export enum BrowserScreencastOpcode {
-  Frame = 1
-}
+export const BrowserScreencastOpcode = {
+  Frame: 1
+} as const
+
+export type BrowserScreencastOpcode =
+  (typeof BrowserScreencastOpcode)[keyof typeof BrowserScreencastOpcode]
 
 export type BrowserScreencastFormat = 'jpeg' | 'png'
 
@@ -32,7 +35,7 @@ export type BrowserScreencastFrameMetadata = {
 }
 
 export type BrowserScreencastFrame = {
-  opcode: BrowserScreencastOpcode.Frame
+  opcode: typeof BrowserScreencastOpcode.Frame
   seq: number
   format: BrowserScreencastFormat
   metadata: BrowserScreencastFrameMetadata

@@ -908,7 +908,7 @@ export type PreloadApi = {
   // because a `name: {` group count skips bare function members like these.
   /** Fire-and-forget track. Loose typing at the IPC boundary on purpose —
    *  the main-side validator is the single enforcement point. Renderer call
-   *  sites should import `track<N>()` from `src/renderer/lib/telemetry.ts`
+   *  sites should import `track<N>()` from `packages/client/src/lib/telemetry.ts`
    *  for the `EventMap`-based type safety, not reach for this directly. */
   telemetryTrack: (name: string, props: Record<string, unknown>) => Promise<void>
   // Why: shell-only — see the `telemetry*` group judgment above.

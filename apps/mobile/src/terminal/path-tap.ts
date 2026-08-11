@@ -1,5 +1,5 @@
 // File-path detection for a single tap in the terminal. Mirrors the desktop
-// link detection (src/renderer/lib/terminal-links.ts) but only finds the
+// link detection (packages/client/src/lib/terminal-links.ts) but only finds the
 // one path span containing the tapped column — mobile opens a tapped path, it
 // does not render hover links over the whole line.
 

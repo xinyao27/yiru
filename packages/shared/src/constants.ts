@@ -344,7 +344,7 @@ export function getDefaultSettings(homedir: string): GlobalSettings {
     confirmClosePinnedTab: true,
     keepComputerAwakeWhileAgentsRun: false,
     // Why: 'auto' runs a layout-aware probe at boot (see
-    // src/renderer/lib/keyboard-layout/*) that picks 'true' for US and
+    // packages/client/src/lib/keyboard-layout/*) that picks 'true' for US and
     // US-International and 'false' for every other layout. This mirrors
     // Ghostty's detectOptionAsAlt() and ensures users on Turkish, German,
     // French, etc. can type Option+Q/L/E characters like @, €, [, ] out of

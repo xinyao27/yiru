@@ -1,9 +1,9 @@
 import { Check } from '@phosphor-icons/react'
+import ghosttyIcon from '~renderer/assets/brand/ghostty.svg'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
 import type { GhosttyImportPreview } from '~shared/types'
 
-import ghosttyIcon from '../../../../resources/ghostty.svg'
 import type { DiscoveryState } from './theme-step'
 
 export function GhosttyDiscoveryRow({

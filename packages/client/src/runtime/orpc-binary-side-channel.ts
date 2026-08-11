@@ -4,8 +4,10 @@ export type RuntimeOrpcBinaryListener = (frame: Uint8Array<ArrayBufferLike>) => 
 
 export class RuntimeOrpcBinarySideChannel {
   private readonly listeners = new Map<string, RuntimeOrpcBinaryListener>()
+  private readonly port: MessagePort
 
-  constructor(private readonly port: MessagePort) {
+  constructor(port: MessagePort) {
+    this.port = port
     port.addEventListener('message', this.handleMessage)
   }
 

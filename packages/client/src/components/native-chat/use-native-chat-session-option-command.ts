@@ -45,7 +45,7 @@ export function useNativeChatSessionOptionCommand(args: {
     }
   }, [])
 
-  const dispatch = useCallback(
+  const dispatch = useCallback<NativeChatSessionOptionDispatchCommand>(
     async (command, options) => {
       const target = resolveTarget()
       if (!target || disabled) {

@@ -2061,8 +2061,10 @@ const LegendWorktreeViewport = React.memo(function LegendWorktreeViewport({
           let current: Worktree | undefined = targetWorktree
           while (current && !seen.has(current.id)) {
             seen.add(current.id)
-            const lineage = worktreeLineageById[current.id]
-            const parent = lineage ? worktreeMap.get(lineage.parentWorktreeId) : undefined
+            const lineage: WorktreeLineage | undefined = worktreeLineageById[current.id]
+            const parent: Worktree | undefined = lineage
+              ? worktreeMap.get(lineage.parentWorktreeId)
+              : undefined
             if (
               !lineage ||
               !parent ||
@@ -5574,8 +5576,10 @@ const WorktreeList = React.memo(function WorktreeList({ scrollOffsetRef }: Workt
     let current: Worktree | undefined = targetWorktree
     while (current && !seen.has(current.id)) {
       seen.add(current.id)
-      const lineage = worktreeLineageById[current.id]
-      const parent = lineage ? worktreeMap.get(lineage.parentWorktreeId) : undefined
+      const lineage: WorktreeLineage | undefined = worktreeLineageById[current.id]
+      const parent: Worktree | undefined = lineage
+        ? worktreeMap.get(lineage.parentWorktreeId)
+        : undefined
       if (
         !lineage ||
         !parent ||

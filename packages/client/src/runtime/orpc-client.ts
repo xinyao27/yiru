@@ -164,7 +164,7 @@ export async function createRuntimeOrpcClient(
 }
 
 export function isWebRuntimeClient(): boolean {
-  return '__YIRU_WEB_CLIENT__' in globalThis && globalThis.__YIRU_WEB_CLIENT__ === true
+  return (globalThis as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__ === true
 }
 
 // Why: a few call sites (e.g. the remote terminal pty transport) still address

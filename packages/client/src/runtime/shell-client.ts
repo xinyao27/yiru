@@ -7,7 +7,7 @@ type RendererShellClient = {
 }
 
 function isWebShellClient(): boolean {
-  return '__YIRU_WEB_CLIENT__' in globalThis && globalThis.__YIRU_WEB_CLIENT__ === true
+  return (globalThis as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__ === true
 }
 
 // Why: feature code targets the shell adapter, not Electron's preload object.

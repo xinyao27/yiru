@@ -36,6 +36,7 @@ import type { CoworkingOwnerControlGrantView } from '~shared/coworking/ipc-contr
 import { hostedReviewInfoFromGitHubPRInfo } from '~shared/hosted-review-github'
 import { isFolderRepo } from '~shared/repo-kind'
 import type { Repo, Tab, TerminalTab, Worktree } from '~shared/types'
+import type { WorkspacePort } from '~shared/workspace/ports'
 import { folderWorkspaceKey, parseWorkspaceKey } from '~shared/workspace/scope'
 
 import { AutoRenameFailedDialog } from './auto-rename-failed-dialog'
@@ -130,7 +131,7 @@ type WorktreeCardProps = {
   onRevokeCoworkingControlGrant?: (grantId: string) => void
 }
 
-const EMPTY_WORKSPACE_PORTS = []
+const EMPTY_WORKSPACE_PORTS: WorkspacePort[] = []
 const EMPTY_OPEN_TABS: readonly Tab[] = []
 const EMPTY_TERMINAL_TABS: readonly TerminalTab[] = []
 const EMPTY_COWORKING_CONTROL_GRANTS: readonly CoworkingOwnerControlGrantView[] = []

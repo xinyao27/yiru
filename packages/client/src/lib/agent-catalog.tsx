@@ -1,11 +1,11 @@
 import type React from 'react'
+import openClaudeLogoUrl from '~renderer/assets/brand/openclaude-logo.png?url'
 import { ClaudeIcon, DroidIcon, OpenAIIcon } from '~renderer/components/status-bar/icons'
 import { translate } from '~renderer/i18n/i18n'
 import { createLocalizedCatalog } from '~renderer/i18n/localized-catalog'
 import { getTuiAgentLaunchCommand, TUI_AGENT_CONFIG } from '~shared/tui-agent/config'
 import type { TuiAgent } from '~shared/types'
 
-import openClaudeLogoUrl from '../../../resources/openclaude-logo.png?url'
 import { AGENT_FAVICON_ASSETS } from './agent-favicon-assets'
 import {
   AgentLetterIcon,

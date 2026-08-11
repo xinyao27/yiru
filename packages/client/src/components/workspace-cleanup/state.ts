@@ -949,7 +949,7 @@ function hasIdleAgentTitleForPty(
   const layoutPtyIds = state.terminalLayoutsByTabId?.[tab.id]?.ptyIdsByLeafId ?? {}
   const matchingTitles = Object.entries(layoutPtyIds)
     .filter(([, leafPtyId]) => leafPtyId === ptyId)
-    .map(([leafId]) => paneTitles[leafId.replace(/^pane:/, '')])
+    .map(([leafId]) => paneTitles[Number.parseInt(leafId.replace(/^pane:/, ''), 10)])
     .filter((title): title is string => typeof title === 'string')
 
   if (matchingTitles.length > 0) {

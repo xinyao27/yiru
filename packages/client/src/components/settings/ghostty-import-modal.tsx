@@ -31,6 +31,10 @@ function formatDiffValue(value: unknown): string {
   return String(value)
 }
 
+function getSettingLabel(key: string): string {
+  return Object.entries(SETTING_LABELS).find(([settingKey]) => settingKey === key)?.[1] ?? key
+}
+
 export function GhosttyImportModal({
   open,
   onOpenChange,
@@ -90,7 +94,7 @@ export function GhosttyImportModal({
                 <ul className="space-y-1 text-xs">
                   {Object.entries(preview.diff).map(([key, value]) => (
                     <li key={key} className="flex justify-between gap-2">
-                      <span className="text-muted-foreground">{SETTING_LABELS[key] ?? key}</span>
+                      <span className="text-muted-foreground">{getSettingLabel(key)}</span>
                       <span className="font-mono">{formatDiffValue(value)}</span>
                     </li>
                   ))}
@@ -107,7 +111,7 @@ export function GhosttyImportModal({
                 <ul className="space-y-1 text-xs">
                   {Object.entries(preview.diff).map(([key, value]) => (
                     <li key={key} className="flex justify-between gap-2">
-                      <span className="text-muted-foreground">{SETTING_LABELS[key] ?? key}</span>
+                      <span className="text-muted-foreground">{getSettingLabel(key)}</span>
                       <span className="font-mono">{formatDiffValue(value)}</span>
                     </li>
                   ))}

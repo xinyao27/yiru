@@ -1,8 +1,7 @@
 import { WINDOWS_GIT_BASH_SHELL } from '@yiru/workbench-model/platform'
 import React from 'react'
+import gitForWindowsLogoUrl from '~renderer/assets/brand/git-for-windows-logo.svg?url'
 import { translate } from '~renderer/i18n/i18n'
-
-import gitForWindowsLogoUrl from '../../../../resources/git-for-windows-logo.svg?url'
 
 // Why: the "+" dropdown and per-tab tab strip both need a visual distinction
 // between PowerShell, CMD, Git Bash, and WSL sessions. Stock lucide glyphs don't

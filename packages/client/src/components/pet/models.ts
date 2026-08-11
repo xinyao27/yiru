@@ -1,3 +1,6 @@
+import claudeUrl from '~renderer/assets/brand/claude.webp?url'
+import gremlinUrl from '~renderer/assets/brand/gremlin.webp?url'
+import opencodeUrl from '~renderer/assets/brand/opencode.webp?url'
 import {
   DEFAULT_PET_ID,
   GREMLIN_PET_ID,
@@ -6,10 +9,6 @@ import {
   type BundledPetId
 } from '~renderer/components/pet/id'
 import { translate } from '~renderer/i18n/i18n'
-
-import claudeUrl from '../../../../resources/claude.webp?url'
-import gremlinUrl from '../../../../resources/gremlin.webp?url'
-import opencodeUrl from '../../../../resources/opencode.webp?url'
 
 // Why: bundled defaults so the overlay always has something to render when the
 // user hasn't uploaded a custom image. Vite's `?url` import hashes each asset

@@ -1550,7 +1550,7 @@ function createGitApi(): NonNullable<Partial<PreloadApi>['git']> {
 }
 
 function createBrowserApi(): NonNullable<Partial<PreloadApi>['browser']> {
-  return {
+  const browserApi = {
     onGuestLoadFailed: (callback) => onBrowserGuestEvent('guestLoadFailed', callback),
     onCertificateFailureChanged: (callback) =>
       onBrowserGuestEvent('certificateFailureChanged', callback),
@@ -1575,7 +1575,8 @@ function createBrowserApi(): NonNullable<Partial<PreloadApi>['browser']> {
           'Cookie import is unavailable in the web client.'
         )
       })
-  } as unknown as NonNullable<Partial<PreloadApi>['browser']>
+  } satisfies Partial<NonNullable<Partial<PreloadApi>['browser']>>
+  return browserApi as unknown as NonNullable<Partial<PreloadApi>['browser']>
 }
 
 function createEmulatorApi(): NonNullable<Partial<PreloadApi>['emulator']> {

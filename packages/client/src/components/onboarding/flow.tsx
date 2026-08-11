@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import logo from '~renderer/assets/brand/yiru-wordmark.png?url'
 import { Button } from '~renderer/components/ui/button'
 import {
   Tooltip,
@@ -15,7 +16,6 @@ import {
 } from '~renderer/lib/screen-submit-shortcut'
 import type { OnboardingState } from '~shared/types'
 
-import logo from '../../../../resources/yiru-wordmark.png?url'
 import { AgentStep } from './agent-step'
 import { shouldRequestOnboardingSkipConfirmation } from './dismiss-target'
 import { OnboardingFooter } from './footer'

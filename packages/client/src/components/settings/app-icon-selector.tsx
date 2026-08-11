@@ -1,11 +1,13 @@
 import { CaretLeft as ChevronLeft, CaretRight as ChevronRight } from '@phosphor-icons/react'
 import type React from 'react'
+// Why: main owns the installable app icons under apps/desktop/resources;
+// the source-only client keeps bundler-owned copies for renderer previews.
+import classicIconUrl from '~renderer/assets/brand/icon.png?url'
+import blueIconUrl from '~renderer/assets/brand/yiru-graphite.png?url'
+import watercolorIconUrl from '~renderer/assets/brand/yiru-warm.png?url'
 import { translate } from '~renderer/i18n/i18n'
 import { APP_ICON_OPTIONS, normalizeAppIconId, type AppIconId } from '~shared/app-icon'
 
-import blueIconUrl from '../../../../resources/app-icons/yiru-graphite.png?url'
-import watercolorIconUrl from '../../../../resources/app-icons/yiru-warm.png?url'
-import classicIconUrl from '../../../../resources/icon.png?url'
 import { Button } from '../ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 

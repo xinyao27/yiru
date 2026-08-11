@@ -95,7 +95,7 @@ export function SparseCheckoutPresetDraftForm({
               onChange={(event) => onDraftChange({ ...draft, directoriesText: event.target.value })}
               placeholder={translate(
                 'auto.components.sparse.SparseCheckoutPresetSelect.ddbcaef7be',
-                'src/renderer packages/ui'
+                'packages/client/src packages/ui'
               )}
               rows={3}
               spellCheck={false}

@@ -135,14 +135,19 @@ class RemoteRuntimeTerminalMultiplexer {
   private ready = false
   private nextStreamId = 1
   private nextSnapshotRequestId = 1
+  private readonly environmentId: string
+  private readonly releaseIfCurrent: (
+    environmentId: string,
+    multiplexer: RemoteRuntimeTerminalMultiplexer
+  ) => void
 
   constructor(
-    private readonly environmentId: string,
-    private readonly releaseIfCurrent: (
-      environmentId: string,
-      multiplexer: RemoteRuntimeTerminalMultiplexer
-    ) => void
-  ) {}
+    environmentId: string,
+    releaseIfCurrent: (environmentId: string, multiplexer: RemoteRuntimeTerminalMultiplexer) => void
+  ) {
+    this.environmentId = environmentId
+    this.releaseIfCurrent = releaseIfCurrent
+  }
 
   async subscribeTerminal(args: {
     terminal: string

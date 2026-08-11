@@ -48,12 +48,17 @@ export class WebRuntimeOrpcChannel {
   // registry).
   private readonly binaryListeners = new Map<string, (bytes: Uint8Array<ArrayBufferLike>) => void>()
   private sendQueue = Promise.resolve()
+  private readonly sendText: (plaintext: string) => boolean
+  private readonly sendBinary: (plaintext: Uint8Array<ArrayBufferLike>) => boolean
   readyState: WebRuntimeOrpcWebsocket['readyState'] = WEBSOCKET_OPEN
 
   constructor(
-    private readonly sendText: (plaintext: string) => boolean,
-    private readonly sendBinary: (plaintext: Uint8Array<ArrayBufferLike>) => boolean
-  ) {}
+    sendText: (plaintext: string) => boolean,
+    sendBinary: (plaintext: Uint8Array<ArrayBufferLike>) => boolean
+  ) {
+    this.sendText = sendText
+    this.sendBinary = sendBinary
+  }
 
   registerBinaryListener(
     requestId: string,
@@ -70,7 +75,10 @@ export class WebRuntimeOrpcChannel {
     }
   }
 
-  readonly addEventListener: WebRuntimeOrpcWebsocket['addEventListener'] = (type, listener) => {
+  readonly addEventListener: WebRuntimeOrpcWebsocket['addEventListener'] = (
+    type: string,
+    listener: EventListenerOrEventListenerObject
+  ) => {
     if (type !== 'message' && type !== 'close') {
       return
     }
@@ -83,8 +91,8 @@ export class WebRuntimeOrpcChannel {
   }
 
   readonly removeEventListener: WebRuntimeOrpcWebsocket['removeEventListener'] = (
-    type,
-    listener
+    type: string,
+    listener: EventListenerOrEventListenerObject
   ) => {
     if (type === 'message' || type === 'close') {
       this.listeners.get(type)?.delete(listener)

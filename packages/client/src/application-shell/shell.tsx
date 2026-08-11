@@ -20,6 +20,7 @@ import {
 } from 'react'
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
+import logo from '~renderer/assets/brand/yiru-wordmark.png?url'
 import { LoadingIndicatorStyleProvider } from '~renderer/components/loading-indicator'
 import { useRateLimitResumeDetector } from '~renderer/components/rate-limit-resume/detector'
 import { useRateLimitResumeDispatch } from '~renderer/components/rate-limit-resume/use-rate-limit-resume-dispatch'
@@ -82,7 +83,6 @@ import {
 import { supportsNativeSidebarMaterial } from '~shared/native-sidebar-material-support'
 import type { OnboardingState, UpdateStatus } from '~shared/types'
 
-import logo from '../../../resources/yiru-wordmark.png?url'
 import { useAutomationDispatchEvents } from '../components/automations/use-automation-dispatch-events'
 import { ConfirmationDialogProvider } from '../components/confirmation-dialog'
 import { CoworkingControlRequestDialog } from '../components/coworking/control-request-dialog'

@@ -5,7 +5,7 @@ import {
 import type { UiLanguage } from '~shared/ui-language'
 import type { SupportedUiLocale } from '~shared/ui-locale'
 
-import * as messages from '../../../generated/paraglide/messages.js'
+import * as messages from '../../generated/paraglide/messages.js'
 import { DEFAULT_LOCALE, resolveUiLocale } from './supported-languages'
 
 let activeLocale: SupportedUiLocale = DEFAULT_LOCALE

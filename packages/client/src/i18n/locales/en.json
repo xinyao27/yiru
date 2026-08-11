@@ -2247,7 +2247,7 @@
           "c7f9b3f0c1": "Off",
           "8b12c0850a": "Save",
           "de8fce5854": "Cancel",
-          "ddbcaef7be": "src/renderer packages/ui",
+          "ddbcaef7be": "packages/client/src packages/ui",
           "0e9ad9c798": "Directories",
           "064c1e2d12": "Renderer UI",
           "b3a500c623": "Name",

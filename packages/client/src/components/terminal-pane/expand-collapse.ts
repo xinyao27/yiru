@@ -58,7 +58,7 @@ export function applyExpandedLayoutTo(
   const snapshots = state.expandedStyleSnapshotRef.current
   let current: HTMLElement | null = targetPane.container
   while (current && current !== root) {
-    const parent = current.parentElement
+    const parent: HTMLElement | null = current.parentElement
     if (!parent) {
       break
     }

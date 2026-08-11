@@ -30,7 +30,7 @@ import { getWebShellApi, pickWebShellDirectories } from './web-shell-client'
 let mounted = false
 
 function isWebShell(): boolean {
-  return '__YIRU_WEB_CLIENT__' in globalThis && globalThis.__YIRU_WEB_CLIENT__ === true
+  return (globalThis as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__ === true
 }
 
 function getShellApi(): Window['api']['shell'] {

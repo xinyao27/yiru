@@ -8,10 +8,10 @@ This catalog defines what belongs in Yiru's reusable UI layer and where higher-l
 
 | Layer | Location | Owns | Must not own |
 | --- | --- | --- | --- |
-| Theme | `src/renderer/assets/main.css` | shadcn roles, light/dark values, exceptional product-domain CSS variables | Per-feature colors or component-specific tokens |
-| Primitives | `src/renderer/components/ui/` | Generic appearance and headless interaction | Repositories, providers, worktrees, teams, or store workflows |
+| Theme | `src/assets/main.css` | shadcn roles, light/dark values, exceptional product-domain CSS variables | Per-feature colors or component-specific tokens |
+| Primitives | `src/components/ui/` | Generic appearance and headless interaction | Repositories, providers, worktrees, teams, or store workflows |
 | Domain UI | The nearest feature folder or domain-named module under `components/` | Product terminology, domain data, composed workflows | New visual foundations that belong in a primitive |
-| Screens | `src/renderer/components/` and feature folders | Layout, data loading, copy, orchestration | Reimplementations of primitive interaction behavior; restyling primitives via color/size className overrides |
+| Screens | `src/components/` and feature folders | Layout, data loading, copy, orchestration | Reimplementations of primitive interaction behavior; restyling primitives via color/size className overrides |
 
 A primitive should remain useful if Yiru's domain types are deleted. A searchable repository picker therefore belongs under `components/repo/`, even though it composes `Popover` and `Command` from the primitive layer.
 
