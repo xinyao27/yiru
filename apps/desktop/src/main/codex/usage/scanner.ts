@@ -56,6 +56,9 @@ type CodexUsageParseContext = {
   currentModel: string | null
   currentTurnId: string | null
   previousTotals: CodexUsageRawUsage | null
+  sawSessionMeta: boolean
+  suppressingForkCopies: boolean
+  forkCopyAnchorMs: number
   totalOnlyBaselinePending?: boolean
 }
 
@@ -65,6 +68,7 @@ type CodexUsageDeltaResolution =
 
 const YIELD_EVERY_FILES = 10
 const YIELD_EVERY_DISCOVERY_ENTRIES = 100
+const FORK_COPY_MAX_GAP_MS = 1_000
 
 function ensureNumber(value: unknown): number {
   return typeof value === 'number' && Number.isFinite(value) ? Math.max(Math.trunc(value), 0) : 0
@@ -276,10 +280,9 @@ function normalizeRawUsage(value: unknown): CodexUsageRawUsage | null {
     Math.max(ensureNumber(record.reasoning_output_tokens), 0),
     outputTokens
   )
-  // Why: CodexBar's usage rows define total tokens as input + cache-read +
-  // output. The wire-level total_tokens field is not stable across Codex
-  // versions and can omit or duplicate cached input.
-  const totalTokens = inputTokens + cachedInputTokens + outputTokens
+  // Why: Codex input already includes its cached portion, while reasoning is
+  // included in output. Adding either subset again inflates provider totals.
+  const totalTokens = inputTokens + outputTokens
 
   return {
     inputTokens,
@@ -422,6 +425,26 @@ function extractString(value: unknown): string | null {
   }
   const trimmed = value.trim()
   return trimmed.length > 0 ? trimmed : null
+}
+
+function isForkedSessionMeta(payload: Record<string, unknown>): boolean {
+  if (extractString(payload.forked_from_id)) {
+    return true
+  }
+  const source = payload.source
+  if (source == null || typeof source !== 'object') {
+    return false
+  }
+  const subagent = (source as Record<string, unknown>).subagent
+  if (subagent == null || typeof subagent !== 'object') {
+    return false
+  }
+  const threadSpawn = (subagent as Record<string, unknown>).thread_spawn
+  return (
+    threadSpawn != null &&
+    typeof threadSpawn === 'object' &&
+    extractString((threadSpawn as Record<string, unknown>).parent_thread_id) !== null
+  )
 }
 
 function extractTurnId(value: unknown): string | null {
@@ -960,11 +983,22 @@ export function parseCodexUsageRecord(
   }
 
   if (parsed.type === 'session_meta') {
+    // Why: forked rollouts repeat ancestor metadata after the child's own
+    // metadata. Only the first record identifies the file being scanned.
+    if (context.sawSessionMeta) {
+      return null
+    }
+    context.sawSessionMeta = true
     context.sessionId = extractString(parsed.payload.id) ?? context.sessionId
     context.sessionCwd = extractString(parsed.payload.cwd)
     context.currentTurnId = null
     if (!context.currentCwd && context.sessionCwd) {
       context.currentCwd = context.sessionCwd
+    }
+    const metaTimestampMs = parsed.timestamp ? Date.parse(parsed.timestamp) : Number.NaN
+    if (Number.isFinite(metaTimestampMs) && isForkedSessionMeta(parsed.payload)) {
+      context.suppressingForkCopies = true
+      context.forkCopyAnchorMs = metaTimestampMs
     }
     return null
   }
@@ -1019,6 +1053,22 @@ export function parseCodexUsageRecord(
       resolvedUsage.delta.cachedInputTokens,
       resolvedUsage.delta.inputTokens
     )
+  }
+
+  // Why: Codex rewrites a fork's copied parent history at the fork instant.
+  // The synchronous burst is already represented by the parent rollout; the
+  // first event after a real turn-sized gap belongs to the child.
+  if (context.suppressingForkCopies) {
+    const timestampMs = Date.parse(parsed.timestamp)
+    if (
+      Number.isFinite(timestampMs) &&
+      timestampMs - context.forkCopyAnchorMs < FORK_COPY_MAX_GAP_MS
+    ) {
+      context.forkCopyAnchorMs = timestampMs
+      context.previousTotals = resolvedUsage.nextTotals
+      return null
+    }
+    context.suppressingForkCopies = false
   }
 
   if (
@@ -1082,6 +1132,9 @@ export async function parseCodexUsageFile(
     currentModel: null,
     currentTurnId: null,
     previousTotals: null,
+    sawSessionMeta: false,
+    suppressingForkCopies: false,
+    forkCopyAnchorMs: 0,
     // Why: suffix-only legacy copy parsing lacks the copied prefix context. A
     // leading total-only snapshot is a baseline, not the suffix's billable delta.
     totalOnlyBaselinePending: (options.skipInitialBytes ?? 0) > 0

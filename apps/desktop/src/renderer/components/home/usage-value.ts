@@ -18,6 +18,8 @@ import {
   type UsageValueSupplementalInput
 } from '~shared/stats/usage-value'
 
+import { buildAddedProjectUsage } from './added-project-usage'
+
 export type ModelUsageValue = UsageValueModel
 
 export type UsageValue = {
@@ -53,6 +55,7 @@ export function useUsageValue(range: StatsUsageBoundedRange): UsageValue {
   const openCodeDaily = useAppStore((state) => state.openCodeUsageDaily)
   const openCodeModels = useAppStore((state) => state.openCodeUsageModelBreakdown)
   const openCodeProjects = useAppStore((state) => state.openCodeUsageProjectBreakdown)
+  const repos = useAppStore((state) => state.repos)
   const supplementalUsage = useAppStore((state) => state.statsSummary?.supplementalUsage)
 
   useEffect(() => {
@@ -105,7 +108,10 @@ export function useUsageValue(range: StatsUsageBoundedRange): UsageValue {
     }),
     [claudeDaily, claudeProjects, codexDaily, codexProjects, openCodeDaily, openCodeProjects]
   )
-  const projects = useMemo(() => buildProjectUsage(aggregationInput), [aggregationInput])
+  const projects = useMemo(
+    () => buildAddedProjectUsage(buildProjectUsage(aggregationInput), repos),
+    [aggregationInput, repos]
+  )
   const dailyByProvider = useMemo(
     () => buildDailyProviderUsage(aggregationInput),
     [aggregationInput]
