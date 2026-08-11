@@ -6,8 +6,8 @@ import { OrbLoader } from './orb-loader'
 import { PROJECT_NAME } from './state'
 import type { AgentRow, DemoState, WorktreeRow, WorktreeStatus } from './state'
 
-// Why: geometry ported from apps/desktop worktree-list-indentation.ts and
-// inline-agent-rail.tsx — a vertical run down the parent's glyph column that
+// Why: geometry ported from the desktop sidebar's nested-row rails — a vertical
+// run down the parent's glyph column that
 // elbows into each child glyph, with a gap so it points at the art rather than
 // crossing it. Both levels of the tree get one.
 const HEADER_PADDING_LEFT = 10

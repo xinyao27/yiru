@@ -2886,7 +2886,7 @@
           "c7591b6014": "repo",
           "8d62c68b35": "Notes",
           "2d74665a56": "Ports",
-          "65a9820bd1": "Agent statuses",
+          "65a9820bd1": "Open tabs",
           "219ebf1961": "Branch name",
           "folderPathIdentity": "Branch / folder path"
         },
@@ -3441,6 +3441,9 @@
           "error": "Could not update discovered worktrees. Try again.",
           "keepHidden": "Keep hidden",
           "show": "Show in workspace list"
+        },
+        "WorktreeCardTabs": {
+          "openTabs": "Open tabs"
         }
       },
       "coworking": {

@@ -20,8 +20,7 @@ export function uiLabWorktrees(): Worktree[] {
       isPinned: true,
       isActive: true,
       linkedPR: { number: 8421, state: 'OPEN' },
-      status: 'working',
-      agents: []
+      status: 'working'
     }
   ]
 }

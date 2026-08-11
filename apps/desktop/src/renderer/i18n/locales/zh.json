@@ -2814,7 +2814,7 @@
           "631b97eea9": "主机范围",
           "8d62c68b35": "笔记",
           "2d74665a56": "端口",
-          "65a9820bd1": "Agent 状态",
+          "65a9820bd1": "已打开的标签页",
           "219ebf1961": "分支名称",
           "automation": "自动化",
           "folderPathIdentity": "分支 / 文件夹路径"
@@ -3405,6 +3405,9 @@
           "error": "Could not update discovered worktrees. Try again.",
           "keepHidden": "Keep hidden",
           "show": "Show in workspace list"
+        },
+        "WorktreeCardTabs": {
+          "openTabs": "已打开的标签页"
         }
       },
       "coworking": {

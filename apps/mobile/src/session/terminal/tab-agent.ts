@@ -1,3 +1,4 @@
+import type { RuntimeMobileSessionClientTab } from '@yiru/runtime-protocol/contract'
 import type { AgentStatusEntry } from '@yiru/workbench-model/agent'
 import { resolveExplicitTerminalTitleAgentType } from '@yiru/workbench-model/agent'
 import { stripLeadingAgentTitleDecorationOrEmpty } from '@yiru/workbench-model/agent'
@@ -32,7 +33,9 @@ export function resolveMobileTerminalTabAgentId(tab: {
   return resolveExplicitTerminalTitleAgentType(tab.title)
 }
 
-export function getMobileSessionTabTitle(tab: MobileSessionTab): string {
+export function getMobileSessionTabTitle(
+  tab: MobileSessionTab | RuntimeMobileSessionClientTab
+): string {
   if (tab.type === 'browser') {
     const title = tab.title.trim()
     if (title && !isBlankBrowserUrl(title)) {

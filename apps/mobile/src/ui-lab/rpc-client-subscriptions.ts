@@ -75,6 +75,10 @@ async function runUiLabSubscription(
       stream.push({ type: 'snapshot', ...uiLabSessionTabs(context.scenario) })
       await waitForAbort(stream.signal)
       return
+    case 'session.tabs.subscribeAll':
+      stream.push({ type: 'snapshots', snapshots: [uiLabSessionTabs(context.scenario)] })
+      await waitForAbort(stream.signal)
+      return
     case 'terminal.subscribe':
       stream.push({ type: 'subscribed' })
       await waitForAbort(stream.signal)

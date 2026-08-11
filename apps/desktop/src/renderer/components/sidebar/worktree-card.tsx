@@ -35,7 +35,7 @@ import { DEFAULT_AGENT_ACTIVITY_DISPLAY_MODE } from '~shared/constants'
 import type { CoworkingOwnerControlGrantView } from '~shared/coworking/ipc-contract'
 import { hostedReviewInfoFromGitHubPRInfo } from '~shared/hosted-review-github'
 import { isFolderRepo } from '~shared/repo-kind'
-import type { Worktree, Repo } from '~shared/types'
+import type { Repo, Tab, TerminalTab, Worktree } from '~shared/types'
 import { folderWorkspaceKey, parseWorkspaceKey } from '~shared/workspace/scope'
 
 import { AutoRenameFailedDialog } from './auto-rename-failed-dialog'
@@ -43,13 +43,11 @@ import CacheTimer, { usePromptCacheCountdownStartedAt } from './cache-timer'
 import { runWorktreeDelete } from './delete-worktree/flow'
 import { resolveRepoHeaderColor } from './project-header-color'
 import { TruncatedSidebarLabel } from './truncated-sidebar-label'
-import { useWorktreeAgentRows } from './use-worktree-agent-rows'
 import {
   canShowWorkspaceDeleteQuickAction,
   useWorkspaceDeleteModifierPressed
 } from './workspace-delete-quick-action'
 import { writeWorkspaceDragData } from './workspace-status'
-import WorktreeCardAgents from './worktree-card/agents'
 import { WorktreeCardControlGrants } from './worktree-card/control-grants'
 import { useWorktreeCardDetailsHoverControl } from './worktree-card/details-hover-state'
 import { isEventTargetInsideCurrentTarget } from './worktree-card/dom-events'
@@ -67,6 +65,7 @@ import {
 import type { WorktreeCardPrDisplay } from './worktree-card/pr-display'
 import { WorktreeCardStatusSlot } from './worktree-card/status-slot'
 import { WorktreeCardSurface, type WorktreeCardSurfaceActiveVariant } from './worktree-card/surface'
+import { WorktreeCardTabs } from './worktree-card/tabs'
 import { getWorktreeCardTitleDisplay } from './worktree-card/title-display'
 import { WorktreeContextMenu } from './worktree-context-menu/menu'
 import {
@@ -132,6 +131,8 @@ type WorktreeCardProps = {
 }
 
 const EMPTY_WORKSPACE_PORTS = []
+const EMPTY_OPEN_TABS: readonly Tab[] = []
+const EMPTY_TERMINAL_TABS: readonly TerminalTab[] = []
 const EMPTY_COWORKING_CONTROL_GRANTS: readonly CoworkingOwnerControlGrantView[] = []
 const EMPTY_COWORKING_REVOKING_GRANT_IDS: ReadonlySet<string> = new Set()
 const HOSTED_REVIEW_CARD_REFRESH_INTERVAL_MS = 60_000
@@ -778,16 +779,18 @@ const WorktreeCard = React.memo(function WorktreeCard({
   const hoverComment = worktree.comment
   const metaAutomationProvenance = showAutomation ? worktree.automationProvenance : null
   const metaComment = showComment ? hoverComment : null
-  const showInlineAgentList = cardProps.includes('inline-agents')
-  const compactInlineAgentRows = useWorktreeAgentRows(
-    worktree.id,
-    showInlineAgentList && agentActivityDisplayMode === 'compact'
+  // Why: `inline-agents` is the persisted compatibility key, but the rendered
+  // source is now the canonical unified-tab model. Agent activity never creates
+  // or retains a sidebar row on its own.
+  const openTabs = useAppStore(
+    (state) => state.unifiedTabsByWorktree[worktree.id] ?? EMPTY_OPEN_TABS
   )
-  const compactInlineAgentRowsVisible =
-    showInlineAgentList &&
-    agentActivityDisplayMode === 'compact' &&
-    compactInlineAgentRows.length > 0
-  const showAggregateCacheTimer = !compactInlineAgentRowsVisible
+  const terminalTabs = useAppStore(
+    (state) => state.tabsByWorktree[worktree.id] ?? EMPTY_TERMINAL_TABS
+  )
+  const showOpenTabs = cardProps.includes('inline-agents')
+  const showOpenTabList = showOpenTabs && openTabs.length > 0
+  const showAggregateCacheTimer = !(showOpenTabList && agentActivityDisplayMode === 'compact')
   const hasExplicitLinkedReview =
     (hoverReview?.provider === 'github' && worktree.linkedPR !== null) ||
     (hoverReview?.provider === 'gitlab' && linkedGitLabMR !== null) ||
@@ -882,12 +885,11 @@ const WorktreeCard = React.memo(function WorktreeCard({
   const parentContentMarginLeft =
     flushSurface && hasLeadingStatusIcon ? getWorktreeCardLeadingStatusMarginLeft(contentIndent) : 0
   const cardStyle = cardPaddingLeft ? { paddingLeft: cardPaddingLeft } : undefined
-  // Why: the rail ends on the last compact agent row by measuring up from the
-  // card's bottom edge, so it only holds while that list is the card's last
-  // content — a child-workspace chip or nested lineage rows below it would move
-  // the anchor onto the wrong row.
-  const showInlineAgentRail =
-    compactInlineAgentRowsVisible &&
+  // Why: the rail is bottom-anchored to the final compact tab row, so content
+  // below the list would move the endpoint away from that row.
+  const showInlineTabRail =
+    showOpenTabList &&
+    agentActivityDisplayMode === 'compact' &&
     hasLeadingStatusIcon &&
     !showLineageChildChip &&
     lineageChildren === undefined
@@ -933,17 +935,13 @@ const WorktreeCard = React.memo(function WorktreeCard({
         ) : null}
       </div>
     ) : null
-  // Why: density must follow what actually renders. Keying the agent list off the
-  // 'inline-agents' card property alone kept every workspace row at the taller
-  // details padding even with zero agents, so single-line rows never matched the
-  // project header's row box.
-  const hasVisibleInlineAgentList =
-    agentActivityDisplayMode === 'compact' ? compactInlineAgentRowsVisible : showInlineAgentList
+  const hasVisibleOpenTabList =
+    agentActivityDisplayMode === 'compact' ? showOpenTabList : showOpenTabs
   const hasSecondaryCardContent =
     hasMetaRow ||
     !!remoteBranchConflict ||
     coworkingControlGrants.length > 0 ||
-    hasVisibleInlineAgentList ||
+    hasVisibleOpenTabList ||
     showLineageChildChip
   const titleOnlyCard = !hasSecondaryCardContent
 
@@ -979,9 +977,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
       <div
         className={cn(
           'flex min-w-0 flex-1 flex-col gap-1.5',
-          // Why: inline agent rows intentionally outdent into the card gutter;
-          // title/meta truncation is handled by their own inner elements.
-          showInlineAgentList ? 'overflow-visible' : 'overflow-hidden'
+          showOpenTabs ? 'overflow-visible' : 'overflow-hidden'
         )}
       >
         {/* Header row: Title */}
@@ -1261,19 +1257,17 @@ const WorktreeCard = React.memo(function WorktreeCard({
           />
         ) : null}
 
-        {/* Why: inline agent list. Gated on the 'inline-agents' card
-             property so users can hide it. Layout coupling: this block
-             grows the card height dynamically — WorktreeList uses
-             measureElement on each row, so the virtualizer re-measures
-             naturally when agents appear/disappear. When agents directly
-             follow the title, counterbalance the card stack gap so both rows
-             read as one compact header group. */}
-        {showInlineAgentList && (
-          <WorktreeCardAgents
+        {/* Why: the compatibility display toggle now projects canonical open
+             tabs. WorktreeList measures each row, so close/open mutations resize
+             the card in the same commit that updates the tab strip. */}
+        {showOpenTabs && (
+          <WorktreeCardTabs
             worktreeId={worktree.id}
-            agents={agentActivityDisplayMode === 'compact' ? compactInlineAgentRows : undefined}
+            tabs={openTabs}
+            terminalTabs={terminalTabs}
+            displayMode={agentActivityDisplayMode}
             hasLeadingStatusIcon={hasLeadingStatusIcon}
-            inlineRailCardPaddingLeft={showInlineAgentRail ? (cardPaddingLeft ?? '0px') : undefined}
+            inlineRailCardPaddingLeft={showInlineTabRail ? (cardPaddingLeft ?? '0px') : undefined}
             className={
               hasMetaRow || remoteBranchConflict || coworkingControlGrants.length > 0
                 ? 'mt-0'
