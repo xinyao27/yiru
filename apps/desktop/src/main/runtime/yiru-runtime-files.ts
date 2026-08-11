@@ -6,6 +6,7 @@ import type { FileHandle } from 'node:fs/promises'
 import {
   chmod,
   constants,
+  cp,
   copyFile,
   lstat,
   mkdir,
@@ -1180,9 +1181,17 @@ export class RuntimeFileCommands {
       preserveSymlink: true
     })
     await mkdir(dirname(destinationPath), { recursive: true })
-    // Why: duplicate/copy operations are deconflicted by the caller. COPYFILE_EXCL
-    // preserves the same no-clobber invariant as the local shell copy IPC.
-    await copyFile(sourcePath, destinationPath, constants.COPYFILE_EXCL)
+    const sourceStat = await lstat(sourcePath)
+    // Why: runtime Explorer clipboard copy mirrors the local path: recurse
+    // through folders, preserve links, and never replace an existing path.
+    await (sourceStat.isDirectory() || sourceStat.isSymbolicLink()
+      ? cp(sourcePath, destinationPath, {
+          recursive: sourceStat.isDirectory(),
+          dereference: false,
+          errorOnExist: true,
+          force: false
+        })
+      : copyFile(sourcePath, destinationPath, constants.COPYFILE_EXCL))
     return { ok: true }
   }
 

@@ -8943,6 +8943,12 @@
           },
           "PierreFileExplorerTree": {
             "copied": "已复制"
+          },
+          "fileExplorerClipboard": {
+            "uniqueName": "无法为“{{value0}}”找到可用的名称。",
+            "sameWorkspace": "文件只能粘贴到复制它们的同一工作区中。",
+            "insideItself": "不能将文件夹粘贴到其自身内部。",
+            "failed": "无法粘贴所选文件。"
           }
         }
       },

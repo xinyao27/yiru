@@ -8979,6 +8979,12 @@
           },
           "PierreFileExplorerTree": {
             "copied": "Copied"
+          },
+          "fileExplorerClipboard": {
+            "uniqueName": "Couldn't find an available name for '{{value0}}'.",
+            "sameWorkspace": "Files can only be pasted into the workspace they were copied from.",
+            "insideItself": "A folder can't be pasted into itself.",
+            "failed": "Could not paste the selected files."
           }
         }
       },

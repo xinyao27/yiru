@@ -1,11 +1,8 @@
-import { isWindowsAbsolutePathLike } from '@yiru/workbench-model/platform'
-import { isWslUncPath, parseWslUncPath } from '@yiru/workbench-model/platform'
+import { isWslUncPath } from '@yiru/workbench-model/platform'
 import { toast } from 'sonner'
 import { translate } from '~renderer/i18n/i18n'
 import { getConnectionId } from '~renderer/lib/connection-context'
 import { extractIpcErrorMessage } from '~renderer/lib/ipc-error'
-import { getLocalProjectExecutionRuntimeContext } from '~renderer/lib/local-preflight-context'
-import { CLIENT_PLATFORM } from '~renderer/lib/new-workspace'
 import type { PaneManager } from '~renderer/lib/pane-manager/pane-manager'
 import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
 import { importExternalPathsToRuntime } from '~renderer/runtime/file-client'
@@ -23,6 +20,7 @@ import { captureTerminalDropTarget, getCurrentTerminalDropTransport } from './dr
 import { reportTerminalDropUploadSkipsAndFailures } from './drop/upload-report'
 import { joinRuntimeTerminalDropDir, resolveTerminalDropWorktreePath } from './drop/worktree-path'
 import { showTerminalDropWriteFailure } from './drop/write-failure'
+import { isWorktreeUsingLocalWslRuntime, toLocalWslDropPath } from './drop/wsl-path'
 import type { PtyTransport } from './pty/transport'
 import { recordTerminalUserInputForLeaf } from './terminal-input-activity'
 
@@ -278,27 +276,4 @@ async function pasteResolvedDropPaths(
   if (writeResult.targetCurrent) {
     args.pane.terminal.focus()
   }
-}
-
-function isWorktreeUsingLocalWslRuntime(
-  state: ReturnType<typeof useAppStore.getState>,
-  worktreeId: string
-): boolean {
-  const projectRuntime = getLocalProjectExecutionRuntimeContext(state, worktreeId, CLIENT_PLATFORM)
-  if (projectRuntime?.status === 'repair-required') {
-    return projectRuntime.repair.preferredRuntime.kind === 'wsl'
-  }
-  return projectRuntime?.status === 'resolved' && projectRuntime.runtime.kind === 'wsl'
-}
-
-function toLocalWslDropPath(path: string): string {
-  const wslUnc = parseWslUncPath(path)
-  if (wslUnc) {
-    return wslUnc.linuxPath
-  }
-  if (isWindowsAbsolutePathLike(path)) {
-    const drive = path[0].toLowerCase()
-    return `/mnt/${drive}/${path.slice(3).replace(/\\/g, '/')}`
-  }
-  return path.replace(/\\/g, '/')
 }

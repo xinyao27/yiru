@@ -207,10 +207,12 @@ export function useFileExplorerInteractions(
     moveSelection: selection.moveSelection,
     toggleDir: view.hasNameFilter ? actions.handleToggleNameFilterDir : toggleDir,
     startRename: inline.startRename,
-    requestDelete: deletion.requestDelete,
     requestDeleteAll: deletion.requestDeleteAll,
+    refreshDir: tree.refreshDir,
     scrollToIndex,
+    setSelectedPaths: selection.setSelectedPaths,
     activeWorktreeId: owner.activeWorktreeId,
+    worktreePath: owner.visibleFilesWorktreePath,
     nativeTreeNavigation: true
   })
 

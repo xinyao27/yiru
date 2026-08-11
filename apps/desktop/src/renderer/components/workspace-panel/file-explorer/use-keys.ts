@@ -2,16 +2,18 @@ import { useEffect, useRef } from 'react'
 import type React from 'react'
 import { toast } from 'sonner'
 import { translate } from '~renderer/i18n/i18n'
+import { APP_MENU_PASTE_EVENT } from '~renderer/lib/app-menu-paste'
 import { isEditableTarget } from '~renderer/lib/editable-target'
+import { joinPath } from '~renderer/lib/path'
 import { getShortcutPlatform } from '~renderer/lib/shortcut-platform'
-import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 import { keybindingMatchesAction } from '~shared/keybindings'
 
+import { pasteFileExplorerClipboard } from './clipboard'
 import { applyFileExplorerNavigation, type SelectionMode } from './keyboard-navigation'
+import { handleFileExplorerOperationShortcut } from './keyboard-operations'
 import type { InlineInput } from './row'
 import type { FileExplorerRowProjection } from './row-projection'
-import { formatFileExplorerPathsForClipboard } from './selection'
 import type { TreeNode } from './types'
 import {
   fileExplorerHasRedo,
@@ -46,10 +48,12 @@ export function useFileExplorerKeys(opts: {
   moveSelection: (targetPath: string, mode: SelectionMode) => void
   toggleDir: (worktreeId: string, dirPath: string) => void
   startRename: (node: TreeNode) => void
-  requestDelete: (node: TreeNode) => void
   requestDeleteAll: (nodes: TreeNode[]) => void
+  refreshDir: (dirPath: string) => Promise<void>
   scrollToIndex: (index: number) => void
+  setSelectedPaths: (paths: Set<string>) => void
   activeWorktreeId: string | null
+  worktreePath: string | null
   nativeTreeNavigation?: boolean
 }): void {
   const rightSidebarExplorerView = useAppStore((s) => s.rightSidebarExplorerView)
@@ -69,8 +73,6 @@ export function useFileExplorerKeys(opts: {
   selectedNodeRef.current = opts.selectedNode
   const startRenameRef = useRef(opts.startRename)
   startRenameRef.current = opts.startRename
-  const requestDeleteRef = useRef(opts.requestDelete)
-  requestDeleteRef.current = opts.requestDelete
   const requestDeleteAllRef = useRef(opts.requestDeleteAll)
   requestDeleteAllRef.current = opts.requestDeleteAll
   const activateNodeRef = useRef(opts.activateNode)
@@ -83,6 +85,12 @@ export function useFileExplorerKeys(opts: {
   scrollToIndexRef.current = opts.scrollToIndex
   const activeWorktreeIdRef = useRef(opts.activeWorktreeId)
   activeWorktreeIdRef.current = opts.activeWorktreeId
+  const worktreePathRef = useRef(opts.worktreePath)
+  worktreePathRef.current = opts.worktreePath
+  const refreshDirRef = useRef(opts.refreshDir)
+  refreshDirRef.current = opts.refreshDir
+  const setSelectedPathsRef = useRef(opts.setSelectedPaths)
+  setSelectedPathsRef.current = opts.setSelectedPaths
 
   useEffect(() => {
     // Find the row index whose button is currently focused. Each virtualized
@@ -129,6 +137,30 @@ export function useFileExplorerKeys(opts: {
       )
       const button = wrapper?.querySelector<HTMLButtonElement>('button')
       button?.focus()
+    }
+
+    const findFocusedNode = (): TreeNode | null => {
+      const focusedIndex = findFocusedIndex()
+      const indexedNode =
+        focusedIndex !== null ? rowProjectionRef.current.getRowAtIndex(focusedIndex) : null
+      if (indexedNode) {
+        return indexedNode
+      }
+      const shadowActiveElement = document.activeElement?.shadowRoot?.activeElement
+      const canonicalPath =
+        shadowActiveElement instanceof HTMLElement
+          ? shadowActiveElement.dataset.itemPath?.replace(/\/$/u, '')
+          : undefined
+      const worktreePath = worktreePathRef.current
+      if (canonicalPath && worktreePath) {
+        const focusedNode = rowProjectionRef.current.getRowByPath(
+          joinPath(worktreePath, canonicalPath)
+        )
+        if (focusedNode) {
+          return focusedNode
+        }
+      }
+      return selectedNodeRef.current
     }
 
     const isDirExpanded = (path: string): boolean => {
@@ -212,10 +244,7 @@ export function useFileExplorerKeys(opts: {
 
         // ── Space activates the focused row (open file / toggle folder). ──
         if (!opts.nativeTreeNavigation && e.key === ' ' && !e.shiftKey) {
-          const focused = findFocusedIndex()
-          const node =
-            (focused !== null ? rowProjectionRef.current.getRowAtIndex(focused) : null) ??
-            selectedNodeRef.current
+          const node = findFocusedNode()
           if (node) {
             e.preventDefault()
             activateNodeRef.current(node)
@@ -223,13 +252,11 @@ export function useFileExplorerKeys(opts: {
           }
         }
 
-        const focused = findFocusedIndex()
-        const node =
-          (focused !== null ? rowProjectionRef.current.getRowAtIndex(focused) : null) ??
-          selectedNodeRef.current
+        const node = findFocusedNode()
         if (node) {
-          if (e.key === 'Enter' && !e.metaKey && !e.ctrlKey && !e.altKey && !e.shiftKey) {
+          if (keybindingMatchesAction('fileExplorer.rename', e, platform, keybindings)) {
             e.preventDefault()
+            e.stopPropagation()
             startRenameRef.current(node)
             return
           }
@@ -253,49 +280,47 @@ export function useFileExplorerKeys(opts: {
       if (!focusInExplorer()) {
         return
       }
-      const wantsCopyRelativePath = keybindingMatchesAction(
-        'fileExplorer.copyRelativePath',
-        e,
-        platform,
-        keybindings
-      )
-      const wantsCopyPath = keybindingMatchesAction(
-        'fileExplorer.copyPath',
-        e,
-        platform,
-        keybindings
-      )
-      if (!wantsCopyRelativePath && !wantsCopyPath) {
-        return
-      }
-
-      const focused = findFocusedIndex()
-      const node =
-        (focused !== null ? rowProjectionRef.current.getRowAtIndex(focused) : null) ??
-        selectedNodeRef.current
+      const node = findFocusedNode()
       const selectedNodes = rowProjectionRef.current.getRowsByPaths(selectedPathsRef.current)
       const fallbackNodes = selectedNodes.length > 0 ? selectedNodes : node ? [node] : []
-      if (fallbackNodes.length === 0) {
-        return
-      }
-      // ⌥⇧⌘C (Mac) / Ctrl+Shift+Alt+C (Win) — Copy Relative Path
-      if (wantsCopyRelativePath) {
-        e.preventDefault()
-        shellClient.ui.writeClipboardText(
-          formatFileExplorerPathsForClipboard(fallbackNodes, 'relative')
-        )
-        return
-      }
-      // ⌥⌘C (Mac) / Shift+Alt+C (Win) — Copy Path
-      if (wantsCopyPath) {
-        e.preventDefault()
-        shellClient.ui.writeClipboardText(
-          formatFileExplorerPathsForClipboard(fallbackNodes, 'absolute')
-        )
+      const didHandleOperation = handleFileExplorerOperationShortcut({
+        activeWorktreeId: activeWorktreeIdRef.current,
+        destinationNode: node,
+        event: e,
+        keybindings,
+        platform,
+        refreshDir: refreshDirRef.current,
+        rowProjection: rowProjectionRef.current,
+        selectedNodes: fallbackNodes,
+        setSelectedPaths: setSelectedPathsRef.current,
+        worktreePath: worktreePathRef.current
+      })
+      if (didHandleOperation) {
+        e.stopPropagation()
       }
     }
 
+    // Why: Electron's CmdOrCtrl+V menu accelerator sends this owned paste event
+    // instead of a keydown, so the focused explorer must claim it explicitly.
+    const onAppMenuPaste = (event: Event): void => {
+      if (rightSidebarExplorerView !== 'files' || inlineInputRef.current || !focusInExplorer()) {
+        return
+      }
+      event.preventDefault()
+      pasteFileExplorerClipboard({
+        activeWorktreeId: activeWorktreeIdRef.current,
+        destinationNode: findFocusedNode(),
+        refreshDir: refreshDirRef.current,
+        setSelectedPaths: setSelectedPathsRef.current,
+        worktreePath: worktreePathRef.current
+      })
+    }
+
     window.addEventListener('keydown', onKeyDown, { capture: true })
-    return () => window.removeEventListener('keydown', onKeyDown, { capture: true })
+    window.addEventListener(APP_MENU_PASTE_EVENT, onAppMenuPaste)
+    return () => {
+      window.removeEventListener('keydown', onKeyDown, { capture: true })
+      window.removeEventListener(APP_MENU_PASTE_EVENT, onAppMenuPaste)
+    }
   }, [keybindings, opts.containerRef, opts.nativeTreeNavigation, rightSidebarExplorerView])
 }
