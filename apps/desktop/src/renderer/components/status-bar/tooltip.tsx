@@ -45,7 +45,7 @@ export function formatTimeAgo(ts: number): string {
 }
 
 // Re-export so existing tooltip consumers/tests keep their import path; the
-// implementation is shared with mobile in src/shared/rate-limit-reset-format.
+// implementation is shared with mobile in packages/shared/src/rate-limit-reset-format.
 export { formatResetCountdown }
 
 export function formatResetCreditExpiry(

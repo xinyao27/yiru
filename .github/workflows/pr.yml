@@ -110,9 +110,9 @@ jobs:
       # past typecheck. See docs/preload-typecheck-hole.md.
       - name: Guard against project-owned .d.ts in preload/shared
         run: |
-          matches=$(find apps/desktop/src/preload apps/desktop/src/shared -name '*.d.ts' 2>/dev/null || true)
+          matches=$(find apps/desktop/src/preload packages/shared/src -name '*.d.ts' 2>/dev/null || true)
           if [ -n "$matches" ]; then
-            echo "::error::Project-owned .d.ts files are not allowed under src/preload or src/shared."
+            echo "::error::Project-owned .d.ts files are not allowed under apps/desktop/src/preload or packages/shared/src."
             echo "Move type declarations into a .ts file so skipLibCheck does not hide errors."
             echo "See docs/preload-typecheck-hole.md."
             echo "Found:"

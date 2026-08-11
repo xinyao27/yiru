@@ -1,5 +1,5 @@
+import type { PreflightRuntimeContext, PreflightStatus } from '@yiru/shared/preload/api-types'
 import type { StateCreator } from 'zustand'
-import type { PreflightRuntimeContext, PreflightStatus } from '~preload/api-types'
 import {
   getLocalPreflightContext,
   localPreflightContextKey,

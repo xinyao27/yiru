@@ -21,7 +21,7 @@ const GIT_ROOT = execFileSync('git', ['rev-parse', '--show-toplevel'], {
 // Alias targets: only areas something imports into get an alias.
 const DESKTOP_AREAS = [
   ['apps/desktop/src/renderer', '~renderer'],
-  ['apps/desktop/src/shared', '~shared'],
+  ['packages/shared/src', '~shared'],
   ['apps/desktop/src/main', '~main'],
   ['apps/desktop/src/preload', '~preload']
 ]
@@ -34,6 +34,7 @@ const DESKTOP_SOURCE_AREAS = [
 ]
 const MOBILE_AREA = 'apps/mobile/src'
 const MOBILE_SOURCES = ['apps/mobile/src', 'apps/mobile/app']
+const SHARED_PACKAGE_AREA = 'packages/shared/src'
 
 const RETIRED_PREFIXES = ['@/', '@renderer/']
 const RESOLVE_EXTENSIONS = ['.ts', '.tsx', '.d.ts', '.js', '.jsx', '.json']
@@ -73,6 +74,16 @@ export function findImportPolicyViolations(gitRoot, files) {
     const sourceArea = areaOf(file, DESKTOP_SOURCE_AREAS)
     for (const match of source.matchAll(SPECIFIER)) {
       const specifier = match[2]
+
+      // Why: package source must stay portable across desktop, mobile, and build
+      // tools; a desktop-only alias would make its dependency direction implicit.
+      if (
+        (file === SHARED_PACKAGE_AREA || file.startsWith(`${SHARED_PACKAGE_AREA}/`)) &&
+        specifier.startsWith('~')
+      ) {
+        violations.push(`${file}: '${specifier}' — @yiru/shared source cannot use aliases`)
+        continue
+      }
 
       const retired = RETIRED_PREFIXES.find((prefix) => specifier.startsWith(prefix))
       if (retired) {

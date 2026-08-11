@@ -5,6 +5,7 @@ import type {
   ShellServicesNotificationsDisplayOutput
 } from '@yiru/runtime-protocol/contract'
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
+import type { PreloadApi } from '@yiru/shared/preload/api-types'
 import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
 import type { AiVaultListArgs, AiVaultSubagentListArgs } from '@yiru/workbench-model/agent'
 import type { ReadClipboardTextOptions } from '@yiru/workbench-model/ui'
@@ -113,7 +114,6 @@ import {
   YIRU_UPDATER_QUIT_AND_INSTALL_STARTED_EVENT
 } from '~shared/updater-renderer-events'
 
-import type { PreloadApi } from './api-types'
 import { subscribeRuntimeEnvironmentFromPreload } from './runtime-environment-subscriptions'
 import type { RuntimeEnvironmentSubscriptionHandle } from './runtime-environment-subscriptions'
 

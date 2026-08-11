@@ -1,4 +1,4 @@
-import type { BrowserApi } from '~preload/api-types'
+import type { BrowserApi } from '@yiru/shared/preload/api-types'
 
 type BrowserShellEventApi = Pick<
   BrowserApi,

@@ -4,15 +4,14 @@
     "../src/renderer/env.d.ts",
     "../src/renderer/**/*",
     "../src/renderer/**/*.tsx",
-    "../src/preload/api-types.ts",
-    "../src/shared/**/*"
+    "../../../packages/shared/src/**/*"
   ],
   "compilerOptions": {
     "composite": true,
     "jsx": "react-jsx",
     "paths": {
       "~renderer/*": ["../src/renderer/*"],
-      "~shared/*": ["../src/shared/*"],
+      "~shared/*": ["../../../packages/shared/src/*"],
       "~main/*": ["../src/main/*"],
       "~preload/*": ["../src/preload/*"]
     }

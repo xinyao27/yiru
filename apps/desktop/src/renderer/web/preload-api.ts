@@ -6,6 +6,10 @@ import type {
 } from '@yiru/runtime-protocol/contract'
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 import { STATUS_GET_CONTRACT } from '@yiru/runtime-protocol/status'
+/* eslint-disable max-lines -- Why: the web preload adapter is the browser-side
+   replacement for Electron preload, so the compatibility surface is necessarily
+   centralized at this boundary. */
+import type { PreloadApi } from '@yiru/shared/preload/api-types'
 import type { AiVaultListArgs, AiVaultListResult } from '@yiru/workbench-model/agent'
 import { relativePathInsideRoot } from '@yiru/workbench-model/platform'
 import {
@@ -19,10 +23,6 @@ import {
   toRuntimeExecutionHostId,
   type ExecutionHostId
 } from '@yiru/workbench-model/workspace'
-/* eslint-disable max-lines -- Why: the web preload adapter is the browser-side
-   replacement for Electron preload, so the compatibility surface is necessarily
-   centralized at this boundary. */
-import type { PreloadApi } from '~preload/api-types'
 import { getDefaultCreateProjectParent } from '~renderer/components/sidebar/create-project-defaults'
 import { translate } from '~renderer/i18n/i18n'
 import { normalizeAutoRenameBranchFromWorkDefaultOn } from '~shared/auto-rename-branch-from-work-settings'

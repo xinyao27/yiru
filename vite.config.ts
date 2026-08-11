@@ -265,7 +265,7 @@ const yiruRootToolingConfig = defineConfig({
   resolve: {
     alias: {
       '~renderer': resolve(desktopRoot, 'src/renderer'),
-      '~shared': resolve(desktopRoot, 'src/shared'),
+      '~shared': resolve(import.meta.dirname, 'packages/shared/src'),
       '~main': resolve(desktopRoot, 'src/main'),
       '~preload': resolve(desktopRoot, 'src/preload')
     }

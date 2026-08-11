@@ -21,7 +21,7 @@ const CROSS_CLIENT_WORKSPACE_PACKAGES = [
 // and there is no bare '~', which is what keeps prefix matching unambiguous.
 const SOURCE_ALIASES = {
   '~renderer': resolve('src/renderer'),
-  '~shared': resolve('src/shared'),
+  '~shared': resolve('../../packages/shared/src'),
   '~main': resolve('src/main'),
   '~preload': resolve('src/preload')
 }

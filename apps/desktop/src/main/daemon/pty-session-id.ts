@@ -5,7 +5,7 @@ import { PTY_SESSION_ID_SEPARATOR } from '@yiru/workbench-model/workspace'
 
 // Why: re-exported here so main-side callers can keep importing
 // `parsePtySessionId` from this module (next to `mintPtySessionId`). The
-// implementation lives in `src/shared/` because the renderer-side merge
+// implementation lives in `packages/shared/src/` because the renderer-side merge
 // helper also needs it and cannot import node-only modules.
 export { parsePtySessionId } from '@yiru/workbench-model/workspace'
 

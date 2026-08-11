@@ -1,4 +1,4 @@
-// Re-export shim: the implementation moved to src/shared so mobile can share it.
+// Re-export shim: the implementation moved to packages/shared/src so mobile can share it.
 export {
   buildSmartWorkspaceSourceRows,
   getBranchSearchRequest,
