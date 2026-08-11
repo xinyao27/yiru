@@ -1,5 +1,5 @@
 import type { RefObject } from 'react'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type {
   NativeSyntheticEvent,
   TextInputKeyPressEventData,
@@ -78,16 +78,36 @@ export function MobileTerminalDock({
 }: MobileTerminalDockProps): React.JSX.Element {
   const [isCommandInputVisible, setIsCommandInputVisible] = useState(() => !liveInputEnabled)
   const [commandInputFocusRequest, setCommandInputFocusRequest] = useState(0)
+  const keyboardHideSubscriptionRef = useRef<ReturnType<typeof Keyboard.addListener> | null>(null)
+
+  useEffect(
+    () => () => {
+      keyboardHideSubscriptionRef.current?.remove()
+    },
+    []
+  )
 
   const toggleCommandInput = (): void => {
     const nextVisible = !isCommandInputVisible
-    setIsCommandInputVisible(nextVisible)
     if (nextVisible) {
+      setIsCommandInputVisible(true)
       setCommandInputFocusRequest((request) => request + 1)
       return
     }
     commandInputRef.current?.blur()
     liveInputRef.current?.blur()
+    keyboardHideSubscriptionRef.current?.remove()
+    keyboardHideSubscriptionRef.current = null
+    if (Platform.OS === 'ios' && keyboardOffset > 0) {
+      keyboardHideSubscriptionRef.current = Keyboard.addListener('keyboardDidHide', () => {
+        keyboardHideSubscriptionRef.current?.remove()
+        keyboardHideSubscriptionRef.current = null
+        setIsCommandInputVisible(false)
+      })
+      Keyboard.dismiss()
+      return
+    }
+    setIsCommandInputVisible(false)
     Keyboard.dismiss()
   }
 

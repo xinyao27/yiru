@@ -279,7 +279,12 @@ export function MobileTerminalAccessoryBar({
     renderNativeAccessoryKey(key, canSend, onAccessoryInput, onRepeatStart, onRepeatStop)
 
   return (
-    <Host colorScheme={theme} matchContents={{ vertical: true }} style={{ width: '100%' }}>
+    <Host
+      colorScheme={theme}
+      ignoreSafeArea="keyboard"
+      matchContents={{ vertical: true }}
+      style={{ width: '100%' }}
+    >
       <HStack alignment="center" spacing={TERMINAL_ACCESSORY_GAP_PT} modifiers={fullWidthModifiers}>
         <HStack alignment="center" spacing={0} modifiers={fixedSlotModifiers}>
           <MobileTerminalToolsMenu

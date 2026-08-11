@@ -7,11 +7,8 @@ import { MobileAgentIcon } from '~/components/agent-icon'
 import { agentDisplayLabel, agentDotState, formatTimeAgo } from './agent-row-display'
 import { AgentStateDot } from './agent-state-dot'
 
-const INDENT_PER_DEPTH = 14
-
 type Props = {
   agent: RuntimeWorktreeAgentRow
-  depth: number
   now: number
   // Bold/foreground until the user has visited the worktree, mirroring desktop's
   // unvisited rule (the workspace title and its agent rows share one signal).
@@ -20,16 +17,13 @@ type Props = {
 
 // One inline agent row: identity → last message/prompt → time ago → state dot.
 // Mirrors desktop DashboardAgentRow's compact in-card layout.
-export function WorkspaceAgentRow({ agent, depth, now, unvisited }: Props) {
+export function WorkspaceAgentRow({ agent, now, unvisited }: Props) {
   const dotState = agentDotState(agent, now)
   const label = agentDisplayLabel(agent, now)
   const ts = formatTimeAgo(agent.stateStartedAt, now)
 
   return (
-    <View
-      className="h-6 flex-row items-center gap-1"
-      style={[{ paddingLeft: depth * INDENT_PER_DEPTH }]}
-    >
+    <View className="h-6 flex-row items-center gap-1">
       {/* Agent identity logo (Claude/Codex/…), matching the desktop sidebar's
           agent icons instead of a two-letter text code. */}
       {agent.agentType ? <MobileAgentIcon agentId={agent.agentType} size={16} /> : null}

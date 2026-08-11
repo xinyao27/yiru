@@ -46,6 +46,7 @@ export type WorkspaceListRowItem = {
 type WorktreeRollupStatus = 'working' | 'active' | 'permission' | 'done' | 'inactive'
 
 const PROJECT_RAIL_BASE_ELBOW_WIDTH_PT = 12
+const WORKSPACE_TITLE_CENTER_TOP_PT = 16
 
 type WorkspaceLeadingStatusProps = {
   branch: string
@@ -108,7 +109,7 @@ export function WorkspaceListRow<T extends WorkspaceListRowItem>({
 
   return (
     <Pressable
-      className="active:bg-accent min-h-11 flex-row items-center gap-1.5 py-1.5 pr-2 pl-2.5"
+      className="active:bg-accent min-h-11 flex-row items-start gap-1.5 py-1.5 pr-2 pl-2.5"
       style={
         lineageDepth > 0 && !nestedUnderProject
           ? { paddingLeft: spacing4 * (lineageDepth + 1) }
@@ -131,7 +132,7 @@ export function WorkspaceListRow<T extends WorkspaceListRowItem>({
           <View
             pointerEvents="none"
             className={cn('absolute inset-x-0 top-0 items-center', !endsProjectRail && 'bottom-0')}
-            style={endsProjectRail ? { height: '50%' } : undefined}
+            style={endsProjectRail ? { height: WORKSPACE_TITLE_CENTER_TOP_PT } : undefined}
           >
             <View className="bg-foreground/30 w-hairline h-full" />
           </View>
@@ -139,9 +140,7 @@ export function WorkspaceListRow<T extends WorkspaceListRowItem>({
             pointerEvents="none"
             className="bg-foreground/30 h-hairline absolute left-1/2"
             style={{
-              // Why: agent rows are taller than plain rows; the status glyph is
-              // vertically centered by the row, so its rail elbow must be too.
-              top: '50%',
+              top: WORKSPACE_TITLE_CENTER_TOP_PT,
               width: PROJECT_RAIL_BASE_ELBOW_WIDTH_PT + spacing4 * lineageDepth
             }}
           />
@@ -193,7 +192,9 @@ export function WorkspaceListRow<T extends WorkspaceListRowItem>({
           <WorkspaceAgentList
             agents={item.agents}
             now={now}
-            railStartOffsetPt={folderMeta ? spacing4 : 0}
+            // Why: the optional folder-meta row adds a fixed 16pt between the
+            // title and agent list; offset the rail so it still starts below the title glyph.
+            railStartOffsetPt={folderMeta ? spacing4 * 4 : 0}
             unvisited={item.unread}
           />
         ) : null}
