@@ -33,7 +33,6 @@
     "verify:repository-contracts": "node ../../scripts/run-vite-plus-lint-profile.mjs switch-exhaustiveness apps/desktop/src/main apps/desktop/src/preload packages/shared/src apps/desktop/src/relay apps/desktop/src/cli packages/client/src apps/desktop/config apps/desktop/scripts packages/client/scripts --quiet && vp run @yiru/client#verify:design-token-budget && vp run @yiru/client#verify:ui-style-drift && vp run verify:localization-catalog && vp run verify:localization-coverage",
     "typecheck:node": "vp run generate:i18n && tsc --noEmit -p config/tsconfig.node.json",
     "typecheck:cli": "tsc --noEmit -p config/tsconfig.tc.cli.json",
-    "typecheck:web": "vp run @yiru/client#typecheck",
     "build:workspace-deps": "vp run --filter '{.}^...' build",
     "generate:i18n": "vp run @yiru/client#generate:i18n",
     "typecheck": "vp run build:workspace-deps && vp run generate:i18n && tsc --noEmit -p config/tsconfig.node.json && tsc --noEmit -p config/tsconfig.tc.cli.json",

@@ -1,3 +1,5 @@
+import type { BrowserWebviewElement } from '~renderer/runtime/browser-webview-element'
+
 // Captures the frozen base screenshot the user draws on. Renderer-only and
 // environment-aware: local Electron webviews expose capturePage(); remote panes
 // already display the streamed frame as an <img> we can snapshot. Keeping this
@@ -14,7 +16,7 @@ export type MarkupBaseImage = {
 }
 
 export type MarkupCaptureSource =
-  | { kind: 'webview'; webview: Electron.WebviewTag }
+  | { kind: 'webview'; webview: BrowserWebviewElement }
   | { kind: 'image'; element: HTMLImageElement }
 
 export async function captureMarkupBaseImage(
@@ -26,7 +28,7 @@ export async function captureMarkupBaseImage(
   return captureFromImage(source.element)
 }
 
-async function captureFromWebview(webview: Electron.WebviewTag): Promise<MarkupBaseImage> {
+async function captureFromWebview(webview: BrowserWebviewElement): Promise<MarkupBaseImage> {
   const native = await webview.capturePage()
   if (native.isEmpty()) {
     throw new Error('markup: webview capturePage returned an empty image')

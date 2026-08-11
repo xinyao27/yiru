@@ -16,13 +16,13 @@ These fail CI or are outright forbidden. No exceptions inside a feature task.
 | --- | --- |
 | Write or retain any test. No test files or test suites are allowed. | Section 9 |
 | Add an `eslint-disable`/`oxlint-disable max-lines`, or a per-file `max-lines` bump in `apps/mobile/config/mobile-max-lines-ratchets.ts` | `check-max-lines-ratchet.mjs` |
-| Add a project-owned `.d.ts` under `src/preload` or `src/shared` | PR workflow guard |
-| Add a variable to the `@theme inline` block in `main.css` | `check-design-token-budget.mjs` |
-| Use a native `<button>`/`<input>`/`<textarea>`/`<select>` in renderer feature TSX; write `rounded-*`; use `bg-black/N`-style alpha washes; import `components/ui/*-styles.ts` from feature code | `check-ui-style-drift.mjs` |
+| Add a project-owned `.d.ts` under `apps/desktop/src/preload` or `packages/shared/src` | PR workflow guard |
+| Add a variable to the `@theme inline` block in `packages/client/src/assets/main.css` | `@yiru/client#verify:design-token-budget` |
+| Use a native `<button>`/`<input>`/`<textarea>`/`<select>` in client feature TSX; write `rounded-*`; use `bg-black/N`-style alpha washes; import `components/ui/*-styles.ts` from feature code | `@yiru/client#verify:ui-style-drift` |
 | Use `interface`, `enum`, `namespace`, or `any` | oxlint + `erasableSyntaxOnly` |
 | Ship a user-visible string that isn't wrapped in `t()` / `translate()` | `audit-localization-coverage.mjs` |
 | Hardcode `e.metaKey`, a path separator, or a platform font | Section 7 |
-| Import from `src/main/` in `src/renderer/` | Section 1 |
+| Import desktop main/preload modules from `packages/client/src`, or use `~renderer` from desktop source | Section 1 |
 | Name a file or folder `helpers`, `utils`, `common`, `misc`, or `shared-stuff`; add an `index.ts` re-export barrel | Section 2 |
 | Rename or move a file without updating the paths written as *strings* — build scripts, CI jobs, baselines, allowlists, `Why:` comments | `check-source-path-references.mjs` |
 | Follow an absolute path from a subagent result into the main repo instead of this worktree | Section 12 |
@@ -33,15 +33,18 @@ These fail CI or are outright forbidden. No exceptions inside a feature task.
 
 ```
 apps/desktop/src/
-  shared/     pure logic + types used by more than one process
   main/       Electron main: OS, git, PTY, agent providers, IPC handlers
-  preload/    the audited contextBridge contract (index.ts + api-types.ts)
-  renderer/   React UI
+  preload/    the audited contextBridge implementation
   relay/      headless runtime server (local, SSH, and remote hosts dispatch through it)
   cli/        the `yiru` CLI
+  types/      desktop build and runtime ambient declarations
 apps/mobile/  Expo app: app/ = routes, src/ = features
-packages/     cross-client contracts: workbench-model, runtime-protocol,
-              mobile-relay-protocol
+apps/web/     landing site and product web entrypoints
+packages/
+  client/     source-only workbench UI consumed by desktop and web hosts
+  shared/     cross-process pure logic, types, and the preload contract
+  workbench-model/, runtime-protocol/, mobile-relay-protocol/
+              cross-client domain and transport contracts
 skills/       agent skill packages shipped to end users, one folder per skill
 scripts/      workspace-level tooling: contracts that span apps, skill generators
 ```
@@ -55,12 +58,23 @@ folder; `config/` is for configuration, never executables.
 
 `skills/<name>/SKILL.md` is product content, not app source — it sits at the
 repository root because it is shipped to users' agent installs rather than built
-into any one client. It is the **source of truth**: `src/cli/bundled-skill-guides.ts`
+into any one client. It is the **source of truth**:
+`apps/desktop/src/cli/bundled-skill-guides.ts`
 is generated from it by `scripts/generate-bundled-skill-guides.mjs`, and
-`resources/skills/*.json` records its release-freshness digests. Edit `SKILL.md`,
-then run that script with `--write`; never edit the generated module.
+`apps/desktop/resources/skills/*.json` records its release-freshness digests. Edit
+`SKILL.md`, then run that script with `--write`; never edit the generated module.
 
-**Import direction is one-way.** `renderer` never imports `main`. `shared` never imports `main`, `renderer`, or `electron` — Node built-ins are fine. `relay` and `cli` may reuse `main` modules. The renderer reaches the main process only through the preload contract. A type used only inside `apps/desktop` belongs in `src/shared/`, not in a package.
+**Import direction is one-way.** `packages/client` never imports desktop `main` or `preload`.
+`packages/shared` never imports desktop, client, or `electron` modules — Node built-ins are fine.
+`relay` and `cli` may reuse `main` modules. The client reaches its Electron host only through the
+preload contract in `packages/shared/src/preload/`. Pure types or logic used by more than one
+desktop process belong in `packages/shared`, even when no other app consumes them.
+
+`@yiru/client` is independently consumable source. Hosts import only its declared package exports;
+they never reach into `packages/client/src`. Its `@yiru/client/vite` preset owns source resolution,
+React/Tailwind plugins, and client aliases, while the package owns its own typecheck, lint, and i18n
+generation. Changing client implementation must not require a desktop edit unless the shared
+preload contract itself changes.
 
 ### Where a new file goes
 
@@ -89,7 +103,11 @@ Past ~15 files, a feature folder has sub-features inside it — nest them (`nati
 
 **A typical feature change should touch 1–3 files in one folder.** If a small behavior change needs a dozen edits, that's a structural defect — the feature is smeared across the tree, or you're editing the wrong layer.
 
-Crossing the process boundary is the one legitimate multi-file change. Keep it to four touchpoints sharing one feature name: the contract in `shared/<feature>/` (or `packages/*` if mobile needs it), the handler in `main/<feature>/`, the preload bridge (`index.ts` + `api-types.ts`, two files by design), and the caller in `renderer/`. A fifth layer is indirection that doesn't earn its keep.
+Crossing the process boundary is the one legitimate multi-file change. Keep it to four touchpoints
+sharing one feature name: the contract in `packages/shared/src/<feature>/`, the handler in
+`apps/desktop/src/main/<feature>/`, the preload bridge in `apps/desktop/src/preload/index.ts`, and
+the caller in `packages/client/src/<feature>/`. A fifth layer is indirection that doesn't earn its
+keep.
 
 ---
 
@@ -126,10 +144,18 @@ Splitting is good; scattering is not. The difference is whether the pieces stay 
 - Use `unknown` at boundaries and narrow. Rest args are the only `any` exemption.
 - `import type { … }` for type-only imports.
 - `switch` over a union is exhaustive with no `default` — adding a union member should break every switch that handles it.
-- Type declarations go in `.ts`. Under `src/preload` and `src/shared` this is a CI gate: `skipLibCheck: true` silently widens unresolved names in a `.d.ts` to `any`, which is how a broken IPC signature once shipped past typecheck.
+- Type declarations go in `.ts`. Under `apps/desktop/src/preload` and `packages/shared/src` this is a CI gate: `skipLibCheck: true` silently widens unresolved names in a `.d.ts` to `any`, which is how a broken IPC signature once shipped past typecheck.
 - Prefer `satisfies` over `as`. An `as` cast is a claim the type system can't back — if you need one, say why.
-- **Imports use an alias the moment they leave the folder they belong to.** `~renderer/*`, `~shared/*`, `~main/*`, and `~preload/*` are the whole set for desktop; mobile has `~/*` for its `src/`. Any import that crosses from one of those areas into another uses the alias, at any depth. Inside one area, `./x` and `../x` stay relative — reach for the alias at two levels up or more. `relay/` and `cli/` are leaf executables nothing imports into, so they have no alias of their own, and there is no bare `~` for desktop.
-- A renderer file importing `~main/*` is a build error, not a style problem — the one-way rule above is enforced by `check-import-path-policy.mjs`.
+- **Imports use an alias the moment they leave the folder they belong to.** `~renderer/*` means
+  `packages/client/src/*`; it is package-internal and supplied to hosts by the
+  `@yiru/client/vite` preset. `~shared/*` means `packages/shared/src/*`. `~main/*` and
+  `~preload/*` are desktop-only. Mobile has `~/*` for its `src/`. Inside one area, `./x` and `../x`
+  stay relative — reach for the alias at two levels up or more. `relay/` and `cli/` are leaf
+  executables nothing imports into, so they have no aliases, and desktop has no bare `~`.
+- `packages/shared/src` uses only relative imports internally; aliases there would make the package
+  depend on a host resolver. Desktop source cannot use `~renderer`; it consumes public
+  `@yiru/client` exports. Client source cannot use `~main` or `~preload`. These are build errors
+  enforced by `check-import-path-policy.mjs`, not style preferences.
 - `build:cli` is a plain `tsc` emit, so it cannot resolve aliases at runtime: `scripts/rewrite-emitted-aliases.mjs` turns them back into relative requires and fails the build on any it does not recognize. Adding a desktop alias means updating that script and `config/tsconfig.cli.json` together.
 
 ---
@@ -163,7 +189,9 @@ No `TODO` without an issue link. No commented-out code — git has it.
 Work runs on the local machine, in a WSL distro, over SSH, and through a relay. Every path that touches a filesystem, a process, or a git binary must work on all of them, on macOS, Linux, and Windows alike — code, commands, and scripts.
 
 - Resolve paths with `path.join` or Electron path utilities. Never assume `/` or `\`.
-- Route filesystem, git, terminal, and search operations through the runtime clients (`renderer/runtime/runtime-*-client.ts`, `main/runtime/`) instead of calling Node from a feature.
+- Route filesystem, git, terminal, and search operations through the runtime clients
+  (`packages/client/src/runtime/*-client.ts`, `apps/desktop/src/main/runtime/`) instead of calling
+  Node from a feature.
 - Scope cached host state — capabilities, versions, connection health — to the host that executes it. One host's answer must never leak into another's.
 - Keyboard shortcuts branch on platform: `navigator.userAgent.includes('Mac')` → `metaKey`, else `ctrlKey`. Electron menu accelerators use `CmdOrCtrl`.
 
@@ -174,7 +202,10 @@ Work runs on the local machine, in a WSL distro, over SSH, and through a relay. 
 Yiru shells out to **the user's** git binary, whose version differs across native, WSL, and SSH hosts. **Git 2.25** is the core-workflow baseline.
 
 - Check when every subcommand and option was introduced. Newer behavior needs a baseline-compatible fallback, or must degrade safely.
-- Route the preferred/fallback pair through `GitCapabilityCache` (`shared/git/capability-cache.ts`) with a narrow unsupported-error predicate, so a known-invalid command isn't retried on every poll. `git --version` isn't sufficient, and `simple-git` doesn't paper over host differences.
+- Route the preferred/fallback pair through `GitCapabilityCache`
+  (`packages/shared/src/git/capability-cache.ts`) with a narrow unsupported-error predicate, so a
+  known-invalid command isn't retried on every poll. `git --version` isn't sufficient, and
+  `simple-git` doesn't paper over host differences.
 - Preserve global options that precede the subcommand (`git -c …`), including auto-maintenance suppression on worktree-create fetches.
 - PR CI verifies compatibility against real git 2.25.5, 2.38.1, and 2.54.0. Adopting a newer feature means adding its version boundary to the compatibility check so both paths get exercised.
 
@@ -206,7 +237,10 @@ Report results honestly: if something fails, show the output; if you skipped a s
 
 ## 11. Working in legacy areas
 
-Much of this repo predates these rules — hundreds of loose modules in `shared/` and `renderer/lib/`, flat feature folders, stuttering filenames, feature CSS in `main.css`, and a `max-lines` grandfather list. That is the state to move away from, not a precedent to copy.
+Much of this repo predates these rules — hundreds of loose modules in `packages/shared/src` and
+`packages/client/src/lib`, flat feature folders, stuttering filenames, feature CSS in
+`packages/client/src/assets/main.css`, and a `max-lines` grandfather list. That is the state to move
+away from, not a precedent to copy.
 
 - **New code follows this document**, without exception.
 - **When you touch a legacy area, move what you touch toward it**: pull the files you're already editing into the feature folder, drop the redundant prefixes. Don't launch an unrequested refactor beyond that.

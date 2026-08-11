@@ -93,6 +93,7 @@ import {
   syncBrowserPageChromeInset
 } from '~renderer/runtime/browser-page-viewport'
 import { browserShellEventsClient } from '~renderer/runtime/browser-shell-events-client'
+import type { BrowserWebviewElement } from '~renderer/runtime/browser-webview-element'
 import {
   destroyPersistentWebview,
   moveFocusToRendererBeforeWebviewDetach,
@@ -355,7 +356,7 @@ function createBrowserAnnotationPayload(payload: BrowserGrabPayload): BrowserAnn
 function getBrowserOverlayAnchor(
   payload: BrowserGrabPayload,
   container: HTMLElement | null,
-  webview: Electron.WebviewTag | null,
+  webview: BrowserWebviewElement | null,
   viewport: BrowserOverlayViewport
 ): BrowserOverlayAnchor {
   const containerRect = container?.getBoundingClientRect()
@@ -713,7 +714,7 @@ function getRemoteBrowserDeviceScaleFactor(): number {
 }
 
 function getOpenableExternalUrl(
-  webview: Electron.WebviewTag | null,
+  webview: BrowserWebviewElement | null,
   fallbackUrl: string
 ): string | null {
   let currentUrl = fallbackUrl
@@ -731,7 +732,7 @@ function getOpenableExternalUrl(
   return normalizeExternalBrowserUrl(redactKagiSessionToken(currentUrl))
 }
 
-function getCurrentBrowserUrl(webview: Electron.WebviewTag | null, fallbackUrl: string): string {
+function getCurrentBrowserUrl(webview: BrowserWebviewElement | null, fallbackUrl: string): string {
   let currentUrl = fallbackUrl
   if (webview) {
     try {
@@ -747,7 +748,7 @@ function getCurrentBrowserUrl(webview: Electron.WebviewTag | null, fallbackUrl: 
 }
 
 function retryBrowserTabLoad(
-  webview: Electron.WebviewTag | null,
+  webview: BrowserWebviewElement | null,
   browserTab: BrowserPageState,
   onUpdatePageState: (tabId: string, updates: BrowserTabPageState) => void
 ): void {
@@ -2849,7 +2850,7 @@ function BrowserPagePane({
   }, [workspaceId])
   const addressBarInputRef = useRef<HTMLInputElement | null>(null)
   const dismissAddressBarSuggestionsRef = useRef<(() => void) | null>(null)
-  const webviewRef = useRef<Electron.WebviewTag | null>(null)
+  const webviewRef = useRef<BrowserWebviewElement | null>(null)
   const browserTabIdRef = useRef(browserTab.id)
   browserTabIdRef.current = browserTab.id
   const inputLockedRef = useRef(inputLocked)
@@ -2896,7 +2897,7 @@ function BrowserPagePane({
   const lastKnownWebviewUrlRef = useRef<string | null>(null)
   // Why: URL synchronization runs in a separate effect and must not bypass the
   // pre-document script registration while a newly attached guest is pending.
-  const initialNavigationPendingWebviewRef = useRef<Electron.WebviewTag | null>(null)
+  const initialNavigationPendingWebviewRef = useRef<BrowserWebviewElement | null>(null)
   const onUpdatePageStateRef = useRef(onUpdatePageState)
   const onSetUrlRef = useRef(onSetUrl)
   const addBrowserHistoryEntry = useAppStore((s) => s.addBrowserHistoryEntry)
@@ -3699,7 +3700,7 @@ function BrowserPagePane({
   }, [onSetUrl, onUpdatePageState, addBrowserHistoryEntry])
 
   const syncNavigationState = useCallback(
-    (webview: Electron.WebviewTag): void => {
+    (webview: BrowserWebviewElement): void => {
       try {
         onUpdatePageStateRef.current(browserTab.id, {
           title: getBrowserDisplayTitle(
