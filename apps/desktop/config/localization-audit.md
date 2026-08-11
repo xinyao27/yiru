@@ -63,8 +63,8 @@ The coverage gate compares current candidates against
 new candidates fail the check and must be localized or added with a reviewed
 reason in the same change.
 
-The script scans `src/renderer` by default. That is the primary UI surface.
-Use `--source-root src` for a wider audit when checking renderer-adjacent shared
+The script scans `../../packages/client/src` by default. That is the primary UI surface.
+Use `--source-root ../../packages/client/src` for an explicit client audit when checking adjacent
 copy, then classify non-renderer findings carefully because many are diagnostics
 or external tool text.
 

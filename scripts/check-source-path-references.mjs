@@ -23,7 +23,7 @@ const REPO_ROOT = path.resolve(import.meta.dirname, '..')
 // allowlist entry per fixture.
 const CHECKED_ROOT = new RegExp(
   [
-    '^src/(main|renderer|preload|shared|relay|cli|types)/',
+    '^src/(main|renderer|preload|shared|relay|cli|types|assets|components|i18n)/',
     '^apps/(desktop|mobile|web)/',
     '^packages/[a-z0-9-]+/',
     '^config/',
@@ -68,6 +68,10 @@ const SEARCH_GLOBS = [
   'apps/*/scripts/**',
   'apps/*/src/**',
   'packages/*/src/**',
+  'packages/*/scripts/**',
+  'packages/*/project.inlang/**',
+  'packages/*/*.json',
+  'packages/*/*.ts',
   'scripts/**',
   '.github/workflows/*',
   'package.json',
@@ -81,7 +85,7 @@ const SEARCH_GLOBS = [
 // Why: a string may be written relative to the repo root or to the app that
 // owns it (the ui-style-drift allowlist uses app-relative paths, the max-lines
 // baseline uses repo-relative ones). Accept a hit under any of them.
-const RESOLUTION_BASES = ['', 'apps/desktop', 'apps/mobile', 'apps/web']
+const RESOLUTION_BASES = ['', 'apps/desktop', 'apps/mobile', 'apps/web', 'packages/client']
 
 function listSearchFiles(repoRoot) {
   const output = execFileSync('git', ['ls-files', '--', ...SEARCH_GLOBS], {

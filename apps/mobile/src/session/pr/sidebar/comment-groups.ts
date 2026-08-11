@@ -1,7 +1,7 @@
 import type { PRComment } from '@yiru/workbench-model/review'
 
 // Thread grouping for the PR comment timeline, ported from the desktop helper
-// (src/renderer/lib/pr-comment-groups.ts) minus the DOM class constants.
+// (packages/client/src/lib/pr-comment-groups.ts) minus the DOM class constants.
 // Inline review comments sharing a threadId collapse into a root + replies; all
 // other comments are standalone. Upstream order is preserved.
 export type PRCommentGroup =

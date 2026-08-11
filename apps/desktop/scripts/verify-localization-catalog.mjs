@@ -10,8 +10,11 @@ const SOURCE_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx', '.mts', '.cts']
 const SKIP_PATH_PARTS = new Set(['.git', 'dist', 'node_modules', 'out', 'assets'])
 const LOCALIZATION_FUNCTION_NAMES = new Set(['t', 'translate', 'translateMain'])
 const PLACEHOLDER_RE = /\{\{[^}]+\}\}/g
-const LOCALES_RELATIVE_DIR = path.join('src', 'renderer', 'i18n', 'locales')
-const SOURCE_RELATIVE_ROOTS = [path.join('src', 'renderer'), path.join('src', 'main')]
+const LOCALES_RELATIVE_DIR = path.join('..', '..', 'packages', 'client', 'src', 'i18n', 'locales')
+const SOURCE_RELATIVE_ROOTS = [
+  path.join('..', '..', 'packages', 'client', 'src'),
+  path.join('src', 'main')
+]
 
 function normalizePath(root, filePath) {
   return path.relative(root, filePath).split(path.sep).join('/')
@@ -417,7 +420,7 @@ export async function main(root = process.cwd(), options = parseArgs(process.arg
         console.error(formatMissingReferences(missingFallbacks))
         return 1
       }
-      console.error('Localization keys are missing from src/renderer/i18n/locales/en.json.')
+      console.error('Localization keys are missing from packages/client/src/i18n/locales/en.json.')
       console.error('')
       console.error(formatMissingReferences(missing))
       console.error('')
@@ -428,7 +431,7 @@ export async function main(root = process.cwd(), options = parseArgs(process.arg
 
   const remainingMissing = references.filter((reference) => !catalogKeys.has(reference.key))
   if (remainingMissing.length > 0) {
-    console.error('Localization keys are missing from src/renderer/i18n/locales/en.json.')
+    console.error('Localization keys are missing from packages/client/src/i18n/locales/en.json.')
     console.error('')
     console.error(formatMissingReferences(remainingMissing))
     return 1

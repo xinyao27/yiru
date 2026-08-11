@@ -197,8 +197,7 @@ function readPreloadSurface() {
     paths: {
       '~shared/*': ['../../packages/shared/src/*'],
       '~main/*': ['src/main/*'],
-      '~preload/*': ['src/preload/*'],
-      '~renderer/*': ['src/renderer/*']
+      '~preload/*': ['src/preload/*']
     }
   })
   const checker = program.getTypeChecker()

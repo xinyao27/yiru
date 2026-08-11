@@ -6,7 +6,7 @@ import { LoadingIndicator } from '~/components/loading-indicator'
 import type { AgentDotState } from './agent-row-display'
 
 // Per-agent state indicator, 1:1 with desktop AgentStateDot
-// (src/renderer/components/agent-state-dot.tsx): the configured loader for
+// (packages/client/src/components/agent-state-dot.tsx): the configured loader for
 // 'working', emerald for 'done', red for attention, and neutral for idle.
 const DOT_COLOR_CLASSES: Record<Exclude<AgentDotState, 'working'>, string> = {
   done: 'bg-emerald-500',

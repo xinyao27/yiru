@@ -48,7 +48,7 @@ async function collectSourceFiles(root, dir) {
 }
 
 function areaForFile(relativePath) {
-  const rendererPrefix = 'src/renderer/'
+  const rendererPrefix = '../../packages/client/src/'
   if (!relativePath.startsWith(rendererPrefix)) {
     return relativePath.split('/').slice(0, 2).join('/')
   }
@@ -118,7 +118,7 @@ function parseArgs(argv) {
     check: false,
     format: 'summary',
     outputPath: null,
-    sourceRoot: path.join('src', 'renderer')
+    sourceRoot: path.join('..', '..', 'packages', 'client', 'src')
   }
 
   for (let index = 0; index < argv.length; index += 1) {

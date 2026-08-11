@@ -1,8 +1,8 @@
 # Yiru desktop design system
 
-This is the binding visual contract for the Electron renderer in `apps/desktop/src/renderer`.
-[`src/assets/main.css`](./src/renderer/assets/main.css) is the executable token source,
-[`src/components/ui/`](./src/renderer/components/ui/) owns reusable primitives, and the
+This is the binding visual contract for the Electron renderer in `packages/client/src`.
+[`src/assets/main.css`](../../packages/client/src/assets/main.css) is the executable token source,
+[`src/components/ui/`](../../packages/client/src/components/ui/) owns reusable primitives, and the
 extended cross-client reference is [`docs/style-guide.md`](../../docs/style-guide.md).
 
 If this document, the token source, and a component disagree, resolve the design decision first.

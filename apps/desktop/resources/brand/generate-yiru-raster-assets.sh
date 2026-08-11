@@ -10,7 +10,7 @@ README_HERO_SOURCE="$REPO_ROOT/docs/assets/yiru-hero.png"
 MOBILE_ASSETS_DIR="$REPO_ROOT/apps/mobile/assets"
 APP_ICONS_DIR="$PROJECT_DIR/resources/app-icons"
 TRAY_ASSETS_DIR="$PROJECT_DIR/resources/tray"
-WEB_PUBLIC_DIR="$PROJECT_DIR/src/renderer/public"
+WEB_PUBLIC_DIR="$REPO_ROOT/packages/client/src/public"
 SITE_PUBLIC_DIR="$REPO_ROOT/apps/web/public"
 
 QLMANAGE_BIN=$(command -v qlmanage || true)

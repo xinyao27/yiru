@@ -20,7 +20,7 @@ const GIT_ROOT = execFileSync('git', ['rev-parse', '--show-toplevel'], {
 
 // Alias targets: only areas something imports into get an alias.
 const DESKTOP_AREAS = [
-  ['apps/desktop/src/renderer', '~renderer'],
+  ['packages/client/src', '~renderer'],
   ['packages/shared/src', '~shared'],
   ['apps/desktop/src/main', '~main'],
   ['apps/desktop/src/preload', '~preload']
@@ -34,6 +34,7 @@ const DESKTOP_SOURCE_AREAS = [
 ]
 const MOBILE_AREA = 'apps/mobile/src'
 const MOBILE_SOURCES = ['apps/mobile/src', 'apps/mobile/app']
+const CLIENT_PACKAGE_AREA = 'packages/client/src'
 const SHARED_PACKAGE_AREA = 'packages/shared/src'
 
 const RETIRED_PREFIXES = ['@/', '@renderer/']
@@ -85,14 +86,28 @@ export function findImportPolicyViolations(gitRoot, files) {
         continue
       }
 
+      if (specifier === '@yiru/client/src' || specifier.startsWith('@yiru/client/src/')) {
+        violations.push(`${file}: '${specifier}' — consume @yiru/client through its exports`)
+        continue
+      }
+
       const retired = RETIRED_PREFIXES.find((prefix) => specifier.startsWith(prefix))
       if (retired) {
         violations.push(`${file}: '${specifier}' uses the retired '${retired}' alias`)
         continue
       }
-      if (specifier.startsWith('~main/') && sourceArea?.alias === '~renderer') {
+      if (
+        (specifier.startsWith('~main/') || specifier.startsWith('~preload/')) &&
+        sourceArea?.alias === '~renderer'
+      ) {
         violations.push(
-          `${file}: '${specifier}' — renderer must reach the main process through the preload contract`
+          `${file}: '${specifier}' — client must reach its host through the preload contract`
+        )
+        continue
+      }
+      if (specifier.startsWith('~renderer/') && file.startsWith('apps/desktop/')) {
+        violations.push(
+          `${file}: '${specifier}' — desktop must consume @yiru/client through package exports`
         )
         continue
       }
@@ -109,6 +124,12 @@ export function findImportPolicyViolations(gitRoot, files) {
       const targetArea = areaOf(target, DESKTOP_AREAS)
       if (targetArea && sourceArea) {
         if (targetArea.root !== sourceArea.root) {
+          if (targetArea.root === CLIENT_PACKAGE_AREA) {
+            violations.push(
+              `${file}: '${specifier}' reaches into @yiru/client source — use a package export`
+            )
+            continue
+          }
           violations.push(
             `${file}: '${specifier}' crosses into ${targetArea.alias}/ — use the alias`
           )

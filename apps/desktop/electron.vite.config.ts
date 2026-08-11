@@ -1,7 +1,6 @@
 import { resolve } from 'node:path'
 
-import tailwindcss from '@tailwindcss/vite'
-import react from '@vitejs/plugin-react'
+import { createClientVitePreset } from '@yiru/client/vite'
 import { defineConfig } from 'electron-vite'
 
 import { createElectronViteRolldownOptionsBridge } from './build-plugins/electron-vite-rolldown-options-bridge'
@@ -10,8 +9,10 @@ import { createPlainNodeEntryGuardPlugin } from './build-plugins/plain-node-entr
 // Why: source-owned workspace packages are not sandbox preload dependencies.
 // Inline runtime subpath imports anywhere Electron cannot resolve node_modules.
 const CROSS_CLIENT_WORKSPACE_PACKAGES = [
+  '@yiru/client',
   '@yiru/mobile-relay-protocol',
   '@yiru/runtime-protocol',
+  '@yiru/shared',
   '@yiru/workbench-model'
 ]
 
@@ -20,11 +21,12 @@ const CROSS_CLIENT_WORKSPACE_PACKAGES = [
 // are leaf executables nothing imports into, so they deliberately get none —
 // and there is no bare '~', which is what keeps prefix matching unambiguous.
 const SOURCE_ALIASES = {
-  '~renderer': resolve('src/renderer'),
   '~shared': resolve('../../packages/shared/src'),
   '~main': resolve('src/main'),
   '~preload': resolve('src/preload')
 }
+
+const clientVitePreset = createClientVitePreset({ featureWallEnabled: true })
 
 // Why: the telemetry transport is gated by two compile-time constants that
 // only the official CI release workflow sets. Contributor / `pnpm dev` /
@@ -262,12 +264,13 @@ export default defineConfig({
     }
   },
   renderer: {
-    resolve: {
-      alias: { ...SOURCE_ALIASES }
-    },
-    plugins: [react(), tailwindcss()],
-    worker: {
-      format: 'es'
+    ...clientVitePreset,
+    build: {
+      outDir: resolve('out/renderer'),
+      emptyOutDir: true,
+      rollupOptions: {
+        input: resolve(clientVitePreset.root, 'index.html')
+      }
     }
   }
 })

@@ -13,7 +13,6 @@
     "composite": true,
     "types": ["electron-vite/node"],
     "paths": {
-      "~renderer/*": ["../src/renderer/*"],
       "~shared/*": ["../../../packages/shared/src/*"],
       "~main/*": ["../src/main/*"],
       "~preload/*": ["../src/preload/*"]
