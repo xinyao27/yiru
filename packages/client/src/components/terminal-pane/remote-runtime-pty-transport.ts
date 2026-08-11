@@ -4,10 +4,10 @@ import { setDriverForPty } from '~renderer/lib/pane-manager/mobile-driver-state'
 import { setFitOverride } from '~renderer/lib/pane-manager/mobile-fit-overrides'
 import { callRuntimeOrpcByPath } from '~renderer/runtime/orpc-client'
 import {
-  getRemoteRuntimeTerminalMultiplexer,
   REMOTE_TERMINAL_SNAPSHOT_TOO_LARGE,
   type RemoteRuntimeMultiplexedTerminal
-} from '~renderer/runtime/remote-runtime-terminal-multiplexer'
+} from '~renderer/runtime/terminal-multiplex/multiplexer'
+import { getRemoteRuntimeTerminalMultiplexer } from '~renderer/runtime/terminal-multiplex/registry'
 import {
   getRemoteRuntimePtyEnvironmentId,
   getRemoteRuntimeTerminalHandle,
@@ -25,8 +25,7 @@ import {
 import type {
   RuntimeMobileSessionTerminalClientTab,
   RuntimeMobileSessionTabsResult,
-  RuntimeTerminalCreate,
-  RuntimeTerminalSend
+  RuntimeTerminalCreate
 } from '~shared/runtime-types'
 import {
   isTerminalInputTooLargeWithDeferredMeasurement,
@@ -39,6 +38,8 @@ import {
   createRemoteRuntimePtyTextBatcher,
   createRemoteRuntimeViewportBatcher
 } from './remote-runtime-pty-batching'
+import { recordTerminalFreezeBreadcrumb } from './terminal-freeze-breadcrumbs'
+import { deliverPtyDataWithDeferredCredit } from './terminal-pty-ack-gate'
 
 const REMOTE_TERMINAL_INPUT_FLUSH_MS = 8
 const REMOTE_TERMINAL_VIEWPORT_FLUSH_MS = 33
@@ -111,11 +112,6 @@ export function createRemoteRuntimePtyTransport(
   // shares them. The instance suffix keeps one viewer's refresh off peer records.
   const clientId = `desktop:${tabId ?? 'tab'}:${leafId ?? 'leaf'}:${createBrowserUuid()}`
   const outputProcessor = createPtyOutputProcessor({
-    onTitleChange,
-    onBell,
-    onAgentBecameIdle,
-    onAgentBecameWorking,
-    onAgentExited,
     onAgentStatus
   })
 
@@ -306,19 +302,15 @@ export function createRemoteRuntimePtyTransport(
       return false
     }
     try {
+      const stream = getCurrentMultiplexedStream(targetHandle)
+      if (!stream) {
+        return false
+      }
       for (const chunk of iterateTerminalInputChunks(text)) {
         if (!connected || handle !== targetHandle) {
           return false
         }
-        // Why: acknowledged sends are ordered behind any pending debounce text,
-        // but they must not collapse large paste input back into one remote RPC.
-        const result = await callRuntime<{ send: RuntimeTerminalSend }>('terminal.send', {
-          terminal: targetHandle,
-          text: chunk,
-          client: { id: clientId, type: 'desktop' },
-          ...(desiredViewport ? { viewport: desiredViewport, claimViewport: true as const } : {})
-        })
-        if (result.send.accepted !== true) {
+        if (!(await stream.sendInputAccepted(chunk))) {
           return false
         }
       }
@@ -514,22 +506,72 @@ export function createRemoteRuntimePtyTransport(
       client: { id: clientId, type: 'desktop' },
       viewport: subscribedViewport ?? undefined,
       callbacks: {
-        onData: (data, meta) => {
+        onData: (data, meta, onParsed) => {
           if (isCurrentSubscription()) {
-            outputProcessor.processData(data, storedCallbacks, undefined, meta)
+            const parseStartedAt = performance.now()
+            deliverPtyDataWithDeferredCredit(
+              () => {
+                recordTerminalFreezeBreadcrumb('multiplex-output-parsed', {
+                  bytes: meta.wireByteLength,
+                  durationMs: performance.now() - parseStartedAt
+                })
+                onParsed()
+              },
+              () =>
+                outputProcessor.processData(data, storedCallbacks, undefined, {
+                  rawLength: data.length
+                })
+            )
+          } else {
+            onParsed()
           }
         },
-        onSnapshot: (data, meta) => {
+        onSnapshot: (data, meta, onParsed) => {
           // Why: a snapshot with no body can still carry a pending mid-escape
           // tail that must be replayed so the next live chunk completes it.
           if ((data || meta?.pendingEscapeTailAnsi) && isCurrentSubscription()) {
+            const parseStartedAt = performance.now()
             outputProcessor.processData(data, storedCallbacks, {
               replayingBufferedData: true,
               suppressAttentionEvents: true,
               ...(meta?.pendingEscapeTailAnsi
                 ? { pendingEscapeTailAnsi: meta.pendingEscapeTailAnsi }
-                : {})
+                : {}),
+              snapshotCols: meta.cols,
+              snapshotRows: meta.rows,
+              onReplayParsed: () => {
+                recordTerminalFreezeBreadcrumb('multiplex-snapshot-parsed', {
+                  bytes: meta.wireByteLength,
+                  durationMs: performance.now() - parseStartedAt
+                })
+                onParsed()
+              }
             })
+          } else {
+            onParsed()
+          }
+        },
+        onSideEffectBatch: (batch) => {
+          if (!isCurrentSubscription()) {
+            return
+          }
+          for (const fact of batch.facts) {
+            if (fact.kind === 'title') {
+              onTitleChange?.(fact.normalizedTitle, fact.rawTitle)
+            } else if (fact.kind === 'bell') {
+              onBell?.()
+            } else if (fact.kind === 'agent-idle') {
+              onAgentBecameIdle?.(fact.title)
+            } else if (fact.kind === 'agent-working') {
+              onAgentBecameWorking?.()
+            } else if (fact.kind === 'agent-exited') {
+              onAgentExited?.()
+            }
+          }
+        },
+        onClearBuffer: () => {
+          if (isCurrentSubscription()) {
+            outputProcessor.processData('\x1b[2J\x1b[3J\x1b[H', storedCallbacks)
           }
         },
         onSubscribed: () => {
@@ -558,6 +600,7 @@ export function createRemoteRuntimePtyTransport(
         },
         onError: (message) => {
           if (isCurrentSubscription()) {
+            recordTerminalFreezeBreadcrumb('multiplex-stream-error')
             handleRemoteTerminalError(message)
           }
         },
@@ -572,6 +615,7 @@ export function createRemoteRuntimePtyTransport(
           }
         },
         onTransportClose: () => {
+          recordTerminalFreezeBreadcrumb('multiplex-reconnect')
           transportClosed = true
           if (generation !== subscriptionGeneration) {
             return
@@ -810,7 +854,7 @@ export function createRemoteRuntimePtyTransport(
       const pending = inputBatcher.takePending()
       const text = `${pending}${data}`
       const stream = getCurrentMultiplexedStream(targetHandle)
-      if (stream?.sendInput(text)) {
+      if (stream?.sendQueryReply(text)) {
         return true
       }
       if (pendingViewportClaim) {

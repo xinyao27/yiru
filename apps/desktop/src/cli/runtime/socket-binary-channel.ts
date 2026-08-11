@@ -1,9 +1,9 @@
+import { decodeTerminalMultiplexFrame } from '@yiru/runtime-protocol/terminal-multiplex/frame'
 import {
   encodeRuntimeOrpcSocketFrame,
   RUNTIME_INBOUND_BINARY_STREAM_CAPABILITY,
   RUNTIME_ORPC_SOCKET_PROTOCOL
 } from '~shared/runtime-orpc-socket'
-import { decodeTerminalStreamFrame } from '~shared/terminal/stream-protocol'
 
 import { RuntimeClientError } from './types'
 
@@ -30,12 +30,12 @@ export class RuntimeOrpcSocketBinaryChannel {
     if (!this.isNegotiated) {
       throw unsupportedBinaryStream()
     }
-    const terminalFrame = decodeTerminalStreamFrame(bytes)
+    const terminalFrame = decodeTerminalMultiplexFrame(bytes)
     if (
       !Number.isSafeInteger(streamId) ||
       streamId < 0 ||
-      !terminalFrame ||
-      terminalFrame.streamId !== streamId
+      !terminalFrame.ok ||
+      terminalFrame.frame.routeId !== streamId
     ) {
       throw new RuntimeClientError(
         'invalid_binary_terminal_stream',
@@ -58,7 +58,7 @@ export class RuntimeOrpcSocketBinaryChannel {
       return false
     }
     const bytes = new Uint8Array(payload)
-    if (!decodeTerminalStreamFrame(bytes)) {
+    if (!decodeTerminalMultiplexFrame(bytes).ok) {
       return false
     }
     if (!this.isNegotiated) {

@@ -1,12 +1,12 @@
 import type { RPCLinkOptions } from '@orpc/client/websocket' with { 'resolution-mode': 'import' }
 import {
   decodeRuntimeOrpcBinaryFrame,
+  decodeRuntimeOrpcSideChannelBinaryFrame,
   decodeRuntimeOrpcTextFrame,
   encodeRuntimeOrpcBinaryFrame,
   encodeRuntimeOrpcTextFrame
 } from '@yiru/runtime-protocol/orpc-peer-frame'
-
-import { decodeTerminalStreamFrame } from '../terminal/stream-protocol'
+import { decodeTerminalMultiplexFrame } from '@yiru/runtime-protocol/terminal-multiplex/frame'
 
 type DedicatedOrpcWebsocket = RPCLinkOptions<Record<never, never>>['websocket']
 type DedicatedOrpcEvent = 'message' | 'close'
@@ -20,13 +20,23 @@ export class DedicatedRemoteRuntimeOrpcPeer {
     Set<EventListenerOrEventListenerObject>
   >()
   private sendQueue = Promise.resolve()
+  private readonly requestId: string
+  private readonly sendText: (frame: string) => boolean
+  private readonly sendBinary: (frame: Uint8Array<ArrayBufferLike>) => boolean
+  private readonly onTerminalBinary: (frame: Uint8Array<ArrayBufferLike>) => void
   readyState: DedicatedOrpcWebsocket['readyState'] = WEBSOCKET_OPEN
 
   constructor(
-    private readonly sendText: (frame: string) => boolean,
-    private readonly sendBinary: (frame: Uint8Array<ArrayBufferLike>) => boolean,
-    private readonly onTerminalBinary: (frame: Uint8Array<ArrayBufferLike>) => void
-  ) {}
+    requestId: string,
+    sendText: (frame: string) => boolean,
+    sendBinary: (frame: Uint8Array<ArrayBufferLike>) => boolean,
+    onTerminalBinary: (frame: Uint8Array<ArrayBufferLike>) => void
+  ) {
+    this.requestId = requestId
+    this.sendText = sendText
+    this.sendBinary = sendBinary
+    this.onTerminalBinary = onTerminalBinary
+  }
 
   readonly addEventListener: DedicatedOrpcWebsocket['addEventListener'] = (
     type: string,
@@ -71,10 +81,15 @@ export class DedicatedRemoteRuntimeOrpcPeer {
       this.emitMessage(orpcPayload)
       return true
     }
-    if (!decodeTerminalStreamFrame(frame)) {
+    const sideChannel = decodeRuntimeOrpcSideChannelBinaryFrame(frame)
+    if (
+      !sideChannel ||
+      sideChannel.requestId !== this.requestId ||
+      !decodeTerminalMultiplexFrame(sideChannel.payload).ok
+    ) {
       return false
     }
-    this.onTerminalBinary(frame)
+    this.onTerminalBinary(sideChannel.payload)
     return true
   }
 

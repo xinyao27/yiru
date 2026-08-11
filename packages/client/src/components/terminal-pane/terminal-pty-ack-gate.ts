@@ -26,8 +26,7 @@ export function ackPtyData(ptyId: string, chars: number): void {
 // instead of dropping.
 
 type DeferredPtyAckCredit = {
-  ptyId: string
-  chars: number
+  credit: () => void
   claimed: boolean
   credited: boolean
 }
@@ -41,7 +40,7 @@ function creditDeferredPtyAck(credit: DeferredPtyAckCredit): void {
     return
   }
   credit.credited = true
-  ackPtyData(credit.ptyId, credit.chars)
+  credit.credit()
 }
 
 /** Runs one pty:data delivery with a parse-deferred ACK credit. If the
@@ -54,7 +53,18 @@ export function deliverPtyDataWithDeferredAck(
   chars: number,
   deliver: () => void
 ): void {
-  const credit: DeferredPtyAckCredit = { ptyId, chars, claimed: false, credited: false }
+  deliverPtyDataWithDeferredCredit(() => ackPtyData(ptyId, chars), deliver)
+}
+
+export function deliverPtyDataWithDeferredCredit(
+  creditCallback: () => void,
+  deliver: () => void
+): void {
+  const credit: DeferredPtyAckCredit = {
+    credit: creditCallback,
+    claimed: false,
+    credited: false
+  }
   currentDeliveryCredit = credit
   try {
     deliver()
