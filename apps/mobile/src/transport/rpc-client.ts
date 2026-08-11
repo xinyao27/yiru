@@ -16,8 +16,11 @@ import { createMobileRpcActivityProbe } from './rpc-client-activity-probe'
 import { createMobileRuntimeOrpcTransport } from './rpc-client-orpc-wiring'
 import { createMobileStatusCompatProbe, type DesktopStatusPayload } from './rpc-client-status-probe'
 import {
+  clearTerminalBinaryFrameState,
+  createTerminalBinaryFrameState,
+  deleteTerminalBinaryStreamState,
   handleTerminalBinaryFrame,
-  type TerminalSnapshotState
+  takePendingTerminalStreamEvents
 } from './rpc-client-terminal-binary-frame'
 import { markRpcDeliveryUnknown } from './rpc-delivery-ambiguity'
 import { isRpcResponse } from './rpc-response-shape'
@@ -167,8 +170,7 @@ export function connect(
 
   const pending = new Map<string, PendingRequest>()
   const terminalStreamListeners = new Map<number, StreamingListener>()
-  const terminalSnapshots = new Map<number, TerminalSnapshotState>()
-  const pendingTerminalStreamEvents = new Map<number, unknown[]>()
+  const terminalBinaryFrameState = createTerminalBinaryFrameState()
   const stateListeners = new Set<(state: ConnectionState) => void>()
   const connectWaiters: ConnectWaiter[] = []
 
@@ -233,8 +235,7 @@ export function connect(
     } else if (prev === 'connected') {
       orpcTransport.disconnected()
       terminalStreamListeners.clear()
-      terminalSnapshots.clear()
-      pendingTerminalStreamEvents.clear()
+      clearTerminalBinaryFrameState(terminalBinaryFrameState)
     }
   }
 
@@ -747,8 +748,7 @@ export function connect(
       return
     }
     handleTerminalBinaryFrame(bytes, {
-      terminalSnapshots,
-      pendingEvents: pendingTerminalStreamEvents,
+      state: terminalBinaryFrameState,
       getListener: (streamId) => terminalStreamListeners.get(streamId),
       recordValidatedInboundTraffic
     })
@@ -772,16 +772,14 @@ export function connect(
 
   function registerOrpcTerminalStream(streamId: number, listener: StreamingListener): () => void {
     terminalStreamListeners.set(streamId, listener)
-    const pendingEvents = pendingTerminalStreamEvents.get(streamId)
-    pendingTerminalStreamEvents.delete(streamId)
-    for (const event of pendingEvents ?? []) {
+    const pendingEvents = takePendingTerminalStreamEvents(terminalBinaryFrameState, streamId)
+    for (const event of pendingEvents) {
       listener(event)
     }
     return () => {
       if (terminalStreamListeners.get(streamId) === listener) {
         terminalStreamListeners.delete(streamId)
-        terminalSnapshots.delete(streamId)
-        pendingTerminalStreamEvents.delete(streamId)
+        deleteTerminalBinaryStreamState(terminalBinaryFrameState, streamId)
       }
     }
   }
