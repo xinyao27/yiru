@@ -131,7 +131,6 @@ import { setDefaultWslDistroOverride } from './git/runner'
 import { moveWorktree } from './git/worktree'
 import { getElectronSystemLocale } from './i18n/electron-system-locale'
 import { setMainSystemLocaleProvider, setMainUiLanguage } from './i18n/main-i18n'
-import { registerMobileHandlers } from './ipc/mobile'
 import { registerCoreHandlers } from './ipc/register-core-handlers'
 import { KeybindingService } from './keybindings/keybinding-service'
 import {
@@ -140,6 +139,7 @@ import {
   rebuildAppMenu
 } from './menu/register-app-menu'
 import { readMiniMaxSessionCookie } from './minimax/cookie-store'
+import { initializeShellMobileService } from './mobile/shell-service'
 import { setHttpFetchProvider } from './network/http-fetch'
 import { applyElectronProxySettings } from './network/proxy-settings'
 import { triggerStartupNotificationRegistration } from './notifications/notifications'
@@ -2500,7 +2500,7 @@ app.whenReady().then(async () => {
       : {}),
     webClientRoot: getBundledWebClientRoot()
   })
-  registerMobileHandlers(runtimeRpc, {
+  initializeShellMobileService(runtimeRpc, {
     openWindowsNetworkSettings: () => shell.openExternal('ms-settings:network-status')
   })
 

@@ -1,9 +1,9 @@
 {
   "schemaVersion": 2,
-  "methodCount": 652,
+  "methodCount": 741,
   "sourceCounts": {
     "legacy": 0,
-    "orpc": 652
+    "orpc": 741
   },
   "methods": [
     {
@@ -7178,6 +7178,246 @@
       ]
     },
     {
+      "method": "shell.app.awaitFirstWindowStartupServices",
+      "access": {
+        "scope": "host",
+        "tier": "read",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.app.getFloatingMarkdownDirectory",
+      "access": {
+        "scope": "host",
+        "tier": "read",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.app.getFloatingTerminalCwd",
+      "access": {
+        "scope": "host",
+        "tier": "read",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.app.getIdentity",
+      "access": {
+        "scope": "host",
+        "tier": "read",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.app.getKeyboardInputSourceId",
+      "access": {
+        "scope": "host",
+        "tier": "read",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.app.pickFloatingMarkdownDocument",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.app.pickFloatingWorkspaceDirectory",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.app.relaunch",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.app.reload",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.app.restart",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.app.setUnreadDockBadgeCount",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.app.startupDiagnostic",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.automations.markDispatchResult",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/tools.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.automations.rendererReady",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/tools.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.automations.runPrecheck",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/tools.ts"
+        }
+      ]
+    },
+    {
       "method": "shell.browser.importCookies",
       "access": {
         "scope": "host",
@@ -7226,6 +7466,230 @@
       ]
     },
     {
+      "method": "shell.crashReports.copyLatestDiagnostics",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/tools.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.crashReports.dismiss",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/tools.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.crashReports.getLatestPending",
+      "access": {
+        "scope": "host",
+        "tier": "read",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/tools.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.crashReports.getLatestReport",
+      "access": {
+        "scope": "host",
+        "tier": "read",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/tools.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.crashReports.recordBreadcrumb",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/tools.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.crashReports.recordRendererError",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/tools.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.crashReports.submit",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/tools.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.developerPermissions.getStatus",
+      "access": {
+        "scope": "host",
+        "tier": "read",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/tools.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.developerPermissions.request",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/tools.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.diagnostics.collectBundle",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/tools.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.diagnostics.discardBundlePreview",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/tools.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.diagnostics.getStatus",
+      "access": {
+        "scope": "host",
+        "tier": "read",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/tools.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.diagnostics.openBundlePreview",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/tools.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.diagnostics.uploadBundle",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/tools.ts"
+        }
+      ]
+    },
+    {
       "method": "shell.events.subscribe",
       "access": {
         "scope": "host",
@@ -7238,6 +7702,38 @@
         {
           "kind": "orpc",
           "file": "packages/runtime-protocol/src/contract/shell/events.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.export.htmlToPdf",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/tools.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.feedback.submit",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/tools.ts"
         }
       ]
     },
@@ -7594,6 +8090,118 @@
       ]
     },
     {
+      "method": "shell.friday.getOrCreate",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/tools.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.friday.restart",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/tools.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.gh.checkYiruStarred",
+      "access": {
+        "scope": "host",
+        "tier": "read",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.gh.enqueuePRRefresh",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.gh.reportVisiblePRRefreshCandidates",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.gh.starYiru",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.gh.viewer",
+      "access": {
+        "scope": "host",
+        "tier": "read",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
       "method": "shell.keybindings.ensureFile",
       "access": {
         "scope": "host",
@@ -7690,6 +8298,214 @@
       ]
     },
     {
+      "method": "shell.localhostWorktreeLabels.register",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/tools.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.minimaxCredentials.clearCookie",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/tools.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.minimaxCredentials.getStatus",
+      "access": {
+        "scope": "host",
+        "tier": "read",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/tools.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.minimaxCredentials.saveCookie",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/tools.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.mobile.getWindowsFirewallStatus",
+      "access": {
+        "scope": "host",
+        "tier": "read",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/tools.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.mobile.openWindowsNetworkSettings",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/tools.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.mobile.repairWindowsFirewall",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/tools.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.notifications.dismissNative",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.notifications.displayNative",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.notifications.getPermissionStatus",
+      "access": {
+        "scope": "host",
+        "tier": "read",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.notifications.openSystemSettings",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.notifications.playSound",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.notifications.probeDelivery",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
       "method": "shell.onboarding.get",
       "access": {
         "scope": "host",
@@ -7718,6 +8534,70 @@
         {
           "kind": "orpc",
           "file": "packages/runtime-protocol/src/contract/shell/persisted-state.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.pet.delete",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/tools.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.pet.import",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/tools.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.pet.importPetBundle",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/tools.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.pet.read",
+      "access": {
+        "scope": "host",
+        "tier": "read",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/tools.ts"
         }
       ]
     },
@@ -7930,6 +8810,214 @@
       ]
     },
     {
+      "method": "shell.repoHost.cloneAbort",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.repoHost.getDefaultCreateProjectParent",
+      "access": {
+        "scope": "host",
+        "tier": "read",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.repoHost.pickDirectory",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.repoHost.pickFolder",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.repoHost.pickFolders",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.repoHost.removeForHost",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.repoHost.reorderForHost",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.runtime.getBrowserDrivers",
+      "access": {
+        "scope": "host",
+        "tier": "read",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.runtime.getTerminalDrivers",
+      "access": {
+        "scope": "host",
+        "tier": "read",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.runtime.getTerminalFitOverrides",
+      "access": {
+        "scope": "host",
+        "tier": "read",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.runtime.reclaimBrowserForDesktop",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.runtime.restoreTerminalFit",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.runtime.syncWindowGraph",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
       "method": "shell.session.flush",
       "access": {
         "scope": "host",
@@ -8038,6 +9126,246 @@
         {
           "kind": "orpc",
           "file": "packages/runtime-protocol/src/contract/shell/settings.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.speech.ensureMicrophoneAccess",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/tools.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.starNag.agentValueMoment",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.starNag.complete",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.starNag.disable",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.starNag.dismiss",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.starNag.forceShow",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.starNag.later",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.starNag.onboardingCompleted",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.starNag.openWeb",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.starNag.showAgentValueMoment",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.starNag.starYiru",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.telemetry.acknowledgeBanner",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/tools.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.telemetry.getConsentState",
+      "access": {
+        "scope": "host",
+        "tier": "read",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/tools.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.telemetry.setOptIn",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/tools.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.telemetry.track",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/tools.ts"
         }
       ]
     },
@@ -8390,6 +9718,102 @@
         {
           "kind": "orpc",
           "file": "packages/runtime-protocol/src/contract/shell/ui.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.updater.check",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.updater.dismissNudge",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.updater.download",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.updater.getStatus",
+      "access": {
+        "scope": "host",
+        "tier": "read",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.updater.getVersion",
+      "access": {
+        "scope": "host",
+        "tier": "read",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.updater.quitAndInstall",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/system.ts"
         }
       ]
     },

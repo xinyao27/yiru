@@ -9,11 +9,13 @@ import { runtimeImplementation } from '../access-middleware'
 import { wireRuntimeStream } from '../registered-stream'
 import { shellConfigurationRuntimeHandlers } from './shell/configuration'
 import { shellSystemRuntimeHandlers } from './shell/system'
+import { shellToolsRuntimeHandlers } from './shell/tools'
 
 export const shellRuntimeHandlers = {
   shell: {
     ...shellConfigurationRuntimeHandlers,
     ...shellSystemRuntimeHandlers,
+    ...shellToolsRuntimeHandlers,
     browser: {
       importCookies: runtimeImplementation.shell.browser.importCookies.handler(
         async ({ input, context }) => {

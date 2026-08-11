@@ -7,25 +7,7 @@ import type { AiVaultListArgs, AiVaultSubagentListArgs } from '@yiru/workbench-m
 renderer and Electron. Keeping the IPC surface co-located in one file makes security
 review and type drift checks easier than scattering these bindings across modules. */
 import { contextBridge, ipcRenderer, webUtils } from 'electron'
-import type {
-  AutomationDispatchResult,
-  AutomationPrecheckResult,
-  AutomationRun
-} from '~shared/automations-types'
 import type { StartupCommandDelivery } from '~shared/codex-startup-delivery'
-import type {
-  CrashReportBreadcrumbData,
-  CrashReportCopyDiagnosticsArgs,
-  CrashReportSubmitArgs,
-  CrashReportSubmitResult,
-  ReactErrorBoundaryReportArgs,
-  ReactErrorBoundaryReportResult
-} from '~shared/crash-reporting'
-import type { FridaySession } from '~shared/friday-types'
-import type {
-  LocalhostWorktreeLabelResult,
-  LocalhostWorktreeLabelRoute
-} from '~shared/localhost-worktree-labels'
 import {
   YIRU_INTERNAL_FILE_DRAG_TYPE,
   createNativeFileDropPayload,
@@ -53,11 +35,10 @@ import {
   SHELL_SERVICES_CONNECT_CHANNEL,
   SHELL_SERVICES_CONNECT_MESSAGE
 } from '~shared/shell-services-message-port'
-import type { TelemetryConsentState } from '~shared/telemetry-consent-types'
 import type { AgentKind, LaunchSource, RequestKind } from '~shared/telemetry-events'
 import type { TerminalSideEffectBatch } from '~shared/terminal/side-effect-facts'
 import type { TerminalViewAttributes } from '~shared/terminal/view-attributes'
-import type { CustomPet, TuiAgent } from '~shared/types'
+import type { TuiAgent } from '~shared/types'
 
 import { subscribeRuntimeEnvironmentFromPreload } from './runtime-environment-subscriptions'
 import type { RuntimeEnvironmentSubscriptionHandle } from './runtime-environment-subscriptions'
@@ -519,76 +500,6 @@ const api = {
       ipcRenderer.invoke('pty:reportRendererSerializerReady', { ptyId })
   },
 
-  feedback: {
-    submit: (args: {
-      feedback: string
-      submitAnonymously?: boolean
-      githubLogin: string | null
-      githubEmail: string | null
-    }): Promise<{ ok: true } | { ok: false; status: number | null; error: string }> =>
-      ipcRenderer.invoke('feedback:submit', args)
-  },
-
-  crashReports: {
-    getLatestPending: () => ipcRenderer.invoke('crashReports:getLatestPending'),
-    getLatestReport: () => ipcRenderer.invoke('crashReports:getLatestReport'),
-    dismiss: (args: { reportId: string }) => ipcRenderer.invoke('crashReports:dismiss', args),
-    recordRendererError: (
-      args: ReactErrorBoundaryReportArgs
-    ): Promise<ReactErrorBoundaryReportResult> =>
-      ipcRenderer.invoke('crashReports:recordRendererError', args),
-    recordBreadcrumb: (args: { name: string; data?: CrashReportBreadcrumbData }): void =>
-      ipcRenderer.send('crashReports:recordBreadcrumb', args),
-    submit: (args: CrashReportSubmitArgs): Promise<CrashReportSubmitResult> =>
-      ipcRenderer.invoke('crashReports:submit', args),
-    copyLatestDiagnostics: (args?: CrashReportCopyDiagnosticsArgs) =>
-      ipcRenderer.invoke('crashReports:copyLatestDiagnostics', args)
-  },
-
-  export: {
-    htmlToPdf: (args: {
-      html: string
-      title: string
-    }): Promise<
-      { success: true; filePath: string } | { success: false; cancelled?: boolean; error?: string }
-    > => ipcRenderer.invoke('export:html-to-pdf', args)
-  },
-
-  // Why: telemetry uses a loose untyped surface at the preload boundary on
-  // purpose — the main-side validator (src/main/telemetry/validator.ts) is
-  // the single enforcement point, not the preload types. The renderer gets
-  // typed `track<N>()` / `setOptIn()` wrappers via
-  // packages/client/src/lib/telemetry.ts, which is what call sites import.
-  telemetryTrack: (name: string, props: Record<string, unknown>): Promise<void> =>
-    ipcRenderer.invoke('telemetry:track', name, props),
-  telemetrySetOptIn: (optedIn: boolean): Promise<void> =>
-    ipcRenderer.invoke('telemetry:setOptIn', optedIn),
-  telemetryAcknowledgeBanner: (): Promise<void> =>
-    ipcRenderer.invoke('telemetry:acknowledgeBanner'),
-  telemetryGetConsentState: (): Promise<TelemetryConsentState> =>
-    ipcRenderer.invoke('telemetry:getConsentState'),
-
-  // Why: diagnostics is the renderer-facing surface for the error-tracking
-  // lane (telemetry-error-tracking.md §User controls). Handlers type-narrow
-  // their inputs in main (renderer is untrusted by design); the bridges here
-  // are deliberately loose for the same reason the telemetry bridges are.
-  diagnostics: {
-    getStatus: (): Promise<unknown> => ipcRenderer.invoke('diagnostics:getStatus'),
-    collectBundle: (lookbackMinutes?: number): Promise<unknown> =>
-      ipcRenderer.invoke('diagnostics:collectBundle', lookbackMinutes),
-    openBundlePreview: (bundleSubmissionId: string): Promise<void> =>
-      ipcRenderer.invoke('diagnostics:openBundlePreview', bundleSubmissionId),
-    discardBundlePreview: (bundleSubmissionId: string): Promise<void> =>
-      ipcRenderer.invoke('diagnostics:discardBundlePreview', bundleSubmissionId),
-    uploadBundle: (bundleSubmissionId: string): Promise<unknown> =>
-      ipcRenderer.invoke('diagnostics:uploadBundle', bundleSubmissionId)
-  },
-
-  localhostWorktreeLabels: {
-    register: (args: LocalhostWorktreeLabelRoute): Promise<LocalhostWorktreeLabelResult> =>
-      ipcRenderer.invoke('localhostWorktreeLabels:register', args)
-  } satisfies PreloadApi['localhostWorktreeLabels'],
-
   codexAccounts: {
     list: (): Promise<unknown> => ipcRenderer.invoke('codexAccounts:list'),
     add: (args?: { runtime?: 'host' | 'wsl'; wslDistro?: string | null }): Promise<unknown> =>
@@ -612,21 +523,6 @@ const api = {
       preset: 'cursor' | 'copilot' | 'codex'
       workspacePath: string
     }): Promise<void> => ipcRenderer.invoke('agentTrust:markTrusted', args)
-  },
-
-  developerPermissions: {
-    getStatus: (): Promise<unknown> => ipcRenderer.invoke('developerPermissions:getStatus'),
-    request: (args: { id: string }): Promise<unknown> =>
-      ipcRenderer.invoke('developerPermissions:request', args)
-  },
-
-  pet: {
-    import: (): Promise<CustomPet | null> => ipcRenderer.invoke('pet:import'),
-    importPetBundle: (): Promise<CustomPet | null> => ipcRenderer.invoke('pet:importPetBundle'),
-    read: (id: string, fileName: string, kind?: 'image' | 'bundle'): Promise<ArrayBuffer | null> =>
-      ipcRenderer.invoke('pet:read', id, fileName, kind),
-    delete: (id: string, fileName: string, kind?: 'image' | 'bundle'): Promise<void> =>
-      ipcRenderer.invoke('pet:delete', id, fileName, kind)
   },
 
   emulator: {
@@ -778,11 +674,6 @@ const api = {
     }
   },
 
-  friday: {
-    getOrCreate: (): Promise<FridaySession> => ipcRenderer.invoke('friday:getOrCreate'),
-    restart: (): Promise<FridaySession> => ipcRenderer.invoke('friday:restart')
-  },
-
   runtimeEnvironments: {
     list: (): Promise<PublicKnownRuntimeEnvironment[]> =>
       ipcRenderer.invoke('runtimeEnvironments:list'),
@@ -827,53 +718,6 @@ const api = {
     // code to its own negotiated peer; it is never reached here.
     callOrpcProcedure: (): Promise<unknown> =>
       Promise.reject(new Error('callOrpcProcedure is only available in the paired web client.'))
-  },
-
-  minimaxCredentials: {
-    getStatus: (): Promise<{ configured: boolean }> =>
-      ipcRenderer.invoke('minimaxCredentials:getStatus'),
-    saveCookie: (cookie: string): Promise<{ configured: boolean }> =>
-      ipcRenderer.invoke('minimaxCredentials:saveCookie', cookie),
-    clearCookie: (): Promise<{ configured: boolean }> =>
-      ipcRenderer.invoke('minimaxCredentials:clearCookie')
-  },
-
-  // Why: list/listRuns/create/update/delete/runNow/listExternalManagers/
-  // listExternalRuns/createExternal/updateExternal/runExternalAction/
-  // snapshotWorkspaceName moved to the `automation.*` oRPC contract —
-  // renderer call sites now go through `callRuntimeOrpc` (see
-  // `renderer/components/automations/automation-host-client.ts`) for every
-  // host target, local included, instead of this preload bridge. The three
-  // members left below are local-dispatch machinery with no host-target
-  // concept: see the matching `Why:` on this group in `api-types.ts`.
-  automations: {
-    runPrecheck: (args: {
-      automationId: string
-      runId: string
-    }): Promise<AutomationPrecheckResult | null> =>
-      ipcRenderer.invoke('automations:runPrecheck', args),
-    markDispatchResult: (result: AutomationDispatchResult): Promise<AutomationRun> =>
-      ipcRenderer.invoke('automations:markDispatchResult', result),
-    rendererReady: (): Promise<void> => ipcRenderer.invoke('automations:rendererReady')
-  },
-
-  // shell-only: listNetworkInterfaces/getPairingQR/listDevices/revokeDevice/
-  // isWebSocketReady moved to the `mobile.*` oRPC contract
-  // (mobile-host-pairing.ts) — they describe a runtime host's own reachable
-  // addresses and device registry, not this shell. The three members left
-  // here inspect/repair the Windows Defender Firewall on the machine running
-  // this Electron shell, an OS-level operation with no runtime-host meaning.
-  mobile: {
-    getWindowsFirewallStatus: (args?: { address?: string }) =>
-      ipcRenderer.invoke('mobile:getWindowsFirewallStatus', args),
-
-    repairWindowsFirewall: () => ipcRenderer.invoke('mobile:repairWindowsFirewall'),
-
-    openWindowsNetworkSettings: () => ipcRenderer.invoke('mobile:openWindowsNetworkSettings')
-  },
-
-  speech: {
-    ensureMicrophoneAccess: (): Promise<void> => ipcRenderer.invoke('speech:ensureMicrophoneAccess')
   }
 }
 

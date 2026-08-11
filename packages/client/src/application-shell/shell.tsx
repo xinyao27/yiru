@@ -1118,7 +1118,7 @@ function App(): React.JSX.Element {
           // new tab/file/browse becomes silently ephemeral — `hydrationSucceeded`
           // stays false for the rest of the process and the session writer is
           // a no-op. The "Restart now" action calls app.relaunch (defined in
-          // src/main/ipc/app.ts) so the user can recover with one click instead
+          // src/main/shell/app.ts) so the user can recover with one click instead
           // of having to find a quit/relaunch path themselves.
           toast.error(translate('auto.App.12e77cf12b', 'Session restore failed'), {
             description: translate(

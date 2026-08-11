@@ -356,101 +356,13 @@ export function installWebPreloadApi(): void {
 
 function createWebPreloadApi(): Partial<PreloadApi> {
   return {
-    // Why: `feedback.submit` posts to a PostHog-backed pipeline from the main
-    // process (net module has no CORS restrictions there); a paired web
-    // client has no equivalent shell to proxy through. Without this entry
-    // the member fell through to the generic fallback proxy, which resolves
-    // `undefined` — the dialog's `result.ok` read then threw instead of
-    // showing this message.
-    feedback: {
-      submit: () =>
-        Promise.resolve({
-          ok: false,
-          status: null,
-          error: translate(
-            'auto.web.webPreloadApi.feedbackUnavailable',
-            'Feedback is unavailable in the web client.'
-          )
-        })
-    },
-    crashReports: {
-      getLatestPending: () => Promise.resolve(null),
-      getLatestReport: () => Promise.resolve(null),
-      dismiss: () => Promise.resolve(null),
-      recordRendererError: () => Promise.resolve({ ok: true, report: null, deduped: true }),
-      recordBreadcrumb: () => {},
-      submit: () =>
-        Promise.resolve({
-          ok: false,
-          status: null,
-          error: translate('auto.web.web.preload.api.fb290366b2', 'Unavailable on web.')
-        }),
-      copyLatestDiagnostics: () =>
-        Promise.resolve({
-          ok: false,
-          error: translate('auto.web.web.preload.api.fb290366b2', 'Unavailable on web.')
-        })
-    },
-    // Why: `export.htmlToPdf` opens a hidden Electron `BrowserWindow`,
-    // prints to PDF with `webContents.printToPDF`, and shows a native save
-    // dialog — every step needs the desktop shell. Without this entry the
-    // member fell through to the generic fallback proxy, which resolves
-    // `undefined` — the editor's `result.success` read then threw instead of
-    // showing this message.
-    export: {
-      htmlToPdf: () =>
-        Promise.resolve({
-          success: false,
-          error: translate(
-            'auto.web.webPreloadApi.exportHtmlToPdfUnavailable',
-            'Exporting to PDF is unavailable in the web client.'
-          )
-        })
-    },
-    diagnostics: {
-      getStatus: () =>
-        Promise.resolve({
-          localFileEnabled: false,
-          bundleEnabled: false,
-          traceFilePath: '',
-          traceFamilySize: 0
-        }),
-      collectBundle: () => Promise.reject(new Error('Review files are unavailable on web.')),
-      openBundlePreview: () => Promise.reject(new Error('Review files are unavailable on web.')),
-      discardBundlePreview: () => Promise.resolve(),
-      uploadBundle: () => Promise.reject(new Error('Sending diagnostics is unavailable on web.'))
-    },
-    // Why: not a stub awaiting migration — `revealFridayChat` needs a renderer
-    // notifier to surface the session as a tab in the local floating
-    // workspace, which a paired web client cannot provide on the runtime host.
-    friday: {
-      getOrCreate: () => Promise.reject(new Error('Friday is available on desktop.')),
-      restart: () => Promise.reject(new Error('Friday is available on desktop.'))
-    },
     runtimeEnvironments: createRuntimeEnvironmentsApi(),
     git: createGitApi(),
     emulator: createEmulatorApi(),
     aiVault: createAiVaultApi(),
-    minimaxCredentials: createMiniMaxCredentialsApi(),
     codexAccounts: createAccountsApi(),
     claudeAccounts: createAccountsApi(),
-    developerPermissions: createDeveloperPermissionsApi(),
-    pty: createPtyApi(),
-    // Why: shell-only — inspecting/repairing the Windows Defender Firewall is
-    // an OS-level operation on the machine running the Electron shell, which
-    // a browser tab has no equivalent of. listNetworkInterfaces/getPairingQR/
-    // listDevices/revokeDevice/isWebSocketReady moved to the `mobile.*` oRPC
-    // contract, which this web client already reaches via the typed client.
-    mobile: {
-      getWindowsFirewallStatus: () => Promise.resolve({ supported: false }),
-      repairWindowsFirewall: () => Promise.resolve({ ok: false, reason: 'unsupported' }),
-      openWindowsNetworkSettings: () => Promise.resolve(false)
-    },
-    telemetryTrack: () => Promise.resolve(),
-    telemetrySetOptIn: () => Promise.resolve(),
-    telemetryGetConsentState: () =>
-      Promise.resolve({ optedIn: false, source: 'default', blockedByEnv: false } as never),
-    telemetryAcknowledgeBanner: () => Promise.resolve()
+    pty: createPtyApi()
   }
 }
 
@@ -1435,14 +1347,6 @@ function createGitHubApi(): WebGitHubApi {
   return githubApi
 }
 
-function createDeveloperPermissionsApi(): NonNullable<Partial<PreloadApi>['developerPermissions']> {
-  return {
-    getStatus: () => Promise.resolve([]),
-    request: ({ id }) =>
-      Promise.resolve({ id, status: 'unsupported', openedSystemSettings: false } as const)
-  }
-}
-
 function createNotificationsApi(): ShellNotificationsApi {
   return {
     // Why: browsers cannot reach Electron's native notification centre. The
@@ -1455,16 +1359,6 @@ function createNotificationsApi(): ShellNotificationsApi {
       Promise.resolve({ supported: false, platform: getBrowserPlatform(), requested: false }),
     probeDelivery: () => Promise.resolve({ state: 'unsupported' as const, authoritative: false }),
     playSound: () => Promise.resolve({ played: false, reason: 'missing-path' })
-  }
-}
-
-function createMiniMaxCredentialsApi(): NonNullable<Partial<PreloadApi>['minimaxCredentials']> {
-  const notConfigured = { configured: false }
-  const unsupportedError = new Error('MiniMax cookie storage is only available in the desktop app.')
-  return {
-    getStatus: () => Promise.resolve(notConfigured),
-    saveCookie: () => Promise.reject(unsupportedError),
-    clearCookie: () => Promise.resolve(notConfigured)
   }
 }
 

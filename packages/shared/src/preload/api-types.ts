@@ -9,17 +9,7 @@ import type {
   CommitMessageAgentCapability,
   CommitMessageModelCapability
 } from '../commit-message/agent-spec'
-import type {
-  CrashReportBreadcrumbData,
-  CrashReportCopyDiagnosticsArgs,
-  CrashReportRecord,
-  CrashReportSubmitArgs,
-  CrashReportSubmitResult,
-  ReactErrorBoundaryReportArgs,
-  ReactErrorBoundaryReportResult
-} from '../crash-reporting'
 import type { FeatureInteractionId } from '../feature-interactions'
-import type { FridaySession } from '../friday-types'
 import type { GitHistoryOptions, GitHistoryResult } from '../git/history'
 import type {
   GitAddTagResult,
@@ -32,10 +22,6 @@ import type {
   GitResetToCommitResult,
   GitRevertResult
 } from '../git/write-op-results'
-import type {
-  LocalhostWorktreeLabelResult,
-  LocalhostWorktreeLabelRoute
-} from '../localhost-worktree-labels'
 import type { ProjectExecutionRuntimeResolution } from '../project-execution-runtime'
 import type { PtyMainDeliveryDiagnostics } from '../pty-delivery-diagnostics'
 import type { PtyModelRestoreNeededEvent } from '../pty-model-restore-marker'
@@ -53,7 +39,6 @@ import type {
   BrowserSessionProfileSource,
   ClaudeRateLimitAccountsState,
   CodexRateLimitAccountsState,
-  CustomPet,
   GitBranchCompareResult,
   GitCommitCompareResult,
   GitConflictOperation,
@@ -91,11 +76,6 @@ import type {
 } from '@yiru/workbench-model/agent'
 
 import type {
-  AutomationDispatchResult,
-  AutomationPrecheckResult,
-  AutomationRun
-} from '../automations-types'
-import type {
   ClaudeUsageBreakdownKind,
   ClaudeUsageBreakdownRow,
   ClaudeUsageDailyPoint,
@@ -118,11 +98,6 @@ import type {
   CodexUsageSummary
 } from '../codex-usage-types'
 import type {
-  DeveloperPermissionId,
-  DeveloperPermissionRequestResult,
-  DeveloperPermissionState
-} from '../developer-permissions-types'
-import type {
   OpenCodeUsageBreakdownKind,
   OpenCodeUsageBreakdownRow,
   OpenCodeUsageDailyPoint,
@@ -133,7 +108,6 @@ import type {
   OpenCodeUsageSnapshot,
   OpenCodeUsageSummary
 } from '../opencode-usage-types'
-import type { TelemetryConsentState } from '../telemetry-consent-types'
 import type { AgentKind, LaunchSource, RequestKind } from '../telemetry-events'
 
 export type EmulatorApi = {
@@ -675,107 +649,6 @@ export type PreloadApi = {
     clearPendingPaneSerializer: (paneKey: string, gen: number) => Promise<void>
     reportRendererSerializerReady?: (ptyId: string) => Promise<void>
   }
-  // Why: shell-only — posts telemetry about this app instance straight to
-  // the support backend over HTTP from the main process; there is no
-  // runtime host in the loop to route through.
-  feedback: {
-    submit: (args: {
-      feedback: string
-      submitAnonymously?: boolean
-      githubLogin: string | null
-      githubEmail: string | null
-    }) => Promise<{ ok: true } | { ok: false; status: number | null; error: string }>
-  }
-  // Why: shell-only — every member reports on or reads back crashes/errors of
-  // *this* Electron process (main + renderer), backed by a local
-  // CrashReportStore and Electron's own `clipboard`/`app.getVersion()`. A
-  // crash belongs to whichever process crashed, which is always this shell,
-  // never a runtime host.
-  crashReports: {
-    getLatestPending: () => Promise<CrashReportRecord | null>
-    getLatestReport: () => Promise<CrashReportRecord | null>
-    dismiss: (args: { reportId: string }) => Promise<CrashReportRecord | null>
-    recordRendererError: (
-      args: ReactErrorBoundaryReportArgs
-    ) => Promise<ReactErrorBoundaryReportResult>
-    recordBreadcrumb: (args: { name: string; data?: CrashReportBreadcrumbData }) => void
-    submit: (args: CrashReportSubmitArgs) => Promise<CrashReportSubmitResult>
-    copyLatestDiagnostics: (
-      args?: CrashReportCopyDiagnosticsArgs
-    ) => Promise<{ ok: true } | { ok: false; error: string }>
-  }
-  // Why: shell-only — `htmlToPdf` opens a hidden Electron `BrowserWindow` and
-  // calls its own `webContents.printToPDF()` (main/export/html-to-pdf.ts),
-  // then shows a native `dialog.showSaveDialog` on the window that asked and
-  // writes the PDF to the chosen local path (main/export/export.ts). Every
-  // step is an API of the machine rendering this window; there is no
-  // host/target parameter anywhere in the chain and no runtime-host
-  // equivalent of "print this window's content to a local PDF file."
-  export: ExportApi
-  // Why: shell-only, and the four `telemetry*` members below are one judgment
-  // — consent and event emission are properties of *this installation*, not of
-  // any runtime host. Routing them through the runtime contract would mean
-  // asking a remote machine about this machine's consent. The PostHog client
-  // and the opt-in store are main-side (gated on IS_OFFICIAL_BUILD plus the
-  // build-identity/write-key pair), the effective-consent reason includes env
-  // vars the renderer cannot read, and the per-session consent-mutation rate
-  // limit is enforced in main. Same reasoning as the `diagnostics` group below,
-  // which is the same pipeline's file/bundle half. These four were the group
-  // the Phase 4/5 acceptance audit found had never been judged anywhere — the
-  // code was already right; only the judgment was missing, and it was missing
-  // because a `name: {` group count skips bare function members like these.
-  /** Fire-and-forget track. Loose typing at the IPC boundary on purpose —
-   *  the main-side validator is the single enforcement point. Renderer call
-   *  sites should import `track<N>()` from `packages/client/src/lib/telemetry.ts`
-   *  for the `EventMap`-based type safety, not reach for this directly. */
-  telemetryTrack: (name: string, props: Record<string, unknown>) => Promise<void>
-  // Why: shell-only — see the `telemetry*` group judgment above.
-  /** Flip the persisted opt-in preference. Subject to a per-session
-   *  consent-mutation rate limit on the main side (≤5/session). */
-  telemetrySetOptIn: (optedIn: boolean) => Promise<void>
-  /** Diagnostic file controls. Surface for telemetry-error-tracking.md
-   *  §User controls. The renderer triggers flows; main does the filesystem /
-   *  network work and returns serializable metadata. Main retains collected
-   *  upload payloads so the renderer can confirm without reading or
-   *  substituting arbitrary bytes.
-   *  Why: shell-only — despite the name, this is unrelated to the contract's
-   *  `diagnostics.memory` (host CPU/memory snapshot). It is *this Electron
-   *  installation's* trace-file/crash-bundle telemetry pipeline, uploaded to
-   *  PostHog; the web adapter hardcodes it disabled and rejects the
-   *  collect/open/upload actions with "unavailable on web" — a deliberate
-   *  non-goal, not a gap. Same-named groups, unrelated concepts. */
-  diagnostics: {
-    getStatus: () => Promise<DiagnosticsStatusPayload>
-    collectBundle: (lookbackMinutes?: number) => Promise<DiagnosticsBundlePayload>
-    openBundlePreview: (bundleSubmissionId: string) => Promise<void>
-    discardBundlePreview: (bundleSubmissionId: string) => Promise<void>
-    uploadBundle: (bundleSubmissionId: string) => Promise<DiagnosticsUploadPayload>
-  }
-  // Why: shell-only — see the `telemetry*` group judgment above. The env-var
-  // half of the reason is main-side state a renderer cannot read at all, so
-  // there is no host-routable version of this answer.
-  /** Read-only view of effective consent state, including the reason if
-   *  disabled (env var / user opt-out / CI / pending banner). Used by the
-   *  Privacy pane to render the correct "blocked by X" helper text — env
-   *  vars are main-side state the renderer cannot read directly. */
-  telemetryGetConsentState: () => Promise<TelemetryConsentState>
-  // Why: shell-only — same judgment as the `telemetry*` block above (the
-  // `diagnostics` group sits between them, so this repeats the tag rather than
-  // relying on comment proximity).
-  /** Banner ✕ — persist `optedIn = true` silently, emit nothing. Deliberately
-   *  a separate channel from `telemetrySetOptIn` because main's `via`
-   *  derivation on that channel would tag this path as `first_launch_banner`
-   *  and fire `telemetry_opted_in`, which the ✕-as-silent-acknowledge
-   *  semantics forbid (the user did not explicitly opt in, they declined to
-   *  intervene). Subject to the same per-session consent-mutation rate
-   *  limit as `telemetrySetOptIn`. */
-  telemetryAcknowledgeBanner: () => Promise<void>
-  // Why: shell-only — `register` spins up a loopback-proxy route on the
-  // machine that will open the link, gated to `sourceOwner.kind === 'local'`
-  // call sites only. It never fires for an environment-hosted workspace.
-  localhostWorktreeLabels: {
-    register: (args: LocalhostWorktreeLabelRoute) => Promise<LocalhostWorktreeLabelResult>
-  }
   // Why: select/remove moved to the runtime contract (`accounts.selectCodex` /
   // `accounts.removeCodex`) — see provider-accounts-client.ts. add/reauthenticate
   // stay here because they spawn `codex login` PTYs that need a desktop browser.
@@ -822,33 +695,6 @@ export type PreloadApi = {
       workspacePath: string
     }) => Promise<void>
   }
-  // Why: shell-only — every check here (systemPreferences, osascript Apple
-  // Events probe, a UDP bind for the local-network prompt) targets the OS
-  // permission state of the Electron shell bundle running on this machine.
-  // Not the same domain as `computer.permissions*`: that pair only covers
-  // the Computer Use sidecar's accessibility/screenshot access on the
-  // targeted runtime host (2 ids); this covers this app's own mic/camera/
-  // screen/accessibility/full-disk-access/automation/local-network/usb/
-  // bluetooth TCC status (9 ids). Same field name (`id`), disjoint domains.
-  // `openSettings` was dropped as dead code (zero callers, confirmed by
-  // typecheck) — `request` already falls back to the same privacy pane.
-  developerPermissions: {
-    getStatus: () => Promise<DeveloperPermissionState[]>
-    request: (args: { id: DeveloperPermissionId }) => Promise<DeveloperPermissionRequestResult>
-  }
-  // Why: shell-only — confirmed. `import`/`importPetBundle` open a native
-  // Electron `dialog.showOpenDialog` tied to the sender's `BrowserWindow`;
-  // `read`/`delete` operate on files under this installation's
-  // `app.getPath('userData')`, addressable only by the id the native picker
-  // just minted. There is no host-wide pet-asset contract and no web
-  // implementation at all (`window.api.pet` is undefined on web builds) —
-  // building one would be a new host-shared-asset feature, not a Phase 4 move.
-  pet: {
-    import: () => Promise<CustomPet | null>
-    importPetBundle: () => Promise<CustomPet | null>
-    read: (id: string, fileName: string, kind?: 'image' | 'bundle') => Promise<ArrayBuffer | null>
-    delete: (id: string, fileName: string, kind?: 'image' | 'bundle') => Promise<void>
-  }
   emulator: EmulatorApi
   stats: StatsApi
   claudeUsage: ClaudeUsageApi
@@ -872,19 +718,6 @@ export type PreloadApi = {
   // `executionHostId`) with no contract leaf yet — the web adapter's own
   // `Why:` next to its no-op stub already says so.
   aiVault: AiVaultApi
-  // Why: genuine forward gap, not migrated this slice. `main/friday/service.ts`
-  // Why: shell-only by construction, not an un-migrated gap. The session
-  // itself is host-side (`runtime.createTerminal`/`closeTerminal`), but
-  // `revealFridayChat` requires `notifier.revealTerminalSession` and throws
-  // `runtime_unavailable` without it — Friday's visible surface is a tab in
-  // the *local* floating workspace, so it needs a renderer window on the
-  // machine running the shell. A paired web client has none on the runtime
-  // host, which is why the web adapter rejects rather than routing. Adding a
-  // `friday.*` contract procedure would not make it work.
-  friday: {
-    getOrCreate: () => Promise<FridaySession>
-    restart: () => Promise<FridaySession>
-  }
   // Why: worktree-owned reads, writes, listings, searches, imports, and watches
   // route through `files.*`. This adapter is limited to native downloads and
   // explicitly authorized absolute paths that cannot use worktree-relative
@@ -1249,55 +1082,6 @@ export type PreloadApi = {
       }
     ) => Promise<unknown>
   }
-  // Why: shell-only, same test as `speech`'s OpenAI key methods (切片 20) —
-  // the session cookie is Electron `safeStorage`-encrypted (falls back to a
-  // sniffed plaintext envelope) into a machine-bound
-  // `~/.yiru/minimax-session-cookie.enc`. A secret bound to this OS
-  // keychain is not a routable host concept.
-  minimaxCredentials: {
-    getStatus: () => Promise<{ configured: boolean }>
-    saveCookie: (cookie: string) => Promise<{ configured: boolean }>
-    clearCookie: () => Promise<{ configured: boolean }>
-  }
-  // Why: list/listRuns/create/update/delete/runNow migrated onto the
-  // `automation.*` oRPC contract (packages/runtime-protocol/src/contract/
-  // automations.ts) — `automation.runs` covers `listRuns` under a renamed
-  // member, everything else kept its name. listExternalManagers/
-  // listExternalRuns/createExternal/updateExternal/runExternalAction/
-  // snapshotWorkspaceName migrated the same way onto `automation-
-  // external.ts`'s members. Every renderer caller now goes through
-  // `renderer/components/automations/automation-host-client.ts`'s
-  // `callRuntimeOrpc`-backed helpers for both local and remote targets — this
-  // preload group no longer carries any of them (2026-08-08, this slice).
-  // `create`'s `projectId`/`workspaceId` looked like a contract gap (the
-  // contract only takes `repo`/`workspace`) but is a verified false positive:
-  // `YiruRuntime.createAutomation`/`updateAutomation` resolve
-  // `repo`/`workspace` into `projectId`/`workspaceId` via
-  // `resolveAutomationTarget` before calling the same `store.createAutomation`
-  // the old IPC handler called directly — a remodeling, not a dropped field.
-  automations: {
-    // Why: runPrecheck only ever runs inside the local dispatch handshake
-    // below — the precheck execution target (main/automations/
-    // precheck-runner.ts) is `{type:'local'}` only, resolved against this
-    // same process's store. It never executes for a remote host, so it stays
-    // local-dispatch machinery rather than a Phase 4 target; see
-    // markDispatchResult below.
-    runPrecheck: (args: {
-      automationId: string
-      runId: string
-    }) => Promise<AutomationPrecheckResult | null>
-    // Why: local IPC mechanics — markDispatchResult/rendererReady report a
-    // dispatch outcome back to the machine that just ran it, not a host
-    // capability an independent client calls, so they stay off the
-    // `automation.*` oRPC contract (Phase 5 slice S5). The dispatch *request*
-    // that used to pair with these over `onDispatchRequested` now arrives as
-    // the reverse `shellServices.automations.dispatch` call instead (see
-    // renderer/components/automations/use-automation-dispatch-events.ts and
-    // main/automations/service.ts `requestDispatch`) — this preload surface
-    // no longer carries it.
-    markDispatchResult: (result: AutomationDispatchResult) => Promise<AutomationRun>
-    rendererReady: () => Promise<void>
-  }
   // Why: already-covered, verified against `contract/host-capabilities.ts` —
   // `host.wsl.isAvailable`/`listDistros`, `host.pwsh.isAvailable`,
   // `host.gitBash.isAvailable` call the exact same `isWslAvailable`/
@@ -1308,52 +1092,4 @@ export type PreloadApi = {
   // 'local'` branch — collapsing that local branch (as `memory-state.ts`'s
   // `diagnostics.memory` call now does for both targets) is separate Phase 5
   // work, not yet done for this group.
-  /**
-   * shell-only: listNetworkInterfaces/getPairingQR/listDevices/revokeDevice/
-   * isWebSocketReady moved to the `mobile.*` oRPC contract
-   * (mobile-host-pairing.ts) — they describe a runtime host's own reachable
-   * addresses and device registry, not this shell. The three members left
-   * here inspect/repair the Windows Defender Firewall on the machine running
-   * this Electron shell, an OS-level operation with no runtime-host meaning.
-   */
-  mobile: {
-    getWindowsFirewallStatus: (args?: { address?: string }) => Promise<
-      | { supported: false }
-      | {
-          supported: true
-          port: number
-          ruleAllowed: boolean
-          blockingRuleDetected: boolean
-          privateFirewallEnabled: boolean
-          networkCategory: 'private' | 'public' | 'domain' | 'unknown'
-          inspectionAvailable: boolean
-        }
-    >
-    repairWindowsFirewall: () => Promise<
-      { ok: true } | { ok: false; reason: 'cancelled' | 'failed' | 'unsupported' }
-    >
-    openWindowsNetworkSettings: () => Promise<boolean>
-  }
-  // Why: catalog reads, model download/delete, and OpenAI-key management
-  // moved to the `speech.models.*`/`speech.openaiKey.*` runtime contract —
-  // host-CRUD with no per-client identity, the same shape mobile already
-  // drives remotely (see `main/runtime/yiru-runtime.ts`'s
-  // `listMobileSpeechModels`/`downloadMobileSpeechModel`/
-  // `deleteMobileSpeechModel`/`getSpeechOpenAiKeyStatus` family and
-  // `dictation/state.ts`'s `refreshModelStates`, which now calls
-  // `speech.models.list` on the local target instead of this preload).
-  // `cancelDownload` (formerly here) had zero renderer callers and was
-  // dropped rather than migrated — `model-manager.ts`'s own
-  // `cancelDownload` stays, just no longer preload-exposed.
-  // What's left below is genuinely shell-only: microphone capture is local
-  // (getUserMedia -> preload -> main). Its lifecycle events now use
-  // `speech.events.subscribe`; the 16kHz audio feed does not.
-  // Model-download progress/failure now comes off the shared
-  // `speech.events.subscribe` stream instead (`speech-events-client.ts`),
-  // since that part of the flow has no per-client identity either.
-  speech: {
-    // Why: microphone permission belongs to the shell. Dictation lifecycle and
-    // audio chunks use `speech.dictation.*` on the selected runtime host.
-    ensureMicrophoneAccess: () => Promise<void>
-  }
 }

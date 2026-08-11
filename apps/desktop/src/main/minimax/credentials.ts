@@ -1,5 +1,3 @@
-import { ipcMain } from 'electron'
-
 import { clearMiniMaxSessionCookieJar } from '../rate-limits/minimax-request-context'
 import type { RateLimitService } from '../rate-limits/service'
 import {
@@ -28,26 +26,31 @@ function refreshAfterMiniMaxCredentialChange(
   })
 }
 
-export function registerMiniMaxCredentialsHandlers(rateLimits: RateLimitService | null): void {
-  ipcMain.handle('minimaxCredentials:getStatus', () => getMiniMaxCredentialsStatus())
-  ipcMain.handle('minimaxCredentials:saveCookie', (_event, cookie: string) => {
-    // Validate the IPC argument in the main process; the renderer-declared type
-    // is compile-time only and the value arrives as unknown over IPC.
-    if (typeof cookie !== 'string') {
-      throw new Error('MiniMax session cookie must be a string')
+let shellRateLimits: RateLimitService | null = null
+
+export function initializeShellMiniMaxCredentialsService(
+  rateLimits: RateLimitService | null
+): void {
+  shellRateLimits = rateLimits
+}
+
+export function getShellMiniMaxCredentialsService() {
+  return {
+    getStatus: getMiniMaxCredentialsStatus,
+    saveCookie: (cookie: string): MiniMaxCredentialsStatus => {
+      saveMiniMaxSessionCookie(cookie)
+      refreshAfterMiniMaxCredentialChange(shellRateLimits, 'save')
+      return getMiniMaxCredentialsStatus()
+    },
+    clearCookie: async (): Promise<MiniMaxCredentialsStatus> => {
+      clearMiniMaxSessionCookie()
+      try {
+        await clearMiniMaxSessionCookieJar()
+      } catch (error) {
+        console.error('[minimax] failed to clear session cookie jar after credential clear:', error)
+      }
+      refreshAfterMiniMaxCredentialChange(shellRateLimits, 'clear')
+      return getMiniMaxCredentialsStatus()
     }
-    saveMiniMaxSessionCookie(cookie)
-    refreshAfterMiniMaxCredentialChange(rateLimits, 'save')
-    return getMiniMaxCredentialsStatus()
-  })
-  ipcMain.handle('minimaxCredentials:clearCookie', async () => {
-    clearMiniMaxSessionCookie()
-    try {
-      await clearMiniMaxSessionCookieJar()
-    } catch (error) {
-      console.error('[minimax] failed to clear session cookie jar after credential clear:', error)
-    }
-    refreshAfterMiniMaxCredentialChange(rateLimits, 'clear')
-    return getMiniMaxCredentialsStatus()
-  })
+  }
 }

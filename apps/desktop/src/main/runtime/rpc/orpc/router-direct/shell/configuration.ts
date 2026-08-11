@@ -1,6 +1,7 @@
 import { getShellKeybindingsService } from '~main/keybindings/keybindings'
 import { getShellOnboardingService } from '~main/persisted-state/onboarding'
 import { getShellSessionService } from '~main/persisted-state/session'
+import { runtimeImplementation } from '~main/runtime/rpc/orpc/access-middleware'
 import { requireShellRenderer } from '~main/shell/files'
 import { getShellSettingsService } from '~main/shell/settings'
 import { getShellYiruProfilesService } from '~main/yiru-profiles/yiru-profiles'
@@ -12,8 +13,6 @@ import type {
   SwitchYiruProfileArgs,
   TransferYiruProfileProjectArgs
 } from '~shared/yiru-profiles'
-
-import { runtimeImplementation } from '../../access-middleware'
 
 export const shellConfigurationRuntimeHandlers = {
   keybindings: {

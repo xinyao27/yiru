@@ -8,6 +8,7 @@ import {
 } from '../ai-vault/runtime-session-scanner'
 import type { AiVaultSessionRuntimeTarget } from '../ai-vault/session/root-configuration'
 import type { AutomationService } from '../automations/service'
+import { initializeShellAutomationService } from '../automations/shell-service'
 import { setTrustedBrowserRendererWebContentsId } from '../browser/browser'
 import { setAgentBrowserBridgeRef } from '../browser/page/control'
 import { registerClaudeAccountHandlers } from '../claude/accounts/claude-accounts'
@@ -19,16 +20,12 @@ import type { CodexAccountService } from '../codex/accounts/service'
 import { registerCodexUsageHandlers } from '../codex/usage/codex-usage'
 import type { CodexUsageStore } from '../codex/usage/store'
 import type { CrashReportStore } from '../crash-reporting/crash-report-store'
-import { registerCrashReportingHandlers } from '../crash-reporting/crash-reporting'
-import { registerFeedbackHandlers } from '../crash-reporting/feedback'
-import { registerDeveloperPermissionHandlers } from '../developer-permissions'
-import { registerDiagnosticsHandlers } from '../diagnostics/diagnostics'
+import { initializeShellCrashReportingService } from '../crash-reporting/crash-reporting'
 import { registerEmulatorFrameStreamHandlers } from '../emulator/frame-stream'
 import { registerEmulatorVideoStreamHandlers } from '../emulator/video-stream'
-import { registerExportHandlers } from '../export/export'
 import type { KeybindingService } from '../keybindings/keybinding-service'
 import { initializeShellKeybindingsService } from '../keybindings/keybindings'
-import { registerMiniMaxCredentialsHandlers } from '../minimax/credentials'
+import { initializeShellMiniMaxCredentialsService } from '../minimax/credentials'
 import { initializeNotebookAuthorizedStore } from '../notebook'
 import { initializeShellNotificationsService } from '../notifications/notifications'
 import { registerOpenCodeUsageHandlers } from '../opencode/usage/opencode-usage'
@@ -36,8 +33,7 @@ import type { OpenCodeUsageStore } from '../opencode/usage/store'
 import { initializeShellOnboardingService } from '../persisted-state/onboarding'
 import { initializeShellSessionService } from '../persisted-state/session'
 import type { Store } from '../persistence'
-import { registerPetHandlers } from '../pet/pet'
-import { registerLocalhostWorktreeLabelHandlers } from '../ports/localhost-worktree-labels'
+import { initializeShellLocalhostWorktreeLabelService } from '../ports/localhost-worktree-labels'
 import { registerWorkspacePortHandlers } from '../ports/workspace-ports'
 import type { RateLimitService } from '../rate-limits/service'
 import { registerRuntimeEnvironmentHandlers } from '../runtime/environments'
@@ -49,13 +45,11 @@ import { initializeShellGitHubWindowService } from '../shell/github'
 import { initializeShellPlatformService } from '../shell/platform'
 import { initializeShellRuntimeStateService } from '../shell/runtime-state'
 import { initializeShellSettingsService } from '../shell/settings'
-import { registerSpeechHandlers } from '../speech/speech'
 import type { StatsCollector } from '../stats/collector'
-import { registerTelemetryHandlers } from '../telemetry/telemetry'
+import { initializeShellTelemetryService } from '../telemetry/telemetry'
 import { registerUIHandlers } from '../window/ui'
 import { initializeShellYiruProfilesService } from '../yiru-profiles/yiru-profiles'
 import { registerAiVaultHandlers } from './ai-vault'
-import { registerAutomationHandlers } from './automations'
 
 let registered = false
 
@@ -102,43 +96,38 @@ export function registerCoreHandlers(
   registerCodexAccountHandlers(codexAccounts)
   registerAgentTrustHandlers()
   registerClaudeAccountHandlers(claudeAccounts)
-  registerMiniMaxCredentialsHandlers(rateLimits)
+  initializeShellMiniMaxCredentialsService(rateLimits)
   initializeShellGitHubWindowService(store, stats)
-  registerFeedbackHandlers()
   if (crashReports) {
-    registerCrashReportingHandlers(crashReports)
+    initializeShellCrashReportingService(crashReports)
   }
-  registerExportHandlers()
   initializeShellNotificationsService(store)
   // Why: no more `notebook:*` IPC channels to register — this just hands the
   // store reference the `notebook.runPythonCell` oRPC contract needs.
   initializeNotebookAuthorizedStore(store)
   initializeShellOnboardingService(store)
-  registerDeveloperPermissionHandlers()
   // Why: diagnostics handlers are wired alongside telemetry but the two
   // lanes never share a code path — `ipc/diagnostics.ts` imports only from
   // `src/main/observability/`, never from `src/main/telemetry/`. Order is
   // not load-bearing; both register independent ipcMain channels.
-  registerDiagnosticsHandlers()
   initializeShellSettingsService(store, agentAwakeService)
   if (automations) {
-    registerAutomationHandlers(automations)
+    initializeShellAutomationService(automations)
   }
   if (keybindings) {
     initializeShellKeybindingsService(keybindings)
   }
-  registerTelemetryHandlers(store)
+  initializeShellTelemetryService(store)
   initializeShellYiruProfilesService(store, {
     onBeforeRelaunch: lifecycleOptions.onBeforeRelaunch
   })
   initializeShellPlatformService()
-  registerPetHandlers()
   initializeShellSessionService(store)
   registerUIHandlers(store)
   registerEmulatorFrameStreamHandlers()
   registerEmulatorVideoStreamHandlers()
   registerWorkspacePortHandlers(store)
-  registerLocalhostWorktreeLabelHandlers(store)
+  initializeShellLocalhostWorktreeLabelService(store)
   initializeShellFilesService(store, {
     chooseDownloadDirectory: async (rendererId) => {
       const parentWindow = findRendererWindow(rendererId)
@@ -169,7 +158,6 @@ export function registerCoreHandlers(
       scanRuntimeAiVaultSessions(app.getPath('userData'), environmentId, args, options)
   })
   initializeShellClipboardService(store)
-  registerSpeechHandlers()
 }
 
 function findRendererWindow(rendererId: number): BrowserWindow | null {

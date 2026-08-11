@@ -1,5 +1,7 @@
 import type { CrashReportBreadcrumbData } from '~shared/crash-reporting'
 
+import { shellClient } from './shell-client'
+
 /** Best-effort crash evidence recording; must never create or mask failures. */
 export function recordRendererCrashReportBreadcrumb(
   name: string,
@@ -10,7 +12,7 @@ export function recordRendererCrashReportBreadcrumb(
   }
 
   try {
-    window.api.crashReports.recordBreadcrumb({ name, ...(data ? { data } : {}) })
+    shellClient.crashReports.recordBreadcrumb({ name, ...(data ? { data } : {}) })
   } catch {
     // Why: crash evidence is diagnostic only and can race renderer teardown.
   }

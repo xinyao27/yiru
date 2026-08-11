@@ -3,6 +3,7 @@ import { BrowserWindow } from 'electron'
 import { getShellGitHubService } from '~main/github/github'
 import { getShellNotificationsService } from '~main/notifications/notifications'
 import { getShellRepoHostService } from '~main/project-groups/repos'
+import { runtimeImplementation } from '~main/runtime/rpc/orpc/access-middleware'
 import { getShellAppService } from '~main/shell/app'
 import { reloadShellApp } from '~main/shell/app-reload'
 import { getShellAppStartupService } from '~main/shell/app-startup'
@@ -17,8 +18,6 @@ import type {
   GitHubPRRefreshReason,
   UpdateCheckOptions
 } from '~shared/types'
-
-import { runtimeImplementation } from '../../access-middleware'
 
 export const shellSystemRuntimeHandlers = {
   app: {
