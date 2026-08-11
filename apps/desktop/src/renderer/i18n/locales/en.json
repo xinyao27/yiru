@@ -6289,6 +6289,8 @@
             "82ba1c80ea": "localhost",
             "bea27bac4b": "links",
             "44d14df30d": "preview",
+            "linkRoutingSystemBrowser": "system browser",
+            "linkRoutingBrowseTab": "browse tab",
             "5cb082b3e3": "Link Routing",
             "95944898e0": "percentage",
             "483a0eb5e0": "new tab",
@@ -6318,7 +6320,8 @@
             "a942905148": "URL opened when creating a new browser tab. Leave empty to open a blank tab.",
             "c3903322d2": "Default Home Page",
             "19ea5607cf": "Localhost Worktree Labels",
-            "4e0fdf0a3f": "Open workspace ports as worktree-specific Yiru localhost URLs so browser tabs are easier to tell apart."
+            "4e0fdf0a3f": "Open workspace ports as worktree-specific Yiru localhost URLs so browser tabs are easier to tell apart.",
+            "linkRoutingDescription": "Choose where HTTP(S) links open across Yiru, including terminals, reviews, Markdown, editors, ports, and Browse Tabs."
           },
           "use": {
             "search": {
@@ -6358,6 +6361,15 @@
               "85fab5e12c": "cli",
               "890ddf943d": "Register the Yiru CLI so agents can drive the browser.",
               "50f0860e18": "Enable Yiru CLI"
+            }
+          },
+          "link": {
+            "routing": {
+              "setting": {
+                "title": "Open Web Links In",
+                "systemBrowser": "System default browser",
+                "browseTab": "Yiru Browse Tab"
+              }
             }
           }
         },
@@ -11343,7 +11355,8 @@
           "oneFailing": "1 failing",
           "failingCount": "{{value0}} failing",
           "onePending": "1 pending",
-          "pendingCount": "{{value0}} pending"
+          "pendingCount": "{{value0}} pending",
+          "openReview": "Open {{value0}} link"
         },
         "parentPrChecks": {
           "rowSummary": {

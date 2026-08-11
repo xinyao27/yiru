@@ -143,7 +143,7 @@ export function LocalWorkspacePortsPanel({ isVisible }: { isVisible: boolean }):
     ]
   )
   const handleOpenPortInBrowser = useCallback(
-    async (port: WorkspacePort, event?: React.MouseEvent<HTMLButtonElement>) => {
+    async (port: WorkspacePort) => {
       const result = await openWorkspacePortInBrowser({
         port,
         activeWorktreeId: activeWorktree?.id,
@@ -151,9 +151,7 @@ export function LocalWorkspacePortsPanel({ isVisible }: { isVisible: boolean }):
         createBrowserTab,
         setRemoteBrowserPageHandle,
         openInYiruBrowser: resolvePortOpenInYiruBrowser({
-          settings,
-          event,
-          isMac: navigator.userAgent.includes('Mac')
+          settings
         }),
         localhostLabelRoute: resolveLocalhostLabelRouteForPort(useAppStore.getState(), port)
       })

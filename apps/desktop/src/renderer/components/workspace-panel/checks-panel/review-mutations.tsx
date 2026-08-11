@@ -1,5 +1,4 @@
-import React, { useCallback } from 'react'
-import { isMacPlatform } from '~renderer/components/terminal-pane/terminal-link-open-hints'
+import { useCallback } from 'react'
 import { refreshHostedReviewCard } from '~renderer/store/slices/hosted-review'
 
 import type { useChecksPanelAgentActionsState } from './agent-actions'
@@ -190,21 +189,14 @@ export function useChecksPanelReviewMutations(context: useChecksPanelAgentAction
   )
 
   // Open hosted review in browser
-  const handleOpenPR = useCallback(
-    (event: React.MouseEvent<HTMLAnchorElement>) => {
-      if (activeReview?.url) {
-        // Why: route through openHttpLink so PR/MR links honor the "open links
-        // in app" setting; Shift+Cmd/Ctrl keeps the terminal-link escape hatch.
-        openChecksPanelHostedReviewUrl({
-          url: activeReview.url,
-          event: event.nativeEvent,
-          isMac: isMacPlatform(),
-          worktreeId: activeWorktreeId
-        })
-      }
-    },
-    [activeReview, activeWorktreeId]
-  )
+  const handleOpenPR = useCallback(() => {
+    if (activeReview?.url) {
+      openChecksPanelHostedReviewUrl({
+        url: activeReview.url,
+        worktreeId: activeWorktreeId
+      })
+    }
+  }, [activeReview, activeWorktreeId])
 
   const handleUnlinkPullRequest = useCallback(() => {
     if (!activeWorktreeId || activeReview?.provider !== 'github' || linkedPR === null) {

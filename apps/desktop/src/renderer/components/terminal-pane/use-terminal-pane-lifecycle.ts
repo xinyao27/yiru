@@ -123,10 +123,7 @@ import { pushMode2031SeedReply } from './terminal-mode-2031-replies'
 import { handleOscLink } from './terminal-osc-link-routing'
 import { captureParkedTerminalPaneCandidates } from './terminal-parked-tab-watchers'
 import { guardParserHandler } from './terminal-parser-handler-guard'
-import {
-  installHttpLinkClickFallback,
-  type TerminalLinkRoutingPreferenceRequester
-} from './terminal-url-link-hit-testing'
+import { installHttpLinkClickFallback } from './terminal-url-link-hit-testing'
 import { handleTerminalWebLinkClick } from './terminal-web-link-click'
 import {
   shouldBypassXtermKeyboardEvent,
@@ -245,7 +242,6 @@ type UseTerminalPaneLifecycleDeps = {
   systemPrefersDark: boolean
   settings: GlobalSettings | null | undefined
   settingsRef: React.RefObject<GlobalSettings | null | undefined>
-  requestOpenLinksInAppPreference: TerminalLinkRoutingPreferenceRequester
   /** Resolved Option-as-Alt value: `'auto'` has already been mapped to
    *  `'true' | 'false'` via the keyboard-layout probe. Passed separately
    *  from `settings` because the probe lives outside the settings store. */
@@ -520,7 +516,6 @@ export function useTerminalPaneLifecycle({
   systemPrefersDark,
   settings,
   settingsRef,
-  requestOpenLinksInAppPreference,
   effectiveMacOptionAsAlt,
   effectiveMacOptionAsAltRef,
   initialLayoutRef,
@@ -1076,8 +1071,8 @@ export function useTerminalPaneLifecycle({
         )
         fileLinkClickFallbackDisposablesRef.current.set(pane.id, fileLinkClickFallbackDisposable)
         const httpLinkClickFallbackDisposable = installHttpLinkClickFallback(pane.terminal, {
-          ...linkDeps,
-          requestOpenLinksInAppPreference
+          worktreeId: linkDeps.worktreeId,
+          getRuntimeEnvironmentId: () => linkDeps.getRuntimeEnvironmentIdForPane?.(pane.id) ?? null
         })
         httpLinkClickFallbackDisposables.set(pane.id, httpLinkClickFallbackDisposable)
         seedStartupSessionRestoredBanner(ptyDeps.startup, pane.id, onShowSessionRestoredBanner)
@@ -1150,8 +1145,7 @@ export function useTerminalPaneLifecycle({
             const handled = handleOscLink(text, event as MouseEvent | undefined, {
               ...linkDeps,
               startupCwd: getPaneLinkCwd(pane.id),
-              runtimeEnvironmentId: linkDeps.getRuntimeEnvironmentIdForPane?.(pane.id) ?? null,
-              requestOpenLinksInAppPreference
+              runtimeEnvironmentId: linkDeps.getRuntimeEnvironmentIdForPane?.(pane.id) ?? null
             })
             // Why: Cmd/Ctrl+clicking a link activates Yiru handling (open file,
             // new browser tab, system browser) which can steal focus from the
@@ -1505,8 +1499,7 @@ export function useTerminalPaneLifecycle({
           startupCwd: activePane ? getPaneLinkCwd(activePane.id) : startupCwd,
           runtimeEnvironmentId: activePane
             ? (linkDeps.getRuntimeEnvironmentIdForPane?.(activePane.id) ?? null)
-            : null,
-          requestOpenLinksInAppPreference
+            : null
         })
       },
       formatLinkTooltip: (url, openLinkHint) => formatTerminalUrlTooltip(url, openLinkHint),

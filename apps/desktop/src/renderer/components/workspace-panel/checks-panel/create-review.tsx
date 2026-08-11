@@ -3,7 +3,6 @@ import { useCallback } from 'react'
 import { toast } from 'sonner'
 import { openHttpLink } from '~renderer/components/editor/http-link-routing'
 import { translate } from '~renderer/i18n/i18n'
-import { shellClient } from '~renderer/runtime/shell-client'
 import { normalizeHostedReviewHeadRef } from '~shared/hosted-review-refs'
 
 import { formatCreateError } from '../create-pull-request-review-copy'
@@ -147,7 +146,7 @@ export function useChecksPanelCreateReview(context: useChecksPanelReviewCreation
                 'Open on {{value0}}',
                 { value0: hostedReviewCreateCopy.providerName }
               ),
-              onClick: () => shellClient.shell.openUrl(outcome.url)
+              onClick: () => openHttpLink(outcome.url, { worktreeId: activeWorktreeId })
             }
           }
         )

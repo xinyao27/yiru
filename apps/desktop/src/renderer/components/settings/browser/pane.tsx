@@ -5,7 +5,6 @@ import {
 } from '@yiru/workbench-model/workspace'
 import { useCallback, useMemo, useRef, useState, type MutableRefObject } from 'react'
 import { buildSidebarHostOptions } from '~renderer/components/sidebar/host-options'
-import { isMacUserAgent } from '~renderer/components/terminal-pane/pane-helpers'
 import { translate } from '~renderer/i18n/i18n'
 import { useAppStore } from '~renderer/store'
 import { getHostDisplayLabelOverrides } from '~shared/host-setting-overrides'
@@ -100,8 +99,7 @@ export function BrowserPane({
   const showLocalhostLabels = matchesSettingsSearch(searchQuery, [getBrowserPaneSearchEntries()[4]])
   const showCookies = matchesSettingsSearch(searchQuery, [getBrowserPaneSearchEntries()[5]])
   const showBrowserUse = matchesSettingsSearch(searchQuery, getBrowserUsePaneSearchEntries())
-  const isMac = isMacUserAgent()
-  const linkRoutingDescription = getBrowserLinkRoutingDescription({ isMac })
+  const linkRoutingDescription = getBrowserLinkRoutingDescription()
   const hostLabelOverrides = useMemo(() => getHostDisplayLabelOverrides(settings), [settings])
   const browserSessionHostOptions = useMemo(
     () =>
@@ -212,7 +210,6 @@ export function BrowserPane({
         <BrowserLinkRoutingSetting
           settings={settings}
           linkRoutingDescription={linkRoutingDescription}
-          isMac={isMac}
           updateSettings={updateSettings}
         />
       ) : null}

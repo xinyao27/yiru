@@ -1,5 +1,6 @@
 import type { HostedReviewInfo } from '@yiru/workbench-model/review'
 import React from 'react'
+import { openHttpLink } from '~renderer/components/editor/http-link-routing'
 import { cn } from '~renderer/lib/class-names'
 
 function hostedReviewLabel(review: HostedReviewInfo): string {
@@ -21,7 +22,11 @@ export function HostedReviewHeaderLink({
       target="_blank"
       rel="noreferrer"
       className={cn('outline-none focus-visible:bg-accent', className)}
-      onClick={(e) => e.stopPropagation()}
+      onClick={(event) => {
+        event.preventDefault()
+        event.stopPropagation()
+        openHttpLink(review.url)
+      }}
     >
       {label}
     </a>

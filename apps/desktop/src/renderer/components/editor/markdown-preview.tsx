@@ -1371,8 +1371,8 @@ export default function MarkdownPreview({
             return
           }
 
-          // Why: Cmd/Ctrl+Shift-click is the OS escape hatch — always hand the
-          // link to the system default handler, bypassing the classifier. For a
+          // Why: Cmd/Ctrl+Shift-click keeps local file targets on the OS path.
+          // HTTP(S) targets still use the shared destination setting. For a
           // dangling in-worktree .md, pre-check existence so the user sees a
           // toast instead of the silent no-op from shell.openFileUri.
           if (isMarkdownPreviewSystemBrowserModifier(event, isMac)) {
@@ -1392,12 +1392,7 @@ export default function MarkdownPreview({
             if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
               openHttpLink(
                 parsed.toString(),
-                resolveMarkdownPreviewHttpOpenOptions(
-                  event,
-                  isMac,
-                  sourceRoutingWorktreeId,
-                  sourceOwner
-                )
+                resolveMarkdownPreviewHttpOpenOptions(sourceRoutingWorktreeId, sourceOwner)
               )
               return
             }
@@ -1450,18 +1445,11 @@ export default function MarkdownPreview({
           }
 
           if (target.protocol === 'http:' || target.protocol === 'https:') {
-            // Why: route through openHttpLink (not raw shell.openUrl) so a plain
-            // click honors the "open links in Yiru" setting; openHttpLink keeps
-            // remote runtimes on the system browser. (Cmd/Ctrl+Shift-click is
-            // handled above; this path only sees non-escape-hatch clicks.)
+            // Why: every HTTP(S) activation uses the shared destination setting,
+            // including Browse Tabs owned by a remote runtime.
             openHttpLink(
               target.toString(),
-              resolveMarkdownPreviewHttpOpenOptions(
-                event,
-                isMac,
-                sourceRoutingWorktreeId,
-                sourceOwner
-              )
+              resolveMarkdownPreviewHttpOpenOptions(sourceRoutingWorktreeId, sourceOwner)
             )
             return
           }

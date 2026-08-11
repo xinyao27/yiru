@@ -125,12 +125,13 @@ export function handleRichMarkdownEditorClick({
     return true
   }
   if (event.shiftKey) {
-    openMarkdownLinkInClientOs({
+    openMarkdownLinkWithShiftModifier({
       href,
       filePath,
       runtimeEnvironmentId,
       sourceOwner,
       settings,
+      worktreeId,
       worktreeRoot
     })
     return true
@@ -183,13 +184,14 @@ function getClickedLinkHref(view: EditorView, pos: number): string {
   return linkMark ? (linkMark.attrs.href as string) || '' : ''
 }
 
-function openMarkdownLinkInClientOs({
+function openMarkdownLinkWithShiftModifier({
   href,
   filePath,
   worktreeRoot,
   runtimeEnvironmentId,
   sourceOwner,
-  settings
+  settings,
+  worktreeId
 }: {
   href: string
   filePath: string
@@ -197,6 +199,7 @@ function openMarkdownLinkInClientOs({
   runtimeEnvironmentId?: string | null
   sourceOwner: HttpLinkSourceOwner
   settings: RichMarkdownRuntimeSettings
+  worktreeId: string
 }): void {
   if (sourceOwner.kind === 'unknown') {
     return
@@ -206,7 +209,7 @@ function openMarkdownLinkInClientOs({
     return
   }
   if (classified.kind === 'external') {
-    openHttpLink(classified.url, { forceSystemBrowser: true, sourceOwner })
+    openHttpLink(classified.url, { sourceOwner, worktreeId })
     return
   }
   if (classified.kind === 'anchor') {

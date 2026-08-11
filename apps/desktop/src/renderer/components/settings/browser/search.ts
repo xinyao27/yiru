@@ -3,27 +3,14 @@ import { translate } from '~renderer/i18n/i18n'
 import type { SettingsSearchEntry } from '../search'
 import { translateSearchKeyword } from '../search-keywords'
 
-type BrowserShortcutPlatform = {
-  isMac: boolean
+export function getBrowserLinkRoutingDescription(): string {
+  return translate(
+    'auto.components.settings.browser.search.linkRoutingDescription',
+    'Choose where HTTP(S) links open across Yiru, including terminals, reviews, Markdown, editors, ports, and Browse Tabs.'
+  )
 }
 
-function getDefaultBrowserShortcutPlatform(): BrowserShortcutPlatform {
-  return {
-    isMac: typeof navigator !== 'undefined' && navigator.userAgent.includes('Mac')
-  }
-}
-
-export function getBrowserLinkRoutingShortcutLabel(platform: BrowserShortcutPlatform): string {
-  return platform.isMac ? '⇧⌘-click' : 'Shift+Ctrl+click'
-}
-
-export function getBrowserLinkRoutingDescription(platform: BrowserShortcutPlatform): string {
-  return `Open http(s) links in Yiru's built-in browser — from the terminal, markdown, and the editor. ${getBrowserLinkRoutingShortcutLabel(platform)} always uses your system browser.`
-}
-
-export function getBrowserPaneSearchEntries(
-  platform: BrowserShortcutPlatform = getDefaultBrowserShortcutPlatform()
-): SettingsSearchEntry[] {
+export function getBrowserPaneSearchEntries(): SettingsSearchEntry[] {
   return [
     {
       title: translate('auto.components.settings.browser.search.c3903322d2', 'Default Home Page'),
@@ -92,8 +79,11 @@ export function getBrowserPaneSearchEntries(
       ]
     },
     {
-      title: translate('auto.components.settings.browser.search.5cb082b3e3', 'Link Routing'),
-      description: getBrowserLinkRoutingDescription(platform),
+      title: translate(
+        'auto.components.settings.browser.link.routing.setting.title',
+        'Open Web Links In'
+      ),
+      description: getBrowserLinkRoutingDescription(),
       keywords: [
         ...translateSearchKeyword('auto.components.settings.browser.search.2d2d995c58', 'browser'),
         ...translateSearchKeyword('auto.components.settings.browser.search.44d14df30d', 'preview'),
@@ -103,11 +93,17 @@ export function getBrowserPaneSearchEntries(
           'localhost'
         ),
         ...translateSearchKeyword('auto.components.settings.browser.search.72c58f7792', 'webview'),
-        ...translateSearchKeyword('auto.components.settings.browser.search.90425d313c', 'shift'),
-        platform.isMac ? 'cmd' : 'ctrl',
         ...translateSearchKeyword('auto.components.settings.browser.search.68d1db8929', 'markdown'),
         ...translateSearchKeyword('auto.components.settings.browser.search.8dd4805991', 'file'),
-        ...translateSearchKeyword('auto.components.settings.browser.search.a7a07d5415', 'editor')
+        ...translateSearchKeyword('auto.components.settings.browser.search.a7a07d5415', 'editor'),
+        ...translateSearchKeyword(
+          'auto.components.settings.browser.search.linkRoutingSystemBrowser',
+          'system browser'
+        ),
+        ...translateSearchKeyword(
+          'auto.components.settings.browser.search.linkRoutingBrowseTab',
+          'browse tab'
+        )
       ]
     },
     {

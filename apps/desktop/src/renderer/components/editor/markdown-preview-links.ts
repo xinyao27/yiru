@@ -68,19 +68,10 @@ export function isMarkdownPreviewSystemBrowserModifier(
   return event.shiftKey && (isMac ? event.metaKey : event.ctrlKey)
 }
 
-// Why: Cmd/Ctrl+Shift-click is the escape hatch that forces the OS default
-// browser; every other click routes through openHttpLink so the "open links in
-// Yiru" setting (and remote-runtime state) decides the destination. Mac uses
-// metaKey, Linux/Windows use ctrlKey per AGENTS.md.
 export function resolveMarkdownPreviewHttpOpenOptions(
-  event: Pick<MouseEvent, 'metaKey' | 'ctrlKey' | 'shiftKey'>,
-  isMac: boolean,
   worktreeId: string | null,
   sourceOwner: HttpLinkSourceOwner
 ): OpenHttpLinkOptions {
-  if (isMarkdownPreviewSystemBrowserModifier(event, isMac)) {
-    return { forceSystemBrowser: true, sourceOwner }
-  }
   return { worktreeId, sourceOwner }
 }
 

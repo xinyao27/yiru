@@ -7,7 +7,6 @@ import {
 } from '@phosphor-icons/react'
 import React from 'react'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
-import { getTerminalUrlSystemBrowserHint } from '~renderer/components/terminal-pane/terminal-link-open-hints'
 import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,
@@ -27,7 +26,6 @@ type ChecksPanelReviewHeaderProps = {
   review: ChecksPanelReview
   isRefreshing: boolean
   canUnlinkPullRequest: boolean
-  showSystemBrowserHint: boolean
   onRefresh: () => void
   onOpenReview: (event: React.MouseEvent<HTMLAnchorElement>) => void
   onUnlinkPullRequest: () => void
@@ -38,7 +36,6 @@ export function ChecksPanelReviewHeader({
   review,
   isRefreshing,
   canUnlinkPullRequest,
-  showSystemBrowserHint,
   onRefresh,
   onOpenReview,
   onUnlinkPullRequest,
@@ -53,9 +50,6 @@ export function ChecksPanelReviewHeader({
     'Open on {{value0}}',
     { value0: reviewHostLabel }
   )
-  const title = showSystemBrowserHint
-    ? `${openTitle}. ${getTerminalUrlSystemBrowserHint()}`
-    : openTitle
 
   return (
     <div className="flex min-w-0 items-center gap-1 text-xs leading-none">
@@ -63,7 +57,7 @@ export function ChecksPanelReviewHeader({
       <a
         href={review.url}
         className="decoration-border text-foreground hover:decoration-foreground focus-visible:bg-accent shrink-0 font-medium underline underline-offset-2 opacity-80 outline-none"
-        title={title}
+        title={openTitle}
         onClick={(event) => {
           event.preventDefault()
           onOpenReview(event)

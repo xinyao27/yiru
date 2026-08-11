@@ -1,8 +1,8 @@
 import { useCallback } from 'react'
 import { toast } from 'sonner'
+import { openHttpLink } from '~renderer/components/editor/http-link-routing'
 import { stripBaseRef } from '~renderer/components/workspace-panel/use-create-pull-request-dialog-fields'
 import { translate } from '~renderer/i18n/i18n'
-import { shellClient } from '~renderer/runtime/shell-client'
 import { normalizeHostedReviewHeadRef } from '~shared/hosted-review-refs'
 
 import { resolveBlockedCreateReviewNoticeMessage } from '../create-review-blocked-action'
@@ -105,7 +105,7 @@ export function useSourceControlCreateReview(scope: SourceControlReviewDialogCon
           url: result.url
         })
         if (resolvedPrCreationDefaults.openAfterCreate) {
-          shellClient.shell.openUrl(result.url)
+          openHttpLink(result.url, { worktreeId: activeWorktreeId })
         }
         return
       }
@@ -131,7 +131,8 @@ export function useSourceControlCreateReview(scope: SourceControlReviewDialogCon
                 'Open on {{value0}}',
                 { value0: hostedReviewCreateCopy.providerName }
               ),
-              onClick: () => shellClient.shell.openUrl(result.existingReview!.url)
+              onClick: () =>
+                openHttpLink(result.existingReview!.url, { worktreeId: activeWorktreeId })
             }
           }
         )

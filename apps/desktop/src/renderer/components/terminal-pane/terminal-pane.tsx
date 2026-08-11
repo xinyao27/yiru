@@ -22,7 +22,6 @@ import {
   DaemonActionDialog,
   useDaemonActions
 } from '~renderer/components/daemon-actions/use-actions'
-import { useLinkRoutingPreferenceDialog } from '~renderer/components/link-routing-preference-dialog'
 import { resolveTerminalLayoutActiveLeafId } from '~renderer/components/terminal-pane/terminal-layout-leaf-ids'
 import {
   isSyntheticSinglePaneTitle,
@@ -806,7 +805,6 @@ export default function TerminalPane({
   const refreshWorkspaceSpace = useAppStore((store) => store.refreshWorkspaceSpace)
   const settings = useAppStore((store) => store.settings)
   const updateSettings = useAppStore((store) => store.updateSettings)
-  const requestLinkRoutingPreference = useLinkRoutingPreferenceDialog()
   const keybindings = useAppStore((store) => store.keybindings)
   const rightClickToPaste = settings?.terminalRightClickToPaste ?? isWindowsUserAgent()
   // Why: Windows ConPTY does not forward DECSET 2004 from foreground TUIs, so
@@ -925,38 +923,6 @@ export default function TerminalPane({
 
   const settingsRef = useRef(settings)
   settingsRef.current = settings
-  const openLinksInAppPreferencePromiseRef = useRef<Promise<boolean> | null>(null)
-
-  const requestOpenLinksInAppPreference = useCallback(
-    (url: string): Promise<boolean> | null => {
-      if (settingsRef.current?.openLinksInAppPreferencePrompted === true) {
-        return null
-      }
-      if (!settingsRef.current) {
-        return null
-      }
-      if (openLinksInAppPreferencePromiseRef.current) {
-        return openLinksInAppPreferencePromiseRef.current
-      }
-      const preferencePromise = (async () => {
-        const openInYiru = await requestLinkRoutingPreference({
-          openLinksInAppDefault: settingsRef.current?.openLinksInApp === true,
-          url
-        })
-        await updateSettings({
-          openLinksInApp: openInYiru,
-          openLinksInAppPreferencePrompted: true
-        })
-        return openInYiru
-      })()
-      openLinksInAppPreferencePromiseRef.current = preferencePromise
-      void preferencePromise.finally(() => {
-        openLinksInAppPreferencePromiseRef.current = null
-      })
-      return preferencePromise
-    },
-    [requestLinkRoutingPreference, updateSettings]
-  )
   // Why: the persisted setting can be 'auto' (default) or one of the four
   // explicit modes. useEffectiveMacOptionAsAlt resolves 'auto' into
   // 'true' | 'false' based on the probe's current layout category (US → 'true',
@@ -1469,7 +1435,6 @@ export default function TerminalPane({
     systemPrefersDark,
     settings,
     settingsRef,
-    requestOpenLinksInAppPreference,
     effectiveMacOptionAsAlt,
     effectiveMacOptionAsAltRef: macOptionAsAltRef,
     initialLayoutRef,

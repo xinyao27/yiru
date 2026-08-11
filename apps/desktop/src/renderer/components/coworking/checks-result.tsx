@@ -1,5 +1,6 @@
 import { GitMerge, GitPullRequest, ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
 import type React from 'react'
+import { openHttpLink } from '~renderer/components/editor/http-link-routing'
 import { Button } from '~renderer/components/ui/button'
 import {
   CHECK_COLOR,
@@ -7,7 +8,6 @@ import {
 } from '~renderer/components/workspace-panel/check-status-presentation'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
-import { shellClient } from '~renderer/runtime/shell-client'
 import type {
   CoworkingChecksReadResult,
   CoworkingChecksReview
@@ -164,6 +164,5 @@ function reviewStateLabel(state: CoworkingChecksReview['state']): string {
 }
 
 function openOwnerUrl(url: string): void {
-  // Why: the requester parser limits owner URLs to HTTP(S); bypass local worktree URL routing.
-  void shellClient.shell.openUrl(url)
+  openHttpLink(url)
 }

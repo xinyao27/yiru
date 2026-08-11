@@ -21,13 +21,7 @@ export function getTerminalHtmlFileOpenHint(): string {
 }
 
 export function getTerminalUrlOpenHint(): string {
-  return isMacPlatform()
-    ? '⌘+click for system browser or ⇧⌘+click for Yiru browser'
-    : 'Ctrl+click for system browser or Shift+Ctrl+click for Yiru browser'
-}
-
-export function getTerminalUrlSystemBrowserHint(): string {
-  return isMacPlatform() ? '⇧⌘+click for system browser' : 'Shift+Ctrl+click for system browser'
+  return isMacPlatform() ? '⌘+click to open link' : 'Ctrl+click to open link'
 }
 
 export function getTerminalWorktreePathOpenHint(canOpenWithSystemDefault: boolean): string {

@@ -1,11 +1,11 @@
 import { ArrowSquareOut as ExternalLink, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import React from 'react'
 import { toast } from 'sonner'
+import { openHttpLink } from '~renderer/components/editor/http-link-routing'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import CommentMarkdown from '~renderer/components/sidebar/comment-markdown'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
-import { shellClient } from '~renderer/runtime/shell-client'
 import type { PRCheckDetail, PRCheckRunDetails } from '~shared/types'
 
 import { SourceControlFixSplitButton } from '../workspace-panel/source-control/fix-split-button'
@@ -316,7 +316,7 @@ export function CheckRunDetailsPanel({
             type="button"
             variant="outline"
             size="sm"
-            onClick={() => shellClient.shell.openUrl(openUrl)}
+            onClick={() => openHttpLink(openUrl, { worktreeId })}
           >
             {translate('auto.components.editor.CheckRunDetailsPanel.a916648574', 'Open details')}
             <ExternalLink className="size-3.5" />

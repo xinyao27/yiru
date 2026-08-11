@@ -3,17 +3,13 @@ import type { Terminal } from '@xterm/xterm'
 import { isTerminalHttpLinkActivation } from './terminal-http-link-activation'
 import type { LinkHandlerDeps } from './terminal-link-handlers'
 import { handleOscLink } from './terminal-osc-link-routing'
-import {
-  openHttpLinkAtTerminalMouseEvent,
-  type TerminalLinkRoutingPreferenceRequester
-} from './terminal-url-link-hit-testing'
+import { openHttpLinkAtTerminalMouseEvent } from './terminal-url-link-hit-testing'
 
 type TerminalWebLinkClickDeps = Pick<
   LinkHandlerDeps,
   'worktreeId' | 'worktreePath' | 'startupCwd' | 'runtimeEnvironmentId' | 'terminalHomePath'
 > & {
   terminal: Terminal | null
-  requestOpenLinksInAppPreference?: TerminalLinkRoutingPreferenceRequester
 }
 
 export function handleTerminalWebLinkClick(
@@ -30,11 +26,7 @@ export function handleTerminalWebLinkClick(
     deps.terminal &&
     openHttpLinkAtTerminalMouseEvent(deps.terminal, event, {
       worktreeId: deps.worktreeId,
-      // Why: terminal Command/Ctrl+click is the explicit system-browser
-      // gesture; Shift+Command/Ctrl is the explicit Yiru-browser escape hatch.
-      forceSystemBrowser: !event.shiftKey,
-      forceInAppBrowser: event.shiftKey,
-      requestOpenLinksInAppPreference: deps.requestOpenLinksInAppPreference
+      runtimeEnvironmentId: deps.runtimeEnvironmentId
     })
   ) {
     // Why: WebLinksAddon only knows the physical row; Yiru's logical hit-test

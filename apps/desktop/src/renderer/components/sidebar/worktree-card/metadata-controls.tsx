@@ -1,3 +1,4 @@
+import { openHttpLink } from '~renderer/components/editor/http-link-routing'
 import { Button } from '~renderer/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 
@@ -57,7 +58,11 @@ export function MetadataActionIcon({
           target="_blank"
           rel="noreferrer"
           aria-label={label}
-          onClick={(event) => event.stopPropagation()}
+          onClick={(event) => {
+            event.preventDefault()
+            event.stopPropagation()
+            openHttpLink(href)
+          }}
           className="focus-visible:bg-accent outline-none"
         />
       }

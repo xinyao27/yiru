@@ -1,10 +1,10 @@
 import type { HostedReviewCreationEligibility } from '@yiru/workbench-model/review'
 import { useCallback } from 'react'
+import { openHttpLink } from '~renderer/components/editor/http-link-routing'
 import { resolveCreateReviewDraftTitle } from '~renderer/components/workspace-panel/create-review-draft-title'
 import { stripBaseRef } from '~renderer/components/workspace-panel/use-create-pull-request-dialog-fields'
 import { translate } from '~renderer/i18n/i18n'
 import { generateRuntimePullRequestFields } from '~renderer/runtime/git-client'
-import { shellClient } from '~renderer/runtime/shell-client'
 import { normalizeHostedReviewHeadRef } from '~shared/hosted-review-refs'
 
 import {
@@ -176,7 +176,7 @@ export function useSourceControlCreateReviewSubmit(scope: SourceControlCreateRev
             }
           )
           if (openChecks && resolvedPrCreationDefaults.openAfterCreate) {
-            shellClient.shell.openUrl(result.url)
+            openHttpLink(result.url, { worktreeId: token.worktreeId })
           }
           setCreatePrIntentNoticeForWorktree(token.worktreeId, null)
           return true

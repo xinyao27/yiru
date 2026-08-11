@@ -5,10 +5,7 @@ import { openDetectedFilePath } from './terminal-file-open-routing'
 import { resolveTerminalFileUrlTarget } from './terminal-file-url-target'
 import { isTerminalLinkActivation } from './terminal-link-activation'
 import type { LinkHandlerDeps } from './terminal-link-handlers'
-import {
-  openTerminalHttpLink,
-  type TerminalLinkRoutingPreferenceRequester
-} from './terminal-url-link-hit-testing'
+import { openTerminalHttpLink } from './terminal-url-link-hit-testing'
 
 type TerminalLinkEvent = Pick<MouseEvent, 'metaKey' | 'ctrlKey'> &
   Partial<Pick<MouseEvent, 'button' | 'shiftKey' | 'preventDefault' | 'stopPropagation'>>
@@ -29,9 +26,7 @@ export function handleOscLink(
   rawText: string,
   event: TerminalLinkEvent | undefined,
   deps: Pick<LinkHandlerDeps, 'worktreeId' | 'worktreePath'> &
-    Partial<Pick<LinkHandlerDeps, 'runtimeEnvironmentId' | 'startupCwd' | 'terminalHomePath'>> & {
-      requestOpenLinksInAppPreference?: TerminalLinkRoutingPreferenceRequester
-    }
+    Partial<Pick<LinkHandlerDeps, 'runtimeEnvironmentId' | 'startupCwd' | 'terminalHomePath'>>
 ): boolean {
   if (!isDesktopOscLinkActivation(event)) {
     return false
@@ -82,11 +77,7 @@ export function handleOscLink(
   if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
     openTerminalHttpLink(parsed.toString(), {
       worktreeId: deps.worktreeId,
-      // Why: OSC 8 links must share plain-text terminal URL semantics and open
-      // in the system browser on Command/Ctrl+click, or Yiru on Shift+Command/Ctrl.
-      forceSystemBrowser: !event?.shiftKey,
-      forceInAppBrowser: Boolean(event?.shiftKey),
-      requestOpenLinksInAppPreference: deps.requestOpenLinksInAppPreference
+      runtimeEnvironmentId: deps.runtimeEnvironmentId
     })
     return true
   }

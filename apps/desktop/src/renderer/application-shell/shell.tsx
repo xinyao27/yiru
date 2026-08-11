@@ -20,7 +20,6 @@ import {
 } from 'react'
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
-import { LinkRoutingPreferenceDialogProvider } from '~renderer/components/link-routing-preference-dialog'
 import { LoadingIndicatorStyleProvider } from '~renderer/components/loading-indicator'
 import { useRateLimitResumeDetector } from '~renderer/components/rate-limit-resume/detector'
 import { useRateLimitResumeDispatch } from '~renderer/components/rate-limit-resume/use-rate-limit-resume-dispatch'
@@ -2227,7 +2226,7 @@ function App(): React.JSX.Element {
     >
       <TooltipProvider>
         <ConfirmationDialogProvider>
-          <LinkRoutingPreferenceDialogProvider>
+          <>
             <WorkspacePortScanner enabled={workspaceSessionReady} />
             <CoworkingControlRequestDialog />
             <CoworkingHostAccessRequestDialog />
@@ -2798,8 +2797,6 @@ function App(): React.JSX.Element {
             >
               <RecentTabSwitcher />
             </RecoverableRenderErrorBoundary>
-            {/* Why: the dialog hosts a live terminal pane, which requires the
-                link-routing preference context; mounting outside crashes it. */}
             <Suspense fallback={null}>
               <RecoverableRenderErrorBoundary
                 boundaryId="overlay.skill-freshness-update-dialog"
@@ -2818,7 +2815,7 @@ function App(): React.JSX.Element {
                 <RemoteServerUpdateDialog />
               </RecoverableRenderErrorBoundary>
             </Suspense>
-          </LinkRoutingPreferenceDialogProvider>
+          </>
         </ConfirmationDialogProvider>
       </TooltipProvider>
       <Toaster
