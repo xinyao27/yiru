@@ -71,6 +71,7 @@ export function createRuntimeOrpcHandlerOptions({
         registerBinaryStreamHandler: context.registerBinaryStreamHandler,
         authenticatedCallerFingerprint: context.authenticatedCallerFingerprint,
         shellConnectionId: context.shellConnectionId,
+        renderingWebContentsId: context.renderingWebContentsId,
         resolveAdmission: context.resolveAdmission,
         beforeInvocation: context.beforeInvocation,
         resolveInvocationMetadata: async (invocation) => ({
