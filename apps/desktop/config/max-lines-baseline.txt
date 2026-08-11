@@ -76,7 +76,6 @@ inline apps/desktop/src/main/rate-limits/service.ts
 inline apps/desktop/src/main/runtime/orchestration/coordinator.ts
 inline apps/desktop/src/main/runtime/orchestration/db.ts
 inline apps/desktop/src/main/runtime/rpc.ts
-inline apps/desktop/src/main/runtime/rpc/methods/terminal.ts
 inline apps/desktop/src/main/runtime/yiru-runtime-browser.ts
 inline apps/desktop/src/main/runtime/yiru-runtime-files.ts
 inline apps/desktop/src/main/runtime/yiru-runtime.ts
@@ -150,7 +149,6 @@ inline packages/client/src/lib/pane-manager/pane-terminal-output-scheduler.ts
 inline packages/client/src/lib/pane-manager/pane-tree-ops.ts
 inline packages/client/src/lib/terminal-links.ts
 inline packages/client/src/lib/worktree-activation.ts
-inline packages/client/src/runtime/remote-runtime-terminal-multiplexer.ts
 inline packages/client/src/runtime/sync-runtime-graph.ts
 inline packages/client/src/runtime/web-runtime-session.ts
 inline packages/client/src/runtime/web-session-tabs-sync.ts
