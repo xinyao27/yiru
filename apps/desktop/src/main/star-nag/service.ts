@@ -8,7 +8,8 @@ import type {
 
 import { checkYiruStarred } from '../github/client'
 import type { Store } from '../persistence'
-import { broadcastShellEvent, publishShellEvent } from '../shell/events'
+import { broadcastShellEvent } from '../shell/event-broadcast'
+import { publishShellEvent } from '../shell/events'
 import type { StatsCollector } from '../stats/collector'
 import { track } from '../telemetry/client'
 import { StarNagAgentValueMoment, type AgentValueMomentPreparation } from './agent-value-moment'

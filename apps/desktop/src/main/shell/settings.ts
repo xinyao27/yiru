@@ -21,7 +21,7 @@ import type { Store } from '../persistence'
 import { track } from '../telemetry/client'
 import { prepareLocalWorktreeRootsForRepos } from '../worktree-root-preparation'
 import { scheduleCurrentWorktreeBaseDirectoryWatcherSync } from '../worktree/base-directory-watcher'
-import { broadcastShellEvent } from './events'
+import { broadcastShellEvent } from './event-broadcast'
 
 // Why: the whitelist is the source-of-truth for which keys we emit on. Casting
 // to a Set once at module load lets the IPC handler's per-key membership

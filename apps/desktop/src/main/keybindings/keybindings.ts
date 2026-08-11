@@ -3,7 +3,7 @@ import type { KeybindingActionId, KeybindingFileSnapshot } from '~shared/keybind
 
 import { authorizeExternalPath } from '../filesystem/auth'
 import { rebuildAppMenu } from '../menu/register-app-menu'
-import { broadcastShellEvent } from '../shell/events'
+import { broadcastShellEvent } from '../shell/event-broadcast'
 import type { KeybindingService } from './keybinding-service'
 
 function broadcastKeybindingsChanged(snapshot: KeybindingFileSnapshot): void {

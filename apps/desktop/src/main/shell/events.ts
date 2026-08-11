@@ -4,7 +4,6 @@ import type {
   ShellEventsSubscribeInput,
   ShellSubscriptionEvent
 } from '@yiru/runtime-protocol/contract'
-import { BrowserWindow } from 'electron'
 
 import type { RpcContext } from '../runtime/rpc/core'
 import { readShellWindowUiState } from './ui'
@@ -55,14 +54,6 @@ export function publishShellEvent(webContentsId: number, event: ShellEvent): voi
   }
   for (const listener of Array.from(state.listeners)) {
     listener(sequenced)
-  }
-}
-
-export function broadcastShellEvent(event: ShellEvent): void {
-  for (const window of BrowserWindow.getAllWindows()) {
-    if (!window.isDestroyed()) {
-      publishShellEvent(window.webContents.id, event)
-    }
   }
 }
 

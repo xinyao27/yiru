@@ -162,6 +162,9 @@ const webCrashReportsApi: ShellCrashReportsApi = {
     })
 }
 
+const diagnosticsUnavailableOnWeb = (): Error =>
+  new Error(translate('auto.web.web.preload.api.fb290366b2', 'Unavailable on web.'))
+
 const webDiagnosticsApi: ShellDiagnosticsApi = {
   getStatus: () =>
     Promise.resolve({
@@ -170,10 +173,10 @@ const webDiagnosticsApi: ShellDiagnosticsApi = {
       traceFilePath: '',
       traceFamilySize: 0
     }),
-  collectBundle: () => Promise.reject(new Error('Review files are unavailable on web.')),
-  openBundlePreview: () => Promise.reject(new Error('Review files are unavailable on web.')),
+  collectBundle: () => Promise.reject(diagnosticsUnavailableOnWeb()),
+  openBundlePreview: () => Promise.reject(diagnosticsUnavailableOnWeb()),
   discardBundlePreview: () => Promise.resolve(),
-  uploadBundle: () => Promise.reject(new Error('Sending diagnostics is unavailable on web.'))
+  uploadBundle: () => Promise.reject(diagnosticsUnavailableOnWeb())
 }
 
 const webTelemetryApi: ShellTelemetryApi = {
