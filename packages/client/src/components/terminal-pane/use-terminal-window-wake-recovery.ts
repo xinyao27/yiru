@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
 import type { PaneManager } from '~renderer/lib/pane-manager/pane-manager'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import { shellClient } from '~renderer/runtime/shell-client'
 
 import { recordTerminalFreezeBreadcrumb } from './terminal-freeze-breadcrumbs'
@@ -106,17 +105,14 @@ export function useTerminalWindowWakeRecovery({
     // visibilitychange, so main relays powerMonitor resume over IPC. Genuine
     // wake clears the WebGL glyph atlas (clearGlyphAtlases=true via
     // onSystemResumed) — the latch-clearing recovery — unlike plain refocus.
-    const unsubscribeSystemResumed =
-      typeof rendererHostClient?.ui?.onSystemResumed === 'function'
-        ? shellClient.ui.onSystemResumed(onSystemResumed)
-        : null
+    const unsubscribeSystemResumed = shellClient.ui.onSystemResumed(onSystemResumed)
     return () => {
       cancelScheduledWakeRecovery()
       window.removeEventListener('focus', onFocus)
       if (typeof document !== 'undefined' && typeof document.removeEventListener === 'function') {
         document.removeEventListener('visibilitychange', onVisibilityChange)
       }
-      unsubscribeSystemResumed?.()
+      unsubscribeSystemResumed()
     }
   }, [isActiveRef, isVisible, isVisibleRef, managerRef])
 }

@@ -64,6 +64,7 @@ import { readCliInstallStatus } from '~renderer/runtime/cli-install-client'
 import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import { runtimeEnvironmentsClient } from '~renderer/runtime/runtime-environments-client'
 import { shellClient } from '~renderer/runtime/shell-client'
+import { getRenderingHostSnapshot } from '~renderer/runtime/shell-platform-client'
 import { getRuntimeUIState, setRuntimeUIState } from '~renderer/runtime/ui-client'
 import {
   canGoBackWorktreeHistory,
@@ -101,7 +102,7 @@ import {
 import {
   fetchWorkspaceSessionWithRuntimeHostOwners,
   patchWorkspaceSessionByHost,
-  persistWorkspaceSessionByHostSync
+  persistWorkspaceSessionByHost
 } from '../components/editor/workspace-session-host-persistence'
 import { RecoverableRenderErrorBoundary } from '../components/error-boundaries/recoverable-render-error-boundary'
 import {
@@ -205,8 +206,7 @@ const SLEEPING_AGENT_RESUME_CAPTURE_INTERVAL_MS = 60_000
 const shortcutPlatform = getRendererAppPlatform()
 const isMac = shortcutPlatform === 'darwin'
 const isWebClient = isPairedWebClientWindow()
-const rendererOsRelease =
-  typeof window === 'undefined' ? '' : rendererHostClient?.platform?.get?.().osRelease
+const rendererOsRelease = typeof window === 'undefined' ? '' : getRenderingHostSnapshot().osRelease
 // Why: Electron exposes native sidebar material on macOS and supported Windows
 // builds. Paired web clients and other platforms keep the opaque surface.
 const hasNativeSidebarMaterial =
@@ -968,7 +968,7 @@ function App(): React.JSX.Element {
         )
         keybindingsPromise.catch(() => {})
         const onboardingPromise = timeRendererStartupStep('onboarding-get', () =>
-          rendererHostClient.onboarding.get()
+          shellClient.onboarding.get()
         )
         onboardingPromise.catch(() => {})
         // Why: hydrate persisted UI immediately after ui.get() so first paint
@@ -1010,7 +1010,7 @@ function App(): React.JSX.Element {
         // without waiting on network reachability. Unreadable partitions skip.
         const sessionRead = await timeRendererStartupStep('session-get', () =>
           fetchWorkspaceSessionWithRuntimeHostOwners(
-            rendererHostClient.session,
+            shellClient.session,
             useAppStore.getState().repos,
             startupRuntimeHostIds
           )
@@ -1118,7 +1118,7 @@ function App(): React.JSX.Element {
           // new tab/file/browse becomes silently ephemeral — `hydrationSucceeded`
           // stays false for the rest of the process and the session writer is
           // a no-op. The "Restart now" action calls app.relaunch (defined in
-          // src/main/ipc/app.ts) so the user can recover with one click instead
+          // src/main/shell/app.ts) so the user can recover with one click instead
           // of having to find a quit/relaunch path themselves.
           toast.error(translate('auto.App.12e77cf12b', 'Session restore failed'), {
             description: translate(
@@ -1267,7 +1267,7 @@ function App(): React.JSX.Element {
         // Why: route each runtime host's worktree-scoped slice to its own
         // partition; the returned promise is the local write so the
         // remote-workspace upload chain below keeps its ordering.
-        void patchWorkspaceSessionByHost(rendererHostClient.session, patch, state)
+        void patchWorkspaceSessionByHost(shellClient.session, patch, state)
       }
     })
   }, [])
@@ -1306,11 +1306,11 @@ function App(): React.JSX.Element {
       // into the store via Zustand setters. The earlier read is only for the
       // gating flags and would miss those updates.
       const freshState = useAppStore.getState()
-      persistWorkspaceSessionByHostSync(
-        rendererHostClient.session,
+      void persistWorkspaceSessionByHost(
+        shellClient.session,
         buildWorkspaceSessionPayload(freshState),
         freshState
-      )
+      ).catch(() => {})
       shutdownBuffersCaptured = true
     }
     window.addEventListener('beforeunload', captureAndFlush)

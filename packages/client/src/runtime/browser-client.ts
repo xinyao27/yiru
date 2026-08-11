@@ -8,7 +8,7 @@ import type {
 } from '~shared/browser/grab-types'
 import type { BrowserSessionProfileScope, BrowserViewportOverride } from '~shared/types'
 
-import { callRuntimeOrpc } from './orpc-client'
+import { callRuntimeOrpc, callShellOrpc } from './orpc-client'
 
 const LOCAL_RUNTIME_TARGET = { kind: 'local' } as const
 
@@ -201,5 +201,5 @@ export function clearLocalDefaultBrowserCookies() {
 // Why: the picker path is selected and consumed in main; the renderer receives
 // only an import result until an opaque file-handle bytes lifecycle exists.
 export function importLocalBrowserCookieFile(profileId: string) {
-  return window.api.browser.sessionImportCookies({ profileId })
+  return callShellOrpc((client) => client.shell.browser.importCookies, { profileId })
 }

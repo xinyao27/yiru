@@ -1,6 +1,5 @@
 import { applyPRBotAuthorOverride } from '@yiru/workbench-model/review'
-import { ipcMain, nativeTheme } from 'electron'
-import { publishSettingsChangedEvent } from '~main/runtime/settings-events'
+import { nativeTheme } from 'electron'
 import { normalizeAppIconId } from '~shared/app-icon'
 import { normalizeLoaderStyle } from '~shared/loader-style'
 import { normalizeProxyBypassRules, normalizeProxyUrl } from '~shared/network-proxy'
@@ -22,6 +21,7 @@ import type { Store } from '../persistence'
 import { track } from '../telemetry/client'
 import { prepareLocalWorktreeRootsForRepos } from '../worktree-root-preparation'
 import { scheduleCurrentWorktreeBaseDirectoryWatcherSync } from '../worktree/base-directory-watcher'
+import { broadcastShellEvent } from './event-broadcast'
 
 // Why: the whitelist is the source-of-truth for which keys we emit on. Casting
 // to a Set once at module load lets the IPC handler's per-key membership
@@ -48,44 +48,49 @@ const APPEARANCE_MENU_KEYS: readonly (keyof GlobalSettings)[] = [
   'showMobileButton'
 ]
 
-export function registerSettingsHandlers(
+export function initializeShellSettingsService(
   store: Store,
   agentAwakeService?: AgentAwakeService
 ): void {
-  store.onSettingsChanged((updates, _settings, originWebContentsId) => {
+  store.onSettingsChanged((_updates, _settings, originWebContentsId) => {
     // Why: all clients subscribe through the runtime event bus. The payload is
     // an invalidation; desktop re-reads its full shell-owned settings document.
-    publishSettingsChangedEvent({ type: 'changed', updates })
+    broadcastShellEvent({ type: 'settingsChanged' })
     void originWebContentsId
   })
 
-  ipcMain.handle('settings:get', () => {
+  shellSettingsService = createShellSettingsService(store, agentAwakeService)
+}
+
+type ShellSettingsService = ReturnType<typeof createShellSettingsService>
+
+let shellSettingsService: ShellSettingsService | null = null
+
+export function getShellSettingsService(): ShellSettingsService {
+  if (!shellSettingsService) {
+    throw new Error('shell_settings_service_unavailable')
+  }
+  return shellSettingsService
+}
+
+function createShellSettingsService(store: Store, agentAwakeService?: AgentAwakeService) {
+  const updatePRBotAuthorOverride = (
+    args: { author: string; isBot: boolean },
+    originWebContentsId: number
+  ): GlobalSettings => {
+    const current = store.getSettings().prBotAuthorOverrides
+    const next = applyPRBotAuthorOverride(current, args.author, args.isBot)
+    store.updateSettings(
+      { prBotAuthorOverrides: next },
+      { notifyListeners: true, originWebContentsId }
+    )
     return store.getSettings()
-  })
+  }
 
-  ipcMain.handle(
-    'settings:update-pr-bot-author-override',
-    (event, args: { author: string; isBot: boolean }) => {
-      const current = store.getSettings().prBotAuthorOverrides
-      const next = applyPRBotAuthorOverride(current, args.author, args.isBot)
-      store.updateSettings(
-        { prBotAuthorOverrides: next },
-        { notifyListeners: true, originWebContentsId: event.sender.id }
-      )
-      return store.getSettings()
-    }
-  )
-
-  // Why: terminal panes can bind PTYs before async settings hydration
-  // completes. The side-effect authority kill switch is consulted once at
-  // transport creation, so the renderer needs the persisted value
-  // synchronously or pre-hydration bindings would always pick main authority
-  // (terminal-side-effect-authority.md, migration switch).
-  ipcMain.on('settings:get-sync', (event) => {
-    event.returnValue = store.getSettings()
-  })
-
-  ipcMain.handle('settings:set', async (event, args: Partial<GlobalSettings>) => {
+  const set = async (
+    args: Partial<GlobalSettings>,
+    originWebContentsId: number
+  ): Promise<GlobalSettings> => {
     const sanitizedArgs = sanitizeRendererSettingsUpdate(args)
     // Why: Floating Workspace grants are trusted only when written by the
     // main-process directory picker, never by renderer-provided settings IPC.
@@ -133,7 +138,7 @@ export function registerSettingsHandlers(
     const before = store.getSettings()
     const result = store.updateSettings(sanitizedArgs, {
       notifyListeners: true,
-      originWebContentsId: event.sender.id
+      originWebContentsId
     })
     if ('keepComputerAwakeWhileAgentsRun' in sanitizedArgs) {
       agentAwakeService?.setEnabled(result.keepComputerAwakeWhileAgentsRun)
@@ -201,13 +206,13 @@ export function registerSettingsHandlers(
     }
 
     return result
-  })
+  }
 
-  ipcMain.handle('cache:getGitHub', () => {
-    return store.getGitHubCache()
-  })
-
-  ipcMain.handle('cache:setGitHub', (_event, args: { cache: PersistedState['githubCache'] }) => {
-    store.setGitHubCache(args.cache)
-  })
+  return {
+    get: (): GlobalSettings => store.getSettings(),
+    set,
+    updatePRBotAuthorOverride,
+    getGitHubCache: (): PersistedState['githubCache'] => store.getGitHubCache(),
+    setGitHubCache: (cache: PersistedState['githubCache']): void => store.setGitHubCache(cache)
+  }
 }

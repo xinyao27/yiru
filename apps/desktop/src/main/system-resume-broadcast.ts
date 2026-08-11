@@ -1,6 +1,6 @@
 import { BrowserWindow, powerMonitor } from 'electron'
 
-export const SYSTEM_RESUMED_CHANNEL = 'system:resumed'
+import { publishShellEvent } from './shell/events'
 
 type ResumeEventSource = {
   on(event: 'resume', listener: () => void): unknown
@@ -9,7 +9,7 @@ type ResumeEventSource = {
 
 type ResumeBroadcastWindow = {
   isDestroyed(): boolean
-  webContents: { send(channel: string): void }
+  webContents: { id: number }
 }
 
 type SystemResumeBroadcastOptions = {
@@ -28,7 +28,7 @@ export function registerSystemResumeBroadcast(
   const onResume = (): void => {
     for (const window of getWindows()) {
       if (!window.isDestroyed()) {
-        window.webContents.send(SYSTEM_RESUMED_CHANNEL)
+        publishShellEvent(window.webContents.id, { type: 'uiSystemResumed' })
       }
     }
   }

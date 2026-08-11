@@ -1,6 +1,7 @@
 import { useCallback, useRef } from 'react'
 import { track } from '~renderer/lib/telemetry'
 import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 import { ONBOARDING_FINAL_STEP, ONBOARDING_FLOW_VERSION } from '~shared/constants'
 import type { EventProps } from '~shared/telemetry-events'
@@ -13,7 +14,7 @@ export async function persistStep(
   stepNumber: number,
   updates: Partial<OnboardingState> = {}
 ): Promise<OnboardingState> {
-  return rendererHostClient.onboarding.update({
+  return shellClient.onboarding.update({
     flowVersion: ONBOARDING_FLOW_VERSION,
     lastCompletedStep: Math.max(stepNumber, -1),
     ...updates
@@ -99,7 +100,7 @@ export function useCloseWith({
         // Why: main-process updateOnboarding already merges with current state,
         // so spreading the local (potentially stale) onboarding.checklist would
         // overwrite concurrent updates.
-        nextState = await rendererHostClient.onboarding.update({
+        nextState = await shellClient.onboarding.update({
           flowVersion: ONBOARDING_FLOW_VERSION,
           closedAt: Date.now(),
           outcome,

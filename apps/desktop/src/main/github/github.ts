@@ -9,7 +9,6 @@ import type {
   PRRefreshOutcome
 } from '~shared/types'
 
-import type { MainIpcRegistration } from '../ipc-registration'
 import type { Store } from '../persistence'
 import type { StatsCollector } from '../stats/collector'
 import { track } from '../telemetry/client'
@@ -27,12 +26,30 @@ import { validateAutomaticPRRefreshCandidate } from './repo-validation'
 
 const prRefreshVisibilityCleanupRegistered = new Set<number>()
 
-export function registerGitHubShellHandlers(
-  ipcMain: MainIpcRegistration,
+type ShellGitHubService = ReturnType<typeof createShellGitHubService>
+
+let shellGitHubService: ShellGitHubService | null = null
+
+export function initializeShellGitHubService(
   shellAdapter: PRRefreshShellAdapter,
   store: Store,
   stats: StatsCollector
 ): void {
+  shellGitHubService = createShellGitHubService(shellAdapter, store, stats)
+}
+
+export function getShellGitHubService(): ShellGitHubService {
+  if (!shellGitHubService) {
+    throw new Error('shell_github_service_unavailable')
+  }
+  return shellGitHubService
+}
+
+function createShellGitHubService(
+  shellAdapter: PRRefreshShellAdapter,
+  store: Store,
+  stats: StatsCollector
+) {
   setPRRefreshShellAdapter(shellAdapter)
 
   function recordPRIfNeeded(repo: Repo, outcome: PRRefreshOutcome): void {
@@ -55,54 +72,48 @@ export function registerGitHubShellHandlers(
     }
   })
 
-  ipcMain.handle(
-    'gh:enqueuePRRefresh',
-    (
-      event,
-      args: {
-        candidate: GitHubPRRefreshCandidate
-        reason: GitHubPRRefreshReason
-        priority?: number
-      }
-    ): GitHubPRRefreshEnqueueResult => {
-      const validation = validateAutomaticPRRefreshCandidate(args.candidate, store)
-      if (validation.kind === 'skipped') {
-        return validation.result
-      }
-      const senderWindowId = event?.sender?.id
-      enqueuePRRefresh(validation.candidate, args.reason, args.priority ?? 0, senderWindowId)
-      return { kind: 'queued' }
+  const enqueueRefresh = (
+    rendererId: number,
+    args: {
+      candidate: GitHubPRRefreshCandidate
+      reason: GitHubPRRefreshReason
+      priority?: number
     }
-  )
+  ): GitHubPRRefreshEnqueueResult => {
+    const validation = validateAutomaticPRRefreshCandidate(args.candidate, store)
+    if (validation.kind === 'skipped') {
+      return validation.result
+    }
+    enqueuePRRefresh(validation.candidate, args.reason, args.priority ?? 0, rendererId)
+    return { kind: 'queued' }
+  }
 
-  ipcMain.handle(
-    'gh:reportVisiblePRRefreshCandidates',
-    (event, args: { candidates: GitHubPRRefreshCandidate[]; generation: number }) => {
-      const senderId = event.sender.id
-      if (!prRefreshVisibilityCleanupRegistered.has(senderId)) {
-        prRefreshVisibilityCleanupRegistered.add(senderId)
-        event.sender.once('destroyed', () => {
-          prRefreshVisibilityCleanupRegistered.delete(senderId)
-          clearVisiblePRRefreshWindow(senderId)
-        })
-      }
-      const candidates: GitHubPRRefreshCandidate[] = []
-      const repos = store.getRepos()
-      for (const candidate of args.candidates) {
-        const validation = validateAutomaticPRRefreshCandidate(candidate, store, repos)
-        if (validation.kind === 'ok') {
-          candidates.push(validation.candidate)
-        }
-      }
-      reportVisiblePRRefreshCandidates(candidates, args.generation, senderId)
-      return true
+  const reportVisible = (
+    rendererId: number,
+    args: { candidates: GitHubPRRefreshCandidate[]; generation: number }
+  ): boolean => {
+    const senderId = rendererId
+    if (!prRefreshVisibilityCleanupRegistered.has(senderId)) {
+      prRefreshVisibilityCleanupRegistered.add(senderId)
+      shellAdapter.onRendererDestroyed(senderId, () => {
+        prRefreshVisibilityCleanupRegistered.delete(senderId)
+        clearVisiblePRRefreshWindow(senderId)
+      })
     }
-  )
+    const candidates: GitHubPRRefreshCandidate[] = []
+    const repos = store.getRepos()
+    for (const candidate of args.candidates) {
+      const validation = validateAutomaticPRRefreshCandidate(candidate, store, repos)
+      if (validation.kind === 'ok') {
+        candidates.push(validation.candidate)
+      }
+    }
+    reportVisiblePRRefreshCandidates(candidates, args.generation, senderId)
+    return true
+  }
 
   // Star operations target the Yiru repo itself — no repoPath validation needed
-  ipcMain.handle('gh:viewer', () => getAuthenticatedViewer())
-  ipcMain.handle('gh:checkYiruStarred', () => checkYiruStarred())
-  ipcMain.handle('gh:starYiru', async (_event, source: unknown) => {
+  const star = async (source: unknown): Promise<boolean> => {
     const sourceParse = appStarSourceSchema.safeParse(source)
     const starred = await starYiru()
     if (starred && sourceParse.success) {
@@ -114,5 +125,13 @@ export function registerGitHubShellHandlers(
       })
     }
     return starred
-  })
+  }
+
+  return {
+    viewer: getAuthenticatedViewer,
+    enqueuePRRefresh: enqueueRefresh,
+    reportVisiblePRRefreshCandidates: reportVisible,
+    checkYiruStarred,
+    starYiru: star
+  }
 }

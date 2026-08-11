@@ -1,6 +1,5 @@
 import { URL } from 'node:url'
 
-import { ipcMain } from 'electron'
 import {
   LOOPBACK_LOCALHOST_HOSTS,
   normalizeLocalhostHostname,
@@ -12,18 +11,24 @@ import { localhostWorktreeLabelProxy } from '../localhost-worktree-label-proxy'
 import type { Store } from '../persistence'
 import { getStoreWorkspacePortProbes, scanWorkspacePortProbes } from './workspace-port-ownership'
 
-export function registerLocalhostWorktreeLabelHandlers(store: Store): void {
-  ipcMain.handle(
-    'localhostWorktreeLabels:register',
-    async (_event, rawArgs: unknown): Promise<LocalhostWorktreeLabelResult> => {
-      const route = parseRegisterArgs(rawArgs)
-      // Why: the proxy will forward to any host it's given, so we restrict the
-      // target to loopback or a host:port that matches a live workspace port —
-      // otherwise this IPC is an open proxy / SSRF vector.
-      await assertAllowedTarget(store, route.targetUrl)
-      return localhostWorktreeLabelProxy.registerRoute(route)
-    }
-  )
+let shellStore: Store | null = null
+
+export function initializeShellLocalhostWorktreeLabelService(store: Store): void {
+  shellStore = store
+}
+
+export async function registerShellLocalhostWorktreeLabel(
+  rawArgs: unknown
+): Promise<LocalhostWorktreeLabelResult> {
+  if (!shellStore) {
+    throw new Error('unavailable_on_host: localhost worktree labels are not initialized')
+  }
+  const route = parseRegisterArgs(rawArgs)
+  // Why: the proxy will forward to any host it's given, so we restrict the
+  // target to loopback or a host:port that matches a live workspace port —
+  // otherwise this shell procedure would be an open proxy / SSRF vector.
+  await assertAllowedTarget(shellStore, route.targetUrl)
+  return localhostWorktreeLabelProxy.registerRoute(route)
 }
 
 async function assertAllowedTarget(store: Store, targetUrl: string): Promise<void> {

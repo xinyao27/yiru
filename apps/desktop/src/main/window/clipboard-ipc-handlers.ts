@@ -6,14 +6,7 @@ import {
   assertClipboardTextWithinLimitWithYield,
   type ReadClipboardTextOptions
 } from '@yiru/workbench-model/ui'
-import {
-  app,
-  clipboard,
-  ipcMain,
-  nativeImage,
-  type IpcMainInvokeEvent,
-  type WebContents
-} from 'electron'
+import { app, clipboard, nativeImage } from 'electron'
 import {
   assertClipboardImageBase64LengthWithinLimit,
   assertClipboardImageByteLengthWithinLimit,
@@ -33,12 +26,6 @@ import {
 } from './clipboard-image-temp-file'
 import { saveClipboardImageBufferInRuntime } from './clipboard-runtime-image-upload'
 
-let trustedClipboardRendererWebContentsId: number | null = null
-
-type ClipboardWriteFileRequest = {
-  filePath: string
-}
-
 async function saveClipboardImageBufferForTarget(
   buffer: Buffer,
   args?: SaveClipboardImageAsTempFileArgs
@@ -51,12 +38,6 @@ async function saveClipboardImageBufferForTarget(
   return saveClipboardImageBufferAsTempFile(buffer)
 }
 
-export function setTrustedClipboardRendererWebContentsId(webContentsId: number | null): void {
-  trustedClipboardRendererWebContentsId = webContentsId
-}
-
-// Run a short-lived OS clipboard helper (PowerShell / wl-copy / xclip), feeding
-// it stdin when provided; resolves only on a clean exit.
 function runCommand(command: string, args: string[], stdin?: string): Promise<void> {
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, { stdio: ['pipe', 'ignore', 'ignore'] })
@@ -68,140 +49,86 @@ function runCommand(command: string, args: string[], stdin?: string): Promise<vo
   })
 }
 
-export function registerClipboardHandlers(store: Store): void {
-  ipcMain.removeHandler('clipboard:readText')
-  ipcMain.removeHandler('clipboard:readSelectionText')
-  ipcMain.removeHandler('clipboard:readImageBase64')
-  ipcMain.removeHandler('clipboard:writeText')
-  ipcMain.removeHandler('clipboard:writeSelectionText')
-  ipcMain.removeHandler('clipboard:writeImage')
-  ipcMain.removeHandler('clipboard:writeFile')
-  ipcMain.removeHandler('clipboard:saveImageAsTempFile')
+export function createClipboardService(store: Store) {
+  const resolveFilePath: ClipboardFileDeps['resolveFilePath'] = async (path) => {
+    try {
+      const authorizedPath = await resolveAuthorizedPath(path, store)
+      await stat(authorizedPath)
+      return { ok: true, path: authorizedPath }
+    } catch (error) {
+      if (error instanceof Error && error.message === PATH_ACCESS_DENIED_MESSAGE) {
+        return { ok: false, reason: 'access-denied' }
+      }
+      return { ok: false, reason: isENOENT(error) ? 'not-found' : 'invalid-path' }
+    }
+  }
+  const fileDeps = makeClipboardFileDeps(resolveFilePath)
 
-  ipcMain.handle('clipboard:readText', async (event, options?: ReadClipboardTextOptions) => {
-    assertTrustedClipboardSender(event)
-    return assertClipboardTextWithinLimitWithYield(clipboard.readText(), options)
-  })
-  ipcMain.handle(
-    'clipboard:readSelectionText',
-    async (event, options?: ReadClipboardTextOptions) => {
-      assertTrustedClipboardSender(event)
-      return assertClipboardTextWithinLimitWithYield(clipboard.readText('selection'), options)
-    }
-  )
-  ipcMain.handle('clipboard:readImageBase64', (event): string | null => {
-    assertTrustedClipboardSender(event)
-    const image = clipboard.readImage()
-    if (image.isEmpty()) {
-      return null
-    }
-    assertClipboardImageDimensionsWithinLimit(image.getSize())
-    const buffer = image.toPNG()
-    assertClipboardImageByteLengthWithinLimit(buffer.byteLength)
-    return buffer.toString('base64')
-  })
-  // Why: terminals need to detect clipboard images to support tools like Claude
-  // Code that accept image input via paste. Writes the clipboard image to a
-  // temp file and returns the path, or null if the clipboard has no image.
-  ipcMain.handle(
-    'clipboard:saveImageAsTempFile',
-    async (event, args?: SaveClipboardImageAsTempFileArgs) => {
-      assertTrustedClipboardSender(event)
+  return {
+    readText: (options?: ReadClipboardTextOptions): Promise<string> =>
+      assertClipboardTextWithinLimitWithYield(clipboard.readText(), options),
+    readSelectionText: (options?: ReadClipboardTextOptions): Promise<string> =>
+      assertClipboardTextWithinLimitWithYield(clipboard.readText('selection'), options),
+    readImageBase64: (): string | null => {
+      const image = clipboard.readImage()
+      if (image.isEmpty()) {
+        return null
+      }
+      assertClipboardImageDimensionsWithinLimit(image.getSize())
+      const buffer = image.toPNG()
+      assertClipboardImageByteLengthWithinLimit(buffer.byteLength)
+      return buffer.toString('base64')
+    },
+    saveImageAsTempFile: async (
+      args?: SaveClipboardImageAsTempFileArgs
+    ): Promise<string | null> => {
       const image = clipboard.readImage()
       if (image.isEmpty()) {
         return null
       }
       assertClipboardImageDimensionsWithinLimit(image.getSize())
       return saveClipboardImageBufferForTarget(image.toPNG(), args)
-    }
-  )
-  // Why: copy the actual file to the OS clipboard so pasting in Finder/Explorer
-  // drops the file itself, not its path as text.
-  ipcMain.handle(
-    'clipboard:writeFile',
-    (event, args: unknown): ClipboardFileResult | Promise<ClipboardFileResult> => {
-      assertTrustedClipboardSender(event)
-      const request = normalizeClipboardWriteFileRequest(args)
-      if (!request) {
-        return { ok: false, reason: 'invalid-path' }
+    },
+    writeFile: (filePath: string): ClipboardFileResult | Promise<ClipboardFileResult> =>
+      writeFileToClipboard(filePath, fileDeps),
+    writeText: async (text: string): Promise<void> => {
+      clipboard.writeText(await assertClipboardTextWriteWithinLimitWithYield(text))
+    },
+    writeSelectionText: async (text: string): Promise<void> => {
+      clipboard.writeText(await assertClipboardTextWriteWithinLimitWithYield(text), 'selection')
+    },
+    writeImage: (dataUrl: string): void => {
+      const prefix = 'data:image/png;base64,'
+      if (!dataUrl.startsWith(prefix)) {
+        return
       }
-      const deps = makeClipboardFileDeps(async (path) => {
-        try {
-          const authorizedPath = await resolveAuthorizedPath(path, store)
-          await stat(authorizedPath)
-          return { ok: true, path: authorizedPath }
-        } catch (error) {
-          if (error instanceof Error && error.message === PATH_ACCESS_DENIED_MESSAGE) {
-            return { ok: false, reason: 'access-denied' }
-          }
-          return { ok: false, reason: isENOENT(error) ? 'not-found' : 'invalid-path' }
-        }
-      })
-      return writeFileToClipboard(request.filePath, deps)
+      const contentBase64 = dataUrl.slice(prefix.length)
+      try {
+        assertClipboardImageBase64LengthWithinLimit(contentBase64.length)
+      } catch {
+        return
+      }
+      const buffer = Buffer.from(contentBase64, 'base64')
+      try {
+        assertClipboardImageByteLengthWithinLimit(buffer.byteLength)
+      } catch {
+        return
+      }
+      const image = nativeImage.createFromBuffer(buffer)
+      if (image.isEmpty()) {
+        return
+      }
+      try {
+        assertClipboardImageDimensionsWithinLimit(image.getSize())
+      } catch {
+        return
+      }
+      clipboard.writeImage(image)
     }
-  )
-  ipcMain.handle('clipboard:writeText', async (event, text: string) => {
-    assertTrustedClipboardSender(event)
-    return clipboard.writeText(await assertClipboardTextWriteWithinLimitWithYield(text))
-  })
-  ipcMain.handle('clipboard:writeSelectionText', async (event, text: string) => {
-    assertTrustedClipboardSender(event)
-    return clipboard.writeText(
-      await assertClipboardTextWriteWithinLimitWithYield(text),
-      'selection'
-    )
-  })
-  ipcMain.handle('clipboard:writeImage', (event, dataUrl: string) => {
-    assertTrustedClipboardSender(event)
-    // Why: only accept validated PNG data URIs to prevent writing arbitrary
-    // data to the clipboard. The renderer already validates the prefix, but
-    // defense-in-depth applies here too.
-    const prefix = 'data:image/png;base64,'
-    if (typeof dataUrl !== 'string' || !dataUrl.startsWith(prefix)) {
-      return
-    }
-    const contentBase64 = dataUrl.slice(prefix.length)
-    try {
-      assertClipboardImageBase64LengthWithinLimit(contentBase64.length)
-    } catch {
-      return
-    }
-    // Why: use createFromBuffer instead of createFromDataURL — the latter
-    // silently returns an empty image on some macOS + Electron combinations
-    // when the data URL is large (>500KB). Decoding the base64 manually and
-    // using createFromBuffer is more reliable.
-    const buffer = Buffer.from(contentBase64, 'base64')
-    try {
-      assertClipboardImageByteLengthWithinLimit(buffer.byteLength)
-    } catch {
-      return
-    }
-    const image = nativeImage.createFromBuffer(buffer)
-    if (image.isEmpty()) {
-      return
-    }
-    try {
-      assertClipboardImageDimensionsWithinLimit(image.getSize())
-    } catch {
-      return
-    }
-    clipboard.writeImage(image)
-  })
+  }
 }
 
-function normalizeClipboardWriteFileRequest(args: unknown): ClipboardWriteFileRequest | null {
-  if (typeof args === 'string') {
-    return { filePath: args }
-  }
-  if (!args || typeof args !== 'object' || Array.isArray(args)) {
-    return null
-  }
-  const filePath = (args as { filePath?: unknown }).filePath
-  if (typeof filePath !== 'string') {
-    return null
-  }
-  return { filePath }
-}
+export type ClipboardService = ReturnType<typeof createClipboardService>
 
 function makeClipboardFileDeps(
   resolveFilePath: ClipboardFileDeps['resolveFilePath']
@@ -213,30 +140,4 @@ function makeClipboardFileDeps(
     writeBuffer: (format, buffer) => clipboard.writeBuffer(format, buffer),
     runCommand
   }
-}
-
-function assertTrustedClipboardSender(event: IpcMainInvokeEvent): void {
-  if (!isTrustedClipboardRenderer(event.sender)) {
-    throw new Error('Unauthorized clipboard IPC sender')
-  }
-}
-
-function isTrustedClipboardRenderer(sender: WebContents): boolean {
-  if (sender.isDestroyed() || sender.getType() !== 'window') {
-    return false
-  }
-  if (trustedClipboardRendererWebContentsId != null) {
-    return sender.id === trustedClipboardRendererWebContentsId
-  }
-
-  const senderUrl = sender.getURL()
-  if (process.env.ELECTRON_RENDERER_URL) {
-    try {
-      return new URL(senderUrl).origin === new URL(process.env.ELECTRON_RENDERER_URL).origin
-    } catch {
-      return false
-    }
-  }
-
-  return senderUrl.startsWith('file://')
 }

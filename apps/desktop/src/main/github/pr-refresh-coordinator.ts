@@ -35,6 +35,7 @@ type PRRefreshOutcomeObserver = (
 
 export type PRRefreshShellAdapter = {
   getLiveRendererIds: () => ReadonlySet<number>
+  onRendererDestroyed: (rendererId: number, callback: () => void) => void
 }
 
 type PRBranchLookupCandidate = Pick<
@@ -91,7 +92,8 @@ let lastBackgroundStartAt = 0
 const visibleByWindow = new Map<number, { generation: number; keys: Set<string> }>()
 let outcomeObserver: PRRefreshOutcomeObserver | null = null
 let shellAdapter: PRRefreshShellAdapter = {
-  getLiveRendererIds: () => new Set()
+  getLiveRendererIds: () => new Set(),
+  onRendererDestroyed: () => {}
 }
 const diagnosticsCounters = {
   enqueued: 0,

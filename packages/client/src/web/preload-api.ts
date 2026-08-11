@@ -1,9 +1,5 @@
 import { ORPCError } from '@orpc/client'
-import type {
-  ContractRouterClient,
-  RuntimeBrowserGuestEvent,
-  runtimeContract
-} from '@yiru/runtime-protocol/contract'
+import type { ContractRouterClient, runtimeContract } from '@yiru/runtime-protocol/contract'
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 import { STATUS_GET_CONTRACT } from '@yiru/runtime-protocol/status'
 /* eslint-disable max-lines -- Why: the web preload adapter is the browser-side
@@ -57,13 +53,28 @@ import type {
   DetectedWorktreeListResult,
   GlobalSettings,
   OnboardingState,
+  PRInfo,
   Worktree,
   WorkspaceSessionPatch,
   WorkspaceSessionState
 } from '~shared/types'
 import { normalizeUiLanguage } from '~shared/ui-language'
-import { createDefaultLocalYiruProfile, DEFAULT_LOCAL_YIRU_PROFILE_ID } from '~shared/yiru-profiles'
+import {
+  createDefaultLocalYiruProfile,
+  DEFAULT_LOCAL_YIRU_PROFILE_ID,
+  type FindYiruProfileProjectsByPathResult,
+  type TransferYiruProfileProjectArgs
+} from '~shared/yiru-profiles'
 
+import type { ShellNotificationsApi } from '../runtime/shell-notifications-client'
+import type {
+  ShellAppApi,
+  ShellGitHubApi,
+  ShellRepoHostApi,
+  ShellRuntimeStateApi,
+  ShellStarNagApi,
+  ShellUpdaterApi
+} from '../runtime/shell-system-client'
 import { readWebUIState } from '../runtime/web-ui-state'
 import { toRuntimeWorktreeSelector } from '../runtime/worktree-selector'
 import {
@@ -108,23 +119,6 @@ const runtimeClientEvents = createRuntimeStreamFanOut({
   open: (client, signal) => client.runtime.clientEvents.subscribe(undefined, { signal })
 })
 
-const runtimeBrowserGuestEvents = createRuntimeStreamFanOut({
-  resolveClient: resolveFanOutClient,
-  open: (client, signal) => client.browser.guestEvents.subscribe(undefined, { signal })
-})
-
-// Narrows the shared guest-event feed to one event kind, so each preload `on*`
-// keeps its original single-payload callback signature.
-function onBrowserGuestEvent<TType extends RuntimeBrowserGuestEvent['type']>(
-  type: TType,
-  callback: (event: Extract<RuntimeBrowserGuestEvent, { type: TType }>) => void
-): () => void {
-  return runtimeBrowserGuestEvents.subscribe((event) => {
-    if (event.type === type) {
-      callback(event as Extract<RuntimeBrowserGuestEvent, { type: TType }>)
-    }
-  })
-}
 let cachedDetectedWorktrees: { loadedAt: number; worktrees: Worktree[] } | null = null
 const runtimeCallQueuePool = new WebRuntimeCallQueuePool()
 
@@ -148,9 +142,19 @@ function invalidateRuntimeWorktreeCaches(): void {
   cachedDetectedWorktrees = null
 }
 
-type WebSettingsApi = NonNullable<PreloadApi['settings']>
-type WebKeybindingsApi = NonNullable<PreloadApi['keybindings']>
-type WebGitHubApi = NonNullable<PreloadApi['gh']>
+type WebKeybindingsApi = {
+  get: () => Promise<KeybindingFileSnapshot>
+  ensureFile: () => Promise<KeybindingFileSnapshot>
+  setAction: (args: {
+    actionId: KeybindingActionId
+    bindings: string[] | null
+  }) => Promise<KeybindingFileSnapshot>
+  reload: () => Promise<KeybindingFileSnapshot>
+  openFile: () => Promise<KeybindingFileSnapshot>
+  revealFile: () => Promise<KeybindingFileSnapshot>
+  onChanged: (callback: (snapshot: KeybindingFileSnapshot) => void) => () => void
+}
+type WebGitHubApi = ShellGitHubApi
 type WebRuntimeProcedureSelector = (client: WebRuntimeOrpcClient) => unknown
 type WebKeybindingDocument = {
   version: 1
@@ -172,6 +176,176 @@ const GIT_PATHS_MUTATION_SELECTORS = {
 const WEB_KEYBINDING_PLATFORMS: readonly KeybindingPlatform[] = ['darwin', 'linux', 'win32']
 const webKeybindingListeners = new Set<(snapshot: KeybindingFileSnapshot) => void>()
 
+const webShellSettingsApi = {
+  get: async (): Promise<GlobalSettings> => getRuntimeBackedStoredSettings(),
+  getSnapshot: (): GlobalSettings => getStoredSettings(),
+  set: async (updates: Partial<GlobalSettings>): Promise<GlobalSettings> => {
+    if (updates.activeRuntimeEnvironmentId === null) {
+      disconnectActiveRuntimeEnvironment()
+    }
+    const sanitizedUpdates = { ...updates }
+    if ('autoRenameBranchFromWorkDefaultedOn' in sanitizedUpdates) {
+      sanitizedUpdates.autoRenameBranchFromWorkDefaultedOn = true
+    }
+    const next = mergeSettings(getStoredSettings(), sanitizedUpdates, {
+      preserveAutoRenameBranchFromWorkUpdate: 'autoRenameBranchFromWork' in sanitizedUpdates
+    })
+    writeJson(SETTINGS_STORAGE_KEY, next)
+    return syncRuntimeBackedSettings(sanitizedUpdates, next)
+  },
+  updatePRBotAuthorOverride: (args: { author: string; isBot: boolean }) =>
+    updateRuntimePRBotAuthorOverride(args)
+}
+
+const webShellSessionApi = {
+  get: (hostId?: ExecutionHostId): Promise<WorkspaceSessionState> =>
+    Promise.resolve(getStoredWorkspaceSession(hostId)),
+  set: async (session: WorkspaceSessionState, hostId?: ExecutionHostId): Promise<void> => {
+    writeJson(sessionStorageKeyForHost(hostId), sanitizeWebRuntimeWorkspaceSession(session))
+  },
+  patch: async (patch: WorkspaceSessionPatch, hostId?: ExecutionHostId): Promise<void> => {
+    writeJson(
+      sessionStorageKeyForHost(hostId),
+      sanitizeWebRuntimeWorkspaceSession({ ...getStoredWorkspaceSession(hostId), ...patch })
+    )
+  },
+  flush: async (): Promise<void> => {}
+}
+
+const webShellOnboardingApi = {
+  get: (): Promise<OnboardingState> => Promise.resolve(getStoredOnboarding()),
+  update: async (
+    updates: Partial<Omit<OnboardingState, 'checklist'>> & {
+      checklist?: Partial<OnboardingState['checklist']>
+    }
+  ): Promise<OnboardingState> => {
+    const current = getStoredOnboarding()
+    const next: OnboardingState = {
+      ...current,
+      ...updates,
+      flowVersion: ONBOARDING_FLOW_VERSION,
+      checklist: { ...current.checklist, ...updates.checklist }
+    }
+    writeJson(ONBOARDING_STORAGE_KEY, next)
+    return next
+  }
+}
+
+const webShellCacheApi = {
+  getGitHub: () =>
+    Promise.resolve(
+      readJson<{ pr: Record<string, { data: PRInfo | null; fetchedAt: number }> }>(
+        GITHUB_CACHE_STORAGE_KEY,
+        { pr: {} }
+      )
+    ),
+  setGitHub: async (args: {
+    cache: { pr: Record<string, { data: PRInfo | null; fetchedAt: number }> }
+  }): Promise<void> => {
+    writeJson(GITHUB_CACHE_STORAGE_KEY, args.cache)
+  }
+}
+
+export function getWebShellStateApis() {
+  return {
+    settings: webShellSettingsApi,
+    session: webShellSessionApi,
+    onboarding: webShellOnboardingApi,
+    cache: webShellCacheApi
+  }
+}
+
+const webShellYiruProfilesApi = {
+  list: () =>
+    Promise.resolve({
+      activeProfileId: DEFAULT_LOCAL_YIRU_PROFILE_ID,
+      profiles: [createDefaultLocalYiruProfile(0)],
+      multiProfileUi: false
+    }),
+  createLocal: () =>
+    Promise.resolve({
+      activeProfileId: DEFAULT_LOCAL_YIRU_PROFILE_ID,
+      profiles: [createDefaultLocalYiruProfile(0)],
+      profile: createDefaultLocalYiruProfile(0)
+    }),
+  switchProfile: () => Promise.resolve({ status: 'already-active' as const }),
+  transferProject: (args: TransferYiruProfileProjectArgs) =>
+    Promise.resolve({
+      status: 'duplicate-target' as const,
+      sourceProfileId: args.sourceProfileId,
+      targetProfileId: args.targetProfileId,
+      sourceRepoId: args.repoId,
+      duplicateRepoId: args.repoId
+    }),
+  findProjectProfiles: async (): Promise<FindYiruProfileProjectsByPathResult> => ({ projects: [] })
+}
+
+let webShellKeybindingsApi: WebKeybindingsApi | null = null
+
+export function getWebShellConfigurationApis() {
+  webShellKeybindingsApi ??= createWebKeybindingsApi()
+  return { keybindings: webShellKeybindingsApi, yiruProfiles: webShellYiruProfilesApi }
+}
+
+const webShellAppApi: ShellAppApi = {
+  getIdentity: () =>
+    Promise.resolve({
+      name: 'Yiru',
+      isDev: false,
+      devLabel: null,
+      devBranch: null,
+      devWorktreeName: null,
+      devRepoRoot: null,
+      dockBadgeLabel: null
+    }),
+  relaunch: () => Promise.resolve(window.location.reload()),
+  restart: () => Promise.resolve(window.location.reload()),
+  reload: () => Promise.resolve(window.location.reload()),
+  awaitFirstWindowStartupServices: () => Promise.resolve(),
+  startupDiagnostic: () => Promise.resolve(),
+  getKeyboardInputSourceId: () => Promise.resolve(null),
+  setUnreadDockBadgeCount: () => Promise.resolve(),
+  getFloatingTerminalCwd: () => Promise.resolve(''),
+  getFloatingMarkdownDirectory: () => Promise.resolve(''),
+  pickFloatingMarkdownDocument: () => Promise.resolve(null),
+  pickFloatingWorkspaceDirectory: () => Promise.resolve(null)
+}
+
+const webShellStarNagApi: ShellStarNagApi = {
+  onShow: () => noopUnsubscribe,
+  onHide: () => noopUnsubscribe,
+  dismiss: () => Promise.resolve(),
+  later: () => Promise.resolve(),
+  complete: () => Promise.resolve(),
+  disable: () => Promise.resolve(),
+  openWeb: () => Promise.resolve(),
+  starYiru: () => Promise.resolve(false),
+  forceShow: () => Promise.resolve(),
+  agentValueMoment: () => Promise.resolve({ status: 'skipped' }),
+  showAgentValueMoment: () => Promise.resolve(),
+  onboardingCompleted: () => Promise.resolve()
+}
+
+export function getWebShellSystemApis(): {
+  app: ShellAppApi
+  repoHost: ShellRepoHostApi
+  runtime: ShellRuntimeStateApi
+  gh: ShellGitHubApi
+  notifications: ShellNotificationsApi
+  starNag: ShellStarNagApi
+  updater: ShellUpdaterApi
+} {
+  return {
+    app: webShellAppApi,
+    repoHost: createRepoHostAdapter(),
+    runtime: createRuntimeApi(),
+    gh: createGitHubApi(),
+    notifications: createNotificationsApi(),
+    starNag: webShellStarNagApi,
+    updater: createUpdaterApi()
+  }
+}
+
 export function installWebPreloadApi(): void {
   activeEnvironment = readStoredWebRuntimeEnvironment()
   const webWindow = window as unknown as { __YIRU_WEB_CLIENT__?: boolean }
@@ -182,250 +356,13 @@ export function installWebPreloadApi(): void {
 
 function createWebPreloadApi(): Partial<PreloadApi> {
   return {
-    app: {
-      getIdentity: () =>
-        Promise.resolve({
-          name: 'Yiru',
-          isDev: false,
-          devLabel: null,
-          devBranch: null,
-          devWorktreeName: null,
-          devRepoRoot: null,
-          dockBadgeLabel: null
-        }),
-      relaunch: () => Promise.resolve(window.location.reload()),
-      restart: () => Promise.resolve(window.location.reload()),
-      reload: () => Promise.resolve(window.location.reload()),
-      awaitFirstWindowStartupServices: () => Promise.resolve(),
-      startupDiagnostic: () => Promise.resolve(),
-      getKeyboardInputSourceId: () => Promise.resolve(null),
-      setUnreadDockBadgeCount: () => Promise.resolve(),
-      getFloatingTerminalCwd: () => Promise.resolve(''),
-      getFloatingMarkdownDirectory: () => Promise.resolve(''),
-      pickFloatingMarkdownDocument: () => Promise.resolve(null),
-      pickFloatingWorkspaceDirectory: () => Promise.resolve(null)
-    },
-    starNag: {
-      onShow: () => noopUnsubscribe,
-      onHide: () => noopUnsubscribe,
-      dismiss: () => Promise.resolve(),
-      later: () => Promise.resolve(),
-      complete: () => Promise.resolve(),
-      disable: () => Promise.resolve(),
-      openWeb: () => Promise.resolve(),
-      starYiru: () => Promise.resolve(false),
-      forceShow: () => Promise.resolve(),
-      agentValueMoment: () => Promise.resolve({ status: 'skipped' }),
-      showAgentValueMoment: () => Promise.resolve(),
-      onboardingCompleted: () => Promise.resolve()
-    },
-    platform: {
-      get: () => ({
-        platform: getBrowserPlatform(),
-        osRelease: '',
-        displayServer: null
-      })
-    },
-    yiruProfiles: {
-      list: () =>
-        Promise.resolve({
-          activeProfileId: DEFAULT_LOCAL_YIRU_PROFILE_ID,
-          profiles: [createDefaultLocalYiruProfile(0)],
-          multiProfileUi: false
-        }),
-      createLocal: () =>
-        Promise.resolve({
-          activeProfileId: DEFAULT_LOCAL_YIRU_PROFILE_ID,
-          profiles: [createDefaultLocalYiruProfile(0)],
-          profile: createDefaultLocalYiruProfile(0)
-        }),
-      switchProfile: () => Promise.resolve({ status: 'already-active' }),
-      transferProject: (args) =>
-        Promise.resolve({
-          status: 'duplicate-target',
-          sourceProfileId: args.sourceProfileId,
-          targetProfileId: args.targetProfileId,
-          sourceRepoId: args.repoId,
-          duplicateRepoId: args.repoId
-        }),
-      findProjectProfiles: async () => ({ projects: [] })
-    },
-    settings: {
-      get: async () => getRuntimeBackedStoredSettings(),
-      // Why: localStorage-backed settings are synchronous in the web client,
-      // so the pre-hydration kill-switch read works the same as desktop.
-      getSync: () => getStoredSettings(),
-      set: async (updates) => {
-        if (updates.activeRuntimeEnvironmentId === null) {
-          disconnectActiveRuntimeEnvironment()
-        }
-        const sanitizedUpdates = { ...updates }
-        if ('autoRenameBranchFromWorkDefaultedOn' in sanitizedUpdates) {
-          sanitizedUpdates.autoRenameBranchFromWorkDefaultedOn = true
-        }
-        const next = mergeSettings(getStoredSettings(), sanitizedUpdates, {
-          preserveAutoRenameBranchFromWorkUpdate: 'autoRenameBranchFromWork' in sanitizedUpdates
-        })
-        writeJson(SETTINGS_STORAGE_KEY, next)
-        return syncRuntimeBackedSettings(sanitizedUpdates, next)
-      },
-      updatePRBotAuthorOverride: (args) => updateRuntimePRBotAuthorOverride(args)
-    } satisfies Partial<WebSettingsApi> as unknown as WebSettingsApi,
-    keybindings: createWebKeybindingsApi(),
-    // Why: `feedback.submit` posts to a PostHog-backed pipeline from the main
-    // process (net module has no CORS restrictions there); a paired web
-    // client has no equivalent shell to proxy through. Without this entry
-    // the member fell through to the generic fallback proxy, which resolves
-    // `undefined` — the dialog's `result.ok` read then threw instead of
-    // showing this message.
-    feedback: {
-      submit: () =>
-        Promise.resolve({
-          ok: false,
-          status: null,
-          error: translate(
-            'auto.web.webPreloadApi.feedbackUnavailable',
-            'Feedback is unavailable in the web client.'
-          )
-        })
-    },
-    crashReports: {
-      getLatestPending: () => Promise.resolve(null),
-      getLatestReport: () => Promise.resolve(null),
-      dismiss: () => Promise.resolve(null),
-      recordRendererError: () => Promise.resolve({ ok: true, report: null, deduped: true }),
-      recordBreadcrumb: () => {},
-      submit: () =>
-        Promise.resolve({
-          ok: false,
-          status: null,
-          error: translate('auto.web.web.preload.api.fb290366b2', 'Unavailable on web.')
-        }),
-      copyLatestDiagnostics: () =>
-        Promise.resolve({
-          ok: false,
-          error: translate('auto.web.web.preload.api.fb290366b2', 'Unavailable on web.')
-        })
-    },
-    // Why: `export.htmlToPdf` opens a hidden Electron `BrowserWindow`,
-    // prints to PDF with `webContents.printToPDF`, and shows a native save
-    // dialog — every step needs the desktop shell. Without this entry the
-    // member fell through to the generic fallback proxy, which resolves
-    // `undefined` — the editor's `result.success` read then threw instead of
-    // showing this message.
-    export: {
-      htmlToPdf: () =>
-        Promise.resolve({
-          success: false,
-          error: translate(
-            'auto.web.webPreloadApi.exportHtmlToPdfUnavailable',
-            'Exporting to PDF is unavailable in the web client.'
-          )
-        })
-    },
-    diagnostics: {
-      getStatus: () =>
-        Promise.resolve({
-          localFileEnabled: false,
-          bundleEnabled: false,
-          traceFilePath: '',
-          traceFamilySize: 0
-        }),
-      collectBundle: () => Promise.reject(new Error('Review files are unavailable on web.')),
-      openBundlePreview: () => Promise.reject(new Error('Review files are unavailable on web.')),
-      discardBundlePreview: () => Promise.resolve(),
-      uploadBundle: () => Promise.reject(new Error('Sending diagnostics is unavailable on web.'))
-    },
-    session: {
-      // hostId mirrors the desktop bridge: omitted/'local' targets the existing
-      // storage key; non-local hosts persist under a host-suffixed key so their
-      // sessions stay isolated from the local one.
-      get: (hostId) => Promise.resolve(getStoredWorkspaceSession(hostId)),
-      set: async (session, hostId) => {
-        writeJson(sessionStorageKeyForHost(hostId), sanitizeWebRuntimeWorkspaceSession(session))
-      },
-      patch: async (patch: WorkspaceSessionPatch, hostId) => {
-        writeJson(
-          sessionStorageKeyForHost(hostId),
-          sanitizeWebRuntimeWorkspaceSession({
-            ...getStoredWorkspaceSession(hostId),
-            ...patch
-          })
-        )
-      },
-      // localStorage writes synchronously, so there is no deferred web flush.
-      flush: async () => {},
-      readTerminalScrollback: () => null,
-      setSync: (session, hostId) => {
-        writeJson(sessionStorageKeyForHost(hostId), sanitizeWebRuntimeWorkspaceSession(session))
-      }
-    },
-    onboarding: {
-      get: () => Promise.resolve(getStoredOnboarding()),
-      update: async (updates) => {
-        const current = getStoredOnboarding()
-        const next: OnboardingState = {
-          ...current,
-          ...updates,
-          flowVersion: ONBOARDING_FLOW_VERSION,
-          checklist: {
-            ...current.checklist,
-            ...updates.checklist
-          }
-        }
-        writeJson(ONBOARDING_STORAGE_KEY, next)
-        return next
-      }
-    },
-    cache: {
-      getGitHub: () =>
-        Promise.resolve(
-          readJson(GITHUB_CACHE_STORAGE_KEY, {
-            pr: {}
-          })
-        ),
-      setGitHub: async ({ cache }) => {
-        writeJson(GITHUB_CACHE_STORAGE_KEY, cache)
-      }
-    },
-    runtime: createRuntimeApi(),
-    // Why: not a stub awaiting migration — `revealFridayChat` needs a renderer
-    // notifier to surface the session as a tab in the local floating
-    // workspace, which a paired web client cannot provide on the runtime host.
-    friday: {
-      getOrCreate: () => Promise.reject(new Error('Friday is available on desktop.')),
-      restart: () => Promise.reject(new Error('Friday is available on desktop.'))
-    },
     runtimeEnvironments: createRuntimeEnvironmentsApi(),
-    repoHost: createRepoHostAdapter(),
-    fileHost: createFileHostApi(),
     git: createGitApi(),
-    browser: createBrowserApi(),
     emulator: createEmulatorApi(),
-    gh: createGitHubApi(),
     aiVault: createAiVaultApi(),
-    notifications: createNotificationsApi(),
-    minimaxCredentials: createMiniMaxCredentialsApi(),
     codexAccounts: createAccountsApi(),
     claudeAccounts: createAccountsApi(),
-    developerPermissions: createDeveloperPermissionsApi(),
-    updater: createUpdaterApi(),
-    pty: createPtyApi(),
-    // Why: shell-only — inspecting/repairing the Windows Defender Firewall is
-    // an OS-level operation on the machine running the Electron shell, which
-    // a browser tab has no equivalent of. listNetworkInterfaces/getPairingQR/
-    // listDevices/revokeDevice/isWebSocketReady moved to the `mobile.*` oRPC
-    // contract, which this web client already reaches via the typed client.
-    mobile: {
-      getWindowsFirewallStatus: () => Promise.resolve({ supported: false }),
-      repairWindowsFirewall: () => Promise.resolve({ ok: false, reason: 'unsupported' }),
-      openWindowsNetworkSettings: () => Promise.resolve(false)
-    },
-    telemetryTrack: () => Promise.resolve(),
-    telemetrySetOptIn: () => Promise.resolve(),
-    telemetryGetConsentState: () =>
-      Promise.resolve({ optedIn: false, source: 'default', blockedByEnv: false } as never),
-    telemetryAcknowledgeBanner: () => Promise.resolve()
+    pty: createPtyApi()
   }
 }
 
@@ -733,7 +670,7 @@ function createWebKeybindingsApi(): WebKeybindingsApi {
 // Why: the web client keeps readSession on its compatibility adapter because
 // it has no local MessagePort. Live tailing uses the typed runtime client from
 // the native-chat feature directly.
-function createRuntimeApi(): NonNullable<Partial<PreloadApi>['runtime']> {
+function createRuntimeApi(): ShellRuntimeStateApi {
   return {
     syncWindowGraph: async (_graph: RuntimeSyncWindowGraph) => getRemoteRuntimeStatus(),
     getTerminalFitOverrides: () => Promise.resolve([]),
@@ -866,7 +803,7 @@ function webAiVaultUnavailableResult(executionHostId: ExecutionHostId): AiVaultL
   }
 }
 
-function createRepoHostAdapter(): PreloadApi['repoHost'] {
+function createRepoHostAdapter(): ShellRepoHostApi {
   return {
     // Why: browser clients have no native filesystem picker. These outcomes
     // preserve cancellation semantics without pretending the runtime picked a path.
@@ -892,166 +829,6 @@ function createRepoHostAdapter(): PreloadApi['repoHost'] {
       )
       return getDefaultCreateProjectParent(result.resolvedPath)
     }
-  }
-}
-
-function createFileHostApi(): NonNullable<Partial<PreloadApi>['fileHost']> {
-  return {
-    readFile: async ({ filePath }) => {
-      const file = await resolveRuntimeFilePath(filePath)
-      return callRuntimeProcedure((client, options) =>
-        client.files.readPreview(
-          {
-            worktree: toRuntimeWorktreeSelector(file.worktree.id),
-            relativePath: file.relativePath
-          },
-          options
-        )
-      )
-    },
-    saveDownloadedFile: async () => {
-      throw new Error('Remote file download is unavailable in paired web clients.')
-    },
-    startDownloadedFile: async () => {
-      throw new Error('Remote file download is unavailable in paired web clients.')
-    },
-    appendDownloadedFileChunk: async () => {
-      throw new Error('Remote file download is unavailable in paired web clients.')
-    },
-    finishDownloadedFile: async () => {
-      throw new Error('Remote file download is unavailable in paired web clients.')
-    },
-    cancelDownloadedFile: async () => {
-      throw new Error('Remote file download is unavailable in paired web clients.')
-    },
-    startDownloadedFolder: async () => {
-      throw new Error('Remote folder download is unavailable in paired web clients.')
-    },
-    createDownloadedFolderDirectory: async () => {
-      throw new Error('Remote folder download is unavailable in paired web clients.')
-    },
-    appendDownloadedFolderFileChunk: async () => {
-      throw new Error('Remote folder download is unavailable in paired web clients.')
-    },
-    finishDownloadedFolder: async () => {
-      throw new Error('Remote folder download is unavailable in paired web clients.')
-    },
-    cancelDownloadedFolder: async () => {
-      throw new Error('Remote folder download is unavailable in paired web clients.')
-    },
-    writeFile: async ({ filePath, content }) => {
-      const file = await resolveRuntimeFilePath(filePath)
-      await callRuntimeProcedure((client, options) =>
-        client.files.write(
-          {
-            worktree: toRuntimeWorktreeSelector(file.worktree.id),
-            relativePath: file.relativePath,
-            content
-          },
-          options
-        )
-      )
-    },
-    createFile: async ({ filePath }) => {
-      const file = await resolveRuntimeFilePath(filePath)
-      await callRuntimeProcedure((client, options) =>
-        client.files.createFile(
-          {
-            worktree: toRuntimeWorktreeSelector(file.worktree.id),
-            relativePath: file.relativePath
-          },
-          options
-        )
-      )
-    },
-    createDir: async ({ dirPath }) => {
-      const file = await resolveRuntimeFilePath(dirPath)
-      await callRuntimeProcedure((client, options) =>
-        client.files.createDir(
-          {
-            worktree: toRuntimeWorktreeSelector(file.worktree.id),
-            relativePath: file.relativePath
-          },
-          options
-        )
-      )
-    },
-    rename: async ({ oldPath, newPath }) => {
-      const oldFile = await resolveRuntimeFilePath(oldPath)
-      const newFile = await resolveRuntimeFilePath(newPath)
-      await callRuntimeProcedure((client, options) =>
-        client.files.rename(
-          {
-            worktree: toRuntimeWorktreeSelector(oldFile.worktree.id),
-            oldRelativePath: oldFile.relativePath,
-            newRelativePath: newFile.relativePath
-          },
-          options
-        )
-      )
-    },
-    copy: async ({ sourcePath, destinationPath }) => {
-      const source = await resolveRuntimeFilePath(sourcePath)
-      const destination = await resolveRuntimeFilePath(destinationPath)
-      await callRuntimeProcedure((client, options) =>
-        client.files.copy(
-          {
-            worktree: toRuntimeWorktreeSelector(source.worktree.id),
-            sourceRelativePath: source.relativePath,
-            destinationRelativePath: destination.relativePath
-          },
-          options
-        )
-      )
-    },
-    deletePath: async ({ targetPath, recursive }) => {
-      const file = await resolveRuntimeFilePath(targetPath)
-      await callRuntimeProcedure((client, options) =>
-        client.files.delete(
-          {
-            worktree: toRuntimeWorktreeSelector(file.worktree.id),
-            relativePath: file.relativePath,
-            recursive
-          },
-          options
-        )
-      )
-    },
-    authorizeExternalPath: () => Promise.resolve(),
-    stat: async ({ filePath }) => {
-      const file = await resolveRuntimeFilePath(filePath)
-      return callRuntimeProcedure((client, options) =>
-        client.files.stat(
-          {
-            worktree: toRuntimeWorktreeSelector(file.worktree.id),
-            relativePath: file.relativePath
-          },
-          options
-        )
-      )
-    },
-    pathExists: async ({ filePath }) => {
-      try {
-        const file = await resolveRuntimeFilePath(filePath)
-        await callRuntimeProcedure((client, options) =>
-          client.files.stat(
-            {
-              worktree: toRuntimeWorktreeSelector(file.worktree.id),
-              relativePath: file.relativePath
-            },
-            options
-          )
-        )
-        return true
-      } catch (error) {
-        if (isMissingPathError(error)) {
-          return false
-        }
-        throw error
-      }
-    },
-    stageExternalPathsForRuntimeUpload: async () => ({ sources: [] }),
-    resolveDroppedPathsForAgent: async () => ({ resolvedPaths: [], skipped: [], failed: [] })
   }
 }
 
@@ -1549,36 +1326,6 @@ function createGitApi(): NonNullable<Partial<PreloadApi>['git']> {
   }
 }
 
-function createBrowserApi(): NonNullable<Partial<PreloadApi>['browser']> {
-  const browserApi = {
-    onGuestLoadFailed: (callback) => onBrowserGuestEvent('guestLoadFailed', callback),
-    onCertificateFailureChanged: (callback) =>
-      onBrowserGuestEvent('certificateFailureChanged', callback),
-    onPermissionDenied: (callback) => onBrowserGuestEvent('permissionDenied', callback),
-    onPopup: (callback) => onBrowserGuestEvent('popup', callback),
-    onDownloadRequested: (callback) => onBrowserGuestEvent('downloadRequested', callback),
-    onDownloadProgress: (callback) => onBrowserGuestEvent('downloadProgress', callback),
-    onDownloadFinished: (callback) => onBrowserGuestEvent('downloadFinished', callback),
-    onContextMenuRequested: () => noopUnsubscribe,
-    onContextMenuDismissed: () => noopUnsubscribe,
-    onNavigationUpdate: (callback) => onBrowserGuestEvent('navigationUpdate', callback),
-    onActivateView: () => noopUnsubscribe,
-    onPaneFocus: () => noopUnsubscribe,
-    onOpenLinkInYiruTab: (callback) => onBrowserGuestEvent('openLinkInYiruTab', callback),
-    onGrabModeToggle: () => noopUnsubscribe,
-    onGrabActionShortcut: () => noopUnsubscribe,
-    sessionImportCookies: () =>
-      Promise.resolve({
-        ok: false,
-        reason: translate(
-          'auto.web.web.preload.api.67ec964791',
-          'Cookie import is unavailable in the web client.'
-        )
-      })
-  } satisfies Partial<NonNullable<Partial<PreloadApi>['browser']>>
-  return browserApi as unknown as NonNullable<Partial<PreloadApi>['browser']>
-}
-
 function createEmulatorApi(): NonNullable<Partial<PreloadApi>['emulator']> {
   return {
     startFrameStream: () => Promise.reject(new Error('Mobile emulator is unavailable on web.')),
@@ -1600,15 +1347,7 @@ function createGitHubApi(): WebGitHubApi {
   return githubApi
 }
 
-function createDeveloperPermissionsApi(): NonNullable<Partial<PreloadApi>['developerPermissions']> {
-  return {
-    getStatus: () => Promise.resolve([]),
-    request: ({ id }) =>
-      Promise.resolve({ id, status: 'unsupported', openedSystemSettings: false } as const)
-  }
-}
-
-function createNotificationsApi(): NonNullable<Partial<PreloadApi>['notifications']> {
+function createNotificationsApi(): ShellNotificationsApi {
   return {
     // Why: browsers cannot reach Electron's native notification centre. The
     // reverse shell adapter keeps this degradation structured until a browser
@@ -1620,16 +1359,6 @@ function createNotificationsApi(): NonNullable<Partial<PreloadApi>['notification
       Promise.resolve({ supported: false, platform: getBrowserPlatform(), requested: false }),
     probeDelivery: () => Promise.resolve({ state: 'unsupported' as const, authoritative: false }),
     playSound: () => Promise.resolve({ played: false, reason: 'missing-path' })
-  }
-}
-
-function createMiniMaxCredentialsApi(): NonNullable<Partial<PreloadApi>['minimaxCredentials']> {
-  const notConfigured = { configured: false }
-  const unsupportedError = new Error('MiniMax cookie storage is only available in the desktop app.')
-  return {
-    getStatus: () => Promise.resolve(notConfigured),
-    saveCookie: () => Promise.reject(unsupportedError),
-    clearCookie: () => Promise.resolve(notConfigured)
   }
 }
 
@@ -1650,7 +1379,7 @@ function createAccountsApi(): never {
   } as never
 }
 
-function createUpdaterApi(): NonNullable<Partial<PreloadApi>['updater']> {
+function createUpdaterApi(): ShellUpdaterApi {
   return {
     getVersion: () => Promise.resolve('web'),
     getStatus: () => Promise.resolve({ state: 'idle' } as never),
@@ -1836,7 +1565,6 @@ function getClientForEnvironment(environment: StoredWebRuntimeEnvironment): WebR
     // environments must reopen it against the new host, or listeners keep
     // waiting on a stream that belongs to the previous pairing.
     runtimeClientEvents.reset()
-    runtimeBrowserGuestEvents.reset()
   }
   return activeClient
 }
@@ -1846,7 +1574,6 @@ function closeActiveRuntimeClients(): void {
   activeClient = null
   activeClientEnvironmentId = null
   runtimeClientEvents.reset()
-  runtimeBrowserGuestEvents.reset()
   invalidateRuntimeWorktreeCaches()
 }
 
@@ -2204,13 +1931,6 @@ function toLegacyDetectedWorktreeResult(
       visible: true
     }))
   }
-}
-
-function isMissingPathError(error: unknown): boolean {
-  if (!(error instanceof Error)) {
-    return false
-  }
-  return /\bENOENT\b|not found|no such file/i.test(error.message)
 }
 
 async function resolveRuntimeWorktreeByPath(worktreePath: string): Promise<Worktree> {

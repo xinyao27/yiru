@@ -1,7 +1,8 @@
 import type { ShellServicesPathSelection } from '@yiru/runtime-protocol/contract'
 import type { ShellOpenLocalPathResult } from '~shared/shell-open-types'
 
-type WebShellApi = Window['api']['shell']
+import type { ShellPlatformApi } from './shell-platform-client'
+
 type WebDirectoryHandle = { kind: 'directory'; name: string }
 type DirectoryPickerWindow = Window & {
   showDirectoryPicker?: () => Promise<WebDirectoryHandle>
@@ -64,14 +65,14 @@ function readFileDataUrl(file: File): Promise<string> {
   })
 }
 
-const webShellApi: WebShellApi = {
+const webShellApi: ShellPlatformApi = {
   openPath: async (path) => openBrowserTarget(path),
   openInFileManager: () => Promise.resolve(unavailablePathResult),
   openInExternalEditor: () => Promise.resolve(unavailablePathResult),
   openUrl: async (url) => openBrowserTarget(url),
   openFilePath: () => Promise.resolve(false),
   openFileUri: async (uri) => openBrowserTarget(uri),
-  pathExists: (path) => window.api.fileHost.pathExists({ filePath: path }),
+  pathExists: () => Promise.reject(new Error('Local shell paths are unavailable on web.')),
   // Why: these signatures can only return native absolute paths. A browser
   // FileSystemHandle cannot be represented without lying about its identity.
   pickAttachment: () => Promise.resolve(null),
@@ -89,7 +90,7 @@ const webShellApi: WebShellApi = {
   }
 }
 
-export function getWebShellApi(): WebShellApi {
+export function getWebShellApi(): ShellPlatformApi {
   return webShellApi
 }
 

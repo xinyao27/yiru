@@ -7,11 +7,11 @@ import {
   buildWorkspaceSessionPayload,
   shouldPersistWorkspaceSession
 } from '~renderer/components/editor/workspace-session'
-import { persistWorkspaceSessionByHostSync } from '~renderer/components/editor/workspace-session-host-persistence'
+import { persistWorkspaceSessionByHost } from '~renderer/components/editor/workspace-session-host-persistence'
 import { getConnectionIdForFile } from '~renderer/lib/connection-context'
 import { writeRuntimeFile } from '~renderer/runtime/file-client'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import { settingsForRuntimeOwner } from '~renderer/runtime/rpc-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import type { AppState } from '~renderer/store'
 import { findWorktreeById } from '~renderer/store/slices/worktree-helpers'
 import {
@@ -352,8 +352,8 @@ export function attachEditorAutosaveController(store: AppStoreApi): () => void {
       if (shouldPersistWorkspaceSession(state)) {
         // Why: runtime-owned worktree slices persist under their host
         // partition, mirroring the debounced writer's split.
-        persistWorkspaceSessionByHostSync(
-          rendererHostClient.session,
+        await persistWorkspaceSessionByHost(
+          shellClient.session,
           buildWorkspaceSessionPayload(state),
           state
         )

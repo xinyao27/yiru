@@ -1,5 +1,5 @@
 import type { StateCreator } from 'zustand'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import type {
   KeybindingActionId,
   KeybindingFileSnapshot,
@@ -40,11 +40,11 @@ export const createKeybindingsSlice: StateCreator<AppState, [], [], KeybindingsS
   setKeybindingSnapshot: (snapshot) => set(applySnapshot(snapshot)),
 
   ensureKeybindingsFile: async () => {
-    if (!rendererHostClient.keybindings) {
+    if (!shellClient.keybindings) {
       return null
     }
     try {
-      const snapshot = await rendererHostClient.keybindings.ensureFile()
+      const snapshot = await shellClient.keybindings.ensureFile()
       set(applySnapshot(snapshot))
       return snapshot
     } catch (error) {
@@ -54,11 +54,11 @@ export const createKeybindingsSlice: StateCreator<AppState, [], [], KeybindingsS
   },
 
   fetchKeybindings: async () => {
-    if (!rendererHostClient.keybindings) {
+    if (!shellClient.keybindings) {
       return
     }
     try {
-      const snapshot = await rendererHostClient.keybindings.get()
+      const snapshot = await shellClient.keybindings.get()
       set(applySnapshot(snapshot))
     } catch (error) {
       console.error('Failed to fetch keybindings:', error)
@@ -67,7 +67,7 @@ export const createKeybindingsSlice: StateCreator<AppState, [], [], KeybindingsS
 
   setKeybindingOverride: async (actionId, bindings) => {
     try {
-      const snapshot = await rendererHostClient.keybindings.setAction({ actionId, bindings })
+      const snapshot = await shellClient.keybindings.setAction({ actionId, bindings })
       set(applySnapshot(snapshot))
     } catch (error) {
       console.error('Failed to update keybinding:', error)
@@ -77,7 +77,7 @@ export const createKeybindingsSlice: StateCreator<AppState, [], [], KeybindingsS
 
   resetKeybindingOverride: async (actionId) => {
     try {
-      const snapshot = await rendererHostClient.keybindings.setAction({ actionId, bindings: null })
+      const snapshot = await shellClient.keybindings.setAction({ actionId, bindings: null })
       set(applySnapshot(snapshot))
     } catch (error) {
       console.error('Failed to reset keybinding:', error)
@@ -87,7 +87,7 @@ export const createKeybindingsSlice: StateCreator<AppState, [], [], KeybindingsS
 
   disableKeybindingAction: async (actionId) => {
     try {
-      const snapshot = await rendererHostClient.keybindings.setAction({ actionId, bindings: [] })
+      const snapshot = await shellClient.keybindings.setAction({ actionId, bindings: [] })
       set(applySnapshot(snapshot))
     } catch (error) {
       console.error('Failed to disable keybinding:', error)
@@ -96,11 +96,11 @@ export const createKeybindingsSlice: StateCreator<AppState, [], [], KeybindingsS
   },
 
   reloadKeybindings: async () => {
-    if (!rendererHostClient.keybindings) {
+    if (!shellClient.keybindings) {
       return
     }
     try {
-      const snapshot = await rendererHostClient.keybindings.reload()
+      const snapshot = await shellClient.keybindings.reload()
       set(applySnapshot(snapshot))
     } catch (error) {
       console.error('Failed to reload keybindings:', error)
@@ -108,11 +108,11 @@ export const createKeybindingsSlice: StateCreator<AppState, [], [], KeybindingsS
   },
 
   openKeybindingsFile: async () => {
-    if (!rendererHostClient.keybindings) {
+    if (!shellClient.keybindings) {
       return
     }
     try {
-      const snapshot = await rendererHostClient.keybindings.openFile()
+      const snapshot = await shellClient.keybindings.openFile()
       set(applySnapshot(snapshot))
     } catch (error) {
       console.error('Failed to open keybindings file:', error)
@@ -120,11 +120,11 @@ export const createKeybindingsSlice: StateCreator<AppState, [], [], KeybindingsS
   },
 
   revealKeybindingsFile: async () => {
-    if (!rendererHostClient.keybindings) {
+    if (!shellClient.keybindings) {
       return
     }
     try {
-      const snapshot = await rendererHostClient.keybindings.revealFile()
+      const snapshot = await shellClient.keybindings.revealFile()
       set(applySnapshot(snapshot))
     } catch (error) {
       console.error('Failed to reveal keybindings file:', error)

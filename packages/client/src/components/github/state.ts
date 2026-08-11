@@ -17,8 +17,8 @@ import {
   reportShellVisibleGitHubPRRefreshCandidates
 } from '~renderer/runtime/github-shell-client'
 import { callRuntimeOrpc, type RuntimeClientTarget } from '~renderer/runtime/orpc-client'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { getGitHubPRCacheKey, getGitHubRepoCacheKey } from '~renderer/store/slices/github-cache-key'
 import {
   getHostedReviewCacheKey,
@@ -1525,7 +1525,7 @@ function debouncedSaveCache(state: AppState): void {
   }
   saveTimer = setTimeout(() => {
     saveTimer = null
-    rendererHostClient.cache.setGitHub({
+    shellClient.cache.setGitHub({
       cache: {
         pr: state.prCache
       }
@@ -1897,7 +1897,7 @@ export const createGitHubSlice: StateCreator<AppState, [], [], GitHubSlice> = (s
 
   initGitHubCache: async () => {
     try {
-      const persisted = await rendererHostClient.cache.getGitHub()
+      const persisted = await shellClient.cache.getGitHub()
       if (persisted) {
         set({
           prCache: evictStaleEntries(persisted.pr || {})

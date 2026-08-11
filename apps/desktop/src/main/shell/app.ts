@@ -1,7 +1,8 @@
 import { spawn } from 'node:child_process'
 
 import { is } from '@electron-toolkit/utils'
-import { app, BrowserWindow, dialog, ipcMain, type IpcMainInvokeEvent } from 'electron'
+import type { BrowserWindow } from 'electron'
+import { app, dialog } from 'electron'
 import type { AppIdentity } from '~shared/app-identity'
 import type { FloatingTerminalCwdRequest, MarkdownDocument } from '~shared/types'
 
@@ -37,7 +38,7 @@ type RegisterAppHandlersOptions = {
 }
 
 async function pickFloatingMarkdownDocument(
-  event: IpcMainInvokeEvent
+  parentWindow: BrowserWindow | null
 ): Promise<MarkdownDocument | null> {
   const cwd = await ensureDefaultFloatingWorkspacePath()
   const options = {
@@ -45,7 +46,6 @@ async function pickFloatingMarkdownDocument(
     properties: ['openFile'],
     filters: [{ name: 'Markdown', extensions: ['md', 'mdx', 'markdown'] }]
   } satisfies Electron.OpenDialogOptions
-  const parentWindow = BrowserWindow.fromWebContents(event.sender)
   const result = parentWindow
     ? await dialog.showOpenDialog(parentWindow, options)
     : await dialog.showOpenDialog(options)
@@ -61,10 +61,9 @@ async function pickFloatingMarkdownDocument(
 }
 
 async function pickFloatingWorkspaceDirectory(
-  event: IpcMainInvokeEvent,
+  parentWindow: BrowserWindow | null,
   store: Store
 ): Promise<string | null> {
-  const parentWindow = BrowserWindow.fromWebContents(event.sender)
   const options = {
     // Why: this picker grants access to an existing workspace directory.
     // Creation belongs to explicit file/write actions, not typeahead input.
@@ -221,8 +220,26 @@ async function readKeyboardInputSourceId(): Promise<string | null> {
   return readKeyboardLayoutInputSourceId()
 }
 
-export function registerAppHandlers(store: Store, options: RegisterAppHandlersOptions = {}): void {
-  ipcMain.handle('app:getIdentity', (): AppIdentity => {
+type ShellAppService = ReturnType<typeof createShellAppService>
+
+let shellAppService: ShellAppService | null = null
+
+export function initializeShellAppService(
+  store: Store,
+  options: RegisterAppHandlersOptions = {}
+): void {
+  shellAppService = createShellAppService(store, options)
+}
+
+export function getShellAppService(): ShellAppService {
+  if (!shellAppService) {
+    throw new Error('shell_app_service_unavailable')
+  }
+  return shellAppService
+}
+
+function createShellAppService(store: Store, options: RegisterAppHandlersOptions) {
+  const getIdentity = (): AppIdentity => {
     const identity = getDevInstanceIdentity(is.dev)
     return {
       name: identity.name,
@@ -233,7 +250,7 @@ export function registerAppHandlers(store: Store, options: RegisterAppHandlersOp
       devRepoRoot: identity.devRepoRoot,
       dockBadgeLabel: identity.dockBadgeLabel
     }
-  })
+  }
 
   // Why: ABC, Polish Pro, US Extended, ABC Extended, and every CJK Roman
   // IME all report a US-QWERTY base layer to navigator.keyboard.getLayoutMap()
@@ -246,7 +263,7 @@ export function registerAppHandlers(store: Store, options: RegisterAppHandlersOp
   // the renderer uses as an authoritative override. Non-Darwin platforms
   // have no equivalent and return null so the fingerprint stays the only
   // signal.
-  ipcMain.handle('app:getKeyboardInputSourceId', async (): Promise<string | null> => {
+  const getKeyboardInputSourceId = async (): Promise<string | null> => {
     if (process.platform !== 'darwin') {
       return null
     }
@@ -264,9 +281,9 @@ export function registerAppHandlers(store: Store, options: RegisterAppHandlersOp
       // "no signal" — the fingerprint still runs as fallback.
       return null
     }
-  })
+  }
 
-  ipcMain.handle('app:relaunch', async () => {
+  const relaunch = async (): Promise<void> => {
     // Why: small delay lets the renderer finish painting any "Restarting…"
     // UI state before the window tears down. `app.relaunch()` schedules a
     // spawn; `app.exit(0)` triggers the actual quit without invoking
@@ -280,9 +297,9 @@ export function registerAppHandlers(store: Store, options: RegisterAppHandlersOp
       app.relaunch()
       app.exit(0)
     }, 150)
-  })
+  }
 
-  ipcMain.handle('app:restart', async () => {
+  const restart = async (): Promise<void> => {
     // Why: the hidden admin restart should mirror the update relaunch path:
     // schedule a new Yiru process, then use the normal quit pipeline so daemon
     // checkpoints, runtime metadata, and telemetry flush before exit.
@@ -291,23 +308,25 @@ export function registerAppHandlers(store: Store, options: RegisterAppHandlersOp
       app.relaunch()
       app.quit()
     }, 150)
-  })
+  }
 
-  ipcMain.handle('app:setUnreadDockBadgeCount', (_event, count: number) => {
+  const setDockBadgeCount = (count: number): void => {
     setUnreadDockBadgeCount(Number.isFinite(count) ? count : 0)
-  })
+  }
 
-  ipcMain.handle('app:getFloatingTerminalCwd', (_event, args?: FloatingTerminalCwdRequest) =>
-    resolveFloatingTerminalCwd(store, args)
-  )
-
-  ipcMain.handle('app:getFloatingMarkdownDirectory', () => ensureDefaultFloatingWorkspacePath())
-
-  ipcMain.handle('app:pickFloatingMarkdownDocument', (event) => pickFloatingMarkdownDocument(event))
-
-  ipcMain.handle('app:pickFloatingWorkspaceDirectory', (event) =>
-    pickFloatingWorkspaceDirectory(event, store)
-  )
+  return {
+    getIdentity,
+    getKeyboardInputSourceId,
+    relaunch,
+    restart,
+    setUnreadDockBadgeCount: setDockBadgeCount,
+    getFloatingTerminalCwd: (args?: FloatingTerminalCwdRequest): Promise<string> =>
+      resolveFloatingTerminalCwd(store, args),
+    getFloatingMarkdownDirectory: ensureDefaultFloatingWorkspacePath,
+    pickFloatingMarkdownDocument,
+    pickFloatingWorkspaceDirectory: (parentWindow: BrowserWindow | null) =>
+      pickFloatingWorkspaceDirectory(parentWindow, store)
+  }
 }
 
 async function runBeforeRelaunchCleanup(

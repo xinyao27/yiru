@@ -14,7 +14,6 @@ import {
   app,
   BrowserWindow,
   dialog,
-  ipcMain,
   nativeTheme,
   net,
   powerMonitor,
@@ -132,7 +131,6 @@ import { setDefaultWslDistroOverride } from './git/runner'
 import { moveWorktree } from './git/worktree'
 import { getElectronSystemLocale } from './i18n/electron-system-locale'
 import { setMainSystemLocaleProvider, setMainUiLanguage } from './i18n/main-i18n'
-import { registerMobileHandlers } from './ipc/mobile'
 import { registerCoreHandlers } from './ipc/register-core-handlers'
 import { KeybindingService } from './keybindings/keybinding-service'
 import {
@@ -141,6 +139,7 @@ import {
   rebuildAppMenu
 } from './menu/register-app-menu'
 import { readMiniMaxSessionCookie } from './minimax/cookie-store'
+import { initializeShellMobileService } from './mobile/shell-service'
 import { setHttpFetchProvider } from './network/http-fetch'
 import { applyElectronProxySettings } from './network/proxy-settings'
 import { triggerStartupNotificationRegistration } from './notifications/notifications'
@@ -199,6 +198,8 @@ import {
   installServeSupervisorDisconnectQuit,
   notifyServeSupervisorReady
 } from './serve-update-handoff'
+import { initializeShellAppStartupService } from './shell/app-startup'
+import { publishShellEvent } from './shell/events'
 import {
   configureSpeechDownloadRequestFactory,
   type SpeechDownloadResponse
@@ -343,9 +344,6 @@ let keybindings: KeybindingService | null = null
 // sweep spare live sessions across that one reload (#5787).
 const expectedRendererReload = createWebContentsTimedFlag()
 const recoveryReloadInFlight = createWebContentsTimedFlag()
-// Why: a tray/menu-bar "Settings…" click can precede the renderer attaching
-// its ui:openSettings listener; the renderer pulls this one-shot on mount.
-const pendingOpenSettings = createWebContentsTimedFlag()
 let firstWindowStartupServicesReady: Promise<void> = Promise.resolve()
 let managedWslCliReconciliationReady: Promise<void> = Promise.resolve()
 let managedWslCliStartupBarrierReady: Promise<void> = Promise.resolve()
@@ -796,27 +794,19 @@ if (hasSingleInstanceLock) {
   headlessBrowserDisplayAvailable = ensureVirtualDisplayForHeadlessServe({ isServeMode })
 }
 
-ipcMain.handle('app:awaitFirstWindowStartupServices', async () => {
+initializeShellAppStartupService({
   // Why: window rendering and local RPC startup stay independent, but restored
   // WSL terminals get a bounded chance to receive launcher repairs first.
-  await Promise.all([firstWindowStartupServicesReady, managedWslCliStartupBarrierReady])
-})
-
-// Why: the renderer pulls this once its ui:openSettings listener is attached so
-// a tray/menu-bar Settings request queued before mount is not lost to a race.
-ipcMain.handle('ui:consumePendingOpenSettings', (event) =>
-  pendingOpenSettings.matches(event.sender.id, { consume: true })
-)
-
-ipcMain.handle(
-  'app:startupDiagnostic',
-  (_event, event: string, details?: Record<string, unknown>) => {
+  awaitFirstWindowStartupServices: async () => {
+    await Promise.all([firstWindowStartupServicesReady, managedWslCliStartupBarrierReady])
+  },
+  startupDiagnostic: (event, details) => {
     if (!startupDiagnosticsEnabled || !event.startsWith('renderer-')) {
       return
     }
     logStartupMilestone(event, details && typeof details === 'object' ? details : {})
   }
-)
+})
 
 // Why: a PTY that dies while Yiru is down cannot clear its persisted hook state.
 async function reapRestoredSubagentsWithoutLiveAgent(): Promise<void> {
@@ -1019,14 +1009,7 @@ function openSettingsFromSystemMenu(): void {
   }
   recordCrashBreadcrumb('settings_opened')
 
-  // Why: no main-side signal proves the renderer listener is attached, so push
-  // and leave a one-shot intent — a mounted renderer acts on the push, an
-  // unmounted one pulls the intent at mount; only one fires per renderer life.
-  targetWindow.webContents.send('ui:openSettings')
-  // Why: leave an untimed intent — any TTL can be outrun by a slow cold start and
-  // would silently drop the Settings click. webContents-id scoping plus consume-on-
-  // read still prevents the intent from leaking to a later, unrelated renderer.
-  pendingOpenSettings.mark(targetWindow.webContents.id, Number.POSITIVE_INFINITY)
+  publishShellEvent(targetWindow.webContents.id, { type: 'uiOpenSettings' })
 }
 
 function quitFromSystemTray(): void {
@@ -1415,19 +1398,25 @@ function openMainWindow(): BrowserWindow {
 function sendOpenFeatureTour(targetWindow?: BrowserWindow | null): void {
   const webContents =
     targetWindow && !targetWindow.isDestroyed() ? targetWindow.webContents : mainWindow?.webContents
-  webContents?.send('ui:openFeatureTour')
+  if (webContents) {
+    publishShellEvent(webContents.id, { type: 'uiOpenFeatureTour' })
+  }
 }
 
 function sendOpenSetupGuide(targetWindow?: BrowserWindow | null): void {
   const webContents =
     targetWindow && !targetWindow.isDestroyed() ? targetWindow.webContents : mainWindow?.webContents
-  webContents?.send('ui:openSetupGuide')
+  if (webContents) {
+    publishShellEvent(webContents.id, { type: 'uiOpenSetupGuide' })
+  }
 }
 
 function sendOpenCrashReport(targetWindow?: BrowserWindow | null): void {
   const webContents =
     targetWindow && !targetWindow.isDestroyed() ? targetWindow.webContents : mainWindow?.webContents
-  webContents?.send('ui:openCrashReport')
+  if (webContents) {
+    publishShellEvent(webContents.id, { type: 'uiOpenCrashReport' })
+  }
 }
 
 // Why: when the renderer crash-loops, the breaker stops auto-reloading and the
@@ -2330,7 +2319,7 @@ app.whenReady().then(async () => {
   })
   starNag = new StarNagService(store, stats)
   starNag.start()
-  starNag.registerIpcHandlers()
+  starNag.registerShellService()
   runtimeService.setAgentBrowserBridge(
     new AgentBrowserBridge(browserManager, {
       onTabsChanged: (worktreeId) => runtimeService.notifyMobileSessionTabsChanged(worktreeId)
@@ -2408,19 +2397,32 @@ app.whenReady().then(async () => {
       sendOpenFeatureTour(targetBrowserWindow)
     },
     onZoomIn: () => {
-      mainWindow?.webContents.send('terminal:zoom', 'in')
+      if (mainWindow) {
+        publishShellEvent(mainWindow.webContents.id, { type: 'uiTerminalZoom', direction: 'in' })
+      }
     },
     onZoomOut: () => {
-      mainWindow?.webContents.send('terminal:zoom', 'out')
+      if (mainWindow) {
+        publishShellEvent(mainWindow.webContents.id, { type: 'uiTerminalZoom', direction: 'out' })
+      }
     },
     onZoomReset: () => {
-      mainWindow?.webContents.send('terminal:zoom', 'reset')
+      if (mainWindow) {
+        publishShellEvent(mainWindow.webContents.id, {
+          type: 'uiTerminalZoom',
+          direction: 'reset'
+        })
+      }
     },
     onToggleLeftSidebar: () => {
-      mainWindow?.webContents.send('ui:toggleLeftSidebar')
+      if (mainWindow) {
+        publishShellEvent(mainWindow.webContents.id, { type: 'uiToggleLeftSidebar' })
+      }
     },
     onToggleRightSidebar: () => {
-      mainWindow?.webContents.send('ui:toggleRightSidebar')
+      if (mainWindow) {
+        publishShellEvent(mainWindow.webContents.id, { type: 'uiToggleRightSidebar' })
+      }
     },
     onToggleAppearance: (key) => {
       if (!store) {
@@ -2431,7 +2433,9 @@ app.whenReady().then(async () => {
         // (ui:set/ui:get), not settings. The renderer owns the authoritative
         // toggle logic (it knows the current value and persists it back), so
         // we forward the event and let it flip + store.
-        mainWindow?.webContents.send('ui:toggleStatusBar')
+        if (mainWindow) {
+          publishShellEvent(mainWindow.webContents.id, { type: 'uiToggleStatusBar' })
+        }
         return
       }
       const current = store.getSettings()
@@ -2496,7 +2500,7 @@ app.whenReady().then(async () => {
       : {}),
     webClientRoot: getBundledWebClientRoot()
   })
-  registerMobileHandlers(runtimeRpc, {
+  initializeShellMobileService(runtimeRpc, {
     openWindowsNetworkSettings: () => shell.openExternal('ms-settings:network-status')
   })
 
@@ -2507,7 +2511,7 @@ app.whenReady().then(async () => {
     // Why: headless runtimes have no BrowserWindow to initialize updater
     // listeners, so use a silent status sink before advertising control.
     setupAutoUpdater(
-      { webContents: { send: () => undefined } },
+      { webContents: {} },
       {
         getLastUpdateCheckAt: () => store!.getUI().lastUpdateCheckAt,
         onBeforeQuit: () => store!.flush(),

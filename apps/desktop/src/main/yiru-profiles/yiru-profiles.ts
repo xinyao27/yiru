@@ -1,5 +1,5 @@
 import { normalizeExecutionHostId } from '@yiru/workbench-model/workspace'
-import { app, ipcMain } from 'electron'
+import { app } from 'electron'
 import type {
   CreateLocalYiruProfileArgs,
   CreateLocalYiruProfileResult,
@@ -117,87 +117,90 @@ function scheduleProfileRelaunch(): void {
   }, 150)
 }
 
-export function registerYiruProfileHandlers(
+type ShellYiruProfilesService = ReturnType<typeof createShellYiruProfilesService>
+
+let shellYiruProfilesService: ShellYiruProfilesService | null = null
+
+export function initializeShellYiruProfilesService(
   store: Store,
   options: RegisterYiruProfileHandlersOptions = {}
 ): void {
-  ipcMain.handle(
-    'yiruProfiles:list',
-    (): YiruProfileListResult => ({
-      ...getYiruProfileListState(),
-      multiProfileUi: isMultiProfileUiEnabled()
-    })
-  )
+  shellYiruProfilesService = createShellYiruProfilesService(store, options)
+}
 
-  ipcMain.handle(
-    'yiruProfiles:createLocal',
-    (_event, args?: CreateLocalYiruProfileArgs): CreateLocalYiruProfileResult => {
-      const result = createLocalYiruProfile(args)
-      seedNewYiruProfileTelemetryConsent(result.profile.id, store.getSettings().telemetry)
+export function getShellYiruProfilesService(): ShellYiruProfilesService {
+  if (!shellYiruProfilesService) {
+    throw new Error('shell_yiru_profiles_service_unavailable')
+  }
+  return shellYiruProfilesService
+}
+
+function createShellYiruProfilesService(store: Store, options: RegisterYiruProfileHandlersOptions) {
+  const list = (): YiruProfileListResult => ({
+    ...getYiruProfileListState(),
+    multiProfileUi: isMultiProfileUiEnabled()
+  })
+
+  const createLocal = (args?: CreateLocalYiruProfileArgs): CreateLocalYiruProfileResult => {
+    const result = createLocalYiruProfile(args)
+    seedNewYiruProfileTelemetryConsent(result.profile.id, store.getSettings().telemetry)
+    return result
+  }
+
+  const switchProfile = async (args: SwitchYiruProfileArgs): Promise<SwitchYiruProfileResult> => {
+    const profileId = profileIdFromArgs(args)
+    const current = getYiruProfileListState()
+    if (profileId === current.activeProfileId) {
+      return { status: 'already-active' }
+    }
+
+    // Why: the current profile must be persisted before the global index
+    // points startup at the target profile.
+    await runBeforeProfileRelaunch(options.onBeforeRelaunch)
+    store.flush()
+    setActiveYiruProfile(profileId)
+
+    scheduleProfileRelaunch()
+
+    return { status: 'relaunching' }
+  }
+
+  const transferProject = async (
+    rawArgs: TransferYiruProfileProjectArgs
+  ): Promise<TransferYiruProfileProjectResult> => {
+    const args = transferProjectArgsFromUnknown(rawArgs)
+    const current = getYiruProfileListState()
+    if (args.targetProfileId === current.activeProfileId) {
+      throw new Error('active_target_yiru_profile_transfer_requires_relaunch')
+    }
+    if (args.mode === 'move' && args.sourceProfileId === current.activeProfileId) {
+      // Why: transfer before any relaunch side effect so a duplicate-target
+      // or validation failure cannot strand the app in a quitting state.
+      // flush→transfer→freeze runs synchronously with no interleaving, and
+      // the freeze keeps late sync saves from resurrecting the moved
+      // project from stale memory before the relaunch.
+      store.flush()
+      const result = transferYiruProfileProject(args, getProfileUserDataPath())
+      if (result.status === 'transferred') {
+        store.freezeWrites()
+        await runBeforeProfileRelaunch(options.onBeforeRelaunch)
+        setActiveYiruProfile(args.targetProfileId)
+        scheduleProfileRelaunch()
+        return { ...result, willRelaunch: true }
+      }
       return result
     }
-  )
+    store.flush()
+    return transferYiruProfileProject(args, getProfileUserDataPath())
+  }
 
-  ipcMain.handle(
-    'yiruProfiles:switch',
-    async (_event, args: SwitchYiruProfileArgs): Promise<SwitchYiruProfileResult> => {
-      const profileId = profileIdFromArgs(args)
-      const current = getYiruProfileListState()
-      if (profileId === current.activeProfileId) {
-        return { status: 'already-active' }
-      }
+  const findProjectProfiles = (
+    rawArgs: FindYiruProfileProjectsByPathArgs
+  ): FindYiruProfileProjectsByPathResult =>
+    findYiruProfileProjectsByPath(
+      findProjectsByPathArgsFromUnknown(rawArgs),
+      getProfileUserDataPath()
+    )
 
-      // Why: the current profile must be persisted before the global index
-      // points startup at the target profile.
-      await runBeforeProfileRelaunch(options.onBeforeRelaunch)
-      store.flush()
-      setActiveYiruProfile(profileId)
-
-      scheduleProfileRelaunch()
-
-      return { status: 'relaunching' }
-    }
-  )
-
-  ipcMain.handle(
-    'yiruProfiles:transferProject',
-    async (
-      _event,
-      rawArgs: TransferYiruProfileProjectArgs
-    ): Promise<TransferYiruProfileProjectResult> => {
-      const args = transferProjectArgsFromUnknown(rawArgs)
-      const current = getYiruProfileListState()
-      if (args.targetProfileId === current.activeProfileId) {
-        throw new Error('active_target_yiru_profile_transfer_requires_relaunch')
-      }
-      if (args.mode === 'move' && args.sourceProfileId === current.activeProfileId) {
-        // Why: transfer before any relaunch side effect so a duplicate-target
-        // or validation failure cannot strand the app in a quitting state.
-        // flush→transfer→freeze runs synchronously with no interleaving, and
-        // the freeze keeps late sync saves from resurrecting the moved
-        // project from stale memory before the relaunch.
-        store.flush()
-        const result = transferYiruProfileProject(args, getProfileUserDataPath())
-        if (result.status === 'transferred') {
-          store.freezeWrites()
-          await runBeforeProfileRelaunch(options.onBeforeRelaunch)
-          setActiveYiruProfile(args.targetProfileId)
-          scheduleProfileRelaunch()
-          return { ...result, willRelaunch: true }
-        }
-        return result
-      }
-      store.flush()
-      return transferYiruProfileProject(args, getProfileUserDataPath())
-    }
-  )
-
-  ipcMain.handle(
-    'yiruProfiles:findProjectProfiles',
-    (_event, rawArgs: FindYiruProfileProjectsByPathArgs): FindYiruProfileProjectsByPathResult =>
-      findYiruProfileProjectsByPath(
-        findProjectsByPathArgsFromUnknown(rawArgs),
-        getProfileUserDataPath()
-      )
-  )
+  return { list, createLocal, switchProfile, transferProject, findProjectProfiles }
 }

@@ -42,8 +42,8 @@ import {
 import { resolveEffectiveTerminalAppearance } from '~renderer/lib/terminal-theme'
 import { getExecutionHostIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
 import { acquireWebviewsDragPassthrough } from '~renderer/runtime/browser-webview-registry'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import { shellClient } from '~renderer/runtime/shell-client'
+import { getRenderingHostSnapshot } from '~renderer/runtime/shell-platform-client'
 import {
   registerRuntimeTerminalTab,
   scheduleRuntimeGraphSync
@@ -353,37 +353,6 @@ function terminalSelectionExceedsPrimaryLimit(terminal: Terminal): boolean {
       ? Math.abs(range.end.x - range.start.x)
       : rowSpan * terminal.cols + Math.abs(range.end.x - range.start.x)
   return cellEstimate > PRIMARY_SELECTION_MAX_LENGTH
-}
-
-function hydrateTerminalScrollbackRefs(layout: TerminalLayoutSnapshot): {
-  layout: TerminalLayoutSnapshot
-  hydrated: boolean
-} {
-  const refs = layout.scrollbackRefsByLeafId
-  if (!refs || Object.keys(refs).length === 0) {
-    return { layout, hydrated: false }
-  }
-
-  const buffers = { ...layout.buffersByLeafId }
-  let hydrated = false
-  for (const [leafId, ref] of Object.entries(refs)) {
-    if (buffers[leafId] !== undefined) {
-      continue
-    }
-    try {
-      const buffer = rendererHostClient.session.readTerminalScrollback({ ref })
-      if (buffer) {
-        buffers[leafId] = buffer
-        hydrated = true
-      }
-    } catch {
-      // Best-effort restore; failed snapshot reads should not block terminal mount.
-    }
-  }
-
-  return hydrated
-    ? { layout: { ...layout, buffersByLeafId: buffers }, hydrated }
-    : { layout, hydrated }
 }
 
 export function resolveQueuedInitialCwd(
@@ -729,10 +698,6 @@ export function useTerminalPaneLifecycle({
       useAppStore.getState().setTabLayout(tabId, normalizedInitialLayout.snapshot)
     }
     const initialLayoutHadBuffers = Boolean(initialLayoutRef.current.buffersByLeafId)
-    const hydratedInitialScrollback = hydrateTerminalScrollbackRefs(initialLayoutRef.current)
-    if (hydratedInitialScrollback.hydrated) {
-      initialLayoutRef.current = hydratedInitialScrollback.layout
-    }
     let shouldPersistLayout = false
     const startupWithSetupSplitWait =
       startup && setupSplit
@@ -1442,7 +1407,7 @@ export function useTerminalPaneLifecycle({
         const currentTab = storeState.tabsByWorktree[worktreeId]?.find(
           (candidate) => candidate.id === tabId
         )
-        const platformInfo = rendererHostClient.platform?.get?.()
+        const platformInfo = getRenderingHostSnapshot()
         // Why: launch identity belongs only to the pane consuming this one-shot
         // startup. A tab-wide hint would leak Grok's KKP exception to shell splits.
         const knownTuiAgent = resolvePaneKeyboardProtocolAgent(

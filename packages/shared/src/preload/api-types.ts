@@ -1,41 +1,15 @@
-import type {
-  ShellServicesNotificationsDismissOutput,
-  ShellServicesNotificationsDisplayInput,
-  ShellServicesNotificationsDisplayOutput
-} from '@yiru/runtime-protocol/contract' with { 'resolution-mode': 'import' }
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
 /* eslint-disable max-lines -- Why: the preload contract is intentionally centralized in one declaration file so renderer and preload stay in lockstep when IPC surfaces change. */
 import type { HostedReviewProvider } from '@yiru/workbench-model/review'
-import type { ReadClipboardTextOptions } from '@yiru/workbench-model/ui'
-import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 
 import type { AppIdentity } from '../app-identity'
-import type {
-  BrowserContextMenuDismissedEvent,
-  BrowserContextMenuRequestedEvent,
-  BrowserDownloadFinishedEvent,
-  BrowserDownloadProgressEvent,
-  BrowserDownloadRequestedEvent,
-  BrowserPermissionDeniedEvent,
-  BrowserPopupEvent
-} from '../browser/guest-events'
 import type { StartupCommandDelivery } from '../codex-startup-delivery'
 import type {
   CommitMessageAgentCapability,
   CommitMessageModelCapability
 } from '../commit-message/agent-spec'
-import type {
-  CrashReportBreadcrumbData,
-  CrashReportCopyDiagnosticsArgs,
-  CrashReportRecord,
-  CrashReportSubmitArgs,
-  CrashReportSubmitResult,
-  ReactErrorBoundaryReportArgs,
-  ReactErrorBoundaryReportResult
-} from '../crash-reporting'
 import type { FeatureInteractionId } from '../feature-interactions'
-import type { FridaySession } from '../friday-types'
 import type { GitHistoryOptions, GitHistoryResult } from '../git/history'
 import type {
   GitAddTagResult,
@@ -48,11 +22,6 @@ import type {
   GitResetToCommitResult,
   GitRevertResult
 } from '../git/write-op-results'
-import type {
-  LocalhostWorktreeLabelResult,
-  LocalhostWorktreeLabelRoute
-} from '../localhost-worktree-labels'
-import type { NativeFileDropPayload } from '../native-file-drop'
 import type { ProjectExecutionRuntimeResolution } from '../project-execution-runtime'
 import type { PtyMainDeliveryDiagnostics } from '../pty-delivery-diagnostics'
 import type { PtyModelRestoreNeededEvent } from '../pty-model-restore-marker'
@@ -60,33 +29,16 @@ import type {
   PtyRendererDeliveryHealthReply,
   PtyRendererDeliveryStateReport
 } from '../pty-renderer-delivery-health'
-import type { RichMarkdownContextMenuCommandPayload } from '../rich-markdown-context-menu'
 import type { PublicKnownRuntimeEnvironment } from '../runtime-environments'
-import type {
-  RuntimeBrowserDriverState,
-  RuntimeStatus,
-  RuntimeSyncWindowGraphResult,
-  RuntimeSyncWindowGraph,
-  RuntimeTerminalDriverState
-} from '../runtime-types'
-import type {
-  ShellOpenExternalEditorRequest,
-  ShellOpenExternalEditorResult,
-  ShellOpenLocalPathResult
-} from '../shell-open-types'
+import type { RuntimeStatus } from '../runtime-types'
 import type { ResolvedSourceControlAiGenerationParams } from '../source-control/ai'
 import type { SourceControlAiSettings } from '../source-control/ai-types'
 import type { TerminalSideEffectBatch } from '../terminal/side-effect-facts'
 import type { TerminalViewAttributes } from '../terminal/view-attributes'
 import type {
-  BrowserCookieImportResult,
-  BrowserCertificateFailure,
-  BrowserLoadError,
   BrowserSessionProfileSource,
   ClaudeRateLimitAccountsState,
   CodexRateLimitAccountsState,
-  CustomPet,
-  GlobalSettings,
   GitBranchCompareResult,
   GitCommitCompareResult,
   GitConflictOperation,
@@ -97,38 +49,14 @@ import type {
   GitStagingArea,
   GitStatusResult,
   GitUpstreamStatus,
-  GitHubViewer,
-  MarkdownDocument,
   FloatingTerminalCwdRequest,
-  GitHubPRRefreshCandidate,
-  GitHubPRRefreshEnqueueResult,
-  GitHubPRRefreshReason,
-  NotificationDeliveryProbeResult,
-  NotificationPermissionStatusResult,
-  NotificationSoundResult,
-  OnboardingState,
+  MarkdownDocument,
   PathSource,
   PersistedUIState,
-  PRInfo,
   ShellHydrationFailureReason,
   StatsSummary,
-  TuiAgent,
-  UpdateCheckOptions,
-  UpdateStatus,
-  WorkspaceSessionPatch,
-  WorkspaceSessionState
+  TuiAgent
 } from '../types'
-import type {
-  CreateLocalYiruProfileArgs,
-  CreateLocalYiruProfileResult,
-  FindYiruProfileProjectsByPathArgs,
-  FindYiruProfileProjectsByPathResult,
-  YiruProfileListResult,
-  SwitchYiruProfileArgs,
-  SwitchYiruProfileResult,
-  TransferYiruProfileProjectArgs,
-  TransferYiruProfileProjectResult
-} from '../yiru-profiles'
 
 export type {
   ShellOpenExternalEditorRequest,
@@ -147,11 +75,6 @@ import type {
   AiVaultSubagentListResult
 } from '@yiru/workbench-model/agent'
 
-import type {
-  AutomationDispatchResult,
-  AutomationPrecheckResult,
-  AutomationRun
-} from '../automations-types'
 import type {
   ClaudeUsageBreakdownKind,
   ClaudeUsageBreakdownRow,
@@ -175,13 +98,6 @@ import type {
   CodexUsageSummary
 } from '../codex-usage-types'
 import type {
-  DeveloperPermissionId,
-  DeveloperPermissionRequestResult,
-  DeveloperPermissionState
-} from '../developer-permissions-types'
-import type { AppStarSource } from '../gh-star-source'
-import type { KeybindingActionId, KeybindingFileSnapshot } from '../keybindings'
-import type {
   OpenCodeUsageBreakdownKind,
   OpenCodeUsageBreakdownRow,
   OpenCodeUsageDailyPoint,
@@ -192,58 +108,7 @@ import type {
   OpenCodeUsageSnapshot,
   OpenCodeUsageSummary
 } from '../opencode-usage-types'
-import type { TelemetryConsentState } from '../telemetry-consent-types'
 import type { AgentKind, LaunchSource, RequestKind } from '../telemetry-events'
-
-export type BrowserApi = {
-  // Why: host-state events also flow through `browser.guestEvents.subscribe`;
-  // these callbacks are the Electron shell's local guest-UI delivery adapter.
-  onGuestLoadFailed: (
-    callback: (args: { browserPageId: string; loadError: BrowserLoadError }) => void
-  ) => () => void
-  onCertificateFailureChanged: (
-    callback: (event: { browserPageId: string; failure: BrowserCertificateFailure | null }) => void
-  ) => () => void
-  onPermissionDenied: (callback: (event: BrowserPermissionDeniedEvent) => void) => () => void
-  onPopup: (callback: (event: BrowserPopupEvent) => void) => () => void
-  onDownloadRequested: (callback: (event: BrowserDownloadRequestedEvent) => void) => () => void
-  onDownloadProgress: (callback: (event: BrowserDownloadProgressEvent) => void) => () => void
-  onDownloadFinished: (callback: (event: BrowserDownloadFinishedEvent) => void) => () => void
-  // Why: shell-only — Electron's native right-click menu, positioned with
-  // screen coordinates. Only meaningful for a window the OS is drawing.
-  onContextMenuRequested: (
-    callback: (event: BrowserContextMenuRequestedEvent) => void
-  ) => () => void
-  onContextMenuDismissed: (
-    callback: (event: BrowserContextMenuDismissedEvent) => void
-  ) => () => void
-  /** already covered: navigationUpdate flows via `browser.guestEvents.subscribe`; this stays as the shell's local IPC delivery. */
-  onNavigationUpdate: (
-    callback: (event: { browserPageId: string; url: string; title: string }) => void
-  ) => () => void
-  // Why: shell-only — view activation and browser-pane focus are Electron
-  // window/pane concerns dispatched by the shell (see 附录 A.2 in
-  // docs/runtime-orpc-migration.md); they carry no host state of their own.
-  onActivateView: (
-    callback: (data: { worktreeId?: string; browserPageId?: string }) => void
-  ) => () => void
-  onPaneFocus: (
-    callback: (data: { worktreeId: string | null; browserPageId: string }) => void
-  ) => () => void
-  /** already covered: openLinkInYiruTab flows via `browser.guestEvents.subscribe`; this stays as the shell's local IPC delivery. */
-  onOpenLinkInYiruTab: (
-    callback: (event: { browserPageId: string; url: string }) => void
-  ) => () => void
-  // Why: shell-only — grab-mode toggle and the c/s action keys are Electron
-  // global keyboard shortcuts forwarded from the OS to the focused window.
-  onGrabModeToggle: (callback: (browserPageId: string) => void) => () => void
-  onGrabActionShortcut: (
-    callback: (args: { browserPageId: string; key: 'c' | 's' }) => void
-  ) => () => void
-  // Why: the native picker and selected absolute path remain confined to main;
-  // only the completed import result crosses this shell adapter.
-  sessionImportCookies: (args: { profileId: string }) => Promise<BrowserCookieImportResult>
-}
 
 export type EmulatorApi = {
   // Why: startFrameStream/stopFrameStream (+ onFrameStreamFrame/
@@ -595,38 +460,6 @@ export type RepoHostAdapter = {
 }
 
 export type PreloadApi = {
-  app: AppApi
-  // Why: shell-only — a "Yiru profile" is a separate userData directory for
-  // *this* Electron installation (own store, own relaunch via app.relaunch())
-  // used to run multiple identities of the app side by side on one machine.
-  // It is not a runtime-host concept; no contract analog exists or should.
-  yiruProfiles: {
-    list: () => Promise<YiruProfileListResult>
-    createLocal: (args?: CreateLocalYiruProfileArgs) => Promise<CreateLocalYiruProfileResult>
-    switchProfile: (args: SwitchYiruProfileArgs) => Promise<SwitchYiruProfileResult>
-    transferProject: (
-      args: TransferYiruProfileProjectArgs
-    ) => Promise<TransferYiruProfileProjectResult>
-    findProjectProfiles: (
-      args: FindYiruProfileProjectsByPathArgs
-    ) => Promise<FindYiruProfileProjectsByPathResult>
-  }
-  // Why: shell-only — despite the name, this reports the platform of the
-  // machine *rendering* the UI (used for terminal WebGL policy and keyboard-
-  // protocol quirks tied to this window's OS release), not the target host a
-  // worktree's agent runs on. The web adapter independently returns the
-  // browser's own platform rather than calling the contract's `host.platform`
-  // (a different concept: the host a runtime target executes on) — routing
-  // this to `host.platform` for a remote environment would report the wrong
-  // machine's platform to a local rendering decision.
-  platform: {
-    get: () => {
-      platform: NodeJS.Platform
-      osRelease: string
-      displayServer: 'wayland' | 'x11' | null
-    }
-  }
-  repoHost: RepoHostAdapter
   // Why: this group's `on*` members (onDeliveryResyncRequest, onData,
   // onReplay, onModelRestoreNeeded, onSideEffect, onExit,
   // onClearBufferRequest) are never a runtime migration gap.
@@ -816,192 +649,6 @@ export type PreloadApi = {
     clearPendingPaneSerializer: (paneKey: string, gen: number) => Promise<void>
     reportRendererSerializerReady?: (ptyId: string) => Promise<void>
   }
-  // Why: shell-only — posts telemetry about this app instance straight to
-  // the support backend over HTTP from the main process; there is no
-  // runtime host in the loop to route through.
-  feedback: {
-    submit: (args: {
-      feedback: string
-      submitAnonymously?: boolean
-      githubLogin: string | null
-      githubEmail: string | null
-    }) => Promise<{ ok: true } | { ok: false; status: number | null; error: string }>
-  }
-  // Why: shell-only — every member reports on or reads back crashes/errors of
-  // *this* Electron process (main + renderer), backed by a local
-  // CrashReportStore and Electron's own `clipboard`/`app.getVersion()`. A
-  // crash belongs to whichever process crashed, which is always this shell,
-  // never a runtime host.
-  crashReports: {
-    getLatestPending: () => Promise<CrashReportRecord | null>
-    getLatestReport: () => Promise<CrashReportRecord | null>
-    dismiss: (args: { reportId: string }) => Promise<CrashReportRecord | null>
-    recordRendererError: (
-      args: ReactErrorBoundaryReportArgs
-    ) => Promise<ReactErrorBoundaryReportResult>
-    recordBreadcrumb: (args: { name: string; data?: CrashReportBreadcrumbData }) => void
-    submit: (args: CrashReportSubmitArgs) => Promise<CrashReportSubmitResult>
-    copyLatestDiagnostics: (
-      args?: CrashReportCopyDiagnosticsArgs
-    ) => Promise<{ ok: true } | { ok: false; error: string }>
-  }
-  // Why: shell-only — `htmlToPdf` opens a hidden Electron `BrowserWindow` and
-  // calls its own `webContents.printToPDF()` (main/export/html-to-pdf.ts),
-  // then shows a native `dialog.showSaveDialog` on the window that asked and
-  // writes the PDF to the chosen local path (main/export/export.ts). Every
-  // step is an API of the machine rendering this window; there is no
-  // host/target parameter anywhere in the chain and no runtime-host
-  // equivalent of "print this window's content to a local PDF file."
-  export: ExportApi
-  // Why: this group now contains only shell semantics. `viewer` and the Yiru
-  // star methods use this installation's own `gh` login; paired web clients
-  // deliberately return fallback values. The coordinator calls are keyed by
-  // Electron renderer id so visible-refresh ownership follows the asking
-  // window. Repo-host reads and writes use the `github.*` contract.
-  gh: {
-    viewer: () => Promise<GitHubViewer | null>
-    enqueuePRRefresh: (args: {
-      candidate: GitHubPRRefreshCandidate
-      reason: GitHubPRRefreshReason
-      priority?: number
-    }) => Promise<GitHubPRRefreshEnqueueResult | false>
-    reportVisiblePRRefreshCandidates: (args: {
-      candidates: GitHubPRRefreshCandidate[]
-      generation: number
-    }) => Promise<boolean>
-    checkYiruStarred: () => Promise<boolean | null>
-    starYiru: (source: AppStarSource) => Promise<boolean>
-  }
-  // Why: shell-only — confirmed via `main/star-nag/service.ts`. `StarNagService`
-  // is an in-memory singleton scoped to this Electron process's own
-  // `BrowserWindow`s (agent-spawn counters, cooldown timers, `gh`-CLI star
-  // checks against this machine's credentials); it has no host/multi-client
-  // concept. The web client deliberately no-ops the whole group rather than
-  // routing it anywhere — the growth nudge never surfaces there.
-  starNag: {
-    onShow: (
-      callback: (payload?: { mode?: 'gh' | 'web'; surface?: 'card' | 'toast' }) => void
-    ) => () => void
-    onHide: (callback: () => void) => () => void
-    dismiss: () => Promise<void>
-    later: () => Promise<void>
-    complete: () => Promise<void>
-    disable: () => Promise<void>
-    openWeb: () => Promise<void>
-    starYiru: () => Promise<boolean>
-    forceShow: () => Promise<void>
-    agentValueMoment: () => Promise<{ status: 'ready'; mode: 'gh' | 'web' } | { status: 'skipped' }>
-    showAgentValueMoment: () => Promise<void>
-    onboardingCompleted: () => Promise<void>
-  }
-  // Why: shell-only, and the four `telemetry*` members below are one judgment
-  // — consent and event emission are properties of *this installation*, not of
-  // any runtime host. Routing them through the runtime contract would mean
-  // asking a remote machine about this machine's consent. The PostHog client
-  // and the opt-in store are main-side (gated on IS_OFFICIAL_BUILD plus the
-  // build-identity/write-key pair), the effective-consent reason includes env
-  // vars the renderer cannot read, and the per-session consent-mutation rate
-  // limit is enforced in main. Same reasoning as the `diagnostics` group below,
-  // which is the same pipeline's file/bundle half. These four were the group
-  // the Phase 4/5 acceptance audit found had never been judged anywhere — the
-  // code was already right; only the judgment was missing, and it was missing
-  // because a `name: {` group count skips bare function members like these.
-  /** Fire-and-forget track. Loose typing at the IPC boundary on purpose —
-   *  the main-side validator is the single enforcement point. Renderer call
-   *  sites should import `track<N>()` from `packages/client/src/lib/telemetry.ts`
-   *  for the `EventMap`-based type safety, not reach for this directly. */
-  telemetryTrack: (name: string, props: Record<string, unknown>) => Promise<void>
-  // Why: shell-only — see the `telemetry*` group judgment above.
-  /** Flip the persisted opt-in preference. Subject to a per-session
-   *  consent-mutation rate limit on the main side (≤5/session). */
-  telemetrySetOptIn: (optedIn: boolean) => Promise<void>
-  /** Diagnostic file controls. Surface for telemetry-error-tracking.md
-   *  §User controls. The renderer triggers flows; main does the filesystem /
-   *  network work and returns serializable metadata. Main retains collected
-   *  upload payloads so the renderer can confirm without reading or
-   *  substituting arbitrary bytes.
-   *  Why: shell-only — despite the name, this is unrelated to the contract's
-   *  `diagnostics.memory` (host CPU/memory snapshot). It is *this Electron
-   *  installation's* trace-file/crash-bundle telemetry pipeline, uploaded to
-   *  PostHog; the web adapter hardcodes it disabled and rejects the
-   *  collect/open/upload actions with "unavailable on web" — a deliberate
-   *  non-goal, not a gap. Same-named groups, unrelated concepts. */
-  diagnostics: {
-    getStatus: () => Promise<DiagnosticsStatusPayload>
-    collectBundle: (lookbackMinutes?: number) => Promise<DiagnosticsBundlePayload>
-    openBundlePreview: (bundleSubmissionId: string) => Promise<void>
-    discardBundlePreview: (bundleSubmissionId: string) => Promise<void>
-    uploadBundle: (bundleSubmissionId: string) => Promise<DiagnosticsUploadPayload>
-  }
-  // Why: shell-only — see the `telemetry*` group judgment above. The env-var
-  // half of the reason is main-side state a renderer cannot read at all, so
-  // there is no host-routable version of this answer.
-  /** Read-only view of effective consent state, including the reason if
-   *  disabled (env var / user opt-out / CI / pending banner). Used by the
-   *  Privacy pane to render the correct "blocked by X" helper text — env
-   *  vars are main-side state the renderer cannot read directly. */
-  telemetryGetConsentState: () => Promise<TelemetryConsentState>
-  // Why: shell-only — same judgment as the `telemetry*` block above (the
-  // `diagnostics` group sits between them, so this repeats the tag rather than
-  // relying on comment proximity).
-  /** Banner ✕ — persist `optedIn = true` silently, emit nothing. Deliberately
-   *  a separate channel from `telemetrySetOptIn` because main's `via`
-   *  derivation on that channel would tag this path as `first_launch_banner`
-   *  and fire `telemetry_opted_in`, which the ✕-as-silent-acknowledge
-   *  semantics forbid (the user did not explicitly opt in, they declined to
-   *  intervene). Subject to the same per-session consent-mutation rate
-   *  limit as `telemetrySetOptIn`. */
-  telemetryAcknowledgeBanner: () => Promise<void>
-  // Why: shell-only — CIRCULAR, not just unmigrated. `get`/`getSync`/`set`/
-  // `updatePRBotAuthorOverride` all read and write `store.getSettings()` /
-  // `store.updateSettings()` (`main/ipc/settings.ts`), this Electron
-  // installation's own `GlobalSettings` — the object that carries
-  // `activeRuntimeEnvironmentId`, the very field that selects which runtime
-  // host a call should target. Routing these through the runtime contract
-  // would mean asking a host for the setting that decides which host to ask.
-  // The contract's identically-named `settings.get`/`settings.update`/
-  // `settings.updatePRBotAuthorOverride` (`main/runtime/rpc/methods/client-ui.ts`)
-  // are a different, narrower object (`RuntimeClientSettings` from
-  // `runtime.getClientSettings()`) scoped to whichever host answers — no
-  // `activeRuntimeEnvironmentId`, no theme/proxy/appearance fields. Same
-  // group name, unrelated concepts, same shape as the `diagnostics` over-merge
-  // above and the `session` over-merge below. `getSync` additionally can't
-  // cross a network hop by
-  // construction (terminal side-effect authority needs it before async
-  // hydration completes).
-  settings: {
-    get: () => Promise<GlobalSettings>
-    /** Synchronous persisted-settings read for startup decisions that cannot
-     *  wait for async hydration (terminal side-effect authority). Blocking
-     *  IPC — call sparingly. */
-    getSync: () => GlobalSettings | null
-    set: (args: Partial<GlobalSettings>) => Promise<GlobalSettings>
-    updatePRBotAuthorOverride: (args: { author: string; isBot: boolean }) => Promise<GlobalSettings>
-  }
-  // Why: shell-only — `register` spins up a loopback-proxy route on the
-  // machine that will open the link, gated to `sourceOwner.kind === 'local'`
-  // call sites only. It never fires for an environment-hosted workspace.
-  localhostWorktreeLabels: {
-    register: (args: LocalhostWorktreeLabelRoute) => Promise<LocalhostWorktreeLabelResult>
-  }
-  // Why: shell-only — confirmed. `openFile`/`revealFile` need a native editor
-  // and Finder/Explorer, and `get`/`set`/`ensureFile`/`reload` read the local
-  // keybindings.json this installation owns. The web client keeps its own
-  // parallel per-browser localStorage document (`createWebKeybindingsApi` in
-  // `renderer/web/preload-api.ts`) rather than routing through any host
-  // contract — keyboard shortcuts are inherently per-client, not host state.
-  keybindings: {
-    get: () => Promise<KeybindingFileSnapshot>
-    ensureFile: () => Promise<KeybindingFileSnapshot>
-    setAction: (args: {
-      actionId: KeybindingActionId
-      bindings: string[] | null
-    }) => Promise<KeybindingFileSnapshot>
-    reload: () => Promise<KeybindingFileSnapshot>
-    openFile: () => Promise<KeybindingFileSnapshot>
-    revealFile: () => Promise<KeybindingFileSnapshot>
-    onChanged: (callback: (snapshot: KeybindingFileSnapshot) => void) => () => void
-  }
   // Why: select/remove moved to the runtime contract (`accounts.selectCodex` /
   // `accounts.removeCodex`) — see provider-accounts-client.ts. add/reauthenticate
   // stay here because they spawn `codex login` PTYs that need a desktop browser.
@@ -1048,167 +695,7 @@ export type PreloadApi = {
       workspacePath: string
     }) => Promise<void>
   }
-  notifications: {
-    // Why: Phase 5 slice S3 — the shell's implementation of the
-    // shellServices.notifications.display/.dismiss reverse procedures, called
-    // only from renderer/runtime/shell-services-handler.ts (never from
-    // feature code — go through the runtime's notifications.report/dismiss
-    // for that). Settings/throttle/dedup/mobile-push judgment already
-    // happened on the runtime side; these two do only the OS-native part.
-    displayNative: (
-      args: ShellServicesNotificationsDisplayInput
-    ) => Promise<ShellServicesNotificationsDisplayOutput>
-    dismissNative: (notificationIds: string[]) => Promise<ShellServicesNotificationsDismissOutput>
-    // Why: shell-only — pure OS permission queries (Notification.isSupported,
-    // the System Settings deep-link, the native authorization probe); no
-    // runtime involvement at all.
-    openSystemSettings: () => Promise<void>
-    getPermissionStatus: () => Promise<NotificationPermissionStatusResult>
-    probeDelivery: (args?: { force?: boolean }) => Promise<NotificationDeliveryProbeResult>
-    // Why: shell-only — same reverse-direction family as `dispatch` above;
-    // plays a locally cached sound file through a preload-context `Audio`.
-    playSound: (options?: { force?: boolean; volume?: number }) => Promise<NotificationSoundResult>
-  }
-  // Why: shell-only — confirmed. `get`/`update` read the local `Store`-backed
-  // onboarding checklist (`main/persisted-state/onboarding.ts`), the same
-  // per-installation-file shape as `settings.get`/`set`. There is no
-  // `onboarding` contract namespace; the web client keeps a fully independent
-  // per-browser localStorage copy (`ONBOARDING_STORAGE_KEY` in
-  // `renderer/web/preload-api.ts`) rather than routing through any host. This
-  // first-run checklist is inherently per-client, not host state.
-  onboarding: {
-    get: () => Promise<OnboardingState>
-    // Why: main-process `updateOnboarding` merges checklist field-by-field, so
-    // callers can pass a partial checklist (e.g. just `{ addedRepo: true }`)
-    // without re-supplying every flag.
-    update: (
-      updates: Partial<Omit<OnboardingState, 'checklist'>> & {
-        checklist?: Partial<OnboardingState['checklist']>
-      }
-    ) => Promise<OnboardingState>
-  }
-  // Why: shell-only — every check here (systemPreferences, osascript Apple
-  // Events probe, a UDP bind for the local-network prompt) targets the OS
-  // permission state of the Electron shell bundle running on this machine.
-  // Not the same domain as `computer.permissions*`: that pair only covers
-  // the Computer Use sidecar's accessibility/screenshot access on the
-  // targeted runtime host (2 ids); this covers this app's own mic/camera/
-  // screen/accessibility/full-disk-access/automation/local-network/usb/
-  // bluetooth TCC status (9 ids). Same field name (`id`), disjoint domains.
-  // `openSettings` was dropped as dead code (zero callers, confirmed by
-  // typecheck) — `request` already falls back to the same privacy pane.
-  developerPermissions: {
-    getStatus: () => Promise<DeveloperPermissionState[]>
-    request: (args: { id: DeveloperPermissionId }) => Promise<DeveloperPermissionRequestResult>
-  }
-  /**
-   * shell-only: every member here acts on the machine running the Electron
-   * shell — native pickers, the OS default handler, and the user's own file
-   * manager and browser. None of it is a runtime-host capability, so this
-   * group stays on the preload face rather than moving to the oRPC contract.
-   */
-  shell: {
-    openPath: (path: string) => Promise<void>
-    openInFileManager: (path: string) => Promise<ShellOpenLocalPathResult>
-    /**
-     * Why: the `externalEditor.openRemoteSsh` contract procedure looks like a
-     * migrated remote path, but its caller is gated on `connectionId`, which
-     * nothing has set since remote hosts were removed. Every reachable call
-     * lands here, on the local machine.
-     */
-    openInExternalEditor: {
-      (request: ShellOpenExternalEditorRequest): Promise<ShellOpenExternalEditorResult>
-      (path: string, command?: string): Promise<ShellOpenLocalPathResult>
-    }
-    openUrl: (url: string) => Promise<void>
-    openFilePath: (path: string) => Promise<boolean>
-    openFileUri: (uri: string) => Promise<void>
-    /**
-     * Why: the handler `stat`s this path on the machine running the Electron
-     * shell, with no `target`/host argument — a caller meaning "does this
-     * exist on the paired runtime host" would get the wrong answer. All four
-     * desktop call sites (mcp-config-section.tsx, terminal-link-handlers.ts,
-     * markdown-preview.tsx, editor-click-routing.ts) verified gated on
-     * `isLocalRepo` / `isLocalPathOpenBlocked` before reaching this member,
-     * so the mismatch this shape could cause is not actually reachable today.
-     */
-    pathExists: (path: string) => Promise<boolean>
-    pickAttachment: () => Promise<string | null>
-    pickImage: () => Promise<string | null>
-    pickRepoIconImage: () => Promise<{ dataUrl: string; fileName: string } | null>
-    pickAudio: () => Promise<string | null>
-    pickDirectory: (args: { defaultPath?: string }) => Promise<string | null>
-  }
-  // Why: shell-only — confirmed. `import`/`importPetBundle` open a native
-  // Electron `dialog.showOpenDialog` tied to the sender's `BrowserWindow`;
-  // `read`/`delete` operate on files under this installation's
-  // `app.getPath('userData')`, addressable only by the id the native picker
-  // just minted. There is no host-wide pet-asset contract and no web
-  // implementation at all (`window.api.pet` is undefined on web builds) —
-  // building one would be a new host-shared-asset feature, not a Phase 4 move.
-  pet: {
-    import: () => Promise<CustomPet | null>
-    importPetBundle: () => Promise<CustomPet | null>
-    read: (id: string, fileName: string, kind?: 'image' | 'bundle') => Promise<ArrayBuffer | null>
-    delete: (id: string, fileName: string, kind?: 'image' | 'bundle') => Promise<void>
-  }
-  browser: BrowserApi
   emulator: EmulatorApi
-  // Why: shell-only — this is the renderer's own client-side cache of GitHub
-  // PR info it already fetched, persisted so it survives a restart. The web
-  // adapter independently mirrors it with `localStorage` rather than calling
-  // any runtime procedure, confirming there is no host-side source behind it.
-  // Host-scoping already holds: the persisted blob is one flat map, but every
-  // key baked into it (`getGitHubPRCacheKey`/`getGitHubRepoCacheKey` in
-  // `renderer/store/slices/github-cache-key.ts`) is prefixed by the repo's
-  // owning execution host (or the focused runtime environment id when the
-  // repo has none), so entries from different hosts coexist in the same file
-  // without one host's cached PR data ever answering for another's.
-  cache: {
-    getGitHub: () => Promise<{
-      pr: Record<string, { data: PRInfo | null; fetchedAt: number }>
-    }>
-    setGitHub: (args: {
-      cache: {
-        pr: Record<string, { data: PRInfo | null; fetchedAt: number }>
-      }
-    }) => Promise<void>
-  }
-  // Why: shell-only — this is the shell's own per-remembered-host cache of
-  // window/tab state (`store.getWorkspaceSession`), addressed by `hostId` so
-  // switching runtimes restores that host's tabs. It is not the contract's
-  // `session.tabs` (worktree tab management) — same name, unrelated concept.
-  // The web adapter independently mirrors it with `localStorage`, never a
-  // runtime call, confirming there is no host-side source to route to.
-  session: {
-    // hostId is optional and defaults to the 'local' partition on the main
-    // side, so existing callers that omit it behave exactly as before.
-    get: (hostId?: ExecutionHostId) => Promise<WorkspaceSessionState>
-    set: (args: WorkspaceSessionState, hostId?: ExecutionHostId) => Promise<void>
-    patch: (args: WorkspaceSessionPatch, hostId?: ExecutionHostId) => Promise<void>
-    flush: () => Promise<void>
-    readTerminalScrollback: (args: { ref: string }) => string | null
-    setSync: (args: WorkspaceSessionState, hostId?: ExecutionHostId) => void
-  }
-  // Why: shell-only, confirmed by slice 19 — every member here drives
-  // `electron-updater` checking/downloading/installing a new build of *this*
-  // Electron binary, on *this* machine. Distinct from the runtime contract's
-  // own `updater` namespace (`client.updater.getStatus/check/download/install`,
-  // consumed by `store/slices/remote-server-updates.ts`), which asks a paired
-  // *runtime environment host* whether its `yiru serve` build is current —
-  // same name, unrelated concepts, same shape as the `diagnostics`/`settings`/
-  // `session` over-merges elsewhere in this file. Nothing here should ever
-  // route through the contract.
-  updater: {
-    getVersion: () => Promise<string>
-    getStatus: () => Promise<UpdateStatus>
-    check: (options?: UpdateCheckOptions) => Promise<void>
-    download: () => Promise<void>
-    quitAndInstall: () => Promise<void>
-    dismissNudge: () => Promise<void>
-    onStatus: (callback: (status: UpdateStatus) => void) => () => void
-    onClearDismissal: (callback: () => void) => () => void
-  }
   stats: StatsApi
   claudeUsage: ClaudeUsageApi
   codexUsage: CodexUsageApi
@@ -1231,130 +718,10 @@ export type PreloadApi = {
   // `executionHostId`) with no contract leaf yet — the web adapter's own
   // `Why:` next to its no-op stub already says so.
   aiVault: AiVaultApi
-  // Why: genuine forward gap, not migrated this slice. `main/friday/service.ts`
-  // Why: shell-only by construction, not an un-migrated gap. The session
-  // itself is host-side (`runtime.createTerminal`/`closeTerminal`), but
-  // `revealFridayChat` requires `notifier.revealTerminalSession` and throws
-  // `runtime_unavailable` without it — Friday's visible surface is a tab in
-  // the *local* floating workspace, so it needs a renderer window on the
-  // machine running the shell. A paired web client has none on the runtime
-  // host, which is why the web adapter rejects rather than routing. Adding a
-  // `friday.*` contract procedure would not make it work.
-  friday: {
-    getOrCreate: () => Promise<FridaySession>
-    restart: () => Promise<FridaySession>
-  }
   // Why: worktree-owned reads, writes, listings, searches, imports, and watches
   // route through `files.*`. This adapter is limited to native downloads and
   // explicitly authorized absolute paths that cannot use worktree-relative
   // addressing, including OS drag-and-drop sources.
-  fileHost: {
-    readFile: (args: {
-      filePath: string
-      connectionId?: string
-      includeLocalLogMetadata?: boolean
-    }) => Promise<{
-      content: string
-      isBinary: boolean
-      isImage?: boolean
-      mimeType?: string
-      fileIdentity?: string
-    }>
-    saveDownloadedFile: (args: {
-      suggestedName: string
-      content: string
-      encoding: 'utf8' | 'base64'
-    }) => Promise<{ canceled: true } | { canceled: false; destinationPath: string }>
-    startDownloadedFile: (args: {
-      suggestedName: string
-    }) => Promise<
-      { canceled: true } | { canceled: false; transferId: string; destinationPath: string }
-    >
-    appendDownloadedFileChunk: (args: {
-      transferId: string
-      contentBase64: string
-    }) => Promise<{ ok: true }>
-    finishDownloadedFile: (args: {
-      transferId: string
-    }) => Promise<{ canceled: false; destinationPath: string }>
-    cancelDownloadedFile: (args: { transferId: string }) => Promise<{ ok: true }>
-    startDownloadedFolder: (args: {
-      suggestedName: string
-    }) => Promise<
-      { canceled: true } | { canceled: false; transferId: string; destinationPath: string }
-    >
-    createDownloadedFolderDirectory: (args: {
-      transferId: string
-      pathSegments: string[]
-    }) => Promise<{ ok: true }>
-    appendDownloadedFolderFileChunk: (args: {
-      transferId: string
-      pathSegments: string[]
-      contentBase64: string
-      first: boolean
-      last: boolean
-    }) => Promise<{ ok: true }>
-    finishDownloadedFolder: (args: {
-      transferId: string
-    }) => Promise<{ canceled: false; destinationPath: string }>
-    cancelDownloadedFolder: (args: { transferId: string }) => Promise<{ ok: true }>
-    writeFile: (args: { filePath: string; content: string; connectionId?: string }) => Promise<void>
-    createFile: (args: { filePath: string; connectionId?: string }) => Promise<void>
-    createDir: (args: { dirPath: string; connectionId?: string }) => Promise<void>
-    rename: (args: { oldPath: string; newPath: string; connectionId?: string }) => Promise<void>
-    copy: (args: {
-      sourcePath: string
-      destinationPath: string
-      connectionId?: string
-    }) => Promise<void>
-    deletePath: (args: {
-      targetPath: string
-      connectionId?: string
-      recursive?: boolean
-    }) => Promise<void>
-    authorizeExternalPath: (args: { targetPath: string }) => Promise<void>
-    stat: (args: {
-      filePath: string
-      connectionId?: string
-    }) => Promise<{ size: number; isDirectory: boolean; mtime: number }>
-    pathExists: (args: { filePath: string; connectionId?: string }) => Promise<boolean>
-    stageExternalPathsForRuntimeUpload: (args: { sourcePaths: string[] }) => Promise<{
-      sources: (
-        | {
-            sourcePath: string
-            status: 'staged'
-            name: string
-            kind: 'file' | 'directory'
-            entries: (
-              | { relativePath: string; kind: 'directory' }
-              | { relativePath: string; kind: 'file'; contentBase64: string }
-            )[]
-          }
-        | {
-            sourcePath: string
-            status: 'skipped'
-            reason: 'missing' | 'symlink' | 'permission-denied' | 'unsupported'
-          }
-        | {
-            sourcePath: string
-            status: 'failed'
-            reason: string
-          }
-      )[]
-    }>
-    resolveDroppedPathsForAgent: (args: {
-      paths: string[]
-      worktreePath: string
-      connectionId?: string
-    }) => Promise<{
-      resolvedPaths: string[]
-      skipped: {
-        sourcePath: string
-        reason: 'missing' | 'symlink' | 'permission-denied' | 'unsupported'
-      }[]
-      failed: { sourcePath: string; reason: string }[]
-    }>
-  }
   git: {
     status: (args: {
       worktreePath: string
@@ -1640,164 +1007,9 @@ export type PreloadApi = {
     }) => Promise<string | null>
   }
   ui: {
-    // Why: the web build layers browser-localStorage offline caching and
-    // cross-tab merge semantics on top of the runtime contract.
     get: () => Promise<PersistedUIState>
     set: (args: Partial<PersistedUIState>) => Promise<void>
     recordFeatureInteraction: (id: FeatureInteractionId) => Promise<PersistedUIState>
-    // Why: shell-only — menu-accelerator / global-shortcut intent events fired
-    // by native menu items or OS-level shortcuts, dispatched to whichever
-    // window/pane currently owns focus. Not a runtime capability.
-    onOpenSettings: (callback: () => void) => () => void
-    // Why: shell-only — consumes a one-shot tray/menu-bar "open settings"
-    // intent queued in the main process before the window mounted. A paired
-    // web client has no tray/menu bar, so there is never a queued intent to
-    // consume (its adapter hardcodes `false`); not a runtime capability.
-    consumePendingOpenSettings: () => Promise<boolean>
-    onOpenSetupGuide: (callback: () => void) => () => void
-    onOpenFeatureTour: (callback: () => void) => () => void
-    onOpenCrashReport: (callback: () => void) => () => void
-    onToggleLeftSidebar: (callback: () => void) => () => void
-    onToggleRightSidebar: (callback: () => void) => () => void
-    onToggleWorktreePalette: (callback: () => void) => () => void
-    onToggleFloatingTerminal: (callback: () => void) => () => void
-    onToggleAssistant: (callback: () => void) => () => void
-    onTerminalShortcutCaptured: (
-      callback: (data: { actionId: KeybindingActionId }) => void
-    ) => () => void
-    onOpenQuickOpen: (callback: () => void) => () => void
-    onToggleQuickCommandsMenu: (callback: () => void) => () => void
-    onOpenNewWorkspace: (callback: () => void) => () => void
-    onDeleteCurrentWorkspace: (callback: () => void) => () => void
-    onJumpToWorktreeIndex: (callback: (index: number) => void) => () => void
-    onJumpToTabIndex: (callback: (index: number) => void) => () => void
-    onWorktreeHistoryNavigate: (callback: (direction: 'back' | 'forward') => void) => () => void
-    onNewBrowserTab: (callback: () => void) => () => void
-    onNewMarkdownTab: (callback: () => void) => () => void
-    onNewSimulatorTab: (callback: () => void) => () => void
-    // Why: shell-only — more menu-accelerator / global-shortcut intents (see
-    // `onOpenSettings` above).
-    onNewTerminalTab: (callback: () => void) => () => void
-    onFocusBrowserAddressBar: (callback: () => void) => () => void
-    onFindInBrowserPage: (callback: () => void) => () => void
-    onReloadBrowserPage: (callback: () => void) => () => void
-    onBrowserHistoryNavigate: (callback: (direction: 'back' | 'forward') => void) => () => void
-    onZoomBrowserPage: (callback: (direction: 'in' | 'out' | 'reset') => void) => () => void
-    onHardReloadBrowserPage: (callback: () => void) => () => void
-    onCloseActiveTab: (callback: () => void) => () => void
-    onSwitchTab: (callback: (direction: 1 | -1) => void) => () => void
-    onSwitchTabAcrossAllTypes: (callback: (direction: 1 | -1) => void) => () => void
-    onSwitchRecentTab: (callback: () => void) => () => void
-    onSwitchTerminalTab: (callback: (direction: 1 | -1) => void) => () => void
-    onCtrlTabKeyDown: (callback: (data: { shiftKey: boolean }) => void) => () => void
-    onCtrlTabKeyUp: (callback: () => void) => () => void
-    onToggleStatusBar: (callback: () => void) => () => void
-    // Why: shell-only — native focus/paste mediation (OS-level dictation key,
-    // app-menu Paste routed to whichever surface owns focus).
-    onDictationKeyDown: (callback: () => void) => () => void
-    // Why: shell-only — menu-accelerator intent (see `onOpenSettings` above).
-    onExportPdfRequested: (callback: () => void) => () => void
-    // Why: shell-only — native focus/paste mediation (see `onDictationKeyDown`).
-    onAppMenuPaste: (callback: () => void) => () => void
-    onEditableContextPaste: (callback: (data: { plainTextOnly: boolean }) => void) => () => void
-    // Why: shell-only — menu-accelerator intent (see `onOpenSettings` above).
-    onTerminalZoom: (callback: (direction: 'in' | 'out' | 'reset') => void) => () => void
-    // Why: shell-only — native focus/paste mediation (see `onDictationKeyDown`).
-    onSystemResumed: (callback: () => void) => () => void
-    // Why: shell-only — the OS clipboard belongs to the machine running the
-    // shell (through `readClipboardImageBase64` below, and `writeClipboardText`/
-    // `writeClipboardImage`/`writeClipboardFile`/`performNativePaste` further
-    // down); covers `readSelectionClipboardText`/`writeSelectionClipboardText`
-    // too — the X11 primary-selection clipboard has no browser equivalent, so
-    // the web adapter rejects both as unavailable rather than no-opping.
-    readClipboardText: (options?: ReadClipboardTextOptions) => Promise<string>
-    readSelectionClipboardText: (options?: ReadClipboardTextOptions) => Promise<string>
-    /** shell-only: reads the current OS clipboard image without choosing a runtime target. */
-    readClipboardImageBase64: () => Promise<string | null>
-    // Why: kept on preload, not collapsed onto `clipboard.saveImageAsTempFile` —
-    // main already reads the OS clipboard natively and, for a local target,
-    // writes the temp file directly with zero base64 round-trip; collapsing to
-    // the renderer-side chunked-upload protocol would add a
-    // read-clipboard-as-base64 IPC hop plus encode/decode overhead to every
-    // local paste for no benefit (web/mobile/cli already reach the same
-    // contract methods from their own code paths). `runtimeEnvironmentId` set
-    // still delegates to the same chunked upload, just issued from main.
-    saveClipboardImageAsTempFile: (args?: {
-      connectionId?: string | null
-      runtimeEnvironmentId?: string | null
-    }) => Promise<string | null>
-    writeClipboardText: (text: string) => Promise<void>
-    writeSelectionClipboardText: (text: string) => Promise<void>
-    writeClipboardImage: (dataUrl: string) => Promise<void>
-    performNativePaste: (options?: { mode?: 'paste' | 'paste-and-match-style' }) => void
-    writeClipboardFile: (
-      args: { filePath: string } | string
-    ) => Promise<{ ok: boolean; reason?: string }>
-    // Why: shell-only — native file-drop mediation.
-    onFileDrop: (callback: (data: NativeFileDropPayload) => void) => () => void
-    // Why: shell-only — BrowserWindow/webContents zoom geometry.
-    getZoomLevel: () => number
-    setZoomLevel: (level: number) => void
-    syncTrafficLights: (zoomFactor: number) => void
-    // Why: shell-only — native focus mediation (which surface currently owns
-    // keyboard focus, mirrored so main can route accelerators correctly).
-    setMarkdownEditorFocused: (focused: boolean) => void
-    setTerminalInputFocused: (focused: boolean) => void
-    setFloatingTerminalInputFocused: (focused: boolean) => void
-    setShortcutRecorderFocused: (focused: boolean) => void
-    // Why: shell-only — native context-menu command mediation (see
-    // `onDictationKeyDown` above).
-    onRichMarkdownContextCommand: (
-      callback: (payload: RichMarkdownContextMenuCommandPayload) => void
-    ) => () => void
-    // Why: shell-only — window control (fullscreen/minimize/maximize/close),
-    // Electron's native chrome.
-    onFullscreenChanged: (callback: (isFullScreen: boolean) => void) => () => void
-    minimize: () => void
-    maximize: () => void
-    isMaximized: () => Promise<boolean>
-    onMaximizeChanged: (callback: (isMaximized: boolean) => void) => () => void
-    requestClose: () => void
-    popupMenu: () => void
-    onWindowCloseRequested: (callback: (data: { isQuitting: boolean }) => void) => () => void
-    confirmWindowClose: () => void
-  }
-  // Why: `runtime.driverEvents.subscribe` carries all three live driver
-  // changes, so this shell adapter retains only members with no equivalent
-  // forward procedure. `syncWindowGraph` is
-  // the *only* writer of `TerminalSessionAuthority.graph.leaves`
-  // (`renderer/runtime/sync-runtime-graph.ts`'s `syncRuntimeGraph` walks this
-  // renderer's mounted `PaneManager`s/DOM containers, which exist only in this
-  // process) — there is no contractual ordering guarantee between "pane just
-  // created" and "first keystroke" (slice 53 declined a pty migration over
-  // exactly this gap), so this must not be restructured or routed elsewhere.
-  // `getTerminalFitOverrides` and `getTerminalDrivers` hydrate local PTY
-  // arbitration state after renderer reload. `getBrowserDrivers` does the same
-  // for BrowserViews owned by this Electron process. `restoreTerminalFit`
-  // reclaims a local PTY addressed only by its opaque ptyId, while
-  // `reclaimBrowserForDesktop` reclaims a local BrowserView page id. These are
-  // data-plane ownership operations, not the connected runtime's status. The
-  // remote-terminal branch already uses `client.terminal.restoreFit` with its
-  // runtime handle before falling back to this local member.
-  runtime: {
-    syncWindowGraph: (graph: RuntimeSyncWindowGraph) => Promise<RuntimeSyncWindowGraphResult>
-    getTerminalFitOverrides: () => Promise<
-      { ptyId: string; mode: 'mobile-fit' | 'remote-desktop-fit'; cols: number; rows: number }[]
-    >
-    getTerminalDrivers: () => Promise<
-      {
-        ptyId: string
-        driver: RuntimeTerminalDriverState
-      }[]
-    >
-    getBrowserDrivers: () => Promise<
-      {
-        browserPageId: string
-        driver: RuntimeBrowserDriverState
-      }[]
-    >
-    restoreTerminalFit: (ptyId: string) => Promise<{ restored: boolean }>
-    reclaimBrowserForDesktop: (browserPageId: string) => Promise<{ reclaimed: boolean }>
   }
   // Why: shell-only by construction — this group IS the transport, not a
   // capability a runtime could provide. `list`/`resolve`/`remove`/
@@ -1870,55 +1082,6 @@ export type PreloadApi = {
       }
     ) => Promise<unknown>
   }
-  // Why: shell-only, same test as `speech`'s OpenAI key methods (切片 20) —
-  // the session cookie is Electron `safeStorage`-encrypted (falls back to a
-  // sniffed plaintext envelope) into a machine-bound
-  // `~/.yiru/minimax-session-cookie.enc`. A secret bound to this OS
-  // keychain is not a routable host concept.
-  minimaxCredentials: {
-    getStatus: () => Promise<{ configured: boolean }>
-    saveCookie: (cookie: string) => Promise<{ configured: boolean }>
-    clearCookie: () => Promise<{ configured: boolean }>
-  }
-  // Why: list/listRuns/create/update/delete/runNow migrated onto the
-  // `automation.*` oRPC contract (packages/runtime-protocol/src/contract/
-  // automations.ts) — `automation.runs` covers `listRuns` under a renamed
-  // member, everything else kept its name. listExternalManagers/
-  // listExternalRuns/createExternal/updateExternal/runExternalAction/
-  // snapshotWorkspaceName migrated the same way onto `automation-
-  // external.ts`'s members. Every renderer caller now goes through
-  // `renderer/components/automations/automation-host-client.ts`'s
-  // `callRuntimeOrpc`-backed helpers for both local and remote targets — this
-  // preload group no longer carries any of them (2026-08-08, this slice).
-  // `create`'s `projectId`/`workspaceId` looked like a contract gap (the
-  // contract only takes `repo`/`workspace`) but is a verified false positive:
-  // `YiruRuntime.createAutomation`/`updateAutomation` resolve
-  // `repo`/`workspace` into `projectId`/`workspaceId` via
-  // `resolveAutomationTarget` before calling the same `store.createAutomation`
-  // the old IPC handler called directly — a remodeling, not a dropped field.
-  automations: {
-    // Why: runPrecheck only ever runs inside the local dispatch handshake
-    // below — the precheck execution target (main/automations/
-    // precheck-runner.ts) is `{type:'local'}` only, resolved against this
-    // same process's store. It never executes for a remote host, so it stays
-    // local-dispatch machinery rather than a Phase 4 target; see
-    // markDispatchResult below.
-    runPrecheck: (args: {
-      automationId: string
-      runId: string
-    }) => Promise<AutomationPrecheckResult | null>
-    // Why: local IPC mechanics — markDispatchResult/rendererReady report a
-    // dispatch outcome back to the machine that just ran it, not a host
-    // capability an independent client calls, so they stay off the
-    // `automation.*` oRPC contract (Phase 5 slice S5). The dispatch *request*
-    // that used to pair with these over `onDispatchRequested` now arrives as
-    // the reverse `shellServices.automations.dispatch` call instead (see
-    // renderer/components/automations/use-automation-dispatch-events.ts and
-    // main/automations/service.ts `requestDispatch`) — this preload surface
-    // no longer carries it.
-    markDispatchResult: (result: AutomationDispatchResult) => Promise<AutomationRun>
-    rendererReady: () => Promise<void>
-  }
   // Why: already-covered, verified against `contract/host-capabilities.ts` —
   // `host.wsl.isAvailable`/`listDistros`, `host.pwsh.isAvailable`,
   // `host.gitBash.isAvailable` call the exact same `isWslAvailable`/
@@ -1929,52 +1092,4 @@ export type PreloadApi = {
   // 'local'` branch — collapsing that local branch (as `memory-state.ts`'s
   // `diagnostics.memory` call now does for both targets) is separate Phase 5
   // work, not yet done for this group.
-  /**
-   * shell-only: listNetworkInterfaces/getPairingQR/listDevices/revokeDevice/
-   * isWebSocketReady moved to the `mobile.*` oRPC contract
-   * (mobile-host-pairing.ts) — they describe a runtime host's own reachable
-   * addresses and device registry, not this shell. The three members left
-   * here inspect/repair the Windows Defender Firewall on the machine running
-   * this Electron shell, an OS-level operation with no runtime-host meaning.
-   */
-  mobile: {
-    getWindowsFirewallStatus: (args?: { address?: string }) => Promise<
-      | { supported: false }
-      | {
-          supported: true
-          port: number
-          ruleAllowed: boolean
-          blockingRuleDetected: boolean
-          privateFirewallEnabled: boolean
-          networkCategory: 'private' | 'public' | 'domain' | 'unknown'
-          inspectionAvailable: boolean
-        }
-    >
-    repairWindowsFirewall: () => Promise<
-      { ok: true } | { ok: false; reason: 'cancelled' | 'failed' | 'unsupported' }
-    >
-    openWindowsNetworkSettings: () => Promise<boolean>
-  }
-  // Why: catalog reads, model download/delete, and OpenAI-key management
-  // moved to the `speech.models.*`/`speech.openaiKey.*` runtime contract —
-  // host-CRUD with no per-client identity, the same shape mobile already
-  // drives remotely (see `main/runtime/yiru-runtime.ts`'s
-  // `listMobileSpeechModels`/`downloadMobileSpeechModel`/
-  // `deleteMobileSpeechModel`/`getSpeechOpenAiKeyStatus` family and
-  // `dictation/state.ts`'s `refreshModelStates`, which now calls
-  // `speech.models.list` on the local target instead of this preload).
-  // `cancelDownload` (formerly here) had zero renderer callers and was
-  // dropped rather than migrated — `model-manager.ts`'s own
-  // `cancelDownload` stays, just no longer preload-exposed.
-  // What's left below is genuinely shell-only: microphone capture is local
-  // (getUserMedia -> preload -> main). Its lifecycle events now use
-  // `speech.events.subscribe`; the 16kHz audio feed does not.
-  // Model-download progress/failure now comes off the shared
-  // `speech.events.subscribe` stream instead (`speech-events-client.ts`),
-  // since that part of the flow has no per-client identity either.
-  speech: {
-    // Why: microphone permission belongs to the shell. Dictation lifecycle and
-    // audio chunks use `speech.dictation.*` on the selected runtime host.
-    ensureMicrophoneAccess: () => Promise<void>
-  }
 }

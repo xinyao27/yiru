@@ -2,6 +2,7 @@ import { useAppStore } from '~renderer/store'
 
 import { callRuntimeOrpc, isWebRuntimeClient } from './orpc-client'
 import { getActiveRuntimeTarget } from './rpc-client'
+import { shellClient } from './shell-client'
 
 function activeTarget() {
   return getActiveRuntimeTarget(useAppStore.getState().settings)
@@ -24,7 +25,7 @@ function encodePcm16(samples: Float32Array): string {
 
 export async function startRuntimeDictation(modelId: string, dictationId: string): Promise<void> {
   if (!isWebRuntimeClient()) {
-    await window.api.speech.ensureMicrophoneAccess()
+    await shellClient.speech.ensureMicrophoneAccess()
   }
   await callRuntimeOrpc(
     activeTarget(),

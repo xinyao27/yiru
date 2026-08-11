@@ -5,7 +5,7 @@ import { basename, dirname, extname, isAbsolute, join, normalize, resolve, sep }
 import { pipeline } from 'node:stream/promises'
 
 /* eslint-disable max-lines */
-import { app, BrowserWindow, dialog, ipcMain, nativeImage } from 'electron'
+import { app, BrowserWindow, dialog, nativeImage } from 'electron'
 import { z } from 'zod'
 import type { CustomPet } from '~shared/types'
 
@@ -191,289 +191,289 @@ async function isSymlink(path: string): Promise<boolean> {
   }
 }
 
-export function registerPetHandlers(): void {
-  ipcMain.handle('pet:import', async (event): Promise<CustomPet | null> => {
-    const senderWindow =
-      BrowserWindow.fromWebContents(event.sender) ?? BrowserWindow.getFocusedWindow()
-    const options: Electron.OpenDialogOptions = {
-      title: 'Pick pet',
-      properties: ['openFile'],
-      // Why: single filter and no `apng` extension. macOS file dialogs map
-      // filter extensions to UTIs; `apng` has no registered UTI, so including
-      // it can drop sibling extensions (notably `webp`) from the allowed set.
-      // APNG files carry the `.png` extension and are detected from magic
-      // bytes by the browser.
-      filters: [
-        {
-          name: 'Pet image',
-          extensions: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg']
-        }
-      ]
-    }
-    const result = senderWindow
-      ? await dialog.showOpenDialog(senderWindow, options)
-      : await dialog.showOpenDialog(options)
-    if (result.canceled || result.filePaths.length === 0) {
-      return null
-    }
-    const src = result.filePaths[0]
-    const classified = classifyFile(src)
-    if (!classified) {
-      throw new Error('Unsupported file. Pick a PNG, APNG, JPG, GIF, WebP, or SVG.')
-    }
-    let srcStat: Awaited<ReturnType<typeof stat>>
-    try {
-      srcStat = await stat(src)
-    } catch {
-      throw new Error('Could not read the selected file.')
-    }
-    if (!srcStat.isFile()) {
-      throw new Error('Selected path is not a file')
-    }
-    if (srcStat.size > MAX_BYTES) {
-      throw new Error(
-        `File is too large (${(srcStat.size / (1024 * 1024)).toFixed(1)} MB). Max is ${MAX_BYTES / (1024 * 1024)} MB.`
-      )
-    }
-
-    const dir = getPetsDir()
-    await mkdir(dir, { recursive: true })
-    const id = randomUUID()
-    // Why: preserve original extension in the on-disk name so pet:read can
-    // rebuild the right Blob MIME via resolvePetFile without a separate
-    // lookup. The extension is only ever written by main (never the renderer).
-    const fileName = `${id}${classified.ext}`
-    const dest = join(dir, fileName)
-    try {
-      await copyFile(src, dest)
-    } catch {
-      await rm(dest, { force: true }).catch(() => {})
-      throw new Error('Could not save the pet.')
-    }
-
-    const rawLabel = basename(src, extname(src)).trim()
-    const label = rawLabel.length > 0 ? rawLabel.slice(0, 40) : 'Custom pet'
-    return {
-      id,
-      label,
-      fileName,
-      mimeType: classified.mimeType,
-      kind: 'image'
-    }
-  })
-
-  ipcMain.handle('pet:importPetBundle', async (event): Promise<CustomPet | null> => {
-    const senderWindow =
-      BrowserWindow.fromWebContents(event.sender) ?? BrowserWindow.getFocusedWindow()
-    // Why: the bundle is a folder. macOS users may also pick `pet.json` itself
-    // when Finder is set to show package contents — the post-pick logic walks
-    // up to the parent directory in that case.
-    const options: Electron.OpenDialogOptions = {
-      title: 'Pick a .codex-pet bundle',
-      properties: ['openFile', 'openDirectory', 'treatPackageAsDirectory']
-    }
-    const result = senderWindow
-      ? await dialog.showOpenDialog(senderWindow, options)
-      : await dialog.showOpenDialog(options)
-    if (result.canceled || result.filePaths.length === 0) {
-      return null
-    }
-    const picked = result.filePaths[0]
-    let bundleDir: string
-    try {
-      const pickedStat = await stat(picked)
-      bundleDir = pickedStat.isDirectory() ? picked : dirname(picked)
-    } catch {
-      throw new Error('Could not read the selected path.')
-    }
-
-    const manifestPath = join(bundleDir, 'pet.json')
-    let manifestStat: Awaited<ReturnType<typeof stat>>
-    try {
-      manifestStat = await stat(manifestPath)
-    } catch {
-      throw new Error('Bundle is missing pet.json.')
-    }
-    if (!manifestStat.isFile() || manifestStat.size > MAX_MANIFEST_BYTES) {
-      throw new Error('pet.json is invalid.')
-    }
-    if (await isSymlink(manifestPath)) {
-      throw new Error('pet.json must not be a symlink.')
-    }
-
-    let manifest: ResolvedPetManifest<PetManifest>
-    try {
-      const raw = await readFile(manifestPath, 'utf8')
-      // Why: defend against TOCTOU between stat and read — the file could have
-      // grown after the stat check.
-      if (Buffer.byteLength(raw, 'utf8') > MAX_MANIFEST_BYTES) {
-        throw new Error('pet.json exceeded the manifest size limit.')
+export function getShellPetService() {
+  return {
+    import: async (parentWindow: BrowserWindow | null): Promise<CustomPet | null> => {
+      const senderWindow = parentWindow ?? BrowserWindow.getFocusedWindow()
+      const options: Electron.OpenDialogOptions = {
+        title: 'Pick pet',
+        properties: ['openFile'],
+        // Why: single filter and no `apng` extension. macOS file dialogs map
+        // filter extensions to UTIs; `apng` has no registered UTI, so including
+        // it can drop sibling extensions (notably `webp`) from the allowed set.
+        // APNG files carry the `.png` extension and are detected from magic
+        // bytes by the browser.
+        filters: [
+          {
+            name: 'Pet image',
+            extensions: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg']
+          }
+        ]
       }
-      manifest = applyCodexPetDefaults(PetManifestSchema.parse(JSON.parse(raw)))
-    } catch (error) {
-      throw new Error(`Invalid pet.json: ${error instanceof Error ? error.message : 'parse error'}`)
-    }
-
-    // Why: spritesheetPath is bundle-relative. Codex pet.json files omit this
-    // path and use a fixed `spritesheet.webp`; applyCodexPetDefaults fills
-    // that shape before path validation. Reject absolute paths and any resolved
-    // path that escapes the bundle directory. Also reject symlinks so a
-    // malicious bundle can't reach outside via a sibling link.
-    const normalizedSpritePath = manifest.spritesheetPath.replace(/[\\/]+/g, sep)
-    if (
-      isAbsolute(manifest.spritesheetPath) ||
-      isAbsolute(normalizedSpritePath) ||
-      /^[a-zA-Z]:/.test(manifest.spritesheetPath)
-    ) {
-      throw new Error('spritesheetPath must be relative to the bundle.')
-    }
-    // Why: pet bundles may be exported on Windows and imported on macOS/Linux;
-    // normalize manifest separators before Node resolves the bundle-relative path.
-    const sheetSrc = resolve(bundleDir, normalizedSpritePath)
-    const bundleResolved = resolve(bundleDir)
-    if (sheetSrc === bundleResolved) {
-      throw new Error('spritesheetPath must point to a file, not the bundle root.')
-    }
-    const bundleRoot = bundleResolved + sep
-    // Why: NTFS/macOS HFS+ default volumes are case-insensitive — a path like
-    // `BUNDLE\sheet.png` is still inside `bundle\`. Compare lowercased on
-    // Windows so the prefix check isn't bypassed by case differences.
-    const cmp = process.platform === 'win32' ? (s: string) => s.toLowerCase() : (s: string) => s
-    if (!cmp(sheetSrc + sep).startsWith(cmp(bundleRoot))) {
-      throw new Error('spritesheetPath escapes the bundle.')
-    }
-    if (await isSymlink(sheetSrc)) {
-      throw new Error('spritesheet must not be a symlink.')
-    }
-    const sheetClass = classifyFile(sheetSrc)
-    if (!sheetClass || sheetClass.ext === '.svg') {
-      // SVG can't be used as a sprite sheet (no pixel grid).
-      throw new Error('Spritesheet must be a PNG, APNG, JPG, GIF, or WebP.')
-    }
-    let sheetStat: Awaited<ReturnType<typeof stat>>
-    try {
-      sheetStat = await stat(sheetSrc)
-    } catch {
-      throw new Error('Spritesheet file not found.')
-    }
-    if (!sheetStat.isFile()) {
-      throw new Error('Spritesheet path is not a file.')
-    }
-    if (sheetStat.size > MAX_BYTES) {
-      throw new Error(
-        `Spritesheet is too large (${(sheetStat.size / (1024 * 1024)).toFixed(1)} MB).`
-      )
-    }
-
-    let sprite: NonNullable<CustomPet['sprite']> | undefined
-    if (manifest.frame) {
-      // Why: only decode the sheet when we need to validate frame layout.
-      // nativeImage may fail on some WebP variants in headless contexts, and
-      // bundles without `frame` render as a static image where dimensions
-      // don't matter.
-      const sheetBuf = await readFile(sheetSrc)
-      // Why: defend against TOCTOU — file may have grown between stat and read.
-      if (sheetBuf.byteLength > MAX_BYTES) {
-        throw new Error('Spritesheet exceeded the size limit.')
+      const result = senderWindow
+        ? await dialog.showOpenDialog(senderWindow, options)
+        : await dialog.showOpenDialog(options)
+      if (result.canceled || result.filePaths.length === 0) {
+        return null
       }
-      const dims = await readSheetDimensions(sheetBuf)
-      if (!dims) {
-        throw new Error('Could not decode the spritesheet image.')
+      const src = result.filePaths[0]
+      const classified = classifyFile(src)
+      if (!classified) {
+        throw new Error('Unsupported file. Pick a PNG, APNG, JPG, GIF, WebP, or SVG.')
       }
-      const { width: fw, height: fh } = manifest.frame
-      if (dims.width % fw !== 0 || dims.height % fh !== 0) {
+      let srcStat: Awaited<ReturnType<typeof stat>>
+      try {
+        srcStat = await stat(src)
+      } catch {
+        throw new Error('Could not read the selected file.')
+      }
+      if (!srcStat.isFile()) {
+        throw new Error('Selected path is not a file')
+      }
+      if (srcStat.size > MAX_BYTES) {
         throw new Error(
-          `Spritesheet ${dims.width}×${dims.height} is not a clean multiple of frame ${fw}×${fh}.`
+          `File is too large (${(srcStat.size / (1024 * 1024)).toFixed(1)} MB). Max is ${MAX_BYTES / (1024 * 1024)} MB.`
         )
       }
-      const columns = dims.width / fw
-      const rows = dims.height / fh
-      if (manifest.animations) {
-        for (const [name, anim] of Object.entries(manifest.animations)) {
-          if (anim.row >= rows) {
-            throw new Error(`Animation "${name}" references row ${anim.row} but sheet has ${rows}.`)
+
+      const dir = getPetsDir()
+      await mkdir(dir, { recursive: true })
+      const id = randomUUID()
+      // Why: preserve original extension in the on-disk name so pet:read can
+      // rebuild the right Blob MIME via resolvePetFile without a separate
+      // lookup. The extension is only ever written by main (never the renderer).
+      const fileName = `${id}${classified.ext}`
+      const dest = join(dir, fileName)
+      try {
+        await copyFile(src, dest)
+      } catch {
+        await rm(dest, { force: true }).catch(() => {})
+        throw new Error('Could not save the pet.')
+      }
+
+      const rawLabel = basename(src, extname(src)).trim()
+      const label = rawLabel.length > 0 ? rawLabel.slice(0, 40) : 'Custom pet'
+      return {
+        id,
+        label,
+        fileName,
+        mimeType: classified.mimeType,
+        kind: 'image'
+      }
+    },
+
+    importPetBundle: async (parentWindow: BrowserWindow | null): Promise<CustomPet | null> => {
+      const senderWindow = parentWindow ?? BrowserWindow.getFocusedWindow()
+      // Why: the bundle is a folder. macOS users may also pick `pet.json` itself
+      // when Finder is set to show package contents — the post-pick logic walks
+      // up to the parent directory in that case.
+      const options: Electron.OpenDialogOptions = {
+        title: 'Pick a .codex-pet bundle',
+        properties: ['openFile', 'openDirectory', 'treatPackageAsDirectory']
+      }
+      const result = senderWindow
+        ? await dialog.showOpenDialog(senderWindow, options)
+        : await dialog.showOpenDialog(options)
+      if (result.canceled || result.filePaths.length === 0) {
+        return null
+      }
+      const picked = result.filePaths[0]
+      let bundleDir: string
+      try {
+        const pickedStat = await stat(picked)
+        bundleDir = pickedStat.isDirectory() ? picked : dirname(picked)
+      } catch {
+        throw new Error('Could not read the selected path.')
+      }
+
+      const manifestPath = join(bundleDir, 'pet.json')
+      let manifestStat: Awaited<ReturnType<typeof stat>>
+      try {
+        manifestStat = await stat(manifestPath)
+      } catch {
+        throw new Error('Bundle is missing pet.json.')
+      }
+      if (!manifestStat.isFile() || manifestStat.size > MAX_MANIFEST_BYTES) {
+        throw new Error('pet.json is invalid.')
+      }
+      if (await isSymlink(manifestPath)) {
+        throw new Error('pet.json must not be a symlink.')
+      }
+
+      let manifest: ResolvedPetManifest<PetManifest>
+      try {
+        const raw = await readFile(manifestPath, 'utf8')
+        // Why: defend against TOCTOU between stat and read — the file could have
+        // grown after the stat check.
+        if (Buffer.byteLength(raw, 'utf8') > MAX_MANIFEST_BYTES) {
+          throw new Error('pet.json exceeded the manifest size limit.')
+        }
+        manifest = applyCodexPetDefaults(PetManifestSchema.parse(JSON.parse(raw)))
+      } catch (error) {
+        throw new Error(
+          `Invalid pet.json: ${error instanceof Error ? error.message : 'parse error'}`
+        )
+      }
+
+      // Why: spritesheetPath is bundle-relative. Codex pet.json files omit this
+      // path and use a fixed `spritesheet.webp`; applyCodexPetDefaults fills
+      // that shape before path validation. Reject absolute paths and any resolved
+      // path that escapes the bundle directory. Also reject symlinks so a
+      // malicious bundle can't reach outside via a sibling link.
+      const normalizedSpritePath = manifest.spritesheetPath.replace(/[\\/]+/g, sep)
+      if (
+        isAbsolute(manifest.spritesheetPath) ||
+        isAbsolute(normalizedSpritePath) ||
+        /^[a-zA-Z]:/.test(manifest.spritesheetPath)
+      ) {
+        throw new Error('spritesheetPath must be relative to the bundle.')
+      }
+      // Why: pet bundles may be exported on Windows and imported on macOS/Linux;
+      // normalize manifest separators before Node resolves the bundle-relative path.
+      const sheetSrc = resolve(bundleDir, normalizedSpritePath)
+      const bundleResolved = resolve(bundleDir)
+      if (sheetSrc === bundleResolved) {
+        throw new Error('spritesheetPath must point to a file, not the bundle root.')
+      }
+      const bundleRoot = bundleResolved + sep
+      // Why: NTFS/macOS HFS+ default volumes are case-insensitive — a path like
+      // `BUNDLE\sheet.png` is still inside `bundle\`. Compare lowercased on
+      // Windows so the prefix check isn't bypassed by case differences.
+      const cmp = process.platform === 'win32' ? (s: string) => s.toLowerCase() : (s: string) => s
+      if (!cmp(sheetSrc + sep).startsWith(cmp(bundleRoot))) {
+        throw new Error('spritesheetPath escapes the bundle.')
+      }
+      if (await isSymlink(sheetSrc)) {
+        throw new Error('spritesheet must not be a symlink.')
+      }
+      const sheetClass = classifyFile(sheetSrc)
+      if (!sheetClass || sheetClass.ext === '.svg') {
+        // SVG can't be used as a sprite sheet (no pixel grid).
+        throw new Error('Spritesheet must be a PNG, APNG, JPG, GIF, or WebP.')
+      }
+      let sheetStat: Awaited<ReturnType<typeof stat>>
+      try {
+        sheetStat = await stat(sheetSrc)
+      } catch {
+        throw new Error('Spritesheet file not found.')
+      }
+      if (!sheetStat.isFile()) {
+        throw new Error('Spritesheet path is not a file.')
+      }
+      if (sheetStat.size > MAX_BYTES) {
+        throw new Error(
+          `Spritesheet is too large (${(sheetStat.size / (1024 * 1024)).toFixed(1)} MB).`
+        )
+      }
+
+      let sprite: NonNullable<CustomPet['sprite']> | undefined
+      if (manifest.frame) {
+        // Why: only decode the sheet when we need to validate frame layout.
+        // nativeImage may fail on some WebP variants in headless contexts, and
+        // bundles without `frame` render as a static image where dimensions
+        // don't matter.
+        const sheetBuf = await readFile(sheetSrc)
+        // Why: defend against TOCTOU — file may have grown between stat and read.
+        if (sheetBuf.byteLength > MAX_BYTES) {
+          throw new Error('Spritesheet exceeded the size limit.')
+        }
+        const dims = await readSheetDimensions(sheetBuf)
+        if (!dims) {
+          throw new Error('Could not decode the spritesheet image.')
+        }
+        const { width: fw, height: fh } = manifest.frame
+        if (dims.width % fw !== 0 || dims.height % fh !== 0) {
+          throw new Error(
+            `Spritesheet ${dims.width}×${dims.height} is not a clean multiple of frame ${fw}×${fh}.`
+          )
+        }
+        const columns = dims.width / fw
+        const rows = dims.height / fh
+        if (manifest.animations) {
+          for (const [name, anim] of Object.entries(manifest.animations)) {
+            if (anim.row >= rows) {
+              throw new Error(
+                `Animation "${name}" references row ${anim.row} but sheet has ${rows}.`
+              )
+            }
+            if (anim.frames > columns) {
+              throw new Error(
+                `Animation "${name}" has ${anim.frames} frames but sheet only has ${columns} columns.`
+              )
+            }
+            if (anim.frameDurationsMs && anim.frameDurationsMs.length !== anim.frames) {
+              throw new Error(
+                `Animation "${name}" declares ${anim.frameDurationsMs.length} frame durations but ${anim.frames} frames.`
+              )
+            }
           }
-          if (anim.frames > columns) {
-            throw new Error(
-              `Animation "${name}" has ${anim.frames} frames but sheet only has ${columns} columns.`
-            )
-          }
-          if (anim.frameDurationsMs && anim.frameDurationsMs.length !== anim.frames) {
-            throw new Error(
-              `Animation "${name}" declares ${anim.frameDurationsMs.length} frame durations but ${anim.frames} frames.`
-            )
+          if (manifest.defaultAnimation && !manifest.animations[manifest.defaultAnimation]) {
+            throw new Error(`defaultAnimation "${manifest.defaultAnimation}" not in animations.`)
           }
         }
-        if (manifest.defaultAnimation && !manifest.animations[manifest.defaultAnimation]) {
-          throw new Error(`defaultAnimation "${manifest.defaultAnimation}" not in animations.`)
+        sprite = {
+          frameWidth: fw,
+          frameHeight: fh,
+          columns,
+          rows,
+          sheetWidth: dims.width,
+          sheetHeight: dims.height,
+          fps: manifest.fps ?? 8,
+          defaultAnimation: manifest.defaultAnimation,
+          animations: manifest.animations
         }
       }
-      sprite = {
-        frameWidth: fw,
-        frameHeight: fh,
-        columns,
-        rows,
-        sheetWidth: dims.width,
-        sheetHeight: dims.height,
-        fps: manifest.fps ?? 8,
-        defaultAnimation: manifest.defaultAnimation,
-        animations: manifest.animations
+
+      // Why: storage id is always a fresh UUID — the manifest's `id` is purely
+      // a display hint. This guards against (a) collisions with bundled
+      // pet ids, (b) failing isSafeId, and (c) re-import clobbering an
+      // earlier copy of the same bundle.
+      const id = randomUUID()
+      const root = getPetsDir()
+      await mkdir(root, { recursive: true })
+      const destDir = join(root, id)
+      const sheetExt = sheetClass.ext
+      const sheetFileName = `spritesheet${sheetExt}`
+      // Why: stage the bundle into a sibling .tmp directory and atomically rename
+      // into place so destDir only appears once both files are written. Avoids
+      // half-imported bundles if a copy fails midway.
+      const tmpDir = `${destDir}.tmp`
+      try {
+        await rm(tmpDir, { recursive: true, force: true }).catch(() => {})
+        await mkdir(tmpDir, { recursive: true })
+        await copyFileNoFollow(sheetSrc, join(tmpDir, sheetFileName))
+        await copyFileNoFollow(manifestPath, join(tmpDir, 'pet.json'))
+        await rename(tmpDir, destDir)
+      } catch {
+        await rm(tmpDir, { recursive: true, force: true }).catch(() => {})
+        throw new Error('Could not save the pet bundle.')
       }
-    }
 
-    // Why: storage id is always a fresh UUID — the manifest's `id` is purely
-    // a display hint. This guards against (a) collisions with bundled
-    // pet ids, (b) failing isSafeId, and (c) re-import clobbering an
-    // earlier copy of the same bundle.
-    const id = randomUUID()
-    const root = getPetsDir()
-    await mkdir(root, { recursive: true })
-    const destDir = join(root, id)
-    const sheetExt = sheetClass.ext
-    const sheetFileName = `spritesheet${sheetExt}`
-    // Why: stage the bundle into a sibling .tmp directory and atomically rename
-    // into place so destDir only appears once both files are written. Avoids
-    // half-imported bundles if a copy fails midway.
-    const tmpDir = `${destDir}.tmp`
-    try {
-      await rm(tmpDir, { recursive: true, force: true }).catch(() => {})
-      await mkdir(tmpDir, { recursive: true })
-      await copyFileNoFollow(sheetSrc, join(tmpDir, sheetFileName))
-      await copyFileNoFollow(manifestPath, join(tmpDir, 'pet.json'))
-      await rename(tmpDir, destDir)
-    } catch {
-      await rm(tmpDir, { recursive: true, force: true }).catch(() => {})
-      throw new Error('Could not save the pet bundle.')
-    }
+      const rawLabel = (manifest.displayName ?? manifest.id ?? basename(bundleDir)).trim()
+      const label = rawLabel.length > 0 ? rawLabel.slice(0, 40) : 'Pet bundle'
+      return {
+        id,
+        label,
+        fileName: sheetFileName,
+        mimeType: sheetClass.mimeType,
+        kind: 'bundle',
+        sprite,
+        // Why: carries manifest.fps for detected-frame bundles where `sprite`
+        // is undefined — renderer falls back to this when sprite is absent.
+        ...(manifest.fps !== undefined ? { spriteFps: manifest.fps } : {})
+      }
+    },
 
-    const rawLabel = (manifest.displayName ?? manifest.id ?? basename(bundleDir)).trim()
-    const label = rawLabel.length > 0 ? rawLabel.slice(0, 40) : 'Pet bundle'
-    return {
-      id,
-      label,
-      fileName: sheetFileName,
-      mimeType: sheetClass.mimeType,
-      kind: 'bundle',
-      sprite,
-      // Why: carries manifest.fps for detected-frame bundles where `sprite`
-      // is undefined — renderer falls back to this when sprite is absent.
-      ...(manifest.fps !== undefined ? { spriteFps: manifest.fps } : {})
-    }
-  })
-
-  ipcMain.handle(
-    'pet:read',
-    async (
-      _event,
-      id: string,
-      fileName: string,
+    read: async (args: {
+      id: string
+      fileName: string
       kind?: 'image' | 'bundle'
-    ): Promise<ArrayBuffer | null> => {
+    }): Promise<ArrayBuffer | null> => {
       // Why: validate IPC inputs before any path logic — renderer is not
       // trusted to send strings of the right shape.
       let parsed: z.infer<typeof PetFileRequestSchema>
       try {
-        parsed = PetFileRequestSchema.parse({ id, fileName, kind })
+        parsed = PetFileRequestSchema.parse(args)
       } catch {
         throw new Error('Invalid pet:read arguments')
       }
@@ -490,16 +490,17 @@ export function registerPetHandlers(): void {
         console.warn('[pet-overlay] pet:read failed', error)
         return null
       }
-    }
-  )
+    },
 
-  ipcMain.handle(
-    'pet:delete',
-    async (_event, id: string, fileName: string, kind?: 'image' | 'bundle'): Promise<void> => {
+    delete: async (args: {
+      id: string
+      fileName: string
+      kind?: 'image' | 'bundle'
+    }): Promise<void> => {
       // Why: validate IPC inputs before any path logic.
       let parsed: z.infer<typeof PetFileRequestSchema>
       try {
-        parsed = PetFileRequestSchema.parse({ id, fileName, kind })
+        parsed = PetFileRequestSchema.parse(args)
       } catch {
         throw new Error('Invalid pet:delete arguments')
       }
@@ -532,5 +533,5 @@ export function registerPetHandlers(): void {
         console.warn('[pet-overlay] pet:delete failed', error)
       }
     }
-  )
+  }
 }

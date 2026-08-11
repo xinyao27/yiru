@@ -2,6 +2,7 @@
 // without importing usePetUrl (which itself imports the store). Keeps
 // the dependency graph acyclic.
 
+import { shellClient } from './shell-client'
 import { detectFramesFromImageData, type DetectedFrame } from './sprite-frame-detection'
 
 // Why: sandbox=true + webSecurity=true block the renderer from reading user
@@ -122,7 +123,7 @@ async function loadCustomBlobUrlUncached(
   // Why: defensively clear any stale entry so we don't leak a prior blob URL
   // or ImageBitmap[] when re-populating after a cache miss.
   clearCustomPetBlobCacheEntry(id)
-  const buffer = await window.api.pet.read(id, fileName, kind)
+  const buffer = await shellClient.pet.read(id, fileName, kind)
   if (!buffer) {
     return null
   }

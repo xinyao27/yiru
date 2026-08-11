@@ -13,14 +13,14 @@ import { X } from '@phosphor-icons/react'
 // Three actions, two semantics:
 //   - "Got it" and the ✕ in the corner → silent acknowledge. Both persist
 //     `optedIn: true`, fire no opt-in event, route through
-//     `rendererHostClient.telemetryAcknowledgeBanner()` to a dedicated main-side
+//     `shellClient.telemetry.acknowledgeBanner()` to a dedicated main-side
 //     channel so no `via` derivation can tag this path. Two surfaces for
 //     the same action because the ✕ alone is easy to miss; "Got it" is
 //     the discoverable primary, ✕ is the keyboard/notification-style
 //     escape. Either way the user sees the notice, chooses not to
 //     intervene, and is opted in silently.
 //   - "Turn off" → explicit opt-out. Routes through
-//     `rendererHostClient.telemetrySetOptIn(false)`; main derives
+//     `shellClient.telemetry.setOptIn(false)`; main derives
 //     `via = 'first_launch_banner'` from the pre-mutation state
 //     (existedBeforeTelemetryRelease=true, optedIn=null, incoming=false)
 //     and fires `telemetry_opted_out { via: 'first_launch_banner' }`

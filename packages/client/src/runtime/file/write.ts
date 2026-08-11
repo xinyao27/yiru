@@ -10,7 +10,7 @@ import {
   getRuntimeFileWorktreeSelector,
   type RuntimeFileOperationArgs
 } from './context'
-import { getNativeFiles } from './native-files'
+import { shellFilesClient } from './shell-files'
 
 export async function writeRuntimeFile(
   context: RuntimeFileOperationArgs,
@@ -20,7 +20,7 @@ export async function writeRuntimeFile(
   const runtimeArgs = getRuntimeFileArgs(context, filePath)
   if (!runtimeArgs) {
     assertNativeFileFallbackAllowed(context)
-    await getNativeFiles().writeFile({ filePath, content, connectionId: context.connectionId })
+    await shellFilesClient.writeFile({ filePath, content, connectionId: context.connectionId })
     return
   }
   await callRuntimeOrpc(
@@ -40,8 +40,8 @@ export async function createRuntimePath(
   if (!runtimeArgs) {
     assertNativeFileFallbackAllowed(context)
     await (kind === 'directory'
-      ? getNativeFiles().createDir({ dirPath: path, connectionId: context.connectionId })
-      : getNativeFiles().createFile({ filePath: path, connectionId: context.connectionId }))
+      ? shellFilesClient.createDir({ dirPath: path, connectionId: context.connectionId })
+      : shellFilesClient.createFile({ filePath: path, connectionId: context.connectionId }))
     return
   }
   const input = { worktree: runtimeArgs.worktreeSelector, relativePath: runtimeArgs.relativePath }
@@ -63,7 +63,7 @@ export async function renameRuntimePath(
   const newRelativePath = getRelativePathInsideWorktree(context.worktreePath, newPath)
   if (!runtimeArgs || newRelativePath === null) {
     assertNativeFileFallbackAllowed(context)
-    await getNativeFiles().rename({ oldPath, newPath, connectionId: context.connectionId })
+    await shellFilesClient.rename({ oldPath, newPath, connectionId: context.connectionId })
     return
   }
   await callRuntimeOrpc(
@@ -87,7 +87,7 @@ export async function copyRuntimePath(
   const destinationArgs = getRuntimeFileArgs(context, destinationPath)
   if (!sourceArgs || !destinationArgs) {
     assertNativeFileFallbackAllowed(context)
-    await getNativeFiles().copy({
+    await shellFilesClient.copy({
       sourcePath,
       destinationPath,
       connectionId: context.connectionId
@@ -114,7 +114,7 @@ export async function deleteRuntimePath(
   const runtimeArgs = getRuntimeFileArgs(context, targetPath)
   if (!runtimeArgs) {
     assertNativeFileFallbackAllowed(context)
-    await getNativeFiles().deletePath({
+    await shellFilesClient.deletePath({
       targetPath,
       connectionId: context.connectionId,
       recursive

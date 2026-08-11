@@ -4,7 +4,7 @@ import { access } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import path from 'node:path'
 
-import { ipcMain, shell, systemPreferences } from 'electron'
+import { shell, systemPreferences } from 'electron'
 import type {
   DeveloperPermissionId,
   DeveloperPermissionRequestResult,
@@ -226,24 +226,15 @@ async function requestPermission(
   return { id, status: (await getPermissionState(id)).status, openedSystemSettings: true }
 }
 
-export function registerDeveloperPermissionHandlers(): void {
-  ipcMain.handle(
-    'developerPermissions:getStatus',
-    async (): Promise<DeveloperPermissionState[]> => {
-      return Promise.all(DEVELOPER_PERMISSION_IDS.map(getPermissionState))
-    }
-  )
+export function getShellDeveloperPermissionStatus(): Promise<DeveloperPermissionState[]> {
+  return Promise.all(DEVELOPER_PERMISSION_IDS.map(getPermissionState))
+}
 
-  ipcMain.handle(
-    'developerPermissions:request',
-    async (
-      _event,
-      args: { id: DeveloperPermissionId }
-    ): Promise<DeveloperPermissionRequestResult> => {
-      if (!DEVELOPER_PERMISSION_IDS.includes(args.id)) {
-        return { id: args.id, status: 'unsupported', openedSystemSettings: false }
-      }
-      return requestPermission(args.id)
-    }
-  )
+export function requestShellDeveloperPermission(
+  id: DeveloperPermissionId
+): Promise<DeveloperPermissionRequestResult> {
+  if (!DEVELOPER_PERMISSION_IDS.includes(id)) {
+    return Promise.resolve({ id, status: 'unsupported', openedSystemSettings: false })
+  }
+  return requestPermission(id)
 }

@@ -4,9 +4,8 @@ import {
 } from '@yiru/workbench-model/ui'
 import { translate } from '~renderer/i18n/i18n'
 
+import type { ShellUiApi } from './shell-ui-client'
 import { readWebUIState } from './web-ui-state'
-
-type WebShellUIApi = Omit<Window['api']['ui'], 'get' | 'set' | 'recordFeatureInteraction'>
 
 const noopUnsubscribe = (): void => {}
 
@@ -19,7 +18,7 @@ function unavailableSelectionClipboardError(): Error {
   )
 }
 
-function createWebShellUIApi(): WebShellUIApi {
+function createWebShellUIApi(): ShellUiApi {
   let zoomLevel = readWebUIState().uiZoomLevel
   return {
     readClipboardText: async (options) =>
@@ -52,7 +51,6 @@ function createWebShellUIApi(): WebShellUIApi {
     },
     isMaximized: () => Promise.resolve(false),
     onOpenSettings: () => noopUnsubscribe,
-    consumePendingOpenSettings: () => Promise.resolve(false),
     onOpenSetupGuide: () => noopUnsubscribe,
     onOpenFeatureTour: () => noopUnsubscribe,
     onOpenCrashReport: () => noopUnsubscribe,
@@ -108,9 +106,9 @@ function createWebShellUIApi(): WebShellUIApi {
   }
 }
 
-let webShellUIApi: WebShellUIApi | null = null
+let webShellUIApi: ShellUiApi | null = null
 
-export function getWebShellUIApi(): WebShellUIApi {
+export function getWebShellUIApi(): ShellUiApi {
   webShellUIApi ??= createWebShellUIApi()
   return webShellUIApi
 }

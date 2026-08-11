@@ -8,11 +8,7 @@ export function logRendererStartupDiagnostic(
   event: string,
   details: StartupDiagnosticDetails = {}
 ): void {
-  const api = window.api?.app
-  if (!api?.startupDiagnostic) {
-    return
-  }
-  void api
+  void shellClient.app
     .startupDiagnostic(`renderer-${event}`, {
       rendererT: nowMs(),
       ...details
@@ -67,3 +63,4 @@ export function timeRendererStartupSyncStep<T>(
     throw error
   }
 }
+import { shellClient } from '../runtime/shell-client'

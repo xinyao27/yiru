@@ -20,7 +20,7 @@ import { arch as osArch, platform as osPlatform, release as osRelease } from 'no
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
-import { app, dialog, ipcMain, shell } from 'electron'
+import { app, dialog, shell } from 'electron'
 
 import type { CollectedBundle } from '../observability/bundle'
 import { resolveDiagnosticYiruChannel } from '../observability/diagnostic-build-channel'
@@ -198,14 +198,10 @@ async function confirmBundleUpload(bundle: CollectedBundle): Promise<boolean> {
   return result.response === 0
 }
 
-export function registerDiagnosticsHandlers(): void {
-  ipcMain.handle('diagnostics:getStatus', (): DiagnosticsStatus => {
-    return getDiagnosticsStatus()
-  })
-
-  ipcMain.handle(
-    'diagnostics:collectBundle',
-    (_event, lookbackMinutesIn: unknown): DiagnosticsBundlePreview => {
+export function getShellDiagnosticsService() {
+  return {
+    getStatus: (): DiagnosticsStatus => getDiagnosticsStatus(),
+    collectBundle: (lookbackMinutesIn?: number): DiagnosticsBundlePreview => {
       // Consent gate: main is the consent enforcement boundary; the
       // renderer-side button-hide is UX, not security. A compromised or
       // malicious renderer must not be able to assemble a bundle when the
@@ -231,12 +227,8 @@ export function registerDiagnosticsHandlers(): void {
       })
       rememberBundle(bundle)
       return toBundlePreview(bundle)
-    }
-  )
-
-  ipcMain.handle(
-    'diagnostics:uploadBundle',
-    async (_event, bundleSubmissionId: unknown): Promise<UploadBundleIpcResult> => {
+    },
+    uploadBundle: async (bundleSubmissionId: string): Promise<UploadBundleIpcResult> => {
       // Why: the renderer is in the threat model. Upload only a payload main
       // collected and retained for preview, never renderer-supplied bytes.
       const pendingForConfirmation = getPendingBundleForUpload(bundleSubmissionId)
@@ -275,22 +267,20 @@ export function registerDiagnosticsHandlers(): void {
         deletePendingBundle(bundle.bundleSubmissionId)
       }
       return { ticketId: result.reportId }
+    },
+    openBundlePreview: async (bundleSubmissionId: string): Promise<void> => {
+      const previewFilePath = getPendingPreviewFilePath(bundleSubmissionId)
+      const errorMessage = await shell.openPath(previewFilePath)
+      if (errorMessage) {
+        throw new Error('could not open review file')
+      }
+      const pending = pendingBundles.get(bundleSubmissionId)
+      if (pending) {
+        pending.previewOpened = true
+      }
+    },
+    discardBundlePreview: (bundleSubmissionId: string): void => {
+      discardPendingBundle(bundleSubmissionId)
     }
-  )
-
-  ipcMain.handle('diagnostics:openBundlePreview', async (_event, bundleSubmissionId: unknown) => {
-    const previewFilePath = getPendingPreviewFilePath(bundleSubmissionId)
-    const errorMessage = await shell.openPath(previewFilePath)
-    if (errorMessage) {
-      throw new Error('could not open review file')
-    }
-    const pending = pendingBundles.get(bundleSubmissionId as string)
-    if (pending) {
-      pending.previewOpened = true
-    }
-  })
-
-  ipcMain.handle('diagnostics:discardBundlePreview', (_event, bundleSubmissionId: unknown) => {
-    discardPendingBundle(bundleSubmissionId)
-  })
+  }
 }

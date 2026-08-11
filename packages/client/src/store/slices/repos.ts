@@ -30,6 +30,7 @@ import {
   getActiveRuntimeTarget
 } from '~renderer/runtime/rpc-client'
 import { runtimeEnvironmentsClient } from '~renderer/runtime/runtime-environments-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { setRuntimeUIState } from '~renderer/runtime/ui-client'
 import { workspaceHostClient } from '~renderer/runtime/workspace-host-client'
 import { toRuntimeWorktreeSelector } from '~renderer/runtime/worktree-selector'
@@ -278,7 +279,7 @@ async function warnIfProjectKnownInAnotherProfile(
   repo: Repo,
   activeYiruProfileId: string | null
 ): Promise<void> {
-  const findProjectProfiles = rendererHostClient.yiruProfiles?.findProjectProfiles
+  const findProjectProfiles = shellClient.yiruProfiles?.findProjectProfiles
   // Why: without a loaded active profile ID the scan cannot exclude the
   // current profile and would false-positive on the project just added.
   if (!findProjectProfiles || !activeYiruProfileId) {

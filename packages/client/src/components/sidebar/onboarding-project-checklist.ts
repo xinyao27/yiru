@@ -1,5 +1,5 @@
 import { track } from '~renderer/lib/telemetry'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import type { OnboardingState } from '~shared/types'
 
 export type OnboardingProjectChecklistItem = 'addedRepo' | 'addedFolder'
@@ -7,10 +7,10 @@ export type OnboardingProjectChecklistItem = 'addedRepo' | 'addedFolder'
 export async function markOnboardingProjectAdded(
   item: OnboardingProjectChecklistItem
 ): Promise<void> {
-  if (typeof window === 'undefined' || !rendererHostClient?.onboarding) {
+  if (typeof window === 'undefined') {
     return
   }
-  const onboarding = await rendererHostClient.onboarding.get().catch(() => null)
+  const onboarding = await shellClient.onboarding.get().catch(() => null)
   if (!onboarding || onboarding.checklist[item]) {
     return
   }
@@ -18,7 +18,7 @@ export async function markOnboardingProjectAdded(
   const checklist: Partial<OnboardingState['checklist']> = {}
   checklist[item] = true
   try {
-    await rendererHostClient.onboarding.update({ checklist })
+    await shellClient.onboarding.update({ checklist })
   } catch (err) {
     console.warn('[onboarding] Failed to update project checklist item:', err)
     return

@@ -18,6 +18,9 @@ import {
   setBrowserTabProfileViaShell
 } from './browser-tab-shell-requests'
 import { readMobileMarkdownTab, saveMobileMarkdownTab } from './mobile-markdown-bridge'
+import { shellClient } from './shell-client'
+import { electronShellPlatformApi, type ShellPlatformApi } from './shell-platform-client'
+import { shellSessionApi } from './shell-state-client'
 import { createTerminalTabViaShell } from './terminal-create-shell-request'
 import { mountTerminalTabViaShell } from './terminal-mount-shell-request'
 import { revealTerminalSessionViaShell } from './terminal-reveal-shell-request'
@@ -33,8 +36,8 @@ function isWebShell(): boolean {
   return (globalThis as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__ === true
 }
 
-function getShellApi(): Window['api']['shell'] {
-  return isWebShell() ? getWebShellApi() : window.api.shell
+function getShellApi(): ShellPlatformApi {
+  return isWebShell() ? getWebShellApi() : electronShellPlatformApi
 }
 
 export function mountShellServicesHandler(): void {
@@ -72,10 +75,10 @@ export function createShellServicesRouter() {
     // reaches the real implementation in main/notifications/notifications.ts.
     notifications: {
       display: implementer.notifications.display.handler(({ input }) =>
-        window.api.notifications.displayNative(input)
+        shellClient.notifications.displayNative(input)
       ),
       dismiss: implementer.notifications.dismiss.handler(({ input }) =>
-        window.api.notifications.dismissNative(input.notificationIds)
+        shellClient.notifications.dismissNative(input.notificationIds)
       )
     },
     ui: {
@@ -100,7 +103,7 @@ export function createShellServicesRouter() {
           return { selections: await pickWebShellDirectories() }
         }
         const paths = input.allowMultiple
-          ? await window.api.repoHost.pickFolders()
+          ? await shellClient.repoHost.pickFolders()
           : [await getShellApi().pickDirectory({ defaultPath: input.defaultPath })].filter(
               (path): path is string => path !== null
             )
@@ -140,7 +143,7 @@ export function createShellServicesRouter() {
                 void (async () => {
                   const state = useAppStore.getState()
                   await persistWorkspaceSessionByHost(
-                    window.api.session,
+                    shellSessionApi,
                     buildWorkspaceSessionPayload(state),
                     state
                   )
