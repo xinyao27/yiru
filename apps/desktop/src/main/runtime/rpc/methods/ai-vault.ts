@@ -1,4 +1,5 @@
 import type { AiVaultListResult, AiVaultListSessionsInput } from '@yiru/runtime-protocol/ai-vault'
+import { listAiVaultSessions } from '~main/ai-vault/ai-vault'
 import { restampAiVaultListResult } from '~main/ai-vault/session/list-results'
 
 import type { RpcContext } from '../core'
@@ -13,6 +14,14 @@ export async function listRuntimeAiVaultSessions(
   params: AiVaultListSessionsInput,
   { runtime }: RpcContext
 ): Promise<AiVaultListResult> {
+  if (params.executionHostScope) {
+    return listAiVaultSessions({
+      limit: params.limit,
+      force: params.force,
+      scopePaths: params.scopePaths,
+      executionHostScope: params.executionHostScope
+    })
+  }
   const result = await runtime.listAiVaultSessions({
     limit: params.limit,
     force: params.force,

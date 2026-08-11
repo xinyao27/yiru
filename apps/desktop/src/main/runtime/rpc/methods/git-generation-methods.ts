@@ -71,10 +71,7 @@ export const handleGitGenerateCommitMessage = (
   { gitCommands }: RpcContext
 ) => {
   const override = buildCommitMessageGenerationOverride(params)
-  if (override === undefined) {
-    return gitCommands.generateRuntimeCommitMessage(params.worktree)
-  }
-  return gitCommands.generateRuntimeCommitMessage(params.worktree, override)
+  return gitCommands.generateRuntimeCommitMessage(params.worktree, override, params.repoId)
 }
 
 export const handleGitDiscoverCommitMessageModels = (
@@ -107,10 +104,12 @@ export const handleGitGeneratePullRequestFields = (
     useTemplate: params.useTemplate
   }
   const override = buildCommitMessageGenerationOverride(params)
-  if (override === undefined) {
-    return gitCommands.generateRuntimePullRequestFields(params.worktree, input)
-  }
-  return gitCommands.generateRuntimePullRequestFields(params.worktree, input, override)
+  return gitCommands.generateRuntimePullRequestFields(
+    params.worktree,
+    input,
+    override,
+    params.repoId
+  )
 }
 
 export const handleGitCancelGeneratePullRequestFields = (

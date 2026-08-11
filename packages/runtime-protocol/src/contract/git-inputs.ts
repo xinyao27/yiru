@@ -26,11 +26,16 @@ export const GitWorktreeSelectorInputSchema = z.object({
 export const GitStatusInputSchema = GitWorktreeSelectorInputSchema.extend({
   includeIgnored: z.boolean().optional(),
   bypassEffectiveUpstreamNegativeCache: z.boolean().optional(),
-  reuseLineStats: z.boolean().optional()
+  reuseLineStats: z.boolean().optional(),
+  requestToken: z.string().min(1, 'Missing request token').optional()
 })
 
 export const GitCheckIgnoredInputSchema = GitWorktreeSelectorInputSchema.extend({
   paths: z.array(z.string().min(1, 'Missing path')).max(2000)
+})
+
+export const GitAppendGitignoreInputSchema = GitWorktreeSelectorInputSchema.extend({
+  folderName: requiredString('Missing folder name')
 })
 
 export const GitSubmoduleStatusInputSchema = GitWorktreeSelectorInputSchema.extend({

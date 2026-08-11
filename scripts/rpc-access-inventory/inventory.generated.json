@@ -1,9 +1,9 @@
 {
   "schemaVersion": 2,
-  "methodCount": 569,
+  "methodCount": 571,
   "sourceCounts": {
     "legacy": 0,
-    "orpc": 569
+    "orpc": 571
   },
   "methods": [
     {
@@ -3817,6 +3817,21 @@
       ]
     },
     {
+      "method": "git.appendGitignore",
+      "access": {
+        "scope": "worktree",
+        "tier": "control"
+      },
+      "mobile": true,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/git.ts"
+        }
+      ]
+    },
+    {
       "method": "git.branchCompare",
       "access": {
         "scope": "worktree",
@@ -4136,6 +4151,21 @@
       "access": {
         "scope": "project",
         "tier": "control"
+      },
+      "mobile": true,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/git.ts"
+        }
+      ]
+    },
+    {
+      "method": "git.findHugeFoldersToIgnore",
+      "access": {
+        "scope": "worktree",
+        "tier": "read"
       },
       "mobile": true,
       "streaming": false,

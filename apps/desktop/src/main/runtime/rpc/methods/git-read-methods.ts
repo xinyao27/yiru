@@ -44,6 +44,11 @@ export const handleGitCheckIgnored = (
   { gitCommands }: RpcContext
 ) => gitCommands.checkRuntimeGitIgnoredPaths(params.worktree, params.paths)
 
+export const handleGitFindHugeFoldersToIgnore = (
+  params: z.infer<typeof GitWorktreeSelectorInputSchema>,
+  { gitCommands }: RpcContext
+) => gitCommands.findRuntimeGitHugeFoldersToIgnore(params.worktree)
+
 export const handleGitSubmoduleStatus = (
   params: z.infer<typeof GitSubmoduleStatusInputSchema>,
   { gitCommands }: RpcContext

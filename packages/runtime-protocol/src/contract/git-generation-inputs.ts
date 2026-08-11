@@ -79,6 +79,7 @@ const ResolvedSourceControlAiGenerationParams = z.object({
 })
 
 export const GitGenerateCommitMessageInputSchema = GitWorktreeSelectorInputSchema.extend({
+  repoId: z.string().min(1, 'Missing repo id').optional(),
   commitMessageAi: CommitMessageAiSettings.optional(),
   sourceControlAi: SourceControlAiSettings.optional(),
   sourceControlAiResolvedParams: ResolvedSourceControlAiGenerationParams.optional(),
