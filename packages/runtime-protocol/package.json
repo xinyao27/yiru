@@ -150,6 +150,69 @@
       "require": "./dist/terminal-query-reply.js",
       "default": "./dist/terminal-query-reply.js"
     },
+    "./terminal-multiplex/connection-records": {
+      "types": "./src/terminal-multiplex/connection-records.ts",
+      "react-native": "./src/terminal-multiplex/connection-records.ts",
+      "browser": "./src/terminal-multiplex/connection-records.ts",
+      "development": "./src/terminal-multiplex/connection-records.ts",
+      "import": "./dist/esm/terminal-multiplex/connection-records.mjs",
+      "require": "./dist/terminal-multiplex/connection-records.js",
+      "default": "./dist/terminal-multiplex/connection-records.js"
+    },
+    "./terminal-multiplex/crc32c": {
+      "types": "./src/terminal-multiplex/crc32c.ts",
+      "react-native": "./src/terminal-multiplex/crc32c.ts",
+      "browser": "./src/terminal-multiplex/crc32c.ts",
+      "development": "./src/terminal-multiplex/crc32c.ts",
+      "import": "./dist/esm/terminal-multiplex/crc32c.mjs",
+      "require": "./dist/terminal-multiplex/crc32c.js",
+      "default": "./dist/terminal-multiplex/crc32c.js"
+    },
+    "./terminal-multiplex/error-codes": {
+      "types": "./src/terminal-multiplex/error-codes.ts",
+      "react-native": "./src/terminal-multiplex/error-codes.ts",
+      "browser": "./src/terminal-multiplex/error-codes.ts",
+      "development": "./src/terminal-multiplex/error-codes.ts",
+      "import": "./dist/esm/terminal-multiplex/error-codes.mjs",
+      "require": "./dist/terminal-multiplex/error-codes.js",
+      "default": "./dist/terminal-multiplex/error-codes.js"
+    },
+    "./terminal-multiplex/flow-records": {
+      "types": "./src/terminal-multiplex/flow-records.ts",
+      "react-native": "./src/terminal-multiplex/flow-records.ts",
+      "browser": "./src/terminal-multiplex/flow-records.ts",
+      "development": "./src/terminal-multiplex/flow-records.ts",
+      "import": "./dist/esm/terminal-multiplex/flow-records.mjs",
+      "require": "./dist/terminal-multiplex/flow-records.js",
+      "default": "./dist/terminal-multiplex/flow-records.js"
+    },
+    "./terminal-multiplex/frame": {
+      "types": "./src/terminal-multiplex/frame.ts",
+      "react-native": "./src/terminal-multiplex/frame.ts",
+      "browser": "./src/terminal-multiplex/frame.ts",
+      "development": "./src/terminal-multiplex/frame.ts",
+      "import": "./dist/esm/terminal-multiplex/frame.mjs",
+      "require": "./dist/terminal-multiplex/frame.js",
+      "default": "./dist/terminal-multiplex/frame.js"
+    },
+    "./terminal-multiplex/json": {
+      "types": "./src/terminal-multiplex/json.ts",
+      "react-native": "./src/terminal-multiplex/json.ts",
+      "browser": "./src/terminal-multiplex/json.ts",
+      "development": "./src/terminal-multiplex/json.ts",
+      "import": "./dist/esm/terminal-multiplex/json.mjs",
+      "require": "./dist/terminal-multiplex/json.js",
+      "default": "./dist/terminal-multiplex/json.js"
+    },
+    "./terminal-multiplex/snapshot-records": {
+      "types": "./src/terminal-multiplex/snapshot-records.ts",
+      "react-native": "./src/terminal-multiplex/snapshot-records.ts",
+      "browser": "./src/terminal-multiplex/snapshot-records.ts",
+      "development": "./src/terminal-multiplex/snapshot-records.ts",
+      "import": "./dist/esm/terminal-multiplex/snapshot-records.mjs",
+      "require": "./dist/terminal-multiplex/snapshot-records.js",
+      "default": "./dist/terminal-multiplex/snapshot-records.js"
+    },
     "./updater": {
       "types": "./src/updater.ts",
       "react-native": "./src/updater.ts",

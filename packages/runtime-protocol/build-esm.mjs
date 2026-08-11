@@ -30,6 +30,28 @@ await build({
         'subscription-replay': resolve(import.meta.dirname, 'src/runtime-subscription-replay.ts'),
         'tailscale-endpoint': resolve(import.meta.dirname, 'src/remote-runtime-tailscale-hint.ts'),
         'terminal-osc-links': resolve(import.meta.dirname, 'src/terminal-osc-link-ranges.ts'),
+        'terminal-multiplex/connection-records': resolve(
+          import.meta.dirname,
+          'src/terminal-multiplex/connection-records.ts'
+        ),
+        'terminal-multiplex/crc32c': resolve(
+          import.meta.dirname,
+          'src/terminal-multiplex/crc32c.ts'
+        ),
+        'terminal-multiplex/error-codes': resolve(
+          import.meta.dirname,
+          'src/terminal-multiplex/error-codes.ts'
+        ),
+        'terminal-multiplex/flow-records': resolve(
+          import.meta.dirname,
+          'src/terminal-multiplex/flow-records.ts'
+        ),
+        'terminal-multiplex/frame': resolve(import.meta.dirname, 'src/terminal-multiplex/frame.ts'),
+        'terminal-multiplex/json': resolve(import.meta.dirname, 'src/terminal-multiplex/json.ts'),
+        'terminal-multiplex/snapshot-records': resolve(
+          import.meta.dirname,
+          'src/terminal-multiplex/snapshot-records.ts'
+        ),
         'terminal-query-reply': resolve(import.meta.dirname, 'src/terminal-query-reply.ts'),
         updater: resolve(import.meta.dirname, 'src/updater.ts')
       },

@@ -2,12 +2,6 @@ import { z } from 'zod'
 
 import type { RuntimeCapability } from './protocol-version'
 
-// Why: these names are frozen before implementation, but hosts must advertise
-// each one only after the corresponding behavior is actually available.
-export const TERMINAL_HOST_AUTHORITY_RUNTIME_CAPABILITY = 'terminal.host-authority.v1' as const
-export const TERMINAL_PARSE_ACK_RUNTIME_CAPABILITY = 'terminal.parse-ack.v1' as const
-export const TERMINAL_ORPHAN_ADOPTION_RUNTIME_CAPABILITY = 'terminal.orphan-adoption.v1' as const
-export const TERMINAL_CLOSE_LIFECYCLE_RUNTIME_CAPABILITY = 'terminal.close-lifecycle.v1' as const
 export const QUICK_COMMANDS_REMOTE_RUNTIME_CAPABILITY = 'quick-commands.remote.v1' as const
 export const EXTERNAL_EDITOR_REMOTE_SSH_RUNTIME_CAPABILITY =
   'external-editor.remote-ssh.v1' as const

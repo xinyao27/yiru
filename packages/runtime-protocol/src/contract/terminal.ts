@@ -12,6 +12,9 @@ const WORKTREE_CONTROL_ACCESS = { scope: 'worktree', tier: 'control' } as const
 const MOBILE_CLIENT = { mobile: true } as const
 
 export const terminalContract = {
+  openMultiplex: withAccess(HOST_READ_ACCESS)
+    .input(inputs.TerminalOpenMultiplexInputSchema)
+    .output(type<results.TerminalOpenMultiplexResult>()),
   multiplex: withAccess(WORKTREE_CONTROL_ACCESS, MOBILE_CLIENT)
     .input(inputs.TerminalMultiplexInputSchema)
     .output(eventIterator(type<results.TerminalMultiplexEvent>())),

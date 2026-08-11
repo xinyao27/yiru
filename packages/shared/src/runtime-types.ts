@@ -428,6 +428,7 @@ export type RuntimeTerminalShow = RuntimeTerminalSummary & {
   paneRuntimeId: number
   ptyId: string | null
   rendererGraphEpoch: number
+  transportGeneration: string
 }
 
 export type RuntimeTerminalState = 'running' | 'exited' | 'unknown'
@@ -476,6 +477,24 @@ export type RuntimeTerminalCreate = {
   title: string | null
   surface?: 'background' | 'visible'
   warning?: string
+  transportGeneration: string
+  isReattach: boolean
+  sessionExpired: boolean
+  restore: {
+    kind: 'none' | 'snapshot' | 'replay' | 'cold-restore'
+    isAlternateScreen: boolean
+    snapshotCols?: number
+    snapshotRows?: number
+    cwd?: string
+    startupCwdFallback?: {
+      kind: 'worktree'
+      cwd: string
+    }
+  }
+  providerSequence?: {
+    value: string
+    generation: 'continued' | 'reset'
+  }
 }
 
 export type RuntimeTerminalSplit = {
