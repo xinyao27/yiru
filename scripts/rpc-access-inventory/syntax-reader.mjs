@@ -78,7 +78,7 @@ function moduleFile(containingFile, specifier) {
   } else if (specifier.startsWith('~main/')) {
     base = path.join(REPO_ROOT, 'apps/desktop/src/main', specifier.slice('~main/'.length))
   } else if (specifier.startsWith('~shared/')) {
-    base = path.join(REPO_ROOT, 'apps/desktop/src/shared', specifier.slice('~shared/'.length))
+    base = path.join(REPO_ROOT, 'packages/shared/src', specifier.slice('~shared/'.length))
   } else if (specifier.startsWith('@yiru/runtime-protocol/')) {
     const subpath = `./${specifier.slice('@yiru/runtime-protocol/'.length)}`
     const typesTarget = RUNTIME_PROTOCOL_PACKAGE.exports?.[subpath]?.types

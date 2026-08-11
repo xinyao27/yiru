@@ -195,7 +195,7 @@ function readPreloadSurface() {
     moduleResolution: ts.ModuleResolutionKind.Bundler,
     baseUrl: DESKTOP,
     paths: {
-      '~shared/*': ['src/shared/*'],
+      '~shared/*': ['../../packages/shared/src/*'],
       '~main/*': ['src/main/*'],
       '~preload/*': ['src/preload/*'],
       '~renderer/*': ['src/renderer/*']

@@ -10,7 +10,10 @@ if (!profile || !supportedProfiles.has(profile)) {
 const vitePlus = process.platform === 'win32' ? 'vp.cmd' : 'vp'
 // Why: Vite+ does not accept alternate config paths; selecting the profile
 // through the child environment keeps specialized passes in vite.config.ts.
+// Running at the workspace root also lets package tasks cover sibling sources
+// without `..` path segments, which Vite+ rejects.
 const result = spawnSync(vitePlus, ['lint', ...lintArguments], {
+  cwd: new URL('..', import.meta.url),
   env: { ...process.env, YIRU_LINT_PROFILE: profile },
   stdio: ['inherit', 'pipe', 'pipe'],
   encoding: 'utf8'

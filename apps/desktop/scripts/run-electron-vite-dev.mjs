@@ -427,7 +427,7 @@ function isDevWebClientFresh() {
   const sourceMtime = Math.max(
     latestMtimeMs(path.join(appRoot, 'vite.web.config.ts')),
     latestMtimeMs(path.join(appRoot, 'src', 'renderer')),
-    latestMtimeMs(path.join(appRoot, 'src', 'shared')),
+    latestMtimeMs(path.resolve(appRoot, '..', '..', 'packages', 'shared', 'src')),
     latestMtimeMs(path.join(appRoot, 'src', 'preload', 'api-types.ts'))
   )
   return sourceMtime <= outputMtime
