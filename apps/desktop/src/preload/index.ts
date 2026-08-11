@@ -33,7 +33,6 @@ import {
 } from '~shared/editor-save-events'
 import type { FridaySession } from '~shared/friday-types'
 import type { AppStarSource } from '~shared/gh-star-source'
-import type { KeybindingActionId, KeybindingFileSnapshot } from '~shared/keybindings'
 import type {
   LocalhostWorktreeLabelResult,
   LocalhostWorktreeLabelRoute
@@ -84,7 +83,6 @@ import type {
   NotificationSoundDataResult,
   NotificationSoundPathResult,
   NotificationSoundResult,
-  OnboardingState,
   FloatingTerminalCwdRequest,
   MarkdownDocument,
   TuiAgent,
@@ -368,14 +366,6 @@ const api = {
     pickFloatingWorkspaceDirectory: (): Promise<string | null> =>
       ipcRenderer.invoke('app:pickFloatingWorkspaceDirectory')
   },
-
-  yiruProfiles: {
-    list: () => ipcRenderer.invoke('yiruProfiles:list'),
-    createLocal: (args) => ipcRenderer.invoke('yiruProfiles:createLocal', args),
-    switchProfile: (args) => ipcRenderer.invoke('yiruProfiles:switch', args),
-    transferProject: (args) => ipcRenderer.invoke('yiruProfiles:transferProject', args),
-    findProjectProfiles: (args) => ipcRenderer.invoke('yiruProfiles:findProjectProfiles', args)
-  } satisfies PreloadApi['yiruProfiles'],
 
   repoHost: {
     pickFolder: () => ipcRenderer.invoke('repo-host:pickFolder'),
@@ -810,44 +800,10 @@ const api = {
       ipcRenderer.invoke('diagnostics:uploadBundle', bundleSubmissionId)
   },
 
-  settings: {
-    get: (): Promise<unknown> => ipcRenderer.invoke('settings:get'),
-
-    // Why: blocking read for the few startup decisions (terminal side-effect
-    // authority) that cannot wait for async hydration. Call sparingly.
-    getSync: (): unknown => ipcRenderer.sendSync('settings:get-sync'),
-
-    set: (args: Record<string, unknown>): Promise<unknown> =>
-      ipcRenderer.invoke('settings:set', args),
-
-    updatePRBotAuthorOverride: (args: { author: string; isBot: boolean }): Promise<unknown> =>
-      ipcRenderer.invoke('settings:update-pr-bot-author-override', args)
-  },
-
   localhostWorktreeLabels: {
     register: (args: LocalhostWorktreeLabelRoute): Promise<LocalhostWorktreeLabelResult> =>
       ipcRenderer.invoke('localhostWorktreeLabels:register', args)
   } satisfies PreloadApi['localhostWorktreeLabels'],
-
-  keybindings: {
-    get: (): Promise<KeybindingFileSnapshot> => ipcRenderer.invoke('keybindings:get'),
-    ensureFile: (): Promise<KeybindingFileSnapshot> => ipcRenderer.invoke('keybindings:ensureFile'),
-    setAction: (args: {
-      actionId: KeybindingActionId
-      bindings: string[] | null
-    }): Promise<KeybindingFileSnapshot> => ipcRenderer.invoke('keybindings:setAction', args),
-    reload: (): Promise<KeybindingFileSnapshot> => ipcRenderer.invoke('keybindings:reload'),
-    openFile: (): Promise<KeybindingFileSnapshot> => ipcRenderer.invoke('keybindings:openFile'),
-    revealFile: (): Promise<KeybindingFileSnapshot> => ipcRenderer.invoke('keybindings:revealFile'),
-    onChanged: (callback: (snapshot: KeybindingFileSnapshot) => void): (() => void) => {
-      const listener = (
-        _event: Electron.IpcRendererEvent,
-        snapshot: KeybindingFileSnapshot
-      ): void => callback(snapshot)
-      ipcRenderer.on('keybindings:changed', listener)
-      return () => ipcRenderer.removeListener('keybindings:changed', listener)
-    }
-  },
 
   codexAccounts: {
     list: (): Promise<unknown> => ipcRenderer.invoke('codexAccounts:list'),
@@ -963,15 +919,6 @@ const api = {
     }
   },
 
-  onboarding: {
-    get: (): Promise<OnboardingState> => ipcRenderer.invoke('onboarding:get'),
-    update: (
-      updates: Partial<Omit<OnboardingState, 'checklist'>> & {
-        checklist?: Partial<OnboardingState['checklist']>
-      }
-    ): Promise<OnboardingState> => ipcRenderer.invoke('onboarding:update', updates)
-  },
-
   developerPermissions: {
     getStatus: (): Promise<unknown> => ipcRenderer.invoke('developerPermissions:getStatus'),
     request: (args: { id: string }): Promise<unknown> =>
@@ -1063,26 +1010,6 @@ const api = {
       return () => ipcRenderer.removeListener('emulator:videoStreamFrame', listener)
     }
   },
-
-  cache: {
-    getGitHub: () => ipcRenderer.invoke('cache:getGitHub'),
-    setGitHub: (args) => ipcRenderer.invoke('cache:setGitHub', args)
-  } satisfies PreloadApi['cache'],
-
-  session: {
-    // hostId is optional and defaults to 'local' on the main side, so existing
-    // call sites that omit it keep targeting the local session partition.
-    get: (hostId) => ipcRenderer.invoke('session:get', hostId),
-    set: (args, hostId) => ipcRenderer.invoke('session:set', args, hostId),
-    patch: (args, hostId) => ipcRenderer.invoke('session:patch', args, hostId),
-    flush: () => ipcRenderer.invoke('session:flush'),
-    readTerminalScrollback: (args) =>
-      ipcRenderer.sendSync('session:read-terminal-scrollback-sync', args),
-    /** Synchronous session save for beforeunload — blocks until flushed to disk. */
-    setSync: (args, hostId) => {
-      ipcRenderer.sendSync('session:set-sync', args, hostId)
-    }
-  } satisfies PreloadApi['session'],
 
   updater: {
     getStatus: () => ipcRenderer.invoke('updater:getStatus'),

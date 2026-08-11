@@ -102,7 +102,7 @@ import {
 import {
   fetchWorkspaceSessionWithRuntimeHostOwners,
   patchWorkspaceSessionByHost,
-  persistWorkspaceSessionByHostSync
+  persistWorkspaceSessionByHost
 } from '../components/editor/workspace-session-host-persistence'
 import { RecoverableRenderErrorBoundary } from '../components/error-boundaries/recoverable-render-error-boundary'
 import {
@@ -968,7 +968,7 @@ function App(): React.JSX.Element {
         )
         keybindingsPromise.catch(() => {})
         const onboardingPromise = timeRendererStartupStep('onboarding-get', () =>
-          rendererHostClient.onboarding.get()
+          shellClient.onboarding.get()
         )
         onboardingPromise.catch(() => {})
         // Why: hydrate persisted UI immediately after ui.get() so first paint
@@ -1010,7 +1010,7 @@ function App(): React.JSX.Element {
         // without waiting on network reachability. Unreadable partitions skip.
         const sessionRead = await timeRendererStartupStep('session-get', () =>
           fetchWorkspaceSessionWithRuntimeHostOwners(
-            rendererHostClient.session,
+            shellClient.session,
             useAppStore.getState().repos,
             startupRuntimeHostIds
           )
@@ -1267,7 +1267,7 @@ function App(): React.JSX.Element {
         // Why: route each runtime host's worktree-scoped slice to its own
         // partition; the returned promise is the local write so the
         // remote-workspace upload chain below keeps its ordering.
-        void patchWorkspaceSessionByHost(rendererHostClient.session, patch, state)
+        void patchWorkspaceSessionByHost(shellClient.session, patch, state)
       }
     })
   }, [])
@@ -1306,11 +1306,11 @@ function App(): React.JSX.Element {
       // into the store via Zustand setters. The earlier read is only for the
       // gating flags and would miss those updates.
       const freshState = useAppStore.getState()
-      persistWorkspaceSessionByHostSync(
-        rendererHostClient.session,
+      void persistWorkspaceSessionByHost(
+        shellClient.session,
         buildWorkspaceSessionPayload(freshState),
         freshState
-      )
+      ).catch(() => {})
       shutdownBuffersCaptured = true
     }
     window.addEventListener('beforeunload', captureAndFlush)

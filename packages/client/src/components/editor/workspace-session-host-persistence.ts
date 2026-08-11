@@ -26,7 +26,6 @@ export type HostPersistenceState = {
 type SessionApi = {
   get: (hostId?: ExecutionHostId) => Promise<WorkspaceSessionState>
   patch: (args: WorkspaceSessionPatch, hostId?: ExecutionHostId) => Promise<void>
-  setSync: (args: WorkspaceSessionState, hostId?: ExecutionHostId) => void
 }
 
 type DurableSessionApi = SessionApi & {
@@ -239,19 +238,6 @@ export async function persistWorkspaceSessionByHost(
   }
   await Promise.all(writes)
   await api.flush()
-}
-
-/** Synchronous full-session split for the beforeunload / quit paths. */
-export function persistWorkspaceSessionByHostSync(
-  api: SessionApi,
-  payload: WorkspaceSessionState,
-  state: HostPersistenceState
-): void {
-  const slices = splitWorkspaceSessionByHost(payload, buildHostIdByWorktreeId(state))
-  api.setSync(slices[LOCAL_EXECUTION_HOST_ID] ?? payload)
-  for (const [hostId, slice] of nonLocalEntries(slices)) {
-    api.setSync(slice, hostId)
-  }
 }
 
 /** Collect the distinct runtime hosts owning any persisted repo. */

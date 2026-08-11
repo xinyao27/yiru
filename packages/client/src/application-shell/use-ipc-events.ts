@@ -71,8 +71,8 @@ import { subscribeRateLimitUpdates } from '~renderer/runtime/rate-limit-events-c
 import { fetchRateLimitSnapshot } from '~renderer/runtime/rate-limits-client'
 import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import { subscribeRuntimeDriverEvents } from '~renderer/runtime/runtime-driver-events-client'
-import { subscribeRuntimeSettingsChanges } from '~renderer/runtime/settings-events-client'
 import { shellClient } from '~renderer/runtime/shell-client'
+import { subscribeShellEvent } from '~renderer/runtime/shell-events-client'
 import { focusRuntimeTerminalSurface } from '~renderer/runtime/sync-runtime-graph'
 import { subscribeRuntimeUIChanges } from '~renderer/runtime/ui-client'
 import { setRuntimeUIState } from '~renderer/runtime/ui-client'
@@ -769,8 +769,10 @@ export function useIpcEvents(): void {
     // schema. Re-read the shell-owned full document so menu-originated fields
     // that are intentionally absent from RuntimeClientSettings stay intact.
     unsubs.push(
-      subscribeRuntimeSettingsChanges(() => {
-        void useAppStore.getState().fetchSettings()
+      subscribeShellEvent((event) => {
+        if (event.type === 'settingsChanged') {
+          void useAppStore.getState().fetchSettings()
+        }
       })
     )
 
@@ -782,9 +784,9 @@ export function useIpcEvents(): void {
       })
     )
 
-    if (rendererHostClient.keybindings) {
+    if (shellClient.keybindings) {
       unsubs.push(
-        rendererHostClient.keybindings.onChanged((snapshot) => {
+        shellClient.keybindings.onChanged((snapshot) => {
           useAppStore.getState().setKeybindingSnapshot(snapshot)
         })
       )

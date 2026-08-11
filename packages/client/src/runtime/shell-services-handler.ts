@@ -19,6 +19,7 @@ import {
 } from './browser-tab-shell-requests'
 import { readMobileMarkdownTab, saveMobileMarkdownTab } from './mobile-markdown-bridge'
 import { electronShellPlatformApi, type ShellPlatformApi } from './shell-platform-client'
+import { shellSessionApi } from './shell-state-client'
 import { createTerminalTabViaShell } from './terminal-create-shell-request'
 import { mountTerminalTabViaShell } from './terminal-mount-shell-request'
 import { revealTerminalSessionViaShell } from './terminal-reveal-shell-request'
@@ -141,7 +142,7 @@ export function createShellServicesRouter() {
                 void (async () => {
                   const state = useAppStore.getState()
                   await persistWorkspaceSessionByHost(
-                    window.api.session,
+                    shellSessionApi,
                     buildWorkspaceSessionPayload(state),
                     state
                   )

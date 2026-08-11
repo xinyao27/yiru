@@ -16,6 +16,7 @@ import {
 import { shouldEnableReactGrab } from './react-grab-dev-gate'
 import { startShellEventStream } from './runtime/shell-events-client'
 import { hydrateRenderingHost } from './runtime/shell-platform-client'
+import { hydrateShellSettings } from './runtime/shell-state-client'
 import { hydrateShellUi } from './runtime/shell-ui-client'
 
 recordRendererCrashBreadcrumb('renderer_bootstrap_started', { dev: import.meta.env.DEV })
@@ -61,13 +62,17 @@ function RendererRoot(): React.JSX.Element {
   )
 }
 
-createRoot(rootElement).render(
-  <StrictMode>
-    <PhosphorIconContextProvider>
-      <I18nProvider>
-        <RendererRoot />
-      </I18nProvider>
-    </PhosphorIconContextProvider>
-  </StrictMode>
-)
-recordRendererCrashBreadcrumb('renderer_bootstrap_rendered')
+void hydrateShellSettings()
+  .catch(() => {})
+  .then(() => {
+    createRoot(rootElement).render(
+      <StrictMode>
+        <PhosphorIconContextProvider>
+          <I18nProvider>
+            <RendererRoot />
+          </I18nProvider>
+        </PhosphorIconContextProvider>
+      </StrictMode>
+    )
+    recordRendererCrashBreadcrumb('renderer_bootstrap_rendered')
+  })

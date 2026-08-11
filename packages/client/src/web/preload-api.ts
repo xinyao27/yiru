@@ -53,12 +53,18 @@ import type {
   DetectedWorktreeListResult,
   GlobalSettings,
   OnboardingState,
+  PRInfo,
   Worktree,
   WorkspaceSessionPatch,
   WorkspaceSessionState
 } from '~shared/types'
 import { normalizeUiLanguage } from '~shared/ui-language'
-import { createDefaultLocalYiruProfile, DEFAULT_LOCAL_YIRU_PROFILE_ID } from '~shared/yiru-profiles'
+import {
+  createDefaultLocalYiruProfile,
+  DEFAULT_LOCAL_YIRU_PROFILE_ID,
+  type FindYiruProfileProjectsByPathResult,
+  type TransferYiruProfileProjectArgs
+} from '~shared/yiru-profiles'
 
 import { readWebUIState } from '../runtime/web-ui-state'
 import { toRuntimeWorktreeSelector } from '../runtime/worktree-selector'
@@ -127,8 +133,18 @@ function invalidateRuntimeWorktreeCaches(): void {
   cachedDetectedWorktrees = null
 }
 
-type WebSettingsApi = NonNullable<PreloadApi['settings']>
-type WebKeybindingsApi = NonNullable<PreloadApi['keybindings']>
+type WebKeybindingsApi = {
+  get: () => Promise<KeybindingFileSnapshot>
+  ensureFile: () => Promise<KeybindingFileSnapshot>
+  setAction: (args: {
+    actionId: KeybindingActionId
+    bindings: string[] | null
+  }) => Promise<KeybindingFileSnapshot>
+  reload: () => Promise<KeybindingFileSnapshot>
+  openFile: () => Promise<KeybindingFileSnapshot>
+  revealFile: () => Promise<KeybindingFileSnapshot>
+  onChanged: (callback: (snapshot: KeybindingFileSnapshot) => void) => () => void
+}
 type WebGitHubApi = NonNullable<PreloadApi['gh']>
 type WebRuntimeProcedureSelector = (client: WebRuntimeOrpcClient) => unknown
 type WebKeybindingDocument = {
@@ -150,6 +166,117 @@ const GIT_PATHS_MUTATION_SELECTORS = {
 
 const WEB_KEYBINDING_PLATFORMS: readonly KeybindingPlatform[] = ['darwin', 'linux', 'win32']
 const webKeybindingListeners = new Set<(snapshot: KeybindingFileSnapshot) => void>()
+
+const webShellSettingsApi = {
+  get: async (): Promise<GlobalSettings> => getRuntimeBackedStoredSettings(),
+  getSnapshot: (): GlobalSettings => getStoredSettings(),
+  set: async (updates: Partial<GlobalSettings>): Promise<GlobalSettings> => {
+    if (updates.activeRuntimeEnvironmentId === null) {
+      disconnectActiveRuntimeEnvironment()
+    }
+    const sanitizedUpdates = { ...updates }
+    if ('autoRenameBranchFromWorkDefaultedOn' in sanitizedUpdates) {
+      sanitizedUpdates.autoRenameBranchFromWorkDefaultedOn = true
+    }
+    const next = mergeSettings(getStoredSettings(), sanitizedUpdates, {
+      preserveAutoRenameBranchFromWorkUpdate: 'autoRenameBranchFromWork' in sanitizedUpdates
+    })
+    writeJson(SETTINGS_STORAGE_KEY, next)
+    return syncRuntimeBackedSettings(sanitizedUpdates, next)
+  },
+  updatePRBotAuthorOverride: (args: { author: string; isBot: boolean }) =>
+    updateRuntimePRBotAuthorOverride(args)
+}
+
+const webShellSessionApi = {
+  get: (hostId?: ExecutionHostId): Promise<WorkspaceSessionState> =>
+    Promise.resolve(getStoredWorkspaceSession(hostId)),
+  set: async (session: WorkspaceSessionState, hostId?: ExecutionHostId): Promise<void> => {
+    writeJson(sessionStorageKeyForHost(hostId), sanitizeWebRuntimeWorkspaceSession(session))
+  },
+  patch: async (patch: WorkspaceSessionPatch, hostId?: ExecutionHostId): Promise<void> => {
+    writeJson(
+      sessionStorageKeyForHost(hostId),
+      sanitizeWebRuntimeWorkspaceSession({ ...getStoredWorkspaceSession(hostId), ...patch })
+    )
+  },
+  flush: async (): Promise<void> => {}
+}
+
+const webShellOnboardingApi = {
+  get: (): Promise<OnboardingState> => Promise.resolve(getStoredOnboarding()),
+  update: async (
+    updates: Partial<Omit<OnboardingState, 'checklist'>> & {
+      checklist?: Partial<OnboardingState['checklist']>
+    }
+  ): Promise<OnboardingState> => {
+    const current = getStoredOnboarding()
+    const next: OnboardingState = {
+      ...current,
+      ...updates,
+      flowVersion: ONBOARDING_FLOW_VERSION,
+      checklist: { ...current.checklist, ...updates.checklist }
+    }
+    writeJson(ONBOARDING_STORAGE_KEY, next)
+    return next
+  }
+}
+
+const webShellCacheApi = {
+  getGitHub: () =>
+    Promise.resolve(
+      readJson<{ pr: Record<string, { data: PRInfo | null; fetchedAt: number }> }>(
+        GITHUB_CACHE_STORAGE_KEY,
+        { pr: {} }
+      )
+    ),
+  setGitHub: async (args: {
+    cache: { pr: Record<string, { data: PRInfo | null; fetchedAt: number }> }
+  }): Promise<void> => {
+    writeJson(GITHUB_CACHE_STORAGE_KEY, args.cache)
+  }
+}
+
+export function getWebShellStateApis() {
+  return {
+    settings: webShellSettingsApi,
+    session: webShellSessionApi,
+    onboarding: webShellOnboardingApi,
+    cache: webShellCacheApi
+  }
+}
+
+const webShellYiruProfilesApi = {
+  list: () =>
+    Promise.resolve({
+      activeProfileId: DEFAULT_LOCAL_YIRU_PROFILE_ID,
+      profiles: [createDefaultLocalYiruProfile(0)],
+      multiProfileUi: false
+    }),
+  createLocal: () =>
+    Promise.resolve({
+      activeProfileId: DEFAULT_LOCAL_YIRU_PROFILE_ID,
+      profiles: [createDefaultLocalYiruProfile(0)],
+      profile: createDefaultLocalYiruProfile(0)
+    }),
+  switchProfile: () => Promise.resolve({ status: 'already-active' as const }),
+  transferProject: (args: TransferYiruProfileProjectArgs) =>
+    Promise.resolve({
+      status: 'duplicate-target' as const,
+      sourceProfileId: args.sourceProfileId,
+      targetProfileId: args.targetProfileId,
+      sourceRepoId: args.repoId,
+      duplicateRepoId: args.repoId
+    }),
+  findProjectProfiles: async (): Promise<FindYiruProfileProjectsByPathResult> => ({ projects: [] })
+}
+
+let webShellKeybindingsApi: WebKeybindingsApi | null = null
+
+export function getWebShellConfigurationApis() {
+  webShellKeybindingsApi ??= createWebKeybindingsApi()
+  return { keybindings: webShellKeybindingsApi, yiruProfiles: webShellYiruProfilesApi }
+}
 
 export function installWebPreloadApi(): void {
   activeEnvironment = readStoredWebRuntimeEnvironment()
@@ -198,52 +325,6 @@ function createWebPreloadApi(): Partial<PreloadApi> {
       showAgentValueMoment: () => Promise.resolve(),
       onboardingCompleted: () => Promise.resolve()
     },
-    yiruProfiles: {
-      list: () =>
-        Promise.resolve({
-          activeProfileId: DEFAULT_LOCAL_YIRU_PROFILE_ID,
-          profiles: [createDefaultLocalYiruProfile(0)],
-          multiProfileUi: false
-        }),
-      createLocal: () =>
-        Promise.resolve({
-          activeProfileId: DEFAULT_LOCAL_YIRU_PROFILE_ID,
-          profiles: [createDefaultLocalYiruProfile(0)],
-          profile: createDefaultLocalYiruProfile(0)
-        }),
-      switchProfile: () => Promise.resolve({ status: 'already-active' }),
-      transferProject: (args) =>
-        Promise.resolve({
-          status: 'duplicate-target',
-          sourceProfileId: args.sourceProfileId,
-          targetProfileId: args.targetProfileId,
-          sourceRepoId: args.repoId,
-          duplicateRepoId: args.repoId
-        }),
-      findProjectProfiles: async () => ({ projects: [] })
-    },
-    settings: {
-      get: async () => getRuntimeBackedStoredSettings(),
-      // Why: localStorage-backed settings are synchronous in the web client,
-      // so the pre-hydration kill-switch read works the same as desktop.
-      getSync: () => getStoredSettings(),
-      set: async (updates) => {
-        if (updates.activeRuntimeEnvironmentId === null) {
-          disconnectActiveRuntimeEnvironment()
-        }
-        const sanitizedUpdates = { ...updates }
-        if ('autoRenameBranchFromWorkDefaultedOn' in sanitizedUpdates) {
-          sanitizedUpdates.autoRenameBranchFromWorkDefaultedOn = true
-        }
-        const next = mergeSettings(getStoredSettings(), sanitizedUpdates, {
-          preserveAutoRenameBranchFromWorkUpdate: 'autoRenameBranchFromWork' in sanitizedUpdates
-        })
-        writeJson(SETTINGS_STORAGE_KEY, next)
-        return syncRuntimeBackedSettings(sanitizedUpdates, next)
-      },
-      updatePRBotAuthorOverride: (args) => updateRuntimePRBotAuthorOverride(args)
-    } satisfies Partial<WebSettingsApi> as unknown as WebSettingsApi,
-    keybindings: createWebKeybindingsApi(),
     // Why: `feedback.submit` posts to a PostHog-backed pipeline from the main
     // process (net module has no CORS restrictions there); a paired web
     // client has no equivalent shell to proxy through. Without this entry
@@ -307,58 +388,6 @@ function createWebPreloadApi(): Partial<PreloadApi> {
       openBundlePreview: () => Promise.reject(new Error('Review files are unavailable on web.')),
       discardBundlePreview: () => Promise.resolve(),
       uploadBundle: () => Promise.reject(new Error('Sending diagnostics is unavailable on web.'))
-    },
-    session: {
-      // hostId mirrors the desktop bridge: omitted/'local' targets the existing
-      // storage key; non-local hosts persist under a host-suffixed key so their
-      // sessions stay isolated from the local one.
-      get: (hostId) => Promise.resolve(getStoredWorkspaceSession(hostId)),
-      set: async (session, hostId) => {
-        writeJson(sessionStorageKeyForHost(hostId), sanitizeWebRuntimeWorkspaceSession(session))
-      },
-      patch: async (patch: WorkspaceSessionPatch, hostId) => {
-        writeJson(
-          sessionStorageKeyForHost(hostId),
-          sanitizeWebRuntimeWorkspaceSession({
-            ...getStoredWorkspaceSession(hostId),
-            ...patch
-          })
-        )
-      },
-      // localStorage writes synchronously, so there is no deferred web flush.
-      flush: async () => {},
-      readTerminalScrollback: () => null,
-      setSync: (session, hostId) => {
-        writeJson(sessionStorageKeyForHost(hostId), sanitizeWebRuntimeWorkspaceSession(session))
-      }
-    },
-    onboarding: {
-      get: () => Promise.resolve(getStoredOnboarding()),
-      update: async (updates) => {
-        const current = getStoredOnboarding()
-        const next: OnboardingState = {
-          ...current,
-          ...updates,
-          flowVersion: ONBOARDING_FLOW_VERSION,
-          checklist: {
-            ...current.checklist,
-            ...updates.checklist
-          }
-        }
-        writeJson(ONBOARDING_STORAGE_KEY, next)
-        return next
-      }
-    },
-    cache: {
-      getGitHub: () =>
-        Promise.resolve(
-          readJson(GITHUB_CACHE_STORAGE_KEY, {
-            pr: {}
-          })
-        ),
-      setGitHub: async ({ cache }) => {
-        writeJson(GITHUB_CACHE_STORAGE_KEY, cache)
-      }
     },
     runtime: createRuntimeApi(),
     // Why: not a stub awaiting migration — `revealFridayChat` needs a renderer

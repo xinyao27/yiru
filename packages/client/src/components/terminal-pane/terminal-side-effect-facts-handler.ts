@@ -11,7 +11,7 @@
  * registered consumer are dropped — mirroring today's eager-buffer behavior
  * where pre-mount output produces no attention side effects.
  */
-import { getRendererSettingsSync } from '~renderer/runtime/settings-client'
+import { getRendererSettingsSnapshot } from '~renderer/runtime/settings-client'
 import {
   getRendererTerminalSideEffectSnapshot,
   subscribeRendererTerminalSideEffects
@@ -29,7 +29,8 @@ let persistedAuthorityFlagCache: boolean | null | undefined
 
 function readPersistedSideEffectAuthorityFlagSync(): boolean | null {
   if (persistedAuthorityFlagCache === undefined) {
-    persistedAuthorityFlagCache = getRendererSettingsSync()?.terminalMainSideEffectAuthority ?? null
+    persistedAuthorityFlagCache =
+      getRendererSettingsSnapshot()?.terminalMainSideEffectAuthority ?? null
   }
   return persistedAuthorityFlagCache
 }

@@ -27,14 +27,14 @@ import { registerEmulatorFrameStreamHandlers } from '../emulator/frame-stream'
 import { registerEmulatorVideoStreamHandlers } from '../emulator/video-stream'
 import { registerExportHandlers } from '../export/export'
 import type { KeybindingService } from '../keybindings/keybinding-service'
-import { registerKeybindingHandlers } from '../keybindings/keybindings'
+import { initializeShellKeybindingsService } from '../keybindings/keybindings'
 import { registerMiniMaxCredentialsHandlers } from '../minimax/credentials'
 import { initializeNotebookAuthorizedStore } from '../notebook'
 import { registerNotificationHandlers } from '../notifications/notifications'
 import { registerOpenCodeUsageHandlers } from '../opencode/usage/opencode-usage'
 import type { OpenCodeUsageStore } from '../opencode/usage/store'
-import { registerOnboardingHandlers } from '../persisted-state/onboarding'
-import { registerSessionHandlers } from '../persisted-state/session'
+import { initializeShellOnboardingService } from '../persisted-state/onboarding'
+import { initializeShellSessionService } from '../persisted-state/session'
 import type { Store } from '../persistence'
 import { registerPetHandlers } from '../pet/pet'
 import { registerLocalhostWorktreeLabelHandlers } from '../ports/localhost-worktree-labels'
@@ -45,18 +45,18 @@ import type { YiruRuntimeService } from '../runtime/yiru-runtime'
 import { initializeShellClipboardService } from '../shell/clipboard'
 import { initializeShellFilesService } from '../shell/files'
 import { initializeShellPlatformService } from '../shell/platform'
+import { initializeShellSettingsService } from '../shell/settings'
 import { registerSpeechHandlers } from '../speech/speech'
 import type { StatsCollector } from '../stats/collector'
 import { registerTelemetryHandlers } from '../telemetry/telemetry'
 import { registerUpdaterHandlers } from '../window/attach-main-window-services'
 import { registerUIHandlers } from '../window/ui'
-import { registerYiruProfileHandlers } from '../yiru-profiles/yiru-profiles'
+import { initializeShellYiruProfilesService } from '../yiru-profiles/yiru-profiles'
 import { registerAiVaultHandlers } from './ai-vault'
 import { registerAppHandlers } from './app'
 import { registerAutomationHandlers } from './automations'
 import { registerGitHubIpcHandlers } from './github'
 import { registerRuntimeHandlers } from './runtime'
-import { registerSettingsHandlers } from './settings'
 
 let registered = false
 
@@ -114,25 +114,27 @@ export function registerCoreHandlers(
   // Why: no more `notebook:*` IPC channels to register — this just hands the
   // store reference the `notebook.runPythonCell` oRPC contract needs.
   initializeNotebookAuthorizedStore(store)
-  registerOnboardingHandlers(store)
+  initializeShellOnboardingService(store)
   registerDeveloperPermissionHandlers()
   // Why: diagnostics handlers are wired alongside telemetry but the two
   // lanes never share a code path — `ipc/diagnostics.ts` imports only from
   // `src/main/observability/`, never from `src/main/telemetry/`. Order is
   // not load-bearing; both register independent ipcMain channels.
   registerDiagnosticsHandlers()
-  registerSettingsHandlers(store, agentAwakeService)
+  initializeShellSettingsService(store, agentAwakeService)
   if (automations) {
     registerAutomationHandlers(automations)
   }
   if (keybindings) {
-    registerKeybindingHandlers(keybindings)
+    initializeShellKeybindingsService(keybindings)
   }
   registerTelemetryHandlers(store)
-  registerYiruProfileHandlers(store, { onBeforeRelaunch: lifecycleOptions.onBeforeRelaunch })
+  initializeShellYiruProfilesService(store, {
+    onBeforeRelaunch: lifecycleOptions.onBeforeRelaunch
+  })
   initializeShellPlatformService()
   registerPetHandlers()
-  registerSessionHandlers(store)
+  initializeShellSessionService(store)
   registerUIHandlers(store)
   registerEmulatorFrameStreamHandlers()
   registerEmulatorVideoStreamHandlers()

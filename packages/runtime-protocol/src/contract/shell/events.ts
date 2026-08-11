@@ -25,7 +25,11 @@ export type ShellBrowserEvent =
   | { type: 'browserGrabModeToggle'; browserPageId: string }
   | { type: 'browserGrabActionShortcut'; browserPageId: string; key: 'c' | 's' }
 
-export type ShellEvent = ShellBrowserEvent | ShellUiEvent
+export type ShellStateEvent =
+  | { type: 'settingsChanged' }
+  | { type: 'keybindingsChanged'; snapshot: unknown }
+
+export type ShellEvent = ShellBrowserEvent | ShellStateEvent | ShellUiEvent
 
 export type SequencedShellEvent = ShellEvent & { seq: number }
 

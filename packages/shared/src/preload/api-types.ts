@@ -7,7 +7,6 @@ import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
 /* eslint-disable max-lines -- Why: the preload contract is intentionally centralized in one declaration file so renderer and preload stay in lockstep when IPC surfaces change. */
 import type { HostedReviewProvider } from '@yiru/workbench-model/review'
-import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 
 import type { AppIdentity } from '../app-identity'
 import type { StartupCommandDelivery } from '../codex-startup-delivery'
@@ -66,7 +65,6 @@ import type {
   ClaudeRateLimitAccountsState,
   CodexRateLimitAccountsState,
   CustomPet,
-  GlobalSettings,
   GitBranchCompareResult,
   GitCommitCompareResult,
   GitConflictOperation,
@@ -86,29 +84,14 @@ import type {
   NotificationDeliveryProbeResult,
   NotificationPermissionStatusResult,
   NotificationSoundResult,
-  OnboardingState,
   PathSource,
   PersistedUIState,
-  PRInfo,
   ShellHydrationFailureReason,
   StatsSummary,
   TuiAgent,
   UpdateCheckOptions,
-  UpdateStatus,
-  WorkspaceSessionPatch,
-  WorkspaceSessionState
+  UpdateStatus
 } from '../types'
-import type {
-  CreateLocalYiruProfileArgs,
-  CreateLocalYiruProfileResult,
-  FindYiruProfileProjectsByPathArgs,
-  FindYiruProfileProjectsByPathResult,
-  YiruProfileListResult,
-  SwitchYiruProfileArgs,
-  SwitchYiruProfileResult,
-  TransferYiruProfileProjectArgs,
-  TransferYiruProfileProjectResult
-} from '../yiru-profiles'
 
 export type {
   ShellOpenExternalEditorRequest,
@@ -160,7 +143,6 @@ import type {
   DeveloperPermissionState
 } from '../developer-permissions-types'
 import type { AppStarSource } from '../gh-star-source'
-import type { KeybindingActionId, KeybindingFileSnapshot } from '../keybindings'
 import type {
   OpenCodeUsageBreakdownKind,
   OpenCodeUsageBreakdownRow,
@@ -526,21 +508,6 @@ export type RepoHostAdapter = {
 
 export type PreloadApi = {
   app: AppApi
-  // Why: shell-only — a "Yiru profile" is a separate userData directory for
-  // *this* Electron installation (own store, own relaunch via app.relaunch())
-  // used to run multiple identities of the app side by side on one machine.
-  // It is not a runtime-host concept; no contract analog exists or should.
-  yiruProfiles: {
-    list: () => Promise<YiruProfileListResult>
-    createLocal: (args?: CreateLocalYiruProfileArgs) => Promise<CreateLocalYiruProfileResult>
-    switchProfile: (args: SwitchYiruProfileArgs) => Promise<SwitchYiruProfileResult>
-    transferProject: (
-      args: TransferYiruProfileProjectArgs
-    ) => Promise<TransferYiruProfileProjectResult>
-    findProjectProfiles: (
-      args: FindYiruProfileProjectsByPathArgs
-    ) => Promise<FindYiruProfileProjectsByPathResult>
-  }
   repoHost: RepoHostAdapter
   // Why: this group's `on*` members (onDeliveryResyncRequest, onData,
   // onReplay, onModelRestoreNeeded, onSideEffect, onExit,
@@ -867,55 +834,11 @@ export type PreloadApi = {
    *  intervene). Subject to the same per-session consent-mutation rate
    *  limit as `telemetrySetOptIn`. */
   telemetryAcknowledgeBanner: () => Promise<void>
-  // Why: shell-only — CIRCULAR, not just unmigrated. `get`/`getSync`/`set`/
-  // `updatePRBotAuthorOverride` all read and write `store.getSettings()` /
-  // `store.updateSettings()` (`main/ipc/settings.ts`), this Electron
-  // installation's own `GlobalSettings` — the object that carries
-  // `activeRuntimeEnvironmentId`, the very field that selects which runtime
-  // host a call should target. Routing these through the runtime contract
-  // would mean asking a host for the setting that decides which host to ask.
-  // The contract's identically-named `settings.get`/`settings.update`/
-  // `settings.updatePRBotAuthorOverride` (`main/runtime/rpc/methods/client-ui.ts`)
-  // are a different, narrower object (`RuntimeClientSettings` from
-  // `runtime.getClientSettings()`) scoped to whichever host answers — no
-  // `activeRuntimeEnvironmentId`, no theme/proxy/appearance fields. Same
-  // group name, unrelated concepts, same shape as the `diagnostics` over-merge
-  // above and the `session` over-merge below. `getSync` additionally can't
-  // cross a network hop by
-  // construction (terminal side-effect authority needs it before async
-  // hydration completes).
-  settings: {
-    get: () => Promise<GlobalSettings>
-    /** Synchronous persisted-settings read for startup decisions that cannot
-     *  wait for async hydration (terminal side-effect authority). Blocking
-     *  IPC — call sparingly. */
-    getSync: () => GlobalSettings | null
-    set: (args: Partial<GlobalSettings>) => Promise<GlobalSettings>
-    updatePRBotAuthorOverride: (args: { author: string; isBot: boolean }) => Promise<GlobalSettings>
-  }
   // Why: shell-only — `register` spins up a loopback-proxy route on the
   // machine that will open the link, gated to `sourceOwner.kind === 'local'`
   // call sites only. It never fires for an environment-hosted workspace.
   localhostWorktreeLabels: {
     register: (args: LocalhostWorktreeLabelRoute) => Promise<LocalhostWorktreeLabelResult>
-  }
-  // Why: shell-only — confirmed. `openFile`/`revealFile` need a native editor
-  // and Finder/Explorer, and `get`/`set`/`ensureFile`/`reload` read the local
-  // keybindings.json this installation owns. The web client keeps its own
-  // parallel per-browser localStorage document (`createWebKeybindingsApi` in
-  // `renderer/web/preload-api.ts`) rather than routing through any host
-  // contract — keyboard shortcuts are inherently per-client, not host state.
-  keybindings: {
-    get: () => Promise<KeybindingFileSnapshot>
-    ensureFile: () => Promise<KeybindingFileSnapshot>
-    setAction: (args: {
-      actionId: KeybindingActionId
-      bindings: string[] | null
-    }) => Promise<KeybindingFileSnapshot>
-    reload: () => Promise<KeybindingFileSnapshot>
-    openFile: () => Promise<KeybindingFileSnapshot>
-    revealFile: () => Promise<KeybindingFileSnapshot>
-    onChanged: (callback: (snapshot: KeybindingFileSnapshot) => void) => () => void
   }
   // Why: select/remove moved to the runtime contract (`accounts.selectCodex` /
   // `accounts.removeCodex`) — see provider-accounts-client.ts. add/reauthenticate
@@ -984,24 +907,6 @@ export type PreloadApi = {
     // plays a locally cached sound file through a preload-context `Audio`.
     playSound: (options?: { force?: boolean; volume?: number }) => Promise<NotificationSoundResult>
   }
-  // Why: shell-only — confirmed. `get`/`update` read the local `Store`-backed
-  // onboarding checklist (`main/persisted-state/onboarding.ts`), the same
-  // per-installation-file shape as `settings.get`/`set`. There is no
-  // `onboarding` contract namespace; the web client keeps a fully independent
-  // per-browser localStorage copy (`ONBOARDING_STORAGE_KEY` in
-  // `renderer/web/preload-api.ts`) rather than routing through any host. This
-  // first-run checklist is inherently per-client, not host state.
-  onboarding: {
-    get: () => Promise<OnboardingState>
-    // Why: main-process `updateOnboarding` merges checklist field-by-field, so
-    // callers can pass a partial checklist (e.g. just `{ addedRepo: true }`)
-    // without re-supplying every flag.
-    update: (
-      updates: Partial<Omit<OnboardingState, 'checklist'>> & {
-        checklist?: Partial<OnboardingState['checklist']>
-      }
-    ) => Promise<OnboardingState>
-  }
   // Why: shell-only — every check here (systemPreferences, osascript Apple
   // Events probe, a UDP bind for the local-network prompt) targets the OS
   // permission state of the Electron shell bundle running on this machine.
@@ -1030,42 +935,6 @@ export type PreloadApi = {
     delete: (id: string, fileName: string, kind?: 'image' | 'bundle') => Promise<void>
   }
   emulator: EmulatorApi
-  // Why: shell-only — this is the renderer's own client-side cache of GitHub
-  // PR info it already fetched, persisted so it survives a restart. The web
-  // adapter independently mirrors it with `localStorage` rather than calling
-  // any runtime procedure, confirming there is no host-side source behind it.
-  // Host-scoping already holds: the persisted blob is one flat map, but every
-  // key baked into it (`getGitHubPRCacheKey`/`getGitHubRepoCacheKey` in
-  // `renderer/store/slices/github-cache-key.ts`) is prefixed by the repo's
-  // owning execution host (or the focused runtime environment id when the
-  // repo has none), so entries from different hosts coexist in the same file
-  // without one host's cached PR data ever answering for another's.
-  cache: {
-    getGitHub: () => Promise<{
-      pr: Record<string, { data: PRInfo | null; fetchedAt: number }>
-    }>
-    setGitHub: (args: {
-      cache: {
-        pr: Record<string, { data: PRInfo | null; fetchedAt: number }>
-      }
-    }) => Promise<void>
-  }
-  // Why: shell-only — this is the shell's own per-remembered-host cache of
-  // window/tab state (`store.getWorkspaceSession`), addressed by `hostId` so
-  // switching runtimes restores that host's tabs. It is not the contract's
-  // `session.tabs` (worktree tab management) — same name, unrelated concept.
-  // The web adapter independently mirrors it with `localStorage`, never a
-  // runtime call, confirming there is no host-side source to route to.
-  session: {
-    // hostId is optional and defaults to the 'local' partition on the main
-    // side, so existing callers that omit it behave exactly as before.
-    get: (hostId?: ExecutionHostId) => Promise<WorkspaceSessionState>
-    set: (args: WorkspaceSessionState, hostId?: ExecutionHostId) => Promise<void>
-    patch: (args: WorkspaceSessionPatch, hostId?: ExecutionHostId) => Promise<void>
-    flush: () => Promise<void>
-    readTerminalScrollback: (args: { ref: string }) => string | null
-    setSync: (args: WorkspaceSessionState, hostId?: ExecutionHostId) => void
-  }
   // Why: shell-only, confirmed by slice 19 — every member here drives
   // `electron-updater` checking/downloading/installing a new build of *this*
   // Electron binary, on *this* machine. Distinct from the runtime contract's
