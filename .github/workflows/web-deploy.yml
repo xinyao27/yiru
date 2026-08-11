@@ -6,6 +6,10 @@ on:
       - main
     paths:
       - 'apps/web/**'
+      # Why: the product entry bundles both packages from workspace source, so
+      # either package changing must publish a fresh web bundle.
+      - 'packages/client/**'
+      - 'packages/shared/**'
       # Why: the landing page renders product URLs straight out of the shared
       # workbench model, so a link change there must reach production too.
       - 'packages/workbench-model/**'

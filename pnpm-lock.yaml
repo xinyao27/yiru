@@ -972,6 +972,9 @@ importers:
       '@tanstack/react-router':
         specifier: 'catalog:'
         version: 1.170.21(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      '@yiru/client':
+        specifier: workspace:*
+        version: link:../../packages/client
       '@yiru/workbench-model':
         specifier: workspace:*
         version: link:../../packages/workbench-model
