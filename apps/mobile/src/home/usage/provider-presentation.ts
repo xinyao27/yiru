@@ -1,6 +1,6 @@
 import type { RuntimeStatsUsageProvider } from '@yiru/runtime-protocol/mobile-runtime-types'
 
-import { translate } from '../../i18n/translate'
+import { translate } from '~/i18n/translate'
 
 export const HOME_USAGE_PROVIDERS: readonly RuntimeStatsUsageProvider[] = [
   'claude',

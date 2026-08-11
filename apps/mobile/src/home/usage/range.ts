@@ -3,7 +3,7 @@ import {
   type StatsUsageBoundedRange
 } from '@yiru/runtime-protocol/stats-usage-range'
 
-import { translate } from '../../i18n/translate'
+import { translate } from '~/i18n/translate'
 
 export const HOME_USAGE_RANGE_OPTIONS = BOUNDED_STATS_USAGE_RANGES.map((range) => ({
   label: usageRangeLabel(range),
