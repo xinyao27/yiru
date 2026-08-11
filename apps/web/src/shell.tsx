@@ -23,7 +23,7 @@ export type ShellProps = {
  *
  * Everything else the head needs comes from the routes' own `head()` through
  * HeadContent, and `Scripts` emits the router's dehydrated payload. Vite's hashed
- * asset tags are injected around this by apps/landing/scripts/prerender.mjs, which
+ * asset tags are injected around this by apps/web/scripts/prerender.mjs, which
  * is the only thing here Vite still owns.
  */
 export function Shell({ children }: ShellProps): React.JSX.Element {
@@ -42,7 +42,7 @@ export function Shell({ children }: ShellProps): React.JSX.Element {
             before main.tsx has run. `?direct` asks Vite for the compiled text rather
             than the module, which makes it a real render-blocking stylesheet. The
             import in main.tsx stays: that is what HMR listens to.
-            The build has no need for this; apps/landing/scripts/prerender.mjs injects the hashed
+            The build has no need for this; apps/web/scripts/prerender.mjs injects the hashed
             stylesheet right after the charset instead. */}
         {import.meta.env.DEV ? <link rel="stylesheet" href="/src/index.css?direct" /> : null}
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
@@ -56,7 +56,7 @@ export function Shell({ children }: ShellProps): React.JSX.Element {
             index.html — the only place that script tag normally lives — is bypassed.
             Rendering it here keeps the server and client trees identical, which
             injecting it into the HTML afterwards would not. The build has no need for
-            it: apps/landing/scripts/prerender.mjs injects the hashed tag instead. */}
+            it: apps/web/scripts/prerender.mjs injects the hashed tag instead. */}
         {import.meta.env.DEV ? <script type="module" src="/src/main.tsx" /> : null}
       </body>
     </html>

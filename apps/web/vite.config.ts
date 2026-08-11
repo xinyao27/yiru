@@ -21,7 +21,7 @@ import { defineConfig } from 'vite-plus'
  */
 function renderDocumentInDev(): Plugin {
   return {
-    name: 'yiru-landing:dev-ssr',
+    name: 'yiru-web:dev-ssr',
     apply: 'serve',
     transformIndexHtml: {
       order: 'pre',

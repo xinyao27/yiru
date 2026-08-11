@@ -19,7 +19,7 @@ const appIconsDir = join(resourcesDir, 'app-icons')
 const trayDir = join(resourcesDir, 'tray')
 const rendererPublicDir = join(desktopDir, 'src', 'renderer', 'public')
 const docsAssetsDir = join(repoRoot, 'docs', 'assets')
-const landingPublicDir = join(repoRoot, 'apps', 'landing', 'public')
+const sitePublicDir = join(repoRoot, 'apps', 'web', 'public')
 
 function readPng(path) {
   const png = PNG.sync.read(readFileSync(path))
@@ -223,7 +223,7 @@ writePng(join(mobileAssetsDir, 'favicon.png'), favicon)
 writePng(join(rendererPublicDir, 'favicon.png'), favicon)
 // Why: yiru.ai served its own copy of this, which had already drifted to
 // different bytes than the two the generator writes. One source, three writes.
-writePng(join(landingPublicDir, 'favicon.png'), favicon)
+writePng(join(sitePublicDir, 'favicon.png'), favicon)
 writePng(join(trayDir, 'yiru-windows-tray.png'), resizeImage(largeClassicIcon, 32, 32))
 writePng(join(trayDir, 'yiru-menu-barTemplate.png'), fitOnCanvas(blackSquareMask, 22, 14, 1))
 writePng(join(trayDir, 'yiru-menu-barTemplate@2x.png'), fitOnCanvas(blackSquareMask, 44, 28, 2))
