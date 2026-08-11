@@ -95,6 +95,7 @@ const KNOWN_REMODELINGS = new Map([
   // MISSING-FIELDS and bury the genuine findings.
   ['dirPath', 'relativePath'],
   ['filePath', 'relativePath'],
+  ['targetPath', 'relativePath'],
   // `rootPath` is the worktree root itself, so it maps onto the selector
   // rather than onto a path inside the worktree.
   ['rootPath', 'worktree'],
@@ -150,6 +151,19 @@ const MEMBER_ALIASES = new Map([
   ['fs.unwatchWorktree', 'files.unwatch'],
   ['fs.readLocalLogTail', 'files.readLogTail'],
   ['fs.startLocalLogTail', 'files.watchLogTail'],
+  // Why: D2 routes fileHost's worktree-owned paths through files.* using a
+  // worktree selector plus relative paths. Native downloads, authorized
+  // absolute paths, staging, and dropped-path mediation intentionally remain
+  // unmapped for the shell.files.* phase.
+  ['fileHost.readFile', 'files.readPreview'],
+  ['fileHost.writeFile', 'files.write'],
+  ['fileHost.createFile', 'files.createFile'],
+  ['fileHost.createDir', 'files.createDir'],
+  ['fileHost.rename', 'files.rename'],
+  ['fileHost.copy', 'files.copy'],
+  ['fileHost.deletePath', 'files.delete'],
+  ['fileHost.stat', 'files.stat'],
+  ['fileHost.pathExists', 'files.stat'],
   // Why: same rename-not-missing case — preload `syncFork` is the contract's
   // `git.forkSync`; `git-client.ts` already routes registered worktrees there.
   ['git.syncFork', 'git.forkSync'],

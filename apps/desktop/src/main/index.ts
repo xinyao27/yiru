@@ -1246,10 +1246,6 @@ function openMainWindow(): BrowserWindow {
     rateLimits,
     rendererWebContentsId,
     automations,
-    {
-      prepareForCodexLaunch: prepareCodexRuntimeHomeForLaunch,
-      prepareForClaudeLaunch: (target) => claudeRuntimeAuth!.prepareForClaudeLaunch(target)
-    },
     agentAwakeService ?? undefined,
     crashReports ?? undefined,
     keybindings,
