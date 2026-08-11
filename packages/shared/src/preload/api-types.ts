@@ -1,16 +1,16 @@
-import type { ElectronAPI } from '@electron-toolkit/preload'
 import type {
   ShellServicesNotificationsDismissOutput,
   ShellServicesNotificationsDisplayInput,
   ShellServicesNotificationsDisplayOutput
-} from '@yiru/runtime-protocol/contract'
+} from '@yiru/runtime-protocol/contract' with { 'resolution-mode': 'import' }
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
 /* eslint-disable max-lines -- Why: the preload contract is intentionally centralized in one declaration file so renderer and preload stay in lockstep when IPC surfaces change. */
 import type { HostedReviewProvider } from '@yiru/workbench-model/review'
 import type { ReadClipboardTextOptions } from '@yiru/workbench-model/ui'
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
-import type { AppIdentity } from '~shared/app-identity'
+
+import type { AppIdentity } from '../app-identity'
 import type {
   BrowserContextMenuDismissedEvent,
   BrowserContextMenuRequestedEvent,
@@ -19,12 +19,12 @@ import type {
   BrowserDownloadRequestedEvent,
   BrowserPermissionDeniedEvent,
   BrowserPopupEvent
-} from '~shared/browser/guest-events'
-import type { StartupCommandDelivery } from '~shared/codex-startup-delivery'
+} from '../browser/guest-events'
+import type { StartupCommandDelivery } from '../codex-startup-delivery'
 import type {
   CommitMessageAgentCapability,
   CommitMessageModelCapability
-} from '~shared/commit-message/agent-spec'
+} from '../commit-message/agent-spec'
 import type {
   CrashReportBreadcrumbData,
   CrashReportCopyDiagnosticsArgs,
@@ -33,10 +33,10 @@ import type {
   CrashReportSubmitResult,
   ReactErrorBoundaryReportArgs,
   ReactErrorBoundaryReportResult
-} from '~shared/crash-reporting'
-import type { FeatureInteractionId } from '~shared/feature-interactions'
-import type { FridaySession } from '~shared/friday-types'
-import type { GitHistoryOptions, GitHistoryResult } from '~shared/git/history'
+} from '../crash-reporting'
+import type { FeatureInteractionId } from '../feature-interactions'
+import type { FridaySession } from '../friday-types'
+import type { GitHistoryOptions, GitHistoryResult } from '../git/history'
 import type {
   GitAddTagResult,
   GitCheckoutCommitResult,
@@ -47,37 +47,37 @@ import type {
   GitRebaseOntoCommitResult,
   GitResetToCommitResult,
   GitRevertResult
-} from '~shared/git/write-op-results'
+} from '../git/write-op-results'
 import type {
   LocalhostWorktreeLabelResult,
   LocalhostWorktreeLabelRoute
-} from '~shared/localhost-worktree-labels'
-import type { NativeFileDropPayload } from '~shared/native-file-drop'
-import type { ProjectExecutionRuntimeResolution } from '~shared/project-execution-runtime'
-import type { PtyMainDeliveryDiagnostics } from '~shared/pty-delivery-diagnostics'
-import type { PtyModelRestoreNeededEvent } from '~shared/pty-model-restore-marker'
+} from '../localhost-worktree-labels'
+import type { NativeFileDropPayload } from '../native-file-drop'
+import type { ProjectExecutionRuntimeResolution } from '../project-execution-runtime'
+import type { PtyMainDeliveryDiagnostics } from '../pty-delivery-diagnostics'
+import type { PtyModelRestoreNeededEvent } from '../pty-model-restore-marker'
 import type {
   PtyRendererDeliveryHealthReply,
   PtyRendererDeliveryStateReport
-} from '~shared/pty-renderer-delivery-health'
-import type { RichMarkdownContextMenuCommandPayload } from '~shared/rich-markdown-context-menu'
-import type { PublicKnownRuntimeEnvironment } from '~shared/runtime-environments'
+} from '../pty-renderer-delivery-health'
+import type { RichMarkdownContextMenuCommandPayload } from '../rich-markdown-context-menu'
+import type { PublicKnownRuntimeEnvironment } from '../runtime-environments'
 import type {
   RuntimeBrowserDriverState,
   RuntimeStatus,
   RuntimeSyncWindowGraphResult,
   RuntimeSyncWindowGraph,
   RuntimeTerminalDriverState
-} from '~shared/runtime-types'
+} from '../runtime-types'
 import type {
   ShellOpenExternalEditorRequest,
   ShellOpenExternalEditorResult,
   ShellOpenLocalPathResult
-} from '~shared/shell-open-types'
-import type { ResolvedSourceControlAiGenerationParams } from '~shared/source-control/ai'
-import type { SourceControlAiSettings } from '~shared/source-control/ai-types'
-import type { TerminalSideEffectBatch } from '~shared/terminal/side-effect-facts'
-import type { TerminalViewAttributes } from '~shared/terminal/view-attributes'
+} from '../shell-open-types'
+import type { ResolvedSourceControlAiGenerationParams } from '../source-control/ai'
+import type { SourceControlAiSettings } from '../source-control/ai-types'
+import type { TerminalSideEffectBatch } from '../terminal/side-effect-facts'
+import type { TerminalViewAttributes } from '../terminal/view-attributes'
 import type {
   BrowserCookieImportResult,
   BrowserCertificateFailure,
@@ -117,7 +117,7 @@ import type {
   UpdateStatus,
   WorkspaceSessionPatch,
   WorkspaceSessionState
-} from '~shared/types'
+} from '../types'
 import type {
   CreateLocalYiruProfileArgs,
   CreateLocalYiruProfileResult,
@@ -128,13 +128,13 @@ import type {
   SwitchYiruProfileResult,
   TransferYiruProfileProjectArgs,
   TransferYiruProfileProjectResult
-} from '~shared/yiru-profiles'
+} from '../yiru-profiles'
 
 export type {
   ShellOpenExternalEditorRequest,
   ShellOpenExternalEditorResult,
   ShellOpenLocalPathResult
-} from '~shared/shell-open-types'
+} from '../shell-open-types'
 
 type RuntimeEnvironmentSubscriptionHandle = {
   unsubscribe: () => void
@@ -146,11 +146,12 @@ import type {
   AiVaultSubagentListArgs,
   AiVaultSubagentListResult
 } from '@yiru/workbench-model/agent'
+
 import type {
   AutomationDispatchResult,
   AutomationPrecheckResult,
   AutomationRun
-} from '~shared/automations-types'
+} from '../automations-types'
 import type {
   ClaudeUsageBreakdownKind,
   ClaudeUsageBreakdownRow,
@@ -161,7 +162,7 @@ import type {
   ClaudeUsageSessionRow,
   ClaudeUsageSnapshot,
   ClaudeUsageSummary
-} from '~shared/claude-usage-types'
+} from '../claude-usage-types'
 import type {
   CodexUsageBreakdownKind,
   CodexUsageBreakdownRow,
@@ -172,14 +173,14 @@ import type {
   CodexUsageSessionRow,
   CodexUsageSnapshot,
   CodexUsageSummary
-} from '~shared/codex-usage-types'
+} from '../codex-usage-types'
 import type {
   DeveloperPermissionId,
   DeveloperPermissionRequestResult,
   DeveloperPermissionState
-} from '~shared/developer-permissions-types'
-import type { AppStarSource } from '~shared/gh-star-source'
-import type { KeybindingActionId, KeybindingFileSnapshot } from '~shared/keybindings'
+} from '../developer-permissions-types'
+import type { AppStarSource } from '../gh-star-source'
+import type { KeybindingActionId, KeybindingFileSnapshot } from '../keybindings'
 import type {
   OpenCodeUsageBreakdownKind,
   OpenCodeUsageBreakdownRow,
@@ -190,9 +191,9 @@ import type {
   OpenCodeUsageSessionRow,
   OpenCodeUsageSnapshot,
   OpenCodeUsageSummary
-} from '~shared/opencode-usage-types'
-import type { TelemetryConsentState } from '~shared/telemetry-consent-types'
-import type { AgentKind, LaunchSource, RequestKind } from '~shared/telemetry-events'
+} from '../opencode-usage-types'
+import type { TelemetryConsentState } from '../telemetry-consent-types'
+import type { AgentKind, LaunchSource, RequestKind } from '../telemetry-events'
 
 export type BrowserApi = {
   // Why: host-state events also flow through `browser.guestEvents.subscribe`;
@@ -1975,13 +1976,5 @@ export type PreloadApi = {
     // Why: microphone permission belongs to the shell. Dictation lifecycle and
     // audio chunks use `speech.dictation.*` on the selected runtime host.
     ensureMicrophoneAccess: () => Promise<void>
-  }
-}
-
-declare global {
-  // oxlint-disable-next-line typescript-eslint/consistent-type-definitions -- declaration merging requires interface
-  interface Window {
-    electron: ElectronAPI
-    api: PreloadApi
   }
 }
