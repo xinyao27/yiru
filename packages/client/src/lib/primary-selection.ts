@@ -1,5 +1,5 @@
 import type { ReadClipboardTextOptions } from '@yiru/workbench-model/ui'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 
 export const PRIMARY_SELECTION_MAX_LENGTH = 65_536
 const PRIMARY_SELECTION_MAX_BYTES = PRIMARY_SELECTION_MAX_LENGTH * 4
@@ -26,14 +26,7 @@ function getSelectionClipboardApi(): SelectionClipboardApi | null {
   if (typeof window === 'undefined') {
     return null
   }
-  const uiApi = rendererHostClient?.ui
-  if (
-    typeof uiApi?.readSelectionClipboardText !== 'function' ||
-    typeof uiApi.writeSelectionClipboardText !== 'function'
-  ) {
-    return null
-  }
-  return uiApi
+  return shellClient.ui
 }
 
 export function shouldUseSystemPrimarySelectionClipboard(userAgent = getUserAgent()): boolean {

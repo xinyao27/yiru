@@ -1,7 +1,9 @@
 import { importShellBrowserCookies } from '~main/browser/browser'
+import { getShellClipboardService } from '~main/shell/clipboard'
 import { handleShellEventsSubscribe } from '~main/shell/events'
 import { getShellFilesService, requireShellRenderer } from '~main/shell/files'
 import { getRenderingHost, getShellPlatformService } from '~main/shell/platform'
+import { requireShellWindowUi } from '~main/shell/ui'
 
 import { runtimeImplementation } from '../access-middleware'
 import { wireRuntimeStream } from '../registered-stream'
@@ -158,6 +160,97 @@ export const shellRuntimeHandlers = {
       ),
       pickDirectory: runtimeImplementation.shell.platform.pickDirectory.handler(({ input }) =>
         getShellPlatformService().pickDirectory(input)
+      )
+    },
+    ui: {
+      readClipboardText: runtimeImplementation.shell.ui.readClipboardText.handler(({ input }) =>
+        getShellClipboardService().readText(input)
+      ),
+      readSelectionClipboardText: runtimeImplementation.shell.ui.readSelectionClipboardText.handler(
+        ({ input }) => getShellClipboardService().readSelectionText(input)
+      ),
+      readClipboardImageBase64: runtimeImplementation.shell.ui.readClipboardImageBase64.handler(
+        () => getShellClipboardService().readImageBase64()
+      ),
+      saveClipboardImageAsTempFile:
+        runtimeImplementation.shell.ui.saveClipboardImageAsTempFile.handler(({ input }) =>
+          getShellClipboardService().saveImageAsTempFile(input)
+        ),
+      writeClipboardText: runtimeImplementation.shell.ui.writeClipboardText.handler(({ input }) =>
+        getShellClipboardService().writeText(input.text)
+      ),
+      writeSelectionClipboardText:
+        runtimeImplementation.shell.ui.writeSelectionClipboardText.handler(({ input }) =>
+          getShellClipboardService().writeSelectionText(input.text)
+        ),
+      writeClipboardImage: runtimeImplementation.shell.ui.writeClipboardImage.handler(({ input }) =>
+        getShellClipboardService().writeImage(input.dataUrl)
+      ),
+      performNativePaste: runtimeImplementation.shell.ui.performNativePaste.handler(
+        ({ input, context }) => {
+          const renderer = requireShellRenderer(context.renderingWebContentsId)
+          if (input.mode === 'paste-and-match-style') {
+            renderer.pasteAndMatchStyle()
+            return
+          }
+          renderer.paste()
+        }
+      ),
+      writeClipboardFile: runtimeImplementation.shell.ui.writeClipboardFile.handler(({ input }) =>
+        getShellClipboardService().writeFile(input.filePath)
+      ),
+      getZoomLevel: runtimeImplementation.shell.ui.getZoomLevel.handler(({ context }) =>
+        requireShellRenderer(context.renderingWebContentsId).getZoomLevel()
+      ),
+      setZoomLevel: runtimeImplementation.shell.ui.setZoomLevel.handler(({ input, context }) => {
+        requireShellRenderer(context.renderingWebContentsId).setZoomLevel(input.level)
+      }),
+      syncTrafficLights: runtimeImplementation.shell.ui.syncTrafficLights.handler(
+        ({ input, context }) =>
+          requireShellWindowUi(context.renderingWebContentsId).syncTrafficLights(input.zoomFactor)
+      ),
+      setMarkdownEditorFocused: runtimeImplementation.shell.ui.setMarkdownEditorFocused.handler(
+        ({ input, context }) =>
+          requireShellWindowUi(context.renderingWebContentsId).setMarkdownEditorFocused(
+            input.focused
+          )
+      ),
+      setTerminalInputFocused: runtimeImplementation.shell.ui.setTerminalInputFocused.handler(
+        ({ input, context }) =>
+          requireShellWindowUi(context.renderingWebContentsId).setTerminalInputFocused(
+            input.focused
+          )
+      ),
+      setFloatingTerminalInputFocused:
+        runtimeImplementation.shell.ui.setFloatingTerminalInputFocused.handler(
+          ({ input, context }) =>
+            requireShellWindowUi(context.renderingWebContentsId).setFloatingTerminalInputFocused(
+              input.focused
+            )
+        ),
+      setShortcutRecorderFocused: runtimeImplementation.shell.ui.setShortcutRecorderFocused.handler(
+        ({ input, context }) =>
+          requireShellWindowUi(context.renderingWebContentsId).setShortcutRecorderFocused(
+            input.focused
+          )
+      ),
+      minimize: runtimeImplementation.shell.ui.minimize.handler(({ context }) =>
+        requireShellWindowUi(context.renderingWebContentsId).minimize()
+      ),
+      maximize: runtimeImplementation.shell.ui.maximize.handler(({ context }) =>
+        requireShellWindowUi(context.renderingWebContentsId).maximize()
+      ),
+      isMaximized: runtimeImplementation.shell.ui.isMaximized.handler(({ context }) =>
+        requireShellWindowUi(context.renderingWebContentsId).isMaximized()
+      ),
+      requestClose: runtimeImplementation.shell.ui.requestClose.handler(({ context }) =>
+        requireShellWindowUi(context.renderingWebContentsId).requestClose()
+      ),
+      popupMenu: runtimeImplementation.shell.ui.popupMenu.handler(({ context }) =>
+        requireShellWindowUi(context.renderingWebContentsId).popupMenu()
+      ),
+      confirmWindowClose: runtimeImplementation.shell.ui.confirmWindowClose.handler(({ context }) =>
+        requireShellWindowUi(context.renderingWebContentsId).confirmWindowClose()
       )
     }
   }

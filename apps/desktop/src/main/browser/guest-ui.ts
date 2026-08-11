@@ -329,7 +329,9 @@ export function setupGuestShortcutForwarding(args: {
   ): void => {
     event.preventDefault()
     const renderer = resolveRenderer(browserTabId)
-    renderer?.send('ui:zoomBrowserPage', direction)
+    if (renderer) {
+      publishShellEvent(renderer.id, { type: 'uiZoomBrowserPage', direction })
+    }
   }
 
   const forwardShortcutInput = (
@@ -360,21 +362,30 @@ export function setupGuestShortcutForwarding(args: {
       // only by suppressing the event here too.
       event.preventDefault()
       const renderer = resolveRenderer(browserTabId)
-      renderer?.send('ui:worktreeHistoryNavigate', action.direction)
+      if (renderer) {
+        publishShellEvent(renderer.id, {
+          type: 'uiWorktreeHistoryNavigate',
+          direction: action.direction
+        })
+      }
       return true
     }
 
     if (action?.type === 'toggleFloatingTerminal') {
       event.preventDefault()
       const renderer = resolveRenderer(browserTabId)
-      renderer?.send('ui:toggleFloatingTerminal')
+      if (renderer) {
+        publishShellEvent(renderer.id, { type: 'uiToggleFloatingTerminal' })
+      }
       return true
     }
 
     if (action?.type === 'toggleAssistant') {
       event.preventDefault()
       const renderer = resolveRenderer(browserTabId)
-      renderer?.send('ui:toggleAssistant')
+      if (renderer) {
+        publishShellEvent(renderer.id, { type: 'uiToggleAssistant' })
+      }
       return true
     }
 
@@ -394,14 +405,21 @@ export function setupGuestShortcutForwarding(args: {
     if (switchAllTypesDirection !== null) {
       event.preventDefault()
       const renderer = resolveRenderer(browserTabId)
-      renderer?.send('ui:switchTabAcrossAllTypes', switchAllTypesDirection)
+      if (renderer) {
+        publishShellEvent(renderer.id, {
+          type: 'uiSwitchTabAcrossAllTypes',
+          direction: switchAllTypesDirection
+        })
+      }
       return true
     }
 
     if (keybindingMatchesAction('tab.previousRecent', input, process.platform, keybindings)) {
       event.preventDefault()
       const renderer = resolveRenderer(browserTabId)
-      renderer?.send('ui:switchRecentTab')
+      if (renderer) {
+        publishShellEvent(renderer.id, { type: 'uiSwitchRecentTab' })
+      }
       return true
     }
 
@@ -420,7 +438,12 @@ export function setupGuestShortcutForwarding(args: {
     if (terminalTabDirection !== null) {
       event.preventDefault()
       const renderer = resolveRenderer(browserTabId)
-      renderer?.send('ui:switchTerminalTab', terminalTabDirection)
+      if (renderer) {
+        publishShellEvent(renderer.id, {
+          type: 'uiSwitchTerminalTab',
+          direction: terminalTabDirection
+        })
+      }
       return true
     }
 
@@ -429,27 +452,27 @@ export function setupGuestShortcutForwarding(args: {
       return false
     }
     if (keybindingMatchesAction('tab.newBrowser', input, process.platform, keybindings)) {
-      renderer.send('ui:newBrowserTab')
+      publishShellEvent(renderer.id, { type: 'uiNewBrowserTab' })
     } else if (
       process.platform === 'darwin' &&
       (isMobileEmulatorEnabled?.() ?? true) &&
       keybindingMatchesAction('tab.newSimulator', input, process.platform, keybindings)
     ) {
-      renderer.send('ui:newSimulatorTab')
+      publishShellEvent(renderer.id, { type: 'uiNewSimulatorTab' })
     } else if (keybindingMatchesAction('tab.newMarkdown', input, process.platform, keybindings)) {
-      renderer.send('ui:newMarkdownTab')
+      publishShellEvent(renderer.id, { type: 'uiNewMarkdownTab' })
     } else if (keybindingMatchesAction('tab.newTerminal', input, process.platform, keybindings)) {
       // Why: Cmd/Ctrl+T opens a terminal in the user's active terminal surface
       // even when focus is inside a browser guest. Cmd/Ctrl+Shift+B is the
       // dedicated shortcut for new browser tabs.
-      renderer.send('ui:newTerminalTab')
+      publishShellEvent(renderer.id, { type: 'uiNewTerminalTab' })
     } else if (
       keybindingMatchesAction('browser.focusAddressBar', input, process.platform, keybindings)
     ) {
       // Why: the address bar lives in the renderer chrome, not the guest
       // page. Forward Cmd/Ctrl+L out of the guest so the active BrowserPane
       // can focus its own input just like a standalone browser would.
-      renderer.send('ui:focusBrowserAddressBar')
+      publishShellEvent(renderer.id, { type: 'uiFocusBrowserAddressBar' })
     } else if (
       keybindingMatchesAction('browser.hardReload', input, process.platform, keybindings)
     ) {
@@ -457,57 +480,57 @@ export function setupGuestShortcutForwarding(args: {
       // (bypass cache). The guest would handle it natively, but Yiru's webview
       // reloadIgnoringCache() call must come from the renderer side so it goes
       // through the same parked-webview ref that owns the guest surface.
-      renderer.send('ui:hardReloadBrowserPage')
+      publishShellEvent(renderer.id, { type: 'uiHardReloadBrowserPage' })
     } else if (keybindingMatchesAction('browser.reload', input, process.platform, keybindings)) {
       // Why: same as above for soft reload — Cmd/Ctrl+R must be forwarded so
       // the renderer can call reload() on its own webview ref rather than
       // relying on the guest's built-in shortcut, which may not reach the
       // parked-webview eviction logic.
-      renderer.send('ui:reloadBrowserPage')
+      publishShellEvent(renderer.id, { type: 'uiReloadBrowserPage' })
     } else if (keybindingMatchesAction('browser.find', input, process.platform, keybindings)) {
       // Why: Cmd/Ctrl+F must be forwarded out of the guest so the renderer can
       // open its own find-in-page bar and call webview.findInPage(). Letting the
       // guest handle it natively would open Chromium's built-in find UI inside
       // the guest frame, which is invisible behind Yiru's chrome.
-      renderer.send('ui:findInBrowserPage')
+      publishShellEvent(renderer.id, { type: 'uiFindInBrowserPage' })
     } else if (keybindingMatchesAction('browser.back', input, process.platform, keybindings)) {
       // Why: macOS Logitech side-button remaps arrive as browser history
       // keystrokes, not mouse/app-command events. Forward out of the guest so
       // the renderer-owned webview ref can call goBack().
-      renderer.send('ui:browserHistoryNavigate', 'back')
+      publishShellEvent(renderer.id, { type: 'uiBrowserHistoryNavigate', direction: 'back' })
     } else if (keybindingMatchesAction('browser.forward', input, process.platform, keybindings)) {
       // Why: same as browser.back; the focused guest cannot call the
       // renderer-owned parked webview's goForward() path directly.
-      renderer.send('ui:browserHistoryNavigate', 'forward')
+      publishShellEvent(renderer.id, { type: 'uiBrowserHistoryNavigate', direction: 'forward' })
     } else if (keybindingMatchesAction('tab.close', input, process.platform, keybindings)) {
-      renderer.send('ui:closeActiveTab')
+      publishShellEvent(renderer.id, { type: 'uiCloseActiveTab' })
     } else if (keybindingMatchesAction('tab.nextSameType', input, process.platform, keybindings)) {
-      renderer.send('ui:switchTab', 1)
+      publishShellEvent(renderer.id, { type: 'uiSwitchTab', direction: 1 })
     } else if (
       keybindingMatchesAction('tab.previousSameType', input, process.platform, keybindings)
     ) {
-      renderer.send('ui:switchTab', -1)
+      publishShellEvent(renderer.id, { type: 'uiSwitchTab', direction: -1 })
     } else if (action?.type === 'toggleWorktreePalette') {
-      renderer.send('ui:toggleWorktreePalette')
+      publishShellEvent(renderer.id, { type: 'uiToggleWorktreePalette' })
     } else if (action?.type === 'openQuickOpen') {
-      renderer.send('ui:openQuickOpen')
+      publishShellEvent(renderer.id, { type: 'uiOpenQuickOpen' })
     } else if (action?.type === 'toggleQuickCommandsMenu') {
-      renderer.send('ui:toggleQuickCommandsMenu')
+      publishShellEvent(renderer.id, { type: 'uiToggleQuickCommandsMenu' })
     } else if (action?.type === 'openNewWorkspace') {
-      renderer.send('ui:openNewWorkspace')
+      publishShellEvent(renderer.id, { type: 'uiOpenNewWorkspace' })
     } else if (action?.type === 'openSettings') {
-      renderer.send('ui:openSettings')
+      publishShellEvent(renderer.id, { type: 'uiOpenSettings' })
     } else if (action?.type === 'forceReload') {
       renderer.reloadIgnoringCache()
     } else if (action?.type === 'jumpToWorktreeIndex') {
-      renderer.send('ui:jumpToWorktreeIndex', action.index)
+      publishShellEvent(renderer.id, { type: 'uiJumpToWorktreeIndex', index: action.index })
     } else if (action?.type === 'jumpToTabIndex') {
-      renderer.send('ui:jumpToTabIndex', action.index)
+      publishShellEvent(renderer.id, { type: 'uiJumpToTabIndex', index: action.index })
     } else if (action?.type === 'dictationKeyDown') {
       if (!shouldForwardDictationShortcut?.()) {
         return false
       }
-      renderer.send('ui:dictationKeyDown')
+      publishShellEvent(renderer.id, { type: 'uiDictationKeyDown' })
     } else {
       return false
     }
@@ -526,7 +549,12 @@ export function setupGuestShortcutForwarding(args: {
       event.preventDefault()
       ctrlTabSwitching = true
       const renderer = resolveRenderer(browserTabId)
-      renderer?.send('ui:ctrlTabKeyDown', { shiftKey: input.shift === true })
+      if (renderer) {
+        publishShellEvent(renderer.id, {
+          type: 'uiCtrlTabKeyDown',
+          shiftKey: input.shift === true
+        })
+      }
       return
     }
 
@@ -534,7 +562,9 @@ export function setupGuestShortcutForwarding(args: {
       event.preventDefault()
       ctrlTabSwitching = false
       const renderer = resolveRenderer(browserTabId)
-      renderer?.send('ui:ctrlTabKeyUp')
+      if (renderer) {
+        publishShellEvent(renderer.id, { type: 'uiCtrlTabKeyUp' })
+      }
       return
     }
 
@@ -625,7 +655,10 @@ export function setupGuestMouseWheelZoomForwarding(args: {
     // handlers, so consume it here and forward to the existing page-zoom path.
     event.preventDefault()
     markGuestWheelZoom(guest, direction)
-    resolveRenderer(browserTabId)?.send('ui:zoomBrowserPage', direction)
+    const renderer = resolveRenderer(browserTabId)
+    if (renderer) {
+      publishShellEvent(renderer.id, { type: 'uiZoomBrowserPage', direction })
+    }
   }
 
   guest.on('before-mouse-event', handler)

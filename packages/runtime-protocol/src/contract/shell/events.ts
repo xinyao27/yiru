@@ -1,6 +1,7 @@
 import { eventIterator, type, type ContractRouter } from '@orpc/contract'
 
 import { withAccess, type RuntimeProcedureMeta } from '../access-meta.js'
+import type { ShellUiEvent } from './ui-events.js'
 
 export type ShellBrowserContextMenuRequestedEvent = {
   type: 'browserContextMenuRequested'
@@ -24,7 +25,7 @@ export type ShellBrowserEvent =
   | { type: 'browserGrabModeToggle'; browserPageId: string }
   | { type: 'browserGrabActionShortcut'; browserPageId: string; key: 'c' | 's' }
 
-export type ShellEvent = ShellBrowserEvent
+export type ShellEvent = ShellBrowserEvent | ShellUiEvent
 
 export type SequencedShellEvent = ShellEvent & { seq: number }
 
@@ -34,6 +35,8 @@ export type ShellSubscriptionEvent =
   | SequencedShellEvent
 
 export type ShellEventsSubscribeInput = { lastSeenSeq?: number }
+
+export type * from './ui-events.js'
 
 const SHELL_READ_ACCESS = {
   scope: 'host',

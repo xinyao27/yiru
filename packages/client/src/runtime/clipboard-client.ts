@@ -1,13 +1,14 @@
 import { CLIPBOARD_IMAGE_UPLOAD_CHUNK_BASE64_CHARS } from '@yiru/runtime-protocol/clipboard'
 
 import { createLocalRuntimeOrpcClient } from './orpc-client'
+import { shellClient } from './shell-client'
 
 const CLIPBOARD_IMAGE_SAVE_TIMEOUT_MS = 30_000
 
 export async function saveLocalClipboardImageAsTempFile(
   connectionId?: string | null
 ): Promise<string | null> {
-  const contentBase64 = await window.api.ui.readClipboardImageBase64()
+  const contentBase64 = await shellClient.ui.readClipboardImageBase64()
   if (!contentBase64) {
     return null
   }

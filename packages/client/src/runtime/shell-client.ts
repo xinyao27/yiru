@@ -1,10 +1,11 @@
 import { electronShellPlatformApi, type ShellPlatformApi } from './shell-platform-client'
+import { electronShellUiApi, type ShellUiApi } from './shell-ui-client'
 import { getWebShellApi } from './web-shell-client'
 import { getWebShellUIApi } from './web-ui-shell-client'
 
 type RendererShellClient = {
   shell: ShellPlatformApi
-  ui: Omit<Window['api']['ui'], 'get' | 'set' | 'recordFeatureInteraction'>
+  ui: ShellUiApi
 }
 
 function isWebShellClient(): boolean {
@@ -18,6 +19,6 @@ export const shellClient: RendererShellClient = {
     return isWebShellClient() ? getWebShellApi() : electronShellPlatformApi
   },
   get ui() {
-    return isWebShellClient() ? getWebShellUIApi() : window.api.ui
+    return isWebShellClient() ? getWebShellUIApi() : electronShellUiApi
   }
 }

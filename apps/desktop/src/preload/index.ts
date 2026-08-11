@@ -8,11 +8,10 @@ import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 import type { PreloadApi } from '@yiru/shared/preload/api-types'
 import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
 import type { AiVaultListArgs, AiVaultSubagentListArgs } from '@yiru/workbench-model/agent'
-import type { ReadClipboardTextOptions } from '@yiru/workbench-model/ui'
 /* eslint-disable max-lines -- Why: the preload bridge is the audited contract between
 renderer and Electron. Keeping the IPC surface co-located in one file makes security
 review and type drift checks easier than scattering these bindings across modules. */
-import { contextBridge, ipcRenderer, webFrame, webUtils } from 'electron'
+import { contextBridge, ipcRenderer, webUtils } from 'electron'
 import type { AppIdentity } from '~shared/app-identity'
 import type {
   AutomationDispatchResult,
@@ -47,7 +46,6 @@ import {
   NATIVE_FILE_DROP_MAX_PATHS,
   resolveNativeFileDropPath,
   type NativeDropResolution,
-  type NativeFileDropPayload,
   type NativeFileDropPathEntry
 } from '~shared/native-file-drop'
 import type { ProjectExecutionRuntimeResolution } from '~shared/project-execution-runtime'
@@ -57,10 +55,6 @@ import type {
   PtyRendererDeliveryHealthReply,
   PtyRendererDeliveryStateReport
 } from '~shared/pty-renderer-delivery-health'
-import {
-  richMarkdownContextMenuCommandChannel,
-  type RichMarkdownContextMenuCommandPayload
-} from '~shared/rich-markdown-context-menu'
 import type { PublicKnownRuntimeEnvironment } from '~shared/runtime-environments'
 import {
   RUNTIME_ORPC_CONNECT_PORT_CHANNEL,
@@ -141,11 +135,6 @@ function forwardShellServicesPort(event: Electron.IpcRendererEvent): void {
 
 ipcRenderer.on(SHELL_SERVICES_CONNECT_CHANNEL, forwardShellServicesPort)
 
-type NativeFileDropCallback = (data: NativeFileDropPayload) => void
-
-const nativeFileDropCallbacks: NativeFileDropCallback[] = []
-let nativeFileDropListenerRegistered = false
-
 type AppRestartPrepOptions = {
   startedEventName: string
   abortedEventName: string
@@ -192,32 +181,6 @@ async function prepareRendererForAppRestart({
   // Dispatch beforeunload now so terminal buffers are captured while panes are
   // still mounted; update installs later bypass the ordinary close sequence.
   window.dispatchEvent(new Event('beforeunload'))
-}
-
-const onNativeFileDrop = (_event: Electron.IpcRendererEvent, data: NativeFileDropPayload): void => {
-  for (const callback of Array.from(nativeFileDropCallbacks)) {
-    callback(data)
-  }
-}
-
-function subscribeNativeFileDrop(callback: NativeFileDropCallback): () => void {
-  nativeFileDropCallbacks.push(callback)
-  if (!nativeFileDropListenerRegistered) {
-    // Why: terminal panes subscribe per visible split group, so the IPC layer
-    // must keep one real listener and fan out locally to avoid listener warnings.
-    ipcRenderer.on('terminal:file-drop', onNativeFileDrop)
-    nativeFileDropListenerRegistered = true
-  }
-  return () => {
-    const callbackIndex = nativeFileDropCallbacks.indexOf(callback)
-    if (callbackIndex !== -1) {
-      nativeFileDropCallbacks.splice(callbackIndex, 1)
-    }
-    if (nativeFileDropCallbacks.length === 0 && nativeFileDropListenerRegistered) {
-      ipcRenderer.removeListener('terminal:file-drop', onNativeFileDrop)
-      nativeFileDropListenerRegistered = false
-    }
-  }
 }
 
 // Why: one shared HTMLAudioElement per sound file, restarted from t=0 on each
@@ -1154,344 +1117,7 @@ const api = {
   ui: {
     get: () => ipcRenderer.invoke('ui:get'),
     set: (args) => ipcRenderer.invoke('ui:set', args),
-    recordFeatureInteraction: (id) => ipcRenderer.invoke('ui:recordFeatureInteraction', id),
-    onOpenSettings: (callback: () => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent) => callback()
-      ipcRenderer.on('ui:openSettings', listener)
-      return () => ipcRenderer.removeListener('ui:openSettings', listener)
-    },
-    consumePendingOpenSettings: (): Promise<boolean> =>
-      ipcRenderer.invoke('ui:consumePendingOpenSettings'),
-    onOpenSetupGuide: (callback: () => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent) => callback()
-      ipcRenderer.on('ui:openSetupGuide', listener)
-      return () => ipcRenderer.removeListener('ui:openSetupGuide', listener)
-    },
-    onOpenFeatureTour: (callback: () => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent) => callback()
-      ipcRenderer.on('ui:openFeatureTour', listener)
-      return () => ipcRenderer.removeListener('ui:openFeatureTour', listener)
-    },
-    onOpenCrashReport: (callback: () => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent) => callback()
-      ipcRenderer.on('ui:openCrashReport', listener)
-      return () => ipcRenderer.removeListener('ui:openCrashReport', listener)
-    },
-    onToggleLeftSidebar: (callback: () => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent) => callback()
-      ipcRenderer.on('ui:toggleLeftSidebar', listener)
-      return () => ipcRenderer.removeListener('ui:toggleLeftSidebar', listener)
-    },
-    onToggleRightSidebar: (callback: () => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent) => callback()
-      ipcRenderer.on('ui:toggleRightSidebar', listener)
-      return () => ipcRenderer.removeListener('ui:toggleRightSidebar', listener)
-    },
-    onToggleWorktreePalette: (callback: () => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent) => callback()
-      ipcRenderer.on('ui:toggleWorktreePalette', listener)
-      return () => ipcRenderer.removeListener('ui:toggleWorktreePalette', listener)
-    },
-    onToggleFloatingTerminal: (callback: () => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent) => callback()
-      ipcRenderer.on('ui:toggleFloatingTerminal', listener)
-      return () => ipcRenderer.removeListener('ui:toggleFloatingTerminal', listener)
-    },
-    onToggleAssistant: (callback: () => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent) => callback()
-      ipcRenderer.on('ui:toggleAssistant', listener)
-      return () => ipcRenderer.removeListener('ui:toggleAssistant', listener)
-    },
-    onTerminalShortcutCaptured: (
-      callback: (data: { actionId: KeybindingActionId }) => void
-    ): (() => void) => {
-      const listener = (
-        _event: Electron.IpcRendererEvent,
-        data: { actionId: KeybindingActionId }
-      ) => callback(data)
-      ipcRenderer.on('ui:terminalShortcutCaptured', listener)
-      return () => ipcRenderer.removeListener('ui:terminalShortcutCaptured', listener)
-    },
-    onOpenQuickOpen: (callback: () => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent) => callback()
-      ipcRenderer.on('ui:openQuickOpen', listener)
-      return () => ipcRenderer.removeListener('ui:openQuickOpen', listener)
-    },
-    onToggleQuickCommandsMenu: (callback: () => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent) => callback()
-      ipcRenderer.on('ui:toggleQuickCommandsMenu', listener)
-      return () => ipcRenderer.removeListener('ui:toggleQuickCommandsMenu', listener)
-    },
-    onOpenNewWorkspace: (callback: () => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent) => callback()
-      ipcRenderer.on('ui:openNewWorkspace', listener)
-      return () => ipcRenderer.removeListener('ui:openNewWorkspace', listener)
-    },
-    onDeleteCurrentWorkspace: (callback: () => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent) => callback()
-      ipcRenderer.on('ui:deleteCurrentWorkspace', listener)
-      return () => ipcRenderer.removeListener('ui:deleteCurrentWorkspace', listener)
-    },
-    onJumpToWorktreeIndex: (callback: (index: number) => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent, index: number) => callback(index)
-      ipcRenderer.on('ui:jumpToWorktreeIndex', listener)
-      return () => ipcRenderer.removeListener('ui:jumpToWorktreeIndex', listener)
-    },
-    onJumpToTabIndex: (callback: (index: number) => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent, index: number) => callback(index)
-      ipcRenderer.on('ui:jumpToTabIndex', listener)
-      return () => ipcRenderer.removeListener('ui:jumpToTabIndex', listener)
-    },
-    onWorktreeHistoryNavigate: (
-      callback: (direction: 'back' | 'forward') => void
-    ): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent, direction: 'back' | 'forward') =>
-        callback(direction)
-      ipcRenderer.on('ui:worktreeHistoryNavigate', listener)
-      return () => ipcRenderer.removeListener('ui:worktreeHistoryNavigate', listener)
-    },
-    onNewBrowserTab: (callback: () => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent) => callback()
-      ipcRenderer.on('ui:newBrowserTab', listener)
-      return () => ipcRenderer.removeListener('ui:newBrowserTab', listener)
-    },
-    onNewMarkdownTab: (callback: () => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent) => callback()
-      ipcRenderer.on('ui:newMarkdownTab', listener)
-      return () => ipcRenderer.removeListener('ui:newMarkdownTab', listener)
-    },
-    onNewSimulatorTab: (callback: () => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent) => callback()
-      ipcRenderer.on('ui:newSimulatorTab', listener)
-      return () => ipcRenderer.removeListener('ui:newSimulatorTab', listener)
-    },
-    onNewTerminalTab: (callback: () => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent) => callback()
-      ipcRenderer.on('ui:newTerminalTab', listener)
-      return () => ipcRenderer.removeListener('ui:newTerminalTab', listener)
-    },
-    onFocusBrowserAddressBar: (callback: () => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent) => callback()
-      ipcRenderer.on('ui:focusBrowserAddressBar', listener)
-      return () => ipcRenderer.removeListener('ui:focusBrowserAddressBar', listener)
-    },
-    onFindInBrowserPage: (callback: () => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent) => callback()
-      ipcRenderer.on('ui:findInBrowserPage', listener)
-      return () => ipcRenderer.removeListener('ui:findInBrowserPage', listener)
-    },
-    onReloadBrowserPage: (callback: () => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent) => callback()
-      ipcRenderer.on('ui:reloadBrowserPage', listener)
-      return () => ipcRenderer.removeListener('ui:reloadBrowserPage', listener)
-    },
-    onBrowserHistoryNavigate: (callback: (direction: 'back' | 'forward') => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent, direction: 'back' | 'forward'): void =>
-        callback(direction)
-      ipcRenderer.on('ui:browserHistoryNavigate', listener)
-      return () => ipcRenderer.removeListener('ui:browserHistoryNavigate', listener)
-    },
-    onZoomBrowserPage: (callback: (direction: 'in' | 'out' | 'reset') => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent, direction: 'in' | 'out' | 'reset') =>
-        callback(direction)
-      ipcRenderer.on('ui:zoomBrowserPage', listener)
-      return () => ipcRenderer.removeListener('ui:zoomBrowserPage', listener)
-    },
-    onHardReloadBrowserPage: (callback: () => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent) => callback()
-      ipcRenderer.on('ui:hardReloadBrowserPage', listener)
-      return () => ipcRenderer.removeListener('ui:hardReloadBrowserPage', listener)
-    },
-    onCloseActiveTab: (callback: () => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent) => callback()
-      ipcRenderer.on('ui:closeActiveTab', listener)
-      return () => ipcRenderer.removeListener('ui:closeActiveTab', listener)
-    },
-    onSwitchTab: (callback: (direction: 1 | -1) => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent, direction: 1 | -1) => callback(direction)
-      ipcRenderer.on('ui:switchTab', listener)
-      return () => ipcRenderer.removeListener('ui:switchTab', listener)
-    },
-    onSwitchTabAcrossAllTypes: (callback: (direction: 1 | -1) => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent, direction: 1 | -1) => callback(direction)
-      ipcRenderer.on('ui:switchTabAcrossAllTypes', listener)
-      return () => ipcRenderer.removeListener('ui:switchTabAcrossAllTypes', listener)
-    },
-    onSwitchRecentTab: (callback: () => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent) => callback()
-      ipcRenderer.on('ui:switchRecentTab', listener)
-      return () => ipcRenderer.removeListener('ui:switchRecentTab', listener)
-    },
-    onSwitchTerminalTab: (callback: (direction: 1 | -1) => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent, direction: 1 | -1) => callback(direction)
-      ipcRenderer.on('ui:switchTerminalTab', listener)
-      return () => ipcRenderer.removeListener('ui:switchTerminalTab', listener)
-    },
-    onCtrlTabKeyDown: (callback: (data: { shiftKey: boolean }) => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent, data: { shiftKey: boolean }) =>
-        callback(data)
-      ipcRenderer.on('ui:ctrlTabKeyDown', listener)
-      return () => ipcRenderer.removeListener('ui:ctrlTabKeyDown', listener)
-    },
-    onCtrlTabKeyUp: (callback: () => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent) => callback()
-      ipcRenderer.on('ui:ctrlTabKeyUp', listener)
-      return () => ipcRenderer.removeListener('ui:ctrlTabKeyUp', listener)
-    },
-    onToggleStatusBar: (callback: () => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent) => callback()
-      ipcRenderer.on('ui:toggleStatusBar', listener)
-      return () => ipcRenderer.removeListener('ui:toggleStatusBar', listener)
-    },
-    onExportPdfRequested: (callback: () => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent) => callback()
-      ipcRenderer.on('export:requestPdf', listener)
-      return () => ipcRenderer.removeListener('export:requestPdf', listener)
-    },
-    onAppMenuPaste: (callback: () => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent) => callback()
-      ipcRenderer.on('ui:appMenuPaste', listener)
-      return () => ipcRenderer.removeListener('ui:appMenuPaste', listener)
-    },
-    onEditableContextPaste: (
-      callback: (data: { plainTextOnly: boolean }) => void
-    ): (() => void) => {
-      const listener = (
-        _event: Electron.IpcRendererEvent,
-        data: { plainTextOnly: boolean }
-      ): void => callback({ plainTextOnly: data?.plainTextOnly === true })
-      ipcRenderer.on('ui:editableContextPaste', listener)
-      return () => ipcRenderer.removeListener('ui:editableContextPaste', listener)
-    },
-    onDictationKeyDown: (callback: () => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent) => callback()
-      ipcRenderer.on('ui:dictationKeyDown', listener)
-      return () => ipcRenderer.removeListener('ui:dictationKeyDown', listener)
-    },
-    onTerminalZoom: (callback: (direction: 'in' | 'out' | 'reset') => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent, direction: 'in' | 'out' | 'reset') =>
-        callback(direction)
-      ipcRenderer.on('terminal:zoom', listener)
-      return () => ipcRenderer.removeListener('terminal:zoom', listener)
-    },
-    readClipboardText: (options?: ReadClipboardTextOptions): Promise<string> =>
-      ipcRenderer.invoke('clipboard:readText', options),
-    readSelectionClipboardText: (options?: ReadClipboardTextOptions): Promise<string> =>
-      ipcRenderer.invoke('clipboard:readSelectionText', options),
-    readClipboardImageBase64: (): Promise<string | null> =>
-      ipcRenderer.invoke('clipboard:readImageBase64'),
-    saveClipboardImageAsTempFile: (args?: {
-      connectionId?: string | null
-      runtimeEnvironmentId?: string | null
-    }): Promise<string | null> => ipcRenderer.invoke('clipboard:saveImageAsTempFile', args),
-    writeClipboardText: (text: string): Promise<void> =>
-      ipcRenderer.invoke('clipboard:writeText', text),
-    writeSelectionClipboardText: (text: string): Promise<void> =>
-      ipcRenderer.invoke('clipboard:writeSelectionText', text),
-    writeClipboardImage: (dataUrl: string): Promise<void> =>
-      ipcRenderer.invoke('clipboard:writeImage', dataUrl),
-    performNativePaste: (options?: { mode?: 'paste' | 'paste-and-match-style' }): void => {
-      ipcRenderer.send('ui:performNativePaste', {
-        mode: options?.mode === 'paste-and-match-style' ? 'paste-and-match-style' : 'paste'
-      })
-    },
-    writeClipboardFile: (
-      args: { filePath: string } | string
-    ): Promise<{ ok: boolean; reason?: string }> => ipcRenderer.invoke('clipboard:writeFile', args),
-    onFileDrop: (callback: (data: NativeFileDropPayload) => void): (() => void) =>
-      subscribeNativeFileDrop(callback),
-    getZoomLevel: (): number => webFrame.getZoomLevel(),
-    setZoomLevel: (level: number): void => webFrame.setZoomLevel(level),
-    syncTrafficLights: (zoomFactor: number): void =>
-      ipcRenderer.send('ui:sync-traffic-lights', zoomFactor),
-    // Why: one-way send (not invoke) so the main-process before-input-event
-    // handler can read the mirrored flag synchronously without a round-trip.
-    // The carve-out in create-main-window.ts uses this to skip Cmd+B interception
-    // while the markdown editor owns focus, letting TipTap apply bold instead.
-    setMarkdownEditorFocused: (focused: boolean): void => {
-      ipcRenderer.send('ui:setMarkdownEditorFocused', focused)
-    },
-    setTerminalInputFocused: (focused: boolean): void => {
-      ipcRenderer.send('ui:setTerminalInputFocused', focused)
-    },
-    setFloatingTerminalInputFocused: (focused: boolean): void => {
-      ipcRenderer.send('ui:setFloatingTerminalInputFocused', focused)
-    },
-    setShortcutRecorderFocused: (focused: boolean): void => {
-      ipcRenderer.send('ui:setShortcutRecorderFocused', focused)
-    },
-    onRichMarkdownContextCommand: (
-      callback: (payload: RichMarkdownContextMenuCommandPayload) => void
-    ): (() => void) => {
-      const listener = (
-        _event: Electron.IpcRendererEvent,
-        payload: RichMarkdownContextMenuCommandPayload
-      ) => callback(payload)
-      ipcRenderer.on(richMarkdownContextMenuCommandChannel, listener)
-      return () => ipcRenderer.removeListener(richMarkdownContextMenuCommandChannel, listener)
-    },
-    onFullscreenChanged: (callback: (isFullScreen: boolean) => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent, isFullScreen: boolean) =>
-        callback(isFullScreen)
-      ipcRenderer.on('window:fullscreen-changed', listener)
-      return () => ipcRenderer.removeListener('window:fullscreen-changed', listener)
-    },
-    /** Fired when the OS resumes from sleep (main relays powerMonitor). A
-     *  focus-preserving display wake fires no renderer focus/visibility
-     *  events, so terminal wake recovery listens to this explicit signal. */
-    onSystemResumed: (callback: () => void): (() => void) => {
-      const listener = () => callback()
-      ipcRenderer.on('system:resumed', listener)
-      return () => ipcRenderer.removeListener('system:resumed', listener)
-    },
-    /** Desktop custom titlebar only: minimize via renderer-drawn window controls. */
-    minimize: (): void => {
-      ipcRenderer.send('window:minimize')
-    },
-    /** Desktop custom titlebar only: toggle maximize/restore via renderer-drawn controls. */
-    maximize: (): void => {
-      ipcRenderer.send('window:maximize')
-    },
-    /** Desktop custom titlebar only: read the current maximize state on mount, since
-     *  window:maximize-changed only fires on transitions and a window that
-     *  starts maximized would otherwise show the wrong icon. */
-    isMaximized: (): Promise<boolean> => ipcRenderer.invoke('window:isMaximized'),
-    /** Desktop custom titlebar only: subscribe to maximize state changes so the renderer-drawn
-     *  maximize button can show the correct restore/maximize icon. */
-    onMaximizeChanged: (callback: (isMaximized: boolean) => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent, isMaximized: boolean) =>
-        callback(isMaximized)
-      ipcRenderer.on('window:maximize-changed', listener)
-      return () => ipcRenderer.removeListener('window:maximize-changed', listener)
-    },
-    /** Desktop custom titlebar only: request a close from the renderer-drawn close button.
-     *  Routes through main so the BrowserWindow 'close' event fires and the
-     *  terminal-running confirmation guard in the renderer stays active.
-     *  window.close() is unreliable in sandboxed renderers. */
-    requestClose: (): void => {
-      ipcRenderer.send('window:request-close')
-    },
-    /** Desktop custom titlebar only: pop up the application menu at the cursor position.
-     *  Replicates the Alt-key reveal that autoHideMenuBar normally provides,
-     *  triggered by the ··· button in the renderer-drawn title bar. */
-    popupMenu: (): void => {
-      ipcRenderer.send('menu:popup')
-    },
-    /** Fired by the main process when the user tries to close the window
-     *  (X button, Cmd+Q, etc.). Renderer should show a confirmation dialog
-     *  if terminals are still running, then call confirmWindowClose().
-     *  When isQuitting is true, the close was initiated by app.quit() (Cmd+Q)
-     *  and the renderer should skip the running-process dialog. */
-    onWindowCloseRequested: (callback: (data: { isQuitting: boolean }) => void): (() => void) => {
-      const listener = (_event: Electron.IpcRendererEvent, data: { isQuitting: boolean }) =>
-        callback(data ?? { isQuitting: false })
-      ipcRenderer.on('window:close-requested', listener)
-      return () => ipcRenderer.removeListener('window:close-requested', listener)
-    },
-    /** Tell the main process to proceed with the window close. */
-    confirmWindowClose: (): void => {
-      ipcRenderer.send('window:confirm-close')
-    }
+    recordFeatureInteraction: (id) => ipcRenderer.invoke('ui:recordFeatureInteraction', id)
   } satisfies PreloadApi['ui'],
 
   claudeUsage: {

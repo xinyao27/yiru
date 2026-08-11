@@ -19,6 +19,7 @@ import { registerPtyHandlers } from '../pty/pty'
 import { electronShellServicesConnectionId } from '../runtime/rpc/orpc/shell-services-identity'
 import { subscribeShellServicesConnectionLifecycle } from '../runtime/rpc/orpc/shell-services-reverse-link'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'
+import { publishShellEvent } from '../shell/events'
 import { logStartupMilestone } from '../startup/diagnostics'
 import { scheduleHistoryGc } from '../terminal-history'
 import {
@@ -290,9 +291,7 @@ function registerFileDropRelay(mainWindow: BrowserWindow): void {
       return
     }
 
-    // Why: relay exactly one IPC event per drop gesture so the renderer
-    // receives the full batch of paths without timer-based reconstruction.
-    mainWindow.webContents.send('terminal:file-drop', args)
+    publishShellEvent(mainWebContents.id, { type: 'uiFileDrop', payload: args })
   }
   ipcMain.on(channel, relayFileDrop)
   mainWindow.on('closed', () => {

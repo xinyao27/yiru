@@ -42,17 +42,14 @@ import { registerWorkspacePortHandlers } from '../ports/workspace-ports'
 import type { RateLimitService } from '../rate-limits/service'
 import { registerRuntimeEnvironmentHandlers } from '../runtime/environments'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'
+import { initializeShellClipboardService } from '../shell/clipboard'
 import { initializeShellFilesService } from '../shell/files'
 import { initializeShellPlatformService } from '../shell/platform'
 import { registerSpeechHandlers } from '../speech/speech'
 import type { StatsCollector } from '../stats/collector'
 import { registerTelemetryHandlers } from '../telemetry/telemetry'
 import { registerUpdaterHandlers } from '../window/attach-main-window-services'
-import {
-  registerClipboardHandlers,
-  setTrustedClipboardRendererWebContentsId
-} from '../window/clipboard-ipc-handlers'
-import { registerUIHandlers, setTrustedUIRendererWebContentsId } from '../window/ui'
+import { registerUIHandlers } from '../window/ui'
 import { registerYiruProfileHandlers } from '../yiru-profiles/yiru-profiles'
 import { registerAiVaultHandlers } from './ai-vault'
 import { registerAppHandlers } from './app'
@@ -93,8 +90,6 @@ export function registerCoreHandlers(
   // if a channel is registered twice, so we guard to register only once and
   // just update the per-window web-contents ID on subsequent calls.
   setTrustedBrowserRendererWebContentsId(mainWindowWebContentsId)
-  setTrustedClipboardRendererWebContentsId(mainWindowWebContentsId)
-  setTrustedUIRendererWebContentsId(mainWindowWebContentsId)
   setAgentBrowserBridgeRef(runtime.getAgentBrowserBridge())
   if (registered) {
     return
@@ -172,7 +167,7 @@ export function registerCoreHandlers(
     scanRuntimeAiVaultSessions: async (environmentId, args, options) =>
       scanRuntimeAiVaultSessions(app.getPath('userData'), environmentId, args, options)
   })
-  registerClipboardHandlers(store)
+  initializeShellClipboardService(store)
   registerUpdaterHandlers(store)
   registerSpeechHandlers()
 }

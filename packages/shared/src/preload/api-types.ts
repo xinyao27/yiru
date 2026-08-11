@@ -7,7 +7,6 @@ import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
 /* eslint-disable max-lines -- Why: the preload contract is intentionally centralized in one declaration file so renderer and preload stay in lockstep when IPC surfaces change. */
 import type { HostedReviewProvider } from '@yiru/workbench-model/review'
-import type { ReadClipboardTextOptions } from '@yiru/workbench-model/ui'
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 
 import type { AppIdentity } from '../app-identity'
@@ -43,7 +42,6 @@ import type {
   LocalhostWorktreeLabelResult,
   LocalhostWorktreeLabelRoute
 } from '../localhost-worktree-labels'
-import type { NativeFileDropPayload } from '../native-file-drop'
 import type { ProjectExecutionRuntimeResolution } from '../project-execution-runtime'
 import type { PtyMainDeliveryDiagnostics } from '../pty-delivery-diagnostics'
 import type { PtyModelRestoreNeededEvent } from '../pty-model-restore-marker'
@@ -51,7 +49,6 @@ import type {
   PtyRendererDeliveryHealthReply,
   PtyRendererDeliveryStateReport
 } from '../pty-renderer-delivery-health'
-import type { RichMarkdownContextMenuCommandPayload } from '../rich-markdown-context-menu'
 import type { PublicKnownRuntimeEnvironment } from '../runtime-environments'
 import type {
   RuntimeBrowserDriverState,
@@ -1412,127 +1409,9 @@ export type PreloadApi = {
     }) => Promise<string | null>
   }
   ui: {
-    // Why: the web build layers browser-localStorage offline caching and
-    // cross-tab merge semantics on top of the runtime contract.
     get: () => Promise<PersistedUIState>
     set: (args: Partial<PersistedUIState>) => Promise<void>
     recordFeatureInteraction: (id: FeatureInteractionId) => Promise<PersistedUIState>
-    // Why: shell-only — menu-accelerator / global-shortcut intent events fired
-    // by native menu items or OS-level shortcuts, dispatched to whichever
-    // window/pane currently owns focus. Not a runtime capability.
-    onOpenSettings: (callback: () => void) => () => void
-    // Why: shell-only — consumes a one-shot tray/menu-bar "open settings"
-    // intent queued in the main process before the window mounted. A paired
-    // web client has no tray/menu bar, so there is never a queued intent to
-    // consume (its adapter hardcodes `false`); not a runtime capability.
-    consumePendingOpenSettings: () => Promise<boolean>
-    onOpenSetupGuide: (callback: () => void) => () => void
-    onOpenFeatureTour: (callback: () => void) => () => void
-    onOpenCrashReport: (callback: () => void) => () => void
-    onToggleLeftSidebar: (callback: () => void) => () => void
-    onToggleRightSidebar: (callback: () => void) => () => void
-    onToggleWorktreePalette: (callback: () => void) => () => void
-    onToggleFloatingTerminal: (callback: () => void) => () => void
-    onToggleAssistant: (callback: () => void) => () => void
-    onTerminalShortcutCaptured: (
-      callback: (data: { actionId: KeybindingActionId }) => void
-    ) => () => void
-    onOpenQuickOpen: (callback: () => void) => () => void
-    onToggleQuickCommandsMenu: (callback: () => void) => () => void
-    onOpenNewWorkspace: (callback: () => void) => () => void
-    onDeleteCurrentWorkspace: (callback: () => void) => () => void
-    onJumpToWorktreeIndex: (callback: (index: number) => void) => () => void
-    onJumpToTabIndex: (callback: (index: number) => void) => () => void
-    onWorktreeHistoryNavigate: (callback: (direction: 'back' | 'forward') => void) => () => void
-    onNewBrowserTab: (callback: () => void) => () => void
-    onNewMarkdownTab: (callback: () => void) => () => void
-    onNewSimulatorTab: (callback: () => void) => () => void
-    // Why: shell-only — more menu-accelerator / global-shortcut intents (see
-    // `onOpenSettings` above).
-    onNewTerminalTab: (callback: () => void) => () => void
-    onFocusBrowserAddressBar: (callback: () => void) => () => void
-    onFindInBrowserPage: (callback: () => void) => () => void
-    onReloadBrowserPage: (callback: () => void) => () => void
-    onBrowserHistoryNavigate: (callback: (direction: 'back' | 'forward') => void) => () => void
-    onZoomBrowserPage: (callback: (direction: 'in' | 'out' | 'reset') => void) => () => void
-    onHardReloadBrowserPage: (callback: () => void) => () => void
-    onCloseActiveTab: (callback: () => void) => () => void
-    onSwitchTab: (callback: (direction: 1 | -1) => void) => () => void
-    onSwitchTabAcrossAllTypes: (callback: (direction: 1 | -1) => void) => () => void
-    onSwitchRecentTab: (callback: () => void) => () => void
-    onSwitchTerminalTab: (callback: (direction: 1 | -1) => void) => () => void
-    onCtrlTabKeyDown: (callback: (data: { shiftKey: boolean }) => void) => () => void
-    onCtrlTabKeyUp: (callback: () => void) => () => void
-    onToggleStatusBar: (callback: () => void) => () => void
-    // Why: shell-only — native focus/paste mediation (OS-level dictation key,
-    // app-menu Paste routed to whichever surface owns focus).
-    onDictationKeyDown: (callback: () => void) => () => void
-    // Why: shell-only — menu-accelerator intent (see `onOpenSettings` above).
-    onExportPdfRequested: (callback: () => void) => () => void
-    // Why: shell-only — native focus/paste mediation (see `onDictationKeyDown`).
-    onAppMenuPaste: (callback: () => void) => () => void
-    onEditableContextPaste: (callback: (data: { plainTextOnly: boolean }) => void) => () => void
-    // Why: shell-only — menu-accelerator intent (see `onOpenSettings` above).
-    onTerminalZoom: (callback: (direction: 'in' | 'out' | 'reset') => void) => () => void
-    // Why: shell-only — native focus/paste mediation (see `onDictationKeyDown`).
-    onSystemResumed: (callback: () => void) => () => void
-    // Why: shell-only — the OS clipboard belongs to the machine running the
-    // shell (through `readClipboardImageBase64` below, and `writeClipboardText`/
-    // `writeClipboardImage`/`writeClipboardFile`/`performNativePaste` further
-    // down); covers `readSelectionClipboardText`/`writeSelectionClipboardText`
-    // too — the X11 primary-selection clipboard has no browser equivalent, so
-    // the web adapter rejects both as unavailable rather than no-opping.
-    readClipboardText: (options?: ReadClipboardTextOptions) => Promise<string>
-    readSelectionClipboardText: (options?: ReadClipboardTextOptions) => Promise<string>
-    /** shell-only: reads the current OS clipboard image without choosing a runtime target. */
-    readClipboardImageBase64: () => Promise<string | null>
-    // Why: kept on preload, not collapsed onto `clipboard.saveImageAsTempFile` —
-    // main already reads the OS clipboard natively and, for a local target,
-    // writes the temp file directly with zero base64 round-trip; collapsing to
-    // the renderer-side chunked-upload protocol would add a
-    // read-clipboard-as-base64 IPC hop plus encode/decode overhead to every
-    // local paste for no benefit (web/mobile/cli already reach the same
-    // contract methods from their own code paths). `runtimeEnvironmentId` set
-    // still delegates to the same chunked upload, just issued from main.
-    saveClipboardImageAsTempFile: (args?: {
-      connectionId?: string | null
-      runtimeEnvironmentId?: string | null
-    }) => Promise<string | null>
-    writeClipboardText: (text: string) => Promise<void>
-    writeSelectionClipboardText: (text: string) => Promise<void>
-    writeClipboardImage: (dataUrl: string) => Promise<void>
-    performNativePaste: (options?: { mode?: 'paste' | 'paste-and-match-style' }) => void
-    writeClipboardFile: (
-      args: { filePath: string } | string
-    ) => Promise<{ ok: boolean; reason?: string }>
-    // Why: shell-only — native file-drop mediation.
-    onFileDrop: (callback: (data: NativeFileDropPayload) => void) => () => void
-    // Why: shell-only — BrowserWindow/webContents zoom geometry.
-    getZoomLevel: () => number
-    setZoomLevel: (level: number) => void
-    syncTrafficLights: (zoomFactor: number) => void
-    // Why: shell-only — native focus mediation (which surface currently owns
-    // keyboard focus, mirrored so main can route accelerators correctly).
-    setMarkdownEditorFocused: (focused: boolean) => void
-    setTerminalInputFocused: (focused: boolean) => void
-    setFloatingTerminalInputFocused: (focused: boolean) => void
-    setShortcutRecorderFocused: (focused: boolean) => void
-    // Why: shell-only — native context-menu command mediation (see
-    // `onDictationKeyDown` above).
-    onRichMarkdownContextCommand: (
-      callback: (payload: RichMarkdownContextMenuCommandPayload) => void
-    ) => () => void
-    // Why: shell-only — window control (fullscreen/minimize/maximize/close),
-    // Electron's native chrome.
-    onFullscreenChanged: (callback: (isFullScreen: boolean) => void) => () => void
-    minimize: () => void
-    maximize: () => void
-    isMaximized: () => Promise<boolean>
-    onMaximizeChanged: (callback: (isMaximized: boolean) => void) => () => void
-    requestClose: () => void
-    popupMenu: () => void
-    onWindowCloseRequested: (callback: (data: { isQuitting: boolean }) => void) => () => void
-    confirmWindowClose: () => void
   }
   // Why: `runtime.driverEvents.subscribe` carries all three live driver
   // changes, so this shell adapter retains only members with no equivalent

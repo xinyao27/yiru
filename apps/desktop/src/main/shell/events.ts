@@ -6,6 +6,7 @@ import type {
 } from '@yiru/runtime-protocol/contract'
 
 import type { RpcContext } from '../runtime/rpc/core'
+import { readShellWindowUiState } from './ui'
 
 const MAX_PENDING_SHELL_EVENTS = 64
 const MAX_REPLAY_SHELL_EVENTS = 128
@@ -95,6 +96,17 @@ export async function handleShellEventsSubscribe(
     emit({ type: 'ready', seq: currentSeq })
     if (shouldResync) {
       emit({ type: 'resync', seq: currentSeq })
+      const uiState = readShellWindowUiState(webContentsId)
+      if (uiState) {
+        publishShellEvent(webContentsId, {
+          type: 'uiMaximizeChanged',
+          isMaximized: uiState.isMaximized
+        })
+        publishShellEvent(webContentsId, {
+          type: 'uiFullscreenChanged',
+          isFullScreen: uiState.isFullScreen
+        })
+      }
     }
     for (const event of initialEvents) {
       emit(event)

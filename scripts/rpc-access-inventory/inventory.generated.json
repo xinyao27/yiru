@@ -1,9 +1,9 @@
 {
   "schemaVersion": 2,
-  "methodCount": 608,
+  "methodCount": 630,
   "sourceCounts": {
     "legacy": 0,
-    "orpc": 608
+    "orpc": 630
   },
   "methods": [
     {
@@ -7766,6 +7766,358 @@
         {
           "kind": "orpc",
           "file": "packages/runtime-protocol/src/contract/shell/platform.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.ui.confirmWindowClose",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/ui.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.ui.getZoomLevel",
+      "access": {
+        "scope": "host",
+        "tier": "read",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/ui.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.ui.isMaximized",
+      "access": {
+        "scope": "host",
+        "tier": "read",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/ui.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.ui.maximize",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/ui.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.ui.minimize",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/ui.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.ui.performNativePaste",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/ui.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.ui.popupMenu",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/ui.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.ui.readClipboardImageBase64",
+      "access": {
+        "scope": "host",
+        "tier": "read",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/ui.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.ui.readClipboardText",
+      "access": {
+        "scope": "host",
+        "tier": "read",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/ui.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.ui.readSelectionClipboardText",
+      "access": {
+        "scope": "host",
+        "tier": "read",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/ui.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.ui.requestClose",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/ui.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.ui.saveClipboardImageAsTempFile",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/ui.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.ui.setFloatingTerminalInputFocused",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/ui.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.ui.setMarkdownEditorFocused",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/ui.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.ui.setShortcutRecorderFocused",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/ui.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.ui.setTerminalInputFocused",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/ui.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.ui.setZoomLevel",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/ui.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.ui.syncTrafficLights",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/ui.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.ui.writeClipboardFile",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/ui.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.ui.writeClipboardImage",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/ui.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.ui.writeClipboardText",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/ui.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.ui.writeSelectionClipboardText",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/ui.ts"
         }
       ]
     },
