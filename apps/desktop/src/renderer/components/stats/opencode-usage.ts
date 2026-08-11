@@ -131,12 +131,19 @@ export const createOpenCodeUsageSlice: StateCreator<AppState, [], [], OpenCodeUs
             opts?.forceRefresh === true
               ? { ...snapshot.scanState, isScanning: true }
               : snapshot.scanState,
+          openCodeUsageSnapshotReady: opts?.forceRefresh !== true,
           openCodeUsageSummary: snapshot.summary,
           openCodeUsageDaily: snapshot.daily,
           openCodeUsageModelBreakdown: snapshot.modelBreakdown,
           openCodeUsageProjectBreakdown: snapshot.projectBreakdown,
           openCodeUsageRecentSessions: snapshot.recentSessions
         })
+        // Why: entering Home should restore persisted analytics without
+        // turning navigation into a transcript scan. The refresh action owns
+        // explicit rescans once a usable snapshot exists.
+        if (opts?.forceRefresh !== true) {
+          return
+        }
       } else {
         set({
           openCodeUsageScanState: {

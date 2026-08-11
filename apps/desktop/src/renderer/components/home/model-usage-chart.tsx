@@ -1,5 +1,5 @@
 import { ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import type { TokenValueMetric } from '~renderer/components/contribution-heatmap/metric'
 import { nextTokenValueMetric } from '~renderer/components/contribution-heatmap/metric'
 import { DitherPieChart, type DitherPieChartPoint } from '~renderer/components/dither-kit/pie-chart'
@@ -109,12 +109,14 @@ function UsageRefreshButton(): React.JSX.Element {
   const claudeScanState = useAppStore((state) => state.claudeUsageScanState)
   const codexScanState = useAppStore((state) => state.codexUsageScanState)
   const openCodeScanState = useAppStore((state) => state.openCodeUsageScanState)
-  const refreshClaudeUsage = useAppStore((state) => state.refreshClaudeUsage)
-  const refreshCodexUsage = useAppStore((state) => state.refreshCodexUsage)
-  const refreshOpenCodeUsage = useAppStore((state) => state.refreshOpenCodeUsage)
+  const fetchClaudeUsage = useAppStore((state) => state.fetchClaudeUsage)
+  const fetchCodexUsage = useAppStore((state) => state.fetchCodexUsage)
+  const fetchOpenCodeUsage = useAppStore((state) => state.fetchOpenCodeUsage)
   const fetchStatsSummary = useAppStore((state) => state.fetchStatsSummary)
   const recordFeatureInteraction = useAppStore((state) => state.recordFeatureInteraction)
+  const [isRefreshing, setIsRefreshing] = useState(false)
   const isScanning =
+    isRefreshing ||
     claudeScanState === null ||
     codexScanState === null ||
     openCodeScanState === null ||
@@ -124,9 +126,10 @@ function UsageRefreshButton(): React.JSX.Element {
 
   const refreshUsage = (): void => {
     recordFeatureInteraction('usage-tracking')
-    void Promise.all([refreshClaudeUsage(), refreshCodexUsage(), refreshOpenCodeUsage()]).then(() =>
-      fetchStatsSummary(true)
-    )
+    setIsRefreshing(true)
+    void fetchStatsSummary(true)
+      .then(() => Promise.all([fetchClaudeUsage(), fetchCodexUsage(), fetchOpenCodeUsage()]))
+      .finally(() => setIsRefreshing(false))
   }
 
   return (

@@ -4,9 +4,7 @@ import { dirname } from 'node:path'
 import { DatabaseSync, type StatementSync } from 'node:sqlite'
 
 const EVENT_HASH_BYTES = 16
-// Why: v2 invalidates ownership and aggregate caches created before fork-copy
-// suppression and provider-total normalization were aligned with Codex logs.
-const GENERATION_KEY = 'generation-v2'
+const GENERATION_KEY = 'generation'
 
 type OwnershipStatements = {
   deleteEventsForFile: StatementSync
