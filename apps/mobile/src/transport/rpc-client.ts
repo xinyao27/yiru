@@ -26,6 +26,8 @@ import { markRpcDeliveryUnknown } from './rpc-delivery-ambiguity'
 import { isRpcResponse } from './rpc-response-shape'
 import type { RuntimeOrpcClient } from './runtime-orpc-client'
 import { describeSocketEvent } from './socket-event-debug'
+import { MobileRuntimeTerminalMultiplexer } from './terminal-multiplex/multiplexer'
+import type { MobileTerminalMultiplexer } from './terminal-multiplex/types'
 import type { RpcResponse, ConnectionState, ConnectionLogLevel, ConnectionLogSink } from './types'
 import { websocketPayloadToUint8 } from './websocket-payload-bytes'
 
@@ -47,6 +49,7 @@ export type RpcClient = {
   // through this. Mobile requires an oRPC-capable host unconditionally; there
   // is no bare-string fallback.
   orpc: RuntimeOrpcClient
+  terminalMultiplexer: MobileTerminalMultiplexer
   getState: () => ConnectionState
   // Why: UI escalates "Reconnecting…" to "Can't connect" once attempts cross
   // a threshold. 0 means never failed; counter is reset on successful open.
@@ -237,6 +240,7 @@ export function connect(
       terminalStreamListeners.clear()
       clearTerminalBinaryFrameState(terminalBinaryFrameState)
     }
+    terminalMultiplexer.controlConnectionChanged(next === 'connected')
   }
 
   // Why: don't dump device tokens / full URLs into log scrolls; truncate to
@@ -816,11 +820,17 @@ export function connect(
     sendFrame: sendEncryptedFrame,
     registerTerminalStream: registerOrpcTerminalStream
   })
+  const terminalMultiplexer = new MobileRuntimeTerminalMultiplexer({
+    getControlClient: () => orpcTransport.client,
+    deviceToken,
+    serverPublicKeyB64
+  })
 
   openConnection()
 
   const client: RpcClient = {
     orpc: orpcTransport.client,
+    terminalMultiplexer,
 
     getState(): ConnectionState {
       return state
@@ -875,6 +885,7 @@ export function connect(
 
     close() {
       intentionallyClosed = true
+      terminalMultiplexer.close()
       orpcTransport.close()
       if (reconnectTimer) {
         clearTimeout(reconnectTimer)

@@ -43,6 +43,10 @@ export function createStableLogicalRpcClient(
       return activeSession.orpc
     },
 
+    get terminalMultiplexer() {
+      return activeSession.terminalMultiplexer
+    },
+
     getState: () => state,
     getReconnectAttempt: () => activeSession.getReconnectAttempt(),
     getLastConnectedAt: () => activeSession.getLastConnectedAt(),
@@ -125,6 +129,10 @@ export function createStableLogicalRpcClient(
   Object.defineProperty(logical, 'orpc', {
     enumerable: false,
     get: () => activeSession.orpc
+  })
+  Object.defineProperty(logical, 'terminalMultiplexer', {
+    enumerable: false,
+    get: () => activeSession.terminalMultiplexer
   })
 
   return logical
