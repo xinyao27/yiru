@@ -21,6 +21,7 @@ trap cleanup EXIT INT TERM
 download_verified_asset() {
   asset_name="$1"
   output_path="$2"
+  signer_workflow="$3"
   if ! command -v perl >/dev/null 2>&1; then
     echo 'Perl is required to verify the Yiru release checksum.' >&2
     exit 1
@@ -66,6 +67,14 @@ download_verified_asset() {
     echo "The SHA-256 checksum for $asset_name did not match its GitHub release digest." >&2
     exit 1
   fi
+  if ! command -v gh >/dev/null 2>&1; then
+    echo 'GitHub CLI is required to verify Yiru release provenance.' >&2
+    echo 'Install it from https://cli.github.com/, then run this command again.' >&2
+    exit 1
+  fi
+  gh attestation verify "$output_path" \
+    --repo xinyao27/yiru \
+    --signer-workflow "$signer_workflow" >/dev/null
 }
 
 replace_install() {
@@ -118,7 +127,8 @@ install_macos() {
     *) echo "Yiru does not provide a macOS build for $machine_arch." >&2; exit 1 ;;
   esac
 
-  download_verified_asset "$asset" "$TEMP_ROOT/yiru.dmg"
+  download_verified_asset "$asset" "$TEMP_ROOT/yiru.dmg" \
+    'xinyao27/yiru/.github/workflows/release-mac-build.yml'
   mkdir -p "$TEMP_ROOT/mount" "$INSTALL_ROOT"
   hdiutil attach "$TEMP_ROOT/yiru.dmg" -nobrowse -readonly -mountpoint "$TEMP_ROOT/mount" -quiet
   app_path="$(find "$TEMP_ROOT/mount" -maxdepth 1 -name '*.app' -type d | head -n 1)"
@@ -143,7 +153,8 @@ install_linux() {
     *) echo "Yiru does not provide a Linux build for $machine_arch." >&2; exit 1 ;;
   esac
 
-  download_verified_asset "$asset" "$TEMP_ROOT/yiru.AppImage"
+  download_verified_asset "$asset" "$TEMP_ROOT/yiru.AppImage" \
+    'xinyao27/yiru/.github/workflows/release-cut.yml'
   chmod 700 "$TEMP_ROOT/yiru.AppImage"
   mkdir -p "$TEMP_ROOT/extract" "$INSTALL_ROOT"
   (

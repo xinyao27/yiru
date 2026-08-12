@@ -37,10 +37,9 @@ WebSocket URL、API key 或机器 ID 再复制回浏览器。连接生命周期�
 - Gitpod Runner：Web 控制面签发一次性 `exchangeToken`，runner 用它换取自己的长期身份；这是
   与 Yiru 的 Web-first 配对最接近的公开实现。
 
-当前发布形态还有一个必须先解决的缺口：仓库里的 `yiru` CLI 通过 Electron 的 Node runtime
-运行，headless runtime 又依赖 `node-pty` 原生模块，因此现有桌面包里的 CLI 不能原样当成
-`curl | sh` 的独立产物。仍然只对外提供 `yiru` 这一个命令，但发布流程需要新增无 GUI、无需用户
-预装 Node 的 headless artifact。
+仓库里的 `yiru` CLI 通过 Electron 的 Node runtime 运行，headless runtime 又依赖 `node-pty`
+原生模块。首个 macOS/Linux 版本先从已签名、已公证或带构建 provenance 的完整发行包中提取同一
+个 CLI/runtime-host，避免并行维护第二套运行时；更小的无 GUI artifact 是后续体积优化。
 
 Yiru 不应照搬 Cloudflare/ngrok 把长期 bearer token 放进命令行。`--pair` 必须是高熵、短期、
 单次兑换的 enrollment grant；grant 同时绑定浏览器公钥。CLI 在本机生成机器密钥，双方核对同一
@@ -401,12 +400,12 @@ Yiru 已有自有 CLI spec/parser、`undici`、`ws`、`zod`、`tweetnacl`、oRPC
 如果未来把 standalone connector 拆成原生二进制，VS Code 已验证的 Rust 组合
 `clap + reqwest + tokio + tokio-tungstenite + keyring` 是合理参考；当前没有足够收益支撑先重写。
 
-### 6.2 发布产物：先做自带 runtime 的 headless Yiru
+### 6.2 发布产物：先复用已签名的 Yiru runtime
 
-不建议让安装脚本先安装 Node，也不建议为了一个 CLI 下载完整 Electron GUI。第一版发布一个按
-OS/架构构建的签名压缩包，内部仍是同一套 TypeScript CLI/runtime-host，加固定版本 Node runtime
-和匹配 ABI 的 `node-pty`。安装器把版本落到用户目录，再原子切换 `yiru` launcher；这样可以复用
-现有 Rolldown build 和 native dependency 矩阵，也能在升级失败时保留旧版本。
+不让安装脚本先安装 Node。第一版 macOS/Linux 安装器复用现有按 OS/架构构建的完整发行包，从中
+安装同一套 TypeScript CLI/runtime-host、固定版本 Electron Node runtime 和匹配 ABI 的
+`node-pty`。每个包必须有 GitHub Actions OIDC 签发的 provenance；macOS 还验证 Developer ID 与
+公证。安装器把版本原子切换到 `yiru` launcher，失败时保留旧版本。
 
 Node SEA 可以作为后续收敛成单文件的选项，但当前 Node 22 的 SEA 仍是 active development，且
 native addon 需要提取后用 `process.dlopen()` 加载；对 `node-pty` 而言并没有消除按平台构建与签名
@@ -459,8 +458,8 @@ Web 页面建议只有三步，并且每一步都由服务端状态自动完成�
   credential 导入浏览器 local storage；云模式必须删除该做法，授权来自 IndexedDB 中不可导出的
   browser private key，`localStorage` 只记非秘密 machine selection。
 - 页面明确提示“此浏览器已获授权”；清除数据或换浏览器需要重新配对，不承诺账号恢复。
-- install script 必须可查看，检测 OS/arch，下载固定版本的签名 artifact，校验 digest/signature 后
-  原子替换；也提供 Homebrew/apt/winget 等用户可审计的替代入口。
+- install script 必须可查看，检测 OS/arch，解析最新发布后锁定其不可变 tag URL，校验 digest 与
+  GitHub build provenance 后原子替换；也提供 Homebrew/apt 等用户可审计的替代入口。
 
 ## 8. 实施计划
 
@@ -475,7 +474,7 @@ Web 页面建议只有三步，并且每一步都由服务端状态自动完成�
 - browser private key、machine private key、grant、connection ticket 和 E2EE session key 在 contract
   中不可互换。
 - 冻结 P-256 browser key、Ed25519 machine key、短验证码 transcript 和本机 browser allowlist。
-- 冻结 headless artifact 的内容、安装位置、签名、升级/回滚和 `node-pty` 平台矩阵。
+- 冻结发行包内 CLI/runtime-host 的内容、安装位置、provenance、升级/回滚和 `node-pty` 平台矩阵。
 
 ### Phase 1：隔离 Workbench origin 与浏览器身份
 
@@ -518,10 +517,11 @@ returning browser、offline machine、grant expiry、短码核对和“撤销当
 完成标准：页面没有登录入口；用户只复制安装与首次 connect 两条命令，不复制 endpoint、pairing
 file 或 API key；CLI online 后 Web 自动进入机器；清除 browser data 后明确要求重新配对。
 
-### Phase 6：installer 与 headless 发布产物
+### Phase 6：installer 与受验证的发布产物
 
-发布 macOS/Linux/Windows headless artifact、manifest 和 install script。`yiru connect` 始终以前台
-进程运行，并使用执行配对的同一用户身份访问 repo、SSH key 和 agent 凭据。
+发布 macOS/Linux install script，复用已签名的发行包；独立 headless artifact 与 Windows 安装器
+在对应平台正式开放前补齐。`yiru connect` 始终以前台进程运行，并使用执行配对的同一用户身份
+访问 repo、SSH key 和 agent 凭据。
 
 完成标准：脚本幂等升级、校验签名、失败不破坏旧版本；uninstall 不误删用户 repo；同一机器重复
 运行 `yiru connect` 时有明确的 singleton/ownership 行为。

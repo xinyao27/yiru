@@ -561,7 +561,9 @@ jobs:
 
     permissions:
       actions: read
+      attestations: write
       contents: write
+      id-token: write
 
     steps:
       - name: Checkout
@@ -686,6 +688,12 @@ jobs:
           command: ${{ matrix.release_command }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Attest Linux release provenance
+        if: matrix.platform == 'linux-x64' || matrix.platform == 'linux-arm64'
+        uses: actions/attest@v4
+        with:
+          subject-path: apps/desktop/dist/yiru-linux*.AppImage
 
       - name: Validate SignPath configuration
         if: matrix.platform == 'win'

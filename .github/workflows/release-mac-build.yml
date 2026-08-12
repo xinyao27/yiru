@@ -15,7 +15,9 @@ on:
         type: string
 
 permissions:
+  attestations: write
   contents: write
+  id-token: write
 
 concurrency:
   group: release-mac-build-${{ inputs.tag }}
@@ -131,6 +133,11 @@ jobs:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+
+      - name: Attest macOS release provenance
+        uses: actions/attest@v4
+        with:
+          subject-path: apps/desktop/dist/yiru-macos-*.dmg
 
       - name: Verify release remains draft after artifact upload
         # Why: the macOS build must never be the actor that exposes a partial
