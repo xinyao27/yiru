@@ -96,6 +96,15 @@
       "require": "./dist/mobile-runtime-types.js",
       "default": "./dist/mobile-runtime-types.js"
     },
+    "./mobile-terminal-wire": {
+      "types": "./src/mobile-terminal-wire.ts",
+      "react-native": "./src/mobile-terminal-wire.ts",
+      "browser": "./src/mobile-terminal-wire.ts",
+      "development": "./src/mobile-terminal-wire.ts",
+      "import": "./dist/esm/mobile-terminal-wire.mjs",
+      "require": "./dist/mobile-terminal-wire.js",
+      "default": "./dist/mobile-terminal-wire.js"
+    },
     "./mobile-worktree-wire": {
       "types": "./src/mobile-worktree-wire.ts",
       "react-native": "./src/mobile-worktree-wire.ts",

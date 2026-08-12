@@ -28,7 +28,14 @@ struct AppView: View {
                 case .workspaces(let host):
                     WorkspaceListView(
                         host: host,
-                        repository: model.dependencies.workspaceRepository
+                        repository: model.dependencies.workspaceRepository,
+                        selectWorkspace: { model.showTerminals(host: host, workspace: $0) }
+                    )
+                case .terminals(let host, let workspace):
+                    TerminalListView(
+                        host: host,
+                        workspace: workspace,
+                        repository: model.dependencies.terminalRepository
                     )
                 case .pair:
                     PairingScanView(onOffer: model.confirmPairing)

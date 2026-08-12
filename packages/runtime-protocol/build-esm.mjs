@@ -22,6 +22,7 @@ await build({
           'src/mobile-development-pairing.ts'
         ),
         'mobile-runtime-types': resolve(import.meta.dirname, 'src/mobile-runtime-types.ts'),
+        'mobile-terminal-wire': resolve(import.meta.dirname, 'src/mobile-terminal-wire.ts'),
         'mobile-worktree-wire': resolve(import.meta.dirname, 'src/mobile-worktree-wire.ts'),
         'orpc-peer-frame': resolve(import.meta.dirname, 'src/runtime-orpc-peer-frame.ts'),
         'provider-usage': resolve(import.meta.dirname, 'src/provider-usage.ts'),

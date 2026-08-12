@@ -52,7 +52,8 @@ Transport 是后续所有 feature 的地基，不能在 Swift 中凭 UI 需要�
 - [x] 加密 oRPC unary transport 与 `worktree.ps` 工作区只读列表
 - [x] 每 host 长期 logical connection、并发 oRPC dispatch、指数退避与 90 秒 trickle reconnect
 - [x] 前台、网络恢复 / 切换唤醒，20 秒 heartbeat 与显式 reconnect
-- [ ] Connection diagnostics log 与 host list 的逐 host 实时状态
+- [x] Host list 的逐 host 实时状态与显式 reconnect
+- [ ] Connection diagnostics log
 - [ ] Workspace create、activate、sleep、pin 与 host edit 操作
 - [ ] Terminal multiplex、snapshot replay、flow control 与远程 PTY session
 - [ ] 其余功能切片

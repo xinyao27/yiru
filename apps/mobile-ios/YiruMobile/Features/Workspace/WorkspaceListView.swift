@@ -3,9 +3,15 @@ import SwiftUI
 struct WorkspaceListView: View {
     let host: HostProfile
     @State private var model: WorkspaceListModel
+    private let selectWorkspace: (WorkspaceSummary) -> Void
 
-    init(host: HostProfile, repository: any WorkspaceRepository) {
+    init(
+        host: HostProfile,
+        repository: any WorkspaceRepository,
+        selectWorkspace: @escaping (WorkspaceSummary) -> Void
+    ) {
         self.host = host
+        self.selectWorkspace = selectWorkspace
         _model = State(
             initialValue: WorkspaceListModel(hostID: host.id, repository: repository)
         )
@@ -62,7 +68,12 @@ struct WorkspaceListView: View {
                 }
 
                 ForEach(snapshot.workspaces) { workspace in
-                    WorkspaceRow(workspace: workspace)
+                    Button {
+                        selectWorkspace(workspace)
+                    } label: {
+                        WorkspaceRow(workspace: workspace)
+                    }
+                    .buttonStyle(.plain)
                 }
             }
             .refreshable {
@@ -118,6 +129,10 @@ private struct WorkspaceRow: View {
                     .foregroundStyle(.secondary)
                     .accessibilityLabel("Pinned")
             }
+
+            Image(systemName: "chevron.forward")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.tertiary)
         }
         .accessibilityElement(children: .combine)
     }
