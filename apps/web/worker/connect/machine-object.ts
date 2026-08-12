@@ -179,6 +179,15 @@ export class ConnectMachineObject {
     record.usedNonces[requestAuth.nonce] = Date.now()
     trimEphemeralRecord(record.usedNonces)
     await this.state.storage.put(MACHINE_STORAGE_KEY, record)
+    if (browserRequest.success) {
+      this.relay.notifyBrowserRevoked({
+        type: 'relay-browser-revoked',
+        version: WEB_CONNECT_PROTOCOL_VERSION,
+        machineId: record.machine.id,
+        browserId,
+        request: browserRequest.data
+      })
+    }
     this.relay.closeBrowserAccess(browserId)
     return jsonResponse({ ok: true })
   }

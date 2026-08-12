@@ -69,9 +69,8 @@ function extractAssetTags(shell) {
 }
 
 try {
-  // Why: Cloudflare applies canonical HTML routing to app.html even for an
-  // internal asset-binding fetch. The .txt copy has an exact asset key and is
-  // served only after the Worker has selected the isolated app origin.
+  // Why: app.html is canonicalized even for binding fetches; the .txt copy has
+  // an exact key and is exposed only after the Worker selects the app origin.
   await copyFile(productShellPath, productShellAssetPath)
   const bundlePath = resolve(bundleDirectory, 'prerender-entry.js')
   const { renderRoute, routeMetas } = await import(pathToFileURL(bundlePath).href)

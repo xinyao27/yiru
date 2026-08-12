@@ -6,6 +6,7 @@ import {
 } from '@yiru/runtime-protocol/web-connect'
 import {
   RelayConnectionCloseSchema,
+  type RelayBrowserRevoked,
   WEB_CONNECT_MAX_TRANSPORT_FRAME_BYTES
 } from '@yiru/runtime-protocol/web-connect/relay-frames'
 import {
@@ -85,6 +86,13 @@ export class MachineRelay {
       if (attachment?.role === 'browser' && attachment.browserId === browserId) {
         socket.close(1008, 'Access revoked')
       }
+    }
+  }
+
+  notifyBrowserRevoked(value: RelayBrowserRevoked): void {
+    const machine = this.machineSocket()
+    if (machine) {
+      sendRelayFrame(machine, JSON.stringify(value))
     }
   }
 

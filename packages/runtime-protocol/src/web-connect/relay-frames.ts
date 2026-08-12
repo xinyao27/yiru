@@ -3,6 +3,7 @@ import { z } from 'zod'
 import {
   BrowserIdentitySchema,
   BrowserRelayAuthSchema,
+  BrowserSelfRevokeRequestSchema,
   WEB_CONNECT_MAX_RELAY_FRAME_BYTES,
   WEB_CONNECT_PROTOCOL_VERSION
 } from './contracts'
@@ -36,9 +37,20 @@ export const RelayConnectionCloseSchema = z
   })
   .strict()
 
+export const RelayBrowserRevokedSchema = z
+  .object({
+    type: z.literal('relay-browser-revoked'),
+    version: z.literal(WEB_CONNECT_PROTOCOL_VERSION),
+    machineId: ConnectionIdSchema,
+    browserId: ConnectionIdSchema,
+    request: BrowserSelfRevokeRequestSchema
+  })
+  .strict()
+
 export const WEB_CONNECT_MAX_TRANSPORT_FRAME_BYTES =
   Math.ceil((WEB_CONNECT_MAX_RELAY_FRAME_BYTES * 4) / 3) + 1024
 
 export type RelayBrowserAuthEnvelope = z.infer<typeof RelayBrowserAuthEnvelopeSchema>
 export type RelayOpaqueFrame = z.infer<typeof RelayOpaqueFrameSchema>
 export type RelayConnectionClose = z.infer<typeof RelayConnectionCloseSchema>
+export type RelayBrowserRevoked = z.infer<typeof RelayBrowserRevokedSchema>

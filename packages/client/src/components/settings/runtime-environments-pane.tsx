@@ -384,6 +384,11 @@ export function RuntimeEnvironmentsPane({
     setRemoveError(null)
     try {
       if (settings.activeRuntimeEnvironmentId === environment.id) {
+        if (!allowLocalRuntime) {
+          // Why: clearing the Web active host also clears the browser credential needed
+          // to sign its revocation, so revoke before switching the local setting to null.
+          await runtimeEnvironmentsClient.remove({ selector: environment.id })
+        }
         const switched = await switchRuntimeEnvironment(null)
         if (!switched) {
           if (mountedRef.current) {

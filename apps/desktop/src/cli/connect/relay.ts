@@ -13,7 +13,8 @@ import { decodePairingOffer } from '~shared/pairing'
 
 import { RuntimeClientError } from '../runtime-client'
 import { openBrowserChannel } from './browser-channel'
-import type { MachineIdentity, PairedBrowserAccess } from './identity'
+import { applyBrowserRevocationFrame } from './browser-revocation'
+import { listPairedBrowserAccess, type MachineIdentity, type PairedBrowserAccess } from './identity'
 import {
   connectionCloseFrame,
   decodeRelayFrame,
@@ -99,7 +100,7 @@ export async function runForegroundRelay(
         let local: WebSocket | null = null
         local = openBrowserChannel(
           envelope,
-          access,
+          listPairedBrowserAccess(),
           pairing.endpoint,
           pairing.deviceToken,
           pairing.publicKeyB64,
@@ -134,6 +135,9 @@ export async function runForegroundRelay(
         if (local) {
           localSockets.set(envelope.connectionId, local)
         }
+        return
+      }
+      if (applyBrowserRevocationFrame(text)) {
         return
       }
       if (text.includes('"type":"machine-ready"')) {

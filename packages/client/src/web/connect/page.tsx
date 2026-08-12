@@ -40,11 +40,15 @@ export function WebConnect({ onConnected }: WebConnectProps): React.JSX.Element 
 
   useEffect(() => {
     const controller = new AbortController()
+    // Why: aborting after server-side creation can hide the grant ID needed for signed cleanup.
+    // A late response is accepted only long enough to revoke that grant immediately.
     void createBrowserConnectGrant().then(
       (grant) => {
-        if (!controller.signal.aborted) {
-          setState({ kind: 'ready', grant })
+        if (controller.signal.aborted) {
+          void cancelBrowserConnectGrant(grant.grantId)
+          return
         }
+        setState({ kind: 'ready', grant })
       },
       (error: unknown) => {
         if (!controller.signal.aborted) {

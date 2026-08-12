@@ -8,7 +8,6 @@ import {
 } from '@phosphor-icons/react'
 import { YIRU_GITHUB_STARGAZERS_URL } from '@yiru/workbench-model/product'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import logo from '~renderer/assets/brand/yiru-wordmark.png?url'
 import { Button } from '~renderer/components/ui/button'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'
@@ -329,16 +328,6 @@ export default function Landing(): React.JSX.Element {
     <div className="bg-background absolute inset-0 flex items-center justify-center">
       <div className="w-full max-w-lg px-6">
         <div className="flex flex-col items-center gap-4 py-8">
-          <div
-            className="border-border/80 flex size-20 items-center justify-center border"
-            style={{ backgroundColor: '#12181e' }}
-          >
-            <img
-              src={logo}
-              alt={translate('auto.components.Landing.520304a067', 'Yiru logo')}
-              className="h-auto w-16"
-            />
-          </div>
           {preflightIssues.length > 0 && <PreflightBanner issues={preflightIssues} repos={repos} />}
 
           <p className="text-muted-foreground text-center text-sm">

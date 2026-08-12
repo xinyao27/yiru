@@ -21,7 +21,7 @@ import {
   fixedLengthEqual,
   isCurrentBrowserRequest,
   trimNonces
-} from './grant-values'
+} from './grant-security'
 import { apiError, jsonResponse } from './responses'
 
 const GRANT_STORAGE_KEY = 'grant'
