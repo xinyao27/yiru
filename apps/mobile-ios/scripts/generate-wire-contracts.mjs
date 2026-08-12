@@ -1,0 +1,428 @@
+import { createHash } from 'node:crypto'
+import { readFile, writeFile } from 'node:fs/promises'
+import { fileURLToPath } from 'node:url'
+
+import {
+  DeviceCredentialInstalledSchema,
+  DeviceResumeConfirmedSchema,
+  MobileRelayEndpointSchema,
+  PairingGetEndpointsParamsSchema,
+  PairingProvisionRelayParamsSchema
+} from '@yiru/mobile-relay-protocol/credential-contract'
+import {
+  MobileE2EEV2ContextSchema,
+  MobileE2EEV2HelloSchema,
+  MobileE2EEV2ReadySchema
+} from '@yiru/mobile-relay-protocol/e2ee-contract'
+import { PairingOfferSchema } from '@yiru/mobile-relay-protocol/pairing-offer'
+import { RelayMovedSchema } from '@yiru/mobile-relay-protocol/phone-protocol'
+import { z } from 'zod'
+
+const OUTPUT_URL = new URL(
+  '../YiruMobile/Platform/Wire/Generated/MobileWire.generated.swift',
+  import.meta.url
+)
+
+const mode = process.argv[2]
+if (mode !== '--write' && mode !== '--check') {
+  throw new Error('Usage: node scripts/generate-wire-contracts.mjs --write|--check')
+}
+
+const schemas = {
+  PairingOfferSchema: z.toJSONSchema(PairingOfferSchema),
+  PairingProvisionRelayParamsSchema: z.toJSONSchema(PairingProvisionRelayParamsSchema),
+  PairingGetEndpointsParamsSchema: z.toJSONSchema(PairingGetEndpointsParamsSchema),
+  DeviceCredentialInstalledSchema: z.toJSONSchema(DeviceCredentialInstalledSchema),
+  DeviceResumeConfirmedSchema: z.toJSONSchema(DeviceResumeConfirmedSchema),
+  MobileRelayEndpointSchema: z.toJSONSchema(MobileRelayEndpointSchema),
+  RelayMovedSchema: z.toJSONSchema(RelayMovedSchema),
+  MobileE2EEV2ContextSchema: z.toJSONSchema(MobileE2EEV2ContextSchema),
+  MobileE2EEV2HelloSchema: z.toJSONSchema(MobileE2EEV2HelloSchema),
+  MobileE2EEV2ReadySchema: z.toJSONSchema(MobileE2EEV2ReadySchema)
+}
+const pairingContract = readPairingContract(schemas.PairingOfferSchema)
+const e2eeContract = readE2EEContract(
+  schemas.MobileE2EEV2ContextSchema,
+  schemas.MobileE2EEV2HelloSchema,
+  schemas.MobileE2EEV2ReadySchema
+)
+const schemaJSON = `${JSON.stringify(schemas, null, 2)}\n`
+const digest = createHash('sha256').update(schemaJSON).digest('hex')
+const generated = renderWireContract(pairingContract, e2eeContract, schemas, digest)
+
+if (mode === '--write') {
+  await writeFile(OUTPUT_URL, generated)
+  process.stdout.write(`Wrote ${fileURLToPath(OUTPUT_URL)}\n`)
+} else {
+  const existing = await readFile(OUTPUT_URL, 'utf8').catch(() => null)
+  if (existing !== generated) {
+    throw new Error(
+      'Swift pairing wire contract is stale. Run vp run yiru-mobile-ios#wire:generate.'
+    )
+  }
+  process.stdout.write(`Swift mobile wire contract is current (${digest.slice(0, 12)}).\n`)
+}
+
+function readPairingContract(value) {
+  const root = requireObjectSchema(value, 'PairingOfferSchema')
+  assertExactKeys(
+    root.properties,
+    ['v', 'endpoint', 'deviceToken', 'publicKeyB64', 'scope', 'relay'],
+    'PairingOfferSchema.properties'
+  )
+  assertRequired(root, ['v', 'endpoint', 'deviceToken', 'publicKeyB64'], 'PairingOfferSchema')
+
+  const relay = requireObjectSchema(root.properties.relay, 'PairingOfferSchema.relay')
+  assertExactKeys(
+    relay.properties,
+    [
+      'v',
+      'directorUrl',
+      'cellUrl',
+      'assignmentEpoch',
+      'relayHostId',
+      'inviteToken',
+      'inviteExpiresAt',
+      'e2eeFraming'
+    ],
+    'PairingOfferSchema.relay.properties'
+  )
+  assertRequired(
+    relay,
+    [
+      'v',
+      'directorUrl',
+      'cellUrl',
+      'assignmentEpoch',
+      'relayHostId',
+      'inviteToken',
+      'inviteExpiresAt',
+      'e2eeFraming'
+    ],
+    'PairingOfferSchema.relay'
+  )
+
+  return {
+    offerVersion: requireIntegerLiteral(root.properties.v, 'PairingOfferSchema.v'),
+    scopes: requireStringEnum(root.properties.scope, 'PairingOfferSchema.scope'),
+    relayVersion: requireIntegerLiteral(relay.properties.v, 'PairingOfferSchema.relay.v'),
+    e2eeFraming: requireIntegerLiteral(
+      relay.properties.e2eeFraming,
+      'PairingOfferSchema.relay.e2eeFraming'
+    ),
+    relayHostIdPattern: requirePattern(
+      relay.properties.relayHostId,
+      'PairingOfferSchema.relay.relayHostId'
+    ),
+    inviteTokenPattern: requirePattern(
+      relay.properties.inviteToken,
+      'PairingOfferSchema.relay.inviteToken'
+    )
+  }
+}
+
+function readE2EEContract(contextValue, helloValue, readyValue) {
+  const contexts = requireUnionSchemas(contextValue, 'MobileE2EEV2ContextSchema')
+  const direct = requireObjectSchema(contexts[0], 'MobileE2EEV2ContextSchema.direct')
+  const relay = requireObjectSchema(contexts[1], 'MobileE2EEV2ContextSchema.relay')
+  assertExactKeys(
+    direct.properties,
+    ['protocol', 'initiator', 'responder', 'transport'],
+    'MobileE2EEV2ContextSchema.direct.properties'
+  )
+  assertExactKeys(
+    relay.properties,
+    ['protocol', 'initiator', 'responder', 'transport', 'relayHostId'],
+    'MobileE2EEV2ContextSchema.relay.properties'
+  )
+
+  const hello = requireObjectSchema(helloValue, 'MobileE2EEV2HelloSchema')
+  assertExactKeys(
+    hello.properties,
+    ['type', 'v', 'clientPublicKeyB64', 'clientNonceB64', 'capabilities', 'context'],
+    'MobileE2EEV2HelloSchema.properties'
+  )
+  assertRequired(hello, Object.keys(hello.properties), 'MobileE2EEV2HelloSchema')
+  const capabilities = requireObjectSchema(
+    hello.properties.capabilities,
+    'MobileE2EEV2HelloSchema.capabilities'
+  )
+  assertExactKeys(
+    capabilities.properties,
+    ['framing', 'payloadKinds'],
+    'MobileE2EEV2HelloSchema.capabilities.properties'
+  )
+  assertRequired(
+    capabilities,
+    Object.keys(capabilities.properties),
+    'MobileE2EEV2HelloSchema.capabilities'
+  )
+
+  const ready = requireObjectSchema(readyValue, 'MobileE2EEV2ReadySchema')
+  assertExactKeys(
+    ready.properties,
+    [
+      'type',
+      'v',
+      'desktopPublicKeyB64',
+      'clientNonceB64',
+      'desktopNonceB64',
+      'selection',
+      'context'
+    ],
+    'MobileE2EEV2ReadySchema.properties'
+  )
+  assertRequired(ready, Object.keys(ready.properties), 'MobileE2EEV2ReadySchema')
+  const selection = requireObjectSchema(
+    ready.properties.selection,
+    'MobileE2EEV2ReadySchema.selection'
+  )
+  assertExactKeys(
+    selection.properties,
+    ['framing', 'payloadKinds'],
+    'MobileE2EEV2ReadySchema.selection.properties'
+  )
+  assertRequired(selection, Object.keys(selection.properties), 'MobileE2EEV2ReadySchema.selection')
+
+  const framing = requireNumberTuple(capabilities.properties.framing, 'capabilities.framing')
+  const payloadKinds = requireStringTuple(
+    capabilities.properties.payloadKinds,
+    'capabilities.payloadKinds'
+  )
+  assertEqualTuple(
+    payloadKinds,
+    requireStringTuple(selection.properties.payloadKinds, 'selection.payloadKinds'),
+    'E2EE payload kinds'
+  )
+  if (framing.length !== 1) {
+    throw new Error('E2EE framing capabilities must contain exactly one version')
+  }
+  const selectedFraming = requireIntegerLiteral(selection.properties.framing, 'selection.framing')
+  if (selectedFraming !== framing[0]) {
+    throw new Error('E2EE selected framing must match the offered framing')
+  }
+
+  const base64Pattern = requireSharedPattern(
+    [
+      hello.properties.clientPublicKeyB64,
+      hello.properties.clientNonceB64,
+      ready.properties.desktopPublicKeyB64,
+      ready.properties.clientNonceB64,
+      ready.properties.desktopNonceB64
+    ],
+    'E2EE 32-byte base64 fields'
+  )
+
+  return {
+    protocol: requireStringLiteral(direct.properties.protocol, 'context.protocol'),
+    initiator: requireStringLiteral(direct.properties.initiator, 'context.initiator'),
+    responder: requireStringLiteral(direct.properties.responder, 'context.responder'),
+    directTransport: requireStringLiteral(direct.properties.transport, 'direct.transport'),
+    relayTransport: requireStringLiteral(relay.properties.transport, 'relay.transport'),
+    relayHostIdPattern: requirePattern(relay.properties.relayHostId, 'relay.relayHostId'),
+    helloType: requireStringLiteral(hello.properties.type, 'hello.type'),
+    readyType: requireStringLiteral(ready.properties.type, 'ready.type'),
+    version: requireIntegerLiteral(hello.properties.v, 'hello.v'),
+    readyVersion: requireIntegerLiteral(ready.properties.v, 'ready.v'),
+    framing: framing[0],
+    payloadKinds,
+    base64Pattern
+  }
+}
+
+function renderWireContract(pairing, e2ee, sourceSchemas, digest) {
+  if (e2ee.readyVersion !== e2ee.version) {
+    throw new Error('E2EE hello and ready versions must match')
+  }
+  const pairingSource = renderPairingContract(pairing, sourceSchemas)
+  const e2eeSource = renderE2EEContract(e2ee)
+  return `// Generated by scripts/generate-wire-contracts.mjs. Do not edit.\n// Mobile wire schemas SHA-256: ${digest}\n\nimport Foundation\n\n${pairingSource}\n${e2eeSource}`
+}
+
+function renderPairingContract(contract, sourceSchemas) {
+  const scopeCases = contract.scopes.map((scope) => `    case ${scope}`).join('\n')
+  const simpleModels = [
+    renderSimpleObject(
+      sourceSchemas.PairingProvisionRelayParamsSchema,
+      'PairingProvisionRelayParamsWire'
+    ),
+    renderSimpleObject(
+      sourceSchemas.PairingGetEndpointsParamsSchema,
+      'PairingGetEndpointsParamsWire'
+    ),
+    renderSimpleObject(
+      sourceSchemas.DeviceCredentialInstalledSchema,
+      'DeviceCredentialInstalledWire'
+    ),
+    renderSimpleObject(sourceSchemas.DeviceResumeConfirmedSchema, 'DeviceResumeConfirmedWire'),
+    renderSimpleObject(sourceSchemas.MobileRelayEndpointSchema, 'MobileRelayEndpointWire'),
+    renderSimpleObject(sourceSchemas.RelayMovedSchema, 'RelayMovedWire')
+  ].join('\n\n')
+  return `enum PairingScopeWire: String, Codable, Equatable, Sendable {\n${scopeCases}\n}\n\nstruct PairingRelayWire: Codable, Equatable, Sendable {\n    let v: Int\n    let directorUrl: String\n    let cellUrl: String\n    let assignmentEpoch: Int64\n    let relayHostId: String\n    let inviteToken: String\n    let inviteExpiresAt: Int64\n    let e2eeFraming: Int\n}\n\nstruct PairingOfferWire: Codable, Equatable, Sendable {\n    let v: Int\n    let endpoint: String\n    let deviceToken: String\n    let publicKeyB64: String\n    let scope: PairingScopeWire?\n    let relay: PairingRelayWire?\n}\n\n${simpleModels}\n\nenum MobilePairingWireContract {\n    static let offerVersion = ${contract.offerVersion}\n    static let relayVersion = ${contract.relayVersion}\n    static let e2eeFraming = ${contract.e2eeFraming}\n    static let relayHostIdPattern = ${JSON.stringify(contract.relayHostIdPattern)}\n    static let inviteTokenPattern = ${JSON.stringify(contract.inviteTokenPattern)}\n}\n`
+}
+
+function renderE2EEContract(contract) {
+  const payloadKindCases = contract.payloadKinds
+    .map((kind) => `    case ${swiftCase(kind)} = ${JSON.stringify(kind)}`)
+    .join('\n')
+  return `enum MobileE2EEPayloadKindWire: String, Codable, Equatable, Sendable {\n${payloadKindCases}\n}\n\nstruct MobileE2EEContextWire: Codable, Equatable, Sendable {\n    let protocolName: String\n    let initiator: String\n    let responder: String\n    let transport: String\n    let relayHostId: String?\n\n    private enum CodingKeys: String, CodingKey {\n        case protocolName = "protocol"\n        case initiator\n        case responder\n        case transport\n        case relayHostId\n    }\n}\n\nstruct MobileE2EECapabilitiesWire: Codable, Equatable, Sendable {\n    let framing: [Int]\n    let payloadKinds: [MobileE2EEPayloadKindWire]\n}\n\nstruct MobileE2EEHelloWire: Codable, Equatable, Sendable {\n    let type: String\n    let v: Int\n    let clientPublicKeyB64: String\n    let clientNonceB64: String\n    let capabilities: MobileE2EECapabilitiesWire\n    let context: MobileE2EEContextWire\n}\n\nstruct MobileE2EESelectionWire: Codable, Equatable, Sendable {\n    let framing: Int\n    let payloadKinds: [MobileE2EEPayloadKindWire]\n}\n\nstruct MobileE2EEReadyWire: Codable, Equatable, Sendable {\n    let type: String\n    let v: Int\n    let desktopPublicKeyB64: String\n    let clientNonceB64: String\n    let desktopNonceB64: String\n    let selection: MobileE2EESelectionWire\n    let context: MobileE2EEContextWire\n}\n\nenum MobileE2EEWireContract {\n    static let protocolName = ${JSON.stringify(contract.protocol)}\n    static let initiator = ${JSON.stringify(contract.initiator)}\n    static let responder = ${JSON.stringify(contract.responder)}\n    static let directTransport = ${JSON.stringify(contract.directTransport)}\n    static let relayTransport = ${JSON.stringify(contract.relayTransport)}\n    static let helloType = ${JSON.stringify(contract.helloType)}\n    static let readyType = ${JSON.stringify(contract.readyType)}\n    static let version = ${contract.version}\n    static let framing = ${contract.framing}\n    static let relayHostIdPattern = ${JSON.stringify(contract.relayHostIdPattern)}\n    static let base64Bytes32Pattern = ${JSON.stringify(contract.base64Pattern)}\n}\n`
+}
+
+function renderSimpleObject(value, name) {
+  const schemaValue = requireObjectSchema(value, name)
+  const required = new Set(schemaValue.required ?? [])
+  const enums = []
+  const properties = Object.entries(schemaValue.properties).map(([propertyName, property]) => {
+    const type = swiftType(property, `${name}${upperFirst(propertyName)}`, enums)
+    const optional = required.has(propertyName) ? '' : '?'
+    return `    let ${propertyName}: ${type}${optional}`
+  })
+  const enumSource = enums.join('\n\n')
+  const structSource = `struct ${name}: Codable, Equatable, Sendable {\n${properties.join('\n')}\n}`
+  return enumSource ? `${enumSource}\n\n${structSource}` : structSource
+}
+
+function swiftType(value, enumName, enums) {
+  if (!isRecord(value)) {
+    throw new Error(`${enumName} has an unsupported schema`)
+  }
+  if (value.type === 'string') {
+    if (Array.isArray(value.enum)) {
+      const cases = value.enum.map((entry) => {
+        if (typeof entry !== 'string') {
+          throw new Error(`${enumName} contains a non-string case`)
+        }
+        return `    case ${swiftCase(entry)} = ${JSON.stringify(entry)}`
+      })
+      enums.push(`enum ${enumName}: String, Codable, Equatable, Sendable {\n${cases.join('\n')}\n}`)
+      return enumName
+    }
+    return 'String'
+  }
+  if (value.type === 'boolean') {
+    return 'Bool'
+  }
+  if (value.type === 'integer') {
+    return 'Int64'
+  }
+  if (value.type === 'number' && Number.isInteger(value.const)) {
+    return 'Int'
+  }
+  throw new Error(`${enumName} has unsupported schema type ${String(value.type)}`)
+}
+
+function swiftCase(value) {
+  const words = value.split(/[^A-Za-z0-9]+/).filter(Boolean)
+  if (words.length === 0) {
+    throw new Error(`Cannot generate a Swift case for ${value}`)
+  }
+  const [first, ...rest] = words
+  return `${first.toLowerCase()}${rest.map(upperFirst).join('')}`
+}
+
+function upperFirst(value) {
+  return `${value.charAt(0).toUpperCase()}${value.slice(1)}`
+}
+
+function requireObjectSchema(value, label) {
+  if (!isRecord(value) || value.type !== 'object' || !isRecord(value.properties)) {
+    throw new Error(`${label} must remain an object schema`)
+  }
+  if (value.additionalProperties !== false) {
+    throw new Error(`${label} must reject unknown properties`)
+  }
+  return value
+}
+
+function assertExactKeys(properties, expected, label) {
+  const actual = Object.keys(properties)
+  if (actual.length !== expected.length || actual.some((key, index) => key !== expected[index])) {
+    throw new Error(
+      `${label} changed: expected ${expected.join(', ')}, received ${actual.join(', ')}`
+    )
+  }
+}
+
+function assertRequired(schemaValue, expected, label) {
+  const actual = schemaValue.required
+  if (
+    !Array.isArray(actual) ||
+    actual.length !== expected.length ||
+    actual.some((key, index) => key !== expected[index])
+  ) {
+    throw new Error(`${label}.required changed`)
+  }
+}
+
+function requireIntegerLiteral(value, label) {
+  if (!isRecord(value) || value.type !== 'number' || !Number.isInteger(value.const)) {
+    throw new Error(`${label} must remain an integer literal`)
+  }
+  return value.const
+}
+
+function requireStringLiteral(value, label) {
+  if (!isRecord(value) || value.type !== 'string' || typeof value.const !== 'string') {
+    throw new Error(`${label} must remain a string literal`)
+  }
+  return value.const
+}
+
+function requireUnionSchemas(value, label) {
+  if (!isRecord(value) || !Array.isArray(value.oneOf) || value.oneOf.length === 0) {
+    throw new Error(`${label} must remain a non-empty oneOf schema`)
+  }
+  return value.oneOf
+}
+
+function requireNumberTuple(value, label) {
+  if (!isRecord(value) || value.type !== 'array' || !Array.isArray(value.prefixItems)) {
+    throw new Error(`${label} must remain a number tuple`)
+  }
+  return value.prefixItems.map((entry, index) => requireIntegerLiteral(entry, `${label}[${index}]`))
+}
+
+function requireStringTuple(value, label) {
+  if (!isRecord(value) || value.type !== 'array' || !Array.isArray(value.prefixItems)) {
+    throw new Error(`${label} must remain a string tuple`)
+  }
+  return value.prefixItems.map((entry, index) => requireStringLiteral(entry, `${label}[${index}]`))
+}
+
+function assertEqualTuple(left, right, label) {
+  if (left.length !== right.length || left.some((entry, index) => entry !== right[index])) {
+    throw new Error(`${label} changed between handshake messages`)
+  }
+}
+
+function requireSharedPattern(values, label) {
+  const patterns = values.map((value, index) => requirePattern(value, `${label}[${index}]`))
+  if (patterns.some((pattern) => pattern !== patterns[0])) {
+    throw new Error(`${label} must share one pattern`)
+  }
+  return patterns[0]
+}
+
+function requireStringEnum(value, label) {
+  if (
+    !isRecord(value) ||
+    value.type !== 'string' ||
+    !Array.isArray(value.enum) ||
+    value.enum.length === 0 ||
+    !value.enum.every((entry) => typeof entry === 'string')
+  ) {
+    throw new Error(`${label} must remain a non-empty string enum`)
+  }
+  return value.enum
+}
+
+function requirePattern(value, label) {
+  if (!isRecord(value) || value.type !== 'string' || typeof value.pattern !== 'string') {
+    throw new Error(`${label} must remain a patterned string`)
+  }
+  return value.pattern
+}
+
+function isRecord(value) {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}

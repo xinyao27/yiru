@@ -1,0 +1,59 @@
+name: YiruMobile
+options:
+  bundleIdPrefix: me.xinyao.yiru
+  createIntermediateGroups: true
+  deploymentTarget:
+    iOS: '26.0'
+  developmentLanguage: en
+
+settings:
+  base:
+    CURRENT_PROJECT_VERSION: '1'
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    MARKETING_VERSION: '0.1.0'
+    SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+    SWIFT_STRICT_CONCURRENCY: complete
+    SWIFT_VERSION: '6.0'
+
+schemes:
+  YiruMobile:
+    build:
+      targets:
+        YiruMobile: all
+
+targets:
+  YiruMobile:
+    type: application
+    platform: iOS
+    sources:
+      - path: YiruMobile
+        type: syncedFolder
+    info:
+      path: YiruMobile/Resources/Info.plist
+      properties:
+        CFBundleDevelopmentRegion: en
+        CFBundleDisplayName: Yiru
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        ITSAppUsesNonExemptEncryption: false
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+    settings:
+      base:
+        ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        CODE_SIGN_STYLE: Automatic
+        GENERATE_INFOPLIST_FILE: NO
+        PRODUCT_BUNDLE_IDENTIFIER: me.xinyao.yiru.mobile.ios
+        PRODUCT_NAME: Yiru
+        SUPPORTS_MACCATALYST: NO
+        SWIFT_EMIT_LOC_STRINGS: YES
+        TARGETED_DEVICE_FAMILY: '1,2'

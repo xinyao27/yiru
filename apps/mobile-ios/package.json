@@ -1,0 +1,22 @@
+{
+  "name": "yiru-mobile-ios",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Native iOS 26 Yiru client",
+  "scripts": {
+    "build": "vp run wire:verify && vp run project:generate && xcodebuild -project YiruMobile.xcodeproj -scheme YiruMobile -configuration Debug -destination 'generic/platform=iOS Simulator' -derivedDataPath build/DerivedData CODE_SIGNING_ALLOWED=NO build",
+    "dev": "vp run project:generate && open YiruMobile.xcodeproj",
+    "format": "xcrun swift-format format --configuration .swift-format --in-place --recursive YiruMobile",
+    "lint": "xcrun swift-format lint --configuration .swift-format --strict --recursive YiruMobile",
+    "project:generate": "xcodegen generate",
+    "verify": "vp run lint && vp run build",
+    "wire:generate": "vp run --filter '{.}^...' build && node scripts/generate-wire-contracts.mjs --write",
+    "wire:verify": "vp run --filter '{.}^...' build && node scripts/generate-wire-contracts.mjs --check"
+  },
+  "dependencies": {
+    "@yiru/mobile-relay-protocol": "workspace:*"
+  },
+  "devDependencies": {
+    "zod": "catalog:"
+  }
+}
