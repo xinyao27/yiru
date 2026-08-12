@@ -31,6 +31,8 @@ final class TerminalLiveModel {
     private(set) var linkRequest: URL?
     private(set) var bellRevision = 0
     private(set) var connectionAttempt = 0
+    private(set) var displayMode = TerminalDisplayMode.auto
+    private(set) var isDisplayModeUpdating = false
 
     @ObservationIgnored
     private let hostID: String
@@ -40,6 +42,8 @@ final class TerminalLiveModel {
     private let isWritable: Bool
     @ObservationIgnored
     private let runtime: any TerminalSessionRuntime
+    @ObservationIgnored
+    private let displayModeRuntime: any TerminalDisplayModeRuntime
     @ObservationIgnored
     private var session: (any TerminalSession)?
     @ObservationIgnored
@@ -53,8 +57,9 @@ final class TerminalLiveModel {
 
     init(
         host: HostProfile,
-        terminal: TerminalSummary,
+        terminal: TerminalTarget,
         runtime: any TerminalSessionRuntime,
+        displayModeRuntime: any TerminalDisplayModeRuntime,
         surfaceFactory: any TerminalSurfaceFactory,
         surfaceConfiguration: TerminalSurfaceConfiguration
     ) {
@@ -62,7 +67,8 @@ final class TerminalLiveModel {
         terminalID = terminal.id
         isWritable = terminal.isWritable
         self.runtime = runtime
-        title = terminal.displayTitle
+        self.displayModeRuntime = displayModeRuntime
+        title = terminal.title
         let surface = surfaceFactory.makeSurface(configuration: surfaceConfiguration)
         self.surface = surface
         surface.events = TerminalSurfaceEvents(
@@ -129,7 +135,7 @@ final class TerminalLiveModel {
             retryCount += 1
             phase = .reconnecting(attempt: retryCount)
             do {
-                try await Task.sleep(for: Self.retryDelay(attempt: retryCount))
+                try await Task.sleep(for: TerminalReconnectPolicy.delay(attempt: retryCount))
             } catch {
                 break
             }
@@ -139,15 +145,6 @@ final class TerminalLiveModel {
 
     func retry() {
         connectionAttempt += 1
-    }
-
-    func focus() {
-        guard canAcceptUserInput else { return }
-        surface.focus()
-    }
-
-    func apply(_ configuration: TerminalSurfaceConfiguration) {
-        surface.apply(configuration)
     }
 
     func setAppState(_ state: TerminalSessionAppState) async {
@@ -185,10 +182,13 @@ final class TerminalLiveModel {
             switch event {
             case .subscribed:
                 phase = .active
+            case .displayMode(let mode):
+                displayMode = mode
             case .snapshot(let snapshot):
                 phase = .restoring
                 title = snapshot.metadata.lastTitle ?? title
                 currentDirectory = snapshot.metadata.currentDirectory
+                displayMode = snapshot.metadata.displayMode
                 surface.restore(snapshot)
                 try await session.acknowledgeSnapshot(id: snapshot.id)
                 phase = .active
@@ -279,18 +279,22 @@ final class TerminalLiveModel {
         linkRequest = url
     }
 
-    private static func retryDelay(attempt: Int) -> Duration {
-        let delays: [Duration] = [
-            .milliseconds(500),
-            .seconds(1),
-            .seconds(2),
-            .seconds(4),
-            .seconds(8),
-            .seconds(15),
-            .seconds(30),
-            .seconds(60),
-        ]
-        guard attempt <= delays.count else { return .seconds(90) }
-        return delays[attempt - 1]
+    func toggleDisplayMode() async {
+        guard !isDisplayModeUpdating else { return }
+        let previous = displayMode
+        let requested = previous.toggleTarget
+        isDisplayModeUpdating = true
+        displayMode = requested
+        do {
+            displayMode = try await displayModeRuntime.setTerminalDisplayMode(
+                hostID: hostID,
+                terminalID: terminalID,
+                mode: requested,
+                viewport: requested == .auto ? gridSize : nil
+            )
+        } catch {
+            displayMode = previous
+        }
+        isDisplayModeUpdating = false
     }
 }

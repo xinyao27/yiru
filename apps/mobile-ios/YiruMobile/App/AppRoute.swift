@@ -2,7 +2,7 @@ enum AppRoute: Hashable {
     case designSystemCatalog
     case hosts
     case workspaces(HostProfile)
-    case terminals(HostProfile, WorkspaceSummary)
+    case workspaceSession(HostProfile, WorkspaceSummary)
     case terminal(HostProfile, TerminalSummary)
     case terminalSettings
     case pair

@@ -52,8 +52,9 @@ method identifier 从 TypeScript source of truth 生成 Swift wire model；domai
 wire 类型。
 
 `RuntimeHostSession` 是每个 host 唯一的物理连接 owner，负责连接代际、heartbeat、退避和恢复；
-`RuntimeOrpcPeer` 是加密流唯一的 reader，并按 request ID 分发并发响应。`RuntimeClient` 只维护
-stable logical session 与值语义 snapshot，再把窄 capability protocol 提供给 feature。当前产品已
+`RuntimeOrpcPeer` 是加密流唯一的 reader，并按 request ID 分发 unary response 与 event iterator；
+iterator 严格遵循锁定 oRPC 版本的 response、message/error/done 和 abort frame 生命周期。
+`RuntimeClient` 只维护 stable logical session 与值语义 snapshot，再把窄 capability protocol 提供给 feature。当前产品已
 退役第一方 Cloud Relay，因此原生端保留旧 pairing field 的边界校验，但不会重新引入已删除的
 provisioning、credential rotation 或 relay endpoint lifecycle。
 
@@ -107,6 +108,10 @@ Terminal 控制面的 `status/list/show/openMultiplex` 使用 runtime-protocol �
 由同一个 drift-checked generator 产出 Swift `Codable` 类型。inner frame 的 kind、version、header
 大小、frame cap 与 opcode 同样来自 TypeScript source of truth；`TerminalMultiplexFrameCodec` 只负责
 严格 little-endian frame 边界，不承担 session、flow-control 或 renderer 状态。
+
+Workspace session 以 `session.tabs` publication 为唯一 tab 权威源；本地只拥有 pending selection、
+短期 close tombstone 和已访问 terminal surface 集合。`publicationEpoch + snapshotVersion` 拒绝同一
+publisher 的倒序 snapshot，隐藏 tab 保留 renderer，但将 terminal delivery interest 降为 background。
 
 ## 文件和 API 边界
 

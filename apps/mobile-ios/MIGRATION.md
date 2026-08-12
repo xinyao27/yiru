@@ -60,5 +60,8 @@ Transport 是后续所有 feature 的地基，不能在 Swift 中凭 UI 需要�
 - [x] Terminal 断线后重建 ticket / bulk / epoch，并由 authoritative snapshot 自动恢复
 - [x] 每 host 共享 terminal bulk、独立 route 生命周期与 server `maxStreams` 限制
 - [x] SwiftTerm 原生输入附件、系统 Liquid Glass 快捷键、设备字号与内置键布局持久化
-- [ ] Terminal tab / accessory 输入与设置 parity
+- [x] Server-authoritative Phone Fit / Desktop Size 显示模式同步与切换
+- [x] `session.tabs` 权威列表、激活、新建、关闭、版本闸门与后台 terminal surface 保活
+- [x] oRPC event iterator 与 `session.tabs.subscribe` 实时跨客户端同步
+- [ ] Tab 高级操作与自定义快捷键 parity
 - [ ] 其余功能切片

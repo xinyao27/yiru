@@ -1,8 +1,14 @@
+import { renderTerminalBulkInvocation } from './terminal-bulk-invocation-render.mjs'
+import {
+  readTerminalDisplayModeContract,
+  renderTerminalDisplayModeWire
+} from './terminal-display-mode-render.mjs'
 import { readTerminalDriverContract } from './terminal-driver-contract.mjs'
 import { renderTerminalStreamRecords } from './terminal-stream-render.mjs'
 
 export function loadTerminalWireSource(packageRequire, z) {
   const terminal = packageRequire('@yiru/runtime-protocol/mobile-terminal-wire')
+  const terminalContract = packageRequire('@yiru/runtime-protocol/contract')
   const frame = packageRequire('@yiru/runtime-protocol/terminal-multiplex/frame')
   const connectionRecords = packageRequire(
     '@yiru/runtime-protocol/terminal-multiplex/connection-records'
@@ -31,6 +37,12 @@ export function loadTerminalWireSource(packageRequire, z) {
     ),
     MobileTerminalMultiplexPeerMessageSchema: z.toJSONSchema(
       terminal.MobileTerminalMultiplexPeerMessageSchema
+    ),
+    TerminalSetDisplayModeInputSchema: z.toJSONSchema(
+      terminalContract.TerminalSetDisplayModeInputSchema
+    ),
+    TerminalSetDisplayModeResultSchema: z.toJSONSchema(
+      terminalContract.TerminalSetDisplayModeResultSchema
     ),
     TerminalMultiplexViewportRecordSchema: z.toJSONSchema(
       streamRecords.TerminalMultiplexViewportRecordSchema
@@ -73,6 +85,7 @@ export function loadTerminalWireSource(packageRequire, z) {
     MOBILE_STATUS_GET_ORPC_PATH: terminal.MOBILE_STATUS_GET_ORPC_PATH,
     MOBILE_TERMINAL_LIST_ORPC_PATH: terminal.MOBILE_TERMINAL_LIST_ORPC_PATH,
     MOBILE_TERMINAL_SHOW_ORPC_PATH: terminal.MOBILE_TERMINAL_SHOW_ORPC_PATH,
+    MOBILE_TERMINAL_SET_DISPLAY_MODE_ORPC_PATH: terminal.MOBILE_TERMINAL_SET_DISPLAY_MODE_ORPC_PATH,
     MOBILE_TERMINAL_OPEN_MULTIPLEX_ORPC_PATH: terminal.MOBILE_TERMINAL_OPEN_MULTIPLEX_ORPC_PATH,
     MOBILE_TERMINAL_MULTIPLEX_ORPC_PATH: terminal.MOBILE_TERMINAL_MULTIPLEX_ORPC_PATH,
     TERMINAL_MULTIPLEX_RUNTIME_CAPABILITY: protocol.TERMINAL_MULTIPLEX_RUNTIME_CAPABILITY,
@@ -145,6 +158,7 @@ function readTerminalWireContract(schemas, domains) {
     'MobileTerminalHandleRequestSchema'
   )
   assertShape(handle, ['terminal'])
+  const displayMode = readTerminalDisplayModeContract(schemas)
   const openRequest = requireObject(
     schemas.MobileTerminalOpenMultiplexRequestSchema,
     'MobileTerminalOpenMultiplexRequestSchema'
@@ -187,7 +201,12 @@ function readTerminalWireContract(schemas, domains) {
     domains.TERMINAL_MULTIPLEX_SNAPSHOT_RECORD_WIRE,
     'TERMINAL_MULTIPLEX_SNAPSHOT_RECORD_WIRE'
   )
-  return { ...domains, opcodes, stream }
+  return {
+    ...domains,
+    ...displayMode,
+    opcodes,
+    stream
+  }
 }
 
 export function renderTerminalWireContract(contract, schemas) {
@@ -198,7 +217,8 @@ export function renderTerminalWireContract(contract, schemas) {
   const flow = contract.TERMINAL_MULTIPLEX_FLOW_RECORD_WIRE
   const snapshot = contract.TERMINAL_MULTIPLEX_SNAPSHOT_RECORD_WIRE
   const stream = contract.stream
-  const invocation = renderBulkInvocation(schemas)
+  const invocation = renderTerminalBulkInvocation(schemas)
+  const displayMode = renderTerminalDisplayModeWire(contract)
   const handshakeCases = Object.entries(connection.phase)
     .map(([name, value]) => `    case ${name} = ${value}`)
     .join('\n')
@@ -261,6 +281,8 @@ struct MobileTerminalShowWire: Codable, Equatable, Sendable {
     let transportGeneration: String
 }
 
+${displayMode}
+
 struct MobileTerminalOpenMultiplexRequestWire: Codable, Equatable, Sendable {
     let environmentId: String
     let clientInstanceId: String
@@ -277,6 +299,7 @@ enum MobileTerminalWireContract {
     static let statusPath = ${JSON.stringify(contract.MOBILE_STATUS_GET_ORPC_PATH)}
     static let listPath = ${JSON.stringify(contract.MOBILE_TERMINAL_LIST_ORPC_PATH)}
     static let showPath = ${JSON.stringify(contract.MOBILE_TERMINAL_SHOW_ORPC_PATH)}
+    static let setDisplayModePath = ${JSON.stringify(contract.MOBILE_TERMINAL_SET_DISPLAY_MODE_ORPC_PATH)}
     static let openMultiplexPath = ${JSON.stringify(contract.MOBILE_TERMINAL_OPEN_MULTIPLEX_ORPC_PATH)}
     static let multiplexPath = ${JSON.stringify(contract.MOBILE_TERMINAL_MULTIPLEX_ORPC_PATH)}
     static let multiplexCapability = ${JSON.stringify(contract.TERMINAL_MULTIPLEX_RUNTIME_CAPABILITY)}
@@ -357,88 +380,6 @@ ${renderTerminalStreamRecords(stream)}
 
 ${invocation}
 `
-}
-
-function renderBulkInvocation(schemas) {
-  const invocation = requireObject(
-    schemas.MobileTerminalMultiplexInvocationSchema,
-    'MobileTerminalMultiplexInvocationSchema'
-  )
-  const invocationPayload = requireObject(
-    invocation.properties.p,
-    'MobileTerminalMultiplexInvocationSchema.p'
-  )
-  const path = requireStringLiteral(
-    invocationPayload.properties.u,
-    'MobileTerminalMultiplexInvocationSchema.p.u'
-  )
-  const peer = requireObject(
-    schemas.MobileTerminalMultiplexPeerMessageSchema,
-    'MobileTerminalMultiplexPeerMessageSchema'
-  )
-  const peerPayload = requireObject(peer.properties.p, 'MobileTerminalMultiplexPeerMessageSchema.p')
-  const peerEvents = requireStringEnum(
-    peerPayload.properties.e,
-    'MobileTerminalMultiplexPeerMessageSchema.p.e'
-  )
-  const peerData = requireObject(
-    peerPayload.properties.d,
-    'MobileTerminalMultiplexPeerMessageSchema.p.d'
-  )
-  const peerJSON = requireObject(
-    peerData.properties.json,
-    'MobileTerminalMultiplexPeerMessageSchema.p.d.json'
-  )
-  const readyType = requireStringLiteral(
-    peerJSON.properties.type,
-    'MobileTerminalMultiplexPeerMessageSchema.p.d.json.type'
-  )
-  return `enum TerminalMultiplexPeerEventKind: String, Codable, Sendable {
-${peerEvents.map((value) => `    case ${value}`).join('\n')}
-}
-
-struct TerminalMultiplexInvocation: Encodable, Sendable {
-    let i: String
-    let p: TerminalMultiplexInvocationPayload
-}
-
-struct TerminalMultiplexInvocationPayload: Encodable, Sendable {
-    let u = ${JSON.stringify(path)}
-    let b: TerminalMultiplexInvocationBody
-    let h: [String: String]
-}
-
-struct TerminalMultiplexInvocationBody: Encodable, Sendable {
-    let json: TerminalMultiplexInvocationInput
-}
-
-struct TerminalMultiplexInvocationInput: Encodable, Sendable {
-    let bulkTicket: String
-}
-
-struct TerminalMultiplexPeerMessage: Decodable, Sendable {
-    let i: String
-    let t: Int?
-    let p: TerminalMultiplexPeerPayload
-}
-
-struct TerminalMultiplexPeerPayload: Decodable, Sendable {
-    let s: Int?
-    let e: TerminalMultiplexPeerEventKind?
-    let d: TerminalMultiplexPeerEvent?
-}
-
-struct TerminalMultiplexPeerEvent: Decodable, Sendable {
-    let json: TerminalMultiplexReadyEvent
-}
-
-struct TerminalMultiplexReadyEvent: Decodable, Sendable {
-    let type: TerminalMultiplexReadyType
-}
-
-enum TerminalMultiplexReadyType: String, Codable, Sendable {
-    case ${swiftCase(readyType)} = ${JSON.stringify(readyType)}
-}`
 }
 
 function readStreamRecordContract(schemas, wire) {
@@ -562,13 +503,6 @@ function requireStringEnum(schema, name) {
   })
 }
 
-function requireStringLiteral(schema, name) {
-  if (!schema || schema.type !== 'string' || typeof schema.const !== 'string') {
-    throw new Error(`${name} must remain a string literal`)
-  }
-  return schema.const
-}
-
 function requireIntegerLiteral(schema, name) {
   if (
     !schema ||
@@ -588,14 +522,6 @@ function renderSwiftConstants(values) {
 
 function lowerFirst(value) {
   return `${value.charAt(0).toLowerCase()}${value.slice(1)}`
-}
-
-function swiftCase(value) {
-  const words = value.split('-')
-  return `${words[0]}${words
-    .slice(1)
-    .map((word) => `${word[0].toUpperCase()}${word.slice(1)}`)
-    .join('')}`
 }
 
 function requireObject(value, name) {

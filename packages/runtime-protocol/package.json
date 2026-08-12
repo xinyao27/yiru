@@ -96,6 +96,15 @@
       "require": "./dist/mobile-runtime-types.js",
       "default": "./dist/mobile-runtime-types.js"
     },
+    "./mobile-session-tabs-wire": {
+      "types": "./src/mobile-session-tabs-wire.ts",
+      "react-native": "./src/mobile-session-tabs-wire.ts",
+      "browser": "./src/mobile-session-tabs-wire.ts",
+      "development": "./src/mobile-session-tabs-wire.ts",
+      "import": "./dist/esm/mobile-session-tabs-wire.mjs",
+      "require": "./dist/mobile-session-tabs-wire.js",
+      "default": "./dist/mobile-session-tabs-wire.js"
+    },
     "./mobile-terminal-wire": {
       "types": "./src/mobile-terminal-wire.ts",
       "react-native": "./src/mobile-terminal-wire.ts",

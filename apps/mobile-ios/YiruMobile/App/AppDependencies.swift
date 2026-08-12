@@ -6,9 +6,11 @@ struct AppDependencies {
     let pairingRuntime: any PairingRuntime
     let runtimeClient: RuntimeClient
     let terminalRepository: any TerminalRepository
+    let terminalDisplayModeRuntime: any TerminalDisplayModeRuntime
     let terminalPreferences: TerminalPreferences
     let terminalSessionRuntime: any TerminalSessionRuntime
     let terminalSurfaceFactory: any TerminalSurfaceFactory
+    let terminalWorkspaceRepository: any TerminalWorkspaceRepository
     let workspaceRepository: any WorkspaceRepository
 
     static func live() -> AppDependencies {
@@ -24,9 +26,11 @@ struct AppDependencies {
             pairingRuntime: DirectPairingClient(hosts: hosts),
             runtimeClient: runtime,
             terminalRepository: runtime,
+            terminalDisplayModeRuntime: runtime,
             terminalPreferences: terminalPreferences,
             terminalSessionRuntime: runtime,
             terminalSurfaceFactory: SwiftTermSurfaceFactory(),
+            terminalWorkspaceRepository: runtime,
             workspaceRepository: runtime
         )
     }

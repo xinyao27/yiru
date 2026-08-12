@@ -3,6 +3,7 @@ import { z } from 'zod'
 export const MOBILE_STATUS_GET_ORPC_PATH = '/status/get'
 export const MOBILE_TERMINAL_LIST_ORPC_PATH = '/terminal/list'
 export const MOBILE_TERMINAL_SHOW_ORPC_PATH = '/terminal/show'
+export const MOBILE_TERMINAL_SET_DISPLAY_MODE_ORPC_PATH = '/terminal/setDisplayMode'
 export const MOBILE_TERMINAL_OPEN_MULTIPLEX_ORPC_PATH = '/terminal/openMultiplex'
 export const MOBILE_TERMINAL_MULTIPLEX_ORPC_PATH = '/terminal/multiplex'
 

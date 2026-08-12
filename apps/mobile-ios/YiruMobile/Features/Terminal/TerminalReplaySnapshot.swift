@@ -10,11 +10,6 @@ nonisolated enum TerminalSnapshotSource: Equatable, Sendable {
     case provider
 }
 
-nonisolated enum TerminalSnapshotDisplayMode: String, Equatable, Sendable {
-    case auto
-    case desktop
-}
-
 nonisolated struct TerminalSnapshotLink: Equatable, Sendable {
     let uri: String
     let start: UInt32
@@ -26,7 +21,7 @@ nonisolated struct TerminalSnapshotMetadata: Equatable, Sendable {
     let lastTitle: String?
     let links: [TerminalSnapshotLink]
     let kittyKeyboardFlags: UInt32
-    let displayMode: TerminalSnapshotDisplayMode
+    let displayMode: TerminalDisplayMode
     let requestedScrollbackRows: UInt32
 }
 

@@ -1,12 +1,10 @@
 import Foundation
 
-actor RuntimeClient: HomeRuntime, HostConnectionRuntime, TerminalRepository, TerminalSessionRuntime,
-    WorkspaceRepository
-{
+actor RuntimeClient: HomeRuntime, HostConnectionRuntime, TerminalSessionRuntime {
     private let hosts: any HostRepository
-    private let timeout: Duration
+    let timeout: Duration
     private let revivalMonitor: ConnectionRevivalMonitor
-    private let terminalClientInstanceID = UUID().uuidString.lowercased()
+    let terminalClientInstanceID = UUID().uuidString.lowercased()
     private var sessions: [String: ManagedSession] = [:]
     var terminalMultiplexers: [String: ManagedRuntimeTerminalMultiplexer] = [:]
     private var snapshots: [String: RuntimeConnectionSnapshot] = [:]
@@ -83,40 +81,10 @@ actor RuntimeClient: HomeRuntime, HostConnectionRuntime, TerminalRepository, Ter
         await reviveConnections()
     }
 
-    func workspaces(for hostID: String) async throws -> WorkspaceSnapshot {
-        try await withThrowingTaskGroup(of: WorkspaceSnapshot.self) { group in
-            group.addTask { try await self.fetchWorkspaces(for: hostID) }
-            group.addTask {
-                try await Task.sleep(for: self.timeout)
-                throw WorkspaceRepositoryError.timeout
-            }
-            guard let snapshot = try await group.next() else { throw CancellationError() }
-            group.cancelAll()
-            return snapshot
-        }
-    }
-
     func reconnect(hostID: String) async {
         guard let credential = try? await credential(for: hostID) else { return }
         let session = await session(for: credential)
         await session.forceReconnect()
-    }
-
-    func terminals(for hostID: String, worktreeID: String) async throws -> TerminalSnapshot {
-        try await withThrowingTaskGroup(of: TerminalSnapshot.self) { group in
-            group.addTask { try await self.fetchTerminals(for: hostID, worktreeID: worktreeID) }
-            group.addTask {
-                try await Task.sleep(for: self.timeout)
-                throw TerminalRepositoryError.timeout
-            }
-            guard let snapshot = try await group.next() else { throw CancellationError() }
-            group.cancelAll()
-            return snapshot
-        }
-    }
-
-    func reconnectTerminalHost(hostID: String) async {
-        await reconnect(hostID: hostID)
     }
 
     func terminalConnectionContext(for hostID: String) async throws
@@ -127,42 +95,6 @@ actor RuntimeClient: HomeRuntime, HostConnectionRuntime, TerminalRepository, Ter
             credential: credential,
             controlSession: await session(for: credential),
             clientInstanceID: terminalClientInstanceID
-        )
-    }
-
-    private func fetchWorkspaces(for hostID: String) async throws -> WorkspaceSnapshot {
-        let credential = try await credential(for: hostID)
-        let session = await session(for: credential)
-        let wire: MobileWorkspaceListWire = try await session.call(
-            path: MobileRuntimeWireContract.worktreeListPath,
-            input: MobileWorkspaceListRequestWire(limit: 10_000),
-            output: MobileWorkspaceListWire.self
-        )
-        return WorkspaceSnapshot(
-            workspaces: wire.worktrees.map(WorkspaceSummary.init(wire:)),
-            totalCount: wire.totalCount,
-            isTruncated: wire.truncated
-        )
-    }
-
-    private func fetchTerminals(for hostID: String, worktreeID: String) async throws
-        -> TerminalSnapshot
-    {
-        let credential = try await credential(for: hostID)
-        let session = await session(for: credential)
-        let wire: MobileTerminalListWire = try await session.call(
-            path: MobileTerminalWireContract.listPath,
-            input: MobileTerminalListRequestWire(
-                worktree: "id:\(worktreeID)",
-                limit: 1_000,
-                requireFreshPtyLiveness: true
-            ),
-            output: MobileTerminalListWire.self
-        )
-        return TerminalSnapshot(
-            terminals: wire.terminals.map(TerminalSummary.init(wire:)),
-            totalCount: wire.totalCount,
-            isTruncated: wire.truncated
         )
     }
 
@@ -187,6 +119,30 @@ actor RuntimeClient: HomeRuntime, HostConnectionRuntime, TerminalRepository, Ter
             throw WorkspaceRepositoryError.hostNotFound
         }
         return credential
+    }
+
+    func callRuntime<Input: Encodable & Sendable, Output: Decodable & Sendable>(
+        hostID: String,
+        path: String,
+        input: Input,
+        output: Output.Type
+    ) async throws -> Output {
+        let credential = try await credential(for: hostID)
+        return try await session(for: credential).call(path: path, input: input, output: output)
+    }
+
+    func subscribeRuntime<Input: Encodable & Sendable, Output: Decodable & Sendable>(
+        hostID: String,
+        path: String,
+        input: Input,
+        output: Output.Type
+    ) async throws -> AsyncThrowingStream<Output, Error> {
+        let credential = try await credential(for: hostID)
+        return try await session(for: credential).subscribe(
+            path: path,
+            input: input,
+            output: output
+        )
     }
 
     private func session(for credential: HostCredential) async -> RuntimeHostSession {

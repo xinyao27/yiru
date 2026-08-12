@@ -7,6 +7,7 @@ nonisolated struct TerminalOutputChunk: Equatable, Sendable {
 
 nonisolated enum TerminalSessionEvent: Equatable, Sendable {
     case subscribed
+    case displayMode(TerminalDisplayMode)
     case snapshot(TerminalReplaySnapshot)
     case output(TerminalOutputChunk)
     case clearBuffer

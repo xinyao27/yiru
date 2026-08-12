@@ -1,0 +1,149 @@
+import SwiftUI
+
+struct TerminalLivePane: View {
+    @Environment(\.openURL) private var openURL
+    @Environment(\.scenePhase) private var scenePhase
+    @Bindable var model: TerminalLiveModel
+    let preferences: TerminalPreferences
+    let isVisible: Bool
+    let showSettings: () -> Void
+
+    var body: some View {
+        ZStack(alignment: .bottomTrailing) {
+            TerminalSurfaceHost(surface: model.surface)
+                .background(Color(red: 0.035, green: 0.047, blue: 0.075))
+
+            statusOverlay
+                .padding(Theme.Spacing.standard)
+        }
+        .toolbar {
+            if isVisible {
+                ToolbarItem(placement: .topBarTrailing) {
+                    controlsMenu
+                }
+            }
+        }
+        .task(id: model.connectionAttempt) {
+            await model.connect(attempt: model.connectionAttempt)
+        }
+        .onChange(of: model.linkRequest) { _, link in
+            guard isVisible, let link else { return }
+            openURL(link)
+            model.clearLinkRequest()
+        }
+        .task(id: scenePhase) {
+            await synchronizeDeliveryState()
+        }
+        .task(id: isVisible) {
+            await synchronizeDeliveryState()
+        }
+        .sensoryFeedback(.warning, trigger: model.bellRevision)
+        .onChange(of: preferences.surfaceConfiguration) { _, configuration in
+            model.apply(configuration)
+        }
+    }
+
+    private var controlsMenu: some View {
+        Menu("Terminal Controls", systemImage: "ellipsis") {
+            Button(
+                model.displayMode.toggleTitle,
+                systemImage: model.displayMode.toggleTarget.systemImage
+            ) {
+                Task { await model.toggleDisplayMode() }
+            }
+            .disabled(model.isDisplayModeUpdating)
+
+            Divider()
+
+            Button("Terminal Settings", systemImage: "gearshape", action: showSettings)
+        }
+    }
+
+    private var statusOverlay: some View {
+        FloatingGlassSurface {
+            HStack(spacing: Theme.Spacing.medium) {
+                VStack(alignment: .trailing, spacing: Theme.Spacing.extraSmall) {
+                    Label(statusTitle, systemImage: statusIcon)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(statusTint)
+                    Label(model.displayMode.title, systemImage: model.displayMode.systemImage)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                    if let statusDetail {
+                        Text(statusDetail)
+                            .font(.caption2.monospaced())
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    }
+                }
+
+                if showsRetry {
+                    Button("Reconnect", systemImage: "arrow.clockwise", action: model.retry)
+                        .buttonStyle(.glassProminent)
+                } else {
+                    Button("Keyboard", systemImage: "keyboard", action: model.focus)
+                        .buttonStyle(.glassProminent)
+                        .disabled(!model.canAcceptUserInput)
+                }
+            }
+        }
+    }
+
+    private var statusTitle: LocalizedStringResource {
+        switch model.phase {
+        case .connecting: "Connecting"
+        case .reconnecting: "Reconnecting"
+        case .restoring: "Restoring terminal"
+        case .active: "Live"
+        case .ended: "Terminal ended"
+        case .failed: "Connection interrupted"
+        }
+    }
+
+    private var statusIcon: String {
+        switch model.phase {
+        case .connecting, .reconnecting, .restoring:
+            "arrow.trianglehead.2.clockwise.rotate.90"
+        case .active: "waveform.path"
+        case .ended: "stop.circle"
+        case .failed: "wifi.exclamationmark"
+        }
+    }
+
+    private var statusTint: Color {
+        switch model.phase {
+        case .active: .green
+        case .failed: .orange
+        case .connecting, .reconnecting, .restoring, .ended: .secondary
+        }
+    }
+
+    private var statusDetail: String? {
+        if case .failed(let message) = model.phase {
+            return String(localized: message)
+        }
+        if case .reconnecting(let attempt) = model.phase {
+            return String(localized: "Retry attempt \(attempt).")
+        }
+        if let directory = model.currentDirectory, !directory.isEmpty {
+            return directory
+        }
+        guard let gridSize = model.gridSize else { return nil }
+        return "\(gridSize.columns) × \(gridSize.rows)"
+    }
+
+    private var showsRetry: Bool {
+        switch model.phase {
+        case .reconnecting, .failed, .ended: true
+        case .connecting, .restoring, .active: false
+        }
+    }
+
+    private func synchronizeDeliveryState() async {
+        let state: TerminalSessionAppState =
+            scenePhase == .active && isVisible
+            ? .foreground
+            : .background
+        await model.setAppState(state)
+    }
+}

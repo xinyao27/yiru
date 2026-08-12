@@ -130,7 +130,7 @@ nonisolated private struct TerminalSnapshotMetadataWire: Decodable {
     let lastTitle: String?
     let oscLinks: [TerminalSnapshotLinkWire]
     let kittyKeyboardFlags: UInt32
-    let displayMode: TerminalSnapshotDisplayMode
+    let displayMode: TerminalDisplayMode
     let requestedScrollbackRows: UInt32
 
     init(from decoder: any Decoder) throws {
@@ -144,7 +144,7 @@ nonisolated private struct TerminalSnapshotMetadataWire: Decodable {
         lastTitle = try container.decodeIfPresent(String.self, forKey: .lastTitle)
         oscLinks = try container.decode([TerminalSnapshotLinkWire].self, forKey: .oscLinks)
         kittyKeyboardFlags = try container.decode(UInt32.self, forKey: .kittyKeyboardFlags)
-        displayMode = try container.decode(TerminalSnapshotDisplayMode.self, forKey: .displayMode)
+        displayMode = try container.decode(TerminalDisplayMode.self, forKey: .displayMode)
         requestedScrollbackRows = try container.decode(
             UInt32.self,
             forKey: .requestedScrollbackRows
@@ -167,4 +167,4 @@ nonisolated private struct TerminalSnapshotLinkWire: Decodable {
     let end: UInt32
 }
 
-extension TerminalSnapshotDisplayMode: Decodable {}
+extension TerminalDisplayMode: Decodable {}

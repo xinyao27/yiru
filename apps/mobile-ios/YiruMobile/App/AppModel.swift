@@ -28,8 +28,8 @@ final class AppModel {
         routes.append(.workspaces(host))
     }
 
-    func showTerminals(host: HostProfile, workspace: WorkspaceSummary) {
-        routes.append(.terminals(host, workspace))
+    func showWorkspaceSession(host: HostProfile, workspace: WorkspaceSummary) {
+        routes.append(.workspaceSession(host, workspace))
     }
 
     func showTerminal(host: HostProfile, terminal: TerminalSummary) {

@@ -3,6 +3,7 @@ import Foundation
 actor RuntimeOrpcPeer {
     private let connection: AuthenticatedRuntimeConnection
     private var pending: [String: PendingRequest] = [:]
+    private var subscriptions: [String: PendingSubscription] = [:]
     private var receiveTask: Task<Void, Never>?
     private var isClosed = false
 
@@ -55,6 +56,59 @@ actor RuntimeOrpcPeer {
         try await connection.ping()
     }
 
+    func subscribe<Input: Encodable, Output: Decodable & Sendable>(
+        path: String,
+        input: Input,
+        output: Output.Type
+    ) async throws -> AsyncThrowingStream<Output, Error> {
+        guard !isClosed else { throw RuntimeOrpcError.closed }
+        startReceivingIfNeeded()
+        let requestID = UUID().uuidString.lowercased()
+        let (stream, continuation) = AsyncThrowingStream.makeStream(of: Output.self)
+        subscriptions[requestID] = PendingSubscription(
+            isConfirmed: false,
+            yieldEvent: { data in
+                do {
+                    continuation.yield(try decodeEvent(data, output: output))
+                    return nil
+                } catch {
+                    return error
+                }
+            },
+            finish: { error in
+                if let error {
+                    continuation.finish(throwing: error)
+                } else {
+                    continuation.finish()
+                }
+            }
+        )
+        continuation.onTermination = { [weak self] _ in
+            Task { await self?.cancelSubscription(requestID: requestID) }
+        }
+
+        let request = OrpcRequestEnvelope(
+            i: requestID,
+            p: OrpcRequestPayload(
+                u: path,
+                b: OrpcEncodableBody(json: input),
+                h: [MobileRuntimeWireContract.requestIdHeader: requestID]
+            )
+        )
+        let data = try JSONEncoder().encode(request)
+        guard let payload = String(data: data, encoding: .utf8) else {
+            finishSubscription(requestID: requestID, error: RuntimeOrpcError.invalidMessage)
+            throw RuntimeOrpcError.invalidMessage
+        }
+        do {
+            try await connection.sendText(MobileRuntimeWireContract.textPrefix + payload)
+        } catch {
+            finishSubscription(requestID: requestID, error: error)
+            throw error
+        }
+        return stream
+    }
+
     func close() async {
         guard !isClosed else { return }
         isClosed = true
@@ -98,7 +152,15 @@ actor RuntimeOrpcPeer {
         guard message.hasPrefix(MobileRuntimeWireContract.textPrefix) else { return }
         let data = Data(message.dropFirst(MobileRuntimeWireContract.textPrefix.count).utf8)
         let head = try JSONDecoder().decode(OrpcResponseHead.self, from: data)
-        pending.removeValue(forKey: head.i)?.continuation.resume(returning: data)
+        if head.t == OrpcPeerMessageType.eventIterator.rawValue {
+            receiveSubscriptionEvent(requestID: head.i, data: data)
+        } else if head.t == OrpcPeerMessageType.abortSignal.rawValue {
+            finishSubscription(requestID: head.i, error: RuntimeOrpcError.closed)
+        } else if subscriptions[head.i] != nil {
+            confirmSubscription(requestID: head.i, data: data, head: head)
+        } else {
+            pending.removeValue(forKey: head.i)?.continuation.resume(returning: data)
+        }
     }
 
     private func fail(requestID: String, error: Error) {
@@ -109,6 +171,79 @@ actor RuntimeOrpcPeer {
         let requests = pending.values
         pending.removeAll()
         requests.forEach { $0.continuation.resume(throwing: error) }
+        let activeSubscriptions = subscriptions.values
+        subscriptions.removeAll()
+        activeSubscriptions.forEach { $0.finish(error) }
+    }
+
+    private func confirmSubscription(requestID: String, data: Data, head: OrpcResponseHead) {
+        guard var subscription = subscriptions[requestID] else { return }
+        let status = head.p?.s ?? 200
+        guard status >= 200 && status < 400 else {
+            let error = try? JSONDecoder().decode(OrpcErrorEnvelope.self, from: data)
+            finishSubscription(
+                requestID: requestID,
+                error: RuntimeOrpcError.server(status: status, code: error?.p.b.json.code)
+            )
+            return
+        }
+        let contentType = head.p?.h?.first { $0.key.lowercased() == "content-type" }?.value
+        guard contentType?.hasPrefix("text/event-stream") == true else {
+            finishSubscription(requestID: requestID, error: RuntimeOrpcError.unexpectedResponse)
+            return
+        }
+        subscription.isConfirmed = true
+        subscriptions[requestID] = subscription
+    }
+
+    private func receiveSubscriptionEvent(requestID: String, data: Data) {
+        guard let subscription = subscriptions[requestID], subscription.isConfirmed else { return }
+        guard let event = try? JSONDecoder().decode(OrpcEventHead.self, from: data) else {
+            rejectSubscription(requestID: requestID, error: RuntimeOrpcError.invalidMessage)
+            return
+        }
+        switch event.p.e {
+        case .message:
+            if let error = subscription.yieldEvent(data) {
+                rejectSubscription(requestID: requestID, error: error)
+            }
+        case .error:
+            let error = try? JSONDecoder().decode(OrpcEventErrorEnvelope.self, from: data)
+            finishSubscription(
+                requestID: requestID,
+                error: RuntimeOrpcError.server(status: 500, code: error?.p.d?.json.code)
+            )
+        case .done:
+            finishSubscription(requestID: requestID, error: nil)
+        }
+    }
+
+    private func finishSubscription(requestID: String, error: Error?) {
+        subscriptions.removeValue(forKey: requestID)?.finish(error)
+    }
+
+    private func rejectSubscription(requestID: String, error: Error) {
+        guard let subscription = subscriptions.removeValue(forKey: requestID) else { return }
+        subscription.finish(error)
+        Task { await sendAbort(requestID: requestID) }
+    }
+
+    private func cancelSubscription(requestID: String) async {
+        guard subscriptions.removeValue(forKey: requestID) != nil, !isClosed else { return }
+        await sendAbort(requestID: requestID)
+    }
+
+    private func sendAbort(requestID: String) async {
+        guard !isClosed else { return }
+        let abort = OrpcAbortEnvelope(
+            i: requestID,
+            t: OrpcPeerMessageType.abortSignal.rawValue
+        )
+        guard
+            let data = try? JSONEncoder().encode(abort),
+            let payload = String(data: data, encoding: .utf8)
+        else { return }
+        try? await connection.sendText(MobileRuntimeWireContract.textPrefix + payload)
     }
 }
 
@@ -123,68 +258,13 @@ nonisolated private struct PendingRequest {
     let continuation: CheckedContinuation<Data, Error>
 }
 
-nonisolated private func decodeResponse<Output: Decodable>(
-    _ data: Data,
-    requestID: String,
-    output: Output.Type
-) throws -> Output {
-    let head = try JSONDecoder().decode(OrpcResponseHead.self, from: data)
-    guard head.i == requestID, head.t == nil || head.t == 2 else {
-        throw RuntimeOrpcError.unexpectedResponse
-    }
-    let status = head.p.s ?? 200
-    guard status >= 200 && status < 400 else {
-        let error = try? JSONDecoder().decode(OrpcErrorEnvelope.self, from: data)
-        throw RuntimeOrpcError.server(status: status, code: error?.p.b.json.code)
-    }
-    return try JSONDecoder().decode(OrpcResponseEnvelope<Output>.self, from: data).p.b.json
+nonisolated private struct PendingSubscription: Sendable {
+    var isConfirmed: Bool
+    let yieldEvent: @Sendable (Data) -> Error?
+    let finish: @Sendable (Error?) -> Void
 }
 
-nonisolated private struct OrpcRequestEnvelope<Input: Encodable>: Encodable {
-    let i: String
-    let p: OrpcRequestPayload<Input>
-}
-
-nonisolated private struct OrpcRequestPayload<Input: Encodable>: Encodable {
-    let u: String
-    let b: OrpcEncodableBody<Input>
-    let h: [String: String]
-}
-
-nonisolated private struct OrpcEncodableBody<Value: Encodable>: Encodable {
-    let json: Value
-}
-
-nonisolated private struct OrpcResponseHead: Decodable {
-    let i: String
-    let t: Int?
-    let p: OrpcResponseHeadPayload
-}
-
-nonisolated private struct OrpcResponseHeadPayload: Decodable {
-    let s: Int?
-}
-
-nonisolated private struct OrpcResponseEnvelope<Output: Decodable>: Decodable {
-    let p: OrpcResponsePayload<Output>
-}
-
-nonisolated private struct OrpcResponsePayload<Output: Decodable>: Decodable {
-    let b: OrpcDecodableBody<Output>
-}
-
-nonisolated private struct OrpcDecodableBody<Value: Decodable>: Decodable {
-    let json: Value
-}
-
-nonisolated private struct OrpcErrorEnvelope: Decodable {
-    let p: OrpcErrorPayload
-}
-
-nonisolated private struct OrpcErrorPayload: Decodable {
-    let b: OrpcDecodableBody<OrpcErrorWire>
-}
-
-nonisolated private struct OrpcErrorWire: Decodable {
-    let code: String
+nonisolated private enum OrpcPeerMessageType: Int {
+    case eventIterator = 3
+    case abortSignal = 4
 }

@@ -1,5 +1,11 @@
 import Foundation
 
+nonisolated struct TerminalTarget: Identifiable, Hashable, Sendable {
+    let id: String
+    let title: String
+    let isWritable: Bool
+}
+
 nonisolated struct TerminalSummary: Identifiable, Hashable, Sendable {
     let id: String
     let ptyID: String?
@@ -34,6 +40,10 @@ nonisolated struct TerminalSummary: Identifiable, Hashable, Sendable {
     var displayTitle: String {
         guard let title, !title.isEmpty else { return branch }
         return title
+    }
+
+    var target: TerminalTarget {
+        TerminalTarget(id: id, title: displayTitle, isWritable: isWritable)
     }
 }
 

@@ -9,7 +9,7 @@ actor RuntimeHostSession {
     private var reconnectAttempt = 0
     private var authenticationRejections = 0
     private var lastConnectedAt: Date?
-    private var connectionGeneration = 0
+    var connectionGeneration = 0
     private var connectionAttemptGeneration = 0
     private var reconnectGeneration = 0
     private var peer: RuntimeOrpcPeer?
@@ -125,7 +125,7 @@ actor RuntimeHostSession {
         phase = .idle
     }
 
-    private func connectIfNeeded() async throws -> RuntimeOrpcPeer {
+    func connectIfNeeded() async throws -> RuntimeOrpcPeer {
         guard !isStopped else { throw RuntimeSessionError.closed }
         if let peer { return peer }
         if let connectTask {
@@ -277,7 +277,7 @@ actor RuntimeHostSession {
         }
     }
 
-    private func invalidate(generation: Int) async {
+    func invalidate(generation: Int) async {
         guard generation == connectionGeneration else { return }
         heartbeatTask?.cancel()
         heartbeatTask = nil
@@ -293,10 +293,4 @@ actor RuntimeHostSession {
     private func publish() async {
         await publishSnapshot(snapshot())
     }
-}
-
-nonisolated enum RuntimeSessionError: Error {
-    case authenticationFailed
-    case timeout
-    case closed
 }

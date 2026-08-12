@@ -231,6 +231,12 @@ actor TerminalMultiplexSession: TerminalSession {
         else {
             throw TerminalMultiplexSessionError.invalidSubscription
         }
+        switch record.displayMode {
+        case .auto:
+            continuation.yield(.displayMode(.auto))
+        case .desktop:
+            continuation.yield(.displayMode(.desktop))
+        }
         isSubscribed = true
         if let viewport, viewport != sentViewport {
             try await sendResize(viewport)

@@ -3,7 +3,7 @@ import { eventIterator, type, type ContractRouter } from '@orpc/contract'
 import { withAccess, type RuntimeProcedureMeta } from './access-meta.js'
 import * as inputs from './terminal-inputs.js'
 import { terminalManagementContract } from './terminal-management.js'
-import type * as results from './terminal-results.js'
+import * as results from './terminal-results.js'
 
 const HOST_READ_ACCESS = { scope: 'host', tier: 'read' } as const
 const HOST_HOST_ACCESS = { scope: 'host', tier: 'host' } as const
@@ -86,7 +86,7 @@ export const terminalContract = {
     .output(type<results.TerminalCloseResult>()),
   setDisplayMode: withAccess(WORKTREE_CONTROL_ACCESS, MOBILE_CLIENT)
     .input(inputs.TerminalSetDisplayModeInputSchema)
-    .output(type<results.TerminalSetDisplayModeResult>()),
+    .output(results.TerminalSetDisplayModeResultSchema),
   restoreFit: withAccess(WORKTREE_CONTROL_ACCESS)
     .input(inputs.TerminalHandleInputSchema)
     .output(type<results.TerminalRestoreFitResult>()),

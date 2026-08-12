@@ -1,3 +1,5 @@
+import { z } from 'zod'
+
 import type { TerminalOscLinkRange } from '../terminal-osc-link-ranges.js'
 
 export type TerminalDriverState =
@@ -294,7 +296,12 @@ export type TerminalResizeForClientResult = {
 
 export type TerminalFocusResult = { focus: TerminalFocus }
 export type TerminalCloseResult = { close: TerminalClose }
-export type TerminalSetDisplayModeResult = { mode: 'auto' | 'desktop'; seq?: number }
+export const TerminalSetDisplayModeResultSchema = z.object({
+  mode: z.enum(['auto', 'desktop']),
+  seq: z.number().optional()
+})
+
+export type TerminalSetDisplayModeResult = z.infer<typeof TerminalSetDisplayModeResultSchema>
 export type TerminalRestoreFitResult = { restored: boolean }
 export type TerminalGetDisplayModeResult = {
   mode: 'auto' | 'desktop'

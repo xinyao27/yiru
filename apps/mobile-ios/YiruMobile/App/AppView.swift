@@ -30,20 +30,25 @@ struct AppView: View {
                     WorkspaceListView(
                         host: host,
                         repository: model.dependencies.workspaceRepository,
-                        selectWorkspace: { model.showTerminals(host: host, workspace: $0) }
+                        selectWorkspace: { model.showWorkspaceSession(host: host, workspace: $0) }
                     )
-                case .terminals(let host, let workspace):
-                    TerminalListView(
+                case .workspaceSession(let host, let workspace):
+                    TerminalWorkspaceView(
                         host: host,
                         workspace: workspace,
-                        repository: model.dependencies.terminalRepository,
-                        selectTerminal: { model.showTerminal(host: host, terminal: $0) }
+                        repository: model.dependencies.terminalWorkspaceRepository,
+                        runtime: model.dependencies.terminalSessionRuntime,
+                        displayModeRuntime: model.dependencies.terminalDisplayModeRuntime,
+                        surfaceFactory: model.dependencies.terminalSurfaceFactory,
+                        preferences: model.dependencies.terminalPreferences,
+                        showSettings: model.showTerminalSettings
                     )
                 case .terminal(let host, let terminal):
                     TerminalLiveView(
                         host: host,
-                        terminal: terminal,
+                        terminal: terminal.target,
                         runtime: model.dependencies.terminalSessionRuntime,
+                        displayModeRuntime: model.dependencies.terminalDisplayModeRuntime,
                         surfaceFactory: model.dependencies.terminalSurfaceFactory,
                         preferences: model.dependencies.terminalPreferences,
                         showSettings: model.showTerminalSettings
