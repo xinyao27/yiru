@@ -10,6 +10,8 @@ import {
   PairingProvisionRelayParamsSchema
 } from '@yiru/mobile-relay-protocol/credential-contract'
 import {
+  MOBILE_E2EE_V2_KDF_DOMAIN,
+  MOBILE_E2EE_V2_TRANSCRIPT_DOMAIN,
   MobileE2EEV2ContextSchema,
   MobileE2EEV2HelloSchema,
   MobileE2EEV2ReadySchema
@@ -44,7 +46,9 @@ const pairingContract = readPairingContract(schemas.PairingOfferSchema)
 const e2eeContract = readE2EEContract(
   schemas.MobileE2EEV2ContextSchema,
   schemas.MobileE2EEV2HelloSchema,
-  schemas.MobileE2EEV2ReadySchema
+  schemas.MobileE2EEV2ReadySchema,
+  MOBILE_E2EE_V2_KDF_DOMAIN,
+  MOBILE_E2EE_V2_TRANSCRIPT_DOMAIN
 )
 const schemaJSON = `${JSON.stringify(schemas, null, 2)}\n`
 const digest = createHash('sha256').update(schemaJSON).digest('hex')
@@ -121,7 +125,7 @@ function readPairingContract(value) {
   }
 }
 
-function readE2EEContract(contextValue, helloValue, readyValue) {
+function readE2EEContract(contextValue, helloValue, readyValue, kdfDomain, transcriptDomain) {
   const contexts = requireUnionSchemas(contextValue, 'MobileE2EEV2ContextSchema')
   const direct = requireObjectSchema(contexts[0], 'MobileE2EEV2ContextSchema.direct')
   const relay = requireObjectSchema(contexts[1], 'MobileE2EEV2ContextSchema.relay')
@@ -226,7 +230,9 @@ function readE2EEContract(contextValue, helloValue, readyValue) {
     readyVersion: requireIntegerLiteral(ready.properties.v, 'ready.v'),
     framing: framing[0],
     payloadKinds,
-    base64Pattern
+    base64Pattern,
+    kdfDomain,
+    transcriptDomain
   }
 }
 
