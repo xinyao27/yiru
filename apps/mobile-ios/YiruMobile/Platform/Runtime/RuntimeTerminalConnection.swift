@@ -44,7 +44,7 @@ extension RuntimeClient {
                 await context.controlSession.generation() == controlGeneration
             }
         )
-        let session = await TerminalMultiplexSession(
+        let session = TerminalMultiplexSession(
             bulk: bulk,
             terminalID: terminalID,
             transportGeneration: shownTerminal.transportGeneration,

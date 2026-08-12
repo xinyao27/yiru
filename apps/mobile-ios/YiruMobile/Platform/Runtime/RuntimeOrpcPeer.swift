@@ -40,7 +40,7 @@ actor RuntimeOrpcPeer {
                         try await connection.sendText(
                             MobileRuntimeWireContract.textPrefix + payload)
                     } catch {
-                        await self.fail(requestID: requestID, error: error)
+                        self.fail(requestID: requestID, error: error)
                     }
                 }
             }

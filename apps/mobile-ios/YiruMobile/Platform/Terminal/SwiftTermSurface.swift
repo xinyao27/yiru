@@ -60,7 +60,7 @@ final class SwiftTermSurface: NSObject, TerminalSurface, TerminalViewDelegate {
     }
 
     func focus() {
-        terminalView.becomeFirstResponder()
+        _ = terminalView.becomeFirstResponder()
     }
 
     func sizeChanged(source: TerminalView, newCols: Int, newRows: Int) {
