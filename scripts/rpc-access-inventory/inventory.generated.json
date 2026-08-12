@@ -10518,7 +10518,7 @@
         "scope": "host",
         "tier": "read"
       },
-      "mobile": false,
+      "mobile": true,
       "streaming": false,
       "sources": [
         {
@@ -10668,7 +10668,7 @@
         "scope": "worktree",
         "tier": "read"
       },
-      "mobile": false,
+      "mobile": true,
       "streaming": false,
       "sources": [
         {
