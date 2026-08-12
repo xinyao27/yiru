@@ -2,6 +2,7 @@ struct AppDependencies: Sendable {
     let hostRepository: any HostRepository
     let homeRuntime: any HomeRuntime
     let pairingRuntime: any PairingRuntime
+    let runtimeLifecycle: any RuntimeLifecycle
     let terminalSurfaceFactory: any TerminalSurfaceFactory
     let workspaceRepository: any WorkspaceRepository
 
@@ -12,6 +13,7 @@ struct AppDependencies: Sendable {
             hostRepository: hosts,
             homeRuntime: runtime,
             pairingRuntime: DirectPairingClient(hosts: hosts),
+            runtimeLifecycle: runtime,
             terminalSurfaceFactory: SwiftTermSurfaceFactory(),
             workspaceRepository: runtime
         )

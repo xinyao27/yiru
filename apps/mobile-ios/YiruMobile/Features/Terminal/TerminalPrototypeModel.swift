@@ -52,17 +52,17 @@ final class TerminalPrototypeModel {
     }
 
     private static let fixture = """
-        \u{001B}[1;34mYiru native terminal\u{001B}[0m  SwiftTerm 1.18.0
-        \u{001B}[2mCore Text / Core Graphics baseline · iOS 26\u{001B}[0m
+        \u{001B}[1;34m\(String(localized: "Yiru native terminal"))\u{001B}[0m  SwiftTerm 1.18.0
+        \u{001B}[2m\(String(localized: "Core Text / Core Graphics baseline · iOS 26"))\u{001B}[0m
 
         \u{001B}[32m✓\u{001B}[0m UTF-8: 你好 · こんにちは · 안녕하세요 · 👩🏽‍💻
-        \u{001B}[33m!\u{001B}[0m OSC clipboard reads remain denied by default
+        \u{001B}[33m!\u{001B}[0m \(String(localized: "OSC clipboard reads remain denied by default"))
         \u{001B}[36m→\u{001B}[0m https://yiru.app
 
         ┌────────────────────────────────────────────┐
-        │ Renderer and transport remain independent │
+        │ \(String(localized: "Renderer and transport remain independent")) │
         └────────────────────────────────────────────┘
 
-        \u{001B}[1;35myiru\u{001B}[0m \u{001B}[2m~/workspaces/megamouth\u{001B}[0m $ 
+        \u{001B}[1;35myiru\u{001B}[0m \u{001B}[2m~/workspaces/megamouth\u{001B}[0m $
         """
 }

@@ -8,7 +8,7 @@ nonisolated struct HostProfile: Codable, Hashable, Sendable {
     let lastConnected: Date
 }
 
-nonisolated struct HostCredential: Sendable {
+nonisolated struct HostCredential: Equatable, Sendable {
     let profile: HostProfile
     let deviceToken: String
 }

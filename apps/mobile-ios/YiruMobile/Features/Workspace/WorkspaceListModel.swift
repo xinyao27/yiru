@@ -34,4 +34,10 @@ final class WorkspaceListModel {
             phase = .failed("Yiru could not load workspaces from this host.")
         }
     }
+
+    func reconnectAndLoad() async {
+        phase = .loading
+        await repository.reconnect(hostID: hostID)
+        await load()
+    }
 }

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct AppView: View {
     @Bindable var model: AppModel
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         NavigationStack(path: $model.routes) {
@@ -43,6 +44,10 @@ struct AppView: View {
         }
         .tint(Theme.Colors.accent)
         .onOpenURL(perform: model.handleOpenURL)
+        .onChange(of: scenePhase) { _, nextPhase in
+            guard nextPhase == .active else { return }
+            Task { await model.dependencies.runtimeLifecycle.applicationDidBecomeActive() }
+        }
     }
 }
 

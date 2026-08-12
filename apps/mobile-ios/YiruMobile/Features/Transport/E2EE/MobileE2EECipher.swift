@@ -36,6 +36,20 @@ nonisolated struct MobileE2EECipher: Sendable {
         return text
     }
 
+    mutating func sealBinary(_ plaintext: Data) throws -> Data {
+        let frame = try seal(plaintext, kind: .binary, counter: outboundCounter)
+        guard outboundCounter < UInt64.max else { throw MobileE2EEError.exhaustedCounter }
+        outboundCounter += 1
+        return frame
+    }
+
+    mutating func openBinary(_ frame: Data) throws -> Data {
+        let plaintext = try open(frame, kind: .binary, counter: inboundCounter)
+        guard inboundCounter < UInt64.max else { throw MobileE2EEError.exhaustedCounter }
+        inboundCounter += 1
+        return plaintext
+    }
+
     private func seal(_ payload: Data, kind: MobileE2EEPayloadKindWire, counter: UInt64) throws
         -> Data
     {

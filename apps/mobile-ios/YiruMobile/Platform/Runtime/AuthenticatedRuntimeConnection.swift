@@ -13,7 +13,8 @@ actor AuthenticatedRuntimeConnection {
     static func connect(
         endpoint: String,
         desktopPublicKeyBase64: String,
-        deviceToken: String
+        deviceToken: String,
+        timeout: Duration = .seconds(17)
     ) async throws -> AuthenticatedRuntimeConnection {
         guard let url = URL(string: endpoint), url.scheme == "ws" || url.scheme == "wss" else {
             throw AuthenticatedRuntimeError.invalidEndpoint
@@ -27,48 +28,82 @@ actor AuthenticatedRuntimeConnection {
 
         let socket = URLSession.shared.webSocketTask(with: url)
         socket.resume()
-        do {
-            let keyPair = try SodiumKeyExchange.makeKeyPair()
-            let clientNonce = try SodiumKeyExchange.randomBytes(count: 32)
-            let hello = try MobileE2EEHandshake.makeHello(
-                publicKey: keyPair.publicKey,
-                clientNonce: clientNonce
-            )
-            try await sendPlaintext(hello, over: socket)
-
-            let readyData = Data(try await receivePlaintext(over: socket).utf8)
-            let handshake = try MobileE2EEHandshake.validateReady(
-                readyData,
-                hello: hello,
-                pinnedDesktopPublicKey: desktopPublicKey
-            )
-            let sharedSecret = try SodiumKeyExchange.sharedSecret(
-                secretKey: keyPair.secretKey,
-                desktopPublicKey: desktopPublicKey
-            )
-            let schedule = try MobileE2EEKeySchedule.derive(
-                sharedSecret: sharedSecret,
-                transcript: handshake.transcript(),
-                clientNonce: handshake.clientNonce,
-                desktopNonce: handshake.desktopNonce
-            )
-            var cipher = MobileE2EECipher(schedule: schedule)
-            let auth = MobileE2EEAuthFrame(
-                type: "e2ee_auth",
-                v: MobileE2EEWireContract.version,
-                deviceToken: deviceToken,
-                transcriptHashB64: schedule.transcriptHash.base64EncodedString()
-            )
-            let authText = try encodedText(auth)
-            try await socket.send(.string(try cipher.sealText(authText)))
-
-            let response = try cipher.openText(try await receivePlaintext(over: socket))
-            try validateAuthentication(response, transcriptHash: schedule.transcriptHash)
-            return AuthenticatedRuntimeConnection(socket: socket, cipher: cipher)
-        } catch {
+        return try await withTaskCancellationHandler {
+            do {
+                return try await withThrowingTaskGroup(
+                    of: AuthenticatedRuntimeConnection.self
+                ) { group in
+                    group.addTask {
+                        try await withTaskCancellationHandler {
+                            try await authenticate(
+                                socket: socket,
+                                desktopPublicKey: desktopPublicKey,
+                                deviceToken: deviceToken
+                            )
+                        } onCancel: {
+                            socket.cancel(with: .goingAway, reason: nil)
+                        }
+                    }
+                    group.addTask {
+                        try await Task.sleep(for: timeout)
+                        throw AuthenticatedRuntimeError.timeout
+                    }
+                    guard let connection = try await group.next() else {
+                        throw CancellationError()
+                    }
+                    group.cancelAll()
+                    return connection
+                }
+            } catch {
+                socket.cancel(with: .goingAway, reason: nil)
+                throw error
+            }
+        } onCancel: {
             socket.cancel(with: .goingAway, reason: nil)
-            throw error
         }
+    }
+
+    private static func authenticate(
+        socket: URLSessionWebSocketTask,
+        desktopPublicKey: Data,
+        deviceToken: String
+    ) async throws -> AuthenticatedRuntimeConnection {
+        let keyPair = try SodiumKeyExchange.makeKeyPair()
+        let clientNonce = try SodiumKeyExchange.randomBytes(count: 32)
+        let hello = try MobileE2EEHandshake.makeHello(
+            publicKey: keyPair.publicKey,
+            clientNonce: clientNonce
+        )
+        try await sendPlaintext(hello, over: socket)
+
+        let readyData = Data(try await receivePlaintext(over: socket).utf8)
+        let handshake = try MobileE2EEHandshake.validateReady(
+            readyData,
+            hello: hello,
+            pinnedDesktopPublicKey: desktopPublicKey
+        )
+        let sharedSecret = try SodiumKeyExchange.sharedSecret(
+            secretKey: keyPair.secretKey,
+            desktopPublicKey: desktopPublicKey
+        )
+        let schedule = try MobileE2EEKeySchedule.derive(
+            sharedSecret: sharedSecret,
+            transcript: handshake.transcript(),
+            clientNonce: handshake.clientNonce,
+            desktopNonce: handshake.desktopNonce
+        )
+        var cipher = MobileE2EECipher(schedule: schedule)
+        let auth = MobileE2EEAuthFrame(
+            type: "e2ee_auth",
+            v: MobileE2EEWireContract.version,
+            deviceToken: deviceToken,
+            transcriptHashB64: schedule.transcriptHash.base64EncodedString()
+        )
+        try await socket.send(.string(try cipher.sealText(encodedText(auth))))
+
+        let response = try cipher.openText(try await receivePlaintext(over: socket))
+        try validateAuthentication(response, transcriptHash: schedule.transcriptHash)
+        return AuthenticatedRuntimeConnection(socket: socket, cipher: cipher)
     }
 
     func sendText(_ plaintext: String) async throws {
@@ -76,9 +111,35 @@ actor AuthenticatedRuntimeConnection {
         try await socket.send(.string(try cipher.sealText(plaintext)))
     }
 
-    func receiveText() async throws -> String {
+    func sendBinary(_ plaintext: Data) async throws {
         guard !isClosed else { throw AuthenticatedRuntimeError.closed }
-        return try cipher.openText(try await Self.receivePlaintext(over: socket))
+        try await socket.send(.data(try cipher.sealBinary(plaintext)))
+    }
+
+    func receive() async throws -> AuthenticatedRuntimeMessage {
+        guard !isClosed else { throw AuthenticatedRuntimeError.closed }
+        switch try await socket.receive() {
+        case .string(let frame):
+            return .text(try cipher.openText(frame))
+        case .data(let frame):
+            return .binary(try cipher.openBinary(frame))
+        @unknown default:
+            throw AuthenticatedRuntimeError.unexpectedMessage
+        }
+    }
+
+    func ping() async throws {
+        guard !isClosed else { throw AuthenticatedRuntimeError.closed }
+        try await withCheckedThrowingContinuation {
+            (continuation: CheckedContinuation<Void, Error>) in
+            socket.sendPing { error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume()
+                }
+            }
+        }
     }
 
     func close() {
@@ -108,12 +169,18 @@ actor AuthenticatedRuntimeConnection {
     }
 }
 
+nonisolated enum AuthenticatedRuntimeMessage: Sendable {
+    case text(String)
+    case binary(Data)
+}
+
 nonisolated enum AuthenticatedRuntimeError: Error {
     case invalidEndpoint
     case invalidDesktopKey
     case unexpectedMessage
     case authenticationFailed
     case closed
+    case timeout
 }
 
 nonisolated private struct MobileE2EEAuthFrame: Encodable {
@@ -149,6 +216,6 @@ nonisolated private func validateAuthentication(_ text: String, transcriptHash: 
         frame["v"] as? Int == MobileE2EEWireContract.version,
         frame["transcriptHashB64"] as? String == transcriptHash.base64EncodedString()
     else {
-        throw AuthenticatedRuntimeError.authenticationFailed
+        throw AuthenticatedRuntimeError.unexpectedMessage
     }
 }

@@ -2,7 +2,9 @@ import Foundation
 
 actor RuntimeOrpcPeer {
     private let connection: AuthenticatedRuntimeConnection
-    private var activeRequestID: String?
+    private var pending: [String: PendingRequest] = [:]
+    private var receiveTask: Task<Void, Never>?
+    private var isClosed = false
 
     init(connection: AuthenticatedRuntimeConnection) {
         self.connection = connection
@@ -13,11 +15,9 @@ actor RuntimeOrpcPeer {
         input: Input,
         output: Output.Type
     ) async throws -> Output {
-        guard activeRequestID == nil else { throw RuntimeOrpcError.requestAlreadyInFlight }
+        guard !isClosed else { throw RuntimeOrpcError.closed }
+        startReceivingIfNeeded()
         let requestID = UUID().uuidString.lowercased()
-        activeRequestID = requestID
-        defer { activeRequestID = nil }
-
         let request = OrpcRequestEnvelope(
             i: requestID,
             p: OrpcRequestPayload(
@@ -30,47 +30,114 @@ actor RuntimeOrpcPeer {
         guard let payload = String(data: data, encoding: .utf8) else {
             throw RuntimeOrpcError.invalidMessage
         }
-        try await connection.sendText(MobileRuntimeWireContract.textPrefix + payload)
-        return try decodeResponse(
-            try await connection.receiveText(),
-            requestID: requestID,
-            output: output
-        )
+
+        return try await withTaskCancellationHandler {
+            let response = try await withCheckedThrowingContinuation {
+                (continuation: CheckedContinuation<Data, Error>) in
+                pending[requestID] = PendingRequest(continuation: continuation)
+                Task {
+                    do {
+                        try await connection.sendText(
+                            MobileRuntimeWireContract.textPrefix + payload)
+                    } catch {
+                        await self.fail(requestID: requestID, error: error)
+                    }
+                }
+            }
+            return try decodeResponse(response, requestID: requestID, output: output)
+        } onCancel: {
+            Task { await self.fail(requestID: requestID, error: CancellationError()) }
+        }
+    }
+
+    func ping() async throws {
+        guard !isClosed else { throw RuntimeOrpcError.closed }
+        try await connection.ping()
     }
 
     func close() async {
+        guard !isClosed else { return }
+        isClosed = true
+        receiveTask?.cancel()
+        receiveTask = nil
         await connection.close()
+        failAll(with: RuntimeOrpcError.closed)
     }
 
-    private func decodeResponse<Output: Decodable>(
-        _ message: String,
-        requestID: String,
-        output: Output.Type
-    ) throws -> Output {
-        guard message.hasPrefix(MobileRuntimeWireContract.textPrefix) else {
-            throw RuntimeOrpcError.invalidMessage
+    private func startReceivingIfNeeded() {
+        guard receiveTask == nil else { return }
+        receiveTask = Task { [weak self] in
+            guard let self else { return }
+            await self.receiveLoop()
         }
-        let json = String(message.dropFirst(MobileRuntimeWireContract.textPrefix.count))
-        let data = Data(json.utf8)
+    }
+
+    private func receiveLoop() async {
+        do {
+            while !Task.isCancelled && !isClosed {
+                switch try await connection.receive() {
+                case .text(let message):
+                    try receiveText(message)
+                case .binary:
+                    // Terminal multiplex owns binary dispatch once its transport is attached.
+                    continue
+                }
+            }
+        } catch is CancellationError {
+            failAll(with: CancellationError())
+        } catch {
+            failAll(with: error)
+        }
+        if !isClosed {
+            isClosed = true
+            await connection.close()
+        }
+    }
+
+    private func receiveText(_ message: String) throws {
+        guard message.hasPrefix(MobileRuntimeWireContract.textPrefix) else { return }
+        let data = Data(message.dropFirst(MobileRuntimeWireContract.textPrefix.count).utf8)
         let head = try JSONDecoder().decode(OrpcResponseHead.self, from: data)
-        guard head.i == requestID, head.t == nil || head.t == 2 else {
-            throw RuntimeOrpcError.unexpectedResponse
-        }
-        let status = head.p.s ?? 200
-        guard status >= 200 && status < 400 else {
-            let error = try? JSONDecoder().decode(OrpcErrorEnvelope.self, from: data)
-            throw RuntimeOrpcError.server(status: status, code: error?.p.b.json.code)
-        }
-        let response = try JSONDecoder().decode(OrpcResponseEnvelope<Output>.self, from: data)
-        return response.p.b.json
+        pending.removeValue(forKey: head.i)?.continuation.resume(returning: data)
+    }
+
+    private func fail(requestID: String, error: Error) {
+        pending.removeValue(forKey: requestID)?.continuation.resume(throwing: error)
+    }
+
+    private func failAll(with error: Error) {
+        let requests = pending.values
+        pending.removeAll()
+        requests.forEach { $0.continuation.resume(throwing: error) }
     }
 }
 
 nonisolated enum RuntimeOrpcError: Error {
-    case requestAlreadyInFlight
     case invalidMessage
     case unexpectedResponse
     case server(status: Int, code: String?)
+    case closed
+}
+
+nonisolated private struct PendingRequest {
+    let continuation: CheckedContinuation<Data, Error>
+}
+
+nonisolated private func decodeResponse<Output: Decodable>(
+    _ data: Data,
+    requestID: String,
+    output: Output.Type
+) throws -> Output {
+    let head = try JSONDecoder().decode(OrpcResponseHead.self, from: data)
+    guard head.i == requestID, head.t == nil || head.t == 2 else {
+        throw RuntimeOrpcError.unexpectedResponse
+    }
+    let status = head.p.s ?? 200
+    guard status >= 200 && status < 400 else {
+        let error = try? JSONDecoder().decode(OrpcErrorEnvelope.self, from: data)
+        throw RuntimeOrpcError.server(status: status, code: error?.p.b.json.code)
+    }
+    return try JSONDecoder().decode(OrpcResponseEnvelope<Output>.self, from: data).p.b.json
 }
 
 nonisolated private struct OrpcRequestEnvelope<Input: Encodable>: Encodable {

@@ -25,7 +25,7 @@ struct WorkspaceListView: View {
                     Text(message)
                 } actions: {
                     Button("Try again") {
-                        Task { await model.load() }
+                        Task { await model.reconnectAndLoad() }
                     }
                     .buttonStyle(.glassProminent)
                 }

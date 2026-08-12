@@ -50,7 +50,7 @@ struct HomeView: View {
             }
         }
         .task(id: refreshRevision) {
-            await model.refresh()
+            await model.observe()
         }
         .refreshable {
             await model.refresh()
@@ -92,7 +92,12 @@ struct HomeView: View {
                 }
             }
         case .loaded(let state):
-            ConnectionSummary(state: state, showHosts: showHosts, showPairing: showPairing)
+            ConnectionSummary(
+                state: state,
+                showHosts: showHosts,
+                showPairing: showPairing,
+                reconnect: { Task { await model.reconnect() } }
+            )
         }
     }
 }
@@ -101,6 +106,7 @@ private struct ConnectionSummary: View {
     let state: RuntimeConnectionState
     let showHosts: () -> Void
     let showPairing: () -> Void
+    let reconnect: () -> Void
 
     var body: some View {
         ContentSurface {
@@ -115,9 +121,15 @@ private struct ConnectionSummary: View {
                         "Pair with desktop", systemImage: "qrcode.viewfinder", action: showPairing
                     )
                     .buttonStyle(.glassProminent)
-                } else if case .paired = state {
-                    Button("View hosts", systemImage: "desktopcomputer", action: showHosts)
-                        .buttonStyle(.glass)
+                } else if shouldShowHosts {
+                    GlassActionGroup {
+                        Button("View hosts", systemImage: "desktopcomputer", action: showHosts)
+                            .buttonStyle(.glass)
+                        if shouldReconnect {
+                            Button("Reconnect", systemImage: "arrow.clockwise", action: reconnect)
+                                .buttonStyle(.glassProminent)
+                        }
+                    }
                 }
             }
         }
@@ -134,8 +146,14 @@ private struct ConnectionSummary: View {
             SemanticBadge("Connecting", systemImage: "arrow.trianglehead.2.clockwise", tint: .blue)
         case .connected:
             SemanticBadge("Connected", systemImage: "checkmark.circle.fill", tint: .green)
+        case .reconnecting:
+            SemanticBadge(
+                "Reconnecting", systemImage: "arrow.trianglehead.2.clockwise", tint: .orange)
         case .unavailable:
             SemanticBadge("Unavailable", systemImage: "exclamationmark.triangle.fill", tint: .red)
+        case .authenticationFailed:
+            SemanticBadge(
+                "Authentication failed", systemImage: "key.slash.fill", tint: .red)
         }
     }
 
@@ -145,12 +163,16 @@ private struct ConnectionSummary: View {
             "No paired hosts"
         case .paired(let hostName):
             "Paired with \(hostName)"
-        case .connecting:
-            "Connecting to host"
+        case .connecting(let hostName):
+            "Connecting to \(hostName)"
         case .connected(let hostName):
             "Connected to \(hostName)"
-        case .unavailable:
-            "Host unavailable"
+        case .reconnecting(let hostName, _):
+            "Reconnecting to \(hostName)"
+        case .unavailable(let hostName, _):
+            "Cannot reach \(hostName)"
+        case .authenticationFailed(let hostName):
+            "Pairing expired for \(hostName)"
         }
     }
 
@@ -164,8 +186,31 @@ private struct ConnectionSummary: View {
             "Yiru is establishing an encrypted runtime connection."
         case .connected:
             "Choose a workspace to continue."
-        case .unavailable:
-            "Check the selected host and connection diagnostics."
+        case .reconnecting(_, let reconnectAttempt):
+            "Encrypted connection interrupted. Retry attempt \(reconnectAttempt)."
+        case .unavailable(_, let reconnectAttempt):
+            "The host is still unavailable after \(reconnectAttempt) attempts."
+        case .authenticationFailed:
+            "The saved credential was rejected. Pair this desktop again."
+        }
+    }
+
+    private var shouldShowHosts: Bool {
+        switch state {
+        case .unpaired:
+            false
+        case .paired, .connecting, .connected, .reconnecting, .unavailable,
+            .authenticationFailed:
+            true
+        }
+    }
+
+    private var shouldReconnect: Bool {
+        switch state {
+        case .reconnecting, .unavailable:
+            true
+        case .unpaired, .paired, .connecting, .connected, .authenticationFailed:
+            false
         }
     }
 }

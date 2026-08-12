@@ -1,22 +1,62 @@
 import Foundation
 
-actor RuntimeClient: HomeRuntime, WorkspaceRepository {
+actor RuntimeClient: HomeRuntime, RuntimeLifecycle, WorkspaceRepository {
     private let hosts: any HostRepository
     private let timeout: Duration
+    private let revivalMonitor: ConnectionRevivalMonitor
+    private var sessions: [String: ManagedSession] = [:]
+    private var snapshots: [String: RuntimeConnectionSnapshot] = [:]
+    private var homeContinuations: [UUID: AsyncStream<RuntimeConnectionState>.Continuation] = [:]
+    private var primaryHostID: String?
+    private var primaryHostName: String?
+    private var isMonitoringNetwork = false
 
-    init(hosts: any HostRepository, timeout: Duration = .seconds(25)) {
+    init(
+        hosts: any HostRepository,
+        timeout: Duration = .seconds(25),
+        revivalMonitor: ConnectionRevivalMonitor = ConnectionRevivalMonitor()
+    ) {
         self.hosts = hosts
         self.timeout = timeout
+        self.revivalMonitor = revivalMonitor
     }
 
     func currentConnectionState() async -> RuntimeConnectionState {
-        guard
-            let host = try? await hosts.hosts().sorted(by: { $0.lastConnected > $1.lastConnected })
-                .first
-        else {
-            return .unpaired
+        guard let credential = try? await primaryCredential() else { return .unpaired }
+        do {
+            let session = try await session(for: credential)
+            await session.start()
+            return map(await session.snapshot())
+        } catch {
+            return .unavailable(hostName: credential.profile.name, reconnectAttempt: 0)
         }
-        return .paired(hostName: host.name)
+    }
+
+    func connectionStates() -> AsyncStream<RuntimeConnectionState> {
+        let id = UUID()
+        let (stream, continuation) = AsyncStream.makeStream(
+            of: RuntimeConnectionState.self,
+            bufferingPolicy: .bufferingNewest(1)
+        )
+        homeContinuations[id] = continuation
+        continuation.yield(currentHomeState())
+        continuation.onTermination = { [weak self] _ in
+            Task { await self?.removeHomeContinuation(id) }
+        }
+        return stream
+    }
+
+    func reconnectMostRecentHost() async {
+        guard let credential = try? await primaryCredential(),
+            let session = try? await session(for: credential)
+        else {
+            return
+        }
+        await session.forceReconnect()
+    }
+
+    func applicationDidBecomeActive() async {
+        await reviveConnections()
     }
 
     func workspaces(for hostID: String) async throws -> WorkspaceSnapshot {
@@ -26,39 +66,137 @@ actor RuntimeClient: HomeRuntime, WorkspaceRepository {
                 try await Task.sleep(for: self.timeout)
                 throw WorkspaceRepositoryError.timeout
             }
-            guard let snapshot = try await group.next() else {
-                throw CancellationError()
-            }
+            guard let snapshot = try await group.next() else { throw CancellationError() }
             group.cancelAll()
             return snapshot
         }
     }
 
+    func reconnect(hostID: String) async {
+        guard let credential = try? await credential(for: hostID),
+            let session = try? await session(for: credential)
+        else {
+            return
+        }
+        await session.forceReconnect()
+    }
+
     private func fetchWorkspaces(for hostID: String) async throws -> WorkspaceSnapshot {
+        let credential = try await credential(for: hostID)
+        let session = try await session(for: credential)
+        let wire: MobileWorkspaceListWire = try await session.call(
+            path: MobileRuntimeWireContract.worktreeListPath,
+            input: MobileWorkspaceListRequestWire(limit: 10_000),
+            output: MobileWorkspaceListWire.self
+        )
+        return WorkspaceSnapshot(
+            workspaces: wire.worktrees.map(WorkspaceSummary.init(wire:)),
+            totalCount: wire.totalCount,
+            isTruncated: wire.truncated
+        )
+    }
+
+    private func primaryCredential() async throws -> HostCredential {
+        guard
+            let profile = try await hosts.hosts().sorted(by: {
+                $0.lastConnected > $1.lastConnected
+            }).first,
+            let credential = try await hosts.credential(for: profile.id)
+        else {
+            primaryHostID = nil
+            primaryHostName = nil
+            throw RuntimeClientError.hostNotFound
+        }
+        primaryHostID = profile.id
+        primaryHostName = profile.name
+        return credential
+    }
+
+    private func credential(for hostID: String) async throws -> HostCredential {
         guard let credential = try await hosts.credential(for: hostID) else {
             throw WorkspaceRepositoryError.hostNotFound
         }
-        let connection = try await AuthenticatedRuntimeConnection.connect(
-            endpoint: credential.profile.endpoint,
-            desktopPublicKeyBase64: credential.profile.publicKeyBase64,
-            deviceToken: credential.deviceToken
-        )
-        let peer = RuntimeOrpcPeer(connection: connection)
-        do {
-            let wire: MobileWorkspaceListWire = try await peer.call(
-                path: MobileRuntimeWireContract.worktreeListPath,
-                input: MobileWorkspaceListRequestWire(limit: 10_000),
-                output: MobileWorkspaceListWire.self
+        return credential
+    }
+
+    private func session(for credential: HostCredential) async throws -> RuntimeHostSession {
+        beginMonitoringNetworkIfNeeded()
+        if let managed = sessions[credential.profile.id], managed.credential == credential {
+            return managed.session
+        }
+        if let previous = sessions.removeValue(forKey: credential.profile.id) {
+            await previous.session.shutdown()
+        }
+        let session = RuntimeHostSession(credential: credential) { [weak self] snapshot in
+            await self?.record(snapshot)
+        }
+        sessions[credential.profile.id] = ManagedSession(credential: credential, session: session)
+        snapshots[credential.profile.id] = await session.snapshot()
+        return session
+    }
+
+    private func record(_ snapshot: RuntimeConnectionSnapshot) {
+        snapshots[snapshot.hostID] = snapshot
+        guard snapshot.hostID == primaryHostID else { return }
+        let state = map(snapshot)
+        homeContinuations.values.forEach { $0.yield(state) }
+    }
+
+    private func currentHomeState() -> RuntimeConnectionState {
+        guard let primaryHostID, let primaryHostName else { return .unpaired }
+        guard let snapshot = snapshots[primaryHostID] else {
+            return .paired(hostName: primaryHostName)
+        }
+        return map(snapshot)
+    }
+
+    private func map(_ snapshot: RuntimeConnectionSnapshot) -> RuntimeConnectionState {
+        switch snapshot.phase {
+        case .idle:
+            .paired(hostName: snapshot.hostName)
+        case .connecting:
+            .connecting(hostName: snapshot.hostName)
+        case .connected:
+            .connected(hostName: snapshot.hostName)
+        case .reconnecting:
+            .reconnecting(
+                hostName: snapshot.hostName,
+                reconnectAttempt: snapshot.reconnectAttempt
             )
-            await peer.close()
-            return WorkspaceSnapshot(
-                workspaces: wire.worktrees.map(WorkspaceSummary.init(wire:)),
-                totalCount: wire.totalCount,
-                isTruncated: wire.truncated
+        case .unreachable:
+            .unavailable(
+                hostName: snapshot.hostName,
+                reconnectAttempt: snapshot.reconnectAttempt
             )
-        } catch {
-            await peer.close()
-            throw error
+        case .authenticationFailed:
+            .authenticationFailed(hostName: snapshot.hostName)
         }
     }
+
+    private func beginMonitoringNetworkIfNeeded() {
+        guard !isMonitoringNetwork else { return }
+        isMonitoringNetwork = true
+        revivalMonitor.start { [weak self] in
+            Task { await self?.reviveConnections() }
+        }
+    }
+
+    private func reviveConnections() async {
+        for managed in sessions.values {
+            await managed.session.revive()
+        }
+    }
+
+    private func removeHomeContinuation(_ id: UUID) {
+        homeContinuations.removeValue(forKey: id)
+    }
+}
+
+nonisolated private struct ManagedSession: Sendable {
+    let credential: HostCredential
+    let session: RuntimeHostSession
+}
+
+nonisolated private enum RuntimeClientError: Error {
+    case hostNotFound
 }
