@@ -10,8 +10,8 @@ import {
   decodeTerminalMultiplexJson,
   encodeTerminalMultiplexJson
 } from '@yiru/runtime-protocol/terminal-multiplex/json'
+import type { TerminalViewportClient } from '~main/runtime/rpc/methods/terminal-viewport-control'
 
-import type { TerminalViewportClient } from '../../rpc/methods/terminal-viewport-control'
 import { TerminalMultiplexSnapshotCoordinator } from '../snapshot/coordinator'
 import { admitTerminalMultiplexStream } from './admission'
 import { TerminalMultiplexStreamControls } from './controls'

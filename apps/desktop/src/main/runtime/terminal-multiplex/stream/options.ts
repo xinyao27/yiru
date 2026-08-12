@@ -1,6 +1,6 @@
 import type { TerminalMultiplexOpcode } from '@yiru/runtime-protocol/terminal-multiplex/frame'
+import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
 
-import type { YiruRuntimeService } from '../../yiru-runtime'
 import type { TerminalMultiplexStreamTelemetry } from '../telemetry'
 import type { TerminalMultiplexSubscribeRecord } from './records'
 

@@ -7,8 +7,8 @@ import {
 } from '@yiru/runtime-protocol/terminal-multiplex/frame'
 import { encodeTerminalMultiplexJson } from '@yiru/runtime-protocol/terminal-multiplex/json'
 import { encodeTerminalMultiplexSnapshotEndRecord } from '@yiru/runtime-protocol/terminal-multiplex/snapshot-records'
+import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
 
-import type { YiruRuntimeService } from '../../yiru-runtime'
 import type { TerminalMultiplexStreamOutput } from '../stream/output/output'
 import type { TerminalMultiplexStreamTelemetry } from '../telemetry'
 import { sendTerminalMultiplexSnapshot } from './sender'

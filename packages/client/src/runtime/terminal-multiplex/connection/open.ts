@@ -1,19 +1,18 @@
 import type { TerminalOpenMultiplexResult } from '@yiru/runtime-protocol/contract'
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 import { TERMINAL_MULTIPLEX_DEFAULT_MAX_FRAME_BYTES } from '@yiru/runtime-protocol/terminal-multiplex/frame'
+import type { RuntimeClientTarget } from '~renderer/runtime/orpc-client'
+import {
+  openAuthenticatedRuntimeLoopbackSocket,
+  runtimeLoopbackEventBytes,
+  sendRuntimeLoopbackSocketFrame
+} from '~renderer/runtime/orpc-loopback-socket'
+import { runtimeEnvironmentsClient } from '~renderer/runtime/runtime-environments-client'
 import { requireWebActiveEnvironment } from '~renderer/web/runtime-connection'
 import {
   openWebTerminalMultiplexSubscription,
   type WebTerminalMultiplexSubscription
 } from '~renderer/web/terminal-multiplex-subscription'
-
-import type { RuntimeClientTarget } from '../../orpc-client'
-import {
-  openAuthenticatedRuntimeLoopbackSocket,
-  runtimeLoopbackEventBytes,
-  sendRuntimeLoopbackSocketFrame
-} from '../../orpc-loopback-socket'
-import { runtimeEnvironmentsClient } from '../../runtime-environments-client'
 
 export type RuntimeTerminalMultiplexHandle = {
   unsubscribe: () => void

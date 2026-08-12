@@ -5,8 +5,8 @@ import {
   encodeTerminalMultiplexSnapshotEndRecord,
   encodeTerminalMultiplexSnapshotStartRecord
 } from '@yiru/runtime-protocol/terminal-multiplex/snapshot-records'
+import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
 
-import type { YiruRuntimeService } from '../../yiru-runtime'
 import { buildTerminalMultiplexSnapshot } from './snapshot'
 
 const SNAPSHOT_CHUNK_DATA_BYTES = 48 * 1024

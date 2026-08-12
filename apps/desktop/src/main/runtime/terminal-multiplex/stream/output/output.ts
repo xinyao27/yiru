@@ -2,9 +2,9 @@ import type {
   TerminalMultiplexAckRecord,
   TerminalMultiplexCreditRecord
 } from '@yiru/runtime-protocol/terminal-multiplex/flow-records'
+import type { TerminalMultiplexStreamTelemetry } from '~main/runtime/terminal-multiplex/telemetry'
+import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
 
-import type { YiruRuntimeService } from '../../../yiru-runtime'
-import type { TerminalMultiplexStreamTelemetry } from '../../telemetry'
 import { splitTerminalMultiplexOutput, type TerminalMultiplexPendingOutput } from './chunks'
 import { TerminalMultiplexOutputFlow } from './flow-control'
 

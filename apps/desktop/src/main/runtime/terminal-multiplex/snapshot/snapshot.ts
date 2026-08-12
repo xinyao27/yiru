@@ -1,6 +1,5 @@
 import { encodeTerminalMultiplexJson } from '@yiru/runtime-protocol/terminal-multiplex/json'
-
-import type { YiruRuntimeService } from '../../yiru-runtime'
+import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
 
 const DEFAULT_SNAPSHOT_BYTES = 2 * 1024 * 1024
 const HARD_SNAPSHOT_BYTES = 8 * 1024 * 1024

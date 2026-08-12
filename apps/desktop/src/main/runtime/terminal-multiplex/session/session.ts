@@ -10,9 +10,9 @@ import {
   type TerminalMultiplexFrame
 } from '@yiru/runtime-protocol/terminal-multiplex/frame'
 import { encodeTerminalMultiplexJson } from '@yiru/runtime-protocol/terminal-multiplex/json'
+import type { RpcContext } from '~main/runtime/rpc/core'
+import { bindSubscriptionAbort } from '~main/runtime/rpc/methods/subscription-abort'
 
-import type { RpcContext } from '../../rpc/core'
-import { bindSubscriptionAbort } from '../../rpc/methods/subscription-abort'
 import { decodeTerminalMultiplexSubscribe } from '../stream/records'
 import { TerminalMultiplexStream } from '../stream/stream'
 import { TerminalMultiplexTelemetry } from '../telemetry'
