@@ -6,6 +6,7 @@ import { TERMINAL_TEXT_SCALES } from '~/storage/preferences'
 
 import { TERMINAL_PATH_TAP_JS } from '../path-tap-injected'
 import { XTERM_ENGINE_CSS, XTERM_ENGINE_JS } from '../webview-engine.generated'
+import { TERMINAL_MULTIPLEX_WEBVIEW_JS } from './multiplex-injected'
 import { TERMINAL_QUERY_REPLY_JS } from './query-reply-injected'
 import { TERMINAL_REFLOW_JS } from './reflow-injected'
 import { TERMINAL_SURFACE_SWAP_JS } from './surface-swap-injected'
@@ -13,6 +14,7 @@ import { TERMINAL_TAP_DISPATCH_JS } from './tap-dispatch-injected'
 import { TERMINAL_BOOTSTRAP_BACKGROUND, TERMINAL_WEBVIEW_THEME_JS } from './theme-injected'
 import { URL_TAP_WEBVIEW_JS } from './url-tap'
 import { TERMINAL_WEBGL_RECOVERY_JS } from './webgl-recovery-injected'
+import { TERMINAL_WRITE_QUEUE_JS } from './write-queue-injected'
 
 const DEFAULT_TERMINAL_THEME: RuntimeMobileTerminalTheme['theme'] = {
   background: TERMINAL_BOOTSTRAP_BACKGROUND,
@@ -564,63 +566,6 @@ ${TERMINAL_WEBVIEW_THEME_JS}
     }
   }
 
-  function resetWriteQueue() {
-    writeQueue = [];
-    writeQueueHead = 0;
-  }
-
-  function isStatusDotPresentationSelector(value) {
-    return value === TEXT_PRESENTATION_SELECTOR || value === EMOJI_PRESENTATION_SELECTOR;
-  }
-
-  function endsWithStatusDotPresentationSequence(data) {
-    var i = data.length - 1;
-    while (i >= 0 && isStatusDotPresentationSelector(data.charAt(i))) i--;
-    return i >= 0 && data.charAt(i) === CLAUDE_STATUS_DOT;
-  }
-
-  // Why: iOS WebKit promotes Claude's record/status dot to a colorful emoji glyph.
-  function normalizeStatusDotPresentation(data) {
-    if (typeof data !== 'string' || data.length === 0) return data;
-    if (statusDotPendingSelector) {
-      statusDotPendingSelector = false;
-      var strippedPendingSelectors = false;
-      while (data.length > 0 && isStatusDotPresentationSelector(data.charAt(0))) data = data.slice(1);
-      strippedPendingSelectors = data.length === 0;
-      if (strippedPendingSelectors) {
-        statusDotPendingSelector = true;
-        return '';
-      }
-    }
-    var normalized = data.replace(CLAUDE_STATUS_DOT_PATTERN, CLAUDE_STATUS_DOT + TEXT_PRESENTATION_SELECTOR);
-    statusDotPendingSelector = endsWithStatusDotPresentationSequence(data);
-    return normalized;
-  }
-
-  function enqueueWrite(data) {
-    writeQueue.push(normalizeStatusDotPresentation(data));
-  }
-
-  function enqueueWriteBoundary(callback) {
-    writeQueue.push(callback);
-  }
-
-  function nextQueuedWrite() {
-    if (writeQueueHead >= writeQueue.length) {
-      resetWriteQueue();
-      return undefined;
-    }
-    var next = writeQueue[writeQueueHead];
-    writeQueueHead++;
-    // Why: high-throughput terminals can enqueue faster than xterm parses;
-    // compact consumed slots so drain work stays O(1) without retaining old chunks.
-    if (writeQueueHead > 128 && writeQueueHead * 2 > writeQueue.length) {
-      writeQueue = writeQueue.slice(writeQueueHead);
-      writeQueueHead = 0;
-    }
-    return next;
-  }
-
   function disposeTermObservers() {
     var disposables = termObserverDisposables;
     termObserverDisposables = [];
@@ -646,34 +591,11 @@ ${TERMINAL_WEBVIEW_THEME_JS}
     return '';
   }
 
-  function pumpWrites(gen) {
-    if (!ready || !term || writesDraining || gen !== terminalGeneration) return;
-    var next = nextQueuedWrite();
-    if (typeof next !== 'string') {
-      if (typeof next === 'function') return next(), pumpWrites(gen);
-      var callbacks = afterDrainCallbacks;
-      afterDrainCallbacks = [];
-      for (var i = 0; i < callbacks.length; i++) callbacks[i]();
-      return;
-    }
-    writesDraining = true;
-    // Why: xterm.write() parses asynchronously. Row adjustment/resizing must
-    // wait until replayed SGR attributes have landed in the buffer.
-    term.write(next, function() {
-      if (gen !== terminalGeneration) return;
-      writesDraining = false;
-      pumpWrites(gen);
-    });
-  }
-
-  function afterWritesDrained(callback) {
-    afterDrainCallbacks.push(callback);
-    pumpWrites(terminalGeneration);
-  }
-
 ${TERMINAL_WEBGL_RECOVERY_JS}
+${TERMINAL_MULTIPLEX_WEBVIEW_JS}
+${TERMINAL_WRITE_QUEUE_JS}
 
-  function init(cols, rows, initialData, nextTheme, nextFontScale, preserveScroll, nextOscLinks) {
+  function init(cols, rows, initialData, nextTheme, nextFontScale, preserveScroll, nextOscLinks, structuralReplay, snapshotId) {
     if (typeof nextFontScale === 'number' && nextFontScale > 0) currentTextScale = nextFontScale;
     // Why: a width-reflow re-stream rewraps the same content at new cols.
     // Distance-from-bottom (rows) is the only stable anchor across reflow,
@@ -689,6 +611,7 @@ ${TERMINAL_WEBGL_RECOVERY_JS}
     webglAddon = null;
     ready = false;
     resetWriteQueue();
+    resetMultiplexParseState();
     statusDotPendingSelector = false;
     writesDraining = false;
     afterDrainCallbacks = [];
@@ -706,7 +629,7 @@ ${TERMINAL_WEBGL_RECOVERY_JS}
       sgrMouseMode: false,
       sgrMousePixelsMode: false
     };
-    var replayData = normalizeInitialData(initialData);
+    var replayData = structuralReplay ? initialData : normalizeInitialData(initialData);
     // Why: normalizeInitialData can discard pre-alt-screen bytes. Keep the
     // mirrored modes aligned with exactly what this mobile xterm replays.
     updateMouseModeFromData(replayData);
@@ -767,14 +690,15 @@ ${TERMINAL_WEBGL_RECOVERY_JS}
         initialOscLinkRowOffset = 0;
         initialOscLinkEvictionReady = true;
         applyFitScale('init-replay');
+        if (typeof snapshotId === 'number') notify({ type: 'snapshot-parsed', snapshotId: snapshotId });
         notify({ type: 'ready', cols: cols, rows: rows });
       });
     });
   }
 
-  function write(data) {
+  function write(data, metadata) {
     updateMouseModeFromData(data);
-    enqueueWrite(data);
+    enqueueWrite(data, metadata);
     pumpWrites(terminalGeneration);
     // Why: first live data chunk after init may widen the buffer past
     // what the post-replay applyFitScale measured. Re-fit once after this
@@ -921,6 +845,8 @@ ${TERMINAL_WEBGL_RECOVERY_JS}
       notify({ type: 'pong', pingId: msg.id });
     } else if (msg.type === 'init') {
       init(msg.cols, msg.rows, msg.initialData, msg.terminalTheme, msg.fontScale, msg.preserveScroll, msg.oscLinks);
+    } else if (msg.type === 'restore') {
+      restoreMultiplexSnapshot(msg.snapshot);
     } else if (msg.type === 'set-font-scale') {
       // Why: ignore RN echoing back the value a pinch just set (msg.fontScale ===
       // currentTextScale) so the post-pinch state isn't reset; only apply changes.
@@ -934,10 +860,15 @@ ${TERMINAL_WEBGL_RECOVERY_JS}
       resize(msg.cols, msg.rows);
     } else if (msg.type === 'reflow') { reflow(msg.cols, msg.rows);
     } else if (msg.type === 'write') {
-      write(msg.data);
+      write(msg.data, {
+        endSeq: msg.endSeq,
+        wireByteLength: msg.wireByteLength,
+        ackEveryBytes: msg.ackEveryBytes
+      });
     } else if (msg.type === 'clear') {
       terminalGeneration++;
       resetWriteQueue(); resumeTerminalDataReplyAuthority(); // Why: clear drops the replay boundary.
+      resetMultiplexParseState();
       statusDotPendingSelector = false;
       afterDrainCallbacks = [];
       writesDraining = false;

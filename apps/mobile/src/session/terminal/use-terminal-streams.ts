@@ -5,12 +5,17 @@ import type {
   TerminalWebViewHandle
 } from '~/terminal/webview/contract'
 import type { RpcClient } from '~/transport/rpc-client'
+import type { MobileMultiplexedTerminal } from '~/transport/terminal-multiplex/types'
 
 import * as nativeChatTerminalStream from '../native-chat/terminal-stream'
 import type { MobileDisplayMode } from '../screen-state'
 import { MobileTerminalDiagnostics } from './diagnostics'
+import { updateTerminalCwdFromStreamEvent } from './records'
+import {
+  applyMobileTerminalSnapshotMetadata,
+  mobileTerminalSnapshotDiagnostic
+} from './snapshot-state'
 import { subscribeMobileTerminalSafely } from './stream-subscribe'
-import { handleMobileTerminalStreamEvent } from './terminal-stream-event'
 
 export type MobileTerminalStreamsDeps = {
   client: RpcClient | null
@@ -28,6 +33,7 @@ export type MobileTerminalStreamsDeps = {
 
 export type MobileTerminalStreams = {
   terminalRefs: React.RefObject<Map<string, TerminalWebViewHandle>>
+  terminalStreamsRef: React.RefObject<Map<string, MobileMultiplexedTerminal>>
   terminalDiagnosticsRef: React.RefObject<MobileTerminalDiagnostics>
   terminalUnsubsRef: React.RefObject<Map<string, () => void>>
   subscribingHandlesRef: React.RefObject<Set<string>>
@@ -44,9 +50,6 @@ export type MobileTerminalStreams = {
   measureViewportOnce: (handle: string) => Promise<void>
 }
 
-// Owns the mobile terminal stream lifecycle for one session route: the xterm
-// WebView handles, the per-handle subscription generation counters, the layout
-// staleness high-water marks, and the measured phone viewport.
 export function useMobileTerminalStreams(deps: MobileTerminalStreamsDeps): MobileTerminalStreams {
   const {
     client,
@@ -59,34 +62,19 @@ export function useMobileTerminalStreams(deps: MobileTerminalStreamsDeps): Mobil
     setTerminalModes,
     setTerminalKeyboardMetrics
   } = deps
-
-  const terminalRefs = useRef<Map<string, TerminalWebViewHandle>>(new Map())
+  const terminalRefs = useRef(new Map<string, TerminalWebViewHandle>())
+  const terminalStreamsRef = useRef(new Map<string, MobileMultiplexedTerminal>())
   const terminalDiagnosticsRef = useRef(new MobileTerminalDiagnostics())
-  const terminalUnsubsRef = useRef<Map<string, () => void>>(new Map())
-  const subscribingHandlesRef = useRef<Set<string>>(new Set())
-  const initializedHandlesRef = useRef<Set<string>>(new Set())
-  // Why: WebViews load xterm.js from CDN asynchronously. Hidden WebViews
-  // (opacity:0) may have delayed JS execution on iOS. We must not subscribe
-  // until the WebView has fired web-ready, otherwise init() messages queue
-  // and may not render reliably.
-  const webReadyHandlesRef = useRef<Set<string>>(new Set())
-  const terminalCwdRef = useRef<Map<string, string>>(new Map())
-  // Why: measured once from TerminalWebView on mount, then passed with every
-  // subscribe call so the server can auto-fit the PTY to phone dimensions.
+  const terminalUnsubsRef = useRef(new Map<string, () => void>())
+  const subscribingHandlesRef = useRef(new Set<string>())
+  const initializedHandlesRef = useRef(new Set<string>())
+  const webReadyHandlesRef = useRef(new Set<string>())
+  const terminalCwdRef = useRef(new Map<string, string>())
   const viewportRef = useRef<{ cols: number; rows: number } | null>(null)
   const viewportMeasuredRef = useRef(false)
-  // Why: tracks the pixel height of the terminal frame so measureFitDimensions
-  // can use the exact container height instead of relying on window.innerHeight,
-  // which can overstate the visible area due to layout timing.
-  const terminalFrameHeightRef = useRef<number>(0)
-  const subscribeSeqRef = useRef<Map<string, number>>(new Map())
-  // Why: server-side layout state machine emits a monotonic seq on every
-  // applyLayout. Track the highest seq we've observed per handle and drop
-  // any scrollback/resized event with a strictly older seq — these are
-  // late-arriving events from a superseded layout (e.g. phone-fit dims
-  // landing after the user toggled to desktop). Drops below `>20`-window
-  // gap reset (treat as a fresh subscription, e.g. server restart).
-  const layoutSeqRef = useRef<Map<string, number>>(new Map())
+  const terminalFrameHeightRef = useRef(0)
+  const subscribeSeqRef = useRef(new Map<string, number>())
+  const pendingSnapshotAckRef = useRef(new Map<string, number>())
 
   const getTerminalRef = useCallback((handle: string | null) => {
     return handle ? terminalRefs.current.get(handle) : undefined
@@ -96,13 +84,11 @@ export function useMobileTerminalStreams(deps: MobileTerminalStreamsDeps): Mobil
     (handle: string) => {
       terminalUnsubsRef.current.get(handle)?.()
       terminalUnsubsRef.current.delete(handle)
+      terminalStreamsRef.current.delete(handle)
+      pendingSnapshotAckRef.current.delete(handle)
       subscribingHandlesRef.current.delete(handle)
-      terminalDiagnosticsRef.current.terminalUnsubscribed(handle)
       subscribeSeqRef.current.set(handle, (subscribeSeqRef.current.get(handle) ?? 0) + 1)
-      // Why: a fresh subscription will land on a new server-side state machine
-      // run (or the same one with a higher seq); reset the high-water mark so
-      // the first scrollback isn't accidentally dropped as stale.
-      layoutSeqRef.current.delete(handle)
+      terminalDiagnosticsRef.current.terminalUnsubscribed(handle)
       clearNativeChatInputLease(handle)
     },
     [clearNativeChatInputLease]
@@ -111,36 +97,38 @@ export function useMobileTerminalStreams(deps: MobileTerminalStreamsDeps): Mobil
   unsubscribeTerminalRef.current = unsubscribeTerminal
 
   const clearTerminalCache = useCallback(() => {
-    terminalUnsubsRef.current.forEach((unsub) => unsub())
+    terminalUnsubsRef.current.forEach((unsubscribe) => unsubscribe())
     clearNativeChatInputLease()
     terminalUnsubsRef.current.clear()
+    terminalStreamsRef.current.clear()
     subscribingHandlesRef.current.clear()
     initializedHandlesRef.current.clear()
-    terminalDiagnosticsRef.current.clearTerminalCache()
     webReadyHandlesRef.current.clear()
     subscribeSeqRef.current.clear()
-    layoutSeqRef.current.clear()
+    pendingSnapshotAckRef.current.clear()
     terminalCwdRef.current.clear()
+    terminalDiagnosticsRef.current.clearTerminalCache()
     setTerminalKeyboardMetrics(new Map())
-    for (const term of terminalRefs.current.values()) {
-      term.clear()
+    for (const terminal of terminalRefs.current.values()) {
+      terminal.clear()
     }
   }, [clearNativeChatInputLease, setTerminalKeyboardMetrics])
 
-  // Why: measures the phone viewport once from the first available TerminalWebView.
-  // The viewport dims are passed with every subscribe call so the server can
-  // auto-fit the PTY without a separate RPC round-trip.
   const measureViewportOnce = useCallback(
     async (handle: string) => {
       if (viewportMeasuredRef.current) {
         return
       }
-      const dims = await getTerminalRef(handle)?.measureFitDimensions(
+      const dimensions = await getTerminalRef(handle)?.measureFitDimensions(
         terminalFrameHeightRef.current || undefined
       )
-      terminalDiagnosticsRef.current.viewportMeasured(handle, dims, terminalFrameHeightRef.current)
-      if (dims) {
-        viewportRef.current = dims
+      terminalDiagnosticsRef.current.viewportMeasured(
+        handle,
+        dimensions,
+        terminalFrameHeightRef.current
+      )
+      if (dimensions) {
+        viewportRef.current = dimensions
         viewportMeasuredRef.current = true
       }
     },
@@ -150,18 +138,14 @@ export function useMobileTerminalStreams(deps: MobileTerminalStreamsDeps): Mobil
   const subscribeToTerminal = useCallback(
     (handle: string) => {
       const diagnostics = terminalDiagnosticsRef.current
-      const logSkippedGate = (reason: string) =>
+      const skip = (reason: string): void =>
         diagnostics.streamSkipped(handle, reason, handle === activeHandleRef.current)
-      if (!client) {
-        logSkippedGate('no-client')
+      if (!client || !deviceTokenRef.current) {
+        skip('no-client-identity')
         return
       }
-      if (terminalUnsubsRef.current.has(handle)) {
-        logSkippedGate('already-subscribed')
-        return
-      }
-      if (subscribingHandlesRef.current.has(handle)) {
-        logSkippedGate('subscribe-in-flight')
+      if (terminalUnsubsRef.current.has(handle) || subscribingHandlesRef.current.has(handle)) {
+        skip('already-subscribed')
         return
       }
       const covered = nativeChatTerminalStream.isTerminalCoveredByNativeChat(
@@ -169,111 +153,139 @@ export function useMobileTerminalStreams(deps: MobileTerminalStreamsDeps): Mobil
         activeHandleRef.current,
         handle
       )
-      // Why: a native-chat-covered terminal subscribes as the input-floor lease
-      // without a mounted xterm webview, so only gate on the webview when NOT covered.
-      if (!covered) {
-        if (!getTerminalRef(handle)) {
-          logSkippedGate('no-webview-ref')
-          return
-        }
-        if (!webReadyHandlesRef.current.has(handle)) {
-          logSkippedGate('webview-not-ready')
-          return
-        }
+      if (!covered && (!getTerminalRef(handle) || !webReadyHandlesRef.current.has(handle))) {
+        skip('webview-not-ready')
+        return
       }
 
-      subscribingHandlesRef.current.add(handle)
       const seq = (subscribeSeqRef.current.get(handle) ?? 0) + 1
       subscribeSeqRef.current.set(handle, seq)
+      subscribingHandlesRef.current.add(handle)
       diagnostics.streamArmed(handle, seq, viewportRef.current)
-
-      // Why: server handles auto-fit on subscribe — no terminal.focus call needed.
-      // The viewport is embedded in the subscribe params so the server resizes
-      // the PTY before serializing scrollback. This eliminates the focus→safeFit
-      // race and the measure→resize→resubscribe pipeline.
-      const unsub = subscribeMobileTerminalSafely(
+      const isCurrent = (): boolean => subscribeSeqRef.current.get(handle) === seq
+      const acknowledgeSnapshot = (snapshotId: number): void => {
+        const stream = terminalStreamsRef.current.get(handle)
+        if (stream) {
+          stream.snapshotParsed(snapshotId)
+        } else {
+          pendingSnapshotAckRef.current.set(handle, snapshotId)
+        }
+      }
+      const unsubscribe = subscribeMobileTerminalSafely(
         client,
         {
           terminal: handle,
-          // Why: the device token loads asynchronously and subscribe can fire first;
-          // omit the client identity rather than sending a null id as a string.
-          ...(deviceTokenRef.current
-            ? { client: { id: deviceTokenRef.current, type: 'mobile' as const } }
-            : {}),
-          viewport: viewportRef.current ?? undefined,
-          capabilities: nativeChatTerminalStream.mobileNativeChatTerminalCapabilities(covered)
+          client: { id: deviceTokenRef.current, type: 'mobile' },
+          ...(viewportRef.current ? { viewport: viewportRef.current } : {}),
+          delivery: covered
+            ? { visible: false, interested: false, priority: 'parked' }
+            : { visible: true, interested: true, priority: 'active' },
+          callbacks: {
+            onData: (data, meta) => {
+              if (!isCurrent()) {
+                return
+              }
+              const terminal = getTerminalRef(handle)
+              if (!terminal || covered) {
+                terminalStreamsRef.current.get(handle)?.outputParsed(meta.endSeq)
+                return
+              }
+              terminal.write(data, meta, (endSeq, receiverQueueBytes) =>
+                terminalStreamsRef.current.get(handle)?.outputParsed(endSeq, receiverQueueBytes)
+              )
+            },
+            onSnapshot: (snapshot) => {
+              if (!isCurrent()) {
+                return
+              }
+              applyMobileTerminalSnapshotMetadata(
+                handle,
+                snapshot,
+                terminalCwdRef.current,
+                setTerminalModes
+              )
+              diagnostics.firstStreamEvent(handle, seq, 'snapshot')
+              diagnostics.streamScrollback(
+                handle,
+                seq,
+                null,
+                mobileTerminalSnapshotDiagnostic(snapshot)
+              )
+              const terminal = getTerminalRef(handle)
+              if (!terminal || covered) {
+                acknowledgeSnapshot(snapshot.id)
+                return
+              }
+              terminal.restore(snapshot, acknowledgeSnapshot)
+              initializedHandlesRef.current.add(handle)
+              scheduleDelayedAction(() => getTerminalRef(handle)?.resetZoom(), 200)
+            },
+            onSubscribed: () => {
+              if (isCurrent()) {
+                markNativeChatInputLeaseReady(handle)
+              }
+            },
+            onEnd: () => unsubscribeTerminalRef.current(handle),
+            onError: (error) => {
+              diagnostics.streamFailed(handle, 'protocol', error)
+              unsubscribeTerminalRef.current(handle)
+            },
+            onFitOverrideChanged: ({ mode, cols, rows }) => {
+              if (!isCurrent()) {
+                return
+              }
+              getTerminalRef(handle)?.resize(cols, rows)
+              setTerminalModes((current) =>
+                new Map(current).set(handle, mode === 'mobile-fit' ? 'phone' : 'desktop')
+              )
+            },
+            onMetadata: (metadata) => {
+              if (!isCurrent()) {
+                return
+              }
+              updateTerminalCwdFromStreamEvent(handle, metadata, terminalCwdRef.current)
+              if (
+                metadata.type === 'resized' &&
+                typeof metadata.cols === 'number' &&
+                typeof metadata.rows === 'number'
+              ) {
+                getTerminalRef(handle)?.resize(metadata.cols, metadata.rows)
+              }
+            },
+            onClearBuffer: () => getTerminalRef(handle)?.clear(),
+            onTransportClose: () => unsubscribeTerminalRef.current(handle)
+          }
         },
-        (result) => {
-          if (subscribeSeqRef.current.get(handle) !== seq) {
+        (stream) => {
+          if (!isCurrent()) {
+            stream.close()
             return
           }
-          // Why: terminal.subscribe frames are always JSON objects, and the event
-          // handler re-checks every field it reads; a guard here would only change
-          // which malformed frames get diagnostics-logged.
-          const data = result as Record<string, unknown>
-          diagnostics.firstStreamEvent(handle, seq, data.type)
-          if (data.type === 'end' || data.type === 'error') {
-            unsubscribeTerminalRef.current(handle)
-            return
+          terminalStreamsRef.current.set(handle, stream)
+          subscribingHandlesRef.current.delete(handle)
+          const pendingSnapshotId = pendingSnapshotAckRef.current.get(handle)
+          if (pendingSnapshotId !== undefined) {
+            pendingSnapshotAckRef.current.delete(handle)
+            stream.snapshotParsed(pendingSnapshotId)
           }
-          if (data.type === 'subscribed') {
-            markNativeChatInputLeaseReady(handle)
-            return
-          }
-          // Why: retain the subscription as the mobile input-floor lease, but
-          // do not mutate covered xterm state; return-to-terminal resubscribes.
-          if (
-            nativeChatTerminalStream.isTerminalCoveredByNativeChat(
-              showNativeChatRef.current,
-              activeHandleRef.current,
-              handle
-            )
-          ) {
-            return
-          }
-          handleMobileTerminalStreamEvent(data, {
-            handle,
-            seq,
-            diagnostics,
-            subscribeSeqRef,
-            layoutSeqRef,
-            initializedHandlesRef,
-            terminalCwdRef,
-            viewportRef,
-            viewportMeasuredRef,
-            terminalFrameHeightRef,
-            getTerminalRef,
-            setTerminalModes,
-            scheduleDelayedAction,
-            unsubscribeTerminal,
-            subscribeToTerminal
-          })
         },
-        () => unsubscribeTerminalRef.current(handle)
+        (error) => {
+          diagnostics.streamFailed(handle, 'connect', error)
+          unsubscribeTerminalRef.current(handle)
+        }
       )
-
-      if (subscribeSeqRef.current.get(handle) === seq) {
-        terminalUnsubsRef.current.set(handle, unsub)
+      if (isCurrent()) {
+        terminalUnsubsRef.current.set(handle, unsubscribe)
       } else {
-        unsub()
+        unsubscribe()
       }
-      subscribingHandlesRef.current.delete(handle)
     },
-    // Why: the deps cannot list subscribeToTerminal itself — the measure→resubscribe
-    // path calls back into this very callback — so exhaustiveness stops one short.
-    // Everything else it reads is either a ref or an identity-stable callback.
-    [
-      client,
-      getTerminalRef,
-      markNativeChatInputLeaseReady,
-      scheduleDelayedAction,
-      setTerminalModes,
-      unsubscribeTerminal
-    ]
+    [client, getTerminalRef, markNativeChatInputLeaseReady, scheduleDelayedAction, setTerminalModes]
   )
 
   return {
     terminalRefs,
+    terminalStreamsRef,
     terminalDiagnosticsRef,
     terminalUnsubsRef,
     subscribingHandlesRef,

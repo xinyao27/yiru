@@ -15,6 +15,7 @@ import type { TerminalWebViewCommand } from './webview/messages'
 import { createTerminalWebViewPendingMessages } from './webview/pending-messages'
 import { routeTerminalQueryReply } from './webview/query-reply-routing'
 import { useTerminalWebReadyWatchdog } from './webview/ready-watchdog'
+import { useTerminalMultiplexBridge } from './webview/use-multiplex-bridge'
 import { useTerminalWebViewTheme } from './webview/use-theme'
 
 export const TerminalWebView = forwardRef<TerminalWebViewHandle, TerminalWebViewProps>(
@@ -49,12 +50,6 @@ export const TerminalWebView = forwardRef<TerminalWebViewHandle, TerminalWebView
     const measureResolveRef = useRef<
       ((result: { cols: number; rows: number } | null) => void) | null
     >(null)
-    // Why: each init() call posts 'init' to the WebView and arms a fresh
-    // ready promise. WebView's init() rAF chain ends with a 'ready' notify
-    // that resolves it. measureFitDimensions awaits this so it doesn't
-    // race ahead of term.open() / renderService population.
-    const readyPromiseRef = useRef<Promise<void> | null>(null)
-    const readyResolveRef = useRef<(() => void) | null>(null)
     const { clearEngineError, engineError, reportEngineError, reportNativeEngineError } =
       useTerminalWebViewEngineErrorState(onEngineError)
     const { armWebReadyWatchdog, clearWebReadyWatchdog } = useTerminalWebReadyWatchdog(
@@ -82,6 +77,7 @@ export const TerminalWebView = forwardRef<TerminalWebViewHandle, TerminalWebView
       },
       [pendingMessages, sendToWebView]
     )
+    const multiplexBridge = useTerminalMultiplexBridge(postMessage)
 
     const confirmWebReady = useCallback(
       (notifyParent: boolean) => {
@@ -116,6 +112,9 @@ export const TerminalWebView = forwardRef<TerminalWebViewHandle, TerminalWebView
           return
         }
         routeTerminalQueryReply(msg, onTerminalQueryReply)
+        if (multiplexBridge.handleMessage(msg)) {
+          return
+        }
 
         if (msg.type === 'web-ready') {
           confirmWebReady(true)
@@ -125,15 +124,6 @@ export const TerminalWebView = forwardRef<TerminalWebViewHandle, TerminalWebView
           msg.pingId === pendingPingIdRef.current
         ) {
           confirmWebReady(false)
-        } else if (msg.type === 'ready') {
-          // Why: the WebView's init() rAF chain has run — term is open
-          // renderService is populated, first paint has happened. Resolve
-          // any pending awaitReady() so a queued measure can now safely
-          // read cell dims.
-          const resolve = readyResolveRef.current
-          readyResolveRef.current = null
-          readyPromiseRef.current = null
-          resolve?.()
         } else if (msg.type === 'measure-result') {
           const resolve = measureResolveRef.current
           measureResolveRef.current = null
@@ -213,6 +203,7 @@ export const TerminalWebView = forwardRef<TerminalWebViewHandle, TerminalWebView
       },
       [
         confirmWebReady,
+        multiplexBridge,
         reportEngineError,
         onSelectionMode,
         onSelectionCopy,
@@ -277,9 +268,8 @@ export const TerminalWebView = forwardRef<TerminalWebViewHandle, TerminalWebView
           armWebReadyWatchdog()
           pendingPingIdRef.current = sendToWebView({ type: 'ping' })
         },
-        write(data: string) {
-          postMessage({ type: 'write', data })
-        },
+        write: multiplexBridge.write,
+        restore: multiplexBridge.restore,
         init(
           cols: number,
           rows: number,
@@ -294,15 +284,7 @@ export const TerminalWebView = forwardRef<TerminalWebViewHandle, TerminalWebView
           // each leaked timer + closure pinned an awaiting measure caller
           // for the full 3s under rapid re-init (orientation change
           // multiple resubscribes), delaying cold-start fit chains.
-          const priorResolve = readyResolveRef.current
-          if (priorResolve) {
-            readyResolveRef.current = null
-            readyPromiseRef.current = null
-            priorResolve()
-          }
-          readyPromiseRef.current = new Promise<void>((resolve) => {
-            readyResolveRef.current = resolve
-          })
+          multiplexBridge.armReady()
           postMessage({
             type: 'init',
             cols,
@@ -363,31 +345,16 @@ export const TerminalWebView = forwardRef<TerminalWebViewHandle, TerminalWebView
         doSelectAll() {
           postMessage({ type: 'do-select-all' })
         },
-        async awaitReady(): Promise<void> {
-          // Why: returns the in-flight ready promise (set by init); resolves
-          // immediately if no init is pending. Capped at 3s so a stuck
-          // WebView doesn't hang the caller.
-          const p = readyPromiseRef.current
-          if (!p) {
-            return
-          }
-          await new Promise<void>((resolve) => {
-            let settled = false
-            const timeout = setTimeout(() => {
-              settled = true
-              resolve()
-            }, 3000)
-            void p.finally(() => {
-              if (!settled) {
-                clearTimeout(timeout)
-                settled = true
-                resolve()
-              }
-            })
-          })
-        }
+        awaitReady: multiplexBridge.awaitReady
       }),
-      [armWebReadyWatchdog, effectiveTerminalTheme, postMessage, sendToWebView, textScale]
+      [
+        armWebReadyWatchdog,
+        effectiveTerminalTheme,
+        multiplexBridge,
+        postMessage,
+        sendToWebView,
+        textScale
+      ]
     )
 
     return (

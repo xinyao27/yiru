@@ -1,10 +1,20 @@
 import type { RuntimeMobileTerminalTheme } from '@yiru/runtime-protocol/mobile-runtime-types'
 
+import type { MobileTerminalSnapshot } from '~/transport/terminal-multiplex/types'
+
 import type { TerminalOscLinkRange } from '../osc-link-ranges'
 
 export type TerminalWebViewCommand =
   | { type: 'ping'; id?: number }
-  | { type: 'write'; id?: number; data: string }
+  | {
+      type: 'write'
+      id?: number
+      data: string
+      endSeq: string
+      wireByteLength: number
+      ackEveryBytes: number
+    }
+  | { type: 'restore'; id?: number; snapshot: MobileTerminalSnapshot }
   | {
       type: 'init'
       id?: number

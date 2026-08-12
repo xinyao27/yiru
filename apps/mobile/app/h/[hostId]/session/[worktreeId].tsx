@@ -50,7 +50,6 @@ import {
 } from '~/platform/haptics'
 import { headlessActivationNeedsHostRenderer } from '~/session/activation-result'
 import { MobileBrowserTabActionSheet } from '~/session/browser-tab-action-sheet'
-import { sendMobileBufferedTerminalInput } from '~/session/buffered-terminal-send'
 import { resolveMobileSessionConnectionHealth } from '~/session/connection-health'
 import { CreateTabDrawers } from '~/session/create-tab-drawers'
 import {
@@ -160,7 +159,6 @@ import {
 } from '~/terminal/live/input'
 import type { TerminalLiveInputSender } from '~/terminal/live/input-sender'
 import { useTerminalLiveInputCommit } from '~/terminal/live/use-input-commit'
-import { sendMobileTerminalQueryReply } from '~/terminal/query-reply'
 import {
   buildMobileQuickCommandLaunch,
   shouldShowMobileQuickCommandsAction,
@@ -453,7 +451,6 @@ export default function SessionScreen(): React.JSX.Element {
     agentSessionHistorySupported,
     browserScreencastSupported,
     browserScreencastSupportedRef,
-    hostQueryReplyInputSupportedRef,
     quickCommandsSupported
   } = useMobileHostCapabilities({ client, connState, onCapabilitiesReset: closeQuickCommands })
   // Why: terminal gesture/input callbacks are intentionally stable and
@@ -600,6 +597,7 @@ export default function SessionScreen(): React.JSX.Element {
     terminalDiagnosticsRef,
     terminalFrameHeightRef,
     terminalRefs,
+    terminalStreamsRef,
     terminalUnsubsRef,
     unsubscribeTerminal,
     viewportMeasuredRef,
@@ -981,14 +979,8 @@ export default function SessionScreen(): React.JSX.Element {
   }, [])
 
   useMobileTerminalForegroundRecovery({
-    connState,
-    connStateRef,
-    activeHandleRef,
-    terminalRefs,
-    initializedHandlesRef,
-    scheduleDelayedAction,
-    subscribeToTerminal,
-    unsubscribeTerminal
+    client,
+    terminalRefs
   })
 
   // Why: viewport refits for layout changes outside the subscribe path
@@ -1518,14 +1510,12 @@ export default function SessionScreen(): React.JSX.Element {
     setInput('')
 
     try {
-      const outcome = await sendMobileBufferedTerminalInput({
-        client,
-        terminal: activeHandle,
-        text,
-        deviceToken: deviceTokenRef.current
-      })
-      // Why: restoring an unknown, possibly delivered command invites duplicate retries.
-      if (outcome === 'rejected' && activeHandleRef.current === activeHandle) {
+      const accepted =
+        (await terminalStreamsRef.current
+          .get(activeHandle)
+          ?.sendInputAccepted(`${text}\r`)
+          .catch(() => false)) ?? false
+      if (!accepted && activeHandleRef.current === activeHandle) {
         setInput(text)
       }
     } finally {
@@ -1542,24 +1532,17 @@ export default function SessionScreen(): React.JSX.Element {
     if (accessoryCommit.kind !== 'allow-raw') {
       return
     }
-    const currentClient = clientRef.current
     // Why: async IME flushing can outlive the original terminal selection.
     const rawSendTarget = getTerminalLiveAccessoryRawSendTarget({
       targetHandle,
       activeHandle: activeHandleRef.current,
       activeSessionTabType: activeSessionTabTypeRef.current
     })
-    if (!currentClient || !rawSendTarget || connStateRef.current !== 'connected') {
+    const stream = rawSendTarget ? terminalStreamsRef.current.get(rawSendTarget) : undefined
+    if (!stream || connStateRef.current !== 'connected') {
       return
     }
-    await callRuntimeOrpc(currentClient, (runtime) => runtime.terminal.send, {
-      terminal: rawSendTarget,
-      text: input.bytes,
-      enter: false,
-      ...(deviceTokenRef.current
-        ? { client: { id: deviceTokenRef.current, type: 'mobile' as const } }
-        : {})
-    }).then(
+    await stream.sendInputAccepted(input.bytes).then(
       () => undefined,
       () => undefined
     )
@@ -1581,27 +1564,17 @@ export default function SessionScreen(): React.JSX.Element {
         )
         return false
       }
-      const rpc = clientRef.current
+      const stream = terminalStreamsRef.current.get(handle)
       // Why: callers suppress follow-up controls/toasts when this live send is stale.
       if (
-        !rpc ||
+        !stream ||
         connStateRef.current !== 'connected' ||
         handle !== activeHandleRef.current ||
         activeSessionTabTypeRef.current !== 'terminal'
       ) {
         return false
       }
-      return callRuntimeOrpc(rpc, (runtime) => runtime.terminal.send, {
-        terminal: handle,
-        text,
-        enter: false,
-        ...(deviceTokenRef.current
-          ? { client: { id: deviceTokenRef.current, type: 'mobile' as const } }
-          : {})
-      }).then(
-        (result) => result.send.accepted,
-        () => false
-      )
+      return stream.sendInputAccepted(text).catch(() => false)
     },
     [showToast]
   )
@@ -1855,21 +1828,14 @@ export default function SessionScreen(): React.JSX.Element {
     const isActive =
       handle === activeHandleRef.current && activeSessionTabTypeRef.current === 'terminal'
     const isFresh = Date.now() - queued.lastUpdatedMs <= TERMINAL_GESTURE_INPUT_MAX_QUEUE_AGE_MS
-    const rpc = clientRef.current
-    if (!rpc || connStateRef.current !== 'connected' || !isActive || !isFresh) {
+    const stream = terminalStreamsRef.current.get(handle)
+    if (!stream || connStateRef.current !== 'connected' || !isActive || !isFresh) {
       return
     }
 
     terminalGestureInputInFlightRef.current.add(handle)
     try {
-      await callRuntimeOrpc(rpc, (runtime) => runtime.terminal.send, {
-        terminal: handle,
-        text: queued.bytes,
-        enter: false,
-        ...(deviceTokenRef.current
-          ? { client: { id: deviceTokenRef.current, type: 'mobile' as const } }
-          : {})
-      })
+      await stream.sendInputAccepted(queued.bytes)
     } catch {
       // Transient failure
     } finally {
@@ -1968,15 +1934,7 @@ export default function SessionScreen(): React.JSX.Element {
   )
 
   const handleTerminalQueryReply = useCallback((handle: string, bytes: string) => {
-    void sendMobileTerminalQueryReply({
-      bytes,
-      client: clientRef.current,
-      clientId: deviceTokenRef.current,
-      connected: connStateRef.current === 'connected',
-      handle,
-      hostSupportsQueryReplyInput: hostQueryReplyInputSupportedRef.current,
-      subscribedTerminals: terminalUnsubsRef.current
-    })
+    terminalStreamsRef.current.get(handle)?.sendQueryReply(bytes)
   }, [])
 
   async function handleClearTerminal(target: Terminal) {
@@ -2172,14 +2130,13 @@ export default function SessionScreen(): React.JSX.Element {
     canSend,
     connState,
     connStateRef,
-    clientRef,
-    deviceTokenRef,
     flushPendingLiveInputBeforeExternalSend,
     onError: triggerError,
     onSuccess: triggerSelection,
     ptyModesRef,
     refreshCanPaste,
-    showToast
+    showToast,
+    terminalStreamsRef
   })
 
   const flushPendingLiveInputBeforeAttachmentSend = useMobileAttachmentInputLeaseGate({
