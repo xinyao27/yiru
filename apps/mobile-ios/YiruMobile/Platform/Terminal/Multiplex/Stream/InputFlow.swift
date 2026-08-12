@@ -8,8 +8,7 @@ actor TerminalMultiplexInputFlow {
 
     nonisolated private static let pendingBytesLimit = 256 * 1_024
 
-    private let routeID: UInt32
-    private let bulk: TerminalBulkConnection
+    private let route: TerminalBulkRoute
     private var inputSequence: UInt64 = 0
     private var acknowledgedSequence: UInt64 = 0
     private var creditBytes: UInt32 = 0
@@ -17,9 +16,8 @@ actor TerminalMultiplexInputFlow {
     private var pending: [PendingInput] = []
     private var pendingBytes = 0
 
-    init(routeID: UInt32, bulk: TerminalBulkConnection) {
-        self.routeID = routeID
-        self.bulk = bulk
+    init(route: TerminalBulkRoute) {
+        self.route = route
     }
 
     func enqueue(_ data: Data, kind: UInt8) async throws {
@@ -79,15 +77,11 @@ actor TerminalMultiplexInputFlow {
             pending.removeFirst()
             pendingBytes -= next.bytes.count
             inputSequence += UInt64(next.bytes.count)
-            try await bulk.send(
-                TerminalMultiplexFrame(
-                    opcode: .input,
-                    routeID: routeID,
-                    epoch: 0,
-                    sequence: inputSequence,
-                    correlationID: try await bulk.allocateCorrelationID(),
-                    payload: payload
-                )
+            try await route.send(
+                opcode: .input,
+                sequence: inputSequence,
+                correlationID: try await route.allocateCorrelationID(),
+                payload: payload
             )
         }
     }

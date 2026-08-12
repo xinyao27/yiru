@@ -80,8 +80,9 @@ provisioning、credential rotation 或 relay endpoint lifecycle。
 Terminal 的 wire transport、session state 与 renderer 必须分离：
 
 ```text
-TerminalMultiplexTransport actor
-  → TerminalSession coordinator
+RuntimeTerminalMultiplexer actor (one per host)
+  → TerminalBulkConnection actor (one E2EE epoch, many routes)
+    → TerminalSession coordinator (one route)
     → TerminalSurface protocol
       → SwiftTermSurface
 ```
@@ -95,6 +96,12 @@ renderer-neutral `TerminalSurface`；首版使用默认 Core Text/Core Graphics 
 
 Renderer 只接收有序 bytes、snapshot、resize 与输入回调。它不知道 WebSocket、relay、epoch
 或 ACK；只有 output 完成 parser feed 后 transport 才能推进 ACK。
+
+每个 host 的 terminal multiplexer 复用一条 bulk socket，并从 server epoch 接受
+`maxStreams` 上限后分配单调递增 route ID。帧只投递给对应 route；一个 terminal 结束或出现
+route-level 错误不会关闭其他 terminal，最后一个 route 释放后才关闭空闲 bulk。bulk epoch、
+控制连接 generation 或后台时效失效时，所有 route 一起失败，各页面重新执行
+`show → ticket → E2EE bulk → authoritative snapshot`，不复用旧 parser sequence。
 
 Terminal 控制面的 `status/list/show/openMultiplex` 使用 runtime-protocol 中的原生客户端投影，
 由同一个 drift-checked generator 产出 Swift `Codable` 类型。inner frame 的 kind、version、header

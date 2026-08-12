@@ -249,6 +249,15 @@
       "require": "./dist/terminal-multiplex/snapshot-records.js",
       "default": "./dist/terminal-multiplex/snapshot-records.js"
     },
+    "./terminal-multiplex/stream-records": {
+      "types": "./src/terminal-multiplex/stream-records.ts",
+      "react-native": "./src/terminal-multiplex/stream-records.ts",
+      "browser": "./src/terminal-multiplex/stream-records.ts",
+      "development": "./src/terminal-multiplex/stream-records.ts",
+      "import": "./dist/esm/terminal-multiplex/stream-records.mjs",
+      "require": "./dist/terminal-multiplex/stream-records.js",
+      "default": "./dist/terminal-multiplex/stream-records.js"
+    },
     "./updater": {
       "types": "./src/updater.ts",
       "react-native": "./src/updater.ts",

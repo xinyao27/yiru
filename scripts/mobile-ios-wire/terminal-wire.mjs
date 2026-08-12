@@ -1,3 +1,5 @@
+import { renderTerminalStreamRecords } from './terminal-stream-render.mjs'
+
 export function loadTerminalWireSource(packageRequire, z) {
   const terminal = packageRequire('@yiru/runtime-protocol/mobile-terminal-wire')
   const frame = packageRequire('@yiru/runtime-protocol/terminal-multiplex/frame')
@@ -8,6 +10,7 @@ export function loadTerminalWireSource(packageRequire, z) {
   const snapshotRecords = packageRequire(
     '@yiru/runtime-protocol/terminal-multiplex/snapshot-records'
   )
+  const streamRecords = packageRequire('@yiru/runtime-protocol/terminal-multiplex/stream-records')
   const crc32c = packageRequire('@yiru/runtime-protocol/terminal-multiplex/crc32c')
   const orpc = packageRequire('@yiru/runtime-protocol/orpc-peer-frame')
   const protocol = packageRequire('@yiru/runtime-protocol/capabilities')
@@ -21,7 +24,40 @@ export function loadTerminalWireSource(packageRequire, z) {
     MobileTerminalOpenMultiplexRequestSchema: z.toJSONSchema(
       terminal.MobileTerminalOpenMultiplexRequestSchema
     ),
-    MobileTerminalOpenMultiplexSchema: z.toJSONSchema(terminal.MobileTerminalOpenMultiplexSchema)
+    MobileTerminalOpenMultiplexSchema: z.toJSONSchema(terminal.MobileTerminalOpenMultiplexSchema),
+    TerminalMultiplexViewportRecordSchema: z.toJSONSchema(
+      streamRecords.TerminalMultiplexViewportRecordSchema
+    ),
+    TerminalMultiplexClientRecordSchema: z.toJSONSchema(
+      streamRecords.TerminalMultiplexClientRecordSchema
+    ),
+    TerminalMultiplexDeliveryRecordSchema: z.toJSONSchema(
+      streamRecords.TerminalMultiplexDeliveryRecordSchema
+    ),
+    TerminalMultiplexCapabilitiesRecordSchema: z.toJSONSchema(
+      streamRecords.TerminalMultiplexCapabilitiesRecordSchema
+    ),
+    TerminalMultiplexSubscribeRecordSchema: z.toJSONSchema(
+      streamRecords.TerminalMultiplexSubscribeRecordSchema
+    ),
+    TerminalMultiplexSubscribedRecordSchema: z.toJSONSchema(
+      streamRecords.TerminalMultiplexSubscribedRecordSchema
+    ),
+    TerminalMultiplexResizeRecordSchema: z.toJSONSchema(
+      streamRecords.TerminalMultiplexResizeRecordSchema
+    ),
+    TerminalMultiplexErrorRecordSchema: z.toJSONSchema(
+      streamRecords.TerminalMultiplexErrorRecordSchema
+    ),
+    TerminalMultiplexRevealRecordSchema: z.toJSONSchema(
+      streamRecords.TerminalMultiplexRevealRecordSchema
+    ),
+    TerminalMultiplexEndRecordSchema: z.toJSONSchema(
+      streamRecords.TerminalMultiplexEndRecordSchema
+    ),
+    TerminalMultiplexModelRestoreRecordSchema: z.toJSONSchema(
+      streamRecords.TerminalMultiplexModelRestoreRecordSchema
+    )
   }
   const domains = {
     MOBILE_STATUS_GET_ORPC_PATH: terminal.MOBILE_STATUS_GET_ORPC_PATH,
@@ -41,6 +77,7 @@ export function loadTerminalWireSource(packageRequire, z) {
     TERMINAL_MULTIPLEX_FLOW_RECORD_WIRE: flowRecords.TERMINAL_MULTIPLEX_FLOW_RECORD_WIRE,
     TERMINAL_MULTIPLEX_SNAPSHOT_RECORD_WIRE:
       snapshotRecords.TERMINAL_MULTIPLEX_SNAPSHOT_RECORD_WIRE,
+    TERMINAL_MULTIPLEX_STREAM_RECORD_WIRE: streamRecords.TERMINAL_MULTIPLEX_STREAM_RECORD_WIRE,
     TERMINAL_MULTIPLEX_CRC32C_POLYNOMIAL: crc32c.TERMINAL_MULTIPLEX_CRC32C_POLYNOMIAL,
     RUNTIME_ORPC_SIDE_CHANNEL_BINARY_KIND: orpc.RUNTIME_ORPC_SIDE_CHANNEL_BINARY_KIND,
     RUNTIME_ORPC_SIDE_CHANNEL_BINARY_VERSION: orpc.RUNTIME_ORPC_SIDE_CHANNEL_BINARY_VERSION,
@@ -108,6 +145,7 @@ function readTerminalWireContract(schemas, domains) {
     'MobileTerminalOpenMultiplexSchema'
   )
   assertShape(open, ['bulkTicket', 'bulkEndpoint', 'expiresAt', 'maxFrameBytes'])
+  const stream = readStreamRecordContract(schemas, domains.TERMINAL_MULTIPLEX_STREAM_RECORD_WIRE)
 
   const opcodes = Object.entries(domains.TerminalMultiplexOpcode)
   if (
@@ -129,7 +167,7 @@ function readTerminalWireContract(schemas, domains) {
     domains.TERMINAL_MULTIPLEX_SNAPSHOT_RECORD_WIRE,
     'TERMINAL_MULTIPLEX_SNAPSHOT_RECORD_WIRE'
   )
-  return { ...domains, opcodes }
+  return { ...domains, opcodes, stream }
 }
 
 export function renderTerminalWireContract(contract) {
@@ -139,6 +177,7 @@ export function renderTerminalWireContract(contract) {
   const connection = contract.TERMINAL_MULTIPLEX_CONNECTION_RECORD_WIRE
   const flow = contract.TERMINAL_MULTIPLEX_FLOW_RECORD_WIRE
   const snapshot = contract.TERMINAL_MULTIPLEX_SNAPSHOT_RECORD_WIRE
+  const stream = contract.stream
   const handshakeCases = Object.entries(connection.phase)
     .map(([name, value]) => `    case ${name} = ${value}`)
     .join('\n')
@@ -292,7 +331,119 @@ ${renderSwiftConstants(snapshot.end)}
 enum TerminalMultiplexCrc32cWire {
     static let polynomial: UInt32 = ${contract.TERMINAL_MULTIPLEX_CRC32C_POLYNOMIAL}
 }
+
+${renderTerminalStreamRecords(stream)}
 `
+}
+
+function readStreamRecordContract(schemas, wire) {
+  const definitions = [
+    ['TerminalMultiplexViewportRecordSchema', ['cols', 'rows']],
+    ['TerminalMultiplexClientRecordSchema', ['id', 'type']],
+    ['TerminalMultiplexDeliveryRecordSchema', ['visible', 'interested', 'priority']],
+    [
+      'TerminalMultiplexCapabilitiesRecordSchema',
+      ['dualScreenSnapshot', 'parseAck', 'explicitWriteAck']
+    ],
+    [
+      'TerminalMultiplexSubscribeRecordSchema',
+      [
+        'terminal',
+        'transportGeneration',
+        'client',
+        'viewport',
+        'lastParsedSeq',
+        'delivery',
+        'snapshotMaxBytes',
+        'capabilities'
+      ],
+      [
+        'terminal',
+        'transportGeneration',
+        'client',
+        'lastParsedSeq',
+        'delivery',
+        'snapshotMaxBytes',
+        'capabilities'
+      ]
+    ],
+    [
+      'TerminalMultiplexSubscribedRecordSchema',
+      ['terminal', 'transportGeneration', 'initialState', 'snapshotId']
+    ],
+    ['TerminalMultiplexResizeRecordSchema', ['cols', 'rows', 'reason']],
+    ['TerminalMultiplexErrorRecordSchema', ['message'], []],
+    ['TerminalMultiplexRevealRecordSchema', ['stateVersion']],
+    ['TerminalMultiplexEndRecordSchema', ['exitCode', 'reason', 'historyKept']],
+    ['TerminalMultiplexModelRestoreRecordSchema', ['reason', 'markerSeq', 'snapshotFollows']]
+  ]
+  const objects = Object.fromEntries(
+    definitions.map(([name, keys, required]) => {
+      const schema = requireObject(schemas[name], name)
+      assertShape(schema, keys, required)
+      return [name, schema]
+    })
+  )
+  requireNonnegativeIntegerTree(wire, 'TERMINAL_MULTIPLEX_STREAM_RECORD_WIRE')
+  const enumValues = (schemaName, key) =>
+    requireStringEnum(objects[schemaName].properties[key], `${schemaName}.${key}`)
+  const literalValue = (schemaName, key) =>
+    requireIntegerLiteral(objects[schemaName].properties[key], `${schemaName}.${key}`)
+  return {
+    wire,
+    clientTypes: enumValues('TerminalMultiplexClientRecordSchema', 'type'),
+    deliveryPriorities: enumValues('TerminalMultiplexDeliveryRecordSchema', 'priority'),
+    capabilityValues: {
+      dualScreenSnapshot: literalValue(
+        'TerminalMultiplexCapabilitiesRecordSchema',
+        'dualScreenSnapshot'
+      ),
+      parseAck: literalValue('TerminalMultiplexCapabilitiesRecordSchema', 'parseAck'),
+      explicitWriteAck: literalValue(
+        'TerminalMultiplexCapabilitiesRecordSchema',
+        'explicitWriteAck'
+      )
+    },
+    initialStates: [
+      requireStringLiteral(
+        objects.TerminalMultiplexSubscribedRecordSchema.properties.initialState,
+        'TerminalMultiplexSubscribedRecordSchema.initialState'
+      )
+    ],
+    resizeReasons: enumValues('TerminalMultiplexResizeRecordSchema', 'reason'),
+    endReasons: enumValues('TerminalMultiplexEndRecordSchema', 'reason'),
+    restoreReasons: enumValues('TerminalMultiplexModelRestoreRecordSchema', 'reason')
+  }
+}
+
+function requireStringEnum(schema, name) {
+  if (!schema || schema.type !== 'string' || !Array.isArray(schema.enum)) {
+    throw new Error(`${name} must remain a string enum`)
+  }
+  return schema.enum.map((value) => {
+    if (typeof value !== 'string') {
+      throw new Error(`${name} must contain only strings`)
+    }
+    return value
+  })
+}
+
+function requireStringLiteral(schema, name) {
+  if (!schema || schema.type !== 'string' || typeof schema.const !== 'string') {
+    throw new Error(`${name} must remain a string literal`)
+  }
+  return schema.const
+}
+
+function requireIntegerLiteral(schema, name) {
+  if (
+    !schema ||
+    (schema.type !== 'integer' && schema.type !== 'number') ||
+    !Number.isInteger(schema.const)
+  ) {
+    throw new Error(`${name} must remain an integer literal`)
+  }
+  return schema.const
 }
 
 function renderSwiftConstants(values) {

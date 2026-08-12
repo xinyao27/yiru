@@ -118,6 +118,14 @@ iOS view 默认使用项目已有的 Apple text renderer；`setUseMetal(_:)` 可
 协议要求。[Apple `UITextInput`](https://developer.apple.com/documentation/uikit/uitextinput)
 硬件特殊键由 `pressesBegan` 映射；普通硬件键盘文本仍经 text input 路径。
 
+SwiftTerm 还自带一个原生 `TerminalAccessory: UIInputView`，已经实现 Esc、Ctrl、Tab、方向键
+长按连发，以及键盘/触摸模式切换；`TerminalView.inputAccessoryView` 是公开可替换的属性，
+系统 paste 路径也会读取 terminal 的 bracketed-paste mode。它适合作为功能基线，但 Yiru 会用
+自己的 SwiftUI-hosted Liquid Glass accessory 替换它的视觉层，继续复用 SwiftTerm 的 text-input
+和 mode state，不复制 Expo 的键盘高度补偿逻辑。
+[SwiftTerm iOS accessory source](https://github.com/migueldeicaza/SwiftTerm/blob/v1.18.0/Sources/SwiftTerm/iOS/iOSAccessoryView.swift)、
+[SwiftTerm iOS paste/inputAccessory source](https://github.com/migueldeicaza/SwiftTerm/blob/v1.18.0/Sources/SwiftTerm/iOS/iOSTerminalView.swift)
+
 iOS view 实现 selection、系统 copy/paste action、context menu、pointer/hover 和 OSC 8/隐式
 链接回调；URL 最终由 Yiru 校验 scheme 并决定是否打开，不能让 terminal output 直接导航。
 源码也实现 `UIAccessibilityReadingContent` 风格的 line/page/frame 方法和 accessibility

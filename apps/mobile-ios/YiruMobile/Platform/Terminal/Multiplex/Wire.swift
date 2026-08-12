@@ -1,7 +1,7 @@
 import Foundation
 
 nonisolated enum TerminalMultiplexWireEvent: Sendable {
-    case accepted
+    case accepted(maxStreams: UInt32)
     case streamFrame(TerminalMultiplexFrame)
 }
 
@@ -31,6 +31,7 @@ actor TerminalMultiplexWire {
     private var pendingHeartbeats: [UInt32: UInt64] = [:]
     private var nextCorrelationID: UInt32 = 1
     private var initialHeartbeatID: UInt32?
+    private var acceptedMaxStreams: UInt32?
     private var heartbeatTask: Task<Void, Never>?
     private var appState = TerminalMultiplexAppState.foreground
     private var isAccepted = false
@@ -126,11 +127,13 @@ actor TerminalMultiplexWire {
         guard epoch == 0 else { throw TerminalMultiplexWireError.duplicateEpoch }
         guard frame.epoch != 0, frame.sequence == 0, frame.correlationID == 0,
             let record = TerminalMultiplexConnectionRecordCodec.decodeEpoch(frame.payload),
-            record.phase == .offer
+            record.phase == .offer,
+            record.maxStreams > 0
         else {
             throw TerminalMultiplexWireError.invalidEpoch
         }
         epoch = frame.epoch
+        acceptedMaxStreams = record.maxStreams
         heartbeatMilliseconds = max(1_000, Int(record.heartbeatMilliseconds))
         maxFrameBytes = min(maxFrameBytes, Int(record.maxFrameBytes))
         let accept = TerminalMultiplexEpochRecord(
@@ -174,9 +177,12 @@ actor TerminalMultiplexWire {
                 throw TerminalMultiplexWireError.invalidHeartbeat
             }
             if frame.correlationID == initialHeartbeatID {
+                guard let acceptedMaxStreams else {
+                    throw TerminalMultiplexWireError.invalidEpoch
+                }
                 initialHeartbeatID = nil
                 isAccepted = true
-                await publishEvent(.accepted)
+                await publishEvent(.accepted(maxStreams: acceptedMaxStreams))
             }
         }
     }

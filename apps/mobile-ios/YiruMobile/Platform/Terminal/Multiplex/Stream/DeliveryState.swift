@@ -1,37 +1,44 @@
 import Foundation
 
 actor TerminalMultiplexDeliveryState {
-    private let routeID: UInt32
-    private let bulk: TerminalBulkConnection
+    private let route: TerminalBulkRoute
     private let delivery: TerminalMultiplexDelivery
     private var appState = TerminalSessionAppState.foreground
     private var subscribedAppState = TerminalSessionAppState.foreground
-    private var pendingRevealStateVersion: UInt32?
+    private struct PendingReveal: Sendable {
+        let stateVersion: UInt32
+        let generation: UInt64
+    }
+
+    private var pendingReveal: PendingReveal?
+    private var transitionGeneration: UInt64 = 0
 
     init(
-        routeID: UInt32,
-        bulk: TerminalBulkConnection,
+        route: TerminalBulkRoute,
         delivery: TerminalMultiplexDelivery
     ) {
-        self.routeID = routeID
-        self.bulk = bulk
+        self.route = route
         self.delivery = delivery
     }
 
     func transition(to state: TerminalSessionAppState, isSubscribed: Bool) async throws {
         guard state != appState else { return }
         appState = state
+        transitionGeneration += 1
+        let generation = transitionGeneration
         switch state {
         case .foreground:
-            await bulk.setAppState(.foreground)
+            await route.setAppState(.foreground)
+            guard isCurrent(generation, state: .foreground) else { return }
             if isSubscribed {
-                try await apply(.foreground)
+                try await apply(.foreground, generation: generation)
             }
         case .background:
             if isSubscribed {
-                try await apply(.background)
+                try await apply(.background, generation: generation)
             }
-            await bulk.setAppState(.background)
+            guard isCurrent(generation, state: .background) else { return }
+            await route.setAppState(.background)
         }
     }
 
@@ -42,7 +49,8 @@ actor TerminalMultiplexDeliveryState {
 
     func reconcileAfterSubscription() async throws {
         if subscribedAppState != appState {
-            try await apply(appState)
+            transitionGeneration += 1
+            try await apply(appState, generation: transitionGeneration)
         }
     }
 
@@ -56,48 +64,78 @@ actor TerminalMultiplexDeliveryState {
         guard record.status == 0, frame.correlationID != 0 else {
             throw TerminalMultiplexSessionError.invalidAcknowledgement
         }
-        guard frame.correlationID == pendingRevealStateVersion else { return true }
+        guard frame.correlationID == pendingReveal?.stateVersion else { return true }
         let stateVersion = frame.correlationID
-        pendingRevealStateVersion = nil
+        guard let generation = pendingReveal?.generation else { return true }
+        pendingReveal = nil
         try await delivery.beginReveal()
+        guard isCurrent(generation, state: .foreground) else { return true }
         let payload = try JSONEncoder().encode(
             TerminalMultiplexRevealRecord(stateVersion: stateVersion)
         )
+        let correlationID = try await route.allocateCorrelationID()
+        guard isCurrent(generation, state: .foreground) else { return true }
+        let sequence = await delivery.currentParsedSequence()
+        guard isCurrent(generation, state: .foreground) else { return true }
         try await send(
             opcode: .revealSnapshot,
-            sequence: await delivery.currentParsedSequence(),
-            correlationID: try await bulk.allocateCorrelationID(),
+            sequence: sequence,
+            correlationID: correlationID,
             payload: payload
         )
         return true
     }
 
-    private func apply(_ state: TerminalSessionAppState) async throws {
-        subscribedAppState = state
+    private func apply(_ state: TerminalSessionAppState, generation: UInt64) async throws {
+        guard isCurrent(generation, state: state) else { return }
         switch state {
         case .foreground:
-            pendingRevealStateVersion = try await sendVisibility(
-                isVisible: true,
-                hasDeliveryInterest: true,
-                priority: 2
-            )
+            guard
+                let stateVersion = try await prepareVisibility(
+                    isVisible: true,
+                    hasDeliveryInterest: true,
+                    priority: 2,
+                    generation: generation,
+                    state: state
+                )
+            else { return }
+            pendingReveal = PendingReveal(stateVersion: stateVersion.id, generation: generation)
+            try await sendVisibility(stateVersion)
+            guard isCurrent(generation, state: state) else { return }
         case .background:
-            pendingRevealStateVersion = nil
-            _ = try await sendVisibility(
-                isVisible: false,
-                hasDeliveryInterest: false,
-                priority: 0
-            )
+            pendingReveal = nil
+            guard
+                let stateVersion = try await prepareVisibility(
+                    isVisible: false,
+                    hasDeliveryInterest: false,
+                    priority: 0,
+                    generation: generation,
+                    state: state
+                )
+            else { return }
+            try await sendVisibility(stateVersion)
+            guard isCurrent(generation, state: state) else { return }
             try await delivery.suspendDelivery()
+            guard isCurrent(generation, state: state) else { return }
         }
+        subscribedAppState = state
     }
 
-    private func sendVisibility(
+    private struct PendingVisibility: Sendable {
+        let id: UInt32
+        let sequence: UInt64
+        let payload: Data
+    }
+
+    private func prepareVisibility(
         isVisible: Bool,
         hasDeliveryInterest: Bool,
-        priority: UInt8
-    ) async throws -> UInt32 {
-        let stateVersion = try await bulk.allocateCorrelationID()
+        priority: UInt8,
+        generation: UInt64,
+        state: TerminalSessionAppState
+    ) async throws -> PendingVisibility? {
+        let stateVersion = try await route.allocateCorrelationID()
+        guard isCurrent(generation, state: state) else { return nil }
         guard
             let payload = TerminalMultiplexFlowRecordCodec.encode(
                 TerminalMultiplexVisibilityRecord(
@@ -110,13 +148,22 @@ actor TerminalMultiplexDeliveryState {
         else {
             throw TerminalMultiplexSessionError.invalidFrame
         }
+        let sequence = await delivery.currentParsedSequence()
+        guard isCurrent(generation, state: state) else { return nil }
+        return PendingVisibility(id: stateVersion, sequence: sequence, payload: payload)
+    }
+
+    private func sendVisibility(_ visibility: PendingVisibility) async throws {
         try await send(
             opcode: .visibilityGate,
-            sequence: await delivery.currentParsedSequence(),
-            correlationID: stateVersion,
-            payload: payload
+            sequence: visibility.sequence,
+            correlationID: visibility.id,
+            payload: visibility.payload
         )
-        return stateVersion
+    }
+
+    private func isCurrent(_ generation: UInt64, state: TerminalSessionAppState) -> Bool {
+        generation == transitionGeneration && state == appState
     }
 
     private func send(
@@ -125,15 +172,11 @@ actor TerminalMultiplexDeliveryState {
         correlationID: UInt32,
         payload: Data
     ) async throws {
-        try await bulk.send(
-            TerminalMultiplexFrame(
-                opcode: opcode,
-                routeID: routeID,
-                epoch: 0,
-                sequence: sequence,
-                correlationID: correlationID,
-                payload: payload
-            )
+        try await route.send(
+            opcode: opcode,
+            sequence: sequence,
+            correlationID: correlationID,
+            payload: payload
         )
     }
 }

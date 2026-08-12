@@ -33,9 +33,11 @@
 - A transport failure invalidates the peer and starts reconnection. Unary calls are not replayed
   automatically because a mutation may already have reached the desktop; each feature chooses
   whether its operation is safe to retry.
-- The shared control connection requests a short-lived terminal bulk ticket. A dedicated
-  `TerminalBulkConnection` then owns the authenticated binary socket, epoch, heartbeat, and
-  multiplex frames; renderer and feature code never read either socket.
+- The shared control connection requests a short-lived terminal bulk ticket. One host-scoped
+  terminal multiplexer owns the authenticated binary socket, epoch, heartbeat, correlation IDs,
+  and route allocation. Concurrent terminal sessions share it; closing one session releases only
+  its route, while closing the final route closes the idle bulk connection. Renderer and feature
+  code never read either socket.
 
 ## Persistence and diagnostics
 

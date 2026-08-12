@@ -6,24 +6,13 @@ import {
 } from '@yiru/runtime-protocol/terminal-multiplex/flow-records'
 import type { TerminalMultiplexFrame } from '@yiru/runtime-protocol/terminal-multiplex/frame'
 import { decodeTerminalMultiplexJson } from '@yiru/runtime-protocol/terminal-multiplex/json'
+import {
+  decodeTerminalMultiplexResizeRecord,
+  decodeTerminalMultiplexSubscribeRecord,
+  type TerminalMultiplexSubscribeRecord
+} from '@yiru/runtime-protocol/terminal-multiplex/stream-records'
 
-const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-
-export type TerminalMultiplexSubscribeRecord = {
-  terminal: string
-  transportGeneration: string
-  client: { id: string; type: 'desktop' | 'mobile' | 'web' }
-  viewport?: { cols: number; rows: number }
-  lastParsedSeq: bigint
-  delivery: { visible: boolean; interested: boolean; priority: 0 | 1 | 2 }
-  snapshotMaxBytes: number
-}
-
-export type TerminalMultiplexResizeRecord = {
-  cols: number
-  rows: number
-  reason: 'fit' | 'user' | 'restore-pulse'
-}
+export type { TerminalMultiplexSubscribeRecord }
 
 export type TerminalMultiplexClaimRecord = {
   action: 'register' | 'claim' | 'release' | 'report'
@@ -72,55 +61,10 @@ export function decodeTerminalMultiplexClientCredit(
 export function decodeTerminalMultiplexSubscribe(
   payload: Uint8Array<ArrayBufferLike>
 ): TerminalMultiplexSubscribeRecord | null {
-  const value = decodeTerminalMultiplexJson(payload)
-  if (!value || !isString(value.terminal) || !isString(value.transportGeneration)) {
-    return null
-  }
-  if (!UUID_PATTERN.test(value.transportGeneration) || !isRecord(value.client)) {
-    return null
-  }
-  const clientType = value.client.type
-  if (
-    !isString(value.client.id) ||
-    (clientType !== 'desktop' && clientType !== 'mobile' && clientType !== 'web')
-  ) {
-    return null
-  }
-  const viewport = decodeViewport(value.viewport)
-  if (value.viewport !== undefined && !viewport) {
-    return null
-  }
-  const lastParsedSeq = decodeU64(value.lastParsedSeq)
-  const delivery = decodeDelivery(value.delivery)
-  if (
-    lastParsedSeq === null ||
-    !delivery ||
-    !isU32(value.snapshotMaxBytes) ||
-    !hasRequiredCapabilities(value.capabilities)
-  ) {
-    return null
-  }
-  return {
-    terminal: value.terminal,
-    transportGeneration: value.transportGeneration,
-    client: { id: value.client.id, type: clientType },
-    ...(viewport ? { viewport } : {}),
-    lastParsedSeq,
-    delivery,
-    snapshotMaxBytes: value.snapshotMaxBytes
-  }
+  return decodeTerminalMultiplexSubscribeRecord(payload)
 }
 
-export function decodeTerminalMultiplexResize(
-  payload: Uint8Array<ArrayBufferLike>
-): TerminalMultiplexResizeRecord | null {
-  const value = decodeTerminalMultiplexJson(payload)
-  const viewport = value ? decodeViewport(value) : null
-  const reason = value?.reason
-  return viewport && (reason === 'fit' || reason === 'user' || reason === 'restore-pulse')
-    ? { ...viewport, reason }
-    : null
-}
+export const decodeTerminalMultiplexResize = decodeTerminalMultiplexResizeRecord
 
 export function decodeTerminalMultiplexClaim(
   payload: Uint8Array<ArrayBufferLike>
@@ -171,48 +115,10 @@ export function decodeTerminalMultiplexSignal(payload: Uint8Array<ArrayBufferLik
     : null
 }
 
-function decodeDelivery(value: unknown): TerminalMultiplexSubscribeRecord['delivery'] | null {
-  if (
-    !isRecord(value) ||
-    typeof value.visible !== 'boolean' ||
-    typeof value.interested !== 'boolean'
-  ) {
-    return null
-  }
-  const priority =
-    value.priority === 'parked'
-      ? 0
-      : value.priority === 'visible'
-        ? 1
-        : value.priority === 'active'
-          ? 2
-          : null
-  return priority === null
-    ? null
-    : { visible: value.visible, interested: value.interested, priority }
-}
-
 function decodeViewport(value: unknown): { cols: number; rows: number } | null {
   return isRecord(value) && isU16(value.cols, 1, 1_000) && isU16(value.rows, 1, 500)
     ? { cols: value.cols, rows: value.rows }
     : null
-}
-
-function hasRequiredCapabilities(value: unknown): boolean {
-  return (
-    isRecord(value) &&
-    value.dualScreenSnapshot === 1 &&
-    value.parseAck === 1 &&
-    value.explicitWriteAck === 1
-  )
-}
-
-function decodeU64(value: unknown): bigint | null {
-  if (typeof value !== 'string' || !/^(?:0|[1-9]\d*)$/.test(value)) {
-    return null
-  }
-  const decoded = BigInt(value)
-  return decoded <= 0xffffffffffffffffn ? decoded : null
 }
 
 function isString(value: unknown): value is string {

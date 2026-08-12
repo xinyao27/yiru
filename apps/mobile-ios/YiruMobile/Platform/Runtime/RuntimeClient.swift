@@ -8,6 +8,7 @@ actor RuntimeClient: HomeRuntime, HostConnectionRuntime, TerminalRepository, Ter
     private let revivalMonitor: ConnectionRevivalMonitor
     private let terminalClientInstanceID = UUID().uuidString.lowercased()
     private var sessions: [String: ManagedSession] = [:]
+    var terminalMultiplexers: [String: ManagedRuntimeTerminalMultiplexer] = [:]
     private var snapshots: [String: RuntimeConnectionSnapshot] = [:]
     private var homeContinuations: [UUID: AsyncStream<RuntimeConnectionState>.Continuation] = [:]
     private var snapshotSubscriptions: [UUID: SnapshotSubscription] = [:]
@@ -195,6 +196,9 @@ actor RuntimeClient: HomeRuntime, HostConnectionRuntime, TerminalRepository, Ter
         }
         if let previous = sessions.removeValue(forKey: credential.profile.id) {
             await previous.session.shutdown()
+        }
+        if let terminal = terminalMultiplexers.removeValue(forKey: credential.profile.id) {
+            await terminal.multiplexer.shutdown()
         }
         let session = RuntimeHostSession(credential: credential) { [weak self] snapshot in
             await self?.record(snapshot)

@@ -59,6 +59,10 @@ await build({
           import.meta.dirname,
           'src/terminal-multiplex/snapshot-records.ts'
         ),
+        'terminal-multiplex/stream-records': resolve(
+          import.meta.dirname,
+          'src/terminal-multiplex/stream-records.ts'
+        ),
         'terminal-query-reply': resolve(import.meta.dirname, 'src/terminal-query-reply.ts'),
         updater: resolve(import.meta.dirname, 'src/updater.ts'),
         'web-connect/contracts': resolve(import.meta.dirname, 'src/web-connect/contracts.ts'),

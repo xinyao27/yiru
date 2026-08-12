@@ -12,9 +12,7 @@ nonisolated enum TerminalMultiplexSessionError: Error, Sendable {
 }
 
 actor TerminalMultiplexSession: TerminalSession {
-    nonisolated private static let routeID: UInt32 = 1
-
-    private let bulk: TerminalBulkConnection
+    private let route: TerminalBulkRoute
     private let terminalID: String
     private let transportGeneration: String
     private let clientID: String
@@ -30,7 +28,7 @@ actor TerminalMultiplexSession: TerminalSession {
     private var isClosed = false
 
     init(
-        bulk: TerminalBulkConnection,
+        route: TerminalBulkRoute,
         terminalID: String,
         transportGeneration: String,
         clientID: String
@@ -38,20 +36,18 @@ actor TerminalMultiplexSession: TerminalSession {
         let pair = AsyncThrowingStream.makeStream(of: TerminalSessionEvent.self)
         stream = pair.stream
         continuation = pair.continuation
-        self.bulk = bulk
+        self.route = route
         self.terminalID = terminalID
         self.transportGeneration = transportGeneration
         self.clientID = clientID
-        input = TerminalMultiplexInputFlow(routeID: Self.routeID, bulk: bulk)
+        input = TerminalMultiplexInputFlow(route: route)
         let delivery = TerminalMultiplexDelivery(
-            routeID: Self.routeID,
-            bulk: bulk,
+            route: route,
             publishEvent: { event in pair.continuation.yield(event) }
         )
         self.delivery = delivery
         deliveryState = TerminalMultiplexDeliveryState(
-            routeID: Self.routeID,
-            bulk: bulk,
+            route: route,
             delivery: delivery
         )
     }
@@ -76,7 +72,12 @@ actor TerminalMultiplexSession: TerminalSession {
     }
 
     func resize(_ size: TerminalGridSize) async throws {
-        guard (1...1_000).contains(size.columns), (1...500).contains(size.rows) else {
+        guard
+            (TerminalMultiplexStreamRecordWire
+                .columnsMin...TerminalMultiplexStreamRecordWire.columnsMax).contains(size.columns),
+            (TerminalMultiplexStreamRecordWire.rowsMin...TerminalMultiplexStreamRecordWire.rowsMax)
+                .contains(size.rows)
+        else {
             throw TerminalMultiplexSessionError.invalidFrame
         }
         viewport = size
@@ -89,13 +90,13 @@ actor TerminalMultiplexSession: TerminalSession {
             TerminalMultiplexResizeRecord(
                 cols: size.columns,
                 rows: size.rows,
-                reason: "fit"
+                reason: .fit
             )
         )
         try await send(
             opcode: .resize,
             sequence: 0,
-            correlationID: try await bulk.allocateCorrelationID(),
+            correlationID: try await route.allocateCorrelationID(),
             payload: payload
         )
     }
@@ -122,7 +123,7 @@ actor TerminalMultiplexSession: TerminalSession {
     func close() async {
         guard !isClosed else { return }
         let sequence = await delivery.currentParsedSequence()
-        if let correlationID = try? await bulk.allocateCorrelationID() {
+        if let correlationID = try? await route.allocateCorrelationID() {
             try? await send(
                 opcode: .unsubscribe,
                 sequence: sequence,
@@ -134,7 +135,7 @@ actor TerminalMultiplexSession: TerminalSession {
 
     private func receiveLoop() async {
         do {
-            let events = await bulk.events()
+            let events = route.events()
             for try await event in events {
                 switch event {
                 case .accepted:
@@ -162,29 +163,29 @@ actor TerminalMultiplexSession: TerminalSession {
             TerminalMultiplexSubscribeRecord(
                 terminal: terminalID,
                 transportGeneration: transportGeneration,
-                client: TerminalMultiplexClientRecord(id: clientID, type: "mobile"),
+                client: TerminalMultiplexClientRecord(id: clientID, type: .mobile),
                 viewport: size,
                 lastParsedSeq: String(await delivery.currentParsedSequence()),
                 delivery: TerminalMultiplexDeliveryRecord(
                     visible: appState == .foreground,
                     interested: appState == .foreground,
-                    priority: appState == .foreground ? "active" : "parked"
+                    priority: appState == .foreground ? .active : .parked
                 ),
-                snapshotMaxBytes: TerminalSnapshotAssembler.maxBytes,
+                snapshotMaxBytes: TerminalMultiplexStreamRecordWire.snapshotMaxBytes,
                 capabilities: TerminalMultiplexCapabilitiesRecord()
             )
         )
         try await send(
             opcode: .subscribe,
             sequence: await delivery.currentParsedSequence(),
-            correlationID: try await bulk.allocateCorrelationID(),
+            correlationID: try await route.allocateCorrelationID(),
             payload: payload
         )
         sentViewport = viewport
     }
 
     private func handle(_ frame: TerminalMultiplexFrame) async throws {
-        guard frame.routeID == Self.routeID, frame.unsupportedOpcode == nil else {
+        guard frame.routeID == route.id, frame.unsupportedOpcode == nil else {
             throw TerminalMultiplexSessionError.invalidFrame
         }
         if try await delivery.handle(frame) { return }
@@ -219,7 +220,7 @@ actor TerminalMultiplexSession: TerminalSession {
         )
         guard record.terminal == terminalID,
             record.transportGeneration == transportGeneration,
-            record.initialState == "snapshot",
+            record.initialState == .snapshot,
             record.snapshotId != 0
         else {
             throw TerminalMultiplexSessionError.invalidSubscription
@@ -262,15 +263,11 @@ actor TerminalMultiplexSession: TerminalSession {
         payload: Data = Data()
     ) async throws {
         guard !isClosed else { throw TerminalMultiplexSessionError.closed }
-        try await bulk.send(
-            TerminalMultiplexFrame(
-                opcode: opcode,
-                routeID: Self.routeID,
-                epoch: 0,
-                sequence: sequence,
-                correlationID: correlationID,
-                payload: payload
-            )
+        try await route.send(
+            opcode: opcode,
+            sequence: sequence,
+            correlationID: correlationID,
+            payload: payload
         )
     }
 
@@ -278,7 +275,7 @@ actor TerminalMultiplexSession: TerminalSession {
         guard !isClosed else { return }
         isClosed = true
         receiveTask = nil
-        await bulk.close()
+        await route.close()
         continuation.finish(throwing: error)
     }
 
@@ -287,7 +284,7 @@ actor TerminalMultiplexSession: TerminalSession {
         isClosed = true
         receiveTask?.cancel()
         receiveTask = nil
-        await bulk.close()
+        await route.close()
         continuation.finish()
     }
 }

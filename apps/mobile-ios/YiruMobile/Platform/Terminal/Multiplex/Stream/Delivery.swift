@@ -16,8 +16,7 @@ actor TerminalMultiplexDelivery {
         let endSequence: UInt64
     }
 
-    private let routeID: UInt32
-    private let bulk: TerminalBulkConnection
+    private let route: TerminalBulkRoute
     private let publishEvent: PublishEvent
     private var assembler = TerminalSnapshotAssembler()
     private var pendingOutput: [PendingOutput] = []
@@ -30,12 +29,10 @@ actor TerminalMultiplexDelivery {
     private var hasRequestedRecovery = false
 
     init(
-        routeID: UInt32,
-        bulk: TerminalBulkConnection,
+        route: TerminalBulkRoute,
         publishEvent: @escaping PublishEvent
     ) {
-        self.routeID = routeID
-        self.bulk = bulk
+        self.route = route
         self.publishEvent = publishEvent
     }
 
@@ -236,7 +233,7 @@ actor TerminalMultiplexDelivery {
         awaitingSnapshot = nil
         assembler.clear()
         try await setOutputCredit(0)
-        let correlationID = try await bulk.allocateCorrelationID()
+        let correlationID = try await route.allocateCorrelationID()
         let payload = try JSONEncoder().encode(
             TerminalSnapshotRequestRecord(requestedScrollbackRows: 1_000)
         )
@@ -295,15 +292,11 @@ actor TerminalMultiplexDelivery {
         correlationID: UInt32 = 0,
         payload: Data = Data()
     ) async throws {
-        try await bulk.send(
-            TerminalMultiplexFrame(
-                opcode: opcode,
-                routeID: routeID,
-                epoch: 0,
-                sequence: sequence,
-                correlationID: correlationID,
-                payload: payload
-            )
+        try await route.send(
+            opcode: opcode,
+            sequence: sequence,
+            correlationID: correlationID,
+            payload: payload
         )
     }
 

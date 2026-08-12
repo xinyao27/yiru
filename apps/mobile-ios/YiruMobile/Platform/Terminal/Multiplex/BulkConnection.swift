@@ -1,14 +1,11 @@
 import Foundation
 
-nonisolated enum TerminalBulkConnectionEvent: Sendable {
-    case accepted
-    case frame(TerminalMultiplexFrame)
-}
-
 nonisolated enum TerminalBulkConnectionError: Error, Sendable {
     case expiredTicket
     case invalidPeerMessage
     case iteratorEnded
+    case maxStreamsExceeded
+    case routeIDsExhausted
     case server(status: Int)
     case staleAfterBackground
 }
@@ -19,10 +16,12 @@ actor TerminalBulkConnection {
     private let connection: AuthenticatedRuntimeConnection
     private let isControlGenerationCurrent: IsControlGenerationCurrent
     private let requestID = UUID().uuidString.lowercased()
-    private let stream: AsyncThrowingStream<TerminalBulkConnectionEvent, Error>
-    private let continuation: AsyncThrowingStream<TerminalBulkConnectionEvent, Error>.Continuation
     private var wire: TerminalMultiplexWire?
     private var receiveTask: Task<Void, Never>?
+    private var routeContinuations:
+        [UInt32: AsyncThrowingStream<TerminalBulkRouteEvent, Error>.Continuation] = [:]
+    private var nextRouteID: UInt32 = 1
+    private var maxStreams: UInt32?
     private var hasAcceptedEpoch = false
     private var hasIteratorReady = false
     private var hasPublishedReady = false
@@ -33,9 +32,6 @@ actor TerminalBulkConnection {
         connection: AuthenticatedRuntimeConnection,
         isControlGenerationCurrent: @escaping IsControlGenerationCurrent
     ) {
-        let pair = AsyncThrowingStream.makeStream(of: TerminalBulkConnectionEvent.self)
-        stream = pair.stream
-        continuation = pair.continuation
         self.connection = connection
         self.isControlGenerationCurrent = isControlGenerationCurrent
     }
@@ -61,12 +57,37 @@ actor TerminalBulkConnection {
         return bulk
     }
 
-    func events() -> AsyncThrowingStream<TerminalBulkConnectionEvent, Error> {
-        stream
+    func openRoute() throws -> TerminalBulkRoute {
+        guard !isClosed else { throw TerminalBulkConnectionError.invalidPeerMessage }
+        guard nextRouteID > 0, nextRouteID <= 0x7fff_ffff else {
+            throw TerminalBulkConnectionError.routeIDsExhausted
+        }
+        if let maxStreams, routeContinuations.count >= Int(maxStreams) {
+            throw TerminalBulkConnectionError.maxStreamsExceeded
+        }
+        let routeID = nextRouteID
+        nextRouteID += 1
+        let pair = AsyncThrowingStream.makeStream(of: TerminalBulkRouteEvent.self)
+        routeContinuations[routeID] = pair.continuation
+        if hasPublishedReady {
+            pair.continuation.yield(.accepted)
+        }
+        return TerminalBulkRoute(id: routeID, bulk: self, stream: pair.stream)
+    }
+
+    func isOpen() -> Bool {
+        !isClosed
+    }
+
+    func closeRoute(_ routeID: UInt32) async {
+        routeContinuations.removeValue(forKey: routeID)?.finish()
+        if routeContinuations.isEmpty {
+            await close()
+        }
     }
 
     func send(_ frame: TerminalMultiplexFrame) async throws {
-        guard hasPublishedReady, let wire else {
+        guard hasPublishedReady, routeContinuations[frame.routeID] != nil, let wire else {
             throw TerminalBulkConnectionError.invalidPeerMessage
         }
         try await wire.send(
@@ -108,7 +129,7 @@ actor TerminalBulkConnection {
         receiveTask = nil
         await wire?.close()
         await connection.close()
-        continuation.finish()
+        finishRoutes()
     }
 
     private func start(ticket: MobileTerminalOpenMultiplexWire) async throws {
@@ -224,20 +245,25 @@ actor TerminalBulkConnection {
         try await connection.sendBinary(sideChannel)
     }
 
-    private func publish(_ event: TerminalMultiplexWireEvent) {
+    private func publish(_ event: TerminalMultiplexWireEvent) async {
         switch event {
-        case .accepted:
+        case .accepted(let maxStreams):
+            guard routeContinuations.count <= Int(maxStreams) else {
+                await fail(TerminalBulkConnectionError.maxStreamsExceeded)
+                return
+            }
+            self.maxStreams = maxStreams
             hasAcceptedEpoch = true
             publishReadyIfNeeded()
         case .streamFrame(let frame):
-            continuation.yield(.frame(frame))
+            routeContinuations[frame.routeID]?.yield(.frame(frame))
         }
     }
 
     private func publishReadyIfNeeded() {
         guard hasAcceptedEpoch, hasIteratorReady, !hasPublishedReady else { return }
         hasPublishedReady = true
-        continuation.yield(.accepted)
+        routeContinuations.values.forEach { $0.yield(.accepted) }
     }
 
     private func fail(_ error: Error) async {
@@ -246,77 +272,20 @@ actor TerminalBulkConnection {
         receiveTask?.cancel()
         receiveTask = nil
         await wire?.close()
-        let details = closeDetails(error)
+        let details = terminalBulkCloseDetails(error)
         await connection.close(code: details.code, reason: details.reason)
-        continuation.finish(throwing: error)
+        finishRoutes(throwing: error)
     }
-}
 
-nonisolated private struct TerminalMultiplexInvocation: Encodable {
-    let i: String
-    let p: TerminalMultiplexInvocationPayload
-}
-
-nonisolated private struct TerminalMultiplexInvocationPayload: Encodable {
-    let u: String
-    let b: TerminalMultiplexInvocationBody
-    let h: [String: String]
-}
-
-nonisolated private struct TerminalMultiplexInvocationBody: Encodable {
-    let json: TerminalMultiplexInvocationInput
-}
-
-nonisolated private struct TerminalMultiplexInvocationInput: Encodable {
-    let bulkTicket: String
-}
-
-nonisolated private struct TerminalMultiplexPeerMessage: Decodable {
-    let i: String
-    let t: Int?
-    let p: TerminalMultiplexPeerPayload
-}
-
-nonisolated private struct TerminalMultiplexPeerPayload: Decodable {
-    let s: Int?
-    let e: String?
-    let d: TerminalMultiplexPeerEvent?
-}
-
-nonisolated private struct TerminalMultiplexPeerEvent: Decodable {
-    let json: TerminalMultiplexReadyEvent
-}
-
-nonisolated private struct TerminalMultiplexReadyEvent: Decodable {
-    let type: String
-}
-
-nonisolated private func closeDetails(_ error: Error) -> (code: Int, reason: String) {
-    if let frameError = error as? TerminalMultiplexFrameError {
-        switch frameError {
-        case .invalidLength:
-            return (1009, "invalid terminal frame length")
-        case .invalidHeader, .invalidRoute, .unsupportedOpcode:
-            return (1002, "invalid terminal frame")
+    private func finishRoutes(throwing error: Error? = nil) {
+        let continuations = routeContinuations.values
+        routeContinuations.removeAll()
+        for continuation in continuations {
+            if let error {
+                continuation.finish(throwing: error)
+            } else {
+                continuation.finish()
+            }
         }
     }
-    if let wireError = error as? TerminalMultiplexWireError {
-        switch wireError {
-        case .heartbeatTimedOut, .correlationIDsExhausted:
-            return (1001, "terminal epoch expired")
-        case .duplicateEpoch, .epochMismatch, .frameBeforeAcceptance, .invalidEpoch,
-            .invalidHeartbeat:
-            return (1002, "terminal protocol violation")
-        }
-    }
-    if let bulkError = error as? TerminalBulkConnectionError {
-        if case .staleAfterBackground = bulkError {
-            return (1001, "terminal epoch stale after background")
-        }
-        return (1002, "invalid terminal peer message")
-    }
-    if error is RuntimeOrpcSideChannelError {
-        return (1002, "invalid terminal side channel")
-    }
-    return (1001, "terminal connection closed")
 }
