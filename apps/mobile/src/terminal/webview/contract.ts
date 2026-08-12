@@ -55,14 +55,11 @@ export type TerminalWebViewHandle = {
   // Why: iOS can preserve the native view while discarding its JS/backing-store
   // state; foreground recovery must wait for the document to answer before replay.
   prepareForForegroundRecovery: () => void
-  write: {
-    (data: string): void
-    (
-      data: string,
-      meta: { endSeq: string; wireByteLength: number; ackEveryBytes: number },
-      onParsed: (endSeq: string, receiverQueueBytes: number) => void
-    ): void
-  }
+  write: (
+    data: string,
+    meta: { endSeq: string; wireByteLength: number; ackEveryBytes: number },
+    onParsed: (endSeq: string, receiverQueueBytes: number) => void
+  ) => void
   restore: (snapshot: MobileTerminalSnapshot, onParsed: (snapshotId: number) => void) => void
   init: (
     cols: number,

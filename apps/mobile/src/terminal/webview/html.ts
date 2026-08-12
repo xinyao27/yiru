@@ -238,7 +238,7 @@ window.onerror = function(msg) {
   // gesture only; it resets to 1 on release. The persistent "text size" is the
   // real xterm fontSize (currentTextScale × BASE_FONT_PX), so changing it
   // reflows the grid: a bigger cell means fewer columns fit, and RN re-measures
-  // and resizes the PTY (terminal.updateViewport) so the shell rewraps to the
+  // and resizes the PTY through its multiplex stream so the shell rewraps to the
   // new width. A finished pinch snaps to the nearest preset and reports it to RN.
   var userScale = 1;
   var BASE_FONT_PX = 13;

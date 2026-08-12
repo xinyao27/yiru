@@ -4,6 +4,7 @@ import {
 } from '@yiru/runtime-protocol/terminal-multiplex/frame'
 import { decodeTerminalMultiplexJson } from '@yiru/runtime-protocol/terminal-multiplex/json'
 
+import { decodeMobileTerminalSideEffectBatch } from './side-effects'
 import type { MobileTerminalCallbacks } from './types'
 
 export class MobileTerminalOrderedEvents {
@@ -40,6 +41,15 @@ export class MobileTerminalOrderedEvents {
       return true
     }
     if (frame.opcode === TerminalMultiplexOpcode.SideEffectBatch) {
+      const batch = decodeMobileTerminalSideEffectBatch(frame.payload)
+      if (!batch) {
+        this.callbacks.onError?.('Mobile terminal side-effect batch is invalid.')
+      } else {
+        this.pending.push({
+          seq: frame.seq,
+          publish: () => this.callbacks.onSideEffectBatch?.(batch)
+        })
+      }
       return true
     }
     return false

@@ -15,7 +15,6 @@ type RuntimeOrpcTransportOptions = {
   nextRequestId: () => string
   sendText: (plaintext: string) => boolean
   sendBinary: (plaintext: Uint8Array<ArrayBufferLike>) => boolean
-  registerTerminalStream: (streamId: number, listener: (event: unknown) => void) => () => void
 }
 
 export class MobileRuntimeOrpcTransport {
@@ -41,7 +40,6 @@ export class MobileRuntimeOrpcTransport {
       },
       shouldReplay: (generation, signal) => this.shouldReplay(generation, signal),
       waitForReplay: (generation, signal) => this.waitForReplay(generation, signal),
-      registerTerminalStream: options.registerTerminalStream,
       isClosed: () => this.isClosed
     })
   }

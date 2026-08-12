@@ -15,13 +15,6 @@ import {
 import { createMobileRpcActivityProbe } from './rpc-client-activity-probe'
 import { createMobileRuntimeOrpcTransport } from './rpc-client-orpc-wiring'
 import { createMobileStatusCompatProbe, type DesktopStatusPayload } from './rpc-client-status-probe'
-import {
-  clearTerminalBinaryFrameState,
-  createTerminalBinaryFrameState,
-  deleteTerminalBinaryStreamState,
-  handleTerminalBinaryFrame,
-  takePendingTerminalStreamEvents
-} from './rpc-client-terminal-binary-frame'
 import { markRpcDeliveryUnknown } from './rpc-delivery-ambiguity'
 import { isRpcResponse } from './rpc-response-shape'
 import type { RuntimeOrpcClient } from './runtime-orpc-client'
@@ -41,8 +34,6 @@ type ConnectWaiter = {
   reject: (error: Error) => void
   timeout: ReturnType<typeof setTimeout> | null
 }
-
-type StreamingListener = (result: unknown) => void
 
 export type RpcClient = {
   // Typed runtime contract client — every runtime RPC and subscription goes
@@ -172,8 +163,6 @@ export function connect(
   const serverPublicKey = publicKeyFromBase64(serverPublicKeyB64)
 
   const pending = new Map<string, PendingRequest>()
-  const terminalStreamListeners = new Map<number, StreamingListener>()
-  const terminalBinaryFrameState = createTerminalBinaryFrameState()
   const stateListeners = new Set<(state: ConnectionState) => void>()
   const connectWaiters: ConnectWaiter[] = []
 
@@ -237,8 +226,6 @@ export function connect(
       orpcTransport.connected()
     } else if (prev === 'connected') {
       orpcTransport.disconnected()
-      terminalStreamListeners.clear()
-      clearTerminalBinaryFrameState(terminalBinaryFrameState)
     }
     terminalMultiplexer.controlConnectionChanged(next === 'connected')
   }
@@ -751,11 +738,6 @@ export function connect(
       handleBrowserBinaryFrame(browserFrame)
       return
     }
-    handleTerminalBinaryFrame(bytes, {
-      state: terminalBinaryFrameState,
-      getListener: (streamId) => terminalStreamListeners.get(streamId),
-      recordValidatedInboundTraffic
-    })
   }
 
   function handleBrowserBinaryFrame(frame: BrowserScreencastFrame): void {
@@ -772,20 +754,6 @@ export function connect(
       typeof payload === 'string' ? encrypt(payload, sharedKey) : encryptBytes(payload, sharedKey)
     )
     return true
-  }
-
-  function registerOrpcTerminalStream(streamId: number, listener: StreamingListener): () => void {
-    terminalStreamListeners.set(streamId, listener)
-    const pendingEvents = takePendingTerminalStreamEvents(terminalBinaryFrameState, streamId)
-    for (const event of pendingEvents) {
-      listener(event)
-    }
-    return () => {
-      if (terminalStreamListeners.get(streamId) === listener) {
-        terminalStreamListeners.delete(streamId)
-        deleteTerminalBinaryStreamState(terminalBinaryFrameState, streamId)
-      }
-    }
   }
 
   function sendEncrypted(request: unknown): boolean {
@@ -817,8 +785,7 @@ export function connect(
     waitForConnected: () => waitForConnected(),
     getState: () => state,
     nextRequestId: nextId,
-    sendFrame: sendEncryptedFrame,
-    registerTerminalStream: registerOrpcTerminalStream
+    sendFrame: sendEncryptedFrame
   })
   const terminalMultiplexer = new MobileRuntimeTerminalMultiplexer({
     getControlClient: () => orpcTransport.client,

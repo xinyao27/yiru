@@ -1,3 +1,5 @@
+import type { MobileTerminalSideEffectBatch } from './side-effects'
+
 export type MobileTerminalDeliveryState = {
   visible: boolean
   interested: boolean
@@ -49,6 +51,7 @@ export type MobileTerminalCallbacks = {
     driver: { kind: 'idle' } | { kind: 'desktop' } | { kind: 'mobile'; clientId: string }
   ) => void
   onMetadata?: (metadata: Record<string, unknown>) => void
+  onSideEffectBatch?: (batch: MobileTerminalSideEffectBatch) => void
   onClearBuffer?: () => void
   onTransportClose?: () => void
 }

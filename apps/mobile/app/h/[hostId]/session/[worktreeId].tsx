@@ -990,17 +990,12 @@ export default function SessionScreen(): React.JSX.Element {
     activeHandleRef,
     terminalRefs,
     terminalFrameHeightRef,
+    terminalStreamsRef,
     viewportRef,
     viewportMeasuredRef,
-    clientRef,
-    deviceTokenRef,
-    initializedHandlesRef,
-    connState,
     tabStripVisible: terminals.length > 1,
     textScale: terminalTextScale,
-    terminalFrameWidth,
-    unsubscribeTerminal,
-    subscribeToTerminal
+    terminalFrameWidth
   })
 
   useEffect(() => {
@@ -1099,19 +1094,11 @@ export default function SessionScreen(): React.JSX.Element {
     if (connState !== 'connected') {
       return
     }
-    // Why: the RPC client auto-resends terminal.subscribe on reconnect.
-    // Keep the current xterm visible while the binary snapshot hydrates,
-    // instead of clearing to a blank "Loading terminals" surface.
+    // Why: keep an initialized xterm visible while the bulk epoch restores it
+    // from an authoritative snapshot instead of flashing the loading surface.
     if (initializedHandlesRef.current.size === 0) {
       setTerminalsLoaded(false)
     }
-    // Why: on reconnect the RPC client auto-resends terminal.subscribe and
-    // the server sends a fresh scrollback frame. The subscribe handler drops
-    // scrollback when initializedHandlesRef already contains the handle, so
-    // we'd keep stale pre-disconnect content (and lose any output emitted
-    // during the disconnect). Clear the flag so the fresh snapshot calls
-    // ref.init(...) and replaces the buffer.
-    initializedHandlesRef.current.clear()
     let disposed = false
     const timers: ReturnType<typeof setTimeout>[] = []
     function addTimer(fn: () => void, ms: number) {

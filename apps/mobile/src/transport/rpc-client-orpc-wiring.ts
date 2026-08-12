@@ -10,7 +10,6 @@ export type MobileRuntimeOrpcWiring = {
   // Encrypts and writes an already-framed oRPC payload. Returns false when the
   // socket is not writable, which the channel surfaces as a link failure.
   sendFrame: (payload: string | Uint8Array<ArrayBufferLike>) => boolean
-  registerTerminalStream: (streamId: number, listener: (event: unknown) => void) => () => void
 }
 
 export function createMobileRuntimeOrpcTransport(
@@ -23,7 +22,6 @@ export function createMobileRuntimeOrpcTransport(
     getState: wiring.getState,
     nextRequestId: wiring.nextRequestId,
     sendText: (plaintext) => wiring.sendFrame(plaintext),
-    sendBinary: (plaintext) => wiring.sendFrame(plaintext),
-    registerTerminalStream: wiring.registerTerminalStream
+    sendBinary: (plaintext) => wiring.sendFrame(plaintext)
   })
 }

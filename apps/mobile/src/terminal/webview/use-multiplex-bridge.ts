@@ -17,8 +17,8 @@ type TerminalMultiplexBridge = {
   restore: (snapshot: MobileTerminalSnapshot, onParsed: (snapshotId: number) => void) => void
   write: (
     data: string,
-    metadata?: OutputMetadata,
-    onParsed?: (endSeq: string, receiverQueueBytes: number) => void
+    metadata: OutputMetadata,
+    onParsed: (endSeq: string, receiverQueueBytes: number) => void
   ) => void
 }
 
@@ -64,12 +64,9 @@ export function useTerminalMultiplexBridge(
   const write = useCallback(
     (
       data: string,
-      metadata?: OutputMetadata,
-      onParsed?: (endSeq: string, receiverQueueBytes: number) => void
+      metadata: OutputMetadata,
+      onParsed: (endSeq: string, receiverQueueBytes: number) => void
     ) => {
-      if (!metadata || !onParsed) {
-        return
-      }
       outputParsedRef.current = onParsed
       postMessage({ type: 'write', data, ...metadata })
     },

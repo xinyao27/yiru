@@ -2,11 +2,7 @@ import type { ClientLink } from '@orpc/client'
 
 import type { BrowserScreencastFrame } from './browser-screencast-protocol'
 import { readRuntimeOrpcSubscriptionDetails } from './runtime-orpc-client'
-import {
-  isAsyncIterator,
-  isRuntimeOrpcBrowserStreamPath,
-  isRuntimeOrpcTerminalStreamPath
-} from './runtime-orpc-compatibility'
+import { isAsyncIterator, isRuntimeOrpcBrowserStreamPath } from './runtime-orpc-compatibility'
 import {
   consumeRuntimeOrpcIterator,
   createRuntimeOrpcEventStream,
@@ -22,7 +18,6 @@ type RuntimeOrpcSubscriptionOptions = {
   resolveConnection: (signal: AbortSignal) => Promise<RuntimeOrpcStreamConnection>
   shouldReplay: (generation: number, signal: AbortSignal) => boolean
   waitForReplay: (generation: number, signal: AbortSignal) => Promise<void>
-  registerTerminalStream: (streamId: number, listener: (event: unknown) => void) => () => void
   isClosed: () => boolean
 }
 
@@ -92,7 +87,6 @@ export class MobileRuntimeOrpcSubscriptions {
         await this.options.waitForReplay(connection.generation, stream.signal)
         continue
       }
-      const terminalCleanups: (() => void)[] = []
       const browserToken = isRuntimeOrpcBrowserStreamPath(path)
         ? this.beginBrowserStream(stream, onBinaryFrame)
         : null
@@ -105,7 +99,7 @@ export class MobileRuntimeOrpcSubscriptions {
           throw new Error('Runtime oRPC stream returned a non-iterator response')
         }
         const outcome = await consumeRuntimeOrpcIterator(output, stream, (event) => {
-          this.handleEvent(path, event, stream, terminalCleanups, browserToken)
+          this.handleEvent(event, browserToken)
         })
         if (outcome === 'cancelled' || stream.signal.aborted) {
           return
@@ -118,9 +112,6 @@ export class MobileRuntimeOrpcSubscriptions {
           throw error
         }
       } finally {
-        for (const cleanup of terminalCleanups) {
-          cleanup()
-        }
         if (browserToken) {
           this.endBrowserAttempt(browserToken)
         }
@@ -129,20 +120,7 @@ export class MobileRuntimeOrpcSubscriptions {
     }
   }
 
-  private handleEvent(
-    path: readonly string[],
-    event: unknown,
-    stream: RuntimeOrpcEventStream,
-    terminalCleanups: (() => void)[],
-    browserToken: symbol | null
-  ): void {
-    if (isRuntimeOrpcTerminalStreamPath(path) && isSubscribedStreamEvent(event)) {
-      terminalCleanups.push(
-        this.options.registerTerminalStream(event.streamId, (binaryEvent) => {
-          stream.push(binaryEvent)
-        })
-      )
-    }
+  private handleEvent(event: unknown, browserToken: symbol | null): void {
     if (browserToken && isBrowserReadyEvent(event)) {
       const browser = this.activeBrowserStream
       if (browser?.token === browserToken) {
@@ -174,19 +152,6 @@ export class MobileRuntimeOrpcSubscriptions {
       stream?.cancel()
     }
   }
-}
-
-function isSubscribedStreamEvent(
-  event: unknown
-): event is { type: 'subscribed'; streamId: number } {
-  return (
-    typeof event === 'object' &&
-    event !== null &&
-    'type' in event &&
-    event.type === 'subscribed' &&
-    'streamId' in event &&
-    typeof event.streamId === 'number'
-  )
 }
 
 function isBrowserReadyEvent(event: unknown): boolean {

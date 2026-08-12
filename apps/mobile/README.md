@@ -121,7 +121,7 @@ yiru fill --element @e1 --value "ls" --json
 yiru screenshot --json
 ```
 
-Use `snapshot` first to find the current element refs, then click/fill those refs. After mobile file edits, Metro usually hot reloads automatically, but navigating out of and back into the session screen can be useful because it re-runs `terminal.subscribe`.
+Use `snapshot` first to find the current element refs, then click/fill those refs. After mobile file edits, Metro usually hot reloads automatically, but navigating out of and back into the session screen can be useful because it opens a fresh terminal multiplex epoch.
 
 ## Validation
 
@@ -156,7 +156,7 @@ Do **not** bump for additive changes:
 
 - New RPC methods
 - New optional fields on existing methods
-- New event types in `terminal.subscribe`
+- New terminal multiplex event types
 
 Set `MIN_COMPATIBLE_RUNTIME_CLIENT_VERSION` when a server must reject older
 clients. Set `MIN_COMPATIBLE_RUNTIME_SERVER_VERSION` when clients require a
