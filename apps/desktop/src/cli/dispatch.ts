@@ -1,3 +1,4 @@
+import { CONNECT_HANDLERS } from './connect/command'
 import { AGENT_HOOK_HANDLERS } from './handlers/agent-hooks'
 import { AUTOMATION_HANDLERS } from './handlers/automations'
 import { BROWSER_CAPTURE_HANDLERS } from './handlers/browser-capture'
@@ -38,6 +39,7 @@ export type CommandHandler = (ctx: HandlerContext) => Promise<void>
 function buildHandlers(): Map<string, CommandHandler> {
   const table = new Map<string, CommandHandler>()
   const groups = [
+    CONNECT_HANDLERS,
     CORE_HANDLERS,
     AUTOMATION_HANDLERS,
     PROJECT_HANDLERS,

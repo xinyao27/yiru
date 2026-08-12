@@ -8,6 +8,7 @@ export type WebPairingOffer = {
   deviceToken: string
   publicKeyB64: string
   scope?: DeviceScope
+  relayMachineId?: string
 }
 
 export type WebPairingStartupDecision =

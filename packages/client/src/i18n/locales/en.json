@@ -207,7 +207,21 @@
         "runtimeHostName": "Runtime host",
         "invalidPairingInput": "Enter a valid Yiru pairing URL or pairing code.",
         "mobileScopeRejected": "This connection has limited mobile access. Ask the host owner to authorize this client through Coworking for full web access.",
-        "mixedContentRejected": "This HTTPS page cannot connect to a plain ws:// runtime host. Open the web client over HTTP or use a wss:// endpoint."
+        "mixedContentRejected": "This HTTPS page cannot connect to a plain ws:// runtime host. Open the web client over HTTP or use a wss:// endpoint.",
+        "grantExpired": "This pairing command expired. Refresh the page to create a new one.",
+        "title": "Connect your computer",
+        "description": "No account is required. This browser and your computer create their own private identities, then pair directly.",
+        "installTitle": "Install Yiru",
+        "installDescription": "Run this once on the macOS or Linux computer you want to use.",
+        "pairTitle": "Pair this browser",
+        "pairDescription": "Run this single-use command on that computer. It expires after 10 minutes.",
+        "verifyTitle": "Check the code before confirming",
+        "verifyDescription": "The terminal on {{machine}} must show this same code:",
+        "pairedTitle": "{{machine}} is paired",
+        "pairedDescription": "Keep the terminal command running to use this computer in the Web app. Ctrl+C takes it offline.",
+        "securityNote": "The private browser key cannot be exported. Clearing this site’s browser data removes access and requires pairing again.",
+        "copyCommand": "Copy command",
+        "creatingGrant": "Creating a secure pairing command…"
       },
       "webShell": {
         "aiVaultUnavailableForHost": "Agent Session History is not available for this execution host.",

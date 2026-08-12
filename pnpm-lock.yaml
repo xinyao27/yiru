@@ -975,6 +975,9 @@ importers:
       '@yiru/client':
         specifier: workspace:*
         version: link:../../packages/client
+      '@yiru/runtime-protocol':
+        specifier: workspace:*
+        version: link:../../packages/runtime-protocol
       '@yiru/workbench-model':
         specifier: workspace:*
         version: link:../../packages/workbench-model

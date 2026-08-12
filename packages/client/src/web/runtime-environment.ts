@@ -13,6 +13,7 @@ export type StoredWebRuntimeEnvironment = Omit<PublicKnownRuntimeEnvironment, 'e
     deviceToken: string
     publicKeyB64: string
     scope?: WebPairingOffer['scope']
+    relayMachineId?: string
   }[]
 }
 
@@ -64,7 +65,8 @@ export function createStoredWebRuntimeEnvironment(args: {
         endpoint: args.offer.endpoint,
         deviceToken: args.offer.deviceToken,
         publicKeyB64: args.offer.publicKeyB64,
-        ...(args.offer.scope ? { scope: args.offer.scope } : {})
+        ...(args.offer.scope ? { scope: args.offer.scope } : {}),
+        ...(args.offer.relayMachineId ? { relayMachineId: args.offer.relayMachineId } : {})
       }
     ]
   }
@@ -97,7 +99,8 @@ export function getPreferredWebPairingOffer(
     endpoint: endpoint.endpoint,
     deviceToken: endpoint.deviceToken,
     publicKeyB64: endpoint.publicKeyB64,
-    ...(endpoint.scope ? { scope: endpoint.scope } : {})
+    ...(endpoint.scope ? { scope: endpoint.scope } : {}),
+    ...(endpoint.relayMachineId ? { relayMachineId: endpoint.relayMachineId } : {})
   }
 }
 

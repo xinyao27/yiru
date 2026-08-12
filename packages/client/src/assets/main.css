@@ -1,5 +1,8 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
+/* Why: the standalone Web host dynamically imports its bootstrap, so Tailwind's
+   host build graph cannot otherwise discover onboarding-only utility classes. */
+@source '../web/connect';
 /* Why: markdown-body.css uses `@layer components`, which Tailwind v4 can only
    resolve inside a CSS entry that has the `@import 'tailwindcss'` context
    above — it must stay a global @import, not a lazy-chunk side-effect import.

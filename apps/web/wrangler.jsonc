@@ -11,7 +11,30 @@
   "account_id": "d0a04266246b5b2d59b897c8dd088776",
   "routes": [
     { "pattern": "yiru.ai", "custom_domain": true },
-    { "pattern": "www.yiru.ai", "custom_domain": true }
+    { "pattern": "www.yiru.ai", "custom_domain": true },
+    { "pattern": "app.yiru.ai", "custom_domain": true }
+  ],
+  "durable_objects": {
+    "bindings": [
+      { "name": "CONNECT_GRANTS", "class_name": "ConnectGrantObject" },
+      { "name": "CONNECT_MACHINES", "class_name": "ConnectMachineObject" }
+    ]
+  },
+  "ratelimits": [
+    {
+      "name": "CONNECT_BROWSER_RATE_LIMIT",
+      "namespace_id": "7312041",
+      "simple": { "limit": 12, "period": 60 }
+    },
+    {
+      "name": "CONNECT_NETWORK_RATE_LIMIT",
+      "namespace_id": "7312042",
+      "simple": { "limit": 60, "period": 60 }
+    }
+  ],
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["ConnectGrantObject"] },
+    { "tag": "v2", "new_sqlite_classes": ["ConnectMachineObject"] }
   ],
   "assets": {
     "directory": "./dist",
@@ -24,7 +47,7 @@
     "not_found_handling": "404-page",
     // Why: the www redirect in worker/site.ts only fires if the Worker runs
     // before the asset router, which short-circuits every matching path.
-    "run_worker_first": true
+    "run_worker_first": ["/*"]
   },
   "observability": {
     "enabled": true

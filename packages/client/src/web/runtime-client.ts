@@ -12,6 +12,7 @@ import type {
 } from '~shared/runtime-method-contract'
 import { RUNTIME_INBOUND_BINARY_STREAM_CAPABILITY } from '~shared/runtime-orpc-socket'
 
+import { createBrowserRelaySession, type BrowserRelaySession } from './connect/grant-client'
 import {
   decrypt,
   decryptBytes,
@@ -90,6 +91,11 @@ type WebRuntimeClientOptions = {
   enableShellServices?: boolean
 }
 
+type PreparedRelayConnection = {
+  session: BrowserRelaySession
+  secretKey: Uint8Array
+}
+
 const REQUEST_TIMEOUT_MS = 30_000
 const CONNECT_TIMEOUT_MS = 12_000
 const HANDSHAKE_TIMEOUT_MS = 10_000
@@ -133,7 +139,8 @@ export class WebRuntimeClient {
   private readonly fileWatchTeardownRetries = new Map<string, Set<() => Promise<void>>>()
   private readonly childClients = new Set<WebRuntimeClient>()
   private readonly waiters: { resolve: () => void; reject: (error: Error) => void }[] = []
-  private readonly serverPublicKey: Uint8Array
+  private readonly serverPublicKey: Uint8Array | null
+  private relayDeviceToken: string | null = null
   private orpcConnection: WebRuntimeOrpcConnection | null = null
   private legacyOrpcClient: WebRuntimeOrpcClient | null = null
   private orpcClientPromise: Promise<WebRuntimeOrpcClient> | null = null
@@ -154,7 +161,7 @@ export class WebRuntimeClient {
     this.pairing = pairing
     this.onRuntimeId = onRuntimeId
     this.options = options
-    this.serverPublicKey = publicKeyFromBase64(pairing.publicKeyB64)
+    this.serverPublicKey = pairing.relayMachineId ? null : publicKeyFromBase64(pairing.publicKeyB64)
     this.openConnection()
   }
 
@@ -551,9 +558,26 @@ export class WebRuntimeClient {
     if (this.intentionallyClosed) {
       return
     }
+    const relayMachineId = this.pairing.relayMachineId
+    if (relayMachineId) {
+      this.setState('connecting')
+      const keyPair = generateKeyPair()
+      void createBrowserRelaySession(relayMachineId, publicKeyToBase64(keyPair.publicKey)).then(
+        (session) => this.openSocket(session.socketUrl, { session, secretKey: keyPair.secretKey }),
+        () => this.scheduleReconnect()
+      )
+      return
+    }
+    this.openSocket(this.pairing.endpoint, null)
+  }
+
+  private openSocket(endpoint: string, relay: PreparedRelayConnection | null): void {
+    if (this.intentionallyClosed) {
+      return
+    }
     let ws: WebSocket
     try {
-      ws = new WebSocket(this.pairing.endpoint)
+      ws = new WebSocket(endpoint)
     } catch (error) {
       this.rejectAllPending(error instanceof Error ? error.message : String(error))
       this.scheduleReconnect()
@@ -563,6 +587,7 @@ export class WebRuntimeClient {
     ws.binaryType = 'arraybuffer'
     this.ws = ws
     this.sharedKey = null
+    this.relayDeviceToken = null
     this.authenticatedRuntimeId = null
     this.authenticatedCapabilities.clear()
     this.setState('connecting')
@@ -580,14 +605,26 @@ export class WebRuntimeClient {
       }
       this.clearConnectTimer()
       this.setState('handshaking')
-      const keyPair = generateKeyPair()
-      this.sharedKey = deriveSharedKey(keyPair.secretKey, this.serverPublicKey)
-      ws.send(
-        JSON.stringify({
-          type: 'e2ee_hello',
-          publicKeyB64: publicKeyToBase64(keyPair.publicKey)
-        })
-      )
+      if (relay) {
+        this.sharedKey = deriveSharedKey(
+          relay.secretKey,
+          publicKeyFromBase64(relay.session.runtimePublicKeyB64)
+        )
+        ws.send(JSON.stringify(relay.session.auth))
+      } else {
+        const keyPair = generateKeyPair()
+        if (!this.serverPublicKey) {
+          ws.close()
+          return
+        }
+        this.sharedKey = deriveSharedKey(keyPair.secretKey, this.serverPublicKey)
+        ws.send(
+          JSON.stringify({
+            type: 'e2ee_hello',
+            publicKeyB64: publicKeyToBase64(keyPair.publicKey)
+          })
+        )
+      }
       this.handshakeTimer = window.setTimeout(() => {
         if (this.ws === ws && this.state === 'handshaking') {
           ws.close()
@@ -631,9 +668,18 @@ export class WebRuntimeClient {
         return
       }
       try {
-        const control = JSON.parse(raw) as { type?: unknown }
+        const control = JSON.parse(raw) as { type?: unknown; deviceToken?: unknown }
+        if (control.type === 'relay-browser-ready' && typeof control.deviceToken === 'string') {
+          this.relayDeviceToken = control.deviceToken
+          return
+        }
         if (control.type === 'e2ee_ready') {
-          this.sendEncrypted({ type: 'e2ee_auth', deviceToken: this.pairing.deviceToken })
+          const deviceToken = this.pairing.relayMachineId
+            ? this.relayDeviceToken
+            : this.pairing.deviceToken
+          if (deviceToken) {
+            this.sendEncrypted({ type: 'e2ee_auth', deviceToken })
+          }
           return
         }
       } catch {

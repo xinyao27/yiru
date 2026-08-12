@@ -4,6 +4,7 @@ import { STATUS_GET_CONTRACT } from '@yiru/runtime-protocol/status'
 import type { RuntimeStatus } from '~shared/runtime-types'
 
 import type { RuntimeEnvironmentApi } from '../runtime/runtime-environment-api'
+import { revokeCurrentBrowserAccess } from './connect/grant-client'
 import {
   isLegacyBackgroundRuntimeMethod,
   type WebRuntimeOrpcClient,
@@ -91,6 +92,10 @@ export function getWebRuntimeEnvironmentApi(): RuntimeEnvironmentApi {
       redactStoredWebRuntimeEnvironment(resolveEnvironment(selector)),
     remove: async ({ selector }) => {
       const environment = resolveEnvironment(selector)
+      const relayMachineId = getPreferredWebPairingOffer(environment).relayMachineId
+      if (relayMachineId) {
+        await revokeCurrentBrowserAccess(relayMachineId)
+      }
       disconnectEnvironment(environment)
       return { removed: redactStoredWebRuntimeEnvironment(environment) }
     },

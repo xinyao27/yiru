@@ -1,4 +1,5 @@
 import type { CommandSpec } from '../args'
+import { CONNECT_COMMAND_SPECS } from '../connect/spec'
 import { MOBILE_COMMAND_SPECS } from '../mobile/development-pairing'
 import { AGENT_HOOK_COMMAND_SPECS } from './agent-hooks'
 import { AUTOMATION_COMMAND_SPECS } from './automations'
@@ -16,6 +17,7 @@ import { SESSION_COMMAND_SPECS } from './sessions'
 import { SKILL_COMMAND_SPECS } from './skills'
 
 export const COMMAND_SPECS: CommandSpec[] = [
+  ...CONNECT_COMMAND_SPECS,
   ...CORE_COMMAND_SPECS,
   ...PROJECT_COMMAND_SPECS,
   ...SESSION_COMMAND_SPECS,

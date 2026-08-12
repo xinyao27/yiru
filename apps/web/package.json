@@ -32,6 +32,7 @@
     "@phosphor-icons/react": "catalog:",
     "@tanstack/react-router": "catalog:",
     "@yiru/client": "workspace:*",
+    "@yiru/runtime-protocol": "workspace:*",
     "@yiru/workbench-model": "workspace:*",
     "cnfast": "catalog:",
     "react": "catalog:",
