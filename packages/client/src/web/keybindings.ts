@@ -12,8 +12,9 @@ import {
   type KeybindingPlatform
 } from '~shared/keybindings'
 
+import { isJsonRecord, readLocalJson, writeLocalJson } from './storage/local-json'
+
 const KEYBINDINGS_STORAGE_KEY = 'yiru.web.keybindings.v1'
-const WEB_KEYBINDING_PLATFORMS: readonly KeybindingPlatform[] = ['darwin', 'linux', 'win32']
 const listeners = new Set<(snapshot: KeybindingFileSnapshot) => void>()
 
 type WebKeybindingDocument = {
@@ -130,7 +131,7 @@ function normalizeOverrides(
   if (value === undefined) {
     return {}
   }
-  if (!isJsonObject(value)) {
+  if (!isJsonRecord(value)) {
     diagnostics.push({
       severity: 'error',
       section,
@@ -197,7 +198,7 @@ function normalizePlatformOverrides(
   if (value === undefined) {
     return {}
   }
-  if (!isJsonObject(value)) {
+  if (!isJsonRecord(value)) {
     diagnostics.push({
       severity: 'error',
       section: 'platforms',
@@ -210,7 +211,7 @@ function normalizePlatformOverrides(
   }
   const result: Partial<Record<KeybindingPlatform, KeybindingOverrides>> = {}
   for (const [platform, overrides] of Object.entries(value)) {
-    if (!WEB_KEYBINDING_PLATFORMS.includes(platform as KeybindingPlatform)) {
+    if (!isWebKeybindingPlatform(platform)) {
       diagnostics.push({
         severity: 'warning',
         section: `platforms.${platform}`,
@@ -222,11 +223,7 @@ function normalizePlatformOverrides(
       })
       continue
     }
-    result[platform as KeybindingPlatform] = normalizeOverrides(
-      overrides,
-      `platforms.${platform}`,
-      diagnostics
-    )
+    result[platform] = normalizeOverrides(overrides, `platforms.${platform}`, diagnostics)
   }
   return result
 }
@@ -263,24 +260,19 @@ function removeConflicts(
 
 function readDocument(): WebKeybindingDocument {
   const empty: WebKeybindingDocument = { version: 1, keybindings: {}, platforms: {} }
-  const raw = window.localStorage.getItem(KEYBINDINGS_STORAGE_KEY)
-  if (!raw) {
+  const value = readLocalJson(KEYBINDINGS_STORAGE_KEY)
+  if (!isJsonRecord(value)) {
     return empty
   }
-  try {
-    const document = JSON.parse(raw) as WebKeybindingDocument
-    return {
-      version: 1,
-      keybindings: isJsonObject(document.keybindings) ? document.keybindings : {},
-      platforms: isJsonObject(document.platforms) ? document.platforms : {}
-    }
-  } catch {
-    return empty
+  return {
+    version: 1,
+    keybindings: isJsonRecord(value.keybindings) ? value.keybindings : {},
+    platforms: isJsonRecord(value.platforms) ? value.platforms : {}
   }
 }
 
 function writeDocument(document: WebKeybindingDocument): void {
-  window.localStorage.setItem(KEYBINDINGS_STORAGE_KEY, JSON.stringify(document))
+  writeLocalJson(KEYBINDINGS_STORAGE_KEY, document)
 }
 
 function notifyListeners(snapshot: KeybindingFileSnapshot): void {
@@ -289,8 +281,8 @@ function notifyListeners(snapshot: KeybindingFileSnapshot): void {
   }
 }
 
-function isJsonObject(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
+function isWebKeybindingPlatform(value: string): value is KeybindingPlatform {
+  return value === 'darwin' || value === 'linux' || value === 'win32'
 }
 
 function getWebKeybindingPlatform(): KeybindingPlatform {

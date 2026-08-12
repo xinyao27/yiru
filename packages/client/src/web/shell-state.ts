@@ -24,6 +24,7 @@ import {
   setWebSettings,
   updateWebPRBotAuthorOverride
 } from './settings'
+import { isJsonRecord, readLocalJson, writeLocalJson } from './storage/local-json'
 import { sanitizeWebRuntimeWorkspaceSession } from './workspace-session'
 
 const SESSION_STORAGE_KEY = 'yiru.web.workspaceSession.v1'
@@ -41,10 +42,10 @@ const webShellSessionApi = {
   get: (hostId?: ExecutionHostId): Promise<WorkspaceSessionState> =>
     Promise.resolve(getStoredWorkspaceSession(hostId)),
   set: async (session: WorkspaceSessionState, hostId?: ExecutionHostId): Promise<void> => {
-    writeJson(sessionStorageKeyForHost(hostId), sanitizeWebRuntimeWorkspaceSession(session))
+    writeLocalJson(sessionStorageKeyForHost(hostId), sanitizeWebRuntimeWorkspaceSession(session))
   },
   patch: async (patch: WorkspaceSessionPatch, hostId?: ExecutionHostId): Promise<void> => {
-    writeJson(
+    writeLocalJson(
       sessionStorageKeyForHost(hostId),
       sanitizeWebRuntimeWorkspaceSession({ ...getStoredWorkspaceSession(hostId), ...patch })
     )
@@ -66,22 +67,16 @@ const webShellOnboardingApi = {
       flowVersion: ONBOARDING_FLOW_VERSION,
       checklist: { ...current.checklist, ...updates.checklist }
     }
-    writeJson(ONBOARDING_STORAGE_KEY, next)
+    writeLocalJson(ONBOARDING_STORAGE_KEY, next)
     return next
   }
 }
 
 const webShellCacheApi = {
-  getGitHub: () =>
-    Promise.resolve(
-      readJson<{ pr: Record<string, { data: PRInfo | null; fetchedAt: number }> }>(
-        GITHUB_CACHE_STORAGE_KEY,
-        { pr: {} }
-      )
-    ),
+  getGitHub: () => Promise.resolve(readStoredGitHubCache()),
   setGitHub: async (args: {
     cache: { pr: Record<string, { data: PRInfo | null; fetchedAt: number }> }
-  }): Promise<void> => writeJson(GITHUB_CACHE_STORAGE_KEY, args.cache)
+  }): Promise<void> => writeLocalJson(GITHUB_CACHE_STORAGE_KEY, args.cache)
 }
 
 export function getWebShellStateApis() {
@@ -94,21 +89,18 @@ export function getWebShellStateApis() {
 }
 
 function getStoredOnboarding(): OnboardingState {
-  const storedRaw = window.localStorage.getItem(ONBOARDING_STORAGE_KEY)
-  const base = storedRaw
-    ? readJson(ONBOARDING_STORAGE_KEY, getDefaultOnboardingState())
-    : getDefaultOnboardingState()
+  const base = decodeStoredOnboarding(readLocalJson(ONBOARDING_STORAGE_KEY))
   if (base.checklist.dismissed) {
     return base
   }
-  const closed = {
+  const closed: OnboardingState = {
     ...base,
     flowVersion: ONBOARDING_FLOW_VERSION,
     closedAt: Date.now(),
-    outcome: 'dismissed' as const,
+    outcome: 'dismissed',
     checklist: { ...base.checklist, dismissed: true }
   }
-  writeJson(ONBOARDING_STORAGE_KEY, closed)
+  writeLocalJson(ONBOARDING_STORAGE_KEY, closed)
   return closed
 }
 
@@ -123,12 +115,10 @@ function getStoredWorkspaceSession(hostId?: string | null): WorkspaceSessionStat
   const resolvedHostId = normalizeExecutionHostId(hostId) ?? LOCAL_EXECUTION_HOST_ID
   if (resolvedHostId !== LOCAL_EXECUTION_HOST_ID) {
     return sanitizeWebRuntimeWorkspaceSession(
-      readJson(sessionStorageKeyForHost(resolvedHostId), getDefaultWorkspaceSession())
+      readLocalJson(sessionStorageKeyForHost(resolvedHostId))
     )
   }
-  const localSession = sanitizeWebRuntimeWorkspaceSession(
-    readJson(SESSION_STORAGE_KEY, getDefaultWorkspaceSession())
-  )
+  const localSession = sanitizeWebRuntimeWorkspaceSession(readLocalJson(SESSION_STORAGE_KEY))
   if (!getWebActiveEnvironment()) {
     return localSession
   }
@@ -141,18 +131,114 @@ function getStoredWorkspaceSession(hostId?: string | null): WorkspaceSessionStat
   })
 }
 
-function readJson<T>(key: string, fallback: T): T {
-  const raw = window.localStorage.getItem(key)
-  if (!raw) {
-    return fallback
+function decodeStoredOnboarding(value: unknown): OnboardingState {
+  const defaults = getDefaultOnboardingState()
+  if (!isJsonRecord(value)) {
+    return defaults
   }
-  try {
-    return JSON.parse(raw) as T
-  } catch {
-    return fallback
+  const checklist = isJsonRecord(value.checklist) ? value.checklist : {}
+  return {
+    flowVersion:
+      typeof value.flowVersion === 'number' && Number.isInteger(value.flowVersion)
+        ? value.flowVersion
+        : defaults.flowVersion,
+    closedAt:
+      value.closedAt === null ||
+      (typeof value.closedAt === 'number' && Number.isFinite(value.closedAt))
+        ? value.closedAt
+        : defaults.closedAt,
+    outcome:
+      value.outcome === 'completed' || value.outcome === 'dismissed'
+        ? value.outcome
+        : defaults.outcome,
+    lastCompletedStep:
+      typeof value.lastCompletedStep === 'number' && Number.isInteger(value.lastCompletedStep)
+        ? value.lastCompletedStep
+        : defaults.lastCompletedStep,
+    checklist: {
+      addedRepo: readBoolean(checklist.addedRepo, defaults.checklist.addedRepo),
+      choseAgent: readBoolean(checklist.choseAgent, defaults.checklist.choseAgent),
+      ranFirstAgent: readBoolean(checklist.ranFirstAgent, defaults.checklist.ranFirstAgent),
+      ranSecondAgentOnSameTask: readBoolean(
+        checklist.ranSecondAgentOnSameTask,
+        defaults.checklist.ranSecondAgentOnSameTask
+      ),
+      triedCmdJ: readBoolean(checklist.triedCmdJ, defaults.checklist.triedCmdJ),
+      shapedSidebar: readBoolean(checklist.shapedSidebar, defaults.checklist.shapedSidebar),
+      reviewedDiff: readBoolean(checklist.reviewedDiff, defaults.checklist.reviewedDiff),
+      openedPr: readBoolean(checklist.openedPr, defaults.checklist.openedPr),
+      addedFolder: readBoolean(checklist.addedFolder, defaults.checklist.addedFolder),
+      openedFile: readBoolean(checklist.openedFile, defaults.checklist.openedFile),
+      ranAgentOnFile: readBoolean(checklist.ranAgentOnFile, defaults.checklist.ranAgentOnFile),
+      dismissed: readBoolean(checklist.dismissed, defaults.checklist.dismissed)
+    }
   }
 }
 
-function writeJson(key: string, value: unknown): void {
-  window.localStorage.setItem(key, JSON.stringify(value))
+function readBoolean(value: unknown, fallback: boolean): boolean {
+  return typeof value === 'boolean' ? value : fallback
+}
+
+function readStoredGitHubCache(): {
+  pr: Record<string, { data: PRInfo | null; fetchedAt: number }>
+} {
+  const value = readLocalJson(GITHUB_CACHE_STORAGE_KEY)
+  if (!isJsonRecord(value) || !isJsonRecord(value.pr)) {
+    return { pr: {} }
+  }
+  const pr: Record<string, { data: PRInfo | null; fetchedAt: number }> = {}
+  for (const [key, entry] of Object.entries(value.pr)) {
+    if (
+      !isJsonRecord(entry) ||
+      typeof entry.fetchedAt !== 'number' ||
+      !Number.isFinite(entry.fetchedAt)
+    ) {
+      continue
+    }
+    const data = decodeStoredPRInfo(entry.data)
+    if (data !== undefined) {
+      pr[key] = { data, fetchedAt: entry.fetchedAt }
+    }
+  }
+  return { pr }
+}
+
+function decodeStoredPRInfo(value: unknown): PRInfo | null | undefined {
+  if (value === null) {
+    return null
+  }
+  if (
+    !isJsonRecord(value) ||
+    typeof value.number !== 'number' ||
+    !Number.isFinite(value.number) ||
+    typeof value.title !== 'string' ||
+    !isPRState(value.state) ||
+    typeof value.url !== 'string' ||
+    !isCheckStatus(value.checksStatus) ||
+    typeof value.updatedAt !== 'string' ||
+    !isMergeableState(value.mergeable)
+  ) {
+    return undefined
+  }
+  return {
+    number: value.number,
+    title: value.title,
+    state: value.state,
+    url: value.url,
+    checksStatus: value.checksStatus,
+    updatedAt: value.updatedAt,
+    mergeable: value.mergeable
+  }
+}
+
+function isPRState(value: unknown): value is PRInfo['state'] {
+  return value === 'open' || value === 'closed' || value === 'merged' || value === 'draft'
+}
+
+function isCheckStatus(value: unknown): value is PRInfo['checksStatus'] {
+  return value === 'pending' || value === 'success' || value === 'failure' || value === 'neutral'
+}
+
+function isMergeableState(value: unknown): value is PRInfo['mergeable'] {
+  return value === 'MERGEABLE' || value === 'CONFLICTING' || value === 'UNKNOWN'
 }
