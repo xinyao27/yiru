@@ -2,6 +2,8 @@ import type { RuntimeConnectionBootstrap } from '@yiru/shared/preload/bootstrap-
 import { contextBridge, ipcRenderer } from 'electron'
 import { RUNTIME_LOOPBACK_CREDENTIALS_CHANNEL } from '~shared/runtime-loopback'
 
+import { installNativeFileDropAdapter } from './native-file-drop'
+
 const runtimeConnection: RuntimeConnectionBootstrap = {
   // Why: docs/reference/terminal-multiplex.md §21.1 permits plaintext loopback only when the
   // process token reaches this isolated renderer through the audited preload.
@@ -9,6 +11,8 @@ const runtimeConnection: RuntimeConnectionBootstrap = {
   // every capability call after this bootstrap is authenticated oRPC over WS.
   getCredentials: () => ipcRenderer.invoke(RUNTIME_LOOPBACK_CREDENTIALS_CHANNEL)
 }
+
+installNativeFileDropAdapter()
 
 if (process.contextIsolated) {
   contextBridge.exposeInMainWorld('runtimeConnection', runtimeConnection)

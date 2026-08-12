@@ -34,7 +34,7 @@ These fail CI or are outright forbidden. No exceptions inside a feature task.
 ```
 apps/desktop/src/
   main/       Electron main: OS, git, PTY, agent providers, IPC handlers
-  preload/    audited bootstrap-only contextBridge for loopback credentials
+  preload/    audited loopback bootstrap plus the native file-drop event adapter
   relay/      headless runtime server (local, SSH, and remote hosts dispatch through it)
   cli/        the `yiru` CLI
   types/      desktop build and runtime ambient declarations
@@ -66,13 +66,17 @@ is generated from it by `scripts/generate-bundled-skill-guides.mjs`, and
 
 **Import direction is one-way.** `packages/client` never imports desktop `main` or `preload`.
 `packages/shared` never imports desktop, client, or `electron` modules — Node built-ins are fine.
-`relay` and `cli` may reuse `main` modules. The preload exposes only the loopback endpoint and
-process token defined in `packages/shared/src/preload/`; it exposes no product capability. After
-that bootstrap, renderer-to-host traffic has one transport: authenticated oRPC over WebSocket.
-Use `shell.*` for capabilities owned by the local Electron shell or browser process, and the
-runtime contract for capabilities executed by the local or selected runtime host. Web supplies its
-runtime connection explicitly and never emulates an Electron preload API. Pure types or logic used
-by more than one desktop process belong in `packages/shared`, even when no other app consumes them.
+`relay` and `cli` may reuse `main` modules. The preload contextBridge exposes only the loopback
+endpoint and process token defined in `packages/shared/src/preload/`; it exposes no product
+capability. Its sole platform event adapter resolves native OS `File` objects with Electron
+`webUtils.getPathForFile`, then sends one validated file-drop payload for main to publish on the
+shell event stream. It exposes no callable renderer API and is not a general transport. After the
+bootstrap, renderer-to-host capability traffic has one transport: authenticated oRPC over
+WebSocket. Use `shell.*` for capabilities owned by the local Electron shell or browser process, and
+the runtime contract for capabilities executed by the local or selected runtime host. Web supplies
+its runtime connection explicitly and never emulates an Electron preload API. Pure types or logic
+used by more than one desktop process belong in `packages/shared`, even when no other app consumes
+them.
 
 `@yiru/client` is independently consumable source. Hosts import only its declared package exports;
 they never reach into `packages/client/src`. Its `@yiru/client/vite` preset owns source resolution,
@@ -111,7 +115,8 @@ Crossing the process boundary is the one legitimate multi-file change. Keep a ru
 three touchpoints sharing one feature name: the contract in `packages/runtime-protocol/src/`, the
 handler in `apps/desktop/src/main/runtime/`, and the caller in `packages/client/src/`. A local
 shell capability uses the same three-point shape under the `shell.*` contract. The preload is not a
-capability layer; touch it only when the loopback bootstrap handshake changes.
+capability layer; touch it only for the loopback bootstrap or an Electron-only platform event that
+cannot be observed with the same information in the isolated renderer.
 
 ---
 
