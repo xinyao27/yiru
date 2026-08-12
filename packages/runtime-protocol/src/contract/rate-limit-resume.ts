@@ -6,9 +6,9 @@ import { withAccess, type RuntimeProcedureMeta } from './access-meta.js'
 
 // Cross-process contract for rate-limit resume: a client reports a provider
 // limit banner it observed in a pane's output; the host resolves the reset
-// time, persists a schedule, and (desktop-only, see api-types.ts) dispatches
-// the resume back to the renderer that owns the pane once the window rolls
-// over. Mirrors packages/shared/src/rate-limit-resume/types.ts.
+// time, persists a schedule, and (desktop-only) dispatches the resume through
+// shellServices.rateLimitResume once the window rolls over. Mirrors
+// packages/shared/src/rate-limit-resume/types.ts.
 
 export type RateLimitResumeProvider =
   | 'claude'
