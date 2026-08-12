@@ -70,12 +70,16 @@ nonisolated enum TerminalMultiplexFrameCodec {
         header[0] = MobileTerminalMultiplexWireContract.kind
         header[1] = MobileTerminalMultiplexWireContract.version
         header[2] = frame.opcode.rawValue
-        write(UInt16(MobileTerminalMultiplexWireContract.headerBytes), to: &header, at: 4)
-        write(frame.routeID, to: &header, at: 8)
-        write(UInt32(frame.payload.count), to: &header, at: 12)
-        write(frame.epoch, to: &header, at: 16)
-        write(frame.sequence, to: &header, at: 24)
-        write(frame.correlationID, to: &header, at: 32)
+        TerminalWireBytes.write(
+            UInt16(MobileTerminalMultiplexWireContract.headerBytes),
+            to: &header,
+            at: 4
+        )
+        TerminalWireBytes.write(frame.routeID, to: &header, at: 8)
+        TerminalWireBytes.write(UInt32(frame.payload.count), to: &header, at: 12)
+        TerminalWireBytes.write(frame.epoch, to: &header, at: 16)
+        TerminalWireBytes.write(frame.sequence, to: &header, at: 24)
+        TerminalWireBytes.write(frame.correlationID, to: &header, at: 32)
         header.append(frame.payload)
         return header
     }
@@ -86,46 +90,46 @@ nonisolated enum TerminalMultiplexFrameCodec {
     ) throws -> TerminalMultiplexFrame {
         let headerBytes = MobileTerminalMultiplexWireContract.headerBytes
         guard data.count >= headerBytes,
-            byte(in: data, at: 0) == MobileTerminalMultiplexWireContract.kind,
-            byte(in: data, at: 1) == MobileTerminalMultiplexWireContract.version,
-            byte(in: data, at: 3) == 0,
-            readUInt16(data, at: 4) == headerBytes,
-            readUInt16(data, at: 6) == 0,
-            readUInt32(data, at: 36) == 0
+            TerminalWireBytes.byte(in: data, at: 0) == MobileTerminalMultiplexWireContract.kind,
+            TerminalWireBytes.byte(in: data, at: 1) == MobileTerminalMultiplexWireContract.version,
+            TerminalWireBytes.byte(in: data, at: 3) == 0,
+            TerminalWireBytes.uint16(in: data, at: 4) == headerBytes,
+            TerminalWireBytes.uint16(in: data, at: 6) == 0,
+            TerminalWireBytes.uint32(in: data, at: 36) == 0
         else {
             throw TerminalMultiplexFrameError.invalidHeader
         }
 
-        let opcodeValue = byte(in: data, at: 2)
-        let routeID = readUInt32(data, at: 8)
-        let payloadBytes = Int(readUInt32(data, at: 12))
-        try validateLength(data, payloadBytes: payloadBytes, maxFrameBytes: maxFrameBytes)
-        let payload = data.subdata(in: headerBytes..<data.count)
-        let epoch = readUInt64(data, at: 16)
-        let sequence = readUInt64(data, at: 24)
-        let correlationID = readUInt32(data, at: 32)
+        let opcodeValue = TerminalWireBytes.byte(in: data, at: 2)
+        let routeID = TerminalWireBytes.uint32(in: data, at: 8)
+        let payloadBytes = Int(TerminalWireBytes.uint32(in: data, at: 12))
+        let epoch = TerminalWireBytes.uint64(in: data, at: 16)
+        let sequence = TerminalWireBytes.uint64(in: data, at: 24)
+        let correlationID = TerminalWireBytes.uint32(in: data, at: 32)
 
         guard let opcode = TerminalMultiplexOpcodeWire(rawValue: opcodeValue) else {
             guard routeID > 0 else { throw TerminalMultiplexFrameError.invalidRoute }
+            try validateLength(data, payloadBytes: payloadBytes, maxFrameBytes: maxFrameBytes)
             return TerminalMultiplexFrame(
                 unsupportedOpcode: opcodeValue,
                 routeID: routeID,
                 epoch: epoch,
                 sequence: sequence,
                 correlationID: correlationID,
-                payload: payload
+                payload: data.subdata(in: headerBytes..<data.count)
             )
         }
         guard isValidRoute(opcode: opcode, routeID: routeID) else {
             throw TerminalMultiplexFrameError.invalidRoute
         }
+        try validateLength(data, payloadBytes: payloadBytes, maxFrameBytes: maxFrameBytes)
         return TerminalMultiplexFrame(
             opcode: opcode,
             routeID: routeID,
             epoch: epoch,
             sequence: sequence,
             correlationID: correlationID,
-            payload: payload
+            payload: data.subdata(in: headerBytes..<data.count)
         )
     }
 
@@ -152,43 +156,5 @@ nonisolated enum TerminalMultiplexFrameCodec {
         default:
             routeID > 0
         }
-    }
-}
-
-nonisolated private func byte(in data: Data, at offset: Int) -> UInt8 {
-    data[data.startIndex + offset]
-}
-
-nonisolated private func readUInt16(_ data: Data, at offset: Int) -> UInt16 {
-    UInt16(byte(in: data, at: offset)) | UInt16(byte(in: data, at: offset + 1)) << 8
-}
-
-nonisolated private func readUInt32(_ data: Data, at offset: Int) -> UInt32 {
-    (0..<4).reduce(0) { value, byteOffset in
-        value | UInt32(byte(in: data, at: offset + byteOffset)) << UInt32(byteOffset * 8)
-    }
-}
-
-nonisolated private func readUInt64(_ data: Data, at offset: Int) -> UInt64 {
-    (0..<8).reduce(0) { value, byteOffset in
-        value | UInt64(byte(in: data, at: offset + byteOffset)) << UInt64(byteOffset * 8)
-    }
-}
-
-nonisolated private func write(_ value: UInt16, to data: inout Data, at offset: Int) {
-    for byteOffset in 0..<2 {
-        data[offset + byteOffset] = UInt8(truncatingIfNeeded: value >> UInt16(byteOffset * 8))
-    }
-}
-
-nonisolated private func write(_ value: UInt32, to data: inout Data, at offset: Int) {
-    for byteOffset in 0..<4 {
-        data[offset + byteOffset] = UInt8(truncatingIfNeeded: value >> UInt32(byteOffset * 8))
-    }
-}
-
-nonisolated private func write(_ value: UInt64, to data: inout Data, at offset: Int) {
-    for byteOffset in 0..<8 {
-        data[offset + byteOffset] = UInt8(truncatingIfNeeded: value >> UInt64(byteOffset * 8))
     }
 }

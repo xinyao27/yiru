@@ -1,6 +1,7 @@
 export function loadTerminalWireSource(packageRequire, z) {
   const terminal = packageRequire('@yiru/runtime-protocol/mobile-terminal-wire')
   const frame = packageRequire('@yiru/runtime-protocol/terminal-multiplex/frame')
+  const orpc = packageRequire('@yiru/runtime-protocol/orpc-peer-frame')
   const schemas = {
     MobileRuntimeStatusSchema: z.toJSONSchema(terminal.MobileRuntimeStatusSchema),
     MobileTerminalSummarySchema: z.toJSONSchema(terminal.MobileTerminalSummarySchema),
@@ -23,7 +24,10 @@ export function loadTerminalWireSource(packageRequire, z) {
     TERMINAL_MULTIPLEX_HEADER_BYTES: frame.TERMINAL_MULTIPLEX_HEADER_BYTES,
     TERMINAL_MULTIPLEX_DEFAULT_MAX_FRAME_BYTES: frame.TERMINAL_MULTIPLEX_DEFAULT_MAX_FRAME_BYTES,
     TERMINAL_MULTIPLEX_HARD_MAX_FRAME_BYTES: frame.TERMINAL_MULTIPLEX_HARD_MAX_FRAME_BYTES,
-    TerminalMultiplexOpcode: frame.TerminalMultiplexOpcode
+    TerminalMultiplexOpcode: frame.TerminalMultiplexOpcode,
+    RUNTIME_ORPC_SIDE_CHANNEL_BINARY_KIND: orpc.RUNTIME_ORPC_SIDE_CHANNEL_BINARY_KIND,
+    RUNTIME_ORPC_SIDE_CHANNEL_BINARY_VERSION: orpc.RUNTIME_ORPC_SIDE_CHANNEL_BINARY_VERSION,
+    RUNTIME_ORPC_SIDE_CHANNEL_HEADER_BYTES: orpc.RUNTIME_ORPC_SIDE_CHANNEL_HEADER_BYTES
   }
   return {
     schemas,
@@ -188,6 +192,9 @@ enum MobileTerminalMultiplexWireContract {
     static let headerBytes = ${contract.TERMINAL_MULTIPLEX_HEADER_BYTES}
     static let defaultMaxFrameBytes = ${contract.TERMINAL_MULTIPLEX_DEFAULT_MAX_FRAME_BYTES}
     static let hardMaxFrameBytes = ${contract.TERMINAL_MULTIPLEX_HARD_MAX_FRAME_BYTES}
+    static let sideChannelKind: UInt8 = ${contract.RUNTIME_ORPC_SIDE_CHANNEL_BINARY_KIND}
+    static let sideChannelVersion: UInt8 = ${contract.RUNTIME_ORPC_SIDE_CHANNEL_BINARY_VERSION}
+    static let sideChannelHeaderBytes = ${contract.RUNTIME_ORPC_SIDE_CHANNEL_HEADER_BYTES}
 }
 `
 }
