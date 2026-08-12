@@ -43,6 +43,8 @@ final class TerminalLiveModel {
     private var pendingActions: [TerminalSurfaceAction] = []
     @ObservationIgnored
     private var actionDrain: Task<Void, Never>?
+    @ObservationIgnored
+    private var appState = TerminalSessionAppState.foreground
 
     init(
         host: HostProfile,
@@ -106,6 +108,7 @@ final class TerminalLiveModel {
                 return
             }
             session = opened
+            await opened.setAppState(appState)
             phase = .restoring
             if let gridSize {
                 enqueue(.resize(gridSize))
@@ -137,6 +140,7 @@ final class TerminalLiveModel {
     }
 
     func setAppState(_ state: TerminalSessionAppState) async {
+        appState = state
         await session?.setAppState(state)
     }
 

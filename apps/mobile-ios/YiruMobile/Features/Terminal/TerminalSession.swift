@@ -13,7 +13,7 @@ nonisolated enum TerminalSessionEvent: Equatable, Sendable {
     case ended
 }
 
-nonisolated enum TerminalSessionAppState: Sendable {
+nonisolated enum TerminalSessionAppState: Equatable, Sendable {
     case foreground
     case background
 }

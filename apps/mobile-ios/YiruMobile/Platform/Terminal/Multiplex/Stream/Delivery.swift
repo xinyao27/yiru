@@ -68,6 +68,12 @@ actor TerminalMultiplexDelivery {
         case .modelRestore:
             try await prepareForModelRestore(frame)
         case .end:
+            guard frame.correlationID == 0,
+                (try? JSONDecoder().decode(TerminalMultiplexEndRecord.self, from: frame.payload))
+                    != nil
+            else {
+                throw TerminalMultiplexDeliveryError.invalidOutput
+            }
             pendingEndSequence = frame.sequence
             await publishEndIfParsed()
         default:
@@ -142,6 +148,18 @@ actor TerminalMultiplexDelivery {
         try await setOutputCredit(clamped, reason: reason)
     }
 
+    func suspendDelivery() async throws {
+        try await setOutputCredit(0)
+    }
+
+    func beginReveal() async throws {
+        isSnapshotting = true
+        hasRequestedRecovery = true
+        awaitingSnapshot = nil
+        assembler.clear()
+        try await setOutputCredit(0)
+    }
+
     private func handleOutput(_ frame: TerminalMultiplexFrame) async throws {
         guard frame.sequence >= UInt64(frame.payload.count) else {
             try await recover()
@@ -193,7 +211,15 @@ actor TerminalMultiplexDelivery {
     }
 
     private func prepareForModelRestore(_ frame: TerminalMultiplexFrame) async throws {
-        let record = try JSONDecoder().decode(TerminalModelRestoreRecord.self, from: frame.payload)
+        guard frame.correlationID == 0,
+            let record = try? JSONDecoder().decode(
+                TerminalMultiplexModelRestoreRecord.self,
+                from: frame.payload
+            ),
+            record.markerSeq == String(frame.sequence)
+        else {
+            throw TerminalMultiplexDeliveryError.invalidOutput
+        }
         isSnapshotting = true
         hasRequestedRecovery = record.snapshotFollows
         awaitingSnapshot = nil
@@ -290,8 +316,4 @@ actor TerminalMultiplexDelivery {
 
 nonisolated private struct TerminalSnapshotRequestRecord: Encodable {
     let requestedScrollbackRows: UInt32
-}
-
-nonisolated private struct TerminalModelRestoreRecord: Decodable {
-    let snapshotFollows: Bool
 }

@@ -21,6 +21,7 @@ actor TerminalMultiplexSession: TerminalSession {
     private let stream: AsyncThrowingStream<TerminalSessionEvent, Error>
     private let continuation: AsyncThrowingStream<TerminalSessionEvent, Error>.Continuation
     private let delivery: TerminalMultiplexDelivery
+    private let deliveryState: TerminalMultiplexDeliveryState
     private let input: TerminalMultiplexInputFlow
     private var receiveTask: Task<Void, Never>?
     private var viewport: TerminalGridSize?
@@ -42,10 +43,16 @@ actor TerminalMultiplexSession: TerminalSession {
         self.transportGeneration = transportGeneration
         self.clientID = clientID
         input = TerminalMultiplexInputFlow(routeID: Self.routeID, bulk: bulk)
-        delivery = TerminalMultiplexDelivery(
+        let delivery = TerminalMultiplexDelivery(
             routeID: Self.routeID,
             bulk: bulk,
             publishEvent: { event in pair.continuation.yield(event) }
+        )
+        self.delivery = delivery
+        deliveryState = TerminalMultiplexDeliveryState(
+            routeID: Self.routeID,
+            bulk: bulk,
+            delivery: delivery
         )
     }
 
@@ -87,7 +94,7 @@ actor TerminalMultiplexSession: TerminalSession {
         )
         try await send(
             opcode: .resize,
-            sequence: await delivery.currentParsedSequence(),
+            sequence: 0,
             correlationID: try await bulk.allocateCorrelationID(),
             payload: payload
         )
@@ -105,11 +112,10 @@ actor TerminalMultiplexSession: TerminalSession {
     }
 
     func setAppState(_ state: TerminalSessionAppState) async {
-        switch state {
-        case .foreground:
-            await bulk.setAppState(.foreground)
-        case .background:
-            await bulk.setAppState(.background)
+        do {
+            try await deliveryState.transition(to: state, isSubscribed: isSubscribed)
+        } catch {
+            await fail(error)
         }
     }
 
@@ -148,6 +154,7 @@ actor TerminalMultiplexSession: TerminalSession {
     }
 
     private func subscribe() async throws {
+        let appState = await deliveryState.prepareSubscription()
         let size = viewport.map {
             TerminalMultiplexViewportRecord(cols: $0.columns, rows: $0.rows)
         }
@@ -159,9 +166,9 @@ actor TerminalMultiplexSession: TerminalSession {
                 viewport: size,
                 lastParsedSeq: String(await delivery.currentParsedSequence()),
                 delivery: TerminalMultiplexDeliveryRecord(
-                    visible: true,
-                    interested: true,
-                    priority: "active"
+                    visible: appState == .foreground,
+                    interested: appState == .foreground,
+                    priority: appState == .foreground ? "active" : "parked"
                 ),
                 snapshotMaxBytes: TerminalSnapshotAssembler.maxBytes,
                 capabilities: TerminalMultiplexCapabilitiesRecord()
@@ -222,6 +229,7 @@ actor TerminalMultiplexSession: TerminalSession {
             try await sendResize(viewport)
         }
         try await delivery.beginInitialSnapshot(id: record.snapshotId)
+        try await deliveryState.reconcileAfterSubscription()
     }
 
     private func handleCredit(_ frame: TerminalMultiplexFrame) async throws {
@@ -243,6 +251,7 @@ actor TerminalMultiplexSession: TerminalSession {
     }
 
     private func handleAcknowledgement(_ frame: TerminalMultiplexFrame) async throws {
+        if try await deliveryState.handleAcknowledgement(frame) { return }
         try await input.acknowledge(frame)
     }
 
