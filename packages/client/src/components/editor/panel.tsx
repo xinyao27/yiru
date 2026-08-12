@@ -206,7 +206,14 @@ function EditorPanelInner({
     },
     [activeFile, handleSaveForFile]
   )
-  useEditorCmdSaveRequest({ activeFile, openFiles, fileContents, handleSave })
+  useEditorCmdSaveRequest({
+    activeFile,
+    activeViewStateId,
+    openFiles,
+    fileContents,
+    handleSaveForFile,
+    panelRef
+  })
 
   const handleCopyPath = useCallback(async (): Promise<void> => {
     if (!activeFile) {

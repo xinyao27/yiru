@@ -1,40 +1,50 @@
-import { useEffect } from 'react'
+import { useCallback, useEffect, type RefObject } from 'react'
 import type { OpenFile } from '~renderer/components/editor/state'
 import { useAppStore } from '~renderer/store'
 
-import { YIRU_EDITOR_REQUEST_CMD_SAVE_EVENT } from './autosave'
+import { type EditorCmdSaveRequestDetail, YIRU_EDITOR_REQUEST_CMD_SAVE_EVENT } from './autosave'
 import type { FileContent } from './panel-content-types'
+import { flushPendingEditorChange } from './pending-flush'
+import { editorShortcutMatches } from './shortcuts'
 
 type UseEditorCmdSaveRequestParams = {
   activeFile: OpenFile | null
+  activeViewStateId: string | null | undefined
   openFiles: OpenFile[]
   fileContents: Record<string, FileContent>
-  handleSave: (content: string) => Promise<void>
+  handleSaveForFile: (file: OpenFile, content: string) => Promise<void>
+  panelRef: RefObject<HTMLDivElement | null>
 }
 
 export function useEditorCmdSaveRequest({
   activeFile,
+  activeViewStateId,
   openFiles,
   fileContents,
-  handleSave
+  handleSaveForFile,
+  panelRef
 }: UseEditorCmdSaveRequestParams): void {
-  useEffect(() => {
-    const handler = (): void => {
+  const save = useCallback(
+    (requestedFileId: string): void => {
       if (!activeFile) {
         return
       }
+      const requestedFile =
+        openFiles.find((openFile) => openFile.id === requestedFileId) ?? activeFile
       const saveTargetFile =
-        activeFile.mode === 'markdown-preview'
+        requestedFile.mode === 'markdown-preview'
           ? (openFiles.find(
               (openFile) =>
-                openFile.id === activeFile.markdownPreviewSourceFileId && openFile.mode === 'edit'
+                openFile.id === requestedFile.markdownPreviewSourceFileId &&
+                openFile.mode === 'edit'
             ) ?? null)
-          : activeFile
+          : requestedFile
       if (!saveTargetFile) {
         return
       }
-      // Why: a markdown preview tab is read-only but fronts the same document,
-      // so Cmd/Ctrl+S should save the source editor's current draft.
+      // Why: rich markdown, editable diffs, and notebook editors debounce or
+      // locally mirror drafts; save must publish their latest input first.
+      flushPendingEditorChange(saveTargetFile.id)
       const state = useAppStore.getState()
       const draft = state.editorDrafts[saveTargetFile.id]
       if (!draft && !saveTargetFile.isUntitled && !saveTargetFile.isDirty) {
@@ -42,10 +52,50 @@ export function useEditorCmdSaveRequest({
       }
       const fallbackContent =
         draft ??
-        (activeFile.mode === 'markdown-preview' ? fileContents[activeFile.id]?.content : '')
-      void handleSave(fallbackContent ?? '')
+        (requestedFile.mode === 'markdown-preview'
+          ? fileContents[requestedFile.id]?.content
+          : fileContents[saveTargetFile.id]?.content)
+      void handleSaveForFile(requestedFile, fallbackContent ?? '')
+    },
+    [activeFile, fileContents, handleSaveForFile, openFiles]
+  )
+
+  useEffect(() => {
+    const handler = (event: Event): void => {
+      const detail = (event as CustomEvent<EditorCmdSaveRequestDetail>).detail
+      if (
+        !activeFile ||
+        !detail ||
+        detail.panelFileId !== activeFile.id ||
+        (detail.viewStateId !== undefined &&
+          detail.viewStateId !== (activeViewStateId ?? activeFile.id)) ||
+        !detail.claim()
+      ) {
+        return
+      }
+      save(detail.fileId)
     }
     window.addEventListener(YIRU_EDITOR_REQUEST_CMD_SAVE_EVENT, handler)
     return () => window.removeEventListener(YIRU_EDITOR_REQUEST_CMD_SAVE_EVENT, handler)
-  }, [activeFile, fileContents, handleSave, openFiles])
+  }, [activeFile, activeViewStateId, save])
+
+  useEffect(() => {
+    const panel = panelRef.current
+    if (!panel) {
+      return
+    }
+    const handler = (event: KeyboardEvent): void => {
+      if (event.defaultPrevented || event.repeat || !editorShortcutMatches('editor.save', event)) {
+        return
+      }
+      event.preventDefault()
+      event.stopPropagation()
+      const target = event.target instanceof HTMLElement ? event.target : null
+      const saveOwnerFileId = target?.closest<HTMLElement>('[data-editor-save-file-id]')?.dataset
+        .editorSaveFileId
+      save(saveOwnerFileId ?? activeFile?.id ?? '')
+    }
+    panel.addEventListener('keydown', handler, { capture: true })
+    return () => panel.removeEventListener('keydown', handler, { capture: true })
+  }, [activeFile?.id, panelRef, save])
 }

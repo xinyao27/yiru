@@ -87,6 +87,7 @@ export function ChangesModeView({
       <div className="flex min-h-0 flex-1 flex-col">
         <DiffViewer
           key={viewStateScopeId}
+          fileId={activeFile.id}
           modelKey={diffViewStateKey}
           originalModelKey={originalModelKey}
           originalContent={dc.originalContent}

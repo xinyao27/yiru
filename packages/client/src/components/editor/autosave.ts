@@ -45,6 +45,15 @@ export type EditorFileSavedDetail = {
   content: string
 }
 
+export type EditorCmdSaveRequestDetail = {
+  panelFileId: string
+  fileId: string
+  viewStateId?: string
+  claim: () => boolean
+}
+
+export type EditorCmdSaveRequestTarget = Omit<EditorCmdSaveRequestDetail, 'claim'>
+
 export type EditorRequestFileCloseDetail = {
   fileId: string
 }
@@ -187,6 +196,24 @@ export function requestEditorFileClose(fileId: string): void {
   window.dispatchEvent(
     new CustomEvent<EditorRequestFileCloseDetail>(YIRU_EDITOR_REQUEST_FILE_CLOSE_EVENT, {
       detail: { fileId }
+    })
+  )
+}
+
+export function requestEditorCmdSave(target: EditorCmdSaveRequestTarget): void {
+  let claimed = false
+  window.dispatchEvent(
+    new CustomEvent<EditorCmdSaveRequestDetail>(YIRU_EDITOR_REQUEST_CMD_SAVE_EVENT, {
+      detail: {
+        ...target,
+        claim: () => {
+          if (claimed) {
+            return false
+          }
+          claimed = true
+          return true
+        }
+      }
     })
   )
 }

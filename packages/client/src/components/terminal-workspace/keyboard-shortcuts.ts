@@ -15,7 +15,7 @@ import { keybindingMatchesAction, type KeybindingActionId } from '~shared/keybin
 import type { TuiAgent } from '~shared/types'
 import { matchesRecentTabSwitcherChord } from '~shared/window-shortcut-policy'
 
-import { YIRU_EDITOR_REQUEST_CMD_SAVE_EVENT } from '../editor/autosave'
+import { requestEditorCmdSave } from '../editor/autosave'
 import {
   handleSwitchRecentTab,
   handleSwitchTab,
@@ -157,30 +157,37 @@ export function useTerminalWorkspaceKeyboardShortcuts({
         return
       }
 
-      // Save active editor file (fallback for when focus is
-      // outside the editor content area, e.g. on the tab bar or sidebar).
-      // When the editor itself has focus, editor-local handlers own the save
-      // shortcut, so we skip this when the target is editable.
+      // Save the editor panel that owns the event target. The explicit panel
+      // identity keeps split and floating editors from saving a different tab.
       if (!e.repeat && matchShortcut('editor.save')) {
-        const target = e.target as HTMLElement | null
-        const inEditor =
-          target?.closest('diffs-container, [contenteditable]') !== null ||
-          target?.closest('textarea:not(.xterm-helper-textarea), input') !== null
-        if (!inEditor) {
-          const state = useAppStore.getState()
-          const activeUnifiedTab = state.activeWorktreeId
-            ? state.getActiveTab(state.activeWorktreeId)
+        const state = useAppStore.getState()
+        const activeUnifiedTab = state.activeWorktreeId
+          ? state.getActiveTab(state.activeWorktreeId)
+          : null
+        const target = e.target instanceof HTMLElement ? e.target : null
+        const targetPanel = target?.closest<HTMLElement>('[data-editor-panel-file-id]') ?? null
+        const targetFileId = targetPanel?.dataset.editorPanelFileId
+        const targetViewStateId = targetPanel?.dataset.editorPanelViewStateId
+        const saveOwnerFileId = target?.closest<HTMLElement>('[data-editor-save-file-id]')?.dataset
+          .editorSaveFileId
+        const fallbackFileId =
+          state.activeTabType === 'editor' &&
+          state.activeFileId &&
+          (!activeUnifiedTab || activeUnifiedTab.contentType !== 'git-graph')
+            ? state.activeFileId
             : null
-          if (
-            state.activeTabType === 'editor' &&
-            state.activeFileId &&
-            (!activeUnifiedTab || activeUnifiedTab.contentType !== 'git-graph')
-          ) {
-            e.preventDefault()
-            notifyTerminalCapture('editor.save')
-            window.dispatchEvent(new Event(YIRU_EDITOR_REQUEST_CMD_SAVE_EVENT))
-            return
-          }
+        const fileId = targetFileId ?? fallbackFileId
+        if (fileId) {
+          e.preventDefault()
+          e.stopPropagation()
+          e.stopImmediatePropagation()
+          notifyTerminalCapture('editor.save')
+          requestEditorCmdSave({
+            panelFileId: fileId,
+            fileId: saveOwnerFileId ?? fileId,
+            viewStateId: targetViewStateId
+          })
+          return
         }
       }
 

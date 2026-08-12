@@ -10,13 +10,16 @@ import { useCallback, useEffect, useRef } from 'react'
  * closing a tab mid-edit drops the change silently.
  */
 export function useDiffCodeViewEditMirror(
+  onFileEditChange: ((fileKey: string, contents: string) => void) | undefined,
   onFileEditComplete: ((fileKey: string, contents: string) => void) | undefined
 ): {
   onItemEditChange: (item: { id: string }, editedFile: { contents: string }) => void
   onItemEditComplete: (item: { id: string }, editedFile: { contents: string }) => void
 } {
   const pendingEditsRef = useRef(new Map<string, string>())
+  const onFileEditChangeRef = useRef(onFileEditChange)
   const onFileEditCompleteRef = useRef(onFileEditComplete)
+  onFileEditChangeRef.current = onFileEditChange
   onFileEditCompleteRef.current = onFileEditComplete
 
   useEffect(() => {
@@ -31,6 +34,7 @@ export function useDiffCodeViewEditMirror(
 
   const onItemEditChange = useCallback((item: { id: string }, editedFile: { contents: string }) => {
     pendingEditsRef.current.set(item.id, editedFile.contents)
+    onFileEditChangeRef.current?.(item.id, editedFile.contents)
   }, [])
   const onItemEditComplete = useCallback(
     (item: { id: string }, editedFile: { contents: string }) => {

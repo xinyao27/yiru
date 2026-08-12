@@ -942,6 +942,7 @@ export function EditorContent({
   const diffViewer = (
     <DiffViewer
       key={`${viewStateScopeId}:${diffReloadNonce}:${getDiffContentSignature(dc.modifiedContent)}`}
+      fileId={activeFile.id}
       modelKey={diffViewStateKey}
       originalModelKey={originalModelKey}
       modifiedModelKey={modifiedModelKey}

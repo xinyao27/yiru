@@ -255,17 +255,19 @@ export default function FileCodeView({
   }, [content, liveTail])
 
   return (
-    <DiffCodeViewEditProvider>
-      <CodeView<DiffCodeViewAnnotation>
-        ref={handleRef}
-        containerRef={containerRef}
-        items={items}
-        options={options}
-        renderAnnotation={renderAnnotation}
-        onItemEditChange={handleItemEditChange}
-        className="scrollbar-editor bg-background h-full min-h-0 overflow-x-hidden overflow-y-auto"
-        style={style}
-      />
-    </DiffCodeViewEditProvider>
+    <div data-editor-save-file-id={fileId} className="h-full min-h-0">
+      <DiffCodeViewEditProvider>
+        <CodeView<DiffCodeViewAnnotation>
+          ref={handleRef}
+          containerRef={containerRef}
+          items={items}
+          options={options}
+          renderAnnotation={renderAnnotation}
+          onItemEditChange={handleItemEditChange}
+          className="scrollbar-editor bg-background h-full min-h-0 overflow-x-hidden overflow-y-auto"
+          style={style}
+        />
+      </DiffCodeViewEditProvider>
+    </div>
   )
 }

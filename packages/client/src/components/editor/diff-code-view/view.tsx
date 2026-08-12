@@ -101,6 +101,7 @@ export function DiffCodeView({
   onUpdateComment,
   onRetryFile,
   onSaveLimitedDiff,
+  onFileEditChange,
   onFileEditComplete,
   pendingScrollCommentId,
   onPendingScrollConsumed,
@@ -124,6 +125,7 @@ export function DiffCodeView({
   onUpdateComment?: (commentId: string, body: string) => Promise<boolean>
   onRetryFile?: (fileKey: string) => void
   onSaveLimitedDiff?: (fileKey: string) => void
+  onFileEditChange?: (fileKey: string, contents: string) => void
   onFileEditComplete?: (fileKey: string, contents: string) => void
   pendingScrollCommentId?: string | null
   onPendingScrollConsumed?: () => void
@@ -296,7 +298,10 @@ export function DiffCodeView({
     []
   )
 
-  const { onItemEditChange, onItemEditComplete } = useDiffCodeViewEditMirror(onFileEditComplete)
+  const { onItemEditChange, onItemEditComplete } = useDiffCodeViewEditMirror(
+    onFileEditChange,
+    onFileEditComplete
+  )
 
   const style = useMemo(() => buildDiffCodeViewCSSVariables(font), [font])
 

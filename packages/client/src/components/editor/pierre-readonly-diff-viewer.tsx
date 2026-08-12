@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { isDiffComment } from '~renderer/components/editor/diff-comment-compat'
 import { resolveDocumentTheme } from '~renderer/components/editor/document-theme'
 import { resolveEditorFontFamily } from '~renderer/components/editor/font-family'
@@ -12,6 +12,7 @@ import { getDiffViewerLargeDiffSaveAction } from './diff-viewer-large-diff-save-
 import type { DiffViewerProps } from './diff-viewer-props'
 import { LargeDiffFallback } from './large-diff-fallback'
 import { getLargeDiffRenderLimit } from './large-diff-render-limit'
+import { registerPendingEditorFlush } from './pending-flush'
 
 export function PierreReadonlyDiffViewer(props: DiffViewerProps): React.JSX.Element {
   const { onAddLineComment, relativePath, worktreeId } = props
@@ -66,13 +67,37 @@ export function PierreReadonlyDiffViewer(props: DiffViewerProps): React.JSX.Elem
     [addDiffComment, onAddLineComment, relativePath, worktreeId]
   )
 
+  const latestEditedContentRef = useRef(props.modifiedContent)
+  const previousInputContentRef = useRef(props.modifiedContent)
+  if (previousInputContentRef.current !== props.modifiedContent) {
+    previousInputContentRef.current = props.modifiedContent
+    latestEditedContentRef.current = props.modifiedContent
+  }
+  const onContentChange = props.onContentChange
   const onSave = props.onSave
+  const handleFileEditChange = useCallback((_fileKey: string, contents: string) => {
+    latestEditedContentRef.current = contents
+  }, [])
   const handleFileEditComplete = useCallback(
     (_fileKey: string, contents: string) => {
+      latestEditedContentRef.current = contents
+      onContentChange?.(contents)
       onSave?.(contents)
     },
-    [onSave]
+    [onContentChange, onSave]
   )
+  const flushPendingEdit = useCallback((): void => {
+    const contents = latestEditedContentRef.current
+    if (contents !== props.modifiedContent) {
+      onContentChange?.(contents)
+    }
+  }, [onContentChange, props.modifiedContent])
+  useEffect(() => {
+    if (!props.editable || !props.fileId) {
+      return
+    }
+    return registerPendingEditorFlush(props.fileId, flushPendingEdit)
+  }, [flushPendingEdit, props.editable, props.fileId])
   // Why: DiffCodeView folds these into the options object CodeView diffs each
   // render, so a fresh arrow here force-renders every mounted row.
   const handleAddLineCommentForPath = useCallback(
@@ -169,6 +194,7 @@ export function PierreReadonlyDiffViewer(props: DiffViewerProps): React.JSX.Elem
         onAddLineComment={worktreeId || onAddLineComment ? handleAddLineCommentForPath : undefined}
         onDeleteComment={worktreeId ? handleDeleteComment : undefined}
         onUpdateComment={worktreeId ? handleUpdateComment : undefined}
+        onFileEditChange={handleFileEditChange}
         pendingScrollCommentId={
           comments.some((comment) => comment.id === scrollToDiffCommentId)
             ? scrollToDiffCommentId

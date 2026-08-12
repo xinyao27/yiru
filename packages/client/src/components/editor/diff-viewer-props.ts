@@ -1,6 +1,8 @@
 import type { LargeDiffRenderLimit } from './large-diff-render-limit'
 
 export type DiffViewerProps = {
+  /** Why: modelKey may include split scope, while pending-save flushes use the open-file id. */
+  fileId?: string
   modelKey: string
   originalModelKey?: string
   modifiedModelKey?: string

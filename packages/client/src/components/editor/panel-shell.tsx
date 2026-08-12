@@ -94,7 +94,12 @@ export function EditorPanelShell({
   markdownAnnotationsEnabled
 }: EditorPanelShellProps): JSX.Element {
   return (
-    <div ref={panelRef} className="flex min-h-0 min-w-0 flex-1 flex-col">
+    <div
+      ref={panelRef}
+      data-editor-panel-file-id={activeFile.id}
+      data-editor-panel-view-state-id={activeViewStateId ?? activeFile.id}
+      className="flex min-h-0 min-w-0 flex-1 flex-col"
+    >
       {!model.isCombinedDiff && activeFile.mode !== 'check-details' && (
         <EditorPanelHeader
           activeFile={activeFile}
