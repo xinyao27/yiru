@@ -1,20 +1,34 @@
-import type { TerminalSubscribeInput } from '@yiru/runtime-protocol/contract'
-
 import type { RpcClient } from '~/transport/rpc-client'
-import { subscribeRuntimeOrpc } from '~/transport/runtime-orpc-client'
+import type {
+  MobileMultiplexedTerminal,
+  MobileTerminalSubscribeArgs
+} from '~/transport/terminal-multiplex/types'
 
 export function subscribeMobileTerminalSafely(
-  client: Pick<RpcClient, 'orpc'>,
-  params: TerminalSubscribeInput,
-  onData: (event: unknown) => void,
-  onSynchronousError: () => void
+  client: Pick<RpcClient, 'terminalMultiplexer'>,
+  args: MobileTerminalSubscribeArgs,
+  onReady: (stream: MobileMultiplexedTerminal) => void,
+  onError: (error: unknown) => void
 ): () => void {
-  try {
-    return subscribeRuntimeOrpc(client, (runtime) => runtime.terminal.subscribe, params, onData)
-  } catch {
-    // Why: a transport mock or closing socket can reject before returning an
-    // unsubscribe handle; callers must still release their subscribing marker.
-    onSynchronousError()
-    return () => {}
+  let stream: MobileMultiplexedTerminal | null = null
+  let cancelled = false
+  void client.terminalMultiplexer
+    .subscribeTerminal(args)
+    .then((nextStream) => {
+      if (cancelled) {
+        nextStream.close()
+        return
+      }
+      stream = nextStream
+      onReady(nextStream)
+    })
+    .catch((error: unknown) => {
+      if (!cancelled) {
+        onError(error)
+      }
+    })
+  return () => {
+    cancelled = true
+    stream?.close()
   }
 }

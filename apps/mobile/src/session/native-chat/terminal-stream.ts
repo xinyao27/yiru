@@ -26,12 +26,3 @@ export function isTerminalCoveredByNativeChat(
 ): boolean {
   return showNativeChat && activeHandle === handle
 }
-
-export function mobileNativeChatTerminalCapabilities(covered: boolean): {
-  terminalBinaryStream: 1
-  mobileInputLeaseOnly?: 1
-} {
-  return covered
-    ? { terminalBinaryStream: 1, mobileInputLeaseOnly: 1 }
-    : { terminalBinaryStream: 1 }
-}

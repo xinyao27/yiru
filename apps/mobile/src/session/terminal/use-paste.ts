@@ -5,7 +5,7 @@ import { useCallback, type RefObject } from 'react'
 
 import type { TerminalModes } from '~/terminal/webview/contract'
 import type { RpcClient } from '~/transport/rpc-client'
-import { callRuntimeOrpc } from '~/transport/runtime-orpc-client'
+import type { MobileMultiplexedTerminal } from '~/transport/terminal-multiplex/types'
 import type { ConnectionState } from '~/transport/types'
 
 import {
@@ -78,16 +78,15 @@ type UseMobileTerminalPasteOptions = {
   readonly activeSessionTabTypeRef: RefObject<string | null>
   readonly canSend: boolean
   readonly client: RpcClient | null
-  readonly clientRef: RefObject<RpcClient | null>
   readonly connState: ConnectionState
   readonly connStateRef: RefObject<ConnectionState>
-  readonly deviceTokenRef: RefObject<string | null>
   readonly flushPendingLiveInputBeforeExternalSend: (handle: string) => Promise<boolean>
   readonly onError: () => void
   readonly onSuccess: () => void
   readonly ptyModesRef: RefObject<Map<string, TerminalModes>>
   readonly refreshCanPaste: () => void
   readonly showToast: (message: string, durationMs?: number) => void
+  readonly terminalStreamsRef: RefObject<Map<string, MobileMultiplexedTerminal>>
 }
 
 export function useMobileTerminalPaste({
@@ -96,16 +95,15 @@ export function useMobileTerminalPaste({
   activeSessionTabTypeRef,
   canSend,
   client,
-  clientRef,
   connState,
   connStateRef,
-  deviceTokenRef,
   flushPendingLiveInputBeforeExternalSend,
   onError,
   onSuccess,
   ptyModesRef,
   refreshCanPaste,
-  showToast
+  showToast,
+  terminalStreamsRef
 }: UseMobileTerminalPasteOptions): () => Promise<void> {
   return useCallback(async () => {
     if (!client || !activeHandle || !canSend) {
@@ -144,23 +142,18 @@ export function useMobileTerminalPaste({
       if (!flushedPendingInput) {
         return
       }
-      const currentClient = clientRef.current
+      const stream = terminalStreamsRef.current.get(targetHandle)
       if (
-        !currentClient ||
+        !stream ||
         connStateRef.current !== 'connected' ||
         targetHandle !== activeHandleRef.current ||
         activeSessionTabTypeRef.current !== 'terminal'
       ) {
         return
       }
-      await callRuntimeOrpc(currentClient, (runtime) => runtime.terminal.send, {
-        terminal: targetHandle,
-        text: payload,
-        enter: false,
-        ...(deviceTokenRef.current
-          ? { client: { id: deviceTokenRef.current, type: 'mobile' as const } }
-          : {})
-      })
+      if (!(await stream.sendInputAccepted(payload))) {
+        throw new Error('Terminal input was not accepted')
+      }
       onSuccess()
       refreshCanPaste()
     } catch (e) {
@@ -183,15 +176,14 @@ export function useMobileTerminalPaste({
     activeSessionTabTypeRef,
     canSend,
     client,
-    clientRef,
     connState,
     connStateRef,
-    deviceTokenRef,
     flushPendingLiveInputBeforeExternalSend,
     onError,
     onSuccess,
     ptyModesRef,
     refreshCanPaste,
-    showToast
+    showToast,
+    terminalStreamsRef
   ])
 }

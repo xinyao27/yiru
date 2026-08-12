@@ -8,17 +8,11 @@ const RUNTIME_STREAM_PATHS = [
   ['notifications', 'subscribe'],
   ['runtime', 'clientEvents', 'subscribe'],
   ['session', 'tabs', 'subscribe'],
-  ['session', 'tabs', 'subscribeAll'],
-  ['terminal', 'multiplex'],
-  ['terminal', 'subscribe']
+  ['session', 'tabs', 'subscribeAll']
 ] as const
 
 export function isRuntimeOrpcStreamPath(path: readonly string[]): boolean {
   return RUNTIME_STREAM_PATHS.some((candidate) => pathsEqual(path, candidate))
-}
-
-export function isRuntimeOrpcTerminalStreamPath(path: readonly string[]): boolean {
-  return pathsEqual(path, ['terminal', 'subscribe']) || pathsEqual(path, ['terminal', 'multiplex'])
 }
 
 export function isRuntimeOrpcBrowserStreamPath(path: readonly string[]): boolean {

@@ -190,6 +190,51 @@ export function createMobileUiLabRpcClient(hostId: string): RpcClient | null {
 
   const client: RpcClient = {
     orpc,
+    terminalMultiplexer: {
+      async subscribeTerminal(args) {
+        queueMicrotask(() =>
+          args.callbacks.onSnapshot({
+            id: 1,
+            cols: 80,
+            rows: 24,
+            activeBuffer: 'normal',
+            normalScrollback: '',
+            normalScreen: '',
+            alternateScreen: '',
+            pendingEscapeTail: '',
+            coverageEndSeq: '0',
+            pendingDeliveryStartSeq: '0',
+            wireByteLength: 0,
+            retainedScrollbackRows: 0,
+            truncated: false,
+            source: 'headless',
+            metadata: {
+              cwd: null,
+              lastTitle: null,
+              oscLinks: [],
+              kittyKeyboardFlags: 0,
+              displayMode: 'auto',
+              requestedScrollbackRows: 0
+            }
+          })
+        )
+        return {
+          streamId: 1,
+          sendInput: () => true,
+          sendInputAccepted: async () => true,
+          sendQueryReply: () => true,
+          resize: () => true,
+          claimViewport: () => true,
+          setDeliveryState: () => true,
+          outputParsed() {},
+          snapshotParsed: () => args.callbacks.onSubscribed?.(),
+          close() {}
+        }
+      },
+      setAppState() {},
+      controlConnectionChanged() {},
+      close() {}
+    },
     getState: () => 'connected',
     getReconnectAttempt: () => 0,
     getLastConnectedAt: () => Date.now(),

@@ -1,18 +1,12 @@
 import { useCallback, useEffect, useRef, type RefObject } from 'react'
 import { AppState, Platform, useWindowDimensions, type AppStateStatus } from 'react-native'
 
-import type { RpcClient } from '../transport/rpc-client'
-import { callRuntimeOrpc, isRuntimeOrpcErrorCode } from '../transport/runtime-orpc-client'
-import type { ConnectionState } from '../transport/types'
-import { shouldRecoverTerminalOnAppStateChange } from './foreground-recovery'
+import type { MobileMultiplexedTerminal } from '../transport/terminal-multiplex/types'
 import {
-  isTerminalUpdateViewportApplied,
-  isTerminalUpdateViewportUpdated,
   isTerminalViewportRefitTargetCurrent,
   reduceTerminalFrameHeightRefit,
   type TerminalFrameHeightRefitEvent,
-  type TerminalFrameHeightRefitState,
-  type TerminalUpdateViewportCapability
+  type TerminalFrameHeightRefitState
 } from './viewport-refit-state'
 import type { TerminalWebViewHandle } from './webview/contract'
 
@@ -22,12 +16,9 @@ type TerminalViewportRefitOptions = {
   activeHandleRef: RefObject<string | null>
   terminalRefs: RefObject<Map<string, TerminalWebViewHandle>>
   terminalFrameHeightRef: RefObject<number>
+  terminalStreamsRef: RefObject<Map<string, MobileMultiplexedTerminal>>
   viewportRef: RefObject<TerminalViewportDims | null>
   viewportMeasuredRef: RefObject<boolean>
-  clientRef: RefObject<RpcClient | null>
-  deviceTokenRef: RefObject<string | null>
-  initializedHandlesRef: RefObject<Set<string>>
-  connState: ConnectionState
   tabStripVisible: boolean
   // Why: terminal text size (font scale) — changing it changes the cell size, so
   // the PTY must be re-fitted to a new column count and reflowed.
@@ -38,8 +29,6 @@ type TerminalViewportRefitOptions = {
   // tab-strip change. Carries that measured width so those resizes re-fit the PTY;
   // the 150ms debounce coalesces the stream of drag widths into one settle-time refit.
   terminalFrameWidth: number
-  unsubscribeTerminal: (handle: string) => void
-  subscribeToTerminal: (handle: string) => void
 }
 
 type TerminalViewportRefitNotifications = {
@@ -60,24 +49,18 @@ export function useTerminalViewportRefit(
     activeHandleRef,
     terminalRefs,
     terminalFrameHeightRef,
+    terminalStreamsRef,
     viewportRef,
     viewportMeasuredRef,
-    clientRef,
-    deviceTokenRef,
-    initializedHandlesRef,
-    connState,
     tabStripVisible,
     textScale,
-    terminalFrameWidth,
-    unsubscribeTerminal,
-    subscribeToTerminal
+    terminalFrameWidth
   } = options
 
   const refitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const refitRunSeqRef = useRef(0)
   const forceNextRefitRef = useRef(false)
   const disposedRef = useRef(false)
-  const updateViewportCapabilityRef = useRef<TerminalUpdateViewportCapability>('unknown')
   const frameHeightRefitStateRef = useRef<TerminalFrameHeightRefitState>({
     frameHeight: 0,
     keyboardVisible: false,
@@ -144,55 +127,10 @@ export function useTerminalViewportRefit(
           }
           viewportRef.current = dims
           viewportMeasuredRef.current = true
-          // Why: prefer the in-place viewport update RPC over the legacy
-          // unsubscribe → subscribe cycle. This keeps the server-side
-          // mobile subscriber record alive (no driver=idle blip on the
-          // desktop banner; no false phone-fit baseline capture on the
-          // re-subscribe). See docs/mobile-presence-lock.md.
-          const rpc = clientRef.current
-          const deviceToken = deviceTokenRef.current
-          if (rpc && deviceToken && updateViewportCapabilityRef.current !== 'unsupported') {
-            try {
-              const response = await callRuntimeOrpc(
-                rpc,
-                (runtime) => runtime.terminal.updateViewport,
-                {
-                  terminal: handle,
-                  client: { id: deviceToken, type: 'mobile' as const },
-                  viewport: dims
-                }
-              )
-              if (!isCurrentTarget()) {
-                return
-              }
-              updateViewportCapabilityRef.current = 'supported'
-              if (isTerminalUpdateViewportUpdated(response)) {
-                if (isTerminalUpdateViewportApplied(response)) {
-                  // Why: updateViewport reflows the server PTY and re-streams only
-                  // the visible screen, so the WebView's local xterm scrollback
-                  // stays wrapped at the old width. Reflow it locally only when
-                  // the server actually applied phone-fit; desktop mode records
-                  // the viewport but leaves the PTY at desktop dims.
-                  ref.reflow(dims.cols, dims.rows)
-                }
-                return
-              }
-            } catch (error) {
-              updateViewportCapabilityRef.current = isRuntimeOrpcErrorCode(
-                error,
-                'method_not_found'
-              )
-                ? 'unsupported'
-                : 'unknown'
-              // Fall through to legacy resubscribe.
-            }
-          }
           if (!isCurrentTarget()) {
             return
           }
-          unsubscribeTerminal(handle)
-          initializedHandlesRef.current.delete(handle)
-          subscribeToTerminal(handle)
+          terminalStreamsRef.current.get(handle)?.resize(dims.cols, dims.rows)
         })()
       }, 150)
     },
@@ -200,13 +138,9 @@ export function useTerminalViewportRefit(
       activeHandleRef,
       terminalRefs,
       terminalFrameHeightRef,
+      terminalStreamsRef,
       viewportRef,
-      viewportMeasuredRef,
-      clientRef,
-      deviceTokenRef,
-      initializedHandlesRef,
-      unsubscribeTerminal,
-      subscribeToTerminal
+      viewportMeasuredRef
     ]
   )
   const scheduleForcedViewportRefit = useCallback(() => {
@@ -310,11 +244,9 @@ export function useTerminalViewportRefit(
     }
     let previousAppState: AppStateStatus | null = AppState.currentState
     const sub = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
-      const shouldRefit = shouldRecoverTerminalOnAppStateChange(
-        previousAppState,
-        nextAppState,
-        Platform.OS
-      )
+      const shouldRefit =
+        nextAppState === 'active' &&
+        (previousAppState === 'background' || previousAppState === 'inactive')
       previousAppState = nextAppState
       if (!shouldRefit) {
         return
@@ -326,22 +258,6 @@ export function useTerminalViewportRefit(
     })
     return () => sub.remove()
   }, [viewportMeasuredRef, scheduleForcedViewportRefit])
-
-  const previousConnStateRef = useRef(connState)
-  useEffect(() => {
-    const previous = previousConnStateRef.current
-    previousConnStateRef.current = connState
-    if (previous === 'connected' || connState !== 'connected') {
-      return
-    }
-    // Why: an in-place desktop upgrade may add updateViewport; reconnect is the
-    // narrow boundary where an old-host method_not_found cache becomes stale.
-    updateViewportCapabilityRef.current = 'unknown'
-    // Why: reconnect can restore a PTY whose host-side size changed while the
-    // socket was down, so equal cached dimensions still need reassertion.
-    viewportMeasuredRef.current = false
-    scheduleForcedViewportRefit()
-  }, [connState, viewportMeasuredRef, scheduleForcedViewportRefit])
 
   useEffect(() => {
     disposedRef.current = false

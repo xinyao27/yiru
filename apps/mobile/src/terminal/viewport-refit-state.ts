@@ -1,7 +1,3 @@
-export type TerminalUpdateViewportCapability = 'unknown' | 'supported' | 'unsupported'
-
-type TerminalUpdateViewportResult = { updated?: boolean; applied?: boolean }
-
 export type TerminalViewportRefitTargetState = {
   activeHandle: string | null
   expectedHandle: string
@@ -12,16 +8,6 @@ export type TerminalViewportRefitTargetState = {
   currentRunSeq: number
 }
 
-export function isTerminalUpdateViewportUpdated(result: TerminalUpdateViewportResult): boolean {
-  return result.updated === true
-}
-
-export function isTerminalUpdateViewportApplied(result: TerminalUpdateViewportResult): boolean {
-  return result.applied === true
-}
-
-// Why: defer height refits while typing, then coalesce every skipped layout
-// change into one correction after the keyboard closes.
 export type TerminalFrameHeightRefitState = {
   frameHeight: number
   keyboardVisible: boolean
@@ -38,9 +24,8 @@ export function reduceTerminalFrameHeightRefit(
   event: TerminalFrameHeightRefitEvent
 ): { state: TerminalFrameHeightRefitState; shouldRefit: boolean } {
   if (event.type === 'refit-committed') {
-    // Why: the debounced height refit is firing. The keyboard can reopen during
-    // the debounce window, so re-check here and re-defer rather than reflow the
-    // PTY mid-keystroke; it runs on the next keyboard close.
+    // Why: the keyboard can reopen during the debounce window, so defer the
+    // resize again instead of reflowing the PTY mid-keystroke.
     if (state.keyboardVisible) {
       return { state: { ...state, pending: true }, shouldRefit: false }
     }

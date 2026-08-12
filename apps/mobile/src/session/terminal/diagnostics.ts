@@ -109,6 +109,15 @@ export class MobileTerminalDiagnostics {
     })
   }
 
+  streamFailed(handle: string, phase: 'connect' | 'protocol', error: unknown): void {
+    logMobileTerminalDiagnostic('stream-failed', {
+      handle: shortenMobileTerminalDiagnosticId(handle),
+      phase,
+      errorName: getMobileTerminalDiagnosticErrorName(error),
+      message: error instanceof Error ? error.message : typeof error === 'string' ? error : null
+    })
+  }
+
   firstStreamEvent(handle: string, seq: number, type: unknown): void {
     if (this.firstStreamEventSeqByHandle.get(handle) === seq) {
       return
