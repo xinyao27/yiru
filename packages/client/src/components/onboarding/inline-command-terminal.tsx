@@ -8,7 +8,7 @@ import {
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
 import { focusTerminalTabSurface } from '~renderer/lib/focus-terminal-tab-surface'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 import { brandEphemeralSetupTerminalWorktreeId } from '~shared/ephemeral-setup-terminal-worktree-id'
 
@@ -87,7 +87,7 @@ export function OnboardingInlineCommandTerminal({
 
   useEffect(() => {
     let cancelled = false
-    void rendererHostClient.app.getFloatingTerminalCwd({ path: '~' }).then((nextCwd) => {
+    void shellClient.app.getFloatingTerminalCwd({ path: '~' }).then((nextCwd) => {
       if (!cancelled) {
         setCwd(nextCwd)
       }

@@ -16,7 +16,7 @@ import { Textarea } from '~renderer/components/ui/textarea'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'
 import { getShellGitHubViewer } from '~renderer/runtime/github-shell-client'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import {
   formatCrashReportText,
   isReactErrorBoundaryReport,
@@ -161,7 +161,7 @@ export function CrashReportDialogSurface({
 
   const dismissReportIfNeeded = async (): Promise<void> => {
     if (report?.status === 'pending') {
-      await rendererHostClient.crashReports.dismiss({ reportId: report.id })
+      await shellClient.crashReports.dismiss({ reportId: report.id })
       if (mountedRef.current) {
         onReportChange({ ...report, status: 'dismissed' })
       }
@@ -178,7 +178,7 @@ export function CrashReportDialogSurface({
   const handleSubmit = async (): Promise<void> => {
     setSubmitting(true)
     try {
-      const result = await rendererHostClient.crashReports.submit({
+      const result = await shellClient.crashReports.submit({
         ...(report ? { reportId: report.id } : {}),
         notes,
         includeDiagnosticLogs,

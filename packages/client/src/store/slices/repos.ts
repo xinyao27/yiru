@@ -24,7 +24,6 @@ import { syncRuntimeGitForkDefaultBranch } from '~renderer/runtime/git-client'
 import { notifyInstalledAgentSkillsChanged } from '~renderer/runtime/installed-agent-skill-discovery-state'
 import { callRuntimeOrpc, createRuntimeOrpcClient } from '~renderer/runtime/orpc-client'
 import { publishRendererCommandResult } from '~renderer/runtime/renderer-command-result-channel'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import {
   assertRuntimeEnvironmentCapability,
   getActiveRuntimeTarget
@@ -393,24 +392,9 @@ async function fetchProjectHostSetupCompatibility(
   repos: readonly Repo[]
 ): Promise<ProjectHostSetupProjection> {
   try {
-    if (target.kind === 'local') {
-      const projectsApi = (
-        rendererHostClient as typeof rendererHostClient & {
-          projects?: {
-            list?: () => Promise<Project[]>
-            listHostSetups?: () => Promise<ProjectHostSetup[]>
-          }
-        }
-      ).projects
-      if (!projectsApi?.list || !projectsApi.listHostSetups) {
-        throw new Error('projects_api_unavailable')
-      }
-      return {
-        projects: await projectsApi.list(),
-        setups: await projectsApi.listHostSetups()
-      }
+    if (target.kind === 'environment') {
+      await assertProjectHostSetupRuntimeCapability(target)
     }
-    await assertProjectHostSetupRuntimeCapability(target)
     const [projectResponse, setupResponse] = await Promise.all([
       callRuntimeOrpc(target, (client) => client.project.list, undefined, {
         timeoutMs: 15_000

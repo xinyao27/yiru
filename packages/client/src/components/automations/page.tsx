@@ -58,7 +58,7 @@ import { installWindowVisibilityInterval } from '~renderer/lib/window-visibility
 import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
 import { checkRuntimeHooks } from '~renderer/runtime/hooks-client'
 import { callRuntimeOrpc, isRuntimeOrpcErrorCode } from '~renderer/runtime/orpc-client'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { getRuntimeUIState } from '~renderer/runtime/ui-client'
 import { useAppStore } from '~renderer/store'
 import { useRepoMap, useWorktreeMap } from '~renderer/store/selectors'
@@ -1130,7 +1130,7 @@ export default function AutomationsPage(): React.JSX.Element {
     }
     void Promise.all(
       completedRuns.map((run) =>
-        rendererHostClient.automations.markDispatchResult({
+        shellClient.automations.markDispatchResult({
           runId: run.id,
           status: 'completed',
           workspaceId: run.workspaceId,

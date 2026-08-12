@@ -9,7 +9,7 @@ import {
 import { submitPromptToAgentPty } from '~renderer/components/native-chat/agent-paste-draft'
 import { translate } from '~renderer/i18n/i18n'
 import { createBrowserUuid } from '~renderer/lib/browser-uuid'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 import {
   didAutomationPrecheckPass,
@@ -50,7 +50,7 @@ function buildAutomationWorkspaceName(runTitle: string, scheduledFor: number): s
 }
 
 // Why: Phase 5 slice S5 — this used to be the callback registered on
-// `rendererHostClient.automations.onDispatchRequested`, fed by main's
+// `shellClient.automations.onDispatchRequested`, fed by main's
 // `webContents.send('automations:dispatchRequested', …)`. That push now
 // arrives as the reverse `shellServices.automations.dispatch` RPC call (see
 // `renderer/runtime/shell-services-handler.ts`), which invokes this function
@@ -64,7 +64,7 @@ export async function handleAutomationDispatchRequest({
   dispatchToken
 }: AutomationDispatchRequest): Promise<void> {
   const markDispatchResult = async (result: AutomationDispatchResult): Promise<void> => {
-    await rendererHostClient.automations.markDispatchResult(result)
+    await shellClient.automations.markDispatchResult(result)
     window.dispatchEvent(new Event(AUTOMATIONS_CHANGED_EVENT))
   }
   const state = useAppStore.getState()
@@ -133,7 +133,7 @@ export async function handleAutomationDispatchRequest({
     }
 
     if (run.trigger === 'scheduled' && automation.precheck) {
-      precheckResult = await rendererHostClient.automations.runPrecheck({
+      precheckResult = await shellClient.automations.runPrecheck({
         automationId: automation.id,
         runId: run.id
       })
@@ -484,6 +484,6 @@ export async function handleAutomationDispatchRequest({
 // next scheduler tick.
 export function useAutomationDispatchEvents(): void {
   useEffect(() => {
-    void rendererHostClient.automations.rendererReady()
+    void shellClient.automations.rendererReady()
   }, [])
 }

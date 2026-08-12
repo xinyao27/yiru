@@ -1,8 +1,8 @@
 import { toast } from 'sonner'
 import { translate } from '~renderer/i18n/i18n'
 import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 import type { GlobalSettings } from '~shared/types'
 
@@ -68,7 +68,7 @@ export async function sendNotificationSettingsTestNotification(
   volumeDraft: number,
   options?: SendTestNotificationOptions
 ): Promise<NotificationTestOutcome> {
-  const permissionStatus = await rendererHostClient.notifications.getPermissionStatus()
+  const permissionStatus = await shellClient.notifications.getPermissionStatus()
   if (!permissionStatus.supported) {
     toast.error(
       translate(
@@ -87,7 +87,7 @@ export async function sendNotificationSettingsTestNotification(
   if (result.delivered) {
     const soundResult =
       notificationSettings.customSoundId !== 'system'
-        ? await rendererHostClient.notifications.playSound({
+        ? await shellClient.notifications.playSound({
             force: true,
             volume: volumeDraft
           })
@@ -122,7 +122,7 @@ export async function sendNotificationSettingsTestNotification(
               'Open Settings'
             ),
             onClick: () => {
-              void rendererHostClient.notifications.openSystemSettings()
+              void shellClient.notifications.openSystemSettings()
             }
           }
         }
@@ -149,7 +149,7 @@ export async function sendNotificationSettingsTestNotification(
             'Open Settings'
           ),
           onClick: () => {
-            void rendererHostClient.notifications.openSystemSettings()
+            void shellClient.notifications.openSystemSettings()
           }
         }
       })

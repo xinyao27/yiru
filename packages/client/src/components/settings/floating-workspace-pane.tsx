@@ -1,7 +1,7 @@
 import { FolderOpen } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
 import { translate } from '~renderer/i18n/i18n'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 import type { FloatingTerminalTriggerLocation, GlobalSettings } from '~shared/types'
 
@@ -41,7 +41,7 @@ export function FloatingWorkspacePane({
 
   useEffect(() => {
     let cancelled = false
-    void rendererHostClient.app
+    void shellClient.app
       .getFloatingTerminalCwd({
         path: settings.floatingTerminalCwd
       })
@@ -61,7 +61,7 @@ export function FloatingWorkspacePane({
   }, [settings.floatingTerminalCwd])
 
   const pickFloatingWorkspaceDirectory = async (): Promise<void> => {
-    const path = await rendererHostClient.app.pickFloatingWorkspaceDirectory()
+    const path = await shellClient.app.pickFloatingWorkspaceDirectory()
     if (!path) {
       return
     }

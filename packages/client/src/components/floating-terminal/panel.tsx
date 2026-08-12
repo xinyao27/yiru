@@ -58,7 +58,6 @@ import {
 } from '~renderer/lib/orchestration-setup-state'
 import { getShortcutPlatform } from '~renderer/lib/shortcut-platform'
 import { notifyActiveBrowserPage } from '~renderer/runtime/browser-client'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 import { destroyWorkspaceWebviews } from '~renderer/store/slices/browser-webview-cleanup'
@@ -547,7 +546,7 @@ export function FloatingTerminalPanel({
 
   useEffect(() => {
     let cancelled = false
-    void rendererHostClient.app
+    void shellClient.app
       .getFloatingTerminalCwd({
         path: floatingTerminalCwd
       })
@@ -563,7 +562,7 @@ export function FloatingTerminalPanel({
 
   useEffect(() => {
     let cancelled = false
-    void rendererHostClient.app.getFloatingMarkdownDirectory().then((nextMarkdownCwd) => {
+    void shellClient.app.getFloatingMarkdownDirectory().then((nextMarkdownCwd) => {
       if (!cancelled) {
         setMarkdownCwd(nextMarkdownCwd)
       }
@@ -705,7 +704,7 @@ export function FloatingTerminalPanel({
   const openFloatingMarkdownTab = useCallback(() => {
     void (async () => {
       try {
-        const document = await rendererHostClient.app.pickFloatingMarkdownDocument()
+        const document = await shellClient.app.pickFloatingMarkdownDocument()
         if (!document) {
           return
         }

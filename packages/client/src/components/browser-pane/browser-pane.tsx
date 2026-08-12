@@ -111,7 +111,6 @@ import {
   isRuntimeOrpcErrorCode,
   type RuntimeClientTarget
 } from '~renderer/runtime/orpc-client'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import { shellClient } from '~renderer/runtime/shell-client'
 import { workspaceHostClient } from '~renderer/runtime/workspace-host-client'
 import { toRuntimeWorktreeSelector } from '~renderer/runtime/worktree-selector'
@@ -845,7 +844,7 @@ export default function BrowserPane({
     if (!activeBrowserPageId) {
       return
     }
-    await rendererHostClient.runtime.reclaimBrowserForDesktop(activeBrowserPageId)
+    await shellClient.runtime.reclaimBrowserForDesktop(activeBrowserPageId)
   }, [activeBrowserPageId])
 
   if (activeBrowserRuntimeEnvironmentId) {

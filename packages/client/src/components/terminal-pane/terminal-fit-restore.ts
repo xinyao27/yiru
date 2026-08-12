@@ -1,5 +1,5 @@
 import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import {
   getRuntimeTerminalEnvironmentId,
   getRuntimeTerminalHandle
@@ -36,7 +36,7 @@ export async function restoreTerminalFitToDesktop(
           { terminal: remoteHandle },
           { timeoutMs: 15_000 }
         ).catch(restoreFailedResult)
-      : await rendererHostClient.runtime.restoreTerminalFit(ptyId).catch(restoreFailedResult)
+      : await shellClient.runtime.restoreTerminalFit(ptyId).catch(restoreFailedResult)
 
   return result.restored
 }

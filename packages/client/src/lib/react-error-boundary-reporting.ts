@@ -1,5 +1,4 @@
 import type React from 'react'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import type { CrashReportRecord, ReactErrorBoundaryReportArgs } from '~shared/crash-reporting'
 
 type RendererErrorContext = Pick<
@@ -128,7 +127,10 @@ export async function reportReactErrorBoundaryCrash(
   }
 
   try {
-    const result = await rendererHostClient?.crashReports?.recordRendererError?.(args)
+    // Why: the Web root loads this error boundary before it installs the paired shell.
+    // Importing the shell client only when reporting preserves that startup ordering.
+    const { shellClient } = await import('~renderer/runtime/shell-client')
+    const result = await shellClient?.crashReports?.recordRendererError?.(args)
     if (result && !result.ok) {
       console.warn('[react-error-boundary] Failed to record renderer crash:', result.error)
       return

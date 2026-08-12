@@ -9,7 +9,7 @@
   ],
   "exports": {
     "./web-index.html": "./src/web-index.html",
-    "./web-bootstrap": "./src/web/main.tsx",
+    "./web-bootstrap": "./src/web/bootstrap.ts",
     "./styles": "./src/assets/main.css",
     "./paraglide/messages": {
       "types": "./generated/paraglide/messages.d.ts",

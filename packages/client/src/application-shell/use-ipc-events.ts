@@ -69,7 +69,6 @@ import { subscribeEmulatorEvents } from '~renderer/runtime/emulator-events-clien
 import { subscribeGitHubPrRefreshEvents } from '~renderer/runtime/github-events-client'
 import { subscribeRateLimitUpdates } from '~renderer/runtime/rate-limit-events-client'
 import { fetchRateLimitSnapshot } from '~renderer/runtime/rate-limits-client'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import { subscribeRuntimeDriverEvents } from '~renderer/runtime/runtime-driver-events-client'
 import { shellClient } from '~renderer/runtime/shell-client'
 import { subscribeShellEvent } from '~renderer/runtime/shell-events-client'
@@ -933,19 +932,19 @@ export function useIpcEvents(): void {
     )
 
     // Hydrate initial update status then subscribe to changes
-    rendererHostClient.updater.getStatus().then((status) => {
+    shellClient.updater.getStatus().then((status) => {
       useAppStore.getState().setUpdateStatus(status as UpdateStatus)
     })
 
     unsubs.push(
-      rendererHostClient.updater.onStatus((raw) => {
+      shellClient.updater.onStatus((raw) => {
         const status = raw as UpdateStatus
         useAppStore.getState().setUpdateStatus(status)
       })
     )
 
     unsubs.push(
-      rendererHostClient.updater.onClearDismissal(() => {
+      shellClient.updater.onClearDismissal(() => {
         useAppStore.getState().clearDismissedUpdateVersion()
       })
     )
@@ -1815,9 +1814,9 @@ export function useIpcEvents(): void {
       mobileStateHydrated = false
       pendingMobileStateEvents.length = 0
       void Promise.all([
-        rendererHostClient.runtime.getTerminalFitOverrides(),
-        rendererHostClient.runtime.getTerminalDrivers(),
-        rendererHostClient.runtime.getBrowserDrivers()
+        shellClient.runtime.getTerminalFitOverrides(),
+        shellClient.runtime.getTerminalDrivers(),
+        shellClient.runtime.getBrowserDrivers()
       ])
         .then(([overrides, drivers, browserDrivers]) => {
           if (mobileStateHydrationDisposed || requestId !== mobileStateHydrationRequestId) {

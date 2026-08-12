@@ -33,7 +33,6 @@ import {
   getUpdateCheckClickOptions,
   getUpdateCheckHint
 } from '~renderer/lib/update-check-click-options'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 
@@ -118,7 +117,7 @@ export function SidebarSettingsHelpMenu(): React.JSX.Element {
     toast.info(
       translate('auto.components.sidebar.SidebarSettingsHelpMenu.5161eef55d', 'Restarting Yiru…')
     )
-    void rendererHostClient.app.restart().catch((error) => {
+    void shellClient.app.restart().catch((error) => {
       if (mountedRef.current) {
         setIsRestartingYiru(false)
         toast.error(
@@ -150,7 +149,7 @@ export function SidebarSettingsHelpMenu(): React.JSX.Element {
   const handleCheckForUpdates = (): void => {
     const modifiers = updateCheckModifiersRef.current
     updateCheckModifiersRef.current = NO_UPDATE_CHECK_MODIFIERS
-    void rendererHostClient.updater.check(getUpdateCheckClickOptions(modifiers))
+    void shellClient.updater.check(getUpdateCheckClickOptions(modifiers))
   }
 
   const openMilestones = (): void => {

@@ -61,7 +61,6 @@ import {
 } from '~renderer/lib/floating-workspace-terminal-actions'
 import { lazyWithRetry as lazy } from '~renderer/lib/lazy-with-retry'
 import { readCliInstallStatus } from '~renderer/runtime/cli-install-client'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import { runtimeEnvironmentsClient } from '~renderer/runtime/runtime-environments-client'
 import { shellClient } from '~renderer/runtime/shell-client'
 import { getRenderingHostSnapshot } from '~renderer/runtime/shell-platform-client'
@@ -1054,7 +1053,7 @@ function App(): React.JSX.Element {
           // first paint, but restored terminals still need those services ready
           // before they mount and spawn/reconnect PTYs.
           await timeRendererStartupStep('first-window-services-await', () =>
-            rendererHostClient.app.awaitFirstWindowStartupServices()
+            shellClient.app.awaitFirstWindowStartupServices()
           )
           reconnectStarted = true
           await timeRendererStartupStep('reconnect-terminals', () =>
@@ -1130,7 +1129,7 @@ function App(): React.JSX.Element {
             action: {
               label: translate('auto.App.caea5b51b9', 'Restart now'),
               onClick: () => {
-                void rendererHostClient.app.relaunch()
+                void shellClient.app.relaunch()
               }
             }
           })
@@ -1141,7 +1140,7 @@ function App(): React.JSX.Element {
           // on-disk file we failed to load.
           if (!reconnectStarted) {
             try {
-              await rendererHostClient.app.awaitFirstWindowStartupServices()
+              await shellClient.app.awaitFirstWindowStartupServices()
               await actions.reconnectPersistedTerminals(abortController.signal)
             } catch (reconnectErr) {
               console.error(

@@ -8,9 +8,9 @@ import {
   type RemoteServerUpdateEntry,
   type RemoteServerUpdateTransport
 } from '~renderer/runtime/remote-server-update-coordinator'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import { getRuntimeEnvironmentStatus } from '~renderer/runtime/rpc-client'
 import { runtimeEnvironmentsClient } from '~renderer/runtime/runtime-environments-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { isValidAppVersion } from '~shared/app-version'
 import type { UpdateCheckOptions } from '~shared/types'
 
@@ -114,7 +114,7 @@ export const createRemoteServerUpdatesSlice: StateCreator<
           })
         )
       })
-      const clientVersion = await rendererHostClient.updater.getVersion()
+      const clientVersion = await shellClient.updater.getVersion()
       // Why: the web client has no app build version; ask each owning runtime's
       // updater instead of comparing against the sentinel "web" version.
       const effectiveOptions =

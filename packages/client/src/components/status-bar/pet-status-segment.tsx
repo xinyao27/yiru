@@ -17,7 +17,7 @@ import {
 import { Slider } from '~renderer/components/ui/slider'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 import { PET_SIZE_MAX, PET_SIZE_MIN } from '~shared/types'
 
@@ -49,8 +49,8 @@ function PetStatusSegmentInner(): React.JSX.Element {
 
   const handleImport = async (): Promise<void> => {
     console.log('[pet-overlay] upload: click')
-    if (!rendererHostClient?.pet?.import) {
-      console.warn('[pet-overlay] upload: rendererHostClient.pet.import missing — restart Yiru')
+    if (!shellClient?.pet?.import) {
+      console.warn('[pet-overlay] upload: shellClient.pet.import missing — restart Yiru')
       toast.error(
         translate(
           'auto.components.status.bar.PetStatusSegment.e6234bcc17',
@@ -60,7 +60,7 @@ function PetStatusSegmentInner(): React.JSX.Element {
       return
     }
     try {
-      const model = await rendererHostClient.pet.import()
+      const model = await shellClient.pet.import()
       console.log('[pet-overlay] upload: result', model)
       if (!model) {
         return
@@ -84,7 +84,7 @@ function PetStatusSegmentInner(): React.JSX.Element {
   }
 
   const handleImportPetBundle = async (): Promise<void> => {
-    if (!rendererHostClient?.pet?.importPetBundle) {
+    if (!shellClient?.pet?.importPetBundle) {
       toast.error(
         translate(
           'auto.components.status.bar.PetStatusSegment.2021d4f6db',
@@ -94,7 +94,7 @@ function PetStatusSegmentInner(): React.JSX.Element {
       return
     }
     try {
-      const model = await rendererHostClient.pet.importPetBundle()
+      const model = await shellClient.pet.importPetBundle()
       if (!model) {
         return
       }

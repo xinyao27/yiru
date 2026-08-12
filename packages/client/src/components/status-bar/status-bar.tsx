@@ -65,8 +65,8 @@ import {
   selectClaudeProviderAccount,
   selectCodexProviderAccount
 } from '~renderer/runtime/provider-accounts-client'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 import { selectFloatingWorkspaceHasUnread } from '~renderer/store/selectors'
 import type {
@@ -1280,7 +1280,7 @@ export function CodexSwitcherMenu({
     }
     setReauthenticatingAccountId(accountId)
     try {
-      const next = await rendererHostClient.accounts.codex.reauthenticate({ accountId })
+      const next = await shellClient.accounts.codex.reauthenticate({ accountId })
       recordFeatureInteraction('codex-account-switching')
       if (mountedRef.current) {
         setAccounts(next)

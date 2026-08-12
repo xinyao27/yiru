@@ -39,7 +39,6 @@ const runtimeCallQueuePool = new WebRuntimeCallQueuePool()
 
 export function initializeWebRuntimeConnection(): void {
   activeEnvironment = readStoredWebRuntimeEnvironment()
-  ;(globalThis as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__ = true
 }
 
 export function getWebActiveEnvironment(): StoredWebRuntimeEnvironment | null {

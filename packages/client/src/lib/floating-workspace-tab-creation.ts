@@ -1,5 +1,5 @@
 import { translate } from '~renderer/i18n/i18n'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import type { AppState } from '~renderer/store/types'
 import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
 import type { BrowserTab, TerminalTab } from '~shared/types'
@@ -59,7 +59,7 @@ export async function createFloatingWorkspaceMarkdownTab(
 ): Promise<void> {
   const targetGroupId = store.activeGroupIdByWorktree[FLOATING_TERMINAL_WORKTREE_ID]
   const floatingMarkdownDirectory =
-    markdownDirectory ?? (await rendererHostClient.app.getFloatingMarkdownDirectory())
+    markdownDirectory ?? (await shellClient.app.getFloatingMarkdownDirectory())
   if (!floatingMarkdownDirectory) {
     return
   }
