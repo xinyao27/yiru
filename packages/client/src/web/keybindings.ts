@@ -17,10 +17,15 @@ import { isJsonRecord, readLocalJson, writeLocalJson } from './storage/local-jso
 const KEYBINDINGS_STORAGE_KEY = 'yiru.web.keybindings.v1'
 const listeners = new Set<(snapshot: KeybindingFileSnapshot) => void>()
 
-type WebKeybindingDocument = {
+type StoredWebKeybindingDocument = {
   version: 1
   keybindings: KeybindingOverrides
   platforms: Partial<Record<KeybindingPlatform, KeybindingOverrides>>
+}
+
+type RawWebKeybindingDocument = {
+  keybindings?: unknown
+  platforms?: unknown
 }
 
 export function createWebKeybindingsApi() {
@@ -262,20 +267,18 @@ function removeConflicts(
   return next
 }
 
-function readDocument(): WebKeybindingDocument {
-  const empty: WebKeybindingDocument = { version: 1, keybindings: {}, platforms: {} }
+function readDocument(): RawWebKeybindingDocument {
   const value = readLocalJson(KEYBINDINGS_STORAGE_KEY)
   if (!isJsonRecord(value)) {
-    return empty
+    return {}
   }
   return {
-    version: 1,
-    keybindings: isJsonRecord(value.keybindings) ? value.keybindings : {},
-    platforms: isJsonRecord(value.platforms) ? value.platforms : {}
+    keybindings: value.keybindings,
+    platforms: value.platforms
   }
 }
 
-function writeDocument(document: WebKeybindingDocument): void {
+function writeDocument(document: StoredWebKeybindingDocument): void {
   writeLocalJson(KEYBINDINGS_STORAGE_KEY, document)
 }
 
