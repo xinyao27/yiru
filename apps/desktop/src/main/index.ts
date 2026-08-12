@@ -286,13 +286,13 @@ import {
 } from './updater'
 import { recordUpdaterLifecycle } from './updater-lifecycle-diagnostics'
 import { previewWarpThemeImport } from './warp-themes/electron-import-preview'
-import { registerWindowFocusBroadcast } from './window-focus-broadcast'
 import {
   attachMainWindowServices,
   ensureAutoUpdaterConfigured
 } from './window/attach-main-window-services'
 import { createElectronBrowserSessionProvider } from './window/browser-session'
 import { createMainWindow, loadMainWindow } from './window/create-main-window'
+import { registerWindowFocusBroadcast } from './window/focus-broadcast'
 import { focusExistingMainWindow } from './window/focus-existing-window'
 import { isMainWindowVisible, notifyMainWindowBecameVisible } from './window/main-window-visibility'
 import {
