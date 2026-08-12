@@ -50,12 +50,8 @@ function systemImageForIcon(
   icon: MobileTerminalAccessoryIcon
 ): NonNullable<ImageProps['systemName']> {
   switch (icon) {
-    case 'dismiss-keyboard':
-      return 'keyboard.chevron.compact.down'
     case 'device-mobile':
       return 'iphone'
-    case 'keyboard':
-      return 'keyboard'
     case 'laptop':
       return 'laptopcomputer'
   }
@@ -228,19 +224,16 @@ export function MobileTerminalAccessoryBar({
   controlModeActive,
   customKeys,
   isAttaching,
-  isCommandInputVisible,
   isPhoneDisplayMode,
   liveInputEnabled,
   onAccessoryInput,
   onAttachImage,
   onCustomKeyLongPress,
-  onToggleCommandInput,
   onPaste,
   onRepeatStart,
   onRepeatStop,
   onToggleControl,
-  onToggleDisplayMode,
-  onToggleLiveInput
+  onToggleDisplayMode
 }: MobileTerminalAccessoryBarProps): React.JSX.Element {
   const { theme } = useUniwind()
   const fullWidthModifiers = useMemo(
@@ -336,19 +329,6 @@ export function MobileTerminalAccessoryBar({
             )}
           </HStack>
         </ScrollView>
-        <HStack alignment="center" spacing={0} modifiers={fixedSlotModifiers}>
-          <NativeTerminalAccessoryKey
-            accessibilityLabel={
-              isCommandInputVisible
-                ? translate('mobile.terminal.hideCommandInput', 'Hide command input')
-                : translate('mobile.terminal.showCommandInput', 'Show command input')
-            }
-            icon={isCommandInputVisible ? 'dismiss-keyboard' : 'keyboard'}
-            isCircular
-            onLongPress={onToggleLiveInput}
-            onPress={onToggleCommandInput}
-          />
-        </HStack>
       </HStack>
     </Host>
   )

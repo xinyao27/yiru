@@ -1,12 +1,7 @@
-import { Text, View } from 'react-native'
+import { Text } from 'react-native'
 
 import { MobileGlassPressable } from '~/components/glass/pressable'
-import {
-  CaretDown as ChevronDown,
-  DeviceMobile,
-  Keyboard as KeyboardIcon,
-  Laptop
-} from '~/components/uniwind-icons'
+import { DeviceMobile, Laptop } from '~/components/uniwind-icons'
 
 import type {
   MobileTerminalAccessoryIcon,
@@ -24,19 +19,8 @@ function MobileTerminalAccessoryIconView({
   icon: MobileTerminalAccessoryIcon
 }): React.JSX.Element {
   switch (icon) {
-    case 'dismiss-keyboard':
-      return (
-        <View className="relative h-5 w-5 items-center justify-start">
-          <KeyboardIcon size={15} colorClassName="accent-muted-foreground" />
-          <View className="absolute -bottom-1">
-            <ChevronDown size={10} colorClassName="accent-muted-foreground" />
-          </View>
-        </View>
-      )
     case 'device-mobile':
       return <DeviceMobile size={20} colorClassName="accent-muted-foreground" />
-    case 'keyboard':
-      return <KeyboardIcon size={20} colorClassName="accent-muted-foreground" />
     case 'laptop':
       return <Laptop size={20} colorClassName="accent-muted-foreground" />
   }

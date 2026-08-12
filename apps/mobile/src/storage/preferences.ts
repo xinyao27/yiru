@@ -81,63 +81,6 @@ export async function saveTerminalTextScale(scale: number): Promise<void> {
   await AsyncStorage.setItem(TEXT_SCALE_KEY, String(scale))
 }
 
-const AUTOCOMPLETE_KEY = 'yiru:terminalAutocompleteEnabled'
-
-// Why: terminal command inputs default to autocorrect/suggestions OFF so the
-// keyboard never mangles commands, flags, or paths. Users who want phone-style
-// typing opt in via Settings → Terminal; the choice persists locally per device.
-export async function loadTerminalAutocompleteEnabled(): Promise<boolean> {
-  try {
-    const raw = await AsyncStorage.getItem(AUTOCOMPLETE_KEY)
-    return raw === 'true'
-  } catch {
-    return false
-  }
-}
-
-export async function saveTerminalAutocompleteEnabled(enabled: boolean): Promise<void> {
-  await AsyncStorage.setItem(AUTOCOMPLETE_KEY, String(enabled))
-}
-
-const TERMINAL_LIVE_INPUT_DISABLED_PREFIX = 'yiru:terminalLiveInputDisabled:'
-
-export type DisabledTerminalLiveInputHandlesPreference = {
-  readonly handles: Set<string>
-  readonly loaded: boolean
-}
-
-function terminalLiveInputDisabledKey(hostId: string, worktreeId: string): string {
-  return `${TERMINAL_LIVE_INPUT_DISABLED_PREFIX}${encodeURIComponent(hostId)}:${encodeURIComponent(
-    worktreeId
-  )}`
-}
-
-export async function readDisabledTerminalLiveInputHandlesPreference(
-  hostId: string,
-  worktreeId: string
-): Promise<DisabledTerminalLiveInputHandlesPreference> {
-  try {
-    const raw = await AsyncStorage.getItem(terminalLiveInputDisabledKey(hostId, worktreeId))
-    if (!raw) {
-      return { handles: new Set(), loaded: true }
-    }
-    return { handles: new Set(stringArray(JSON.parse(raw))), loaded: true }
-  } catch {
-    return { handles: new Set(), loaded: false }
-  }
-}
-
-export async function saveDisabledTerminalLiveInputHandles(
-  hostId: string,
-  worktreeId: string,
-  handles: ReadonlySet<string>
-): Promise<void> {
-  await AsyncStorage.setItem(
-    terminalLiveInputDisabledKey(hostId, worktreeId),
-    JSON.stringify([...handles])
-  )
-}
-
 const SIDEBAR_WIDTH_KEY = 'yiru:hostSidebarWidth'
 
 // Bounds for the draggable host worktree-list sidebar on tablet/foldable

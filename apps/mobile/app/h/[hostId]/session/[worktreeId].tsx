@@ -109,7 +109,7 @@ import { openMobileTerminalFileTap } from '~/session/terminal/file-tap-open'
 import { TerminalPaneView } from '~/session/terminal/pane-view'
 import { mergeTerminalListWithKnownRecords, terminalRecordsEqual } from '~/session/terminal/records'
 import { useMobileTerminalForegroundRecovery } from '~/session/terminal/use-foreground-recovery'
-import { useTerminalLiveInputModePreference } from '~/session/terminal/use-live-input-mode-preference'
+import { useTerminalLiveInputMode } from '~/session/terminal/use-live-input-mode'
 import { useMobileTerminalPaste } from '~/session/terminal/use-paste'
 import { useMobileTerminalStreams } from '~/session/terminal/use-terminal-streams'
 import { useMobileAttachmentInputLeaseGate } from '~/session/use-attachment-input-lease-gate'
@@ -121,7 +121,6 @@ import { useMobileMarkdownDocs } from '~/session/use-markdown-docs'
 import { useMobileSessionTabSnapshot } from '~/session/use-session-tab-snapshot'
 import { useMobileSessionTabsStore } from '~/session/use-session-tabs'
 import {
-  loadTerminalAutocompleteEnabled,
   loadTerminalLinkOpenMode,
   loadTerminalTextScale,
   HOST_DOCK_MIN_WIDTH,
@@ -278,13 +277,9 @@ export default function SessionScreen(): React.JSX.Element {
     setSessionTabs
   } = sessionTabsStore
   const [terminalsLoaded, setTerminalsLoaded] = useState(false)
-  const [input, setInput] = useState('')
   // Why: baseline terminal zoom, reloaded on focus so a Settings → Terminal change
   // applies in place (the terminal panes stay mounted).
   const [terminalTextScale, setTerminalTextScale] = useState(1)
-  // Why: local opt-in for keyboard autocomplete/autocorrect on the terminal
-  // command bar; reloaded on focus so a Settings → Terminal toggle takes effect on return.
-  const [autocompleteEnabled, setAutocompleteEnabled] = useState(false)
   const [terminalLinkOpenMode, setTerminalLinkOpenMode] =
     useState<MobileTerminalLinkOpenMode>('yiru-browser')
   const {
@@ -292,9 +287,8 @@ export default function SessionScreen(): React.JSX.Element {
     defaultTerminalHandlesToLiveInput,
     liveInputTerminalHandles,
     liveInputTerminalHandlesRef,
-    pruneTerminalHandlesFromLiveInput,
-    toggleTerminalLiveInput
-  } = useTerminalLiveInputModePreference({ hostId, worktreeId })
+    pruneTerminalHandlesFromLiveInput
+  } = useTerminalLiveInputMode({ hostId, worktreeId })
   const [activeHandle, setActiveHandle] = useState<string | null>(null)
   const [fileDocs, setFileDocs] = useState<Map<string, FileDocState>>(new Map())
   const [creating, setCreating] = useState(false)
@@ -372,7 +366,6 @@ export default function SessionScreen(): React.JSX.Element {
   const clientRef = useRef<RpcClient | null>(null)
   const connStateRef = useRef<ConnectionState>(connState)
   const liveInputRef = useRef<TextInput>(null)
-  const commandInputRef = useRef<TextInput>(null)
   const liveInputFocusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const sendLiveTerminalInputRef = useRef<TerminalLiveInputSender>(async () => false)
   const sessionTabActionSheetKeyboardHideSubRef = useRef<ReturnType<
@@ -400,7 +393,6 @@ export default function SessionScreen(): React.JSX.Element {
   // Why: post-RPC refresh timers capture this screen and must not survive
   // route reuse or unmount.
   const delayedActionTimersRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set())
-  const sendingRef = useRef(false)
   // Why: the terminal frame's width changes when EITHER sidebar is resized (the
   // left worktree sidebar shrinks the detail pane; the right dock takes a slice of
   // the row) without any window-dim change. Tracking the measured width lets the
@@ -410,7 +402,6 @@ export default function SessionScreen(): React.JSX.Element {
     controlModeActive,
     handleInputChange: handleControlModeInputChange,
     liveInputCapture,
-    reset: resetControlMode,
     setLiveInputCapture,
     toggle: toggleControlMode
   } = useMobileTerminalControlMode({
@@ -1234,21 +1225,6 @@ export default function SessionScreen(): React.JSX.Element {
     }, [])
   )
 
-  // Why: pick up the Settings → Terminal autocomplete toggle when returning here.
-  useFocusEffect(
-    useCallback(() => {
-      let active = true
-      void loadTerminalAutocompleteEnabled().then((enabled) => {
-        if (active) {
-          setAutocompleteEnabled(enabled)
-        }
-      })
-      return () => {
-        active = false
-      }
-    }, [])
-  )
-
   // Why: link routing is a phone-local choice; reload after Settings → Browser.
   useFocusEffect(
     useCallback(() => {
@@ -1486,29 +1462,6 @@ export default function SessionScreen(): React.JSX.Element {
       void readFileTab(activeSessionTab)
     }
   }, [activeSessionTab, fileDocs, readFileTab])
-
-  async function handleSend() {
-    if (!client || !activeHandle || sendingRef.current) {
-      return
-    }
-    sendingRef.current = true
-
-    const text = normalizeTerminalTextInput(input)
-    setInput('')
-
-    try {
-      const accepted =
-        (await terminalStreamsRef.current
-          .get(activeHandle)
-          ?.sendInputAccepted(`${text}\r`)
-          .catch(() => false)) ?? false
-      if (!accepted && activeHandleRef.current === activeHandle) {
-        setInput(text)
-      }
-    } finally {
-      sendingRef.current = false
-    }
-  }
 
   async function handleAccessoryKey(input: ReturnType<typeof createTerminalLiveAccessoryInput>) {
     if (!client || !activeHandle || !canSend) {
@@ -1751,23 +1704,6 @@ export default function SessionScreen(): React.JSX.Element {
     },
     [isFloatingWorkspaceRoute, terminalLinkOpenMode]
   )
-
-  const toggleLiveInput = useCallback(() => {
-    if (!activeHandle) {
-      return
-    }
-    const nextEnabled = toggleTerminalLiveInput(activeHandle)
-    if (!nextEnabled) {
-      resetControlMode()
-    }
-    clearPendingLiveInputCommit()
-    if (nextEnabled) {
-      scheduleTerminalLiveInputFocus(liveInputFocusTimerRef, () => liveInputRef.current?.focus())
-    } else {
-      clearTerminalLiveInputFocusTimer(liveInputFocusTimerRef)
-      liveInputRef.current?.blur()
-    }
-  }, [activeHandle, clearPendingLiveInputCommit, resetControlMode, toggleTerminalLiveInput])
 
   const allowTerminalGestureInput = useCallback(
     (handle: string, sequenceCount: number): boolean => {
@@ -3235,15 +3171,12 @@ export default function SessionScreen(): React.JSX.Element {
             chat because that view supplies its own composer. */}
             {!activeMarkdownTab && !activeFileTab && !activeBrowserTab && !showNativeChat && (
               <MobileTerminalDock
-                autocompleteEnabled={autocompleteEnabled}
                 bottomInset={insets.bottom}
                 builtInKeys={visibleBuiltInAccessoryKeys}
                 canPaste={canPaste}
                 canSend={canSend}
-                commandInputRef={commandInputRef}
                 controlModeActive={controlModeActive}
                 customKeys={customKeys}
-                input={input}
                 isAttaching={isAttaching}
                 isPhoneDisplayMode={isPhoneMode(activeHandle)}
                 keyboardOffset={terminalComposerKeyboardOffset}
@@ -3252,7 +3185,6 @@ export default function SessionScreen(): React.JSX.Element {
                 liveInputRef={liveInputRef}
                 onAccessoryInput={(accessoryInput) => void handleAccessoryKey(accessoryInput)}
                 onAttachImage={attachImage}
-                onChangeCommandText={setInput}
                 onChangeLiveInput={handleTerminalLiveInputChange}
                 onCustomKeyLongPress={(key) => {
                   triggerMediumImpact()
@@ -3262,7 +3194,6 @@ export default function SessionScreen(): React.JSX.Element {
                 onPaste={() => void handlePaste()}
                 onRepeatStart={startAccessoryRepeat}
                 onRepeatStop={stopAccessoryRepeat}
-                onSendCommand={() => void handleSend()}
                 onSubmitLiveInput={handleLiveInputSubmit}
                 onToggleControl={toggleControlMode}
                 onToggleDisplayMode={() => {
@@ -3270,7 +3201,6 @@ export default function SessionScreen(): React.JSX.Element {
                     void toggleDisplayMode(activeHandle)
                   }
                 }}
-                onToggleLiveInput={toggleLiveInput}
               />
             )}
           </View>

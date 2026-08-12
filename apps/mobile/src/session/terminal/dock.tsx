@@ -1,28 +1,23 @@
 import type { RefObject } from 'react'
-import { useEffect, useRef, useState } from 'react'
 import type {
   NativeSyntheticEvent,
   TextInputKeyPressEventData,
   TextInputSubmitEditingEventData
 } from 'react-native'
-import { Keyboard, Platform, TextInput, View } from 'react-native'
+import { Platform, TextInput, View } from 'react-native'
 
 import { getTerminalLiveInputKeyboardType } from '~/terminal/keyboard-type'
 
 import type { MobileImageSource } from '../image-source-picker'
 import { MobileTerminalAccessoryBar, type TerminalAccessoryInput } from './accessory-bar'
-import { MobileTerminalInputBar } from './input-bar'
 
 type MobileTerminalDockProps = {
-  autocompleteEnabled: boolean
   bottomInset: number
   builtInKeys: Parameters<typeof MobileTerminalAccessoryBar>[0]['builtInKeys']
   canPaste: boolean
   canSend: boolean
-  commandInputRef: RefObject<TextInput | null>
   controlModeActive: boolean
   customKeys: Parameters<typeof MobileTerminalAccessoryBar>[0]['customKeys']
-  input: string
   isAttaching: boolean
   isPhoneDisplayMode: boolean
   keyboardOffset: number
@@ -31,30 +26,24 @@ type MobileTerminalDockProps = {
   liveInputRef: RefObject<TextInput | null>
   onAccessoryInput: (input: TerminalAccessoryInput) => void
   onAttachImage: (source: MobileImageSource) => void
-  onChangeCommandText: (text: string) => void
   onChangeLiveInput: (text: string) => void
   onCustomKeyLongPress: (key: MobileTerminalDockProps['customKeys'][number]) => void
   onKeyPressLiveInput: (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => void
   onPaste: () => void
   onRepeatStart: (input: TerminalAccessoryInput) => void
   onRepeatStop: () => void
-  onSendCommand: () => void
   onSubmitLiveInput: (event: NativeSyntheticEvent<TextInputSubmitEditingEventData>) => void
   onToggleControl: () => void
   onToggleDisplayMode: () => void
-  onToggleLiveInput: () => void
 }
 
 export function MobileTerminalDock({
-  autocompleteEnabled,
   bottomInset,
   builtInKeys,
   canPaste,
   canSend,
-  commandInputRef,
   controlModeActive,
   customKeys,
-  input,
   isAttaching,
   isPhoneDisplayMode,
   keyboardOffset,
@@ -63,54 +52,16 @@ export function MobileTerminalDock({
   liveInputRef,
   onAccessoryInput,
   onAttachImage,
-  onChangeCommandText,
   onChangeLiveInput,
   onCustomKeyLongPress,
   onKeyPressLiveInput,
   onPaste,
   onRepeatStart,
   onRepeatStop,
-  onSendCommand,
   onSubmitLiveInput,
   onToggleControl,
-  onToggleDisplayMode,
-  onToggleLiveInput
+  onToggleDisplayMode
 }: MobileTerminalDockProps): React.JSX.Element {
-  const [isCommandInputVisible, setIsCommandInputVisible] = useState(() => !liveInputEnabled)
-  const [commandInputFocusRequest, setCommandInputFocusRequest] = useState(0)
-  const keyboardHideSubscriptionRef = useRef<ReturnType<typeof Keyboard.addListener> | null>(null)
-
-  useEffect(
-    () => () => {
-      keyboardHideSubscriptionRef.current?.remove()
-    },
-    []
-  )
-
-  const toggleCommandInput = (): void => {
-    const nextVisible = !isCommandInputVisible
-    if (nextVisible) {
-      setIsCommandInputVisible(true)
-      setCommandInputFocusRequest((request) => request + 1)
-      return
-    }
-    commandInputRef.current?.blur()
-    liveInputRef.current?.blur()
-    keyboardHideSubscriptionRef.current?.remove()
-    keyboardHideSubscriptionRef.current = null
-    if (Platform.OS === 'ios' && keyboardOffset > 0) {
-      keyboardHideSubscriptionRef.current = Keyboard.addListener('keyboardDidHide', () => {
-        keyboardHideSubscriptionRef.current?.remove()
-        keyboardHideSubscriptionRef.current = null
-        setIsCommandInputVisible(false)
-      })
-      Keyboard.dismiss()
-      return
-    }
-    setIsCommandInputVisible(false)
-    Keyboard.dismiss()
-  }
-
   return (
     <View
       className="z-20 px-3 pt-1"
@@ -126,33 +77,17 @@ export function MobileTerminalDock({
         controlModeActive={controlModeActive}
         customKeys={customKeys}
         isAttaching={isAttaching}
-        isCommandInputVisible={isCommandInputVisible}
         isPhoneDisplayMode={isPhoneDisplayMode}
         liveInputEnabled={liveInputEnabled}
         onAccessoryInput={onAccessoryInput}
         onAttachImage={onAttachImage}
         onCustomKeyLongPress={onCustomKeyLongPress}
-        onToggleCommandInput={toggleCommandInput}
         onPaste={onPaste}
         onRepeatStart={onRepeatStart}
         onRepeatStop={onRepeatStop}
         onToggleControl={onToggleControl}
         onToggleDisplayMode={onToggleDisplayMode}
-        onToggleLiveInput={onToggleLiveInput}
       />
-      {isCommandInputVisible ? (
-        <View className="mt-2">
-          <MobileTerminalInputBar
-            autocompleteEnabled={autocompleteEnabled}
-            canSend={canSend}
-            commandInputRef={commandInputRef}
-            commandInputFocusRequest={commandInputFocusRequest}
-            input={input}
-            onChangeText={onChangeCommandText}
-            onSend={onSendCommand}
-          />
-        </View>
-      ) : null}
       {liveInputEnabled ? (
         <TextInput
           ref={liveInputRef}

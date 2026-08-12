@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { View, Text, Pressable } from 'react-native'
 import Animated, {
   useAnimatedRef,
@@ -8,7 +8,6 @@ import Animated, {
 
 import { MobileContentSection } from '~/components/content-section'
 import { SelectionDrawer } from '~/components/selection-drawer'
-import { SettingsToggleRow } from '~/components/settings-toggle-row'
 import {
   CaretRight as ChevronRight,
   DeviceMobile as Smartphone,
@@ -16,12 +15,7 @@ import {
 } from '~/components/uniwind-icons'
 import { GestureHandlerRootView } from '~/components/uniwind-native-components'
 import { translate } from '~/i18n/translate'
-import {
-  loadTerminalAutocompleteEnabled,
-  loadTerminalTextScale,
-  saveTerminalAutocompleteEnabled,
-  saveTerminalTextScale
-} from '~/storage/preferences'
+import { loadTerminalTextScale, saveTerminalTextScale } from '~/storage/preferences'
 import { setTerminalAutoRestoreFitMsForHost } from '~/terminal/auto-restore-fit-state'
 import {
   AUTO_RESTORE_FIT_OPTIONS,
@@ -107,27 +101,6 @@ export default function TerminalSettingsScreen(): React.JSX.Element {
     }
     setTextScale(opt.scale)
     void saveTerminalTextScale(opt.scale)
-  }, [])
-
-  const [autocompleteEnabled, setAutocompleteEnabled] = useState(false)
-  // Why: a fast toggle before the initial load resolves must win — otherwise the
-  // delayed read would clobber the user's choice with the stored (stale) value.
-  const userToggledAutocompleteRef = useRef(false)
-  useEffect(() => {
-    let stale = false
-    void loadTerminalAutocompleteEnabled().then((enabled) => {
-      if (!stale && !userToggledAutocompleteRef.current) {
-        setAutocompleteEnabled(enabled)
-      }
-    })
-    return () => {
-      stale = true
-    }
-  }, [])
-  const toggleAutocomplete = useCallback((next: boolean) => {
-    userToggledAutocompleteRef.current = true
-    setAutocompleteEnabled(next)
-    void saveTerminalAutocompleteEnabled(next)
   }, [])
 
   useEffect(() => {
@@ -302,26 +275,6 @@ export default function TerminalSettingsScreen(): React.JSX.Element {
               <ChevronRight size={16} colorClassName="accent-muted-foreground" />
             </View>
           </Pressable>
-        </MobileContentSection>
-
-        <Text className="text-muted-foreground mt-6 mb-1 px-1 text-xs font-semibold tracking-wide">
-          {translate('mobile.terminalSettings.keyboard.heading', 'KEYBOARD INPUT')}
-        </Text>
-        <Text className="text-muted-foreground px-1 text-xs leading-5">
-          {translate(
-            'mobile.terminalSettings.keyboard.description',
-            "Enable phone-style autocomplete, autocorrect, and spelling suggestions in the terminal command bar. Off by default so the keyboard never rewrites commands, flags, or paths. Direct keyboard input (when keys go straight to the terminal) always sends raw keystrokes, so suggestions don't apply there."
-          )}
-        </Text>
-        <MobileContentSection className="mt-2">
-          <SettingsToggleRow
-            label={translate(
-              'mobile.terminalSettings.autocomplete.label',
-              'Autocomplete & autocorrect'
-            )}
-            onValueChange={toggleAutocomplete}
-            value={autocompleteEnabled}
-          />
         </MobileContentSection>
 
         <TerminalShortcutSettings

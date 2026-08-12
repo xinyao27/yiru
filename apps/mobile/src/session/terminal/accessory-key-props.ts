@@ -1,10 +1,6 @@
 import type { PressableProps } from 'react-native'
 
-export type MobileTerminalAccessoryIcon =
-  | 'device-mobile'
-  | 'dismiss-keyboard'
-  | 'keyboard'
-  | 'laptop'
+export type MobileTerminalAccessoryIcon = 'device-mobile' | 'laptop'
 
 type MobileTerminalAccessoryKeyContent =
   | { icon: MobileTerminalAccessoryIcon; label?: never }

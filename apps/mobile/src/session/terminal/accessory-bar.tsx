@@ -18,20 +18,17 @@ export type MobileTerminalAccessoryBarProps = {
   canSend: boolean
   controlModeActive: boolean
   customKeys: readonly CustomKey[]
-  isCommandInputVisible: boolean
   isAttaching: boolean
   isPhoneDisplayMode: boolean
   liveInputEnabled: boolean
   onAttachImage: ((source: MobileImageSource) => void) | null
   onAccessoryInput: (input: TerminalAccessoryInput) => void
   onCustomKeyLongPress: (key: CustomKey) => void
-  onToggleCommandInput: () => void
   onPaste: () => void
   onRepeatStart: (input: TerminalAccessoryInput) => void
   onRepeatStop: () => void
   onToggleControl: () => void
   onToggleDisplayMode: () => void
-  onToggleLiveInput: () => void
 }
 
 export function MobileTerminalAccessoryBar({
@@ -41,19 +38,16 @@ export function MobileTerminalAccessoryBar({
   controlModeActive,
   customKeys,
   isAttaching,
-  isCommandInputVisible,
   isPhoneDisplayMode,
   liveInputEnabled,
   onAccessoryInput,
   onAttachImage,
   onCustomKeyLongPress,
-  onToggleCommandInput,
   onPaste,
   onRepeatStart,
   onRepeatStop,
   onToggleControl,
-  onToggleDisplayMode,
-  onToggleLiveInput
+  onToggleDisplayMode
 }: MobileTerminalAccessoryBarProps): React.JSX.Element {
   const renderBuiltInKey = (key: TerminalAccessoryKey): React.JSX.Element => (
     <MobileTerminalAccessoryKey
@@ -159,23 +153,6 @@ export function MobileTerminalAccessoryBar({
               />
             ))}
           </ScrollView>
-        </View>
-        <View className="h-11 w-11 shrink-0 items-center justify-center">
-          <MobileTerminalAccessoryKey
-            accessibilityHint={translate(
-              'mobile.terminal.commandInputToggleHint',
-              'Tap to show or hide the command input. Long press to switch input mode.'
-            )}
-            accessibilityLabel={
-              isCommandInputVisible
-                ? translate('mobile.terminal.hideCommandInput', 'Hide command input')
-                : translate('mobile.terminal.showCommandInput', 'Show command input')
-            }
-            icon={isCommandInputVisible ? 'dismiss-keyboard' : 'keyboard'}
-            isCircular
-            onLongPress={onToggleLiveInput}
-            onPress={onToggleCommandInput}
-          />
         </View>
       </View>
     </View>
