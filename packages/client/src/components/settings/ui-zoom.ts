@@ -2,7 +2,7 @@ import { shellClient } from '~renderer/runtime/shell-client'
 const isMac = navigator.userAgent.includes('Mac')
 
 /**
- * Apply a UI zoom level change: sets webFrame zoom via the preload API,
+ * Apply a UI zoom level change through the shell UI contract,
  * updates the CSS variable used to compensate the traffic-light pad,
  * and repositions the native macOS traffic lights to stay aligned.
  */

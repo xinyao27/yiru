@@ -1128,7 +1128,7 @@ type RuntimeHeadlessTerminal = {
   // Why: serialize can race with newer writes appended to writeChain; return
   // the seq actually painted into this emulator, not the latest PTY seq.
   outputSequence: number
-  // Why: terminal-multiplex.md §11.2 forbids estimating UTF-8 byte position
+  // Why: docs/reference/terminal-multiplex.md §11.2 forbids estimating UTF-8 byte position
   // from the legacy UTF-16 sequence. The authoritative model records both.
   wireByteSequence: bigint
   writeChain: Promise<void>
@@ -6887,7 +6887,7 @@ export class YiruRuntimeService {
     ptyId: string,
     streams: Map<string, { participates: boolean; blocked: boolean; pendingRatio: number }>
   ): void {
-    // Why: terminal-multiplex.md OQ-5 lets one progressing interested viewer keep
+    // Why: docs/reference/terminal-multiplex.md OQ-5 lets one progressing interested viewer keep
     // the producer live; only all-blocked viewers may pause the shared PTY.
     const interested = Array.from(streams.values()).filter((stream) => stream.participates)
     const isPaused = this.terminalMultiplexPausedProducers.has(ptyId)

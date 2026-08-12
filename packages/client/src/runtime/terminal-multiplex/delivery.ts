@@ -117,7 +117,7 @@ export class RemoteTerminalDelivery {
   }
 
   prepareForNewEpoch(): void {
-    // Why: terminal-multiplex.md OQ-6 always restores a new epoch from an
+    // Why: docs/reference/terminal-multiplex.md OQ-6 always restores a new epoch from an
     // authoritative snapshot; raw bytes from the previous epoch are never resumed.
     this.snapshotting = true
     this.snapshot.clear()

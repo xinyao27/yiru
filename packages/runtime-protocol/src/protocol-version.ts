@@ -19,7 +19,7 @@ import { REMOTE_UPDATER_CONTROL_RUNTIME_CAPABILITY } from './runtime-capability-
 // this client build requires a newer host. Exact app-version equality is
 // never required; these numbers define the supported compatibility window.
 
-// Why: terminal-multiplex.md §22 is a coordinated, single-version wire cutover.
+// Why: docs/reference/terminal-multiplex.md §22 is a coordinated, single-version wire cutover.
 // Version 5 replaces the 16-byte terminal stream, changes sequence units to UTF-8
 // bytes, and requires ticketed exclusive admission; both compatibility floors move
 // with it so neither side can silently negotiate the removed decoder or adapter.

@@ -3182,7 +3182,7 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
           })
         } catch (error) {
           // Why: preserving automation history labels is best-effort; a stale
-          // stale preload bridge must not block worktree removal cleanup.
+          // stale renderer state must not block worktree removal cleanup.
           console.warn('Failed to snapshot automation workspace name:', error)
         }
       }

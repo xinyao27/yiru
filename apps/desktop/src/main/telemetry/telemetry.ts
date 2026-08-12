@@ -1,8 +1,8 @@
-// IPC surface for the telemetry transport. Four handlers, all renderer-
-// facing: one pipe (`telemetry:track`), one consent-mutation
-// (`telemetry:setOptIn`), one silent-persist for the banner ✕ path
-// (`telemetry:acknowledgeBanner`), and one read-only getter for effective
-// consent state (`telemetry:getConsentState`, used by the Privacy pane to
+// Shell oRPC service for telemetry. Four procedures are renderer-facing:
+// one pipe (`shell.telemetry.track`), one consent mutation
+// (`shell.telemetry.setOptIn`), one silent persist for the banner ✕ path
+// (`shell.telemetry.acknowledgeBanner`), and one read-only getter for effective
+// consent state (`shell.telemetry.getConsentState`, used by the Privacy pane to
 // render env-var blocked-state helper text). Every track call from the
 // renderer lands here and funnels into the same `track()` the main-
 // originated events go through — the validator is the single enforcement
@@ -11,7 +11,7 @@
 // Threat model: the renderer renders attacker-controllable content (agent
 // output, MCP responses, file contents, markdown, diff views). An
 // XSS-equivalent rendering bug in any of those surfaces gives an attacker
-// the ability to invoke `window.api.telemetry*` at will. The handlers
+// the ability to invoke authenticated `shell.telemetry.*` calls at will. The handlers
 // below are designed to fail closed under that model:
 //
 //   - Strict main-side type narrows. TypeScript types do not survive IPC
@@ -46,7 +46,7 @@ import { getCohortAtEmit } from './cohort-classifier'
 import { resolveConsent, type ConsentState } from './consent'
 import { getOnboardingCohortAtEmit } from './onboarding-cohort-classifier'
 
-// Module-level store reference, populated by `registerTelemetryHandlers`.
+// Module-level store reference, populated by `initializeShellTelemetryService`.
 // The handlers need a synchronous read of `settings.telemetry` at call time
 // to derive `via` before any mutation runs — threading the store through
 // every handler closure is the least-surprising shape for that, and it

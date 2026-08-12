@@ -3,7 +3,7 @@ import { contextBridge, ipcRenderer } from 'electron'
 import { RUNTIME_LOOPBACK_CREDENTIALS_CHANNEL } from '~shared/runtime-loopback'
 
 const runtimeConnection: RuntimeConnectionBootstrap = {
-  // Why: terminal-multiplex.md §21.1 permits plaintext loopback only when the
+  // Why: docs/reference/terminal-multiplex.md §21.1 permits plaintext loopback only when the
   // process token reaches this isolated renderer through the audited preload.
   // The token never enters a URL, storage, logs, breadcrumbs, or analytics;
   // every capability call after this bootstrap is authenticated oRPC over WS.

@@ -2542,15 +2542,9 @@ async function createAndRefreshWebSessionTerminal(args: {
   return true
 }
 
-// Why: `session.tabs.subscribeAll` is called by BOTH the web browser client
-// and Electron's desktop-as-remote-client path. On web, `window.api.
-// runtimeEnvironments.subscribe` sends the raw `{id, method, params}` legacy
-// envelope with no capability negotiation, so a host that has retired this
-// method from its legacy dispatcher (Phase 6 D-stage) would answer
-// `method_not_found` — go through the negotiated oRPC client instead. On
-// Electron the same preload member is routed by main to the target host's
-// legacy dispatcher via its own (already capability-aware) shared-control
-// connection, so that path is left exactly as it was.
+// Why: browsers own their peer connection directly, while Electron routes a
+// selected environment through the desktop runtime client. Both paths carry
+// the same typed `session.tabs.subscribeAll` oRPC stream.
 function subscribeAllWebSessionTabs(
   environmentId: string,
   isDisposed: () => boolean,

@@ -1,11 +1,11 @@
 import { shellClient } from '~renderer/runtime/shell-client'
-// Typed renderer-side wrapper around the preload bridge.
+// Typed renderer-side wrapper around the shell telemetry contract.
 //
 // Renderer call sites import `track` from this module rather than reaching
 // for `shellClient.telemetry.track` directly, because this wrapper is what
-// gives them the `EventMap`-based type safety. The preload bridge is
+// gives them the `EventMap`-based type safety. The wire contract is
 // deliberately typed as a loose `(name: string, props: Record<string,
-// unknown>) => Promise<void>` so it can cross the IPC boundary without
+// unknown>) => Promise<void>` so it can cross the process boundary without
 // pretending the renderer's types are load-bearing — the main-side
 // validator is the single enforcement point.
 //

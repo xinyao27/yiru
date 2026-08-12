@@ -5,12 +5,8 @@ import { bindSubscriptionAbort } from './subscription-abort'
 
 let hostProgressEventSubscriptionSeq = 0
 
-// Why: Phase 6 D-stage — plain function with the emit-based streaming shape
-// (`RuntimeOrpcStreamHandler`), called directly from
-// orpc/router-direct/runtime-events.ts via `wireRuntimeStream` instead of
-// through a `defineStreamingMethod` legacy registration. Retired (切片 73):
-// same reasoning as driver-events.ts — no caller reaches this leaf through
-// the bare `window.api.runtimeEnvironments.subscribe` channel.
+// Why: the direct runtime-events router uses this emit-based streaming shape
+// for desktop, web, and mobile oRPC subscriptions without a second transport.
 export async function handleRuntimeProgressEventsSubscribe(
   _params: void,
   { runtime, connectionId, signal }: RpcContext,

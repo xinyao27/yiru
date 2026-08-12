@@ -34,7 +34,7 @@ These fail CI or are outright forbidden. No exceptions inside a feature task.
 ```
 apps/desktop/src/
   main/       Electron main: OS, git, PTY, agent providers, IPC handlers
-  preload/    the audited contextBridge implementation
+  preload/    audited bootstrap-only contextBridge for loopback credentials
   relay/      headless runtime server (local, SSH, and remote hosts dispatch through it)
   cli/        the `yiru` CLI
   types/      desktop build and runtime ambient declarations
@@ -42,7 +42,7 @@ apps/mobile/  Expo app: app/ = routes, src/ = features
 apps/web/     landing site and product web entrypoints
 packages/
   client/     source-only workbench UI consumed by desktop and web hosts
-  shared/     cross-process pure logic, types, and the preload contract
+  shared/     cross-process pure logic, types, and the bootstrap contract
   workbench-model/, runtime-protocol/, mobile-relay-protocol/
               cross-client domain and transport contracts
 skills/       agent skill packages shipped to end users, one folder per skill
@@ -66,15 +66,19 @@ is generated from it by `scripts/generate-bundled-skill-guides.mjs`, and
 
 **Import direction is one-way.** `packages/client` never imports desktop `main` or `preload`.
 `packages/shared` never imports desktop, client, or `electron` modules — Node built-ins are fine.
-`relay` and `cli` may reuse `main` modules. The client reaches its Electron host only through the
-preload contract in `packages/shared/src/preload/`. Pure types or logic used by more than one
-desktop process belong in `packages/shared`, even when no other app consumes them.
+`relay` and `cli` may reuse `main` modules. The preload exposes only the loopback endpoint and
+process token defined in `packages/shared/src/preload/`; it exposes no product capability. After
+that bootstrap, renderer-to-host traffic has one transport: authenticated oRPC over WebSocket.
+Use `shell.*` for capabilities owned by the local Electron shell or browser process, and the
+runtime contract for capabilities executed by the local or selected runtime host. Web supplies its
+runtime connection explicitly and never emulates an Electron preload API. Pure types or logic used
+by more than one desktop process belong in `packages/shared`, even when no other app consumes them.
 
 `@yiru/client` is independently consumable source. Hosts import only its declared package exports;
 they never reach into `packages/client/src`. Its `@yiru/client/vite` preset owns source resolution,
 React/Tailwind plugins, and client aliases, while the package owns its own typecheck, lint, and i18n
-generation. Changing client implementation must not require a desktop edit unless the shared
-preload contract itself changes.
+generation. Changing client implementation must not require a desktop edit unless the runtime
+protocol or the bootstrap handshake itself changes.
 
 ### Where a new file goes
 
@@ -103,11 +107,11 @@ Past ~15 files, a feature folder has sub-features inside it — nest them (`nati
 
 **A typical feature change should touch 1–3 files in one folder.** If a small behavior change needs a dozen edits, that's a structural defect — the feature is smeared across the tree, or you're editing the wrong layer.
 
-Crossing the process boundary is the one legitimate multi-file change. Keep it to four touchpoints
-sharing one feature name: the contract in `packages/shared/src/<feature>/`, the handler in
-`apps/desktop/src/main/<feature>/`, the preload bridge in `apps/desktop/src/preload/index.ts`, and
-the caller in `packages/client/src/<feature>/`. A fifth layer is indirection that doesn't earn its
-keep.
+Crossing the process boundary is the one legitimate multi-file change. Keep a runtime capability to
+three touchpoints sharing one feature name: the contract in `packages/runtime-protocol/src/`, the
+handler in `apps/desktop/src/main/runtime/`, and the caller in `packages/client/src/`. A local
+shell capability uses the same three-point shape under the `shell.*` contract. The preload is not a
+capability layer; touch it only when the loopback bootstrap handshake changes.
 
 ---
 

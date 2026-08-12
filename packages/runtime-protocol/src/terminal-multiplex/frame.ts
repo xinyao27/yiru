@@ -128,7 +128,7 @@ export function decodeTerminalMultiplexFrame(
     if (lengthError) {
       return decodeFailure(1009, 'invalid_length', { opcode: opcodeValue, routeId })
     }
-    // Why: terminal-multiplex.md §7.3 scopes an unknown opcode to its stream.
+    // Why: docs/reference/terminal-multiplex.md §7.3 scopes an unknown opcode to its stream.
     // Error is an internal sentinel; unsupportedOpcode prevents it from being re-encoded.
     return {
       ok: true,

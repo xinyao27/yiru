@@ -189,7 +189,7 @@ export class YiruRuntimeRpcServer {
       router: runtimeOrpcRouter,
       connections: this.terminalMultiplex,
       userDataPath,
-      // Why: terminal-multiplex.md §21.1 makes these preferences part of
+      // Why: docs/reference/terminal-multiplex.md §21.1 makes these preferences part of
       // plaintext admission. create-main-window.ts fixes all three to true.
       browserSecurity: { contextIsolation: true, sandbox: true, webSecurity: true }
     })

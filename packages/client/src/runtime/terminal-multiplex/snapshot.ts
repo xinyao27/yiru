@@ -8,7 +8,7 @@ import {
   TERMINAL_MULTIPLEX_SNAPSHOT_CHUNK_DATA_BYTES
 } from '@yiru/runtime-protocol/terminal-multiplex/snapshot-records'
 
-// Why: terminal-multiplex.md OQ-2 selects one 2 MiB snapshot cap for every lane;
+// Why: docs/reference/terminal-multiplex.md OQ-2 selects one 2 MiB snapshot cap for every lane;
 // telemetry can justify raising it later without creating a decoder fallback.
 const REMOTE_TERMINAL_SNAPSHOT_MAX_BYTES = 2 * 1024 * 1024
 

@@ -203,7 +203,7 @@ export class TerminalMultiplexStreamTelemetry {
 }
 
 function randomFingerprint(): string {
-  // Why: terminal-multiplex.md §23 forbids raw identifiers. Per-connection
+  // Why: docs/reference/terminal-multiplex.md §23 forbids raw identifiers. Per-connection
   // random labels correlate samples without making environment or terminal IDs recoverable.
   return randomBytes(6).toString('hex')
 }

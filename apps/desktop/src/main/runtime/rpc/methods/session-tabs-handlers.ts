@@ -154,13 +154,8 @@ export function handleMarkdownSaveTab(params: SaveMarkdownTabInput, { runtime }:
   )
 }
 
-// Why: kept as a plain streaming handler (not `defineStreamingMethod`) so
-// orpc/router-direct.ts's `wireRuntimeStream` and the legacy
-// `defineStreamingMethod` registration in session-tabs.ts can both call the
-// same subscription logic — the legacy registration must stay (Phase 6
-// D-stage: web and Electron-as-remote-client reach it via
-// `window.api.runtimeEnvironments.subscribe`'s bare-string channel, which
-// never negotiates oRPC; see docs/runtime-orpc-migration.md 切片 70/73).
+// Why: the direct oRPC router and its subscription lifecycle share this plain
+// streaming handler, including AbortSignal cleanup for every client lane.
 export async function handleSessionTabsSubscribe(
   params: WorktreeTabSelectorInput,
   { runtime, connectionId, requestId, signal }: RpcContext,

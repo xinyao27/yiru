@@ -44,7 +44,7 @@ export class TerminalMultiplexConnections {
     environmentId: string,
     bulkEndpoint: string
   ): { bulkTicket: string; bulkEndpoint: string; expiresAt: number; maxFrameBytes: number } {
-    // Why: terminal-multiplex.md OQ-4 defers relay QoS. This release isolates
+    // Why: docs/reference/terminal-multiplex.md OQ-4 defers relay QoS. This release isolates
     // bulk on a dedicated admitted connection without inspecting encrypted opcodes.
     this.pruneTickets()
     const bulkTicket = randomBytes(32).toString('base64url')

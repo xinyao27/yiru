@@ -142,11 +142,9 @@ export function isWebRuntimeClient(): boolean {
 
 // Why: a few call sites (e.g. the remote terminal pty transport) still address
 // a runtime procedure by a dot-joined method string instead of a statically
-// known contract path. Walk the negotiated client the same way the web shim's
-// `callOrpcProcedure` does, instead of each of those call sites hand-rolling
-// its own compatibility dispatcher
-// directly — that bare-string channel skips capability negotiation entirely
-// (see docs/runtime-orpc-migration.md Phase 6 D-stage).
+// known contract path. Walk the negotiated client once here so those callers
+// keep the same authenticated oRPC transport and capability negotiation as
+// statically selected procedures.
 export async function callRuntimeOrpcByPath<TResult = unknown>(
   target: RuntimeClientTarget,
   path: readonly string[],

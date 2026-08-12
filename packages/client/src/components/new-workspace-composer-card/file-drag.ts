@@ -50,10 +50,8 @@ export function useComposerFileDragOver(): {
     [reset]
   )
 
-  // Why: the preload bridge calls stopPropagation on native `drop` events so
-  // React's onDrop never fires on the composer card. Listen at the document
-  // level (also capture-phase) to reset the drag highlight whenever any drop
-  // or dragend occurs anywhere in the window.
+  // Why: a drop may resolve on a nested or competing target, so listen at the
+  // document capture phase and always clear the gesture highlight.
   React.useEffect(() => {
     const handler = (): void => {
       reset()

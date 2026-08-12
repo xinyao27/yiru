@@ -5,10 +5,9 @@ import { bindSubscriptionAbort } from './subscription-abort'
 
 let browserGuestEventSubscriptionSeq = 0
 
-// Why: direct-wired only (orpc/router-direct/browser-streams.ts) — the web shim's
-// own `client.browser.guestEvents.subscribe` (renderer/web/preload-api.ts) is its
-// only caller and always negotiates real oRPC, so this never needs a legacy twin
-// (docs/runtime-orpc-migration.md Phase 6 D-stage). The feed is host-wide — every
+// Why: direct-wired only (orpc/router-direct/browser-streams.ts) — its client
+// always negotiates authenticated oRPC, so this needs no alternate transport.
+// The feed is host-wide — every
 // browser page id, navigated URL, and download filename on the machine flows
 // through it — so it carries the same host/host grant the rest of the browser
 // surface requires and can never be narrowed to a single worktree.

@@ -566,7 +566,7 @@ export async function subscribeRemoteRuntimeRequest<TResult>(
       if (state !== 'ready' || !ws || ws.readyState !== WebSocket.OPEN) {
         return false
       }
-      // Why: terminal-multiplex.md OQ-3 keeps the existing mobile secretbox
+      // Why: docs/reference/terminal-multiplex.md OQ-3 keeps the existing mobile secretbox
       // framing and key schedule; the terminal inner protocol never guesses a suite.
       ensureSendQueue(ws).enqueue(Buffer.from(encryptBytes(bytes, sharedKey)))
       return true

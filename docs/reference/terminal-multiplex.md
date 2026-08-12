@@ -1,6 +1,6 @@
 # Terminal multiplex 协议规格
 
-状态：Proposed，等待人工评审<br>
+状态：Implemented，现行参考<br>
 目标 capability：terminal.multiplex<br>
 适用客户端：Electron desktop、web、mobile，以及经 relay 接入的客户端<br>
 协议所有者：runtime host 的 terminal transport 模块

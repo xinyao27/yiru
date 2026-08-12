@@ -1749,7 +1749,7 @@ export class BrowserManager {
     return true
   }
 
-  // Why: guest browser surfaces are isolated from Yiru's preload bridge, so
+  // Why: guest browser surfaces are isolated from Yiru's bootstrap preload, so
   // the registered page handle owns the optional backend devtools escape hatch.
   async openDevTools(browserTabId: string): Promise<boolean> {
     const page = this.pageRegistry.get(browserTabId)

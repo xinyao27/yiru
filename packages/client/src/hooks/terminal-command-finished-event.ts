@@ -8,7 +8,7 @@ export type TerminalCommandFinishedEventDetail = {
 // decoupled consumers (e.g. git status refresh) react to shell commands
 // finishing without reaching into terminal internals.
 export function dispatchTerminalCommandFinishedEvent(worktreeId: string): void {
-  // Why: unit tests and non-DOM renderer shims may expose only the preload API.
+  // Why: non-DOM renderer hosts may not provide the browser event target methods.
   if (typeof window.dispatchEvent !== 'function') {
     return
   }

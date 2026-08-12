@@ -38,8 +38,8 @@ export function createShellServicesRouter() {
     ping: implementer.ping.handler(() => ({ pong: true as const, respondedAtMs: Date.now() })),
     // Why: Phase 5 slice S3 — job3 (driving the OS notification centre) needs
     // Electron's main-process Notification API, unavailable in this renderer
-    // context, so this is a thin pass-through to the preload bridge that
-    // reaches the real implementation in main/notifications/notifications.ts.
+    // context, so this delegates through the authenticated shell notification
+    // contract to main/notifications/notifications.ts.
     notifications: {
       display: implementer.notifications.display.handler(({ input }) =>
         shellClient.notifications.displayNative(input)

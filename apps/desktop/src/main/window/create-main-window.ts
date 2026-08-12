@@ -515,7 +515,7 @@ export function createMainWindow(
 
     delete webPreferences.preload
     // Why: older Electron builds expose preloadURL alongside preload; delete
-    // both so the guest surface cannot inherit the main preload bridge.
+    // both so the guest surface cannot inherit the main bootstrap preload.
     delete (webPreferences as Record<string, unknown>).preloadURL
     webPreferences.nodeIntegration = false
     webPreferences.nodeIntegrationInSubFrames = false
@@ -546,8 +546,8 @@ export function createMainWindow(
     )
   })
 
-  // Block ALL in-window navigations to prevent remote pages from inheriting
-  // the privileged preload bridge (PTY, filesystem, etc.).
+  // Block ALL in-window navigations so remote pages can never reach the main
+  // renderer's loopback bootstrap credentials.
   // In dev mode, allow navigations to the local dev server (e.g. HMR reloads).
   mainWindow.webContents.on('will-navigate', (event, url) => {
     const externalUrl = normalizeExternalBrowserUrl(url)

@@ -22,8 +22,8 @@ function isWebRuntimeClient(): boolean {
 // Why: the manage rail had no web coverage at all — a pure `unsupported` stub
 // — so there is nothing web-specific to preserve. Both platforms resolve the
 // same way: local when no runtime environment is paired, that environment's
-// host otherwise (the web shim keeps `activeRuntimeEnvironmentId` synced to
-// whichever host it is connected to, so this is never actually undefined there).
+// host otherwise (the web runtime connection keeps `activeRuntimeEnvironmentId`
+// synced to its connected host, so this is never undefined there).
 function activeSkillManageTarget(): RuntimeClientTarget {
   return getActiveRuntimeTarget(useAppStore.getState().settings)
 }

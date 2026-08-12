@@ -169,8 +169,8 @@ export function useGlobalFileDrop(): void {
               }
             }
 
-            // Why: the preload bridge already proved this OS drop landed on the
-            // tab-strip editor target. Keeping the editor-open path centralized
+            // Why: the shell event identifies the tab-strip editor target.
+            // Keeping the editor-open path centralized
             // here avoids the regression where CLI drops were all coerced into
             // editor tabs once the renderer lost the original drop surface.
             store.setActiveTabType('editor')
