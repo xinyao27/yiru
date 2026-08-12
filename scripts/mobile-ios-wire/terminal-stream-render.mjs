@@ -30,9 +30,7 @@ ${cases(contract.displayModes)}
 }
 
 enum TerminalMultiplexDriverKind: String, Codable, Sendable {
-    case idle
-    case desktop
-    case mobile
+${cases(contract.drivers.map(({ kind }) => kind))}
 }
 
 enum TerminalMultiplexResizeReason: String, Codable, Sendable {
@@ -96,6 +94,19 @@ struct TerminalMultiplexSubscribedRecord: Decodable, Sendable {
 struct TerminalMultiplexDriverRecord: Decodable, Sendable {
     let kind: TerminalMultiplexDriverKind
     let clientId: String?
+
+    private enum CodingKeys: String, CodingKey {
+        case kind
+        case clientId
+    }
+
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        kind = try container.decode(TerminalMultiplexDriverKind.self, forKey: .kind)
+        switch kind {
+${renderDriverDecodeCases(contract.drivers)}
+        }
+    }
 }
 
 struct TerminalMultiplexResizeRecord: Encodable, Sendable {
@@ -158,4 +169,33 @@ function swiftCase(value) {
     .slice(1)
     .map((word) => `${word[0].toUpperCase()}${word.slice(1)}`)
     .join('')}`
+}
+
+function renderDriverDecodeCases(drivers) {
+  return drivers
+    .map(({ kind, hasClientID }) => {
+      const label = `        case .${swiftCase(kind)}:`
+      if (hasClientID) {
+        return `${label}
+            let value = try container.decode(String.self, forKey: .clientId)
+            guard !value.isEmpty else {
+                throw DecodingError.dataCorruptedError(
+                    forKey: .clientId,
+                    in: container,
+                    debugDescription: "Terminal driver client ID must not be empty"
+                )
+            }
+            clientId = value`
+      }
+      return `${label}
+            guard !container.contains(.clientId) else {
+                throw DecodingError.dataCorruptedError(
+                    forKey: .clientId,
+                    in: container,
+                    debugDescription: "Terminal driver client ID is not allowed"
+                )
+            }
+            clientId = nil`
+    })
+    .join('\n')
 }

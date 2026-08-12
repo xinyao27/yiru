@@ -1,3 +1,4 @@
+import { readTerminalDriverContract } from './terminal-driver-contract.mjs'
 import { renderTerminalStreamRecords } from './terminal-stream-render.mjs'
 
 export function loadTerminalWireSource(packageRequire, z) {
@@ -380,6 +381,18 @@ function renderBulkInvocation(schemas) {
     peerPayload.properties.e,
     'MobileTerminalMultiplexPeerMessageSchema.p.e'
   )
+  const peerData = requireObject(
+    peerPayload.properties.d,
+    'MobileTerminalMultiplexPeerMessageSchema.p.d'
+  )
+  const peerJSON = requireObject(
+    peerData.properties.json,
+    'MobileTerminalMultiplexPeerMessageSchema.p.d.json'
+  )
+  const readyType = requireStringLiteral(
+    peerJSON.properties.type,
+    'MobileTerminalMultiplexPeerMessageSchema.p.d.json.type'
+  )
   return `enum TerminalMultiplexPeerEventKind: String, Codable, Sendable {
 ${peerEvents.map((value) => `    case ${value}`).join('\n')}
 }
@@ -424,7 +437,7 @@ struct TerminalMultiplexReadyEvent: Decodable, Sendable {
 }
 
 enum TerminalMultiplexReadyType: String, Codable, Sendable {
-    case ready
+    case ${swiftCase(readyType)} = ${JSON.stringify(readyType)}
 }`
 }
 
@@ -508,6 +521,10 @@ function readStreamRecordContract(schemas, wire) {
     requireStringEnum(objects[schemaName].properties[key], `${schemaName}.${key}`)
   const literalValue = (schemaName, key) =>
     requireIntegerLiteral(objects[schemaName].properties[key], `${schemaName}.${key}`)
+  const drivers = readTerminalDriverContract(
+    objects.TerminalMultiplexSubscribedRecordSchema.properties.driver,
+    'TerminalMultiplexSubscribedRecordSchema.driver'
+  )
   return {
     wire,
     clientTypes: enumValues('TerminalMultiplexClientRecordSchema', 'type'),
@@ -525,6 +542,7 @@ function readStreamRecordContract(schemas, wire) {
     },
     ptyStates: enumValues('TerminalMultiplexSubscribedRecordSchema', 'ptyState'),
     displayModes: enumValues('TerminalMultiplexSubscribedRecordSchema', 'displayMode'),
+    drivers,
     initialStates: enumValues('TerminalMultiplexSubscribedRecordSchema', 'initialState'),
     resizeReasons: enumValues('TerminalMultiplexResizeRecordSchema', 'reason'),
     endReasons: enumValues('TerminalMultiplexEndRecordSchema', 'reason'),
@@ -570,6 +588,14 @@ function renderSwiftConstants(values) {
 
 function lowerFirst(value) {
   return `${value.charAt(0).toLowerCase()}${value.slice(1)}`
+}
+
+function swiftCase(value) {
+  const words = value.split('-')
+  return `${words[0]}${words
+    .slice(1)
+    .map((word) => `${word[0].toUpperCase()}${word.slice(1)}`)
+    .join('')}`
 }
 
 function requireObject(value, name) {

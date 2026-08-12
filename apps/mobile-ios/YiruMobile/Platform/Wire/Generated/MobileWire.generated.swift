@@ -508,9 +508,9 @@ nonisolated enum TerminalMultiplexDisplayMode: String, Codable, Sendable {
 }
 
 nonisolated enum TerminalMultiplexDriverKind: String, Codable, Sendable {
-    case idle
-    case desktop
-    case mobile
+    case idle = "idle"
+    case desktop = "desktop"
+    case mobile = "mobile"
 }
 
 nonisolated enum TerminalMultiplexResizeReason: String, Codable, Sendable {
@@ -584,6 +584,46 @@ nonisolated struct TerminalMultiplexSubscribedRecord: Decodable, Sendable {
 nonisolated struct TerminalMultiplexDriverRecord: Decodable, Sendable {
     let kind: TerminalMultiplexDriverKind
     let clientId: String?
+
+    private enum CodingKeys: String, CodingKey {
+        case kind
+        case clientId
+    }
+
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        kind = try container.decode(TerminalMultiplexDriverKind.self, forKey: .kind)
+        switch kind {
+        case .idle:
+            guard !container.contains(.clientId) else {
+                throw DecodingError.dataCorruptedError(
+                    forKey: .clientId,
+                    in: container,
+                    debugDescription: "Terminal driver client ID is not allowed"
+                )
+            }
+            clientId = nil
+        case .desktop:
+            guard !container.contains(.clientId) else {
+                throw DecodingError.dataCorruptedError(
+                    forKey: .clientId,
+                    in: container,
+                    debugDescription: "Terminal driver client ID is not allowed"
+                )
+            }
+            clientId = nil
+        case .mobile:
+            let value = try container.decode(String.self, forKey: .clientId)
+            guard !value.isEmpty else {
+                throw DecodingError.dataCorruptedError(
+                    forKey: .clientId,
+                    in: container,
+                    debugDescription: "Terminal driver client ID must not be empty"
+                )
+            }
+            clientId = value
+        }
+    }
 }
 
 nonisolated struct TerminalMultiplexResizeRecord: Encodable, Sendable {
@@ -685,5 +725,5 @@ nonisolated struct TerminalMultiplexReadyEvent: Decodable, Sendable {
 }
 
 nonisolated enum TerminalMultiplexReadyType: String, Codable, Sendable {
-    case ready
+    case ready = "ready"
 }
