@@ -1,14 +1,9 @@
 import { type, type ContractRouter, type Schema } from '@orpc/contract'
 
 import type {
-  ClaudeUsageScanState,
-  ClaudeUsageSnapshot,
-  CodexUsageScanState,
-  CodexUsageSnapshot,
-  OpenCodeUsageScanState,
-  OpenCodeUsageSnapshot,
   ProviderUsageProvider,
-  ProviderUsageSnapshotInput
+  ProviderUsageSnapshotInput,
+  ProviderUsageTypesByProvider
 } from '../provider-usage.js'
 import { withAccess, type RuntimeProcedureMeta } from './access-meta.js'
 import type { ProviderRateLimits } from './accounts.js'
@@ -21,16 +16,10 @@ type ProviderUsageContractDescriptor<TScanState, TSnapshot> = {
   snapshot: Schema<TSnapshot, TSnapshot>
 }
 
-type ProviderUsageTypes = {
-  claude: { scanState: ClaudeUsageScanState; snapshot: ClaudeUsageSnapshot }
-  codex: { scanState: CodexUsageScanState; snapshot: CodexUsageSnapshot }
-  openCode: { scanState: OpenCodeUsageScanState; snapshot: OpenCodeUsageSnapshot }
-}
-
 type ProviderUsageContractDescriptors = {
   [Provider in ProviderUsageProvider]: ProviderUsageContractDescriptor<
-    ProviderUsageTypes[Provider]['scanState'],
-    ProviderUsageTypes[Provider]['snapshot']
+    ProviderUsageTypesByProvider[Provider]['scanState'],
+    ProviderUsageTypesByProvider[Provider]['snapshot']
   >
 }
 
@@ -55,16 +44,16 @@ function createProviderUsageContract<TScanState, TSnapshot>(
 
 const providerUsageContractDescriptors = {
   claude: {
-    scanState: type<ClaudeUsageScanState>(),
-    snapshot: type<ClaudeUsageSnapshot>()
+    scanState: type<ProviderUsageTypesByProvider['claude']['scanState']>(),
+    snapshot: type<ProviderUsageTypesByProvider['claude']['snapshot']>()
   },
   codex: {
-    scanState: type<CodexUsageScanState>(),
-    snapshot: type<CodexUsageSnapshot>()
+    scanState: type<ProviderUsageTypesByProvider['codex']['scanState']>(),
+    snapshot: type<ProviderUsageTypesByProvider['codex']['snapshot']>()
   },
   openCode: {
-    scanState: type<OpenCodeUsageScanState>(),
-    snapshot: type<OpenCodeUsageSnapshot>()
+    scanState: type<ProviderUsageTypesByProvider['openCode']['scanState']>(),
+    snapshot: type<ProviderUsageTypesByProvider['openCode']['snapshot']>()
   }
 } as const satisfies ProviderUsageContractDescriptors
 

@@ -245,3 +245,9 @@ export type OpenCodeUsageSnapshot = {
   projectBreakdown: OpenCodeUsageBreakdownRow[]
   recentSessions: OpenCodeUsageSessionRow[]
 }
+
+export type ProviderUsageTypesByProvider = {
+  claude: { scanState: ClaudeUsageScanState; snapshot: ClaudeUsageSnapshot }
+  codex: { scanState: CodexUsageScanState; snapshot: CodexUsageSnapshot }
+  openCode: { scanState: OpenCodeUsageScanState; snapshot: OpenCodeUsageSnapshot }
+}
