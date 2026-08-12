@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import logo from '~renderer/assets/brand/yiru-wordmark.png?url'
 import { Button } from '~renderer/components/ui/button'
 import {
   Tooltip,
@@ -214,14 +213,7 @@ export default function OnboardingFlow({
           )}
         >
           <div className="relative flex h-full min-h-0 flex-col px-6 pt-8 pb-6 sm:px-8 sm:pt-9 sm:pb-8">
-            <img
-              src={logo}
-              alt=""
-              aria-hidden="true"
-              className="h-7 w-auto shrink-0 invert dark:invert-0"
-            />
-
-            <div className="mt-10 flex items-center gap-2 transition-[margin-top] duration-[760ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none">
+            <div className="flex items-center gap-2">
               {flow.progressSteps.map(({ step, index: realStepIndex }, progressIdx) => {
                 const isActive = realStepIndex === stepIndex
                 const isDone = realStepIndex < stepIndex
