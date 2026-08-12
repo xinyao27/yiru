@@ -84,6 +84,7 @@ struct TerminalLiveView: View {
     private var statusTitle: LocalizedStringResource {
         switch model.phase {
         case .connecting: "Connecting"
+        case .reconnecting: "Reconnecting"
         case .restoring: "Restoring terminal"
         case .active: "Live"
         case .ended: "Terminal ended"
@@ -93,7 +94,8 @@ struct TerminalLiveView: View {
 
     private var statusIcon: String {
         switch model.phase {
-        case .connecting, .restoring: "arrow.trianglehead.2.clockwise.rotate.90"
+        case .connecting, .reconnecting, .restoring:
+            "arrow.trianglehead.2.clockwise.rotate.90"
         case .active: "waveform.path"
         case .ended: "stop.circle"
         case .failed: "wifi.exclamationmark"
@@ -104,13 +106,16 @@ struct TerminalLiveView: View {
         switch model.phase {
         case .active: .green
         case .failed: .orange
-        case .connecting, .restoring, .ended: .secondary
+        case .connecting, .reconnecting, .restoring, .ended: .secondary
         }
     }
 
     private var statusDetail: String? {
         if case .failed(let message) = model.phase {
             return String(localized: message)
+        }
+        if case .reconnecting(let attempt) = model.phase {
+            return String(localized: "Retry attempt \(attempt).")
         }
         if let directory = model.currentDirectory, !directory.isEmpty {
             return directory
@@ -121,7 +126,7 @@ struct TerminalLiveView: View {
 
     private var showsRetry: Bool {
         switch model.phase {
-        case .failed, .ended: true
+        case .reconnecting, .failed, .ended: true
         case .connecting, .restoring, .active: false
         }
     }

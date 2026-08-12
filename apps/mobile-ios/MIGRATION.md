@@ -57,5 +57,6 @@ Transport 是后续所有 feature 的地基，不能在 Swift 中凭 UI 需要�
 - [ ] Connection diagnostics log
 - [ ] Workspace create、activate、sleep、pin 与 host edit 操作
 - [x] Terminal multiplex、双屏 snapshot replay、parse ACK、flow control 与远程 PTY session
-- [ ] Terminal 多路复用复用、tab / accessory 输入、设置与自动 snapshot reconnect parity
+- [x] Terminal 断线后重建 ticket / bulk / epoch，并由 authoritative snapshot 自动恢复
+- [ ] Terminal bulk 连接复用、tab / accessory 输入与设置 parity
 - [ ] 其余功能切片

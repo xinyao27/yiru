@@ -77,6 +77,7 @@
     "Renderer and transport remain independent" : {},
     "Renderer ready" : {},
     "Restoring terminal" : {},
+    "Retry attempt %lld." : {},
     "Scan the QR code from Yiru on your desktop to add a host." : {},
     "Scan the QR code from Yiru on your desktop to add your first host." : {},
     "Scan the QR code shown by Yiru on your desktop." : {},

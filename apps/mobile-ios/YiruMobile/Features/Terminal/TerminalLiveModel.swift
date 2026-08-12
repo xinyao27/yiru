@@ -3,6 +3,7 @@ import Observation
 
 nonisolated enum TerminalLivePhase: Sendable {
     case connecting
+    case reconnecting(attempt: Int)
     case restoring
     case active
     case ended
@@ -96,35 +97,35 @@ final class TerminalLiveModel {
     func connect(attempt: Int) async {
         let connectionID = UUID()
         guard await beginConnection(connectionID: connectionID, attempt: attempt) else { return }
-        phase = .connecting
-        do {
-            let opened = try await runtime.openTerminalSession(
-                hostID: hostID,
-                terminalID: terminalID
-            )
-            try Task.checkCancellation()
-            guard activeConnectionID == connectionID else {
-                await opened.close()
-                return
+        var retryCount = 0
+        while activeConnectionID == connectionID, !Task.isCancelled {
+            phase = retryCount == 0 ? .connecting : .reconnecting(attempt: retryCount)
+            do {
+                let opened = try await openSession(connectionID: connectionID)
+                let didEnd = try await consume(opened)
+                if case .active = phase {
+                    retryCount = 0
+                }
+                await closeCurrentSession(connectionID: connectionID)
+                if didEnd {
+                    phase = .ended
+                    break
+                }
+            } catch is CancellationError {
+                break
+            } catch {
+                guard activeConnectionID == connectionID else { break }
+                if case .active = phase {
+                    retryCount = 0
+                }
+                await closeCurrentSession(connectionID: connectionID)
             }
-            session = opened
-            await opened.setAppState(appState)
-            phase = .restoring
-            if let gridSize {
-                enqueue(.resize(gridSize))
-            }
-            let events = await opened.events()
-            for try await event in events {
-                try Task.checkCancellation()
-                try await apply(event, to: opened)
-            }
-            if activeConnectionID == connectionID, !hasFailed {
-                phase = .ended
-            }
-        } catch is CancellationError {
-        } catch {
-            if activeConnectionID == connectionID {
-                phase = .failed("Yiru could not connect to this terminal.")
+            retryCount += 1
+            phase = .reconnecting(attempt: retryCount)
+            do {
+                try await Task.sleep(for: Self.retryDelay(attempt: retryCount))
+            } catch {
+                break
             }
         }
         await stopSession(connectionID: connectionID)
@@ -148,33 +149,52 @@ final class TerminalLiveModel {
         linkRequest = nil
     }
 
-    private var hasFailed: Bool {
-        guard case .failed = phase else { return false }
-        return true
+    private func openSession(connectionID: UUID) async throws -> any TerminalSession {
+        let opened = try await runtime.openTerminalSession(
+            hostID: hostID,
+            terminalID: terminalID
+        )
+        try Task.checkCancellation()
+        guard activeConnectionID == connectionID else {
+            await opened.close()
+            throw CancellationError()
+        }
+        session = opened
+        await opened.setAppState(appState)
+        phase = .restoring
+        if let gridSize {
+            enqueue(.resize(gridSize))
+        }
+        return opened
     }
 
-    private func apply(_ event: TerminalSessionEvent, to session: any TerminalSession) async throws
-    {
-        switch event {
-        case .subscribed:
-            phase = .active
-        case .snapshot(let snapshot):
-            phase = .restoring
-            title = snapshot.metadata.lastTitle ?? title
-            currentDirectory = snapshot.metadata.currentDirectory
-            surface.restore(snapshot)
-            try await session.acknowledgeSnapshot(id: snapshot.id)
-        case .output(let output):
-            surface.feed(output.bytes)
-            try await session.acknowledgeOutput(
-                endSequence: output.endSequence,
-                receiverQueueBytes: 0
-            )
-        case .clearBuffer:
-            surface.clear()
-        case .ended:
-            phase = .ended
+    private func consume(_ session: any TerminalSession) async throws -> Bool {
+        let events = await session.events()
+        for try await event in events {
+            try Task.checkCancellation()
+            switch event {
+            case .subscribed:
+                phase = .active
+            case .snapshot(let snapshot):
+                phase = .restoring
+                title = snapshot.metadata.lastTitle ?? title
+                currentDirectory = snapshot.metadata.currentDirectory
+                surface.restore(snapshot)
+                try await session.acknowledgeSnapshot(id: snapshot.id)
+                phase = .active
+            case .output(let output):
+                surface.feed(output.bytes)
+                try await session.acknowledgeOutput(
+                    endSequence: output.endSequence,
+                    receiverQueueBytes: 0
+                )
+            case .clearBuffer:
+                surface.clear()
+            case .ended:
+                return true
+            }
         }
+        return false
     }
 
     private func enqueue(_ action: TerminalSurfaceAction) {
@@ -202,7 +222,6 @@ final class TerminalLiveModel {
                 }
             } catch {
                 guard activeConnectionID == connectionID, !Task.isCancelled else { break }
-                phase = .failed("The terminal connection was interrupted.")
                 self.session = nil
                 pendingActions.removeAll(keepingCapacity: true)
                 await session.close()
@@ -233,10 +252,35 @@ final class TerminalLiveModel {
         await closingSession?.close()
     }
 
+    private func closeCurrentSession(connectionID: UUID) async {
+        guard activeConnectionID == connectionID else { return }
+        actionDrain?.cancel()
+        actionDrain = nil
+        pendingActions.removeAll(keepingCapacity: true)
+        let closingSession = session
+        session = nil
+        await closingSession?.close()
+    }
+
     private func requestOpenLink(_ rawLink: String) {
         guard let url = URL(string: rawLink), ["http", "https"].contains(url.scheme) else {
             return
         }
         linkRequest = url
+    }
+
+    private static func retryDelay(attempt: Int) -> Duration {
+        let delays: [Duration] = [
+            .milliseconds(500),
+            .seconds(1),
+            .seconds(2),
+            .seconds(4),
+            .seconds(8),
+            .seconds(15),
+            .seconds(30),
+            .seconds(60),
+        ]
+        guard attempt <= delays.count else { return .seconds(90) }
+        return delays[attempt - 1]
     }
 }
