@@ -45,6 +45,7 @@ Transport 是后续所有 feature 的地基，不能在 Swift 中凭 UI 需要�
 - [x] App composition root 与 typed route
 - [x] Liquid Glass token、surface、action group 和 catalog
 - [x] Terminal renderer 技术选型与 prototype 验收清单
-- [ ] Transport contract generation
-- [ ] Pairing 纵向切片
+- [x] Transport contract generation 与 drift check
+- [x] QR / paste / deep-link pairing、E2EE v2 direct authentication 与 Keychain host credential
+- [ ] Relay provisioning、endpoint rotation 与断线恢复
 - [ ] 其余功能切片

@@ -44,6 +44,11 @@ App ───────→ Features ───────→ DesignSystem
   `packages/mobile-relay-protocol`。Swift wire model 必须由可校验的生成步骤产生，不能在
   多个 feature 手抄一套相似 JSON 结构。
 
+Pairing 是第一个完整纵向切片：`PairingCodeDecoder` 只负责边界校验，`PairingModel` 只负责
+页面状态，`DirectPairingClient` 负责一次认证生命周期，`KeychainHostRepository` 负责持久
+身份。E2EE schema 与 domain constant 从 TypeScript source of truth 生成 Swift wire model；
+domain model 不向 UI 暴露 wire 类型。
+
 ## 状态与并发
 
 - SwiftUI 状态使用 `@State`、`@Binding`、`@Observable` 和 `@Environment`。
