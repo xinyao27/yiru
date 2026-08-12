@@ -60,7 +60,7 @@ const tuiAgent = z.string().transform((value, context) => {
   if (isTuiAgent(value)) {
     return value
   }
-  context.addIssue({ code: 'custom', message: 'Unknown agent' })
+  context.addIssue({ code: 'custom' })
   return z.NEVER
 })
 
@@ -134,7 +134,7 @@ const hostSettingOverrides = z
   .superRefine((value, context) => {
     for (const key of Object.keys(value)) {
       if (!normalizeExecutionHostId(key)) {
-        context.addIssue({ code: 'custom', message: `Invalid execution host: ${key}` })
+        context.addIssue({ code: 'custom' })
       }
     }
   })
@@ -164,7 +164,7 @@ const keybindingOverrides = z
   .superRefine((value, context) => {
     for (const actionId of Object.keys(value)) {
       if (!isKeybindingActionId(actionId)) {
-        context.addIssue({ code: 'custom', message: `Unknown keybinding action: ${actionId}` })
+        context.addIssue({ code: 'custom' })
       }
     }
   })
@@ -176,7 +176,7 @@ const keybindingOverrides = z
       }
       const normalized = normalizeKeybindingArrayForAction(actionId, bindings)
       if (!Array.isArray(normalized)) {
-        context.addIssue({ code: 'custom', message: `Invalid keybinding: ${actionId}` })
+        context.addIssue({ code: 'custom' })
         return z.NEVER
       }
       result[actionId] = normalized

@@ -15,7 +15,7 @@ const tuiAgent = z.string().transform((value, context) => {
   if (isTuiAgent(value)) {
     return value
   }
-  context.addIssue({ code: 'custom', message: 'Unknown agent' })
+  context.addIssue({ code: 'custom' })
   return z.NEVER
 })
 
@@ -23,7 +23,7 @@ const sourceControlAgent = z.string().transform((value, context) => {
   if (isTuiAgent(value) || isCustomAgentId(value)) {
     return value
   }
-  context.addIssue({ code: 'custom', message: 'Unknown source-control agent' })
+  context.addIssue({ code: 'custom' })
   return z.NEVER
 })
 

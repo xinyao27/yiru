@@ -16,7 +16,7 @@ const tuiAgent = z.string().transform((value, context) => {
   if (isTuiAgent(value)) {
     return value
   }
-  context.addIssue({ code: 'custom', message: 'Unknown agent' })
+  context.addIssue({ code: 'custom' })
   return z.NEVER
 })
 
@@ -25,7 +25,7 @@ const appIcon = z.string().transform((value, context) => {
   if (normalized === value) {
     return normalized
   }
-  context.addIssue({ code: 'custom', message: 'Unknown app icon' })
+  context.addIssue({ code: 'custom' })
   return z.NEVER
 })
 
@@ -34,7 +34,7 @@ const loaderStyle = z.string().transform((value, context) => {
   if (normalized === value) {
     return normalized
   }
-  context.addIssue({ code: 'custom', message: 'Unknown loader style' })
+  context.addIssue({ code: 'custom' })
   return z.NEVER
 })
 
@@ -43,7 +43,7 @@ const uiLanguage = z.string().transform((value, context) => {
   if (normalized === value) {
     return normalized
   }
-  context.addIssue({ code: 'custom', message: 'Unknown UI language' })
+  context.addIssue({ code: 'custom' })
   return z.NEVER
 })
 
@@ -51,7 +51,7 @@ const openInTargetKey = z.string().transform((value, context) => {
   if (isOpenInTargetKey(value)) {
     return value
   }
-  context.addIssue({ code: 'custom', message: 'Unknown open-in target' })
+  context.addIssue({ code: 'custom' })
   return z.NEVER
 })
 
