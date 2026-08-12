@@ -1,15 +1,15 @@
 import { encodeRuntimeOrpcSideChannelBinaryFrame } from '@yiru/runtime-protocol/orpc-peer-frame'
-import { withRemoteRuntimeTailscaleHint } from '@yiru/runtime-protocol/tailscale-endpoint'
 import type { MessagePortMain } from 'electron'
-import { connectRemoteRuntimeSharedControlOrpcTunnel } from '~main/runtime/environment-request-connections'
-import { supportsRuntimeOrpcTunnel } from '~main/runtime/environment-shared-control'
-import { resolveEnvironment } from '~shared/runtime-environment-store'
-import { getPreferredPairingOffer } from '~shared/runtime-environments'
 import {
   RUNTIME_ORPC_PORT_ERROR_MESSAGE,
   RUNTIME_ORPC_PORT_READY_MESSAGE,
   type RuntimeOrpcConnectTarget
 } from '~shared/runtime-orpc-message-port'
+
+import {
+  connectRuntimeEnvironmentOrpcBridge,
+  RuntimeEnvironmentOrpcBridgeError
+} from './environment-orpc-bridge'
 
 const DEFAULT_RUNTIME_ORPC_CONNECT_TIMEOUT_MS = 15_000
 
@@ -34,40 +34,20 @@ export async function connectRuntimeEnvironmentOrpcMessagePort(args: {
   args.port.start()
 
   const timeoutMs = args.target.timeoutMs ?? DEFAULT_RUNTIME_ORPC_CONNECT_TIMEOUT_MS
-  let endpoint: string | null = null
   try {
-    const environment = resolveEnvironment(args.userDataPath, args.target.environmentId)
-    const pairing = getPreferredPairingOffer(environment)
-    endpoint = pairing.endpoint
-    const supported = await supportsRuntimeOrpcTunnel(
-      args.userDataPath,
-      environment,
-      pairing,
-      timeoutMs
-    )
-    if (!supported) {
-      postBootstrapError(
-        args.port,
-        'unsupported',
-        'The paired runtime does not support the encrypted oRPC tunnel.'
-      )
-      return
-    }
-    const tunnel = await connectRemoteRuntimeSharedControlOrpcTunnel(
-      environment.id,
-      pairing,
-      args.ownerId,
+    const tunnel = await connectRuntimeEnvironmentOrpcBridge({
+      userDataPath: args.userDataPath,
+      ownerId: args.ownerId,
+      environmentId: args.target.environmentId,
       timeoutMs,
-      {
+      callbacks: {
         onText: (frame) => args.port.postMessage(frame),
         onBinary: (frame) => args.port.postMessage(frame),
         onSideChannelBinary: (requestId, frame) =>
           args.port.postMessage(encodeRuntimeOrpcSideChannelBinaryFrame(requestId, frame)),
-        onClose: () => setTimeout(() => args.port.close(), 0),
-        formatCloseError: (error) =>
-          runtimeOrpcTunnelErrorWithTailscaleHint(error, pairing.endpoint)
+        onClose: () => setTimeout(() => args.port.close(), 0)
       }
-    )
+    })
     closeTunnel = tunnel.close
     if (isClosed) {
       tunnel.close()
@@ -90,16 +70,10 @@ export async function connectRuntimeEnvironmentOrpcMessagePort(args: {
     const message = error instanceof Error ? error.message : String(error)
     postBootstrapError(
       args.port,
-      'unavailable',
-      endpoint ? withRemoteRuntimeTailscaleHint(message, endpoint) : message
+      error instanceof RuntimeEnvironmentOrpcBridgeError ? error.code : 'unavailable',
+      message
     )
   }
-}
-
-function runtimeOrpcTunnelErrorWithTailscaleHint(error: Error, endpoint: string): Error {
-  const hinted = new Error(withRemoteRuntimeTailscaleHint(error.message, endpoint))
-  hinted.name = error.name
-  return hinted
 }
 
 function postBootstrapError(

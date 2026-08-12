@@ -129,7 +129,9 @@ export class RuntimeOrpcWsHandler {
     } as const
     return createRuntimeOrpcContext(this.options.runtime, {
       connectionId: socket.connectionId,
-      shellConnectionId: webShellServicesConnectionId(socket.connectionId),
+      shellConnectionId:
+        socket.shellConnectionId ?? webShellServicesConnectionId(socket.connectionId),
+      renderingWebContentsId: socket.renderingWebContentsId,
       clientId: socket.device.deviceToken,
       clientKind: socket.device.scope === 'mobile' ? 'mobile' : 'runtime',
       principal,

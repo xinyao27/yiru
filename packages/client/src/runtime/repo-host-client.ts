@@ -9,7 +9,7 @@ import type { RepoWorkspaceApi } from './workspace-host-api'
 const LOCAL_TARGET = { kind: 'local' } as const
 
 const localClientEvents = createRuntimeStreamFanOut({
-  resolveClient: async () => createLocalRuntimeOrpcClient().client,
+  resolveClient: async () => (await createLocalRuntimeOrpcClient()).client,
   open: (client, signal) => client.runtime.clientEvents.subscribe(undefined, { signal })
 })
 

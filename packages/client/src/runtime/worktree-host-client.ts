@@ -12,11 +12,11 @@ import { toRuntimeWorktreeSelector } from './worktree-selector'
 const LOCAL_TARGET = { kind: 'local' } as const
 
 const localClientEvents = createRuntimeStreamFanOut({
-  resolveClient: async () => createLocalRuntimeOrpcClient().client,
+  resolveClient: async () => (await createLocalRuntimeOrpcClient()).client,
   open: (client, signal) => client.runtime.clientEvents.subscribe(undefined, { signal })
 })
 const localStateEvents = createRuntimeStreamFanOut({
-  resolveClient: async () => createLocalRuntimeOrpcClient().client,
+  resolveClient: async () => (await createLocalRuntimeOrpcClient()).client,
   open: (client, signal) => client.worktree.stateEvents.subscribe(undefined, { signal })
 })
 

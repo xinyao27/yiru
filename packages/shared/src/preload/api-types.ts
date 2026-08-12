@@ -460,6 +460,12 @@ export type RepoHostAdapter = {
 }
 
 export type PreloadApi = {
+  runtimeConnection: {
+    getCredentials: () => Promise<{
+      endpoint: string
+      processToken: Uint8Array<ArrayBuffer>
+    }>
+  }
   // Why: this group's `on*` members (onDeliveryResyncRequest, onData,
   // onReplay, onModelRestoreNeeded, onSideEffect, onExit,
   // onClearBufferRequest) are never a runtime migration gap.

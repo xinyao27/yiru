@@ -26,6 +26,7 @@ import type {
   PtyRendererDeliveryStateReport
 } from '~shared/pty-renderer-delivery-health'
 import type { PublicKnownRuntimeEnvironment } from '~shared/runtime-environments'
+import { RUNTIME_LOOPBACK_CREDENTIALS_CHANNEL } from '~shared/runtime-loopback'
 import {
   RUNTIME_ORPC_CONNECT_PORT_CHANNEL,
   parseRuntimeOrpcConnectPortRequest
@@ -189,6 +190,12 @@ document.addEventListener(
 
 // Custom APIs for renderer
 const api = {
+  runtimeConnection: {
+    getCredentials: (): Promise<{
+      endpoint: string
+      processToken: Uint8Array<ArrayBuffer>
+    }> => ipcRenderer.invoke(RUNTIME_LOOPBACK_CREDENTIALS_CHANNEL)
+  },
   pty: {
     spawn: (opts: {
       cols: number

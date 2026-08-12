@@ -31,6 +31,7 @@ import type { DeviceScope } from '~shared/runtime-types'
 import type { CoworkingGrantJournal } from '../coworking/grant-journal'
 import { DeviceRegistry, type CoworkingHostDeviceEntry } from './device-registry'
 import { loadOrCreateE2EEKeypair, type E2EEKeypair } from './e2ee-keypair'
+import { RuntimeLoopbackServer } from './loopback/server'
 import { writeRuntimeMetadata } from './metadata'
 import { isLongPollRequest } from './rpc-long-poll-classification'
 import { grantedAccessForDevice } from './rpc/access-adjudication'
@@ -53,7 +54,6 @@ import { UnixSocketTransport } from './rpc/unix-socket-transport'
 import { readWsFallbackPort, writeWsFallbackPort } from './rpc/ws-fallback-port-store'
 import { WebSocketTransport } from './rpc/ws-transport'
 import { TerminalMultiplexConnections } from './terminal-multiplex/connections'
-import { TerminalMultiplexLoopbackServer } from './terminal-multiplex/loopback-server'
 import type { YiruRuntimeService } from './yiru-runtime'
 
 const DEFAULT_WS_PORT = 6768
@@ -157,7 +157,7 @@ export class YiruRuntimeRpcServer {
   private transports: RuntimeTransportMetadata[] = []
   private mobileSocketWiring: MobileSocketWiring | null = null
   private readonly terminalMultiplex = new TerminalMultiplexConnections()
-  private readonly terminalMultiplexLoopback: TerminalMultiplexLoopbackServer
+  private readonly runtimeLoopback: RuntimeLoopbackServer
   private readonly wsDispatchAbortStates = new Map<
     WebSocket,
     {
@@ -184,11 +184,11 @@ export class YiruRuntimeRpcServer {
     webClientRoot
   }: YiruRuntimeRpcServerOptions) {
     this.runtime = runtime
-    this.terminalMultiplexLoopback = new TerminalMultiplexLoopbackServer({
+    this.runtimeLoopback = new RuntimeLoopbackServer({
       runtime,
       router: runtimeOrpcRouter,
       connections: this.terminalMultiplex,
-      allowedOrigins: terminalMultiplexLoopbackOrigins(),
+      userDataPath,
       // Why: terminal-multiplex.md §21.1 makes these preferences part of
       // plaintext admission. create-main-window.ts fixes all three to true.
       browserSecurity: { contextIsolation: true, sandbox: true, webSecurity: true }
@@ -232,17 +232,11 @@ export class YiruRuntimeRpcServer {
     return this.mobileSocketWiring
   }
 
-  copyTerminalMultiplexLoopbackCredentials(): {
-    endpoint: string
-    processToken: Uint8Array<ArrayBuffer>
-  } | null {
-    const endpoint = this.terminalMultiplexLoopback.endpoint
-    return endpoint
-      ? {
-          endpoint,
-          processToken: this.terminalMultiplexLoopback.copyProcessToken()
-        }
-      : null
+  getRendererLoopbackCredentials(
+    webContentsId: number,
+    rendererUrl: string
+  ): Promise<{ endpoint: string; processToken: Uint8Array<ArrayBuffer> }> {
+    return this.runtimeLoopback.credentialsForRenderer(webContentsId, rendererUrl)
   }
 
   async revokeMobileDevice(deviceId: string): Promise<boolean> {
@@ -598,7 +592,7 @@ export class YiruRuntimeRpcServer {
       sweepOrphanedRuntimeSockets(this.userDataPath, this.pid)
     }
 
-    await this.terminalMultiplexLoopback.start()
+    await this.runtimeLoopback.start()
     const transportMeta = createRuntimeTransportMetadata(
       this.userDataPath,
       this.pid,
@@ -615,7 +609,7 @@ export class YiruRuntimeRpcServer {
       authToken: this.authToken,
       mobileDevelopmentPairing: (params) => this.createDevelopmentMobilePairing(params),
       openTerminalMultiplex: (input) => {
-        const endpoint = this.terminalMultiplexLoopback.endpoint
+        const endpoint = this.runtimeLoopback.endpoint
         if (!endpoint) {
           throw new Error('terminal_loopback_unavailable')
         }
@@ -667,11 +661,11 @@ export class YiruRuntimeRpcServer {
     try {
       await socketTransport.start()
     } catch (error) {
-      await this.terminalMultiplexLoopback.stop().catch(() => {})
+      await this.runtimeLoopback.stop().catch(() => {})
       throw error
     }
 
-    const activeTransports: RpcTransport[] = [socketTransport, this.terminalMultiplexLoopback]
+    const activeTransports: RpcTransport[] = [socketTransport, this.runtimeLoopback]
     const transportsMeta: RuntimeTransportMetadata[] = [transportMeta]
 
     // Why: WebSocket transport is opt-in and starts alongside the Unix socket.
@@ -1086,21 +1080,6 @@ export class YiruRuntimeRpcServer {
     }
     writeRuntimeMetadata(this.userDataPath, metadata)
   }
-}
-
-function terminalMultiplexLoopbackOrigins(): string[] {
-  const developmentRendererUrl = process.env.ELECTRON_RENDERER_URL
-  if (developmentRendererUrl) {
-    try {
-      return [new URL(developmentRendererUrl).origin]
-    } catch {
-      return []
-    }
-  }
-  // Why: terminal-multiplex.md OQ-1 requires the actual packaged renderer
-  // origin, never null or a wildcard. Chromium serializes loadFile origins
-  // for WebSocket upgrades as the exact file scheme origin.
-  return ['file://']
 }
 
 /**

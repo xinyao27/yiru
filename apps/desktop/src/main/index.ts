@@ -178,6 +178,7 @@ import { setGitHubEventPublisher } from './runtime/github-events'
 import { setHostProgressEventPublisher } from './runtime/host-progress-events'
 import { setRuntimeHostPathsProvider } from './runtime/host/paths-provider'
 import { setRuntimeHostSecureStorageProvider } from './runtime/host/secure-storage-provider'
+import { registerRuntimeLoopbackCredentials } from './runtime/loopback/credentials'
 import { clearRuntimeMetadataIfOwned } from './runtime/metadata'
 import { setNotificationShellAttentionSignal } from './runtime/notification-shell-attention'
 import {
@@ -2500,6 +2501,7 @@ app.whenReady().then(async () => {
       : {}),
     webClientRoot: getBundledWebClientRoot()
   })
+  registerRuntimeLoopbackCredentials(runtimeRpc)
   initializeShellMobileService(runtimeRpc, {
     openWindowsNetworkSettings: () => shell.openExternal('ms-settings:network-status')
   })

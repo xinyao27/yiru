@@ -1,6 +1,5 @@
 import { createORPCClient, type ClientLink } from '@orpc/client'
 import { RPCLink } from '@orpc/client/message-port'
-import type { ContractRouterClient, runtimeContract } from '@yiru/runtime-protocol/contract'
 import {
   RUNTIME_ORPC_BINARY_SIDE_CHANNEL_HEADER,
   RUNTIME_ORPC_FEATURE_INTERACTION_SOURCE_HEADER,
@@ -13,33 +12,24 @@ import {
 
 import {
   retainRuntimeOrpcBinaryRoute,
-  RuntimeOrpcBinarySideChannel,
-  type RuntimeOrpcBinaryListener
+  RuntimeOrpcBinarySideChannel
 } from './orpc-binary-side-channel'
+import type {
+  RuntimeOrpcClient,
+  RuntimeOrpcClientConnection,
+  RuntimeOrpcClientContext
+} from './orpc-connection'
+
+export type {
+  RuntimeOrpcClient,
+  RuntimeOrpcClientConnection,
+  RuntimeOrpcClientContext
+} from './orpc-connection'
 
 const RUNTIME_ORPC_REQUEST_CONTEXT = Symbol('runtime-orpc-request-context')
 
-export type RuntimeOrpcClientContext = {
-  onBinary?: RuntimeOrpcBinaryListener
-}
-
 type RuntimeOrpcInternalClientContext = RuntimeOrpcClientContext & {
   [RUNTIME_ORPC_REQUEST_CONTEXT]: string
-}
-
-export type RuntimeOrpcClient = ContractRouterClient<
-  typeof runtimeContract,
-  RuntimeOrpcClientContext
->
-
-export type RuntimeOrpcClientConnection = {
-  client: RuntimeOrpcClient
-  // Why: 'web-peer' marks a connection routed through a paired web client's own
-  // negotiated oRPC peer (see `orpc-web-environment-client.ts`) — distinct from
-  // 'legacy' because the underlying transport may in fact be real oRPC, decided
-  // inside `WebRuntimeClient`, not visible at connection-creation time here.
-  transport: 'message-port' | 'legacy' | 'web-peer'
-  close: () => void
 }
 
 export function createRuntimeOrpcMessagePortConnection(
