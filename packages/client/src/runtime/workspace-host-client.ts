@@ -8,15 +8,11 @@ type WorkspaceHostClient = {
   worktrees: typeof worktreeHostClient
 }
 
-// Why: workspace features depend on the runtime adapter surface. Desktop
-// currently delegates local-only picker/event tails to preload; web supplies
-// the same shape while its capability calls terminate on the paired runtime.
+// Why: workspace features depend on one oRPC host surface. Grouping these
+// domain clients keeps desktop and paired Web callers aligned without adding
+// another renderer facade.
 export const workspaceHostClient: WorkspaceHostClient = {
-  // Why: the web entry installs its preload-compatible adapter after static
-  // modules evaluate, so resolve the filesystem member only when it is used.
-  get fileHost() {
-    return shellFilesClient
-  },
+  fileHost: shellFilesClient,
   repos: repoHostClient,
   worktrees: worktreeHostClient
 }
