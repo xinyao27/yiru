@@ -1280,7 +1280,7 @@ export function CodexSwitcherMenu({
     }
     setReauthenticatingAccountId(accountId)
     try {
-      const next = await rendererHostClient.codexAccounts.reauthenticate({ accountId })
+      const next = await rendererHostClient.accounts.codex.reauthenticate({ accountId })
       recordFeatureInteraction('codex-account-switching')
       if (mountedRef.current) {
         setAccounts(next)

@@ -812,7 +812,7 @@ export function AccountsPane({
                 size="xs"
                 onClick={() =>
                   void runClaudeAccountAction('adding', () =>
-                    rendererHostClient.claudeAccounts.add({
+                    rendererHostClient.accounts.claude.add({
                       runtime: accountRuntime.runtime,
                       wslDistro: accountRuntime.wslDistro
                     })
@@ -839,7 +839,7 @@ export function AccountsPane({
                 <Button
                   variant="quiet"
                   size="xs"
-                  onClick={() => void rendererHostClient.claudeAccounts.cancelPendingLogin()}
+                  onClick={() => void rendererHostClient.accounts.claude.cancelPendingLogin()}
                   className="gap-1.5"
                 >
                   <X className="size-3" />
@@ -989,7 +989,7 @@ export function AccountsPane({
                             void runClaudeAccountAction(
                               `reauth:${account.id}`,
                               () =>
-                                rendererHostClient.claudeAccounts.reauthenticate({
+                                rendererHostClient.accounts.claude.reauthenticate({
                                   accountId: account.id
                                 }),
                               getProviderAccountRuntime(account)
@@ -1124,7 +1124,7 @@ export function AccountsPane({
               size="xs"
               onClick={() =>
                 void runCodexAccountAction('adding', () =>
-                  rendererHostClient.codexAccounts.add({
+                  rendererHostClient.accounts.codex.add({
                     runtime: accountRuntime.runtime,
                     wslDistro: accountRuntime.wslDistro
                   })
@@ -1360,7 +1360,7 @@ export function AccountsPane({
                             void runCodexAccountAction(
                               `reauth:${account.id}`,
                               () =>
-                                rendererHostClient.codexAccounts.reauthenticate({
+                                rendererHostClient.accounts.codex.reauthenticate({
                                   accountId: account.id
                                 }),
                               getProviderAccountRuntime(account)

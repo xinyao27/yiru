@@ -107,7 +107,7 @@ export function UsageAccountsCard(props: {
     void fetchRateLimits()
     void (async () => {
       try {
-        const next = await rendererHostClient.claudeAccounts.list()
+        const next = await rendererHostClient.accounts.claude.list()
         if (!stale) {
           setClaudeAccounts(next)
         }
@@ -117,7 +117,7 @@ export function UsageAccountsCard(props: {
     })()
     void (async () => {
       try {
-        const next = await rendererHostClient.codexAccounts.list()
+        const next = await rendererHostClient.accounts.codex.list()
         if (!stale) {
           setCodexAccounts(next)
         }
@@ -145,7 +145,7 @@ export function UsageAccountsCard(props: {
     }
     setClaudeAction('adding')
     try {
-      const next = await rendererHostClient.claudeAccounts.add()
+      const next = await rendererHostClient.accounts.claude.add()
       if (mountedRef.current) {
         setClaudeAccounts(next)
       }
@@ -186,7 +186,7 @@ export function UsageAccountsCard(props: {
     }
     setCodexAction('adding')
     try {
-      const next = await rendererHostClient.codexAccounts.add()
+      const next = await rendererHostClient.accounts.codex.add()
       if (mountedRef.current) {
         setCodexAccounts(next)
       }

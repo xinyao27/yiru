@@ -114,14 +114,14 @@
       "require": "./dist/runtime-orpc-peer-frame.js",
       "default": "./dist/runtime-orpc-peer-frame.js"
     },
-    "./provider-analytics": {
-      "types": "./src/provider-analytics.ts",
-      "react-native": "./src/provider-analytics.ts",
-      "browser": "./src/provider-analytics.ts",
-      "development": "./src/provider-analytics.ts",
-      "import": "./dist/esm/provider-analytics.mjs",
-      "require": "./dist/provider-analytics.js",
-      "default": "./dist/provider-analytics.js"
+    "./provider-usage": {
+      "types": "./src/provider-usage.ts",
+      "react-native": "./src/provider-usage.ts",
+      "browser": "./src/provider-usage.ts",
+      "development": "./src/provider-usage.ts",
+      "import": "./dist/esm/provider-usage.mjs",
+      "require": "./dist/provider-usage.js",
+      "default": "./dist/provider-usage.js"
     },
     "./subscription-replay": {
       "types": "./src/runtime-subscription-replay.ts",

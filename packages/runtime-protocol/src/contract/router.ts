@@ -43,7 +43,11 @@ import { orchestrationContract } from './orchestration.js'
 import { preflightContract } from './preflight.js'
 import { projectGroupContract } from './project-group.js'
 import { projectContract, projectHostSetupContract } from './project.js'
-import { CURSOR_USAGE_GET_CONTRACT, providerUsageContract } from './provider-usage.js'
+import {
+  CURSOR_USAGE_GET_CONTRACT,
+  cursorUsageContract,
+  providerUsageContract
+} from './provider-usage.js'
 import { rateLimitResumeContract } from './rate-limit-resume.js'
 import { repoContract } from './repo.js'
 import { markdownContract, sessionContract } from './session-tabs.js'
@@ -99,7 +103,7 @@ export const runtimeContract = {
   project: projectContract,
   projectGroup: projectGroupContract,
   projectHostSetup: projectHostSetupContract,
-  usage: providerUsageContract,
+  providerUsage: providerUsageContract,
   rateLimitResume: rateLimitResumeContract,
   repo: repoContract,
   runtime: runtimeNamespaceContract,
@@ -113,6 +117,7 @@ export const runtimeContract = {
   terminal: terminalContract,
   ui: uiContract,
   updater: updaterContract,
+  usage: cursorUsageContract,
   workspace: workspaceContract,
   workspaceCleanup: workspaceCleanupContract,
   workspacePorts: workspacePortsContract,

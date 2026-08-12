@@ -7,15 +7,15 @@ import type {
   CodexUsageSnapshot,
   OpenCodeUsageScanState,
   OpenCodeUsageSnapshot,
-  UsageAnalyticsSnapshotInput
-} from '../provider-analytics.js'
+  ProviderUsageSnapshotInput
+} from '../provider-usage.js'
 import { withAccess, type RuntimeProcedureMeta } from './access-meta.js'
 import type { ProviderRateLimits } from './accounts.js'
 
 const PROVIDER_USAGE_ACCESS = { scope: 'host', tier: 'read' } as const
 const PROVIDER_USAGE_WRITE_ACCESS = { scope: 'host', tier: 'host' } as const
 
-const ClaudeUsageAnalyticsContract = {
+const claudeProviderUsageContract = {
   getScanState: withAccess(PROVIDER_USAGE_ACCESS)
     .input(type<void>())
     .output(type<ClaudeUsageScanState>()),
@@ -26,11 +26,11 @@ const ClaudeUsageAnalyticsContract = {
     .input(type<{ force?: boolean }>())
     .output(type<ClaudeUsageScanState>()),
   getSnapshot: withAccess(PROVIDER_USAGE_ACCESS)
-    .input(type<UsageAnalyticsSnapshotInput>())
+    .input(type<ProviderUsageSnapshotInput>())
     .output(type<ClaudeUsageSnapshot>())
 } satisfies ContractRouter<RuntimeProcedureMeta>
 
-const CodexUsageAnalyticsContract = {
+const codexProviderUsageContract = {
   getScanState: withAccess(PROVIDER_USAGE_ACCESS)
     .input(type<void>())
     .output(type<CodexUsageScanState>()),
@@ -41,11 +41,11 @@ const CodexUsageAnalyticsContract = {
     .input(type<{ force?: boolean }>())
     .output(type<CodexUsageScanState>()),
   getSnapshot: withAccess(PROVIDER_USAGE_ACCESS)
-    .input(type<UsageAnalyticsSnapshotInput>())
+    .input(type<ProviderUsageSnapshotInput>())
     .output(type<CodexUsageSnapshot>())
 } satisfies ContractRouter<RuntimeProcedureMeta>
 
-const OpenCodeUsageAnalyticsContract = {
+const openCodeProviderUsageContract = {
   getScanState: withAccess(PROVIDER_USAGE_ACCESS)
     .input(type<void>())
     .output(type<OpenCodeUsageScanState>()),
@@ -56,7 +56,7 @@ const OpenCodeUsageAnalyticsContract = {
     .input(type<{ force?: boolean }>())
     .output(type<OpenCodeUsageScanState>()),
   getSnapshot: withAccess(PROVIDER_USAGE_ACCESS)
-    .input(type<UsageAnalyticsSnapshotInput>())
+    .input(type<ProviderUsageSnapshotInput>())
     .output(type<OpenCodeUsageSnapshot>())
 } satisfies ContractRouter<RuntimeProcedureMeta>
 
@@ -74,10 +74,11 @@ export const CURSOR_USAGE_GET_CONTRACT: CursorUsageLegacyContract = {
 }
 
 export const providerUsageContract = {
-  cursor: withAccess(PROVIDER_USAGE_ACCESS).input(type<void>()).output(type<ProviderRateLimits>()),
-  analytics: {
-    claude: ClaudeUsageAnalyticsContract,
-    codex: CodexUsageAnalyticsContract,
-    openCode: OpenCodeUsageAnalyticsContract
-  }
+  claude: claudeProviderUsageContract,
+  codex: codexProviderUsageContract,
+  openCode: openCodeProviderUsageContract
+} satisfies ContractRouter<RuntimeProcedureMeta>
+
+export const cursorUsageContract = {
+  cursor: withAccess(PROVIDER_USAGE_ACCESS).input(type<void>()).output(type<ProviderRateLimits>())
 } satisfies ContractRouter<RuntimeProcedureMeta>

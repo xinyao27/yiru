@@ -5,7 +5,7 @@ export type {
   ClaudeUsageSessionRow,
   ClaudeUsageSnapshot,
   ClaudeUsageSummary,
-  UsageAnalyticsBreakdownKind as ClaudeUsageBreakdownKind,
-  UsageAnalyticsRange as ClaudeUsageRange,
-  UsageAnalyticsScope as ClaudeUsageScope
-} from '@yiru/runtime-protocol/provider-analytics'
+  ProviderUsageBreakdownKind as ClaudeUsageBreakdownKind,
+  ProviderUsageRange as ClaudeUsageRange,
+  ProviderUsageScope as ClaudeUsageScope
+} from '@yiru/runtime-protocol/provider-usage'

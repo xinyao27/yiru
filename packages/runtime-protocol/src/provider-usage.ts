@@ -1,10 +1,10 @@
-export type UsageAnalyticsScope = 'yiru' | 'all'
-export type UsageAnalyticsRange = '7d' | '30d' | '90d' | 'all'
-export type UsageAnalyticsBreakdownKind = 'model' | 'project'
+export type ProviderUsageScope = 'yiru' | 'all'
+export type ProviderUsageRange = '7d' | '30d' | '90d' | 'all'
+export type ProviderUsageBreakdownKind = 'model' | 'project'
 
-export type UsageAnalyticsSnapshotInput = {
-  scope: UsageAnalyticsScope
-  range: UsageAnalyticsRange
+export type ProviderUsageSnapshotInput = {
+  scope: ProviderUsageScope
+  range: ProviderUsageRange
   limit?: number
 }
 
@@ -18,8 +18,8 @@ export type ClaudeUsageScanState = {
 }
 
 export type ClaudeUsageSummary = {
-  scope: UsageAnalyticsScope
-  range: UsageAnalyticsRange
+  scope: ProviderUsageScope
+  range: ProviderUsageRange
   sessions: number
   turns: number
   zeroCacheReadTurns: number
@@ -89,8 +89,8 @@ export type CodexUsageScanState = {
 }
 
 export type CodexUsageSummary = {
-  scope: UsageAnalyticsScope
-  range: UsageAnalyticsRange
+  scope: ProviderUsageScope
+  range: ProviderUsageRange
   sessions: number
   events: number
   inputTokens: number
@@ -163,8 +163,8 @@ export type OpenCodeUsageScanState = {
 }
 
 export type OpenCodeUsageSummary = {
-  scope: UsageAnalyticsScope
-  range: UsageAnalyticsRange
+  scope: ProviderUsageScope
+  range: ProviderUsageRange
   sessions: number
   events: number
   inputTokens: number

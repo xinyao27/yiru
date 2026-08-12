@@ -1,5 +1,5 @@
 import type { StateCreator } from 'zustand'
-import { openCodeUsageClient } from '~renderer/runtime/usage-analytics-client'
+import { openCodeProviderUsageClient } from '~renderer/runtime/provider-usage-client'
 import type { AppState } from '~renderer/store/types'
 import type {
   OpenCodeUsageBreakdownRow,
@@ -45,7 +45,7 @@ export const createOpenCodeUsageSlice: StateCreator<AppState, [], [], OpenCodeUs
 
   setOpenCodeUsageEnabled: async (enabled) => {
     try {
-      const nextScanState = await openCodeUsageClient.setEnabled({
+      const nextScanState = await openCodeProviderUsageClient.setEnabled({
         enabled
       })
       set({
@@ -85,7 +85,7 @@ export const createOpenCodeUsageSlice: StateCreator<AppState, [], [], OpenCodeUs
   fetchOpenCodeUsage: async (opts) => {
     set({ openCodeUsageSnapshotReady: false })
     try {
-      const scanState = await openCodeUsageClient.getScanState()
+      const scanState = await openCodeProviderUsageClient.getScanState()
       const currentScanState = get().openCodeUsageScanState
       const shouldPreserveLoadingState =
         opts?.forceRefresh === true &&
@@ -106,7 +106,7 @@ export const createOpenCodeUsageSlice: StateCreator<AppState, [], [], OpenCodeUs
       }
 
       const { openCodeUsageScope, openCodeUsageRange } = get()
-      const snapshot = await openCodeUsageClient.getSnapshot({
+      const snapshot = await openCodeProviderUsageClient.getSnapshot({
         scope: openCodeUsageScope,
         range: openCodeUsageRange,
         limit: 10
@@ -143,11 +143,11 @@ export const createOpenCodeUsageSlice: StateCreator<AppState, [], [], OpenCodeUs
         })
       }
 
-      await openCodeUsageClient.refresh({
+      await openCodeProviderUsageClient.refresh({
         force: opts?.forceRefresh ?? false
       })
       const { openCodeUsageScope: refreshedScope, openCodeUsageRange: refreshedRange } = get()
-      const refreshedSnapshot = await openCodeUsageClient.getSnapshot({
+      const refreshedSnapshot = await openCodeProviderUsageClient.getSnapshot({
         scope: refreshedScope,
         range: refreshedRange,
         limit: 10

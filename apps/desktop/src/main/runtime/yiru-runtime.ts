@@ -560,11 +560,7 @@ import {
 import { getSpeechModelManager, getSpeechSttService } from '../speech/runtime-service'
 import { AgentDetector } from '../stats/agent-detector'
 import type { StatsCollector } from '../stats/collector'
-import {
-  buildStatsSummary,
-  type StatsSummaryOptions,
-  type StatsUsageStores
-} from '../stats/summary'
+import type { ProviderUsageStores, StatsSummaryOptions } from '../stats/summary'
 import { deleteWorktreeHistoryDir } from '../terminal-history'
 import type { CommitMessageAgentEnvironmentResolvers } from '../text-generation/commit-message-agent-environment'
 import {
@@ -670,6 +666,7 @@ import {
   createSetupCompletionScanner
 } from './orchestration/setup-completion-signal'
 import { selectExactWorkerProviderSession } from './orchestration/worker-provider-session'
+import { RuntimeProviderUsage } from './provider-usage/capabilities'
 import { joinWorktreeRelativePath } from './relative-paths'
 import type { ShellServicesConnectionId } from './rpc/orpc/shell-services-identity'
 import {
@@ -2024,7 +2021,6 @@ export class YiruRuntimeService {
   // teardown so dead agents don't linger. See RuntimeAgentRowSnapshot.
   private latestAgentStatusByPaneKey = new Map<string, RuntimeAgentRowSnapshot>()
   private stats: StatsCollector | null = null
-  private readonly statsUsageStores: StatsUsageStores | null
   // Why (§3.3 + §7.1): the renderer-create path and coordinator
   // `probeWorktreeDrift` share this cache so a create that already fetched
   // `origin` within the last 30s does not re-fetch during dispatch, and
@@ -2164,7 +2160,7 @@ export class YiruRuntimeService {
       previewWarpThemeImportForClient?: (
         source: WarpThemeImportSource
       ) => Promise<WarpThemeImportPreview>
-      statsUsageStores?: StatsUsageStores
+      providerUsageStores?: ProviderUsageStores
       orchestrationEnvironmentTransport?: OrchestrationEnvironmentTransport
     }
   ) {
@@ -2187,7 +2183,7 @@ export class YiruRuntimeService {
       this.stats = stats
       this.agentDetector = new AgentDetector(stats)
     }
-    this.statsUsageStores = deps?.statsUsageStores ?? null
+    this.providerUsage = new RuntimeProviderUsage(deps?.providerUsageStores ?? null)
     this.orchestrationEnvironmentTransport = deps?.orchestrationEnvironmentTransport ?? null
     this.getAgentStatusSnapshotFn = deps?.getAgentStatusSnapshot ?? null
     // Why: both managed-provider root resolvers must work without desktop IPC registration.
@@ -2264,9 +2260,7 @@ export class YiruRuntimeService {
   }
 
   async getStatsSummary(options: StatsSummaryOptions = {}): Promise<StatsSummary | null> {
-    return this.stats
-      ? buildStatsSummary(this.stats, this.statsUsageStores ?? undefined, options)
-      : null
+    return this.stats ? this.providerUsage.buildSummary(this.stats, options) : null
   }
 
   getMemorySnapshot(): Promise<MemorySnapshot> {
@@ -2831,13 +2825,6 @@ export class YiruRuntimeService {
   // cache so the desktop panel and the mobile screen never double-scan.
   listAiVaultSessions(args?: AiVaultListArgs): Promise<AiVaultListResult> {
     return listAiVaultSessions(args)
-  }
-
-  getStatsUsageStores(): StatsUsageStores {
-    if (!this.statsUsageStores) {
-      throw new Error('usage_analytics_unavailable')
-    }
-    return this.statsUsageStores
   }
 
   setPtyController(controller: RuntimePtyController | null): void {
@@ -7764,6 +7751,7 @@ export class YiruRuntimeService {
 
   readonly mobileNotifications = new MobileNotificationChannel()
   readonly accounts = new RuntimeAccounts()
+  readonly providerUsage: RuntimeProviderUsage
   // Why: notifications.report's job1 (throttle/dedup) moved here from the
   // legacy notifications:dispatch ipcMain closure — Phase 5 slice S3. Two
   // independent trackers because the desktop-notification cooldown and the

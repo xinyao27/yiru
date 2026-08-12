@@ -2233,7 +2233,7 @@ app.whenReady().then(async () => {
         ? previewWarpThemeImport(store, source)
         : Promise.resolve({ found: false, themes: [], skippedFiles: [] }),
     orchestrationEnvironmentTransport,
-    statsUsageStores: {
+    providerUsageStores: {
       claude: claudeUsage,
       codex: codexUsage,
       openCode: openCodeUsage,
