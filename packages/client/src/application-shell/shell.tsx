@@ -2034,7 +2034,7 @@ function App(): React.JSX.Element {
           when it still owns the standalone sidebar toggle. */}
       {(!isMac || !isFullScreen || (showSidebar && !showWorktreeHistoryControls)) && (
         <div className="flex h-full items-center">
-          {isMac && !isFullScreen ? (
+          {isMac && !isWebClient && !isFullScreen ? (
             // Why: the 92px gutter leaves the native control cluster with matching 16px outer insets.
             <div className="w-[calc(92px/var(--ui-zoom-factor,1))] shrink-0" />
           ) : hasCustomTitleBar ? (
