@@ -1,11 +1,11 @@
 import type { TerminalOpenMultiplexResult } from '@yiru/runtime-protocol/contract'
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 import { TERMINAL_MULTIPLEX_DEFAULT_MAX_FRAME_BYTES } from '@yiru/runtime-protocol/terminal-multiplex/frame'
-
 import {
   openWebTerminalMultiplexSubscription,
   type WebTerminalMultiplexSubscription
-} from '../../web/terminal-multiplex-subscription'
+} from '~renderer/web/terminal-multiplex-subscription'
+
 import type { RuntimeClientTarget } from '../orpc-client'
 import {
   openAuthenticatedRuntimeLoopbackSocket,

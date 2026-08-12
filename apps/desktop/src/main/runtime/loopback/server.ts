@@ -220,9 +220,11 @@ export class RuntimeLoopbackServer {
     return new RuntimeOrpcWsHandler({
       runtime: this.options.runtime,
       router: this.options.router,
-      resolveAdmission: () => ({
-        principal: { kind: 'paired-device', deviceId: 'loopback-renderer', scope: 'runtime' }
-      }),
+      // Why: the exact-Origin upgrade, process token, and authorized WebContents
+      // identify this socket as the in-process desktop renderer. Leaving a
+      // paired-device principal here would misclassify it as a remote runtime
+      // and deny every local-only shell.* procedure.
+      resolveAdmission: () => ({}),
       beforeInvocation: (socket, invocation) => {
         const admission = this.options.connections.admitInvocation(
           socket.connectionId,
