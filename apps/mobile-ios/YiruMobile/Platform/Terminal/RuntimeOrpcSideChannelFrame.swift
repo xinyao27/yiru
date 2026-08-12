@@ -44,13 +44,15 @@ nonisolated enum RuntimeOrpcSideChannelCodec {
         }
         let requestIDBytes = Int(TerminalWireBytes.uint16(in: data, at: 2))
         let payloadOffset = headerBytes + requestIDBytes
-        guard requestIDBytes > 0, payloadOffset <= data.count,
-            let requestID = String(
-                data: data.subdata(in: headerBytes..<payloadOffset),
-                encoding: .utf8
-            ),
-            !requestID.isEmpty
+        guard requestIDBytes > 0, payloadOffset <= data.count
         else {
+            throw RuntimeOrpcSideChannelError.invalidRequestID
+        }
+        let requestID = String(
+            decoding: data.subdata(in: headerBytes..<payloadOffset),
+            as: UTF8.self
+        )
+        guard !requestID.isEmpty else {
             throw RuntimeOrpcSideChannelError.invalidRequestID
         }
         return RuntimeOrpcSideChannelFrame(

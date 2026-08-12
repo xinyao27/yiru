@@ -31,9 +31,11 @@ const {
   MobileWorkspaceListRequestSchema,
   MobileWorkspaceListSchema
 } = packageRequire('@yiru/runtime-protocol/mobile-worktree-wire')
-const { RUNTIME_ORPC_REQUEST_ID_HEADER, RUNTIME_ORPC_TEXT_PREFIX } = packageRequire(
-  '@yiru/runtime-protocol/orpc-peer-frame'
-)
+const {
+  RUNTIME_ORPC_BINARY_SIDE_CHANNEL_HEADER,
+  RUNTIME_ORPC_REQUEST_ID_HEADER,
+  RUNTIME_ORPC_TEXT_PREFIX
+} = packageRequire('@yiru/runtime-protocol/orpc-peer-frame')
 const { z } = packageRequire('zod')
 const terminalWire = loadTerminalWireSource(packageRequire, z)
 
@@ -83,6 +85,7 @@ const contractSource = {
     MOBILE_E2EE_V2_TRANSCRIPT_DOMAIN,
     MOBILE_WORKTREE_PS_ORPC_PATH,
     ...terminalWire.domains,
+    RUNTIME_ORPC_BINARY_SIDE_CHANNEL_HEADER,
     RUNTIME_ORPC_REQUEST_ID_HEADER,
     RUNTIME_ORPC_TEXT_PREFIX
   }
@@ -339,6 +342,7 @@ function readRuntimeContract(value, requestValue) {
   return {
     statuses: requireStringEnum(item.properties.status, 'MobileWorkspaceListItemSchema.status'),
     path: MOBILE_WORKTREE_PS_ORPC_PATH,
+    binarySideChannelHeader: RUNTIME_ORPC_BINARY_SIDE_CHANNEL_HEADER,
     requestIdHeader: RUNTIME_ORPC_REQUEST_ID_HEADER,
     textPrefix: RUNTIME_ORPC_TEXT_PREFIX
   }
@@ -360,7 +364,7 @@ function renderRuntimeContract(contract) {
   const statusCases = contract.statuses
     .map((status) => `    case ${swiftCase(status)} = ${JSON.stringify(status)}`)
     .join('\n')
-  return `enum MobileWorkspaceActivityWire: String, Codable, Equatable, Sendable {\n${statusCases}\n}\n\nstruct MobileWorkspaceListRequestWire: Codable, Equatable, Sendable {\n    let limit: Int?\n}\n\nstruct MobileWorkspaceListItemWire: Codable, Equatable, Sendable {\n    let worktreeId: String\n    let repo: String\n    let path: String\n    let branch: String\n    let displayName: String\n    let workspaceStatus: String\n    let isArchived: Bool\n    let isMainWorktree: Bool?\n    let isPinned: Bool\n    let isActive: Bool\n    let unread: Bool\n    let liveTerminalCount: Int\n    let lastActivityAt: Int64?\n    let lastOutputAt: Int64?\n    let preview: String\n    let status: MobileWorkspaceActivityWire\n}\n\nstruct MobileWorkspaceListWire: Codable, Equatable, Sendable {\n    let worktrees: [MobileWorkspaceListItemWire]\n    let totalCount: Int\n    let truncated: Bool\n}\n\nenum MobileRuntimeWireContract {\n    static let textPrefix = ${JSON.stringify(contract.textPrefix)}\n    static let requestIdHeader = ${JSON.stringify(contract.requestIdHeader)}\n    static let worktreeListPath = ${JSON.stringify(contract.path)}\n}\n`
+  return `enum MobileWorkspaceActivityWire: String, Codable, Equatable, Sendable {\n${statusCases}\n}\n\nstruct MobileWorkspaceListRequestWire: Codable, Equatable, Sendable {\n    let limit: Int?\n}\n\nstruct MobileWorkspaceListItemWire: Codable, Equatable, Sendable {\n    let worktreeId: String\n    let repo: String\n    let path: String\n    let branch: String\n    let displayName: String\n    let workspaceStatus: String\n    let isArchived: Bool\n    let isMainWorktree: Bool?\n    let isPinned: Bool\n    let isActive: Bool\n    let unread: Bool\n    let liveTerminalCount: Int\n    let lastActivityAt: Int64?\n    let lastOutputAt: Int64?\n    let preview: String\n    let status: MobileWorkspaceActivityWire\n}\n\nstruct MobileWorkspaceListWire: Codable, Equatable, Sendable {\n    let worktrees: [MobileWorkspaceListItemWire]\n    let totalCount: Int\n    let truncated: Bool\n}\n\nenum MobileRuntimeWireContract {\n    static let textPrefix = ${JSON.stringify(contract.textPrefix)}\n    static let requestIdHeader = ${JSON.stringify(contract.requestIdHeader)}\n    static let binarySideChannelHeader = ${JSON.stringify(contract.binarySideChannelHeader)}\n    static let worktreeListPath = ${JSON.stringify(contract.path)}\n}\n`
 }
 
 function renderPairingContract(contract, sourceSchemas) {

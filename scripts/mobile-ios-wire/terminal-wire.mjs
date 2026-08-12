@@ -19,6 +19,7 @@ export function loadTerminalWireSource(packageRequire, z) {
     MOBILE_TERMINAL_LIST_ORPC_PATH: terminal.MOBILE_TERMINAL_LIST_ORPC_PATH,
     MOBILE_TERMINAL_SHOW_ORPC_PATH: terminal.MOBILE_TERMINAL_SHOW_ORPC_PATH,
     MOBILE_TERMINAL_OPEN_MULTIPLEX_ORPC_PATH: terminal.MOBILE_TERMINAL_OPEN_MULTIPLEX_ORPC_PATH,
+    MOBILE_TERMINAL_MULTIPLEX_ORPC_PATH: terminal.MOBILE_TERMINAL_MULTIPLEX_ORPC_PATH,
     TERMINAL_MULTIPLEX_KIND: frame.TERMINAL_MULTIPLEX_KIND,
     TERMINAL_MULTIPLEX_VERSION: frame.TERMINAL_MULTIPLEX_VERSION,
     TERMINAL_MULTIPLEX_HEADER_BYTES: frame.TERMINAL_MULTIPLEX_HEADER_BYTES,
@@ -180,6 +181,7 @@ enum MobileTerminalWireContract {
     static let listPath = ${JSON.stringify(contract.MOBILE_TERMINAL_LIST_ORPC_PATH)}
     static let showPath = ${JSON.stringify(contract.MOBILE_TERMINAL_SHOW_ORPC_PATH)}
     static let openMultiplexPath = ${JSON.stringify(contract.MOBILE_TERMINAL_OPEN_MULTIPLEX_ORPC_PATH)}
+    static let multiplexPath = ${JSON.stringify(contract.MOBILE_TERMINAL_MULTIPLEX_ORPC_PATH)}
 }
 
 enum TerminalMultiplexOpcodeWire: UInt8, Sendable {
