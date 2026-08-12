@@ -35,23 +35,20 @@ export function SetupHookTrustDrawer({
   onDontRun,
   onClose
 }: Props) {
+  const title = prompt?.previouslyApproved
+    ? translate('mobile.newWorkspace.setupTrust.changedTitle', "{{repo}}'s setup script changed", {
+        repo: prompt.repoName
+      })
+    : translate('mobile.newWorkspace.setupTrust.title', 'Run setup from {{repo}}?', {
+        repo: prompt?.repoName ?? ''
+      })
+
   return (
-    <BottomDrawer visible={visible && prompt != null} onClose={onClose}>
+    <BottomDrawer visible={visible && prompt != null} onClose={onClose} title={title}>
       {prompt ? (
         <View>
           <View className="mb-3">
-            <Text className="text-foreground text-sm font-semibold">
-              {prompt.previouslyApproved
-                ? translate(
-                    'mobile.newWorkspace.setupTrust.changedTitle',
-                    "{{repo}}'s setup script changed",
-                    { repo: prompt.repoName }
-                  )
-                : translate('mobile.newWorkspace.setupTrust.title', 'Run setup from {{repo}}?', {
-                    repo: prompt.repoName
-                  })}
-            </Text>
-            <Text className="text-muted-foreground mt-1 text-xs">
+            <Text className="text-muted-foreground text-xs">
               {translate(
                 'mobile.newWorkspace.setupTrust.description',
                 "This repository's yiru.yaml runs before the workspace starts. Only run it if you trust this repository."

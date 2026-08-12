@@ -2,6 +2,7 @@ import type { NativeChatBlock } from '@yiru/workbench-model/agent'
 import { Pressable, Text, View } from 'react-native'
 
 import { BottomDrawer } from '~/components/bottom-drawer'
+import { translate } from '~/i18n/translate'
 
 import { pairToolBlocks, type ToolPair } from './blocks'
 import { MobileNativeChatCodeBlock } from './code-block'
@@ -127,13 +128,14 @@ export function MobileNativeChatToolDetailsDrawer({
   const diffLineLimit = Math.max(1, Math.floor(MAX_TOOL_RUN_DIFF_ROWS / (pairs.length * 2 || 1)))
 
   return (
-    <BottomDrawer visible={visible} onClose={onClose}>
-      <View className="border-b-hairline border-border pb-3">
-        <Text className="text-foreground text-base font-semibold">Tool activity</Text>
-        <Text className="text-muted-foreground text-sm">
-          {pairs.length} {pairs.length === 1 ? 'tool call' : 'tool calls'}
-        </Text>
-      </View>
+    <BottomDrawer
+      visible={visible}
+      onClose={onClose}
+      title={translate('mobile.nativeChat.toolActivity', 'Tool activity')}
+    >
+      <Text className="border-b-hairline border-border text-muted-foreground pb-3 text-sm">
+        {pairs.length} {pairs.length === 1 ? 'tool call' : 'tool calls'}
+      </Text>
       <View>
         {keyedPairs.map(({ key, value: pair }, index) => (
           <View key={key} className={index > 0 ? 'border-t-hairline border-border' : undefined}>

@@ -1,4 +1,4 @@
-import { View, Text } from 'react-native'
+import { Text } from 'react-native'
 
 import { translate } from '~/i18n/translate'
 
@@ -28,13 +28,10 @@ export function ConfirmModal({
   onCancel
 }: Props): React.JSX.Element {
   return (
-    <BottomDrawer visible={visible} onClose={onCancel}>
-      <View className="pb-4">
-        <Text className="text-foreground text-sm font-bold">{title}</Text>
-        {message ? (
-          <Text className="text-muted-foreground mt-1 text-sm leading-5">{message}</Text>
-        ) : null}
-      </View>
+    <BottomDrawer visible={visible} onClose={onCancel} title={title}>
+      {message ? (
+        <Text className="text-muted-foreground pb-4 text-sm leading-5">{message}</Text>
+      ) : null}
       <MobileGlassGroup className="flex-row gap-2" spacing={8}>
         <MobileGlassTextButton
           className="flex-1"

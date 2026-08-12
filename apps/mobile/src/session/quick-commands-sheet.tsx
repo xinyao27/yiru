@@ -1,8 +1,8 @@
 import type { TerminalQuickCommand } from '@yiru/workbench-model/ui'
 import { useMemo, useRef, useState } from 'react'
-import { Alert, Text, View } from 'react-native'
+import { Alert, Text } from 'react-native'
 
-import { MobileGlassIconButton } from '~/components/glass/icon-button'
+import { translate } from '~/i18n/translate'
 
 import { BottomDrawer } from '../components/bottom-drawer'
 import {
@@ -139,18 +139,15 @@ export function QuickCommandsSheet({
         : 'Quick Commands'
 
   return (
-    <BottomDrawer visible={visible} onClose={onClose}>
-      <View className="flex-row items-center gap-2 pb-2">
-        {view !== 'list' ? (
-          <MobileGlassIconButton
-            accessibilityLabel="Back"
-            icon="back"
-            onPress={() => setView(view === 'agent' ? 'editor' : 'list')}
-            size="small"
-          />
-        ) : null}
-        <Text className="text-foreground text-sm font-bold">{title}</Text>
-      </View>
+    <BottomDrawer
+      visible={visible}
+      leadingAccessibilityLabel={
+        view !== 'list' ? translate('mobile.common.back', 'Back') : undefined
+      }
+      onBack={view !== 'list' ? () => setView(view === 'agent' ? 'editor' : 'list') : undefined}
+      onClose={onClose}
+      title={title}
+    >
       {view === 'editor' && draft ? (
         <Text className="text-muted-foreground pb-2 text-xs">
           Save terminal commands or agent prompts for quick access.

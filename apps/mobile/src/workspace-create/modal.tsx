@@ -647,12 +647,13 @@ function NewWorkspaceModalContent({
       dismissEnabled={drawerView !== 'trust' || !creating}
       onRequestClose={onClose}
     >
-      <BottomDrawer visible={visible && drawerView === 'form'} onClose={onClose}>
+      <BottomDrawer
+        visible={visible && drawerView === 'form'}
+        onClose={onClose}
+        title={translate('mobile.newWorkspace.title', 'Create Workspace')}
+      >
         <View className="mb-3">
-          <Text className="text-foreground text-sm font-semibold">
-            {translate('mobile.newWorkspace.title', 'Create Workspace')}
-          </Text>
-          <Text className="text-muted-foreground mt-1 text-xs">
+          <Text className="text-muted-foreground text-xs">
             {translate(
               'mobile.newWorkspace.subtitle',
               'Pick a repository and agent to spin up a new workspace.'

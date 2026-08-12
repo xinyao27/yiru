@@ -1,13 +1,12 @@
 import type { DiffComment } from '@yiru/workbench-model/workspace'
 import { useMemo } from 'react'
-import { KeyboardAvoidingView, Platform, Text, TextInput, View } from 'react-native'
+import { KeyboardAvoidingView, Platform, Text, TextInput } from 'react-native'
 
 import type { ActionSheetAction } from '~/components/action-sheet-modal'
 import { ActionSheetModal } from '~/components/action-sheet-modal'
 import { BottomDrawer, BottomDrawerModalHost } from '~/components/bottom-drawer'
 import { ConfirmModal } from '~/components/confirm-modal'
 import { MobileGlassGroup } from '~/components/glass/group'
-import { MobileGlassIconButton } from '~/components/glass/icon-button'
 import { MobileGlassSurface } from '~/components/glass/surface'
 import { MobileGlassTextButton } from '~/components/glass/text-button'
 import {
@@ -221,30 +220,20 @@ function sendSheetMessage(
 
 function NoteComposerDrawer({ controller }: MobileDiffReviewDrawersProps): React.JSX.Element {
   const composer = controller.composer
+  const title =
+    composer?.mode === 'edit'
+      ? translate('mobile.review.editNote', 'Edit Note')
+      : translate('mobile.review.addNote', 'Add Note')
   return (
-    <BottomDrawer visible={composer !== null} onClose={controller.closeComposer}>
+    <BottomDrawer visible={composer !== null} onClose={controller.closeComposer} title={title}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <View className="mb-3 flex-row items-center justify-between gap-3">
-          <View>
-            <Text className={styles.drawerTitle}>
-              {composer?.mode === 'edit'
-                ? translate('mobile.review.editNote', 'Edit Note')
-                : translate('mobile.review.addNote', 'Add Note')}
-            </Text>
-            <Text className={styles.drawerSubtitle}>
-              {composer?.mode === 'create' && composer.lineNumber > 0
-                ? translate('mobile.review.lineNumber', 'Line {{line}}', {
-                    line: composer.lineNumber
-                  })
-                : translate('mobile.review.fileNote', 'File note')}
-            </Text>
-          </View>
-          <MobileGlassIconButton
-            accessibilityLabel={translate('mobile.review.cancelNote', 'Cancel note')}
-            icon="close"
-            onPress={controller.closeComposer}
-          />
-        </View>
+        <Text className={styles.drawerSubtitle}>
+          {composer?.mode === 'create' && composer.lineNumber > 0
+            ? translate('mobile.review.lineNumber', 'Line {{line}}', {
+                line: composer.lineNumber
+              })
+            : translate('mobile.review.fileNote', 'File note')}
+        </Text>
         <MobileGlassSurface className="min-h-28 overflow-hidden rounded-2xl" isInteractive>
           <TextInput
             className="text-foreground min-h-28 p-3 text-sm leading-5"
@@ -318,10 +307,8 @@ function CompletionDrawer({ controller }: MobileDiffReviewDrawersProps): React.J
     <BottomDrawer
       visible={controller.showCompletion}
       onClose={() => controller.setShowCompletion(false)}
+      title={translate('mobile.review.complete.title', 'Review Complete')}
     >
-      <Text className={styles.drawerTitle}>
-        {translate('mobile.review.complete.title', 'Review Complete')}
-      </Text>
       <Text className={styles.drawerSubtitle}>
         {translate('mobile.review.complete.summary', '{{files}} reviewed, {{notes}}', {
           files: mobileReviewCountLabel(

@@ -1,4 +1,4 @@
-import { Text, View } from 'react-native'
+import { View } from 'react-native'
 
 import { BottomDrawer } from '~/components/bottom-drawer'
 import { MobileSearchField } from '~/components/search-field'
@@ -18,11 +18,13 @@ export function WorkspaceSearchSheet({
   visible
 }: WorkspaceSearchSheetProps): React.JSX.Element {
   return (
-    <BottomDrawer visible={visible} onClose={onClose} contentScrollable={false}>
-      <View className="gap-3">
-        <Text className="text-foreground text-base font-semibold">
-          {translate('mobile.workspace.search.title', 'Search workspaces')}
-        </Text>
+    <BottomDrawer
+      visible={visible}
+      onClose={onClose}
+      contentScrollable={false}
+      title={translate('mobile.workspace.search.title', 'Search workspaces')}
+    >
+      <View>
         <MobileSearchField
           accessibilityLabel={translate('mobile.workspace.search.label', 'Search workspaces')}
           autoFocus={visible}

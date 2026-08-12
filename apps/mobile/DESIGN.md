@@ -156,6 +156,9 @@ and hit slop; feature call sites do not override them.
   or inset.
 - A custom page header is one row: back, one flexible title, then at most two visible actions.
   Overflow additional actions into a native menu.
+- Every `BottomDrawer` uses the shared page-sheet skeleton: 16pt top and horizontal insets, one
+  44pt circular back/close control, a 16pt gap before the required title, 32pt from the header row
+  to content, and 16pt bottom content padding. Feature content never repeats this header.
 - Controls with the same scope belong in one Glass group with an 8pt layout and container gap.
 - Tabs navigate between peer views. Filters, sort controls, and commands are buttons, not tabs.
 - Icon-only actions have an accessibility label; their position and diameter remain stable when

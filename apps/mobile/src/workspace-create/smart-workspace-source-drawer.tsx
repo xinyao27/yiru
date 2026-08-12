@@ -131,18 +131,13 @@ export function SmartWorkspaceSourceDrawer({
     !loading && !error && !needsGitHubRemote && effectiveMode !== 'text' && rows.length === 0
 
   return (
-    <BottomDrawer visible={visible} onClose={onClose} contentScrollable={false}>
-      <View className="flex-row items-center justify-between pb-2">
-        <Text className="text-foreground text-sm font-semibold">
-          {translate('mobile.newWorkspace.source.title', "Name or 'Create From'")}
-        </Text>
-        <MobileGlassTextButton
-          label={translate('mobile.common.done', 'Done')}
-          onPress={onClose}
-          size="small"
-        />
-      </View>
-
+    <BottomDrawer
+      visible={visible}
+      contentScrollable={false}
+      headerAction={{ label: translate('mobile.common.done', 'Done'), onPress: onClose }}
+      onClose={onClose}
+      title={translate('mobile.newWorkspace.source.title', "Name or 'Create From'")}
+    >
       <MobileGlassSurface className="mb-2 min-h-11 overflow-hidden rounded-full" isInteractive>
         <TextInput
           className="text-foreground min-h-11 rounded-full px-4 text-sm"

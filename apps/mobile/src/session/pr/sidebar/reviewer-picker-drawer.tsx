@@ -96,10 +96,11 @@ export function ReviewerPickerDrawer({
   }, [load, seededLogins, query])
 
   return (
-    <BottomDrawer visible={visible} onClose={onClose}>
-      <Text className="text-foreground mb-2 text-sm font-bold">
-        {translate('mobile.pullRequest.reviewers.title', 'Reviewers')}
-      </Text>
+    <BottomDrawer
+      visible={visible}
+      onClose={onClose}
+      title={translate('mobile.pullRequest.reviewers.title', 'Reviewers')}
+    >
       <MobileGlassSurface className="mb-2 min-h-11 overflow-hidden rounded-xl" isInteractive>
         <TextInput
           className="text-foreground min-h-11 px-3 text-sm"

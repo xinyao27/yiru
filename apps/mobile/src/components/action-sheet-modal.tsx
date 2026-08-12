@@ -3,6 +3,7 @@ import { useState, type ReactNode } from 'react'
 import { ActivityIndicator, View, Text, Pressable } from 'react-native'
 
 import type { Icon } from '~/components/uniwind-icons'
+import { translate } from '~/i18n/translate'
 
 import { BottomDrawer } from './bottom-drawer'
 import { MobileContentSection } from './content-section'
@@ -34,14 +35,12 @@ type ActionSheetModalProps = {
 }
 
 type ActionSheetContentProps = {
-  title?: string
   message?: string
   actions: ActionSheetAction[]
   onClose?: () => void
 }
 
 export function ActionSheetContent({
-  title,
   message,
   actions,
   onClose
@@ -70,16 +69,7 @@ export function ActionSheetContent({
 
   return (
     <>
-      {(title || message) && (
-        <View className="pb-2">
-          {title ? (
-            <Text className="text-muted-foreground text-xs font-medium" numberOfLines={1}>
-              {title}
-            </Text>
-          ) : null}
-          {message ? <Text className="text-muted-foreground mt-1 text-xs">{message}</Text> : null}
-        </View>
-      )}
+      {message ? <Text className="text-muted-foreground pb-2 text-xs">{message}</Text> : null}
 
       <MobileContentSection>
         {actions.map((action, i) => {
@@ -145,9 +135,10 @@ export function ActionSheetModal({
   actions,
   onClose
 }: ActionSheetModalProps): React.JSX.Element {
+  const resolvedTitle = title ?? translate('mobile.common.actions', 'Actions')
   return (
-    <BottomDrawer visible={visible} onClose={onClose}>
-      <ActionSheetContent title={title} message={message} actions={actions} onClose={onClose} />
+    <BottomDrawer visible={visible} onClose={onClose} title={resolvedTitle}>
+      <ActionSheetContent message={message} actions={actions} onClose={onClose} />
     </BottomDrawer>
   )
 }

@@ -41,15 +41,16 @@ export function MobileWorktreeActionsDrawer({
     onClose()
   }
 
+  const title = deleteTarget
+    ? translate('mobile.workspace.delete.title', 'Delete Worktree')
+    : target?.displayName || target?.repo || translate('mobile.common.actions', 'Actions')
+
   return (
-    <BottomDrawer visible={target !== null} onClose={close}>
+    <BottomDrawer visible={target !== null} onClose={close} title={title}>
       {deleteTarget ? (
         <View>
           <View className="pb-4">
-            <Text className="text-foreground text-sm">
-              {translate('mobile.workspace.delete.title', 'Delete Worktree')}
-            </Text>
-            <Text className="text-muted-foreground mt-1 text-sm leading-5">
+            <Text className="text-muted-foreground text-sm leading-5">
               {translate('mobile.workspace.delete.message', 'Delete "{{name}}" ({{branch}})?', {
                 name: deleteTarget.displayName || deleteTarget.repo,
                 branch: deleteTarget.branch
@@ -77,7 +78,6 @@ export function MobileWorktreeActionsDrawer({
         </View>
       ) : (
         <ActionSheetContent
-          title={target ? target.displayName || target.repo : undefined}
           message={target?.branch}
           actions={
             target

@@ -34,12 +34,7 @@ export function SelectionDrawer<TValue, TId extends string>({
   onClose
 }: SelectionDrawerProps<TValue, TId>): React.JSX.Element {
   return (
-    <BottomDrawer visible={visible} onClose={onClose} contentScrollable={false}>
-      <View className="pb-2">
-        <Text className="text-muted-foreground text-xs font-medium" numberOfLines={1}>
-          {title}
-        </Text>
-      </View>
+    <BottomDrawer visible={visible} onClose={onClose} contentScrollable={false} title={title}>
       <MobileContentSection className="max-h-96 grow-0">
         <FlatList
           data={options}

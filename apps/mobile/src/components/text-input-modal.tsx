@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { View, Text, TextInput, type KeyboardTypeOptions } from 'react-native'
+import { Text, TextInput, type KeyboardTypeOptions } from 'react-native'
 
 import { translate } from '~/i18n/translate'
 
@@ -60,11 +60,8 @@ export function TextInputModal({
   const canSubmit = allowEmpty || value.trim().length > 0
 
   return (
-    <BottomDrawer visible={visible} onClose={onCancel}>
-      <View className="pb-2">
-        <Text className="text-foreground text-sm font-semibold">{title}</Text>
-        {message ? <Text className="text-muted-foreground mt-1 text-xs">{message}</Text> : null}
-      </View>
+    <BottomDrawer visible={visible} onClose={onCancel} title={title}>
+      {message ? <Text className="text-muted-foreground pb-2 text-xs">{message}</Text> : null}
 
       <MobileGlassSurface className="min-h-11 overflow-hidden rounded-full" isInteractive>
         <TextInput

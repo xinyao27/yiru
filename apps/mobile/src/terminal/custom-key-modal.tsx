@@ -6,7 +6,6 @@ import { View, Text, Pressable, TextInput } from 'react-native'
 import { BottomDrawer } from '~/components/bottom-drawer'
 import { MobileContentSection } from '~/components/content-section'
 import { MobileGlassGroup } from '~/components/glass/group'
-import { MobileGlassIconButton } from '~/components/glass/icon-button'
 import { MobileGlassPressable } from '~/components/glass/pressable'
 import { MobileGlassSurface } from '~/components/glass/surface'
 import { MobileGlassTextButton } from '~/components/glass/text-button'
@@ -166,21 +165,13 @@ export function CustomKeyModal(props: Props): React.JSX.Element {
   }, [step])
 
   return (
-    <BottomDrawer visible={visible} onClose={onClose}>
-      <View className="flex-row items-center gap-2 pb-2">
-        {showBack ? (
-          <MobileGlassIconButton
-            accessibilityLabel={CUSTOM_KEY_COPY.back}
-            icon="back"
-            onPress={onBack}
-            size="small"
-          />
-        ) : null}
-        <Text className="text-foreground text-sm font-semibold">
-          {CUSTOM_KEY_STEP_TITLES[step]}
-        </Text>
-      </View>
-
+    <BottomDrawer
+      visible={visible}
+      leadingAccessibilityLabel={showBack ? CUSTOM_KEY_COPY.back : undefined}
+      onBack={showBack ? onBack : undefined}
+      onClose={onClose}
+      title={CUSTOM_KEY_STEP_TITLES[step]}
+    >
       {step === 'choose-type' && (
         <MobileContentSection>
           <Pressable
