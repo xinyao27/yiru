@@ -13,9 +13,16 @@ type ProviderUsageStore<TScanState, TSnapshot> = {
   ) => TSnapshot
 }
 
+export type ProviderUsageOperations<TScanState, TSnapshot> = {
+  getScanState: (_input: void, context: RpcContext) => TScanState
+  setEnabled: (input: { enabled: boolean }, context: RpcContext) => Promise<TScanState>
+  refresh: (input: { force?: boolean }, context: RpcContext) => Promise<TScanState>
+  getSnapshot: (input: ProviderUsageSnapshotInput, context: RpcContext) => TSnapshot
+}
+
 export function createProviderUsageOperations<TScanState, TSnapshot>(
   getStore: (context: RpcContext) => ProviderUsageStore<TScanState, TSnapshot>
-) {
+): ProviderUsageOperations<TScanState, TSnapshot> {
   return {
     getScanState: (_input: void, context: RpcContext): TScanState =>
       getStore(context).getScanState(),

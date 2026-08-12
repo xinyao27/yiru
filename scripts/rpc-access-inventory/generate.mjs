@@ -247,6 +247,31 @@ function hasEventIteratorOutput(reference) {
   return false
 }
 
+function routerFactoryObject(reference) {
+  const resolved = resolveExpression(reference)
+  const call = unwrapExpression(resolved.node)
+  if (!ts.isCallExpression(call)) {
+    return null
+  }
+  const callee = unwrapExpression(call.expression)
+  if (!ts.isIdentifier(callee)) {
+    return null
+  }
+  const sourceFile = loadSourceFile(resolved.file)
+  const factory = sourceFile.statements.find(
+    (statement) => ts.isFunctionDeclaration(statement) && statement.name?.text === callee.text
+  )
+  if (!factory?.body) {
+    return null
+  }
+  const returns = factory.body.statements.filter(ts.isReturnStatement)
+  if (returns.length !== 1 || !returns[0].expression) {
+    return null
+  }
+  const output = unwrapExpression(returns[0].expression)
+  return ts.isObjectLiteralExpression(output) ? { file: resolved.file, node: output } : null
+}
+
 function orpcEntry(pathParts, propertyFile, propertyNode, builder, procedureReference) {
   const accessArgument = builder.node.arguments[0]
   if (!accessArgument) {
@@ -310,7 +335,10 @@ function collectOrpcEntries() {
       entries.push(orpcEntry(pathParts, reference.file, reference.node, builder, reference))
       return
     }
-    const resolved = resolveExpression(reference)
+    // Why: provider families share a contract factory so access and operation
+    // declarations stay single-source; inventory still requires its returned
+    // router to be a static top-level object literal.
+    const resolved = routerFactoryObject(reference) ?? resolveExpression(reference)
     if (!ts.isObjectLiteralExpression(resolved.node)) {
       fail(
         'oRPC router members must resolve to a router object or withAccess procedure',

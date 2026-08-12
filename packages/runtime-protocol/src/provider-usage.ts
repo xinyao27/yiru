@@ -2,6 +2,27 @@ export type ProviderUsageScope = 'yiru' | 'all'
 export type ProviderUsageRange = '7d' | '30d' | '90d' | 'all'
 export type ProviderUsageBreakdownKind = 'model' | 'project'
 
+export const PROVIDER_USAGE_PROVIDERS = ['claude', 'codex', 'openCode'] as const
+export type ProviderUsageProvider = (typeof PROVIDER_USAGE_PROVIDERS)[number]
+
+export const PROVIDER_USAGE_OPERATIONS = [
+  'getScanState',
+  'setEnabled',
+  'refresh',
+  'getSnapshot'
+] as const
+export type ProviderUsageOperation = (typeof PROVIDER_USAGE_OPERATIONS)[number]
+
+export type ProviderUsageMethodName =
+  `providerUsage.${ProviderUsageProvider}.${ProviderUsageOperation}`
+
+export function getProviderUsageMethodName(
+  provider: ProviderUsageProvider,
+  operation: ProviderUsageOperation
+): ProviderUsageMethodName {
+  return `providerUsage.${provider}.${operation}`
+}
+
 export type ProviderUsageSnapshotInput = {
   scope: ProviderUsageScope
   range: ProviderUsageRange
