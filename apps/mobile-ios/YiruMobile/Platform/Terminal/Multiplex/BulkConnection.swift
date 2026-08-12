@@ -1,16 +1,5 @@
 import Foundation
 
-nonisolated enum TerminalBulkConnectionError: Error, Sendable {
-    case expiredTicket
-    case invalidPeerMessage
-    case iteratorEnded
-    case maxStreamsExceeded
-    case routeIDsExhausted
-    case server(status: Int)
-    case staleAfterBackground
-    case staleControlGeneration
-}
-
 actor TerminalBulkConnection {
     typealias IsControlGenerationCurrent = @Sendable () async -> Bool
 

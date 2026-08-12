@@ -1,5 +1,16 @@
 import Foundation
 
+nonisolated enum TerminalBulkConnectionError: Error, Sendable {
+    case expiredTicket
+    case invalidPeerMessage
+    case iteratorEnded
+    case maxStreamsExceeded
+    case routeIDsExhausted
+    case server(status: Int)
+    case staleAfterBackground
+    case staleControlGeneration
+}
+
 nonisolated func terminalBulkCloseDetails(_ error: Error) -> (code: Int, reason: String) {
     if let frameError = error as? TerminalMultiplexFrameError {
         switch frameError {
