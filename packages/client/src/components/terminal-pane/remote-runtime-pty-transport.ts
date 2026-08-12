@@ -2,12 +2,12 @@
 import { createBrowserUuid } from '~renderer/lib/browser-uuid'
 import { setDriverForPty } from '~renderer/lib/pane-manager/mobile-driver-state'
 import { setFitOverride } from '~renderer/lib/pane-manager/mobile-fit-overrides'
-import { callRuntimeOrpcByPath } from '~renderer/runtime/orpc-client'
+import { callRuntimeOrpcByPath, type RuntimeClientTarget } from '~renderer/runtime/orpc-client'
 import {
   REMOTE_TERMINAL_SNAPSHOT_TOO_LARGE,
   type RemoteRuntimeMultiplexedTerminal
 } from '~renderer/runtime/terminal-multiplex/multiplexer'
-import { getRemoteRuntimeTerminalMultiplexer } from '~renderer/runtime/terminal-multiplex/registry'
+import { getRuntimeTerminalMultiplexer } from '~renderer/runtime/terminal-multiplex/registry'
 import {
   getRemoteRuntimePtyEnvironmentId,
   getRemoteRuntimeTerminalHandle,
@@ -60,8 +60,8 @@ function isRemoteTerminalGoneMessage(message: string): boolean {
  * runtime host, over runtime RPC plus the multiplexed stream (create, subscribe, input,
  * resize, close, reattach).
  */
-export function createRemoteRuntimePtyTransport(
-  runtimeEnvironmentId: string,
+export function createRuntimePtyTransport(
+  runtimeTarget: RuntimeClientTarget,
   opts: IpcPtyTransportOptions = {}
 ): PtyTransport {
   const {
@@ -89,7 +89,7 @@ export function createRemoteRuntimePtyTransport(
   let destroyed = false
   let handle: string | null = null
   let remotePtyId: string | null = null
-  let currentRuntimeEnvironmentId = runtimeEnvironmentId
+  let currentRuntimeTarget = runtimeTarget
   let multiplexedStream: RemoteRuntimeMultiplexedTerminal | null = null
   let multiplexedStreamHandle: string | null = null
   let desiredViewport: { cols: number; rows: number } | null = null
@@ -225,7 +225,7 @@ export function createRemoteRuntimePtyTransport(
     }
 
     handle = hostHandle
-    remotePtyId = toRemoteRuntimePtyId(hostHandle, currentRuntimeEnvironmentId)
+    remotePtyId = toRemoteRuntimePtyId(hostHandle, environmentIdForTarget(currentRuntimeTarget))
     connected = true
     desiredViewport = {
       cols: options.cols ?? 80,
@@ -250,12 +250,9 @@ export function createRemoteRuntimePtyTransport(
   // lands on the legacy dispatcher, which no longer serves domains retired
   // from it (see docs/runtime-orpc-migration.md Phase 6 D-stage).
   async function callRuntime<TResult>(method: string, params?: unknown): Promise<TResult> {
-    return callRuntimeOrpcByPath<TResult>(
-      { kind: 'environment', environmentId: currentRuntimeEnvironmentId },
-      method.split('.'),
-      params,
-      { timeoutMs: 15_000 }
-    )
+    return callRuntimeOrpcByPath<TResult>(currentRuntimeTarget, method.split('.'), params, {
+      timeoutMs: 15_000
+    })
   }
 
   async function closeRemoteTerminal(handleOverride?: string): Promise<void> {
@@ -449,7 +446,7 @@ export function createRemoteRuntimePtyTransport(
       }
       if (nextHandle !== previousHandle) {
         handle = nextHandle
-        remotePtyId = toRemoteRuntimePtyId(nextHandle, currentRuntimeEnvironmentId)
+        remotePtyId = toRemoteRuntimePtyId(nextHandle, environmentIdForTarget(currentRuntimeTarget))
         onPtySpawn?.(remotePtyId)
       }
     }
@@ -499,9 +496,7 @@ export function createRemoteRuntimePtyTransport(
       !transportClosed &&
       generation === subscriptionGeneration &&
       isCurrentRemoteTerminal(subscribedHandle, subscribedPtyId)
-    const nextStream = await getRemoteRuntimeTerminalMultiplexer(
-      currentRuntimeEnvironmentId
-    ).subscribeTerminal({
+    const nextStream = await getRuntimeTerminalMultiplexer(currentRuntimeTarget).subscribeTerminal({
       terminal: subscribedHandle,
       client: { id: clientId, type: 'desktop' },
       viewport: subscribedViewport ?? undefined,
@@ -693,6 +688,7 @@ export function createRemoteRuntimePtyTransport(
         const launchAgentToSend = options.launchAgent ?? launchAgent
         const created = await callRuntime<{ terminal: RuntimeTerminalCreate }>('terminal.create', {
           worktree: toRuntimeTerminalWorktreeSelector(worktreeId),
+          viewport: { cols: options.cols ?? 80, rows: options.rows ?? 24 },
           ...(commandToSend !== undefined ? { command: commandToSend } : {}),
           ...(startupCommandDeliveryToSend !== undefined
             ? { startupCommandDelivery: startupCommandDeliveryToSend }
@@ -718,7 +714,7 @@ export function createRemoteRuntimePtyTransport(
           return
         }
 
-        remotePtyId = toRemoteRuntimePtyId(handle, currentRuntimeEnvironmentId)
+        remotePtyId = toRemoteRuntimePtyId(handle, environmentIdForTarget(currentRuntimeTarget))
         connected = true
         desiredViewport = {
           cols: options.cols ?? 80,
@@ -743,8 +739,10 @@ export function createRemoteRuntimePtyTransport(
 
     attach(options) {
       storedCallbacks = options.callbacks
-      currentRuntimeEnvironmentId =
-        getRemoteRuntimePtyEnvironmentId(options.existingPtyId) ?? runtimeEnvironmentId
+      const restoredEnvironmentId = getRemoteRuntimePtyEnvironmentId(options.existingPtyId)
+      currentRuntimeTarget = restoredEnvironmentId
+        ? { kind: 'environment', environmentId: restoredEnvironmentId }
+        : runtimeTarget
       const previousHandle = handle
       const nextHandle = getRemoteRuntimeTerminalHandle(options.existingPtyId)
       if (previousHandle && previousHandle !== nextHandle) {
@@ -761,7 +759,7 @@ export function createRemoteRuntimePtyTransport(
       }
       // Why: legacy restored ids omitted their runtime owner. Canonicalize at
       // attach so renderer stores and lifecycle guards never share raw aliases.
-      remotePtyId = toRemoteRuntimePtyId(handle, currentRuntimeEnvironmentId)
+      remotePtyId = toRemoteRuntimePtyId(handle, environmentIdForTarget(currentRuntimeTarget))
       connected = true
       desiredViewport = {
         cols: options.cols ?? 80,
@@ -913,7 +911,7 @@ export function createRemoteRuntimePtyTransport(
     },
 
     getRuntimeEnvironmentId() {
-      return currentRuntimeEnvironmentId
+      return environmentIdForTarget(currentRuntimeTarget)
     },
 
     async serializeBuffer(opts) {
@@ -930,4 +928,8 @@ export function createRemoteRuntimePtyTransport(
       viewportBatcher.clear()
     }
   }
+}
+
+function environmentIdForTarget(target: RuntimeClientTarget): string | null {
+  return target.kind === 'environment' ? target.environmentId : null
 }

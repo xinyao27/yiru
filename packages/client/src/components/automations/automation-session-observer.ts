@@ -3,7 +3,7 @@ import { isMainTerminalSideEffectAuthorityForPty } from '~renderer/components/te
 import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
 import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
 import { isRemoteRuntimePtyId } from '~renderer/runtime/terminal-inspection'
-import { getRemoteRuntimeTerminalMultiplexer } from '~renderer/runtime/terminal-multiplex/registry'
+import { getRuntimeTerminalMultiplexer } from '~renderer/runtime/terminal-multiplex/registry'
 import {
   getRemoteRuntimePtyEnvironmentId,
   getRemoteRuntimeTerminalHandle
@@ -53,12 +53,10 @@ export async function observeExistingAutomationSession(args: {
       ? ({ kind: 'environment', environmentId: ownerEnvironmentId } as const)
       : getActiveRuntimeTarget(useAppStore.getState().settings)
     const terminal = getRemoteRuntimeTerminalHandle(ptyId)
-    if (runtimeTarget.kind !== 'environment' || !terminal) {
+    if (!terminal) {
       return () => {}
     }
-    const stream = await getRemoteRuntimeTerminalMultiplexer(
-      runtimeTarget.environmentId
-    ).subscribeTerminal({
+    const stream = await getRuntimeTerminalMultiplexer(runtimeTarget).subscribeTerminal({
       terminal,
       client: { id: `desktop:automation-reuse:${runId}`, type: 'desktop' },
       callbacks: {

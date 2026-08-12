@@ -37,6 +37,8 @@ export async function handleTerminalCreate(
 ): Promise<TerminalCreateResult> {
   return {
     terminal: await runtime.createTerminal(params.worktree, {
+      cols: params.viewport?.cols,
+      rows: params.viewport?.rows,
       command: params.command,
       startupCommandDelivery: params.startupCommandDelivery,
       env: params.env,

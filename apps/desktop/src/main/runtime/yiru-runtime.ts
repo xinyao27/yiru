@@ -964,6 +964,8 @@ type RuntimePtyWorktreeRecord = {
 }
 
 type TerminalCreateOptions = {
+  cols?: number
+  rows?: number
   command?: string
   claudeAgentTeamsSourceCommand?: string
   cwd?: string
@@ -17441,8 +17443,8 @@ export class YiruRuntimeService {
       )
       await launchOpts.beforeSpawn?.()
       const result = await this.ptyController.spawn({
-        cols: 120,
-        rows: 40,
+        cols: launchOpts.cols ?? 120,
+        rows: launchOpts.rows ?? 40,
         cwd,
         command: sequencedStartupCommand
           ? launchOpts.command

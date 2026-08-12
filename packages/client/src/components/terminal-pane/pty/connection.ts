@@ -209,7 +209,7 @@ import {
   requestTerminalPaneRecovery
 } from '../recovery'
 import { shouldClaimRemoteDesktopViewport } from '../remote-desktop-viewport-claim'
-import { createRemoteRuntimePtyTransport } from '../remote-runtime-pty-transport'
+import { createRuntimePtyTransport } from '../remote-runtime-pty-transport'
 import {
   isPaneReplaying,
   replayIntoTerminal,
@@ -278,7 +278,6 @@ import {
 import { createPtySizeReassertion } from './size-reassertion'
 import { reconcilePtySizeAcrossFrames, type PtySizeReconcileHandle } from './size-reconcile'
 import type { PtyBufferSnapshot, PtyConnectResult } from './transport'
-import { createIpcPtyTransport } from './transport'
 
 const pendingSpawnByPaneKey = new Map<string, Promise<string | null>>()
 const SSH_SESSION_EXPIRED_ERROR = 'SSH_SESSION_EXPIRED'
@@ -3141,9 +3140,10 @@ export function connectPanePty(
         }
       : {})
   }
-  const transport = runtimeEnvironmentId
-    ? createRemoteRuntimePtyTransport(runtimeEnvironmentId, transportOptions)
-    : createIpcPtyTransport(transportOptions)
+  const runtimeTarget = runtimeEnvironmentId
+    ? ({ kind: 'environment', environmentId: runtimeEnvironmentId } as const)
+    : ({ kind: 'local' } as const)
+  const transport = createRuntimePtyTransport(runtimeTarget, transportOptions)
   const canSendDesktopQueryReply = (): boolean => {
     const ptyId = transport.getPtyId()
     return !ptyId || !isPtyLocked(ptyId)

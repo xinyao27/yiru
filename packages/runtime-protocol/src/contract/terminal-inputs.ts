@@ -176,6 +176,12 @@ export const TerminalWaitInputSchema = TerminalHandleInputSchema.extend({
 
 export const TerminalCreateInputSchema = z.object({
   worktree: OptionalString,
+  viewport: z
+    .object({
+      cols: z.number().int().min(1).max(1000),
+      rows: z.number().int().min(1).max(500)
+    })
+    .optional(),
   command: OptionalString,
   startupCommandDelivery: z.enum(['fast', 'shell-ready']).optional(),
   env: z.record(z.string(), z.string()).optional(),

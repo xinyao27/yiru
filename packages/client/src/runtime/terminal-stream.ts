@@ -1,7 +1,7 @@
 import type { GlobalSettings } from '~shared/types'
 
 import { RuntimeRpcCallError, getActiveRuntimeTarget } from './rpc-client'
-import { getRemoteRuntimeTerminalMultiplexer } from './terminal-multiplex/registry'
+import { getRuntimeTerminalMultiplexer } from './terminal-multiplex/registry'
 
 const REMOTE_PTY_ID_PREFIX = 'remote:'
 const REMOTE_PTY_OWNER_SEPARATOR = '@@'
@@ -84,7 +84,7 @@ export async function subscribeToRuntimeTerminalData(
     rejectLiveTail = null
   }
 
-  const stream = await getRemoteRuntimeTerminalMultiplexer(target.environmentId).subscribeTerminal({
+  const stream = await getRuntimeTerminalMultiplexer(target).subscribeTerminal({
     terminal,
     client: { id: clientId, type: 'desktop' },
     callbacks: {

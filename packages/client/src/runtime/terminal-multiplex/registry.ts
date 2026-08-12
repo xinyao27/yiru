@@ -1,18 +1,20 @@
+import type { RuntimeClientTarget } from '../orpc-client'
 import { RemoteRuntimeTerminalMultiplexer } from './multiplexer'
 
 const multiplexers = new Map<string, RemoteRuntimeTerminalMultiplexer>()
 
-export function getRemoteRuntimeTerminalMultiplexer(
-  environmentId: string
+export function getRuntimeTerminalMultiplexer(
+  target: RuntimeClientTarget
 ): RemoteRuntimeTerminalMultiplexer {
-  let multiplexer = multiplexers.get(environmentId)
+  const targetKey = target.kind === 'local' ? 'local' : `environment:${target.environmentId}`
+  let multiplexer = multiplexers.get(targetKey)
   if (!multiplexer) {
-    multiplexer = new RemoteRuntimeTerminalMultiplexer(environmentId, (id, current) => {
+    multiplexer = new RemoteRuntimeTerminalMultiplexer(target, targetKey, (id, current) => {
       if (multiplexers.get(id) === current) {
         multiplexers.delete(id)
       }
     })
-    multiplexers.set(environmentId, multiplexer)
+    multiplexers.set(targetKey, multiplexer)
   }
   return multiplexer
 }
