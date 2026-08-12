@@ -104,16 +104,18 @@ function fireShellUi(promise: Promise<unknown>): void {
   void promise.catch(() => {})
 }
 
-export function hydrateShellUi(): void {
+export function hydrateShellUi(): Promise<void> {
   if (!isResyncHydrationRegistered) {
     isResyncHydrationRegistered = true
-    subscribeShellEventResync(refreshShellUiSnapshot)
+    subscribeShellEventResync(() => {
+      void refreshShellUiSnapshot()
+    })
   }
-  refreshShellUiSnapshot()
+  return refreshShellUiSnapshot()
 }
 
-function refreshShellUiSnapshot(): void {
-  void callShellOrpc((client) => client.shell.ui.getZoomLevel, undefined)
+function refreshShellUiSnapshot(): Promise<void> {
+  return callShellOrpc((client) => client.shell.ui.getZoomLevel, undefined)
     .then((level) => {
       zoomLevelSnapshot = level
     })

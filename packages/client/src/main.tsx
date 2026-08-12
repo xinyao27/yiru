@@ -22,7 +22,7 @@ import { hydrateShellUi } from './runtime/shell-ui-client'
 recordRendererCrashBreadcrumb('renderer_bootstrap_started', { dev: import.meta.env.DEV })
 startShellEventStream()
 hydrateRenderingHost()
-hydrateShellUi()
+const shellUiHydration = hydrateShellUi()
 installRendererCrashDiagnostics()
 
 if (
@@ -64,6 +64,7 @@ function RendererRoot(): React.JSX.Element {
 
 void hydrateShellSettings()
   .catch(() => {})
+  .then(() => shellUiHydration)
   .then(() => {
     createRoot(rootElement).render(
       <StrictMode>
