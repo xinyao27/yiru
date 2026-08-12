@@ -54,7 +54,7 @@
     "build:web": "vp run generate:i18n && node scripts/run-vite-web-build.mjs && node scripts/verify-web-build.mjs",
     "build:desktop": "vp run typecheck && vp run build:relay && vp run build:runtime-host && vp run build:cli && vp run build:electron-vite && vp run build:web",
     "build": "vp run build:desktop && vp run build:native",
-    "build:release": "vp run build:relay && vp run build:runtime-host && vp run build:native && vp run verify:computer-native && vp run build:cli && vp run build:electron-vite && vp run build:web",
+    "build:release": "vp run build:relay && vp run build:runtime-host && vp run build:native && vp run verify:computer-native && vp run build:cli && vp run build:machine-key-macos && vp run build:electron-vite && vp run build:web",
     "postinstall": "node scripts/rebuild-native-deps.mjs",
     "build:unpack": "vp run build && vp run ensure:electron-runtime && electron-builder --config config/electron-builder.config.cjs --dir",
     "build:win": "vp run build:desktop && vp run ensure:electron-runtime && electron-builder --config config/electron-builder.config.cjs --win",

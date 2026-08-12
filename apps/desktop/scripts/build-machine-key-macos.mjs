@@ -48,6 +48,7 @@ try {
     execFileSync('cp', [binaries[0], outputPath])
   } else {
     execFileSync('lipo', ['-create', ...binaries, '-output', outputPath])
+    execFileSync('lipo', [outputPath, '-verify_arch', 'arm64', 'x86_64'])
   }
   execFileSync('chmod', ['755', outputPath])
 } finally {
