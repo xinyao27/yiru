@@ -47,5 +47,7 @@ Transport 是后续所有 feature 的地基，不能在 Swift 中凭 UI 需要�
 - [x] Terminal renderer 技术选型与 prototype 验收清单
 - [x] Transport contract generation 与 drift check
 - [x] QR / paste / deep-link pairing、E2EE v2 direct authentication 与 Keychain host credential
+- [x] Host 列表、重复桌面身份复用与安全凭据读取
 - [ ] Relay provisioning、endpoint rotation 与断线恢复
+- [ ] Workspace runtime capability 与 host/worktree 操作
 - [ ] 其余功能切片

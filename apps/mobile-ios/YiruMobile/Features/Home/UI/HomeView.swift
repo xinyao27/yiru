@@ -3,17 +3,20 @@ import SwiftUI
 struct HomeView: View {
     @State private var model: HomeModel
     private let refreshRevision: Int
+    private let showHosts: () -> Void
     private let showPairing: () -> Void
     private let showDesignSystemCatalog: () -> Void
 
     init(
         runtime: any HomeRuntime,
         refreshRevision: Int,
+        showHosts: @escaping () -> Void,
         showPairing: @escaping () -> Void,
         showDesignSystemCatalog: @escaping () -> Void
     ) {
         _model = State(initialValue: HomeModel(runtime: runtime))
         self.refreshRevision = refreshRevision
+        self.showHosts = showHosts
         self.showPairing = showPairing
         self.showDesignSystemCatalog = showDesignSystemCatalog
     }
@@ -77,13 +80,14 @@ struct HomeView: View {
                 }
             }
         case .loaded(let state):
-            ConnectionSummary(state: state, showPairing: showPairing)
+            ConnectionSummary(state: state, showHosts: showHosts, showPairing: showPairing)
         }
     }
 }
 
 private struct ConnectionSummary: View {
     let state: RuntimeConnectionState
+    let showHosts: () -> Void
     let showPairing: () -> Void
 
     var body: some View {
@@ -99,6 +103,9 @@ private struct ConnectionSummary: View {
                         "Pair with desktop", systemImage: "qrcode.viewfinder", action: showPairing
                     )
                     .buttonStyle(.glassProminent)
+                } else if case .paired = state {
+                    Button("View hosts", systemImage: "desktopcomputer", action: showHosts)
+                        .buttonStyle(.glass)
                 }
             }
         }

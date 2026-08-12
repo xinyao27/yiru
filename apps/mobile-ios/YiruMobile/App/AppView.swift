@@ -8,6 +8,7 @@ struct AppView: View {
             HomeView(
                 runtime: model.dependencies.homeRuntime,
                 refreshRevision: model.homeRevision,
+                showHosts: model.showHosts,
                 showPairing: model.showPairing,
                 showDesignSystemCatalog: model.showDesignSystemCatalog
             )
@@ -15,6 +16,11 @@ struct AppView: View {
                 switch route {
                 case .designSystemCatalog:
                     DesignSystemCatalogView()
+                case .hosts:
+                    HostListView(
+                        repository: model.dependencies.hostRepository,
+                        showPairing: model.showPairing
+                    )
                 case .pair:
                     PairingScanView(onOffer: model.confirmPairing)
                 case .pairConfirm(let offer):

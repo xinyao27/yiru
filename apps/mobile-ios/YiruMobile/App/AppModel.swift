@@ -20,6 +20,10 @@ final class AppModel {
         routes.append(.pair)
     }
 
+    func showHosts() {
+        routes.append(.hosts)
+    }
+
     func confirmPairing(_ offer: PairingOffer) {
         routes.append(.pairConfirm(offer))
     }
