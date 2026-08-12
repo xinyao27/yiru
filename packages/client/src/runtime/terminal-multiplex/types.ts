@@ -60,4 +60,4 @@ export type RemoteRuntimeMultiplexedTerminal = {
 
 export const REMOTE_TERMINAL_SNAPSHOT_TOO_LARGE =
   'Remote terminal snapshot exceeded the 2 MiB replay limit; live output will continue.'
-import type { RemoteTerminalSideEffectBatch } from './side-effects'
+import type { RemoteTerminalSideEffectBatch } from './delivery/side-effects'

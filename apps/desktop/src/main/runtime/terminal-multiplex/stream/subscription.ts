@@ -7,11 +7,11 @@ import {
 import {
   updateViewportForClient,
   type TerminalViewportClient
-} from '../rpc/methods/terminal-viewport-control'
-import type { YiruRuntimeService } from '../yiru-runtime'
-import type { TerminalMultiplexSnapshotCoordinator } from './snapshot-coordinator'
-import type { TerminalMultiplexStreamOutput } from './stream-output'
-import type { TerminalMultiplexSubscribeRecord } from './stream-records'
+} from '../../rpc/methods/terminal-viewport-control'
+import type { YiruRuntimeService } from '../../yiru-runtime'
+import type { TerminalMultiplexSnapshotCoordinator } from '../snapshot/coordinator'
+import type { TerminalMultiplexStreamOutput } from './output/output'
+import type { TerminalMultiplexSubscribeRecord } from './records'
 
 type TerminalMultiplexStreamSubscriptionOptions = {
   runtime: YiruRuntimeService

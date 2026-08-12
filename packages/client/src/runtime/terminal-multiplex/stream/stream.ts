@@ -8,12 +8,12 @@ import {
   encodeTerminalMultiplexJson
 } from '@yiru/runtime-protocol/terminal-multiplex/json'
 
-import { RemoteTerminalControlSender } from './control-sender'
-import { RemoteTerminalDelivery } from './delivery'
+import { RemoteTerminalDelivery } from '../delivery/delivery'
 import type {
   RemoteRuntimeMultiplexedTerminal,
   RemoteRuntimeMultiplexedTerminalCallbacks
-} from './types'
+} from '../types'
+import { RemoteTerminalControlSender } from './control-sender'
 
 type SendFrame = (
   opcode: TerminalMultiplexOpcodeValue,

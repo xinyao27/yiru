@@ -5,19 +5,19 @@ import {
 import { encodeTerminalMultiplexJson } from '@yiru/runtime-protocol/terminal-multiplex/json'
 import { decodeTerminalMultiplexSnapshotEndRecord } from '@yiru/runtime-protocol/terminal-multiplex/snapshot-records'
 
+import { RemoteTerminalManualSnapshot } from '../snapshot/manual'
+import { RemoteTerminalSnapshotAssembler, type RemoteTerminalSnapshot } from '../snapshot/snapshot'
+import { REMOTE_TERMINAL_SNAPSHOT_TOO_LARGE } from '../types'
 import {
   once,
   RemoteTerminalDeliveryAcks,
   safeSequenceNumber,
   sendRemoteTerminalDeliveryAck
-} from './delivery-ack'
-import { applyRemoteTerminalOutputCredit } from './delivery-credit'
-import { decodeRemoteTerminalEnd, decodeRemoteTerminalModelRestore } from './delivery-records'
-import type { PendingRemoteTerminalOutput, RemoteTerminalDeliveryOptions } from './delivery-types'
-import { RemoteTerminalManualSnapshot } from './manual-snapshot'
+} from './ack'
+import { applyRemoteTerminalOutputCredit } from './credit'
 import { RemoteTerminalOrderedEvents } from './ordered-events'
-import { RemoteTerminalSnapshotAssembler, type RemoteTerminalSnapshot } from './snapshot'
-import { REMOTE_TERMINAL_SNAPSHOT_TOO_LARGE } from './types'
+import { decodeRemoteTerminalEnd, decodeRemoteTerminalModelRestore } from './records'
+import type { PendingRemoteTerminalOutput, RemoteTerminalDeliveryOptions } from './types'
 
 export class RemoteTerminalDelivery {
   private readonly options: RemoteTerminalDeliveryOptions

@@ -1,21 +1,35 @@
-import { decodeTerminalMultiplexJson } from '@yiru/runtime-protocol/terminal-multiplex/json'
-import type { TerminalSideEffectFact } from '~shared/terminal/side-effect-facts'
+import { decodeTerminalMultiplexJson } from './json'
 
-export type RemoteTerminalSideEffectBatch = {
-  facts: TerminalSideEffectFact[]
+export type TerminalMultiplexSideEffectFact =
+  | { kind: 'title'; normalizedTitle: string; rawTitle: string; staleWorkingTitleClear?: true }
+  | { kind: 'bell' }
+  | { kind: 'agent-working' }
+  | { kind: 'agent-idle'; title: string; staleWorkingTitleClear?: true }
+  | { kind: 'agent-exited' }
+  | { kind: 'command-finished'; exitCode: number | null }
+  | {
+      kind: 'pr-link'
+      link: { url: string; slug: { owner: string; repo: string }; number: number }
+    }
+  | { kind: 'command-code-working'; prompt: string }
+  | { kind: 'command-code-done'; prompt: string }
+  | { kind: '2031-subscribe' }
+
+export type TerminalMultiplexSideEffectBatch = {
+  facts: TerminalMultiplexSideEffectFact[]
   replay: boolean
 }
 
-export function decodeRemoteTerminalSideEffectBatch(
+export function decodeTerminalMultiplexSideEffectBatch(
   payload: Uint8Array<ArrayBufferLike>
-): RemoteTerminalSideEffectBatch | null {
+): TerminalMultiplexSideEffectBatch | null {
   const value = decodeTerminalMultiplexJson(payload)
   if (!value || !Array.isArray(value.facts) || typeof value.replay !== 'boolean') {
     return null
   }
-  const facts: TerminalSideEffectFact[] = []
+  const facts: TerminalMultiplexSideEffectFact[] = []
   for (const candidate of value.facts) {
-    const fact = decodeFact(candidate)
+    const fact = decodeSideEffectFact(candidate)
     if (!fact || (value.replay && fact.kind !== 'title')) {
       return null
     }
@@ -24,7 +38,7 @@ export function decodeRemoteTerminalSideEffectBatch(
   return { facts, replay: value.replay }
 }
 
-function decodeFact(value: unknown): TerminalSideEffectFact | null {
+function decodeSideEffectFact(value: unknown): TerminalMultiplexSideEffectFact | null {
   if (!isRecord(value) || typeof value.kind !== 'string') {
     return null
   }
@@ -81,9 +95,8 @@ function decodeFact(value: unknown): TerminalSideEffectFact | null {
     case 'command-code-working':
     case 'command-code-done':
       return typeof value.prompt === 'string' ? { kind: value.kind, prompt: value.prompt } : null
-    default:
-      return null
   }
+  return null
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

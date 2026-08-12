@@ -2,7 +2,7 @@ import type {
   TerminalMultiplexEvent,
   TerminalMultiplexInput
 } from '@yiru/runtime-protocol/contract'
-import { TerminalMultiplexSession } from '~main/runtime/terminal-multiplex/session'
+import { TerminalMultiplexSession } from '~main/runtime/terminal-multiplex/session/session'
 
 import type { RpcContext } from '../core'
 

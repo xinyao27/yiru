@@ -1,5 +1,5 @@
-import type { YiruRuntimeService } from '../yiru-runtime'
-import type { TerminalMultiplexSubscribeRecord } from './stream-records'
+import type { YiruRuntimeService } from '../../yiru-runtime'
+import type { TerminalMultiplexSubscribeRecord } from './records'
 
 export type TerminalMultiplexStreamAdmission =
   | { accepted: true; ptyId: string }

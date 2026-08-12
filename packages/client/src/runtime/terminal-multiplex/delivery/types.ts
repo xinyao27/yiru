@@ -1,6 +1,6 @@
 import type { TerminalMultiplexOpcode as TerminalMultiplexOpcodeValue } from '@yiru/runtime-protocol/terminal-multiplex/frame'
 
-import type { RemoteRuntimeMultiplexedTerminalCallbacks } from './types'
+import type { RemoteRuntimeMultiplexedTerminalCallbacks } from '../types'
 
 export type RemoteTerminalSendFrame = (
   opcode: TerminalMultiplexOpcodeValue,

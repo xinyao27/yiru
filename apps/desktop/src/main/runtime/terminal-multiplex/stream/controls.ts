@@ -9,21 +9,18 @@ import {
 } from '@yiru/runtime-protocol/terminal-multiplex/frame'
 import { decodeTerminalMultiplexJson } from '@yiru/runtime-protocol/terminal-multiplex/json'
 
-import { isTerminalInputLockedForClient } from '../rpc/methods/terminal-send-control'
+import { isTerminalInputLockedForClient } from '../../rpc/methods/terminal-send-control'
 import {
   updateViewportForClient,
   type TerminalViewportClient
-} from '../rpc/methods/terminal-viewport-control'
-import type { YiruRuntimeService } from '../yiru-runtime'
-import {
-  TerminalMultiplexControlReplies,
-  type TerminalMultiplexAckResult
-} from './stream-control-replies'
+} from '../../rpc/methods/terminal-viewport-control'
+import type { YiruRuntimeService } from '../../yiru-runtime'
+import { TerminalMultiplexControlReplies, type TerminalMultiplexAckResult } from './control-replies'
 import {
   decodeTerminalMultiplexClaim,
   decodeTerminalMultiplexResize,
   decodeTerminalMultiplexSignal
-} from './stream-records'
+} from './records'
 
 type TerminalMultiplexControlOptions = {
   runtime: YiruRuntimeService

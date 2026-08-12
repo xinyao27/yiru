@@ -7,13 +7,13 @@ import {
   type WebTerminalMultiplexSubscription
 } from '~renderer/web/terminal-multiplex-subscription'
 
-import type { RuntimeClientTarget } from '../orpc-client'
+import type { RuntimeClientTarget } from '../../orpc-client'
 import {
   openAuthenticatedRuntimeLoopbackSocket,
   runtimeLoopbackEventBytes,
   sendRuntimeLoopbackSocketFrame
-} from '../orpc-loopback-socket'
-import { runtimeEnvironmentsClient } from '../runtime-environments-client'
+} from '../../orpc-loopback-socket'
+import { runtimeEnvironmentsClient } from '../../runtime-environments-client'
 
 export type RuntimeTerminalMultiplexHandle = {
   unsubscribe: () => void

@@ -3,10 +3,10 @@ import type {
   TerminalMultiplexCreditRecord
 } from '@yiru/runtime-protocol/terminal-multiplex/flow-records'
 
-import type { YiruRuntimeService } from '../yiru-runtime'
+import type { YiruRuntimeService } from '../../../yiru-runtime'
+import type { TerminalMultiplexStreamTelemetry } from '../../telemetry'
+import { splitTerminalMultiplexOutput, type TerminalMultiplexPendingOutput } from './chunks'
 import { TerminalMultiplexOutputFlow } from './flow-control'
-import { splitTerminalMultiplexOutput, type TerminalMultiplexPendingOutput } from './output-chunks'
-import type { TerminalMultiplexStreamTelemetry } from './telemetry'
 
 const OUTPUT_TARGET_BYTES = 32 * 1024
 const OUTPUT_FLUSH_MS = 2

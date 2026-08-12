@@ -3,7 +3,7 @@ import {
   type TerminalMultiplexOpcode
 } from '@yiru/runtime-protocol/terminal-multiplex/frame'
 
-import type { TerminalMultiplexTelemetry } from './telemetry'
+import type { TerminalMultiplexTelemetry } from '../telemetry'
 
 type SendBinary = (bytes: Uint8Array<ArrayBufferLike>) => boolean | void
 

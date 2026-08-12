@@ -213,6 +213,15 @@
       "require": "./dist/terminal-multiplex/json.js",
       "default": "./dist/terminal-multiplex/json.js"
     },
+    "./terminal-multiplex/side-effects": {
+      "types": "./src/terminal-multiplex/side-effects.ts",
+      "react-native": "./src/terminal-multiplex/side-effects.ts",
+      "browser": "./src/terminal-multiplex/side-effects.ts",
+      "development": "./src/terminal-multiplex/side-effects.ts",
+      "import": "./dist/esm/terminal-multiplex/side-effects.mjs",
+      "require": "./dist/terminal-multiplex/side-effects.js",
+      "default": "./dist/terminal-multiplex/side-effects.js"
+    },
     "./terminal-multiplex/snapshot-records": {
       "types": "./src/terminal-multiplex/snapshot-records.ts",
       "react-native": "./src/terminal-multiplex/snapshot-records.ts",

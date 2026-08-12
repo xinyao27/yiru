@@ -7,9 +7,9 @@ import { unwrapRuntimeRpcResult } from '../rpc-client'
 import {
   openTerminalMultiplexSubscription,
   type RuntimeTerminalMultiplexHandle
-} from './connection-open'
-import { RemoteTerminalMultiplexWire } from './connection-wire'
-import { RemoteTerminalMultiplexedStream } from './stream'
+} from './connection/open'
+import { RemoteTerminalMultiplexWire } from './connection/wire'
+import { RemoteTerminalMultiplexedStream } from './stream/stream'
 import type {
   RemoteRuntimeMultiplexedTerminal,
   RemoteRuntimeMultiplexedTerminalCallbacks

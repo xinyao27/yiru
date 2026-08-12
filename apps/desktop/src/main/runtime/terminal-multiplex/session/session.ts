@@ -11,18 +11,18 @@ import {
 } from '@yiru/runtime-protocol/terminal-multiplex/frame'
 import { encodeTerminalMultiplexJson } from '@yiru/runtime-protocol/terminal-multiplex/json'
 
-import type { RpcContext } from '../rpc/core'
-import { bindSubscriptionAbort } from '../rpc/methods/subscription-abort'
+import type { RpcContext } from '../../rpc/core'
+import { bindSubscriptionAbort } from '../../rpc/methods/subscription-abort'
+import { decodeTerminalMultiplexSubscribe } from '../stream/records'
+import { TerminalMultiplexStream } from '../stream/stream'
+import { TerminalMultiplexTelemetry } from '../telemetry'
 import {
   randomTerminalMultiplexConnectionGeneration,
   randomTerminalMultiplexEpoch,
   TerminalMultiplexIdSequence,
   terminalMultiplexMonotonicMicros
-} from './session-clock'
-import { TerminalMultiplexSessionSender } from './session-sender'
-import { TerminalMultiplexStream } from './stream'
-import { decodeTerminalMultiplexSubscribe } from './stream-records'
-import { TerminalMultiplexTelemetry } from './telemetry'
+} from './clock'
+import { TerminalMultiplexSessionSender } from './sender'
 
 const HEARTBEAT_MS = 15_000
 const MAX_STREAMS = 1_024

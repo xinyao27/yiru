@@ -4,8 +4,8 @@ import {
 } from '@yiru/runtime-protocol/terminal-multiplex/frame'
 import { decodeTerminalMultiplexJson } from '@yiru/runtime-protocol/terminal-multiplex/json'
 
+import type { RemoteRuntimeMultiplexedTerminalCallbacks } from '../types'
 import { decodeRemoteTerminalSideEffectBatch } from './side-effects'
-import type { RemoteRuntimeMultiplexedTerminalCallbacks } from './types'
 
 type PendingEvent = { seq: bigint; publish: () => void }
 

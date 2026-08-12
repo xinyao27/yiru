@@ -13,7 +13,7 @@ import {
 } from '@yiru/runtime-protocol/terminal-multiplex/frame'
 import { encodeTerminalMultiplexJson } from '@yiru/runtime-protocol/terminal-multiplex/json'
 
-import type { RemoteRuntimeMultiplexedTerminalCallbacks } from './types'
+import type { RemoteRuntimeMultiplexedTerminalCallbacks } from '../types'
 
 type SendFrame = (
   opcode: TerminalMultiplexOpcodeValue,

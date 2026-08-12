@@ -11,20 +11,20 @@ import {
   encodeTerminalMultiplexJson
 } from '@yiru/runtime-protocol/terminal-multiplex/json'
 
-import type { TerminalViewportClient } from '../rpc/methods/terminal-viewport-control'
-import { TerminalMultiplexSnapshotCoordinator } from './snapshot-coordinator'
-import { admitTerminalMultiplexStream } from './stream-admission'
-import { TerminalMultiplexStreamControls } from './stream-controls'
-import type { TerminalMultiplexStreamOptions } from './stream-options'
-import { TerminalMultiplexStreamOutput } from './stream-output'
+import type { TerminalViewportClient } from '../../rpc/methods/terminal-viewport-control'
+import { TerminalMultiplexSnapshotCoordinator } from '../snapshot/coordinator'
+import { admitTerminalMultiplexStream } from './admission'
+import { TerminalMultiplexStreamControls } from './controls'
+import type { TerminalMultiplexStreamOptions } from './options'
+import { TerminalMultiplexStreamOutput } from './output/output'
 import {
   decodeTerminalMultiplexClientAck,
   decodeTerminalMultiplexClientCredit,
   decodeTerminalMultiplexSnapshotRequest,
   type TerminalMultiplexSubscribeRecord
-} from './stream-records'
-import { TerminalMultiplexStreamSender } from './stream-sender'
-import { activateTerminalMultiplexStream } from './stream-subscription'
+} from './records'
+import { TerminalMultiplexStreamSender } from './sender'
+import { activateTerminalMultiplexStream } from './subscription'
 
 type StreamState = 'snapshotting' | 'live' | 'gated' | 'recovering' | 'closed'
 

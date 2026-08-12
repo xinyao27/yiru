@@ -49,6 +49,10 @@ await build({
         ),
         'terminal-multiplex/frame': resolve(import.meta.dirname, 'src/terminal-multiplex/frame.ts'),
         'terminal-multiplex/json': resolve(import.meta.dirname, 'src/terminal-multiplex/json.ts'),
+        'terminal-multiplex/side-effects': resolve(
+          import.meta.dirname,
+          'src/terminal-multiplex/side-effects.ts'
+        ),
         'terminal-multiplex/snapshot-records': resolve(
           import.meta.dirname,
           'src/terminal-multiplex/snapshot-records.ts'

@@ -8,10 +8,10 @@ import {
 import { encodeTerminalMultiplexJson } from '@yiru/runtime-protocol/terminal-multiplex/json'
 import { encodeTerminalMultiplexSnapshotEndRecord } from '@yiru/runtime-protocol/terminal-multiplex/snapshot-records'
 
-import type { YiruRuntimeService } from '../yiru-runtime'
-import { sendTerminalMultiplexSnapshot } from './snapshot-sender'
-import type { TerminalMultiplexStreamOutput } from './stream-output'
-import type { TerminalMultiplexStreamTelemetry } from './telemetry'
+import type { YiruRuntimeService } from '../../yiru-runtime'
+import type { TerminalMultiplexStreamOutput } from '../stream/output/output'
+import type { TerminalMultiplexStreamTelemetry } from '../telemetry'
+import { sendTerminalMultiplexSnapshot } from './sender'
 
 export type TerminalMultiplexSnapshotReason = 0 | 1 | 2 | 3 | 4 | 5 | 6
 export type TerminalMultiplexSnapshotState = 'snapshotting' | 'live' | 'gated' | 'recovering'
