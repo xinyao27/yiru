@@ -192,6 +192,10 @@ module.exports = {
         join(resourcesDir, '..', 'MacOS', 'yiru-notification-status'),
         context.packager
       )
+      await signMacMachineKeyHelper(
+        join(resourcesDir, '..', 'MacOS', 'yiru-machine-key'),
+        context.packager
+      )
     }
   },
   win: {
@@ -291,6 +295,10 @@ module.exports = {
       {
         from: 'native/notification-status-macos/.build/release/yiru-notification-status',
         to: 'MacOS/yiru-notification-status'
+      },
+      {
+        from: 'native/machine-key-macos/.build/release/yiru-machine-key',
+        to: 'MacOS/yiru-machine-key'
       }
     ],
     target: [
@@ -481,6 +489,33 @@ async function signMacNotificationStatusHelper(helperPath, packager) {
   // binary embeds the app's CFBundleIdentifier in __TEXT,__info_plist so this
   // (and any later) `codesign --force` derives the correct identifier. Sign
   // before the outer Yiru.app is sealed, like the computer-use helper.
+  const args = ['--force', '--sign', identity]
+  if (isMacRelease) {
+    args.push('--options', 'runtime', '--timestamp')
+  }
+  args.push(helperPath)
+  execFileSync('codesign', args, { stdio: 'inherit' })
+  execFileSync('codesign', ['--verify', '--strict', helperPath], { stdio: 'inherit' })
+}
+
+async function signMacMachineKeyHelper(helperPath, packager) {
+  if (!existsSync(helperPath)) {
+    if (isMacRelease) {
+      throw new Error(`Missing yiru-machine-key helper at ${helperPath}`)
+    }
+    return
+  }
+  const codeSigningInfo =
+    isMacRelease && process.env.CSC_LINK && packager?.codeSigningInfo?.value
+      ? await packager.codeSigningInfo.value
+      : null
+  const identity =
+    process.env.CSC_NAME ??
+    findInstalledMacSigningIdentity(codeSigningInfo?.keychainFile) ??
+    (isMacRelease ? null : '-')
+  if (!identity) {
+    throw new Error('Missing signing identity for yiru-machine-key helper')
+  }
   const args = ['--force', '--sign', identity]
   if (isMacRelease) {
     args.push('--options', 'runtime', '--timestamp')

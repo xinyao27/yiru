@@ -51,6 +51,12 @@ runtime capability 不各写一套 transport。E2EE 和移动工作区 schema、
 method identifier 从 TypeScript source of truth 生成 Swift wire model；domain model 不向 UI 暴露
 wire 类型。
 
+`RuntimeHostSession` 是每个 host 唯一的物理连接 owner，负责连接代际、heartbeat、退避和恢复；
+`RuntimeOrpcPeer` 是加密流唯一的 reader，并按 request ID 分发并发响应。`RuntimeClient` 只维护
+stable logical session 与值语义 snapshot，再把窄 capability protocol 提供给 feature。当前产品已
+退役第一方 Cloud Relay，因此原生端保留旧 pairing field 的边界校验，但不会重新引入已删除的
+provisioning、credential rotation 或 relay endpoint lifecycle。
+
 ## 状态与并发
 
 - SwiftUI 状态使用 `@State`、`@Binding`、`@Observable` 和 `@Environment`。

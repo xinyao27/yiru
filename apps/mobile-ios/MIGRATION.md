@@ -8,7 +8,7 @@
 | 阶段 | 原生 feature | 对应现有范围 | 完成标准 |
 | --- | --- | --- | --- |
 | 0 | Foundation | app shell、theme、glass、navigation | Design System catalog、Swift 6 build、架构合同 |
-| 1 | Transport + Pairing | `transport/`、pair / scan / confirm、connection log | 直连与 relay、E2EE、Keychain、断线恢复行为一致 |
+| 1 | Transport + Pairing | `transport/`、pair / scan / confirm、connection log | 直连、E2EE、Keychain、断线恢复行为一致；不复活已退役 Cloud Relay |
 | 2 | Hosts + Workspaces | `home/`、`workspace/`、`workspace-create/`、host edit/accounts | host/worktree 浏览、创建与操作一致 |
 | 3 | Session + Terminal | `session/`、`terminal/` | terminal multiplex、tabs、输入、恢复与设置一致 |
 | 4 | Native Chat | session native-chat、attachments、tool details | transcript、streaming、tool approval、resume 一致 |
@@ -50,7 +50,9 @@ Transport 是后续所有 feature 的地基，不能在 Swift 中凭 UI 需要�
 - [x] QR / paste / deep-link pairing、E2EE v2 direct authentication 与 Keychain host credential
 - [x] Host 列表、重复桌面身份复用与安全凭据读取
 - [x] 加密 oRPC unary transport 与 `worktree.ps` 工作区只读列表
-- [ ] Relay provisioning、endpoint rotation 与断线恢复
+- [x] 每 host 长期 logical connection、并发 oRPC dispatch、指数退避与 90 秒 trickle reconnect
+- [x] 前台、网络恢复 / 切换唤醒，20 秒 heartbeat 与显式 reconnect
+- [ ] Connection diagnostics log 与 host list 的逐 host 实时状态
 - [ ] Workspace create、activate、sleep、pin 与 host edit 操作
 - [ ] Terminal multiplex、snapshot replay、flow control 与远程 PTY session
 - [ ] 其余功能切片

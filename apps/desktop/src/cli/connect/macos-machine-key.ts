@@ -1,12 +1,14 @@
 import { spawnSync } from 'node:child_process'
 import type { webcrypto } from 'node:crypto'
+import { existsSync } from 'node:fs'
+import { dirname, join, resolve } from 'node:path'
 
 const KEYCHAIN_SERVICE = 'ai.yiru.connect.machine-identity'
 const KEYCHAIN_TIMEOUT_MS = 15_000
 
 export function readMacMachinePrivateKey(account: string): webcrypto.JsonWebKey | null {
-  const result = runSecurity(['find-generic-password', '-s', KEYCHAIN_SERVICE, '-a', account, '-w'])
-  if (result.status === 44 || result.stderr.toLowerCase().includes('could not be found')) {
+  const result = runHelper(['read', KEYCHAIN_SERVICE, account])
+  if (result.status === 44) {
     return null
   }
   assertSecuritySuccess(result, 'read')
@@ -24,18 +26,13 @@ export function readMacMachinePrivateKey(account: string): webcrypto.JsonWebKey 
 }
 
 export function writeMacMachinePrivateKey(account: string, privateKey: webcrypto.JsonWebKey): void {
-  // Why: omitting the value after the final `-w` makes `security` read it from
-  // stdin, keeping the long-lived private key out of argv and process listings.
-  const result = runSecurity(
-    ['add-generic-password', '-U', '-s', KEYCHAIN_SERVICE, '-a', account, '-w'],
-    `${JSON.stringify(privateKey)}\n`
-  )
+  const result = runHelper(['write', KEYCHAIN_SERVICE, account], JSON.stringify(privateKey))
   assertSecuritySuccess(result, 'write')
 }
 
 export function deleteMacMachinePrivateKey(account: string): void {
-  const result = runSecurity(['delete-generic-password', '-s', KEYCHAIN_SERVICE, '-a', account])
-  if (result.status === 44 || result.stderr.toLowerCase().includes('could not be found')) {
+  const result = runHelper(['delete', KEYCHAIN_SERVICE, account])
+  if (result.status === 44) {
     return
   }
   assertSecuritySuccess(result, 'delete')
@@ -48,8 +45,8 @@ type SecurityResult = {
   error?: Error
 }
 
-function runSecurity(args: string[], input?: string): SecurityResult {
-  const result = spawnSync('/usr/bin/security', args, {
+function runHelper(args: string[], input?: string): SecurityResult {
+  const result = spawnSync(resolveHelperPath(), args, {
     encoding: 'utf8',
     input,
     timeout: KEYCHAIN_TIMEOUT_MS
@@ -60,6 +57,21 @@ function runSecurity(args: string[], input?: string): SecurityResult {
     stderr: result.stderr ?? '',
     ...(result.error ? { error: result.error } : {})
   }
+}
+
+function resolveHelperPath(): string {
+  const packaged = join(dirname(process.execPath), 'yiru-machine-key')
+  if (existsSync(packaged)) {
+    return packaged
+  }
+  const development = resolve(
+    __dirname,
+    '../../../native/machine-key-macos/.build/release/yiru-machine-key'
+  )
+  if (existsSync(development)) {
+    return development
+  }
+  throw new Error('The Yiru macOS Keychain helper is missing. Reinstall Yiru and try again.')
 }
 
 function assertSecuritySuccess(result: SecurityResult, operation: string): void {

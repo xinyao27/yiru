@@ -26,7 +26,7 @@ xcodebuild -downloadComponent MetalToolchain
 vp run yiru-mobile-ios#project:generate
 vp run yiru-mobile-ios#dev
 vp run yiru-mobile-ios#verify
-vp run yiru-mobile-ios#wire:verify
+vp run verify:mobile-ios-wire
 ```
 
 代码结构和依赖规则见 [ARCHITECTURE.md](./ARCHITECTURE.md)，视觉规则见

@@ -90,9 +90,7 @@ if (mode === '--write') {
 } else {
   const existing = await readFile(OUTPUT_URL, 'utf8').catch(() => null)
   if (existing !== generated) {
-    throw new Error(
-      'Swift pairing wire contract is stale. Run vp run yiru-mobile-ios#wire:generate.'
-    )
+    throw new Error('Swift pairing wire contract is stale. Run vp run generate:mobile-ios-wire.')
   }
   process.stdout.write(`Swift mobile wire contract is current (${digest.slice(0, 12)}).\n`)
 }
