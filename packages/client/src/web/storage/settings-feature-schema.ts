@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { isCustomAgentId } from '~shared/commit-message/agent-spec'
+import { getDefaultVoiceSettings } from '~shared/constants'
 import type { PersistedNativeChatSessionOptions } from '~shared/native-chat/session-options'
 import {
   SOURCE_CONTROL_ACTION_IDS,
@@ -111,27 +112,19 @@ const nativeChatSessionOptions = z
   )
   .transform((value): PersistedNativeChatSessionOptions => value)
 
-const notifications = z.object({
-  enabled: z.boolean(),
-  agentTaskComplete: z.boolean(),
-  terminalBell: z.boolean(),
-  suppressWhenFocused: z.boolean(),
-  customSoundId: z.enum([
-    'system',
-    'two-tone',
-    'bong',
-    'thump',
-    'blip',
-    'sonar',
-    'blop',
-    'ding',
-    'clack',
-    'beep',
-    'custom'
-  ]),
-  customSoundPath: z.string().nullable(),
-  customSoundVolume: finiteNumber
-})
+const notificationSoundId = z.enum([
+  'system',
+  'two-tone',
+  'bong',
+  'thump',
+  'blip',
+  'sonar',
+  'blop',
+  'ding',
+  'clack',
+  'beep',
+  'custom'
+])
 
 const telemetry = z.object({
   optedIn: z.boolean().nullable(),
@@ -148,33 +141,54 @@ const speechModelType = z.enum([
   'openai'
 ])
 
-const voice = z.object({
-  enabled: z.boolean(),
-  sttModel: z.string(),
-  modelsDir: z.string(),
-  language: z.string(),
-  dictationMode: z.enum(['toggle', 'hold']),
-  terminalConfirmBeforeInsert: z.boolean(),
-  userModels: z.array(
-    z.object({
-      id: z.string(),
-      type: speechModelType,
-      dir: z.string(),
-      sampleRate: finiteNumber.optional()
+function createNotificationSettingsSchema(defaults: GlobalSettings['notifications']) {
+  return z
+    .object({
+      enabled: z.boolean().catch(defaults.enabled),
+      agentTaskComplete: z.boolean().catch(defaults.agentTaskComplete),
+      terminalBell: z.boolean().catch(defaults.terminalBell),
+      suppressWhenFocused: z.boolean().catch(defaults.suppressWhenFocused),
+      customSoundId: notificationSoundId.catch(defaults.customSoundId),
+      customSoundPath: z.string().nullable().catch(defaults.customSoundPath),
+      customSoundVolume: finiteNumber.catch(defaults.customSoundVolume)
     })
-  ),
-  openAiApiKeyConfigured: z.boolean()
-})
+    .catch(defaults)
+}
+
+function createVoiceSettingsSchema(defaults: NonNullable<GlobalSettings['voice']>) {
+  return z
+    .object({
+      enabled: z.boolean().catch(defaults.enabled),
+      sttModel: z.string().catch(defaults.sttModel),
+      modelsDir: z.string().catch(defaults.modelsDir),
+      language: z.string().catch(defaults.language),
+      dictationMode: z.enum(['toggle', 'hold']).catch(defaults.dictationMode),
+      terminalConfirmBeforeInsert: z.boolean().catch(defaults.terminalConfirmBeforeInsert),
+      userModels: z
+        .array(
+          z.object({
+            id: z.string(),
+            type: speechModelType,
+            dir: z.string(),
+            sampleRate: finiteNumber.optional()
+          })
+        )
+        .catch(defaults.userModels),
+      openAiApiKeyConfigured: z.boolean().catch(defaults.openAiApiKeyConfigured)
+    })
+    .catch(defaults)
+}
 
 export function createFeatureSettingSchemas(defaults: GlobalSettings) {
+  const voiceDefaults = defaults.voice ?? getDefaultVoiceSettings()
   return {
     nativeChatSessionOptions: nativeChatSessionOptions
       .optional()
       .catch(() => defaults.nativeChatSessionOptions),
-    notifications: notifications.catch(defaults.notifications),
+    notifications: createNotificationSettingsSchema(defaults.notifications),
     commitMessageAi: commitMessageAi.optional().catch(() => defaults.commitMessageAi),
     sourceControlAi: sourceControlAi.optional().catch(() => defaults.sourceControlAi),
     telemetry: telemetry.optional().catch(defaults.telemetry),
-    voice: voice.optional().catch(defaults.voice)
+    voice: createVoiceSettingsSchema(voiceDefaults)
   }
 }
