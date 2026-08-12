@@ -1,0 +1,194 @@
+import Foundation
+
+nonisolated struct TerminalMultiplexFrame: Equatable, Sendable {
+    let opcode: TerminalMultiplexOpcodeWire
+    let unsupportedOpcode: UInt8?
+    let routeID: UInt32
+    let epoch: UInt64
+    let sequence: UInt64
+    let correlationID: UInt32
+    let payload: Data
+
+    init(
+        opcode: TerminalMultiplexOpcodeWire,
+        routeID: UInt32,
+        epoch: UInt64,
+        sequence: UInt64 = 0,
+        correlationID: UInt32 = 0,
+        payload: Data = Data()
+    ) {
+        self.opcode = opcode
+        unsupportedOpcode = nil
+        self.routeID = routeID
+        self.epoch = epoch
+        self.sequence = sequence
+        self.correlationID = correlationID
+        self.payload = payload
+    }
+
+    fileprivate init(
+        unsupportedOpcode: UInt8,
+        routeID: UInt32,
+        epoch: UInt64,
+        sequence: UInt64,
+        correlationID: UInt32,
+        payload: Data
+    ) {
+        opcode = .error
+        self.unsupportedOpcode = unsupportedOpcode
+        self.routeID = routeID
+        self.epoch = epoch
+        self.sequence = sequence
+        self.correlationID = correlationID
+        self.payload = payload
+    }
+}
+
+nonisolated enum TerminalMultiplexFrameError: Error, Equatable, Sendable {
+    case invalidHeader
+    case invalidLength
+    case invalidRoute
+    case unsupportedOpcode
+}
+
+nonisolated enum TerminalMultiplexFrameCodec {
+    static func encode(_ frame: TerminalMultiplexFrame) throws -> Data {
+        guard frame.unsupportedOpcode == nil else {
+            throw TerminalMultiplexFrameError.unsupportedOpcode
+        }
+        guard isValidRoute(opcode: frame.opcode, routeID: frame.routeID) else {
+            throw TerminalMultiplexFrameError.invalidRoute
+        }
+        guard frame.payload.count <= MobileTerminalMultiplexWireContract.hardMaxFrameBytes else {
+            throw TerminalMultiplexFrameError.invalidLength
+        }
+
+        var header = Data(
+            repeating: 0,
+            count: MobileTerminalMultiplexWireContract.headerBytes
+        )
+        header[0] = MobileTerminalMultiplexWireContract.kind
+        header[1] = MobileTerminalMultiplexWireContract.version
+        header[2] = frame.opcode.rawValue
+        write(UInt16(MobileTerminalMultiplexWireContract.headerBytes), to: &header, at: 4)
+        write(frame.routeID, to: &header, at: 8)
+        write(UInt32(frame.payload.count), to: &header, at: 12)
+        write(frame.epoch, to: &header, at: 16)
+        write(frame.sequence, to: &header, at: 24)
+        write(frame.correlationID, to: &header, at: 32)
+        header.append(frame.payload)
+        return header
+    }
+
+    static func decode(
+        _ data: Data,
+        maxFrameBytes: Int = MobileTerminalMultiplexWireContract.defaultMaxFrameBytes
+    ) throws -> TerminalMultiplexFrame {
+        let headerBytes = MobileTerminalMultiplexWireContract.headerBytes
+        guard data.count >= headerBytes,
+            byte(in: data, at: 0) == MobileTerminalMultiplexWireContract.kind,
+            byte(in: data, at: 1) == MobileTerminalMultiplexWireContract.version,
+            byte(in: data, at: 3) == 0,
+            readUInt16(data, at: 4) == headerBytes,
+            readUInt16(data, at: 6) == 0,
+            readUInt32(data, at: 36) == 0
+        else {
+            throw TerminalMultiplexFrameError.invalidHeader
+        }
+
+        let opcodeValue = byte(in: data, at: 2)
+        let routeID = readUInt32(data, at: 8)
+        let payloadBytes = Int(readUInt32(data, at: 12))
+        try validateLength(data, payloadBytes: payloadBytes, maxFrameBytes: maxFrameBytes)
+        let payload = data.subdata(in: headerBytes..<data.count)
+        let epoch = readUInt64(data, at: 16)
+        let sequence = readUInt64(data, at: 24)
+        let correlationID = readUInt32(data, at: 32)
+
+        guard let opcode = TerminalMultiplexOpcodeWire(rawValue: opcodeValue) else {
+            guard routeID > 0 else { throw TerminalMultiplexFrameError.invalidRoute }
+            return TerminalMultiplexFrame(
+                unsupportedOpcode: opcodeValue,
+                routeID: routeID,
+                epoch: epoch,
+                sequence: sequence,
+                correlationID: correlationID,
+                payload: payload
+            )
+        }
+        guard isValidRoute(opcode: opcode, routeID: routeID) else {
+            throw TerminalMultiplexFrameError.invalidRoute
+        }
+        return TerminalMultiplexFrame(
+            opcode: opcode,
+            routeID: routeID,
+            epoch: epoch,
+            sequence: sequence,
+            correlationID: correlationID,
+            payload: payload
+        )
+    }
+
+    private static func validateLength(_ data: Data, payloadBytes: Int, maxFrameBytes: Int) throws {
+        let effectiveMax = min(
+            max(0, maxFrameBytes),
+            MobileTerminalMultiplexWireContract.hardMaxFrameBytes
+        )
+        guard payloadBytes <= effectiveMax,
+            payloadBytes <= MobileTerminalMultiplexWireContract.hardMaxFrameBytes,
+            data.count == MobileTerminalMultiplexWireContract.headerBytes + payloadBytes
+        else {
+            throw TerminalMultiplexFrameError.invalidLength
+        }
+    }
+
+    private static func isValidRoute(
+        opcode: TerminalMultiplexOpcodeWire,
+        routeID: UInt32
+    ) -> Bool {
+        switch opcode {
+        case .epoch, .heartbeat:
+            routeID == 0
+        default:
+            routeID > 0
+        }
+    }
+}
+
+nonisolated private func byte(in data: Data, at offset: Int) -> UInt8 {
+    data[data.startIndex + offset]
+}
+
+nonisolated private func readUInt16(_ data: Data, at offset: Int) -> UInt16 {
+    UInt16(byte(in: data, at: offset)) | UInt16(byte(in: data, at: offset + 1)) << 8
+}
+
+nonisolated private func readUInt32(_ data: Data, at offset: Int) -> UInt32 {
+    (0..<4).reduce(0) { value, byteOffset in
+        value | UInt32(byte(in: data, at: offset + byteOffset)) << UInt32(byteOffset * 8)
+    }
+}
+
+nonisolated private func readUInt64(_ data: Data, at offset: Int) -> UInt64 {
+    (0..<8).reduce(0) { value, byteOffset in
+        value | UInt64(byte(in: data, at: offset + byteOffset)) << UInt64(byteOffset * 8)
+    }
+}
+
+nonisolated private func write(_ value: UInt16, to data: inout Data, at offset: Int) {
+    for byteOffset in 0..<2 {
+        data[offset + byteOffset] = UInt8(truncatingIfNeeded: value >> UInt16(byteOffset * 8))
+    }
+}
+
+nonisolated private func write(_ value: UInt32, to data: inout Data, at offset: Int) {
+    for byteOffset in 0..<4 {
+        data[offset + byteOffset] = UInt8(truncatingIfNeeded: value >> UInt32(byteOffset * 8))
+    }
+}
+
+nonisolated private func write(_ value: UInt64, to data: inout Data, at offset: Int) {
+    for byteOffset in 0..<8 {
+        data[offset + byteOffset] = UInt8(truncatingIfNeeded: value >> UInt64(byteOffset * 8))
+    }
+}

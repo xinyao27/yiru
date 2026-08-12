@@ -96,6 +96,11 @@ renderer-neutral `TerminalSurface`；首版使用默认 Core Text/Core Graphics 
 Renderer 只接收有序 bytes、snapshot、resize 与输入回调。它不知道 WebSocket、relay、epoch
 或 ACK；只有 output 完成 parser feed 后 transport 才能推进 ACK。
 
+Terminal 控制面的 `status/list/show/openMultiplex` 使用 runtime-protocol 中的原生客户端投影，
+由同一个 drift-checked generator 产出 Swift `Codable` 类型。inner frame 的 kind、version、header
+大小、frame cap 与 opcode 同样来自 TypeScript source of truth；`TerminalMultiplexFrameCodec` 只负责
+严格 little-endian frame 边界，不承担 session、flow-control 或 renderer 状态。
+
 ## 文件和 API 边界
 
 - Swift 文件目标上限 300 行；SwiftUI 文件 400 行。达到上限说明职责需要沿 seam 拆分。

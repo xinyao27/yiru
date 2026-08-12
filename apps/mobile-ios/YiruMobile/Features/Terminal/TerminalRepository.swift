@@ -1,4 +1,4 @@
-protocol TerminalRepository: Sendable {
+nonisolated protocol TerminalRepository: Sendable {
     func terminals(for hostID: String, worktreeID: String) async throws -> TerminalSnapshot
     func reconnectTerminalHost(hostID: String) async
 }
