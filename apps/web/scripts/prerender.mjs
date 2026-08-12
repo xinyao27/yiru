@@ -1,4 +1,4 @@
-import { mkdir, readFile, rm, writeFile } from 'node:fs/promises'
+import { copyFile, mkdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 
@@ -17,6 +17,8 @@ const appDirectory = resolve(import.meta.dirname, '..')
 const bundleDirectory = resolve(appDirectory, '.prerender')
 const distDirectory = resolve(appDirectory, 'dist')
 const shellPath = resolve(distDirectory, 'index.html')
+const productShellPath = resolve(distDirectory, 'app.html')
+const productShellAssetPath = resolve(distDirectory, 'web-app-shell.txt')
 
 // Why: an exact marker, so a change to what the shell renders fails the build instead
 // of silently shipping a page whose stylesheet is nowhere near the top of head.
@@ -67,6 +69,10 @@ function extractAssetTags(shell) {
 }
 
 try {
+  // Why: Cloudflare applies canonical HTML routing to app.html even for an
+  // internal asset-binding fetch. The .txt copy has an exact asset key and is
+  // served only after the Worker has selected the isolated app origin.
+  await copyFile(productShellPath, productShellAssetPath)
   const bundlePath = resolve(bundleDirectory, 'prerender-entry.js')
   const { renderRoute, routeMetas } = await import(pathToFileURL(bundlePath).href)
   const assets = extractAssetTags(await readFile(shellPath, 'utf8'))

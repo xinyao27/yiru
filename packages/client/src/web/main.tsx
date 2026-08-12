@@ -8,11 +8,14 @@ import { PhosphorIconContextProvider } from '../components/phosphor-icon-context
 import { translate } from '../i18n/i18n'
 import { I18nProvider } from '../i18n/provider'
 import { useUiLocale } from '../i18n/use-ui-locale'
-import WebConnect from './connect/page'
+import { WebConnect } from './connect/page'
 import { initializeWebRuntimeConnection } from './runtime-connection'
 import { readStoredWebRuntimeEnvironment } from './runtime-environment'
+import { installWebTrustedTypesPolicy } from './trusted-html'
 
 const App = lazy(() => import('../application-shell/shell'))
+
+installWebTrustedTypesPolicy()
 
 function WebRoot(): React.JSX.Element {
   const [hasEnvironment, setHasEnvironment] = useState(

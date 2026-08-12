@@ -35,19 +35,11 @@ export async function signBrowserMessage(
 }
 
 async function createBrowserIdentity(): Promise<StoredBrowserIdentity> {
-  const generated = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, [
+  const generated = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, false, [
     'sign',
     'verify'
   ])
   const publicJwk = await crypto.subtle.exportKey('jwk', generated.publicKey)
-  const privateJwk = await crypto.subtle.exportKey('jwk', generated.privateKey)
-  const privateKey = await crypto.subtle.importKey(
-    'jwk',
-    privateJwk,
-    { name: 'ECDSA', namedCurve: 'P-256' },
-    false,
-    ['sign']
-  )
   const publicKey = await crypto.subtle.importKey(
     'jwk',
     publicJwk,
@@ -55,11 +47,17 @@ async function createBrowserIdentity(): Promise<StoredBrowserIdentity> {
     true,
     ['verify']
   )
+  const signingKey = BrowserSigningKeySchema.parse({
+    kty: publicJwk.kty,
+    crv: publicJwk.crv,
+    x: publicJwk.x,
+    y: publicJwk.y
+  })
   return {
-    privateKey,
+    privateKey: generated.privateKey,
     publicKey,
     publicIdentity: {
-      signingKey: BrowserSigningKeySchema.parse(publicJwk)
+      signingKey
     }
   }
 }
@@ -106,12 +104,16 @@ function isStoredBrowserIdentity(value: unknown): value is StoredBrowserIdentity
   if (!value || typeof value !== 'object') {
     return false
   }
-  const candidate = value as Partial<StoredBrowserIdentity>
+  const privateKey = Reflect.get(value, 'privateKey')
+  const publicKey = Reflect.get(value, 'publicKey')
+  const publicIdentity = Reflect.get(value, 'publicIdentity')
   return (
-    candidate.privateKey instanceof CryptoKey &&
-    candidate.publicKey instanceof CryptoKey &&
-    BrowserSigningKeySchema.safeParse(candidate.publicIdentity?.signingKey).success &&
-    candidate.privateKey.extractable === false
+    privateKey instanceof CryptoKey &&
+    publicKey instanceof CryptoKey &&
+    !!publicIdentity &&
+    typeof publicIdentity === 'object' &&
+    BrowserSigningKeySchema.safeParse(Reflect.get(publicIdentity, 'signingKey')).success &&
+    privateKey.extractable === false
   )
 }
 

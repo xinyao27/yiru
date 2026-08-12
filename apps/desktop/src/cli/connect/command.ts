@@ -4,7 +4,7 @@ import { createInterface } from 'node:readline/promises'
 import type { CommandHandler } from '../dispatch'
 import { getOptionalStringFlag, getRequiredStringFlag } from '../flags'
 import { RuntimeClientError } from '../runtime-client'
-import { confirmConnectGrant, exchangeConnectGrant, revokeBrowserAccess } from './api'
+import { confirmConnectGrant, exchangeConnectGrant, revokeBrowserAccess } from './grant-client'
 import {
   browserAccessId,
   forgetConnectIdentity,

@@ -2,14 +2,21 @@ import {
   BrowserMachineTicketResponseSchema,
   ConnectGrantStatusResponseSchema,
   CreateConnectGrantResponseSchema,
+  MachineBrowserReadySchema,
   WEB_CONNECT_PROTOCOL_VERSION,
+  type ConnectGrantStatusResponse,
+  type MachineBrowserReady,
+  type MachineSigningKey
+} from '@yiru/runtime-protocol/web-connect'
+import {
+  browserCancelGrantSigningMessage,
   browserRelayAuthSigningMessage,
   browserSelfRevokeSigningMessage,
   browserStatusSigningMessage,
   browserTicketSigningMessage,
-  pairingVerificationMessage,
-  type ConnectGrantStatusResponse
-} from '@yiru/runtime-protocol/web-connect'
+  machineBrowserReadySigningMessage,
+  pairingVerificationMessage
+} from '@yiru/runtime-protocol/web-connect/signing-messages'
 
 import { loadOrCreateBrowserIdentity, signBrowserMessage } from './browser-identity'
 
@@ -91,6 +98,40 @@ export async function readBrowserConnectGrantStatus(
   return status
 }
 
+export async function cancelBrowserConnectGrant(grantId: string): Promise<void> {
+  const identity = await loadOrCreateBrowserIdentity()
+  const timestamp = Date.now()
+  const nonce = randomBase64Url(18)
+  const signature = await signBrowserMessage(
+    identity,
+    browserCancelGrantSigningMessage({ grantId, timestamp, nonce })
+  )
+  await fetch(`/api/connect/grants/${encodeURIComponent(grantId)}`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ version: WEB_CONNECT_PROTOCOL_VERSION, timestamp, nonce, signature }),
+    keepalive: true
+  })
+}
+
+export function readMachineBrowserReady(value: unknown): MachineBrowserReady | null {
+  const parsed = MachineBrowserReadySchema.safeParse(value)
+  return parsed.success ? parsed.data : null
+}
+
+export async function verifyMachineBrowserReady(
+  ready: MachineBrowserReady,
+  signingKey: MachineSigningKey
+): Promise<boolean> {
+  const key = await crypto.subtle.importKey('jwk', signingKey, 'Ed25519', false, ['verify'])
+  return await crypto.subtle.verify(
+    'Ed25519',
+    key,
+    Uint8Array.from(base64UrlToBytes(ready.signature)),
+    new TextEncoder().encode(machineBrowserReadySigningMessage(ready))
+  )
+}
+
 export async function createBrowserRelaySession(
   machineId: string,
   e2eePublicKeyB64: string
@@ -122,7 +163,7 @@ export async function createBrowserRelaySession(
   const timestamp = Date.now()
   const nonce = randomBase64Url(18)
   const authWithoutSignature: Omit<BrowserRelaySession['auth'], 'signature'> = {
-    type: 'browser-auth' as const,
+    type: 'browser-auth',
     version: WEB_CONNECT_PROTOCOL_VERSION,
     machineId,
     ticket: ticket.ticket,
@@ -183,6 +224,12 @@ function bytesToBase64Url(bytes: Uint8Array): string {
     binary += String.fromCharCode(byte)
   }
   return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+}
+
+function base64UrlToBytes(value: string): Uint8Array {
+  const base64 = value.replace(/-/g, '+').replace(/_/g, '/')
+  const binary = atob(base64.padEnd(Math.ceil(base64.length / 4) * 4, '='))
+  return Uint8Array.from(binary, (character) => character.charCodeAt(0))
 }
 
 async function browserIdentityId(value: string): Promise<string> {

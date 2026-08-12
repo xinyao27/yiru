@@ -1,12 +1,14 @@
 import {
   BrowserMachineTicketRequestSchema,
+  BrowserIdentitySchema,
   BrowserSelfRevokeRequestSchema,
+  MachineSigningKeySchema,
   RevokeBrowserAccessRequestSchema,
   WEB_CONNECT_PROTOCOL_VERSION,
-  browserTicketSigningMessage,
   type BrowserIdentity,
   type MachineSigningKey
 } from '@yiru/runtime-protocol/web-connect'
+import { browserTicketSigningMessage } from '@yiru/runtime-protocol/web-connect/signing-messages'
 
 import { randomBase64Url } from './encoding'
 import {
@@ -24,6 +26,11 @@ import {
   type MachineRecord
 } from './machine-record'
 import { MachineRelay } from './machine-relay'
+import {
+  acceptPendingRelaySocket,
+  clearPendingRelayTimeout,
+  expirePendingRelaySockets
+} from './relay-socket'
 import { apiError, jsonResponse } from './responses'
 
 export class ConnectMachineObject {
@@ -50,7 +57,10 @@ export class ConnectMachineObject {
       request.headers.get('Upgrade')?.toLowerCase() === 'websocket' &&
       pathname.endsWith('/socket')
     ) {
-      return this.relay.acceptSocket()
+      if (!(await readMachine(this.state))) {
+        return apiError('machine_not_found', 404)
+      }
+      return await acceptPendingRelaySocket(this.state)
     }
     return apiError('not_found', 404)
   }
@@ -60,15 +70,20 @@ export class ConnectMachineObject {
   }
 
   webSocketClose(socket: WebSocket): void {
+    clearPendingRelayTimeout(socket)
     this.relay.disconnected(socket)
   }
 
   webSocketError(): void {}
 
+  async alarm(): Promise<void> {
+    await expirePendingRelaySockets(this.state)
+  }
+
   private async authorize(request: Request): Promise<Response> {
-    const input = (await request.json()) as {
-      machine: { id: string; signingKey: MachineSigningKey }
-      browser: BrowserIdentity
+    const input = readMachineAuthorization(await request.json())
+    if (!input) {
+      return apiError('invalid_request', 400)
     }
     const browserId = await browserIdentityId(input.browser)
     const existing = await readMachine(this.state)
@@ -167,4 +182,23 @@ export class ConnectMachineObject {
     this.relay.closeBrowserAccess(browserId)
     return jsonResponse({ ok: true })
   }
+}
+
+function readMachineAuthorization(value: unknown): {
+  machine: { id: string; signingKey: MachineSigningKey }
+  browser: BrowserIdentity
+} | null {
+  if (!value || typeof value !== 'object') {
+    return null
+  }
+  const machine = Reflect.get(value, 'machine')
+  const browser = BrowserIdentitySchema.safeParse(Reflect.get(value, 'browser'))
+  if (!machine || typeof machine !== 'object' || !browser.success) {
+    return null
+  }
+  const id = Reflect.get(machine, 'id')
+  const signingKey = MachineSigningKeySchema.safeParse(Reflect.get(machine, 'signingKey'))
+  return typeof id === 'string' && signingKey.success
+    ? { machine: { id, signingKey: signingKey.data }, browser: browser.data }
+    : null
 }

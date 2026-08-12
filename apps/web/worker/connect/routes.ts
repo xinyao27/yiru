@@ -24,6 +24,14 @@ export async function handleConnectApi(
     url.pathname
   )
   if (machineMatch) {
+    if (machineMatch[2] === 'socket') {
+      const socketLimit = await env.CONNECT_NETWORK_RATE_LIMIT.limit({
+        key: request.headers.get('CF-Connecting-IP') ?? 'unknown-network'
+      })
+      if (!socketLimit.success) {
+        return apiError('rate_limited', 429)
+      }
+    }
     const objectId = env.CONNECT_MACHINES.idFromName(`machine:${machineMatch[1]}`)
     return await env.CONNECT_MACHINES.get(objectId).fetch(request)
   }
@@ -35,7 +43,7 @@ export async function handleConnectApi(
     const objectId = env.CONNECT_MACHINES.idFromName(`machine:${revokeMatch[1]}`)
     return await env.CONNECT_MACHINES.get(objectId).fetch(request)
   }
-  const match = /^\/api\/connect\/grants\/([A-Za-z0-9_-]+)\/(exchange|confirm|status)$/.exec(
+  const match = /^\/api\/connect\/grants\/([A-Za-z0-9_-]+)(?:\/(exchange|confirm|status))?$/.exec(
     url.pathname
   )
   if (!match) {

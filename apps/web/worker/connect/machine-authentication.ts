@@ -4,11 +4,13 @@ import type {
 } from '@yiru/runtime-protocol/web-connect'
 import {
   WEB_CONNECT_REQUEST_CLOCK_SKEW_MS,
-  browserSelfRevokeSigningMessage,
-  revokeBrowserAccessSigningMessage,
   type BrowserIdentity,
   type MachineSigningKey
 } from '@yiru/runtime-protocol/web-connect'
+import {
+  browserSelfRevokeSigningMessage,
+  revokeBrowserAccessSigningMessage
+} from '@yiru/runtime-protocol/web-connect/signing-messages'
 
 import { base64UrlToBytes, sha256Base64Url } from './encoding'
 

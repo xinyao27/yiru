@@ -2,14 +2,12 @@ import { spawn, type ChildProcess } from 'node:child_process'
 import { randomBytes, sign } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 
-import {
-  WEB_CONNECT_PROTOCOL_VERSION,
-  machineRelayAuthSigningMessage
-} from '@yiru/runtime-protocol/web-connect'
+import { WEB_CONNECT_PROTOCOL_VERSION } from '@yiru/runtime-protocol/web-connect'
 import {
   RelayBrowserAuthEnvelopeSchema,
   WEB_CONNECT_MAX_TRANSPORT_FRAME_BYTES
 } from '@yiru/runtime-protocol/web-connect/relay-frames'
+import { machineRelayAuthSigningMessage } from '@yiru/runtime-protocol/web-connect/signing-messages'
 import { WebSocket } from 'ws'
 import { decodePairingOffer } from '~shared/pairing'
 
@@ -99,32 +97,40 @@ export async function runForegroundRelay(
       if (envelope) {
         localSockets.get(envelope.connectionId)?.close()
         let local: WebSocket | null = null
-        local = openBrowserChannel(envelope, access, pairing.endpoint, pairing.deviceToken, {
-          onClose: () => {
-            if (localSockets.get(envelope.connectionId) === local) {
-              localSockets.delete(envelope.connectionId)
-              sendRelayJson(socket, connectionCloseFrame(envelope.connectionId))
-            }
-          },
-          sendFrame: (frame, binary) => {
-            const encoded = encodeRelayFrame(envelope.connectionId, frame, binary)
-            if (encoded) {
-              sendRelayJson(socket, encoded)
-            } else {
-              local?.close(1009, 'Relay frame is too large')
-            }
-          },
-          sendReady: (deviceToken) => {
-            const ready = encodeRelayFrame(
-              envelope.connectionId,
-              Buffer.from(JSON.stringify({ type: 'relay-browser-ready', deviceToken })),
-              false
-            )
-            if (ready) {
-              sendRelayJson(socket, ready)
+        local = openBrowserChannel(
+          envelope,
+          access,
+          pairing.endpoint,
+          pairing.deviceToken,
+          pairing.publicKeyB64,
+          identity,
+          {
+            onClose: () => {
+              if (localSockets.get(envelope.connectionId) === local) {
+                localSockets.delete(envelope.connectionId)
+                sendRelayJson(socket, connectionCloseFrame(envelope.connectionId))
+              }
+            },
+            sendFrame: (frame, binary) => {
+              const encoded = encodeRelayFrame(envelope.connectionId, frame, binary)
+              if (encoded) {
+                sendRelayJson(socket, encoded)
+              } else {
+                local?.close(1009, 'Relay frame is too large')
+              }
+            },
+            sendReady: (readyMessage) => {
+              const ready = encodeRelayFrame(
+                envelope.connectionId,
+                Buffer.from(JSON.stringify(readyMessage)),
+                false
+              )
+              if (ready) {
+                sendRelayJson(socket, ready)
+              }
             }
           }
-        })
+        )
         if (local) {
           localSockets.set(envelope.connectionId, local)
         }
@@ -208,14 +214,14 @@ async function startRuntimeHost(): Promise<{ child: ChildProcess; readiness: Run
       output = lines.pop() ?? ''
       for (const line of lines) {
         try {
-          const parsed = JSON.parse(line) as Partial<RuntimeReadiness> & { type?: unknown }
-          if (parsed.type === 'yiru_runtime_ready' && parsed.web?.pairingFile) {
+          const parsed = readRuntimeReadiness(JSON.parse(line))
+          if (parsed) {
             clearTimeout(timeout)
-            resolve({ web: parsed.web })
+            resolve(parsed)
             return
           }
         } catch {
-          // Ignore non-readiness output from the supervised runtime.
+          // Why: the runtime can emit diagnostics before its machine-readable readiness line.
         }
       }
     })
@@ -234,14 +240,28 @@ async function startRuntimeHost(): Promise<{ child: ChildProcess; readiness: Run
 }
 
 function readRuntimePairing(path: string): ReturnType<typeof decodePairingOffer> {
-  const parsed = JSON.parse(readFileSync(path, 'utf8')) as { pairingUrl?: unknown }
-  if (typeof parsed.pairingUrl !== 'string') {
+  const parsed: unknown = JSON.parse(readFileSync(path, 'utf8'))
+  const pairingUrl =
+    parsed && typeof parsed === 'object' ? Reflect.get(parsed, 'pairingUrl') : undefined
+  if (typeof pairingUrl !== 'string') {
     throw new RuntimeClientError(
       'runtime_pairing_failed',
       'Runtime pairing credentials are missing.'
     )
   }
-  return decodePairingOffer(parsed.pairingUrl)
+  return decodePairingOffer(pairingUrl)
+}
+
+function readRuntimeReadiness(value: unknown): RuntimeReadiness | null {
+  if (!value || typeof value !== 'object' || Reflect.get(value, 'type') !== 'yiru_runtime_ready') {
+    return null
+  }
+  const web = Reflect.get(value, 'web')
+  if (!web || typeof web !== 'object') {
+    return null
+  }
+  const pairingFile = Reflect.get(web, 'pairingFile')
+  return typeof pairingFile === 'string' ? { web: { pairingFile } } : null
 }
 
 function parseBrowserAuthEnvelope(

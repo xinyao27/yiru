@@ -2,14 +2,16 @@ import {
   BrowserRelayAuthSchema,
   MachineRelayAuthSchema,
   WEB_CONNECT_MAX_RELAY_FRAME_BYTES,
-  WEB_CONNECT_PROTOCOL_VERSION,
-  browserRelayAuthSigningMessage,
-  machineRelayAuthSigningMessage
+  WEB_CONNECT_PROTOCOL_VERSION
 } from '@yiru/runtime-protocol/web-connect'
 import {
   RelayConnectionCloseSchema,
   WEB_CONNECT_MAX_TRANSPORT_FRAME_BYTES
 } from '@yiru/runtime-protocol/web-connect/relay-frames'
+import {
+  browserRelayAuthSigningMessage,
+  machineRelayAuthSigningMessage
+} from '@yiru/runtime-protocol/web-connect/signing-messages'
 
 import { base64UrlToBytes, randomBase64Url } from './encoding'
 import { isCurrentTimestamp, verifyBrowserSignature } from './machine-authentication'
@@ -20,11 +22,7 @@ import {
   relayMessageByteLength,
   sendRelayFrame
 } from './relay-frame'
-
-type RelayAttachment =
-  | { role: 'pending' }
-  | { role: 'machine'; runtimePublicKeyB64: string }
-  | { role: 'browser'; browserId: string; connectionId: string }
+import { clearPendingRelayTimeout, relayAttachment, type RelayAttachment } from './relay-socket'
 
 const MAX_BROWSER_CONNECTIONS = 8
 
@@ -35,17 +33,8 @@ export class MachineRelay {
     this.state = state
   }
 
-  acceptSocket(): Response {
-    const pair = new WebSocketPair()
-    const client = pair[0]
-    const server = pair[1]
-    server.serializeAttachment({ role: 'pending' } satisfies RelayAttachment)
-    this.state.acceptWebSocket(server)
-    return new Response(null, { status: 101, webSocket: client })
-  }
-
   async receive(socket: WebSocket, message: string | ArrayBuffer): Promise<void> {
-    const attachment = socket.deserializeAttachment() as RelayAttachment | null
+    const attachment = relayAttachment(socket)
     const maxBytes =
       attachment?.role === 'machine'
         ? WEB_CONNECT_MAX_TRANSPORT_FRAME_BYTES
@@ -75,7 +64,7 @@ export class MachineRelay {
   }
 
   disconnected(socket: WebSocket): void {
-    const attachment = socket.deserializeAttachment() as RelayAttachment | null
+    const attachment = relayAttachment(socket)
     if (attachment?.role === 'machine') {
       for (const browser of this.browserSockets()) {
         browser.close(1012, 'Machine offline')
@@ -86,13 +75,13 @@ export class MachineRelay {
   }
 
   runtimePublicKey(): string | null {
-    const attachment = this.machineSocket()?.deserializeAttachment() as RelayAttachment | null
+    const attachment = relayAttachment(this.machineSocket() ?? undefined)
     return attachment?.role === 'machine' ? attachment.runtimePublicKeyB64 : null
   }
 
   closeBrowserAccess(browserId: string): void {
     for (const socket of this.browserSockets()) {
-      const attachment = socket.deserializeAttachment() as RelayAttachment | null
+      const attachment = relayAttachment(socket)
       if (attachment?.role === 'browser' && attachment.browserId === browserId) {
         socket.close(1008, 'Access revoked')
       }
@@ -153,6 +142,7 @@ export class MachineRelay {
     for (const browser of this.browserSockets()) {
       browser.close(1012, 'Machine reconnected')
     }
+    clearPendingRelayTimeout(socket)
     socket.serializeAttachment({
       role: 'machine',
       runtimePublicKeyB64: auth.runtimePublicKeyB64
@@ -200,6 +190,7 @@ export class MachineRelay {
       return
     }
     const connectionId = randomBase64Url(18)
+    clearPendingRelayTimeout(socket)
     socket.serializeAttachment({
       role: 'browser',
       browserId: browser.id,
@@ -259,8 +250,7 @@ export class MachineRelay {
         .getWebSockets()
         .find(
           (socket) =>
-            socket.readyState === WebSocket.OPEN &&
-            (socket.deserializeAttachment() as RelayAttachment | null)?.role === 'machine'
+            socket.readyState === WebSocket.OPEN && relayAttachment(socket)?.role === 'machine'
         ) ?? null
     )
   }
@@ -270,15 +260,14 @@ export class MachineRelay {
       .getWebSockets()
       .filter(
         (socket) =>
-          socket.readyState === WebSocket.OPEN &&
-          (socket.deserializeAttachment() as RelayAttachment | null)?.role === 'browser'
+          socket.readyState === WebSocket.OPEN && relayAttachment(socket)?.role === 'browser'
       )
   }
 
   private browserSocket(connectionId: string): WebSocket | null {
     return (
       this.browserSockets().find((socket) => {
-        const attachment = socket.deserializeAttachment() as RelayAttachment | null
+        const attachment = relayAttachment(socket)
         return attachment?.role === 'browser' && attachment.connectionId === connectionId
       }) ?? null
     )

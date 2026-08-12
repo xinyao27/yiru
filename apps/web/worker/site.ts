@@ -29,7 +29,11 @@ const DOWNLOAD_PATH = '/download'
 const DOCUMENTATION_PREFIX = '/docs'
 const DOCUMENTATION_PATHS = new Set(['/privacy'])
 const PRODUCT_APP_PATH = '/app'
+const PRODUCT_SHELL_ASSET_PATH = '/web-app-shell.txt'
 const PRODUCT_APP_HOSTNAME = `app.${CANONICAL_HOSTNAME}`
+// Why: app.localhost is a browser-defined loopback origin, so local QA can
+// exercise the same origin routing and CSP without weakening the production host.
+const PRODUCT_APP_HOSTNAMES = new Set([PRODUCT_APP_HOSTNAME, 'app.localhost'])
 const PRODUCT_SECURITY_HEADERS = {
   'Content-Security-Policy': [
     "default-src 'self'",
@@ -40,8 +44,11 @@ const PRODUCT_SECURITY_HEADERS = {
     "frame-ancestors 'none'",
     "img-src 'self' data: blob:",
     "object-src 'none'",
+    "require-trusted-types-for 'script'",
     "script-src 'self'",
-    "style-src 'self' 'unsafe-inline'"
+    "style-src 'self'",
+    "style-src-attr 'unsafe-inline'",
+    'trusted-types default'
   ].join('; '),
   'Cross-Origin-Opener-Policy': 'same-origin',
   'Cross-Origin-Resource-Policy': 'same-origin',
@@ -65,7 +72,7 @@ export default {
     // Why: proof-of-possession protects every sensitive endpoint. Keeping the
     // apex alias allows the legacy /app origin and Wrangler's hostname rewrite
     // to finish pairing while the UI itself remains isolated on app.yiru.ai.
-    if (url.hostname === PRODUCT_APP_HOSTNAME || url.hostname === CANONICAL_HOSTNAME) {
+    if (PRODUCT_APP_HOSTNAMES.has(url.hostname) || url.hostname === CANONICAL_HOSTNAME) {
       const connectApiResponse = await handleConnectApi(request, env)
       if (connectApiResponse) {
         return withProductSecurityHeaders(connectApiResponse)
@@ -80,11 +87,16 @@ export default {
     // slash is what a stray copy-paste adds. Root keeps its own slash.
     const pathname = url.pathname === '/' ? url.pathname : url.pathname.replace(/\/+$/, '')
 
-    if (url.hostname === PRODUCT_APP_HOSTNAME) {
+    if (PRODUCT_APP_HOSTNAMES.has(url.hostname)) {
       if (pathname === '/') {
-        const appEntryUrl = new URL(PRODUCT_APP_PATH, url)
-        appEntryUrl.search = url.search
-        return withProductSecurityHeaders(await env.ASSETS.fetch(new Request(appEntryUrl, request)))
+        // Why: the asset binding keys only by pathname. A fresh internal URL
+        // avoids reusing the outer root navigation's cached marketing document.
+        const appEntryUrl = new URL(request.url)
+        appEntryUrl.pathname = PRODUCT_SHELL_ASSET_PATH
+        appEntryUrl.search = ''
+        const appEntry = withProductSecurityHeaders(await env.ASSETS.fetch(appEntryUrl))
+        appEntry.headers.set('Content-Type', 'text/html; charset=utf-8')
+        return appEntry
       }
       return withProductSecurityHeaders(await env.ASSETS.fetch(request))
     }
@@ -94,6 +106,10 @@ export default {
       productUrl.hostname = PRODUCT_APP_HOSTNAME
       productUrl.pathname = pathname.slice(PRODUCT_APP_PATH.length) || '/'
       return Response.redirect(productUrl.toString(), TEMPORARY_REDIRECT)
+    }
+
+    if (pathname === PRODUCT_SHELL_ASSET_PATH) {
+      return new Response(null, { status: 404 })
     }
 
     if (pathname === DOWNLOAD_PATH) {

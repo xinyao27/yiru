@@ -96,6 +96,7 @@ export const BrowserGrantStatusRequestSchema = z
   .strict()
 
 export const BrowserMachineTicketRequestSchema = BrowserGrantStatusRequestSchema
+export const BrowserCancelGrantRequestSchema = BrowserGrantStatusRequestSchema
 
 export const BrowserMachineTicketResponseSchema = z
   .object({
@@ -152,6 +153,19 @@ export const BrowserRelayAuthSchema = z
   })
   .strict()
 
+export const MachineBrowserReadySchema = z
+  .object({
+    type: z.literal('relay-browser-ready'),
+    version: z.literal(WEB_CONNECT_PROTOCOL_VERSION),
+    machineId: Base64UrlSchema,
+    browserE2eePublicKeyB64: z.string().min(1),
+    runtimePublicKeyB64: z.string().min(1),
+    machineE2eePublicKeyB64: z.string().min(1),
+    encryptedDeviceTokenB64: z.string().min(1),
+    signature: Base64UrlSchema
+  })
+  .strict()
+
 const GrantStatusBaseSchema = z.object({
   version: z.literal(WEB_CONNECT_PROTOCOL_VERSION),
   expiresAt: z.number().int().positive()
@@ -169,7 +183,8 @@ export const ConnectGrantStatusResponseSchema = z.discriminatedUnion('status', [
   GrantStatusBaseSchema.extend({
     status: z.literal('paired'),
     machineId: Base64UrlSchema,
-    machineName: z.string().min(1)
+    machineName: z.string().min(1),
+    machineSigningKey: MachineSigningKeySchema
   }).strict(),
   GrantStatusBaseSchema.extend({ status: z.literal('expired') }).strict()
 ])
@@ -187,123 +202,10 @@ export type BrowserGrantStatusRequest = z.infer<typeof BrowserGrantStatusRequest
 export type BrowserMachineTicketResponse = z.infer<typeof BrowserMachineTicketResponseSchema>
 export type BrowserRelayAuth = z.infer<typeof BrowserRelayAuthSchema>
 export type MachineRelayAuth = z.infer<typeof MachineRelayAuthSchema>
+export type MachineBrowserReady = z.infer<typeof MachineBrowserReadySchema>
 export type ConnectGrantStatusResponse = z.infer<typeof ConnectGrantStatusResponseSchema>
 
 export function parseConnectGrant(value: string): { grantId: string; secret: string } | null {
   const match = /^yrp_([A-Za-z0-9_-]+)\.([A-Za-z0-9_-]+)$/.exec(value.trim())
   return match ? { grantId: match[1], secret: match[2] } : null
-}
-
-export function browserStatusSigningMessage(args: {
-  grantId: string
-  timestamp: number
-  nonce: string
-}): string {
-  return ['yiru-connect-browser-status-v1', args.grantId, String(args.timestamp), args.nonce].join(
-    '\n'
-  )
-}
-
-export function machineConfirmationSigningMessage(args: {
-  grantId: string
-  machineId: string
-  challenge: string
-  verificationCode: string
-}): string {
-  return [
-    'yiru-connect-machine-confirm-v1',
-    args.grantId,
-    args.machineId,
-    args.challenge,
-    args.verificationCode
-  ].join('\n')
-}
-
-export function pairingVerificationMessage(args: {
-  grantId: string
-  browser: BrowserIdentity
-  machineSigningKey: MachineSigningKey
-}): string {
-  return [
-    'yiru-connect-pairing-verification-v1',
-    args.grantId,
-    args.browser.signingKey.x,
-    args.browser.signingKey.y,
-    args.machineSigningKey.x
-  ].join('\n')
-}
-
-export function browserTicketSigningMessage(args: {
-  machineId: string
-  timestamp: number
-  nonce: string
-}): string {
-  return [
-    'yiru-connect-browser-ticket-v1',
-    args.machineId,
-    String(args.timestamp),
-    args.nonce
-  ].join('\n')
-}
-
-export function machineRelayAuthSigningMessage(args: {
-  machineId: string
-  timestamp: number
-  nonce: string
-  runtimePublicKeyB64: string
-}): string {
-  return [
-    'yiru-connect-machine-relay-v1',
-    args.machineId,
-    String(args.timestamp),
-    args.nonce,
-    args.runtimePublicKeyB64
-  ].join('\n')
-}
-
-export function browserRelayAuthSigningMessage(args: {
-  machineId: string
-  ticket: string
-  timestamp: number
-  nonce: string
-  e2eePublicKeyB64: string
-}): string {
-  return [
-    'yiru-connect-browser-relay-v1',
-    args.machineId,
-    args.ticket,
-    String(args.timestamp),
-    args.nonce,
-    args.e2eePublicKeyB64
-  ].join('\n')
-}
-
-export function revokeBrowserAccessSigningMessage(args: {
-  machineId: string
-  browserId: string
-  timestamp: number
-  nonce: string
-}): string {
-  return [
-    'yiru-connect-machine-revoke-browser-v1',
-    args.machineId,
-    args.browserId,
-    String(args.timestamp),
-    args.nonce
-  ].join('\n')
-}
-
-export function browserSelfRevokeSigningMessage(args: {
-  machineId: string
-  browserId: string
-  timestamp: number
-  nonce: string
-}): string {
-  return [
-    'yiru-connect-browser-self-revoke-v1',
-    args.machineId,
-    args.browserId,
-    String(args.timestamp),
-    args.nonce
-  ].join('\n')
 }

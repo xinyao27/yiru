@@ -1,5 +1,6 @@
-import { Check, Copy, SpinnerGap } from '@phosphor-icons/react'
+import { Check, Copy } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
 
@@ -7,7 +8,11 @@ import {
   createStoredWebRuntimeEnvironment,
   saveStoredWebRuntimeEnvironment
 } from '../runtime-environment'
-import { createBrowserConnectGrant, readBrowserConnectGrantStatus } from './grant-client'
+import {
+  cancelBrowserConnectGrant,
+  createBrowserConnectGrant,
+  readBrowserConnectGrantStatus
+} from './grant-client'
 import type { BrowserConnectGrant } from './grant-client'
 
 type PairingViewState =
@@ -27,9 +32,11 @@ const STATUS_POLL_INTERVAL_MS = 1_500
 
 type WebConnectProps = { onConnected: () => void }
 
-export default function WebConnect({ onConnected }: WebConnectProps): React.JSX.Element {
+export function WebConnect({ onConnected }: WebConnectProps): React.JSX.Element {
   const [state, setState] = useState<PairingViewState>({ kind: 'loading' })
   const [copiedCommand, setCopiedCommand] = useState<string | null>(null)
+  const activeGrantId =
+    state.kind === 'ready' || state.kind === 'verification-required' ? state.grant.grantId : null
 
   useEffect(() => {
     const controller = new AbortController()
@@ -81,7 +88,8 @@ export default function WebConnect({ onConnected }: WebConnectProps): React.JSX.
                 deviceToken: '',
                 publicKeyB64: '',
                 scope: 'runtime',
-                relayMachineId: status.machineId
+                relayMachineId: status.machineId,
+                relayMachineSigningKey: status.machineSigningKey
               }
             })
           )
@@ -116,6 +124,15 @@ export default function WebConnect({ onConnected }: WebConnectProps): React.JSX.
       }
     }
   }, [onConnected, state])
+
+  useEffect(() => {
+    if (!activeGrantId) {
+      return
+    }
+    return () => {
+      void cancelBrowserConnectGrant(activeGrantId)
+    }
+  }, [activeGrantId])
 
   const copyCommand = async (command: string): Promise<void> => {
     await navigator.clipboard.writeText(command)
@@ -237,11 +254,13 @@ export default function WebConnect({ onConnected }: WebConnectProps): React.JSX.
   )
 }
 
-function ConnectStep(props: {
+type ConnectStepProps = {
   number: string
   title: string
   children: React.ReactNode
-}): React.JSX.Element {
+}
+
+function ConnectStep(props: ConnectStepProps): React.JSX.Element {
   return (
     <section className="grid gap-4 sm:grid-cols-[32px_1fr]">
       <div className="border-border flex size-8 items-center justify-center border font-mono text-xs">
@@ -255,11 +274,13 @@ function ConnectStep(props: {
   )
 }
 
-function CommandBlock(props: {
+type CommandBlockProps = {
   command: string
   copied: boolean
   onCopy: (command: string) => Promise<void>
-}): React.JSX.Element {
+}
+
+function CommandBlock(props: CommandBlockProps): React.JSX.Element {
   return (
     <div className="border-border bg-muted flex min-w-0 items-stretch border">
       <code className="min-w-0 flex-1 overflow-x-auto px-4 py-3 font-mono text-xs leading-5 whitespace-nowrap">
@@ -282,7 +303,7 @@ function CommandBlock(props: {
 function LoadingRow(): React.JSX.Element {
   return (
     <div className="text-muted-foreground flex items-center gap-2 text-sm">
-      <SpinnerGap className="animate-spin" size={16} aria-hidden />
+      <LoadingIndicator className="size-4" aria-hidden="true" />
       {translate('auto.web.WebConnect.creatingGrant', 'Creating a secure pairing command…')}
     </div>
   )

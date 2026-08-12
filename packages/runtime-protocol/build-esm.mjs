@@ -60,6 +60,10 @@ await build({
         'terminal-query-reply': resolve(import.meta.dirname, 'src/terminal-query-reply.ts'),
         updater: resolve(import.meta.dirname, 'src/updater.ts'),
         'web-connect/contracts': resolve(import.meta.dirname, 'src/web-connect/contracts.ts'),
+        'web-connect/signing-messages': resolve(
+          import.meta.dirname,
+          'src/web-connect/signing-messages.ts'
+        ),
         'web-connect/relay-frames': resolve(import.meta.dirname, 'src/web-connect/relay-frames.ts')
       },
       output: {

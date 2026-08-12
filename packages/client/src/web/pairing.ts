@@ -1,3 +1,4 @@
+import type { MachineSigningKey } from '@yiru/runtime-protocol/web-connect'
 import type { DeviceScope } from '~shared/runtime-types'
 
 const PAIRING_OFFER_VERSION = 2
@@ -9,6 +10,7 @@ export type WebPairingOffer = {
   publicKeyB64: string
   scope?: DeviceScope
   relayMachineId?: string
+  relayMachineSigningKey?: MachineSigningKey
 }
 
 export type WebPairingStartupDecision =

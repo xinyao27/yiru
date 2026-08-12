@@ -22,6 +22,10 @@ export function publicKeyFromBase64(b64: string): Uint8Array {
   return key
 }
 
+export function bytesFromBase64(b64: string): Uint8Array {
+  return base64ToBytes(b64)
+}
+
 export function publicKeyToBase64(key: Uint8Array): string {
   return bytesToBase64(key)
 }

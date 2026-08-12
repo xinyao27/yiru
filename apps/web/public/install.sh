@@ -1,7 +1,6 @@
 #!/bin/sh
 set -eu
 
-RELEASE_BASE='https://github.com/xinyao27/yiru/releases/latest/download'
 RELEASE_API='https://api.github.com/repos/xinyao27/yiru/releases/latest'
 INSTALL_ROOT="${XDG_DATA_HOME:-$HOME/.local/share}/yiru"
 BIN_ROOT="${XDG_BIN_HOME:-$HOME/.local/bin}"
@@ -41,7 +40,24 @@ download_verified_asset() {
     echo "The latest Yiru release does not publish a SHA-256 digest for $asset_name." >&2
     exit 1
   }
-  curl -fL --retry 3 "$RELEASE_BASE/$asset_name" -o "$output_path"
+  asset_url="$(
+    YIRU_ASSET_NAME="$asset_name" perl -MJSON::PP -0777 -ne '
+      $release = decode_json($_);
+      ($asset) = grep { $_->{name} eq $ENV{YIRU_ASSET_NAME} } @{$release->{assets}};
+      exit 1 unless $asset && $asset->{browser_download_url};
+      print $asset->{browser_download_url};
+    ' "$TEMP_ROOT/release.json"
+  )" || {
+    echo "The latest Yiru release does not include $asset_name." >&2
+    exit 1
+  }
+  case "$asset_url" in
+    "https://github.com/xinyao27/yiru/releases/download/"*) ;;
+    *) echo 'GitHub returned an unexpected Yiru release asset URL.' >&2; exit 1 ;;
+  esac
+  # Why: the latest-release alias can move between metadata and download. The
+  # asset URL captured above contains the exact release tag whose digest we read.
+  curl -fL --retry 3 "$asset_url" -o "$output_path"
   case "$(uname -s)" in
     Darwin) actual_digest="$(shasum -a 256 "$output_path" | awk '{print $1}')" ;;
     Linux) actual_digest="$(sha256sum "$output_path" | awk '{print $1}')" ;;

@@ -257,6 +257,15 @@
       "import": "./dist/esm/web-connect/relay-frames.mjs",
       "require": "./dist/web-connect/relay-frames.js",
       "default": "./dist/web-connect/relay-frames.js"
+    },
+    "./web-connect/signing-messages": {
+      "types": "./src/web-connect/signing-messages.ts",
+      "react-native": "./src/web-connect/signing-messages.ts",
+      "browser": "./src/web-connect/signing-messages.ts",
+      "development": "./src/web-connect/signing-messages.ts",
+      "import": "./dist/esm/web-connect/signing-messages.mjs",
+      "require": "./dist/web-connect/signing-messages.js",
+      "default": "./dist/web-connect/signing-messages.js"
     }
   },
   "scripts": {

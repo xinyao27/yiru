@@ -5,6 +5,7 @@ import { RUNTIME_ORPC_RUNTIME_CAPABILITY } from '@yiru/runtime-protocol/capabili
 import type { RuntimeRpcResponse, RuntimeRpcSuccess } from '@yiru/runtime-protocol/rpc-envelope'
 import { isKeepaliveFrame } from '@yiru/runtime-protocol/rpc-envelope'
 import { withRemoteRuntimeTailscaleHint } from '@yiru/runtime-protocol/tailscale-endpoint'
+import type { MachineBrowserReady } from '@yiru/runtime-protocol/web-connect'
 import type {
   RuntimeMethodContract,
   RuntimeMethodParams,
@@ -12,8 +13,14 @@ import type {
 } from '~shared/runtime-method-contract'
 import { RUNTIME_INBOUND_BINARY_STREAM_CAPABILITY } from '~shared/runtime-orpc-socket'
 
-import { createBrowserRelaySession, type BrowserRelaySession } from './connect/grant-client'
 import {
+  createBrowserRelaySession,
+  readMachineBrowserReady,
+  verifyMachineBrowserReady,
+  type BrowserRelaySession
+} from './connect/grant-client'
+import {
+  bytesFromBase64,
   decrypt,
   decryptBytes,
   deriveSharedKey,
@@ -141,6 +148,7 @@ export class WebRuntimeClient {
   private readonly waiters: { resolve: () => void; reject: (error: Error) => void }[] = []
   private readonly serverPublicKey: Uint8Array | null
   private relayDeviceToken: string | null = null
+  private preparedRelay: PreparedRelayConnection | null = null
   private orpcConnection: WebRuntimeOrpcConnection | null = null
   private legacyOrpcClient: WebRuntimeOrpcClient | null = null
   private orpcClientPromise: Promise<WebRuntimeOrpcClient> | null = null
@@ -551,6 +559,7 @@ export class WebRuntimeClient {
       this.ws = null
     }
     this.sharedKey = null
+    this.preparedRelay = null
     this.setState('disconnected')
   }
 
@@ -588,6 +597,7 @@ export class WebRuntimeClient {
     this.ws = ws
     this.sharedKey = null
     this.relayDeviceToken = null
+    this.preparedRelay = relay
     this.authenticatedRuntimeId = null
     this.authenticatedCapabilities.clear()
     this.setState('connecting')
@@ -668,12 +678,15 @@ export class WebRuntimeClient {
         return
       }
       try {
-        const control = JSON.parse(raw) as { type?: unknown; deviceToken?: unknown }
-        if (control.type === 'relay-browser-ready' && typeof control.deviceToken === 'string') {
-          this.relayDeviceToken = control.deviceToken
+        const control: unknown = JSON.parse(raw)
+        const ready = readMachineBrowserReady(control)
+        if (ready) {
+          if (!(await this.acceptMachineBrowserReady(ready))) {
+            sourceWs?.close()
+          }
           return
         }
-        if (control.type === 'e2ee_ready') {
+        if (isControlType(control, 'e2ee_ready')) {
           const deviceToken = this.pairing.relayMachineId
             ? this.relayDeviceToken
             : this.pairing.deviceToken
@@ -822,6 +835,34 @@ export class WebRuntimeClient {
     return this.sendEncryptedText(JSON.stringify(message))
   }
 
+  private async acceptMachineBrowserReady(ready: MachineBrowserReady): Promise<boolean> {
+    const relay = this.preparedRelay
+    const machineSigningKey = this.pairing.relayMachineSigningKey
+    if (
+      !relay ||
+      !machineSigningKey ||
+      ready.machineId !== relay.session.auth.machineId ||
+      ready.browserE2eePublicKeyB64 !== relay.session.auth.e2eePublicKeyB64 ||
+      ready.runtimePublicKeyB64 !== relay.session.runtimePublicKeyB64 ||
+      !(await verifyMachineBrowserReady(ready, machineSigningKey))
+    ) {
+      return false
+    }
+    const machineSharedKey = deriveSharedKey(
+      relay.secretKey,
+      publicKeyFromBase64(ready.machineE2eePublicKeyB64)
+    )
+    const tokenBytes = decryptBytes(
+      bytesFromBase64(ready.encryptedDeviceTokenB64),
+      machineSharedKey
+    )
+    if (!tokenBytes) {
+      return false
+    }
+    this.relayDeviceToken = new TextDecoder().decode(tokenBytes)
+    return this.relayDeviceToken.length > 0
+  }
+
   private sendEncryptedText(plaintext: string): boolean {
     const ws = this.ws
     if (!ws || ws.readyState !== WebSocket.OPEN || !this.sharedKey) {
@@ -900,6 +941,7 @@ export class WebRuntimeClient {
     }
     this.ws = null
     this.sharedKey = null
+    this.preparedRelay = null
     this.closeTerminalMultiplexSubscription(true)
     this.closeOrpcConnection()
     this.closeShellServicesChannel()
@@ -1233,6 +1275,10 @@ function abortError(signal: AbortSignal | undefined): Error {
   return signal?.reason instanceof Error
     ? signal.reason
     : new DOMException('The operation was aborted', 'AbortError')
+}
+
+function isControlType(value: unknown, type: string): boolean {
+  return !!value && typeof value === 'object' && Reflect.get(value, 'type') === type
 }
 
 function isRuntimeFailureResponse(

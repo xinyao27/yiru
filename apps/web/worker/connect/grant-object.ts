@@ -1,40 +1,30 @@
 import {
+  BrowserCancelGrantRequestSchema,
   BrowserGrantStatusRequestSchema,
   ConfirmConnectGrantRequestSchema,
   ExchangeConnectGrantRequestSchema,
   WEB_CONNECT_PROTOCOL_VERSION,
-  WEB_CONNECT_REQUEST_CLOCK_SKEW_MS,
+  WEB_CONNECT_REQUEST_CLOCK_SKEW_MS
+} from '@yiru/runtime-protocol/web-connect'
+import {
+  browserCancelGrantSigningMessage,
   browserStatusSigningMessage,
   machineConfirmationSigningMessage,
-  pairingVerificationMessage,
-  type BrowserIdentity
-} from '@yiru/runtime-protocol/web-connect'
+  pairingVerificationMessage
+} from '@yiru/runtime-protocol/web-connect/signing-messages'
 
 import { base64UrlToBytes, randomBase64Url, sha256Base64Url } from './encoding'
 import type { WebWorkerEnvironment } from './environment'
+import { readCreateGrantRecord, readStoredGrant, type ConnectGrantRecord } from './grant-record'
+import {
+  deriveVerificationCode,
+  fixedLengthEqual,
+  isCurrentBrowserRequest,
+  trimNonces
+} from './grant-values'
 import { apiError, jsonResponse } from './responses'
 
-type PendingMachine = {
-  id: string
-  name: string
-  signingKey: JsonWebKey
-  challenge: string
-  verificationCode: string
-}
-
-type ConnectGrantRecord = {
-  browser: BrowserIdentity
-  secretHash: string
-  expiresAt: number
-  usedBrowserNonces: Record<string, number>
-  pendingMachine: PendingMachine | null
-  pairedAt: number | null
-}
-
-type CreateGrantRecord = Pick<ConnectGrantRecord, 'browser' | 'secretHash' | 'expiresAt'>
-
 const GRANT_STORAGE_KEY = 'grant'
-const MAX_REMEMBERED_NONCES = 64
 
 export class ConnectGrantObject {
   private readonly state: DurableObjectState
@@ -49,6 +39,9 @@ export class ConnectGrantObject {
     const pathname = new URL(request.url).pathname
     if (request.method === 'PUT' && pathname.endsWith('/internal/create')) {
       return await this.create(request)
+    }
+    if (request.method === 'DELETE' && /\/grants\/[A-Za-z0-9_-]+$/.test(pathname)) {
+      return await this.cancel(request)
     }
     if (request.method !== 'POST') {
       return apiError('method_not_allowed', 405)
@@ -73,7 +66,10 @@ export class ConnectGrantObject {
     if (await this.readGrant()) {
       return apiError('grant_already_exists', 409)
     }
-    const input = (await request.json()) as CreateGrantRecord
+    const input = readCreateGrantRecord(await request.json())
+    if (!input) {
+      return apiError('invalid_request', 400)
+    }
     const grant: ConnectGrantRecord = {
       browser: input.browser,
       secretHash: input.secretHash,
@@ -84,6 +80,43 @@ export class ConnectGrantObject {
     }
     await this.state.storage.put(GRANT_STORAGE_KEY, grant)
     await this.state.storage.setAlarm(grant.expiresAt)
+    return jsonResponse({ ok: true })
+  }
+
+  private async cancel(request: Request): Promise<Response> {
+    const grant = await this.readGrant()
+    if (!grant) {
+      return jsonResponse({ ok: true })
+    }
+    const parsed = BrowserCancelGrantRequestSchema.safeParse(await request.json())
+    if (!parsed.success || !isCurrentBrowserRequest(grant, parsed.data)) {
+      return apiError('invalid_request', 400)
+    }
+    const publicKey = await crypto.subtle.importKey(
+      'jwk',
+      grant.browser.signingKey,
+      { name: 'ECDSA', namedCurve: 'P-256' },
+      false,
+      ['verify']
+    )
+    const isValid = await crypto.subtle.verify(
+      { name: 'ECDSA', hash: 'SHA-256' },
+      publicKey,
+      base64UrlToBytes(parsed.data.signature),
+      new TextEncoder().encode(
+        browserCancelGrantSigningMessage({
+          grantId: this.grantIdFromCancel(request),
+          timestamp: parsed.data.timestamp,
+          nonce: parsed.data.nonce
+        })
+      )
+    )
+    if (!isValid) {
+      return apiError('invalid_signature', 401)
+    }
+    if (grant.pairedAt === null) {
+      await this.state.storage.deleteAll()
+    }
     return jsonResponse({ ok: true })
   }
 
@@ -255,12 +288,12 @@ export class ConnectGrantObject {
       machineName: machine.name,
       ...(grant.pairedAt === null
         ? { machineSigningKey: machine.signingKey, verificationCode: machine.verificationCode }
-        : {})
+        : { machineSigningKey: machine.signingKey })
     })
   }
 
   private async readGrant(): Promise<ConnectGrantRecord | null> {
-    return (await this.state.storage.get<ConnectGrantRecord>(GRANT_STORAGE_KEY)) ?? null
+    return readStoredGrant(await this.state.storage.get<unknown>(GRANT_STORAGE_KEY))
   }
 
   private async readActiveGrant(): Promise<ConnectGrantRecord | Response> {
@@ -275,28 +308,8 @@ export class ConnectGrantObject {
     const parts = new URL(request.url).pathname.split('/')
     return parts.at(-2) ?? ''
   }
-}
 
-async function deriveVerificationCode(message: string): Promise<string> {
-  const digest = new Uint8Array(
-    await crypto.subtle.digest('SHA-256', new TextEncoder().encode(message))
-  )
-  const value = ((digest[0] << 16) | (digest[1] << 8) | digest[2]) % 1_000_000
-  return String(value).padStart(6, '0')
-}
-
-function fixedLengthEqual(left: string, right: string): boolean {
-  if (left.length !== right.length) {
-    return false
+  private grantIdFromCancel(request: Request): string {
+    return new URL(request.url).pathname.split('/').at(-1) ?? ''
   }
-  let difference = 0
-  for (let index = 0; index < left.length; index += 1) {
-    difference |= left.charCodeAt(index) ^ right.charCodeAt(index)
-  }
-  return difference === 0
-}
-
-function trimNonces(nonces: Record<string, number>): Record<string, number> {
-  const entries = Object.entries(nonces).sort((left, right) => right[1] - left[1])
-  return Object.fromEntries(entries.slice(0, MAX_REMEMBERED_NONCES))
 }

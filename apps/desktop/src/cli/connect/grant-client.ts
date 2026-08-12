@@ -4,12 +4,14 @@ import {
   ConfirmConnectGrantResponseSchema,
   ExchangeConnectGrantResponseSchema,
   WEB_CONNECT_PROTOCOL_VERSION,
-  machineConfirmationSigningMessage,
-  pairingVerificationMessage,
   parseConnectGrant,
-  revokeBrowserAccessSigningMessage,
   type MachineSigningKey
 } from '@yiru/runtime-protocol/web-connect'
+import {
+  machineConfirmationSigningMessage,
+  pairingVerificationMessage,
+  revokeBrowserAccessSigningMessage
+} from '@yiru/runtime-protocol/web-connect/signing-messages'
 
 import { RuntimeClientError } from '../runtime-client'
 import type { MachineIdentity } from './identity'
