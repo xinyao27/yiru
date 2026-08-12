@@ -11,9 +11,13 @@ settings:
     CURRENT_PROJECT_VERSION: '1'
     ENABLE_USER_SCRIPT_SANDBOXING: YES
     MARKETING_VERSION: '0.1.0'
-    SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
     SWIFT_STRICT_CONCURRENCY: complete
     SWIFT_VERSION: '6.0'
+
+packages:
+  Sodium:
+    url: https://github.com/jedisct1/swift-sodium.git
+    exactVersion: 0.11.0
 
 schemes:
   YiruMobile:
@@ -28,6 +32,10 @@ targets:
     sources:
       - path: YiruMobile
         type: syncedFolder
+        excludes:
+          - '**/*.md'
+    dependencies:
+      - package: Sodium
     info:
       path: YiruMobile/Resources/Info.plist
       properties:
@@ -35,7 +43,12 @@ targets:
         CFBundleDisplayName: Yiru
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        CFBundleURLTypes:
+          - CFBundleURLName: me.xinyao.yiru.mobile.pairing
+            CFBundleURLSchemes:
+              - yiru
         ITSAppUsesNonExemptEncryption: false
+        NSCameraUsageDescription: Scan a Yiru desktop pairing code.
         UILaunchScreen: {}
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait

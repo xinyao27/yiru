@@ -1,4 +1,4 @@
-enum HomePhase: Equatable {
+nonisolated enum HomePhase: Equatable {
     case loading
     case loaded(RuntimeConnectionState)
 }

@@ -1,6 +1,7 @@
 import Observation
 
 @Observable
+@MainActor
 final class HomeModel {
     private(set) var phase: HomePhase = .loading
 

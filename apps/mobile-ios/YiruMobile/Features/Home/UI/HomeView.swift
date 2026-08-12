@@ -2,10 +2,19 @@ import SwiftUI
 
 struct HomeView: View {
     @State private var model: HomeModel
+    private let refreshRevision: Int
+    private let showPairing: () -> Void
     private let showDesignSystemCatalog: () -> Void
 
-    init(runtime: any HomeRuntime, showDesignSystemCatalog: @escaping () -> Void) {
+    init(
+        runtime: any HomeRuntime,
+        refreshRevision: Int,
+        showPairing: @escaping () -> Void,
+        showDesignSystemCatalog: @escaping () -> Void
+    ) {
         _model = State(initialValue: HomeModel(runtime: runtime))
+        self.refreshRevision = refreshRevision
+        self.showPairing = showPairing
         self.showDesignSystemCatalog = showDesignSystemCatalog
     }
 
@@ -26,12 +35,15 @@ struct HomeView: View {
         }
         .navigationTitle(Text("Yiru"))
         .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button("Pair", systemImage: "qrcode.viewfinder", action: showPairing)
+            }
             ToolbarItem(placement: .topBarTrailing) {
                 Button(
                     "Design System", systemImage: "paintpalette", action: showDesignSystemCatalog)
             }
         }
-        .task {
+        .task(id: refreshRevision) {
             await model.refresh()
         }
         .refreshable {
@@ -65,13 +77,14 @@ struct HomeView: View {
                 }
             }
         case .loaded(let state):
-            ConnectionSummary(state: state)
+            ConnectionSummary(state: state, showPairing: showPairing)
         }
     }
 }
 
 private struct ConnectionSummary: View {
     let state: RuntimeConnectionState
+    let showPairing: () -> Void
 
     var body: some View {
         ContentSurface {
@@ -81,6 +94,12 @@ private struct ConnectionSummary: View {
                     .font(.headline)
                 Text(detail)
                     .foregroundStyle(.secondary)
+                if case .unpaired = state {
+                    Button(
+                        "Pair with desktop", systemImage: "qrcode.viewfinder", action: showPairing
+                    )
+                    .buttonStyle(.glassProminent)
+                }
             }
         }
     }
@@ -90,6 +109,8 @@ private struct ConnectionSummary: View {
         switch state {
         case .unpaired:
             SemanticBadge("Not paired", systemImage: "link.badge.plus", tint: .orange)
+        case .paired:
+            SemanticBadge("Paired", systemImage: "checkmark.shield.fill", tint: .green)
         case .connecting:
             SemanticBadge("Connecting", systemImage: "arrow.trianglehead.2.clockwise", tint: .blue)
         case .connected:
@@ -103,6 +124,8 @@ private struct ConnectionSummary: View {
         switch state {
         case .unpaired:
             "No paired hosts"
+        case .paired(let hostName):
+            "Paired with \(hostName)"
         case .connecting:
             "Connecting to host"
         case .connected(let hostName):
@@ -115,7 +138,9 @@ private struct ConnectionSummary: View {
     private var detail: LocalizedStringKey {
         switch state {
         case .unpaired:
-            "Pairing and the encrypted relay transport are the next migration slice."
+            "Scan the QR code from Yiru on your desktop to add your first host."
+        case .paired:
+            "The desktop identity and device credential are stored securely on this device."
         case .connecting:
             "Yiru is establishing an encrypted runtime connection."
         case .connected:

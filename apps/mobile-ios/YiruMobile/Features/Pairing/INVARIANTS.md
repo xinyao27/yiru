@@ -9,5 +9,6 @@
   authentication all succeed.
 - Device tokens live in a `ThisDeviceOnly` Keychain item. Host metadata never contains the token.
 - Re-pairing the same desktop public key preserves its host identity and display name.
-- Direct transport is the first native vertical slice. Relay provisioning remains unavailable until
-  its director/cell state machine and credential rotation are ported together.
+- Pairing preserves the Expo behavior of authenticating the offer's direct endpoint. Relay metadata
+  is validated but is not persisted until its director/cell state machine and credential rotation
+  are ported together.

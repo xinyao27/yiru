@@ -1,11 +1,11 @@
 import Foundation
 
-enum PairingScope: String, Hashable, Sendable {
+nonisolated enum PairingScope: String, Hashable, Sendable {
     case mobile
     case runtime
 }
 
-struct PairingRelay: Hashable, Sendable {
+nonisolated struct PairingRelay: Hashable, Sendable {
     let directorURL: URL
     let cellURL: URL
     let assignmentEpoch: Int64
@@ -14,7 +14,7 @@ struct PairingRelay: Hashable, Sendable {
     let inviteExpiresAt: Date
 }
 
-struct PairingOffer: Hashable, Sendable {
+nonisolated struct PairingOffer: Hashable, Sendable {
     let endpoint: String
     let deviceToken: String
     let publicKey: Data

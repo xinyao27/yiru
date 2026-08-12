@@ -1,6 +1,6 @@
 import Foundation
 
-struct PairingCodeDecoder: Sendable {
+nonisolated struct PairingCodeDecoder: Sendable {
     private let now: @Sendable () -> Date
 
     init(now: @escaping @Sendable () -> Date = Date.init) {
@@ -45,7 +45,7 @@ struct PairingCodeDecoder: Sendable {
     }
 
     private func decodePayload(_ code: String) throws -> PairingOffer {
-        guard code.wholeMatch(of: /^[A-Za-z0-9_-]+$/) != nil else {
+        guard code.wholeMatch(of: /^[A-Za-z0-9_-]+={0,2}$/) != nil else {
             throw PairingCodeError.invalid
         }
         let remainder = code.count % 4
@@ -194,6 +194,6 @@ struct PairingCodeDecoder: Sendable {
     }
 }
 
-enum PairingCodeError: Error {
+nonisolated enum PairingCodeError: Error {
     case invalid
 }

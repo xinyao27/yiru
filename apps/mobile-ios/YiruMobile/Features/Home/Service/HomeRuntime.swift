@@ -1,3 +1,3 @@
-protocol HomeRuntime: Sendable {
+nonisolated protocol HomeRuntime: Sendable {
     func currentConnectionState() async -> RuntimeConnectionState
 }

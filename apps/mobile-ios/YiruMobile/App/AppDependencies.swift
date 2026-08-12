@@ -1,7 +1,12 @@
 struct AppDependencies: Sendable {
     let homeRuntime: any HomeRuntime
+    let pairingRuntime: any PairingRuntime
 
     static func live() -> AppDependencies {
-        AppDependencies(homeRuntime: RuntimeClient())
+        let hosts = KeychainHostRepository()
+        return AppDependencies(
+            homeRuntime: RuntimeClient(hosts: hosts),
+            pairingRuntime: DirectPairingClient(hosts: hosts)
+        )
     }
 }

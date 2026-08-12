@@ -1,7 +1,17 @@
 actor RuntimeClient: HomeRuntime {
-    private var connectionState: RuntimeConnectionState = .unpaired
+    private let hosts: any HostRepository
 
-    func currentConnectionState() -> RuntimeConnectionState {
-        connectionState
+    init(hosts: any HostRepository) {
+        self.hosts = hosts
+    }
+
+    func currentConnectionState() async -> RuntimeConnectionState {
+        guard
+            let host = try? await hosts.hosts().sorted(by: { $0.lastConnected > $1.lastConnected })
+                .first
+        else {
+            return .unpaired
+        }
+        return .paired(hostName: host.name)
     }
 }
