@@ -6,6 +6,13 @@ INSTALL_ROOT="${XDG_DATA_HOME:-$HOME/.local/share}/yiru"
 BIN_ROOT="${XDG_BIN_HOME:-$HOME/.local/bin}"
 TEMP_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/yiru-install.XXXXXX")"
 STAGED_INSTALL=''
+GH_COMMAND=''
+
+GH_VERSION='2.94.0'
+GH_MACOS_ARM64_SHA256='4f9bc1a5e77500737290a307b40b4c396a4d23729f55340f2a83f414410165a1'
+GH_MACOS_AMD64_SHA256='733ee8fa49247d27cd94a6c7384455bdecaa82172a3bcfad63ac1ecc2867251d'
+GH_LINUX_ARM64_SHA256='705a23b70b0f1b7ba4c302fdcef392ce3edaacfa7ce8e85e4d93d72ea800a538'
+GH_LINUX_AMD64_SHA256='a757f1ba6db18f4de8cbadb244843a5f89bc75b5e7c6fc127d2bd77fbd12ed62'
 
 cleanup() {
   if [ "$(uname -s)" = 'Darwin' ] && mount | grep -q "$TEMP_ROOT/mount"; then
@@ -67,14 +74,76 @@ download_verified_asset() {
     echo "The SHA-256 checksum for $asset_name did not match its GitHub release digest." >&2
     exit 1
   fi
-  if ! command -v gh >/dev/null 2>&1; then
-    echo 'GitHub CLI is required to verify Yiru release provenance.' >&2
-    echo 'Install it from https://cli.github.com/, then run this command again.' >&2
-    exit 1
-  fi
-  gh attestation verify "$output_path" \
+  ensure_attestation_verifier
+  "$GH_COMMAND" attestation verify "$output_path" \
     --repo xinyao27/yiru \
     --signer-workflow "$signer_workflow" >/dev/null
+}
+
+ensure_attestation_verifier() {
+  if [ -n "$GH_COMMAND" ]; then
+    return
+  fi
+  if command -v gh >/dev/null 2>&1; then
+    GH_COMMAND="$(command -v gh)"
+    return
+  fi
+
+  os_name="$(uname -s)"
+  machine_arch="$(uname -m)"
+  case "$os_name:$machine_arch" in
+    Darwin:arm64)
+      archive="gh_${GH_VERSION}_macOS_arm64.zip"
+      expected_digest="$GH_MACOS_ARM64_SHA256"
+      extracted_directory="gh_${GH_VERSION}_macOS_arm64"
+      ;;
+    Darwin:x86_64)
+      archive="gh_${GH_VERSION}_macOS_amd64.zip"
+      expected_digest="$GH_MACOS_AMD64_SHA256"
+      extracted_directory="gh_${GH_VERSION}_macOS_amd64"
+      ;;
+    Linux:aarch64|Linux:arm64)
+      archive="gh_${GH_VERSION}_linux_arm64.tar.gz"
+      expected_digest="$GH_LINUX_ARM64_SHA256"
+      extracted_directory="gh_${GH_VERSION}_linux_arm64"
+      ;;
+    Linux:x86_64|Linux:amd64)
+      archive="gh_${GH_VERSION}_linux_amd64.tar.gz"
+      expected_digest="$GH_LINUX_AMD64_SHA256"
+      extracted_directory="gh_${GH_VERSION}_linux_amd64"
+      ;;
+    *)
+      echo "Yiru cannot bootstrap release verification on $os_name/$machine_arch." >&2
+      exit 1
+      ;;
+  esac
+
+  verifier_archive="$TEMP_ROOT/$archive"
+  curl -fL --retry 3 \
+    "https://github.com/cli/cli/releases/download/v${GH_VERSION}/${archive}" \
+    -o "$verifier_archive"
+  case "$os_name" in
+    Darwin)
+      actual_digest="$(shasum -a 256 "$verifier_archive" | awk '{print $1}')"
+      ;;
+    Linux)
+      actual_digest="$(sha256sum "$verifier_archive" | awk '{print $1}')"
+      ;;
+  esac
+  if [ "$actual_digest" != "$expected_digest" ]; then
+    echo 'The pinned GitHub CLI verifier checksum did not match.' >&2
+    exit 1
+  fi
+  mkdir -p "$TEMP_ROOT/verifier"
+  case "$os_name" in
+    Darwin) ditto -x -k "$verifier_archive" "$TEMP_ROOT/verifier" ;;
+    Linux) tar -xzf "$verifier_archive" -C "$TEMP_ROOT/verifier" ;;
+  esac
+  GH_COMMAND="$TEMP_ROOT/verifier/$extracted_directory/bin/gh"
+  if [ ! -x "$GH_COMMAND" ]; then
+    echo 'The pinned GitHub CLI verifier archive was malformed.' >&2
+    exit 1
+  fi
 }
 
 replace_install() {

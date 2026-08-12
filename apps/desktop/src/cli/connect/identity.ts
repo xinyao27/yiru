@@ -11,6 +11,11 @@ import {
 import { hardenExistingSecureFile, writeSecureJsonFile } from '~shared/secure-file'
 
 import { getDefaultUserDataPath } from '../runtime-client'
+import {
+  deleteMacMachinePrivateKey,
+  readMacMachinePrivateKey,
+  writeMacMachinePrivateKey
+} from './macos-machine-key'
 
 export type MachineIdentity = {
   publicKey: MachineSigningKey
@@ -30,6 +35,11 @@ type StoredMachineIdentity = {
   privateKey: webcrypto.JsonWebKey
 }
 
+type StoredKeychainMachineIdentity = {
+  version: 2
+  publicKey: MachineSigningKey
+}
+
 type StoredBrowserAccess = {
   version: 1
   entries: PairedBrowserAccess[]
@@ -43,15 +53,17 @@ export function loadOrCreateMachineIdentity(): MachineIdentity {
   const path = connectFilePath(IDENTITY_FILENAME)
   const stored = readStoredMachineIdentity(path)
   if (stored) {
-    return {
-      publicKey: stored.publicKey,
-      privateKey: createPrivateKey({ key: stored.privateKey, format: 'jwk' })
-    }
+    return materializeMachineIdentity(path, stored)
   }
   const generated = generateKeyPairSync('ed25519')
   const publicKey = MachineSigningKeySchema.parse(generated.publicKey.export({ format: 'jwk' }))
   const privateKey = generated.privateKey.export({ format: 'jwk' })
-  writeSecureJsonFile(path, { version: 1, publicKey, privateKey } satisfies StoredMachineIdentity)
+  if (process.platform === 'darwin') {
+    writeMacMachinePrivateKey(machineKeychainAccount(publicKey), privateKey)
+    writeSecureJsonFile(path, { version: 2, publicKey } satisfies StoredKeychainMachineIdentity)
+  } else {
+    writeSecureJsonFile(path, { version: 1, publicKey, privateKey } satisfies StoredMachineIdentity)
+  }
   return { publicKey, privateKey: generated.privateKey }
 }
 
@@ -108,33 +120,82 @@ export function removePairedBrowserAccess(browserId: string): void {
 }
 
 export function forgetConnectIdentity(): void {
+  const identityPath = connectFilePath(IDENTITY_FILENAME)
+  const stored = readStoredMachineIdentity(identityPath)
+  if (process.platform === 'darwin' && stored) {
+    deleteMacMachinePrivateKey(machineKeychainAccount(stored.publicKey))
+  }
   rmSync(connectFilePath(ACCESS_FILENAME), { force: true })
-  rmSync(connectFilePath(IDENTITY_FILENAME), { force: true })
+  rmSync(identityPath, { force: true })
 }
 
 function connectFilePath(filename: string): string {
   return join(getDefaultUserDataPath(), CONNECT_DIRECTORY, filename)
 }
 
-function readStoredMachineIdentity(path: string): StoredMachineIdentity | null {
+function readStoredMachineIdentity(
+  path: string
+): StoredMachineIdentity | StoredKeychainMachineIdentity | null {
   if (!existsSync(path)) {
     return null
   }
   hardenExistingSecureFile(path)
   try {
     const value: unknown = JSON.parse(readFileSync(path, 'utf8'))
-    if (!value || typeof value !== 'object' || Reflect.get(value, 'version') !== 1) {
+    if (!value || typeof value !== 'object') {
       return null
     }
+    const version = Reflect.get(value, 'version')
     const publicKey = MachineSigningKeySchema.safeParse(Reflect.get(value, 'publicKey'))
-    const privateKey = Reflect.get(value, 'privateKey')
-    if (!publicKey.success || !privateKey || typeof privateKey !== 'object') {
+    if (!publicKey.success) {
       return null
     }
-    return { version: 1, publicKey: publicKey.data, privateKey }
+    if (version === 2) {
+      return { version, publicKey: publicKey.data }
+    }
+    const privateKey = Reflect.get(value, 'privateKey')
+    return version === 1 && privateKey && typeof privateKey === 'object'
+      ? { version, publicKey: publicKey.data, privateKey }
+      : null
   } catch {
     return null
   }
+}
+
+function materializeMachineIdentity(
+  path: string,
+  stored: StoredMachineIdentity | StoredKeychainMachineIdentity
+): MachineIdentity {
+  if (process.platform !== 'darwin') {
+    if (stored.version !== 1) {
+      throw new Error('This Yiru machine identity requires macOS Keychain.')
+    }
+    return {
+      publicKey: stored.publicKey,
+      privateKey: createPrivateKey({ key: stored.privateKey, format: 'jwk' })
+    }
+  }
+
+  const account = machineKeychainAccount(stored.publicKey)
+  if (stored.version === 1) {
+    writeMacMachinePrivateKey(account, stored.privateKey)
+    writeSecureJsonFile(path, {
+      version: 2,
+      publicKey: stored.publicKey
+    } satisfies StoredKeychainMachineIdentity)
+  }
+  const privateKey = stored.version === 1 ? stored.privateKey : readMacMachinePrivateKey(account)
+  if (!privateKey) {
+    throw new Error('The Yiru machine identity is missing from macOS Keychain.')
+  }
+  return {
+    publicKey: stored.publicKey,
+    privateKey: createPrivateKey({ key: privateKey, format: 'jwk' })
+  }
+}
+
+function machineKeychainAccount(publicKey: MachineSigningKey): string {
+  return createHash('sha256').update(publicKey.x).digest('base64url')
 }
 
 function readStoredBrowserAccess(path: string): StoredBrowserAccess {

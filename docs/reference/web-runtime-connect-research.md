@@ -367,8 +367,10 @@ yiru connect forget                  删除本机身份并请求服务端撤销�
   IndexedDB、Service Worker 或脚本执行上下文。
 - Workbench 不加载 tag manager、广告、客服挂件或第三方 analytics JavaScript；遥测从应用自己的
   后端接收经过白名单的事件，不让第三方脚本进入 origin。
-- CSP 禁止 `unsafe-inline`、`unsafe-eval` 和非白名单脚本，启用 Trusted Types、
-  `frame-ancestors 'none'`、`Referrer-Policy: no-referrer` 和严格 Permissions Policy。
+- script CSP 禁止 `unsafe-inline`、`unsafe-eval` 和非白名单脚本，启用 Trusted Types、
+  `frame-ancestors 'none'`、`Referrer-Policy: no-referrer` 和严格 Permissions Policy。Workbench
+  的既有布局会通过 React 写入动态 style attribute，因此 `style-src-attr 'unsafe-inline'` 暂时保留；
+  它不放宽 `script-src`，且不得扩展到 `<style>`、外部 style origin 或 HTML 字符串注入。
 - 第一版不注册 Service Worker，避免一次脚本供应链事件形成长期持久化控制；以后若需要离线能力，
   必须单独设计更新完整性和强制撤销。
 - pairing grant、challenge、ticket、terminal frame 和错误内容都不得进入 URL、browser history、
