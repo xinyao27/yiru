@@ -3,7 +3,7 @@ import {
   normalizePRBotAuthorOverrides
 } from '@yiru/workbench-model/review'
 import { normalizeAutoRenameBranchFromWorkDefaultOn } from '~shared/auto-rename-branch-from-work-settings'
-import { getDefaultSettings } from '~shared/constants'
+import { getDefaultSettings, getDefaultVoiceSettings } from '~shared/constants'
 import { normalizeTerminalCursorStyleDefault } from '~shared/terminal/cursor-style-settings'
 import { normalizeTerminalCustomThemes } from '~shared/terminal/custom-themes'
 import {
@@ -19,30 +19,17 @@ import {
   disconnectActiveWebRuntimeEnvironment,
   getWebActiveEnvironment
 } from './runtime-connection'
+import { isJsonRecord, readLocalJson, writeLocalJson } from './storage/local-json'
+import { decodeStoredWebSettings } from './storage/settings-codec'
 
 const SETTINGS_STORAGE_KEY = 'yiru.web.settings.v1'
 
 export function readWebSettings(): GlobalSettings {
   const environment = getWebActiveEnvironment()
   const defaults = getDefaultSettings('~')
-  const rawText = window.localStorage.getItem(SETTINGS_STORAGE_KEY)
-  const rawStored = readJson<Partial<GlobalSettings>>(
-    SETTINGS_STORAGE_KEY,
-    {}
-  ) as Partial<GlobalSettings> & {
-    experimentalNewWorktreeCardStyle?: unknown
-    compactWorktreeCards?: unknown
-    experimentalCompactWorktreeCards?: unknown
-  }
-  const {
-    experimentalNewWorktreeCardStyle: _retiredCardStyle,
-    compactWorktreeCards: _retiredCompactCards,
-    experimentalCompactWorktreeCards: _retiredExperimentalCompactCards,
-    ...stored
-  } = rawStored
-  void _retiredCardStyle
-  void _retiredCompactCards
-  void _retiredExperimentalCompactCards
+  const parsed = readLocalJson(SETTINGS_STORAGE_KEY)
+  const rawStored = isJsonRecord(parsed) ? parsed : {}
+  const stored = decodeStoredWebSettings(defaults, rawStored)
   const hadRetiredCardSettings = [
     'experimentalNewWorktreeCardStyle',
     'compactWorktreeCards',
@@ -56,7 +43,7 @@ export function readWebSettings(): GlobalSettings {
     uiLanguage: normalizeUiLanguage(stored.uiLanguage)
   }
   if (
-    rawText &&
+    isJsonRecord(parsed) &&
     (hadRetiredCardSettings ||
       stored.autoRenameBranchFromWork !== migratedStored.autoRenameBranchFromWork ||
       stored.autoRenameBranchFromWorkDefaultedOn !==
@@ -67,14 +54,7 @@ export function readWebSettings(): GlobalSettings {
       stored.terminalCustomThemes !== migratedStored.terminalCustomThemes ||
       stored.uiLanguage !== migratedStored.uiLanguage)
   ) {
-    try {
-      const parsed = JSON.parse(rawText) as unknown
-      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-        writeSettings(migratedStored)
-      }
-    } catch {
-      // Keep invalid persisted JSON non-destructive.
-    }
+    writeSettings(migratedStored)
   }
   return mergeSettings(
     {
@@ -192,7 +172,6 @@ function mergeSettings(
   updates: Partial<GlobalSettings>,
   options: { preserveAutoRenameBranchFromWorkUpdate?: boolean } = {}
 ): GlobalSettings {
-  const defaults = getDefaultSettings('~')
   const merged = {
     ...base,
     ...updates,
@@ -204,9 +183,7 @@ function mergeSettings(
       updates.agentDefaultArgs ?? base.agentDefaultArgs
     ),
     agentDefaultEnv: normalizeTuiAgentEnvRecord(updates.agentDefaultEnv ?? base.agentDefaultEnv),
-    voice: { ...(base.voice ?? defaults.voice), ...updates.voice } as NonNullable<
-      GlobalSettings['voice']
-    >,
+    voice: { ...getDefaultVoiceSettings(), ...base.voice, ...updates.voice },
     activeRuntimeEnvironmentId:
       getWebActiveEnvironment()?.id ?? updates.activeRuntimeEnvironmentId ?? null,
     terminalCustomThemes: normalizeTerminalCustomThemes(
@@ -222,18 +199,6 @@ function mergeSettings(
   }
 }
 
-function readJson<T>(key: string, fallback: T): T {
-  const raw = window.localStorage.getItem(key)
-  if (!raw) {
-    return fallback
-  }
-  try {
-    return JSON.parse(raw) as T
-  } catch {
-    return fallback
-  }
-}
-
 function writeSettings(value: unknown): void {
-  window.localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(value))
+  writeLocalJson(SETTINGS_STORAGE_KEY, value)
 }

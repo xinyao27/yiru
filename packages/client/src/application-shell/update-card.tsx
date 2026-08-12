@@ -16,7 +16,6 @@ import { Button as UiButton } from '~renderer/components/ui/button'
 import { usePrefersReducedMotion } from '~renderer/hooks/use-prefers-reduced-motion'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import { updateRendererSettings } from '~renderer/runtime/settings-client'
 import { shellClient } from '~renderer/runtime/shell-client'
 import type { ChangelogData } from '~shared/types'
@@ -215,7 +214,7 @@ export function UpdateCard() {
   // auto-restart the app — the user expects to click "Restart" in Settings.
   useEffect(() => {
     if (status.state === 'downloaded' && hasStartedDownload.current) {
-      void rendererHostClient.updater.quitAndInstall().catch((error) => {
+      void shellClient.updater.quitAndInstall().catch((error) => {
         setInstallError(String((error as Error)?.message ?? error))
       })
     }
@@ -314,7 +313,7 @@ export function UpdateCard() {
     if (!reassuranceSeen) {
       markReassuranceSeen()
     }
-    void rendererHostClient.updater.download()
+    void shellClient.updater.download()
   }
 
   // Why: the 'error' variant has no version field, so dismiss needs an
@@ -333,7 +332,7 @@ export function UpdateCard() {
   }
 
   const handleInstallRetry = () => {
-    void rendererHostClient.updater.quitAndInstall().catch((error) => {
+    void shellClient.updater.quitAndInstall().catch((error) => {
       setInstallError(String((error as Error)?.message ?? error))
     })
   }
@@ -342,7 +341,7 @@ export function UpdateCard() {
     setCompatibilityRelaunching(true)
     setCompatibilitySetupError(null)
     void updateRendererSettings({ electronHttp1CompatibilityMode: true })
-      .then(() => rendererHostClient.app.relaunch())
+      .then(() => shellClient.app.relaunch())
       .catch((error) => {
         const message = String((error as Error)?.message ?? error)
         console.error('[updates] failed to enable HTTP/1.1 compatibility:', error)
@@ -388,7 +387,7 @@ export function UpdateCard() {
               : {
                   label: translate('auto.components.UpdateCard.6b0085010d', 'Re-check'),
                   onClick: () => {
-                    void rendererHostClient.updater.check({ includePrerelease: false })
+                    void shellClient.updater.check({ includePrerelease: false })
                   }
                 }
           }

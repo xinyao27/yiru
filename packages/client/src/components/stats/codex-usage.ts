@@ -1,5 +1,5 @@
 import type { StateCreator } from 'zustand'
-import { codexUsageClient } from '~renderer/runtime/usage-analytics-client'
+import { codexProviderUsageClient } from '~renderer/runtime/provider-usage-client'
 import type { AppState } from '~renderer/store/types'
 import type {
   CodexUsageBreakdownRow,
@@ -45,7 +45,7 @@ export const createCodexUsageSlice: StateCreator<AppState, [], [], CodexUsageSli
 
   setCodexUsageEnabled: async (enabled) => {
     try {
-      const nextScanState = await codexUsageClient.setEnabled({
+      const nextScanState = await codexProviderUsageClient.setEnabled({
         enabled
       })
       set({
@@ -85,7 +85,7 @@ export const createCodexUsageSlice: StateCreator<AppState, [], [], CodexUsageSli
   fetchCodexUsage: async (opts) => {
     set({ codexUsageSnapshotReady: false })
     try {
-      const scanState = await codexUsageClient.getScanState()
+      const scanState = await codexProviderUsageClient.getScanState()
       const currentScanState = get().codexUsageScanState
       const shouldPreserveLoadingState =
         opts?.forceRefresh === true &&
@@ -106,7 +106,7 @@ export const createCodexUsageSlice: StateCreator<AppState, [], [], CodexUsageSli
       }
 
       const { codexUsageScope, codexUsageRange } = get()
-      const snapshot = await codexUsageClient.getSnapshot({
+      const snapshot = await codexProviderUsageClient.getSnapshot({
         scope: codexUsageScope,
         range: codexUsageRange,
         limit: 10
@@ -143,11 +143,11 @@ export const createCodexUsageSlice: StateCreator<AppState, [], [], CodexUsageSli
         })
       }
 
-      await codexUsageClient.refresh({
+      await codexProviderUsageClient.refresh({
         force: opts?.forceRefresh ?? false
       })
       const { codexUsageScope: refreshedScope, codexUsageRange: refreshedRange } = get()
-      const refreshedSnapshot = await codexUsageClient.getSnapshot({
+      const refreshedSnapshot = await codexProviderUsageClient.getSnapshot({
         scope: refreshedScope,
         range: refreshedRange,
         limit: 10

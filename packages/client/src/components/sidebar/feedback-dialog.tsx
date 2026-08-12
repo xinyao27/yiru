@@ -17,7 +17,6 @@ import { Textarea } from '~renderer/components/ui/textarea'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'
 import { getShellGitHubViewer } from '~renderer/runtime/github-shell-client'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import { shellClient } from '~renderer/runtime/shell-client'
 import type { GitHubViewer } from '~shared/types'
 
@@ -111,7 +110,7 @@ export function SidebarFeedbackDialog({
       // cross-origin fetch() fail CORS preflight. Electron's net module in
       // the main process has no CORS restrictions and works uniformly in dev
       // and prod.
-      const result = await rendererHostClient.feedback.submit({
+      const result = await shellClient.feedback.submit({
         feedback: trimmed,
         submitAnonymously,
         githubLogin: identity.githubLogin,

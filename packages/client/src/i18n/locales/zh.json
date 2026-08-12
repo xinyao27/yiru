@@ -178,26 +178,23 @@
         "feedbackUnavailable": "Feedback is unavailable in the web client.",
         "exportHtmlToPdfUnavailable": "Exporting to PDF is unavailable in the web client."
       },
+      "runtime": {
+        "shellBoundary": {
+          "unavailable": "无法在网络上使用。"
+        }
+      },
       "web": {
-        "preload": {
-          "api": {
-            "31bfe8ae1a": "在网络客户端中不可用。",
-            "67ec964791": "Web 客户端不支持 Cookie 导入。",
-            "275a776357": "悬停提取在 Web 客户端中不可用。",
-            "8dfcb7a351": "选择屏幕截图在 Web 客户端中不可用。",
-            "31bea294d5": "抓取模式在 Web 客户端中不可用。",
-            "b8a1618172": "PR详细信息生成在 Web 客户端中不可用。",
-            "e57c82d276": "Commit 消息模型发现在 Web 客户端中不可用。",
-            "9fc90740b6": "Commit 消息生成在 Web 客户端中不可用。",
-            "52bee9d8a0": "冲突的自定义快捷键被忽略：{{value0}}。",
-            "32f15bdb0f": "未知平台“{{value0}}”被忽略。",
-            "0a69fcd8bc": "platform 必须是具有 darwin、linux 或 win32 部分的对象。",
-            "10898045f3": "“{{value0}}”的快捷方式被忽略：使用字符串数组。",
-            "36761d9604": "未知的键绑定操作“{{value0}}”被忽略。",
-            "d2e43e426a": "{{value0}} 必须是一个对象。",
-            "fb290366b2": "无法在网络上使用。",
-            "76122208ca": "“{{value0}}”的快捷方式被忽略：{{value1}}"
-          }
+        "keybindings": {
+          "conflictingShortcuts": "冲突的自定义快捷键被忽略：{{value0}}。",
+          "invalidObject": "{{value0}} 必须是一个对象。",
+          "invalidPlatforms": "platform 必须是具有 darwin、linux 或 win32 部分的对象。",
+          "invalidShortcut": "“{{value0}}”的快捷方式被忽略：{{value1}}",
+          "invalidShortcutList": "“{{value0}}”的快捷方式被忽略：使用字符串数组。",
+          "unknownAction": "未知的键绑定操作“{{value0}}”被忽略。",
+          "unknownPlatform": "未知平台“{{value0}}”被忽略。"
+        },
+        "shell": {
+          "repoHostUnavailable": "在网络客户端中不可用。"
         },
         "runtime": {
           "environment": {

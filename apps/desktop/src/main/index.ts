@@ -292,6 +292,7 @@ import {
 } from './window/attach-main-window-services'
 import { createElectronBrowserSessionProvider } from './window/browser-session'
 import { createMainWindow, loadMainWindow } from './window/create-main-window'
+import { registerWindowFocusBroadcast } from './window/focus-broadcast'
 import { focusExistingMainWindow } from './window/focus-existing-window'
 import { isMainWindowVisible, notifyMainWindowBecameVisible } from './window/main-window-visibility'
 import {
@@ -333,6 +334,7 @@ let agentAwakeService: AgentAwakeService | null = null
 let crashReports: CrashReportStore | null = null
 let unsubscribeAgentAwakeStatusChanges: (() => void) | null = null
 let unsubscribeSystemResumeBroadcast: (() => void) | null = null
+let unsubscribeWindowFocusBroadcast: (() => void) | null = null
 let watcherShutdownPromise: Promise<void> | null = null
 let watcherShutdownDone = false
 let automations: AutomationService | null = null
@@ -2030,6 +2032,7 @@ app.whenReady().then(async () => {
     profileDirectory: activeYiruProfile.profileDirectory
   })
   unsubscribeSystemResumeBroadcast = registerSystemResumeBroadcast()
+  unsubscribeWindowFocusBroadcast = registerWindowFocusBroadcast()
   agentAwakeService = new AgentAwakeService()
   agentAwakeService.setEnabled(store.getSettings().keepComputerAwakeWhileAgentsRun)
   // Why: disk-hydrated status rows are UI continuity only. The service starts
@@ -2230,7 +2233,7 @@ app.whenReady().then(async () => {
         ? previewWarpThemeImport(store, source)
         : Promise.resolve({ found: false, themes: [], skippedFiles: [] }),
     orchestrationEnvironmentTransport,
-    statsUsageStores: {
+    providerUsageStores: {
       claude: claudeUsage,
       codex: codexUsage,
       openCode: openCodeUsage,
@@ -2282,7 +2285,7 @@ app.whenReady().then(async () => {
     headlessDispatcher: isServeMode ? createHeadlessAutomationDispatcher(runtimeService) : undefined
   })
   runtimeService.setAutomationService(automations)
-  runtimeService.setAccountServices({ claudeAccounts, codexAccounts, rateLimits })
+  runtimeService.accounts.configure({ claudeAccounts, codexAccounts, rateLimits })
   runtimeService.setCommitMessageAgentEnvironmentResolvers({
     // Why: local Codex hooks and auth now live in Yiru's managed runtime home
     // even for the system-default path, so every Yiru-launched Codex process
@@ -2631,6 +2634,8 @@ app.on('before-quit', () => {
   isQuitting = true
   unsubscribeSystemResumeBroadcast?.()
   unsubscribeSystemResumeBroadcast = null
+  unsubscribeWindowFocusBroadcast?.()
+  unsubscribeWindowFocusBroadcast = null
   unsubscribeAgentAwakeStatusChanges?.()
   unsubscribeAgentAwakeStatusChanges = null
   agentAwakeService?.dispose()

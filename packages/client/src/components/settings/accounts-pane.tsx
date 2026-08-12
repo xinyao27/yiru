@@ -32,7 +32,7 @@ import {
   selectCodexProviderAccount,
   watchProviderAccounts
 } from '~renderer/runtime/provider-accounts-client'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 import type {
   ClaudeRateLimitAccountsState,
@@ -439,7 +439,7 @@ export function AccountsPane({
 
   const refreshMiniMaxCredentialStatus = async (): Promise<void> => {
     try {
-      const status = await rendererHostClient.minimaxCredentials.getStatus()
+      const status = await shellClient.minimaxCredentials.getStatus()
       setMiniMaxConfigured(status.configured)
     } catch (error) {
       console.error('Failed to load MiniMax credential status:', error)
@@ -455,9 +455,7 @@ export function AccountsPane({
     }
     setMiniMaxCredentialBusy(true)
     try {
-      const status = await rendererHostClient.minimaxCredentials.saveCookie(
-        miniMaxCookieDraft.trim()
-      )
+      const status = await shellClient.minimaxCredentials.saveCookie(miniMaxCookieDraft.trim())
       if (!status.configured) {
         throw new Error(
           translate(
@@ -488,7 +486,7 @@ export function AccountsPane({
   const clearMiniMaxCookie = async (): Promise<void> => {
     setMiniMaxCredentialBusy(true)
     try {
-      const status = await rendererHostClient.minimaxCredentials.clearCookie()
+      const status = await shellClient.minimaxCredentials.clearCookie()
       setMiniMaxConfigured(status.configured)
       setMiniMaxCookieDraft('')
       recordFeatureInteraction('usage-tracking')
@@ -812,7 +810,7 @@ export function AccountsPane({
                 size="xs"
                 onClick={() =>
                   void runClaudeAccountAction('adding', () =>
-                    rendererHostClient.claudeAccounts.add({
+                    shellClient.accounts.claude.add({
                       runtime: accountRuntime.runtime,
                       wslDistro: accountRuntime.wslDistro
                     })
@@ -839,7 +837,7 @@ export function AccountsPane({
                 <Button
                   variant="quiet"
                   size="xs"
-                  onClick={() => void rendererHostClient.claudeAccounts.cancelPendingLogin()}
+                  onClick={() => void shellClient.accounts.claude.cancelPendingLogin()}
                   className="gap-1.5"
                 >
                   <X className="size-3" />
@@ -989,7 +987,7 @@ export function AccountsPane({
                             void runClaudeAccountAction(
                               `reauth:${account.id}`,
                               () =>
-                                rendererHostClient.claudeAccounts.reauthenticate({
+                                shellClient.accounts.claude.reauthenticate({
                                   accountId: account.id
                                 }),
                               getProviderAccountRuntime(account)
@@ -1124,7 +1122,7 @@ export function AccountsPane({
               size="xs"
               onClick={() =>
                 void runCodexAccountAction('adding', () =>
-                  rendererHostClient.codexAccounts.add({
+                  shellClient.accounts.codex.add({
                     runtime: accountRuntime.runtime,
                     wslDistro: accountRuntime.wslDistro
                   })
@@ -1360,7 +1358,7 @@ export function AccountsPane({
                             void runCodexAccountAction(
                               `reauth:${account.id}`,
                               () =>
-                                rendererHostClient.codexAccounts.reauthenticate({
+                                shellClient.accounts.codex.reauthenticate({
                                   accountId: account.id
                                 }),
                               getProviderAccountRuntime(account)

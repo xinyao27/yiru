@@ -121,7 +121,7 @@ export function createNodeRuntimeHostService(
     // Why: a relay or `serve` host answers mobile's stats reads on its own, so it
     // owns the same attributed-usage stores the windowed app wires. Cursor's
     // metered spend stays desktop-only — that probe needs Electron's net stack.
-    statsUsageStores: {
+    providerUsageStores: {
       claude: new ClaudeUsageStore(store),
       codex: new CodexUsageStore(store),
       openCode: new OpenCodeUsageStore(store),

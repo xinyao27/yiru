@@ -23,6 +23,7 @@ await build({
         ),
         'mobile-runtime-types': resolve(import.meta.dirname, 'src/mobile-runtime-types.ts'),
         'orpc-peer-frame': resolve(import.meta.dirname, 'src/runtime-orpc-peer-frame.ts'),
+        'provider-usage': resolve(import.meta.dirname, 'src/provider-usage.ts'),
         'rpc-envelope': resolve(import.meta.dirname, 'src/runtime-rpc-envelope.ts'),
         stats: resolve(import.meta.dirname, 'src/stats.ts'),
         'stats-usage-range': resolve(import.meta.dirname, 'src/stats-usage-range.ts'),

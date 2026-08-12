@@ -245,8 +245,8 @@ export function NewWorkspaceComposerCard({
     <div
       ref={setComposerNode}
       data-workspace-composer-root="true"
-      // Why: preload classifies native OS file drops by the nearest
-      // `data-native-file-drop-target` marker in the composedPath. Tagging
+      // Why: the Electron file-drop adapter classifies native OS drops by the
+      // nearest marker in the composedPath. Tagging
       // the composer root makes drops anywhere on the card route to the
       // composer attachment handler instead of falling back to the default
       // editor-open behavior.

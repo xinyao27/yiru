@@ -165,7 +165,7 @@ const electronSpeechApi: ShellSpeechApi = {
 }
 
 const unavailableOnWeb = (): Error =>
-  new Error(translate('auto.web.web.preload.api.fb290366b2', 'Unavailable on web.'))
+  new Error(translate('auto.web.runtime.shellBoundary.unavailable', 'Unavailable on web.'))
 const webPetApi: ShellPetApi = {
   import: () => Promise.resolve(null),
   importPetBundle: () => Promise.resolve(null),

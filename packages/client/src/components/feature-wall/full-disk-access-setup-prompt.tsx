@@ -6,7 +6,7 @@ import { Badge } from '~renderer/components/ui/badge'
 import { Button } from '~renderer/components/ui/button'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import type {
   DeveloperPermissionId,
   DeveloperPermissionState,
@@ -115,7 +115,7 @@ function useFullDiskAccessStatus(): FullDiskAccessStatusState & { refresh: () =>
       setState((current) => (current.checking ? current : { ...current, checking: true }))
     }
     const refreshId = ++refreshSequenceRef.current
-    rendererHostClient.developerPermissions
+    shellClient.developerPermissions
       .getStatus()
       .then((states) => {
         if (refreshId === refreshSequenceRef.current) {
@@ -160,7 +160,7 @@ export function FullDiskAccessSetupPrompt(): React.JSX.Element | null {
   const handleOpenFullDiskAccess = useCallback(async (): Promise<void> => {
     setRequesting(true)
     try {
-      const result = await rendererHostClient.developerPermissions.request({
+      const result = await shellClient.developerPermissions.request({
         id: FULL_DISK_ACCESS_PERMISSION_ID
       })
       if (!mountedRef.current) {

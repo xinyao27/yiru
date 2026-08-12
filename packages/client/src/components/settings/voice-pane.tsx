@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { translate } from '~renderer/i18n/i18n'
 import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { subscribeLocalSpeechDownloadEvents } from '~renderer/runtime/speech-events-client'
 import { useAppStore } from '~renderer/store'
 import { getDefaultVoiceSettings } from '~shared/constants'
@@ -99,7 +99,7 @@ export function VoicePane({ settings, updateSettings }: VoicePaneProps): React.J
       markFeatureTipsSeen,
       updateVoiceSettings,
       requestMicrophonePermission: () =>
-        rendererHostClient.developerPermissions.request({ id: 'microphone' }),
+        shellClient.developerPermissions.request({ id: 'microphone' }),
       setPermissionPending,
       isMounted: () => mountedRef.current,
       notifyPermissionGranted: () =>

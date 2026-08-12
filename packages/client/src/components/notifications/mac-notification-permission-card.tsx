@@ -7,7 +7,7 @@ import {
 import { useEffect, useState } from 'react'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import type { NotificationDeliveryProbeResult } from '~shared/types'
 
 export type MacNotificationPermissionState =
@@ -66,7 +66,7 @@ export function useMacNotificationPermissionState(
       }
       pollTimer = setTimeout(() => {
         pollAttempts += 1
-        void rendererHostClient.notifications.probeDelivery({ force: true }).then((probe) => {
+        void shellClient.notifications.probeDelivery({ force: true }).then((probe) => {
           if (cancelled) {
             return
           }
@@ -83,7 +83,7 @@ export function useMacNotificationPermissionState(
     }
 
     void (async () => {
-      const status = await rendererHostClient.notifications.getPermissionStatus()
+      const status = await shellClient.notifications.getPermissionStatus()
       if (cancelled) {
         return
       }
@@ -94,7 +94,7 @@ export function useMacNotificationPermissionState(
       // Why: `status.requested` is read before the probe stamps it, so a
       // fresh install (where the check itself pops the macOS dialog) renders
       // as "answer the dialog" instead of "blocked" on probe-fallback hosts.
-      const probe = await rendererHostClient.notifications.probeDelivery()
+      const probe = await shellClient.notifications.probeDelivery()
       if (cancelled) {
         return
       }
@@ -180,7 +180,7 @@ export function MacNotificationPermissionCard({
             variant="outline"
             size="sm"
             className="gap-2"
-            onClick={() => void rendererHostClient.notifications.openSystemSettings()}
+            onClick={() => void shellClient.notifications.openSystemSettings()}
           >
             <Settings className="size-3.5" />
             {translate(
@@ -216,7 +216,7 @@ export function MacNotificationPermissionCard({
             type="button"
             size="sm"
             className="gap-2"
-            onClick={() => void rendererHostClient.notifications.openSystemSettings()}
+            onClick={() => void shellClient.notifications.openSystemSettings()}
           >
             <Settings className="size-3.5" />
             {translate(

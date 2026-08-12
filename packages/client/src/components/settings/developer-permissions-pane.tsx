@@ -17,7 +17,7 @@ import { toast } from 'sonner'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import type {
   DeveloperPermissionId,
   DeveloperPermissionState,
@@ -234,7 +234,7 @@ export function DeveloperPermissionsPane(): React.JSX.Element {
     refreshSequenceRef.current = refreshId
     setLoading(true)
     try {
-      const nextStates = await rendererHostClient.developerPermissions.getStatus()
+      const nextStates = await shellClient.developerPermissions.getStatus()
       if (mountedRef.current && refreshId === refreshSequenceRef.current) {
         setStates(nextStates)
       }
@@ -273,7 +273,7 @@ export function DeveloperPermissionsPane(): React.JSX.Element {
   const request = async (id: DeveloperPermissionId): Promise<void> => {
     setPendingId(id)
     try {
-      const result = await rendererHostClient.developerPermissions.request({ id })
+      const result = await shellClient.developerPermissions.request({ id })
       if (!mountedRef.current) {
         return
       }

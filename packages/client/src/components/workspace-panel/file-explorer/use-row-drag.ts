@@ -174,7 +174,7 @@ export function useFileExplorerRowDrag({
       for (const sourcePath of dragPaths.paths) {
         onMoveDrop(sourcePath, rowDropDir)
       }
-      // Why: native Files drops are handled by the preload-relayed IPC event,
+      // Why: native Files drops are handled by the Electron adapter event,
       // not the React drop handler. We only clear visual state here.
     },
     [

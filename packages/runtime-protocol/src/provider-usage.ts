@@ -1,10 +1,31 @@
-export type UsageAnalyticsScope = 'yiru' | 'all'
-export type UsageAnalyticsRange = '7d' | '30d' | '90d' | 'all'
-export type UsageAnalyticsBreakdownKind = 'model' | 'project'
+export type ProviderUsageScope = 'yiru' | 'all'
+export type ProviderUsageRange = '7d' | '30d' | '90d' | 'all'
+export type ProviderUsageBreakdownKind = 'model' | 'project'
 
-export type UsageAnalyticsSnapshotInput = {
-  scope: UsageAnalyticsScope
-  range: UsageAnalyticsRange
+export const PROVIDER_USAGE_PROVIDERS = ['claude', 'codex', 'openCode'] as const
+export type ProviderUsageProvider = (typeof PROVIDER_USAGE_PROVIDERS)[number]
+
+export const PROVIDER_USAGE_OPERATIONS = [
+  'getScanState',
+  'setEnabled',
+  'refresh',
+  'getSnapshot'
+] as const
+export type ProviderUsageOperation = (typeof PROVIDER_USAGE_OPERATIONS)[number]
+
+export type ProviderUsageMethodName =
+  `providerUsage.${ProviderUsageProvider}.${ProviderUsageOperation}`
+
+export function getProviderUsageMethodName(
+  provider: ProviderUsageProvider,
+  operation: ProviderUsageOperation
+): ProviderUsageMethodName {
+  return `providerUsage.${provider}.${operation}`
+}
+
+export type ProviderUsageSnapshotInput = {
+  scope: ProviderUsageScope
+  range: ProviderUsageRange
   limit?: number
 }
 
@@ -18,8 +39,8 @@ export type ClaudeUsageScanState = {
 }
 
 export type ClaudeUsageSummary = {
-  scope: UsageAnalyticsScope
-  range: UsageAnalyticsRange
+  scope: ProviderUsageScope
+  range: ProviderUsageRange
   sessions: number
   turns: number
   zeroCacheReadTurns: number
@@ -89,8 +110,8 @@ export type CodexUsageScanState = {
 }
 
 export type CodexUsageSummary = {
-  scope: UsageAnalyticsScope
-  range: UsageAnalyticsRange
+  scope: ProviderUsageScope
+  range: ProviderUsageRange
   sessions: number
   events: number
   inputTokens: number
@@ -163,8 +184,8 @@ export type OpenCodeUsageScanState = {
 }
 
 export type OpenCodeUsageSummary = {
-  scope: UsageAnalyticsScope
-  range: UsageAnalyticsRange
+  scope: ProviderUsageScope
+  range: ProviderUsageRange
   sessions: number
   events: number
   inputTokens: number
@@ -223,4 +244,10 @@ export type OpenCodeUsageSnapshot = {
   modelBreakdown: OpenCodeUsageBreakdownRow[]
   projectBreakdown: OpenCodeUsageBreakdownRow[]
   recentSessions: OpenCodeUsageSessionRow[]
+}
+
+export type ProviderUsageTypesByProvider = {
+  claude: { scanState: ClaudeUsageScanState; snapshot: ClaudeUsageSnapshot }
+  codex: { scanState: CodexUsageScanState; snapshot: CodexUsageSnapshot }
+  openCode: { scanState: OpenCodeUsageScanState; snapshot: OpenCodeUsageSnapshot }
 }

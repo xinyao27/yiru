@@ -1,64 +1,61 @@
-import { type, type ContractRouter } from '@orpc/contract'
+import { type, type ContractRouter, type Schema } from '@orpc/contract'
 
 import type {
-  ClaudeUsageScanState,
-  ClaudeUsageSnapshot,
-  CodexUsageScanState,
-  CodexUsageSnapshot,
-  OpenCodeUsageScanState,
-  OpenCodeUsageSnapshot,
-  UsageAnalyticsSnapshotInput
-} from '../provider-analytics.js'
+  ProviderUsageProvider,
+  ProviderUsageSnapshotInput,
+  ProviderUsageTypesByProvider
+} from '../provider-usage.js'
 import { withAccess, type RuntimeProcedureMeta } from './access-meta.js'
 import type { ProviderRateLimits } from './accounts.js'
 
 const PROVIDER_USAGE_ACCESS = { scope: 'host', tier: 'read' } as const
 const PROVIDER_USAGE_WRITE_ACCESS = { scope: 'host', tier: 'host' } as const
 
-const ClaudeUsageAnalyticsContract = {
-  getScanState: withAccess(PROVIDER_USAGE_ACCESS)
-    .input(type<void>())
-    .output(type<ClaudeUsageScanState>()),
-  setEnabled: withAccess(PROVIDER_USAGE_WRITE_ACCESS)
-    .input(type<{ enabled: boolean }>())
-    .output(type<ClaudeUsageScanState>()),
-  refresh: withAccess(PROVIDER_USAGE_WRITE_ACCESS)
-    .input(type<{ force?: boolean }>())
-    .output(type<ClaudeUsageScanState>()),
-  getSnapshot: withAccess(PROVIDER_USAGE_ACCESS)
-    .input(type<UsageAnalyticsSnapshotInput>())
-    .output(type<ClaudeUsageSnapshot>())
-} satisfies ContractRouter<RuntimeProcedureMeta>
+type ProviderUsageContractDescriptor<TScanState, TSnapshot> = {
+  scanState: Schema<TScanState, TScanState>
+  snapshot: Schema<TSnapshot, TSnapshot>
+}
 
-const CodexUsageAnalyticsContract = {
-  getScanState: withAccess(PROVIDER_USAGE_ACCESS)
-    .input(type<void>())
-    .output(type<CodexUsageScanState>()),
-  setEnabled: withAccess(PROVIDER_USAGE_WRITE_ACCESS)
-    .input(type<{ enabled: boolean }>())
-    .output(type<CodexUsageScanState>()),
-  refresh: withAccess(PROVIDER_USAGE_WRITE_ACCESS)
-    .input(type<{ force?: boolean }>())
-    .output(type<CodexUsageScanState>()),
-  getSnapshot: withAccess(PROVIDER_USAGE_ACCESS)
-    .input(type<UsageAnalyticsSnapshotInput>())
-    .output(type<CodexUsageSnapshot>())
-} satisfies ContractRouter<RuntimeProcedureMeta>
+type ProviderUsageContractDescriptors = {
+  [Provider in ProviderUsageProvider]: ProviderUsageContractDescriptor<
+    ProviderUsageTypesByProvider[Provider]['scanState'],
+    ProviderUsageTypesByProvider[Provider]['snapshot']
+  >
+}
 
-const OpenCodeUsageAnalyticsContract = {
-  getScanState: withAccess(PROVIDER_USAGE_ACCESS)
-    .input(type<void>())
-    .output(type<OpenCodeUsageScanState>()),
-  setEnabled: withAccess(PROVIDER_USAGE_WRITE_ACCESS)
-    .input(type<{ enabled: boolean }>())
-    .output(type<OpenCodeUsageScanState>()),
-  refresh: withAccess(PROVIDER_USAGE_WRITE_ACCESS)
-    .input(type<{ force?: boolean }>())
-    .output(type<OpenCodeUsageScanState>()),
-  getSnapshot: withAccess(PROVIDER_USAGE_ACCESS)
-    .input(type<UsageAnalyticsSnapshotInput>())
-    .output(type<OpenCodeUsageSnapshot>())
-} satisfies ContractRouter<RuntimeProcedureMeta>
+function createProviderUsageContract<TScanState, TSnapshot>(
+  descriptor: ProviderUsageContractDescriptor<TScanState, TSnapshot>
+) {
+  return {
+    getScanState: withAccess(PROVIDER_USAGE_ACCESS)
+      .input(type<void>())
+      .output(descriptor.scanState),
+    setEnabled: withAccess(PROVIDER_USAGE_WRITE_ACCESS)
+      .input(type<{ enabled: boolean }>())
+      .output(descriptor.scanState),
+    refresh: withAccess(PROVIDER_USAGE_WRITE_ACCESS)
+      .input(type<{ force?: boolean }>())
+      .output(descriptor.scanState),
+    getSnapshot: withAccess(PROVIDER_USAGE_ACCESS)
+      .input(type<ProviderUsageSnapshotInput>())
+      .output(descriptor.snapshot)
+  } satisfies ContractRouter<RuntimeProcedureMeta>
+}
+
+const providerUsageContractDescriptors = {
+  claude: {
+    scanState: type<ProviderUsageTypesByProvider['claude']['scanState']>(),
+    snapshot: type<ProviderUsageTypesByProvider['claude']['snapshot']>()
+  },
+  codex: {
+    scanState: type<ProviderUsageTypesByProvider['codex']['scanState']>(),
+    snapshot: type<ProviderUsageTypesByProvider['codex']['snapshot']>()
+  },
+  openCode: {
+    scanState: type<ProviderUsageTypesByProvider['openCode']['scanState']>(),
+    snapshot: type<ProviderUsageTypesByProvider['openCode']['snapshot']>()
+  }
+} as const satisfies ProviderUsageContractDescriptors
 
 export type CursorUsageLegacyContract = Readonly<{
   name: 'usage.cursor'
@@ -74,10 +71,11 @@ export const CURSOR_USAGE_GET_CONTRACT: CursorUsageLegacyContract = {
 }
 
 export const providerUsageContract = {
-  cursor: withAccess(PROVIDER_USAGE_ACCESS).input(type<void>()).output(type<ProviderRateLimits>()),
-  analytics: {
-    claude: ClaudeUsageAnalyticsContract,
-    codex: CodexUsageAnalyticsContract,
-    openCode: OpenCodeUsageAnalyticsContract
-  }
+  claude: createProviderUsageContract(providerUsageContractDescriptors.claude),
+  codex: createProviderUsageContract(providerUsageContractDescriptors.codex),
+  openCode: createProviderUsageContract(providerUsageContractDescriptors.openCode)
+} satisfies ContractRouter<RuntimeProcedureMeta>
+
+export const cursorUsageContract = {
+  cursor: withAccess(PROVIDER_USAGE_ACCESS).input(type<void>()).output(type<ProviderRateLimits>())
 } satisfies ContractRouter<RuntimeProcedureMeta>

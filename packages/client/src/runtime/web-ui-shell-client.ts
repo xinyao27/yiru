@@ -88,6 +88,7 @@ function createWebShellUIApi(): ShellUiApi {
     onDictationKeyDown: () => noopUnsubscribe,
     onTerminalZoom: () => noopUnsubscribe,
     onSystemResumed: () => noopUnsubscribe,
+    onWindowFocused: () => noopUnsubscribe,
     onFileDrop: () => noopUnsubscribe,
     syncTrafficLights: () => {},
     setMarkdownEditorFocused: () => {},

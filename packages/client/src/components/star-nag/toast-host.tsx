@@ -5,7 +5,6 @@ import { toast } from 'sonner'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import { shellClient } from '~renderer/runtime/shell-client'
 
 type StarNagMode = 'gh' | 'web'
@@ -40,7 +39,7 @@ function StarNagToast({
       return
     }
     markResolved()
-    void rendererHostClient.starNag.later()
+    void shellClient.starNag.later()
     toast.dismiss(id)
   }
 
@@ -53,7 +52,7 @@ function StarNagToast({
     if (mode === 'web') {
       try {
         await shellClient.shell.openUrl(YIRU_GITHUB_REPOSITORY_URL)
-        await rendererHostClient.starNag.openWeb()
+        await shellClient.starNag.openWeb()
         markResolved()
         setStatus('opened')
       } catch {
@@ -64,7 +63,7 @@ function StarNagToast({
     }
     let ok = false
     try {
-      ok = await rendererHostClient.starNag.starYiru()
+      ok = await shellClient.starNag.starYiru()
     } catch {
       ok = false
     }
@@ -183,7 +182,7 @@ export function StarNagToastHost(): null {
       activeToastResolvedRef.current?.()
       toast.dismiss(activeToastIdRef.current)
     }
-    const unsubscribeShow = rendererHostClient.starNag.onShow((payload) => {
+    const unsubscribeShow = shellClient.starNag.onShow((payload) => {
       if (payload?.surface !== 'toast') {
         return
       }
@@ -217,7 +216,7 @@ export function StarNagToastHost(): null {
               activeToastResolvedRef.current = null
             }
             if (!resolved && !dismissSuppressed) {
-              void rendererHostClient.starNag.dismiss()
+              void shellClient.starNag.dismiss()
             }
           },
           onAutoClose: () => {
@@ -230,7 +229,7 @@ export function StarNagToastHost(): null {
       )
       activeToastIdRef.current = id
     })
-    const unsubscribeHide = rendererHostClient.starNag.onHide(dismissActiveToast)
+    const unsubscribeHide = shellClient.starNag.onHide(dismissActiveToast)
     return () => {
       unsubscribeShow()
       unsubscribeHide()

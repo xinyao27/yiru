@@ -28,8 +28,8 @@ import {
 import { revokeCustomPetBlobUrl } from '~renderer/runtime/custom-pet-blob-cache'
 import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
 import { publishRendererCommandResult } from '~renderer/runtime/renderer-command-result-channel'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { recordRuntimeUIFeatureInteraction, setRuntimeUIState } from '~renderer/runtime/ui-client'
 import { buildAgentNotificationId } from '~shared/agent/notification-id'
 import {
@@ -1894,7 +1894,7 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
       // fails, the orphaned image stays in userData; each import uses a fresh
       // UUID so the file won't be hit again, and the renderer's metadata
       // index no longer references it.
-      rendererHostClient.pet.delete(id, target.fileName, target.kind).catch(console.error)
+      shellClient.pet.delete(id, target.fileName, target.kind).catch(console.error)
       const partial: Partial<UISlice> = { customPets: next }
       if (fallback !== s.petId) {
         partial.petId = fallback
@@ -2205,7 +2205,7 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
       // actually came from a nudge-driven update cycle. Ordinary update dismissals
       // must not consume the active campaign state.
       if (activeNudgeId) {
-        void rendererHostClient.updater.dismissNudge().catch(console.error)
+        void shellClient.updater.dismissNudge().catch(console.error)
       }
       return { dismissedUpdateVersion, updateUserInitiatedCycle: false }
     }),

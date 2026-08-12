@@ -1,6 +1,7 @@
 import type { TerminalOpenMultiplexResult } from '@yiru/runtime-protocol/contract'
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 import { TERMINAL_MULTIPLEX_DEFAULT_MAX_FRAME_BYTES } from '@yiru/runtime-protocol/terminal-multiplex/frame'
+import { requireWebActiveEnvironment } from '~renderer/web/runtime-connection'
 import {
   openWebTerminalMultiplexSubscription,
   type WebTerminalMultiplexSubscription
@@ -118,12 +119,15 @@ async function openWebRuntimeTerminalMultiplex(
   options: OpenTerminalMultiplexOptions,
   ticket: TerminalOpenMultiplexResult
 ): Promise<RuntimeTerminalMultiplexHandle> {
-  if (options.target.kind !== 'environment') {
-    throw new Error('The web runtime cannot open a local terminal bulk connection.')
-  }
+  // Why: Web treats the paired host as its logical local target for ordinary
+  // oRPC calls; the bulk gateway still needs that environment's concrete selector.
+  const environmentId =
+    options.target.kind === 'environment'
+      ? options.target.environmentId
+      : requireWebActiveEnvironment().id
   return runtimeEnvironmentsClient.subscribe(
     {
-      selector: options.target.environmentId,
+      selector: environmentId,
       method: 'terminal.multiplex',
       params: { bulkTicket: ticket.bulkTicket },
       timeoutMs: 15_000

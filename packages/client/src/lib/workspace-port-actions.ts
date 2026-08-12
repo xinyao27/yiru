@@ -5,7 +5,6 @@ import {
   isRuntimeOrpcErrorCode,
   type RuntimeClientTarget
 } from '~renderer/runtime/orpc-client'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import { shellClient } from '~renderer/runtime/shell-client'
 import { toRuntimeWorktreeSelector } from '~renderer/runtime/worktree-selector'
 import type { useAppStore } from '~renderer/store'
@@ -84,8 +83,7 @@ export async function openWorkspacePortInBrowser(args: {
   let url = rawUrl
   if (args.runtimeTarget.kind === 'local' && args.localhostLabelRoute) {
     try {
-      url = (await rendererHostClient.localhostWorktreeLabels.register(args.localhostLabelRoute))
-        .url
+      url = (await shellClient.localhostWorktreeLabels.register(args.localhostLabelRoute)).url
     } catch {
       url = rawUrl
     }

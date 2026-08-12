@@ -1,6 +1,6 @@
 import { toast } from 'sonner'
 import { translate } from '~renderer/i18n/i18n'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 
 // Why: agent completions can dispatch in bursts; one in-app pointer at the
 // broken OS setting per session teaches the fix without nagging.
@@ -32,7 +32,7 @@ export function showBlockedNotificationFallbackToast(): void {
           'Open System Settings'
         ),
         onClick: () => {
-          void rendererHostClient.notifications.openSystemSettings()
+          void shellClient.notifications.openSystemSettings()
         }
       }
     }

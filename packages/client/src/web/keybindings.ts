@@ -12,14 +12,20 @@ import {
   type KeybindingPlatform
 } from '~shared/keybindings'
 
+import { isJsonRecord, readLocalJson, writeLocalJson } from './storage/local-json'
+
 const KEYBINDINGS_STORAGE_KEY = 'yiru.web.keybindings.v1'
-const WEB_KEYBINDING_PLATFORMS: readonly KeybindingPlatform[] = ['darwin', 'linux', 'win32']
 const listeners = new Set<(snapshot: KeybindingFileSnapshot) => void>()
 
-type WebKeybindingDocument = {
+type StoredWebKeybindingDocument = {
   version: 1
   keybindings: KeybindingOverrides
   platforms: Partial<Record<KeybindingPlatform, KeybindingOverrides>>
+}
+
+type RawWebKeybindingDocument = {
+  keybindings?: unknown
+  platforms?: unknown
 }
 
 export function createWebKeybindingsApi() {
@@ -130,13 +136,17 @@ function normalizeOverrides(
   if (value === undefined) {
     return {}
   }
-  if (!isJsonObject(value)) {
+  if (!isJsonRecord(value)) {
     diagnostics.push({
       severity: 'error',
       section,
-      message: translate('auto.web.web.preload.api.d2e43e426a', '{{value0}} must be an object.', {
-        value0: section
-      })
+      message: translate(
+        'auto.web.web.keybindings.invalidObject',
+        '{{value0}} must be an object.',
+        {
+          value0: section
+        }
+      )
     })
     return {}
   }
@@ -148,7 +158,7 @@ function normalizeOverrides(
         section,
         actionId,
         message: translate(
-          'auto.web.web.preload.api.36761d9604',
+          'auto.web.web.keybindings.unknownAction',
           'Unknown keybinding action "{{value0}}" was ignored.',
           { value0: actionId }
         )
@@ -161,7 +171,7 @@ function normalizeOverrides(
         section,
         actionId,
         message: translate(
-          'auto.web.web.preload.api.10898045f3',
+          'auto.web.web.keybindings.invalidShortcutList',
           'Shortcut for "{{value0}}" was ignored: Use a string array.',
           { value0: actionId }
         )
@@ -175,7 +185,7 @@ function normalizeOverrides(
         section,
         actionId,
         message: translate(
-          'auto.web.web.preload.api.76122208ca',
+          'auto.web.web.keybindings.invalidShortcut',
           'Shortcut for "{{value0}}" was ignored: {{value1}}',
           {
             value0: actionId,
@@ -197,12 +207,12 @@ function normalizePlatformOverrides(
   if (value === undefined) {
     return {}
   }
-  if (!isJsonObject(value)) {
+  if (!isJsonRecord(value)) {
     diagnostics.push({
       severity: 'error',
       section: 'platforms',
       message: translate(
-        'auto.web.web.preload.api.0a69fcd8bc',
+        'auto.web.web.keybindings.invalidPlatforms',
         'platforms must be an object with darwin, linux, or win32 sections.'
       )
     })
@@ -210,23 +220,19 @@ function normalizePlatformOverrides(
   }
   const result: Partial<Record<KeybindingPlatform, KeybindingOverrides>> = {}
   for (const [platform, overrides] of Object.entries(value)) {
-    if (!WEB_KEYBINDING_PLATFORMS.includes(platform as KeybindingPlatform)) {
+    if (!isWebKeybindingPlatform(platform)) {
       diagnostics.push({
         severity: 'warning',
         section: `platforms.${platform}`,
         message: translate(
-          'auto.web.web.preload.api.32f15bdb0f',
+          'auto.web.web.keybindings.unknownPlatform',
           'Unknown platform "{{value0}}" was ignored.',
           { value0: platform }
         )
       })
       continue
     }
-    result[platform as KeybindingPlatform] = normalizeOverrides(
-      overrides,
-      `platforms.${platform}`,
-      diagnostics
-    )
+    result[platform] = normalizeOverrides(overrides, `platforms.${platform}`, diagnostics)
   }
   return result
 }
@@ -252,7 +258,7 @@ function removeConflicts(
     diagnostics.push({
       severity: 'error',
       message: translate(
-        'auto.web.web.preload.api.52bee9d8a0',
+        'auto.web.web.keybindings.conflictingShortcuts',
         'Conflicting custom shortcuts were ignored: {{value0}}.',
         { value0: Array.from(conflicting).join(', ') }
       )
@@ -261,26 +267,19 @@ function removeConflicts(
   return next
 }
 
-function readDocument(): WebKeybindingDocument {
-  const empty: WebKeybindingDocument = { version: 1, keybindings: {}, platforms: {} }
-  const raw = window.localStorage.getItem(KEYBINDINGS_STORAGE_KEY)
-  if (!raw) {
-    return empty
+function readDocument(): RawWebKeybindingDocument {
+  const value = readLocalJson(KEYBINDINGS_STORAGE_KEY)
+  if (!isJsonRecord(value)) {
+    return {}
   }
-  try {
-    const document = JSON.parse(raw) as WebKeybindingDocument
-    return {
-      version: 1,
-      keybindings: isJsonObject(document.keybindings) ? document.keybindings : {},
-      platforms: isJsonObject(document.platforms) ? document.platforms : {}
-    }
-  } catch {
-    return empty
+  return {
+    keybindings: value.keybindings,
+    platforms: value.platforms
   }
 }
 
-function writeDocument(document: WebKeybindingDocument): void {
-  window.localStorage.setItem(KEYBINDINGS_STORAGE_KEY, JSON.stringify(document))
+function writeDocument(document: StoredWebKeybindingDocument): void {
+  writeLocalJson(KEYBINDINGS_STORAGE_KEY, document)
 }
 
 function notifyListeners(snapshot: KeybindingFileSnapshot): void {
@@ -289,8 +288,8 @@ function notifyListeners(snapshot: KeybindingFileSnapshot): void {
   }
 }
 
-function isJsonObject(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
+function isWebKeybindingPlatform(value: string): value is KeybindingPlatform {
+  return value === 'darwin' || value === 'linux' || value === 'win32'
 }
 
 function getWebKeybindingPlatform(): KeybindingPlatform {

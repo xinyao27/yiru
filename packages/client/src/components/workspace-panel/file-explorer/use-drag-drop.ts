@@ -84,7 +84,7 @@ export function useFileExplorerDragDrop({
 
   useEffect(() => {
     const handleGlobalDragFinish = (): void => {
-      // Why: preload consumes native drops before React sees them.
+      // Why: the Electron adapter consumes native drops before React sees them.
       stopAndClearDragState()
     }
     document.addEventListener('drop', handleGlobalDragFinish, true)
@@ -99,7 +99,7 @@ export function useFileExplorerDragDrop({
   }, [stopAndClearDragState, stopDragEdgeScroll])
 
   const clearNativeDragState = useCallback(() => {
-    // Why: preload-consumed drops must still stop the edge-scroll loop.
+    // Why: adapter-consumed drops must still stop the edge-scroll loop.
     stopAndClearDragState()
   }, [stopAndClearDragState])
 

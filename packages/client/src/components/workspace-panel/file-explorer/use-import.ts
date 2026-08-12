@@ -21,7 +21,7 @@ type UseFileExplorerImportParams = {
  * runs the import pipeline: copy into worktree, refresh, reveal.
  *
  * Why this is a separate hook: the actual filesystem paths from native OS
- * drops are only available through the preload-relayed IPC event, not the
+ * drops are only available through the Electron adapter event, not the
  * React drop handler. The drop handler manages visual state; this hook
  * manages the import action.
  */
@@ -52,7 +52,7 @@ export function useFileExplorerImport({
 
       const wtId = activeWorktreeIdRef.current
       if (!wtId || !worktreePathRef.current) {
-        // Why: the preload stops propagation of the native drop event, so
+        // Why: the Electron adapter stops propagation of the native drop, so
         // React onDrop handlers never fire. We must clear the drag highlight
         // ourselves even when we bail out, otherwise the explorer stays stuck
         // in its drag-over visual state.

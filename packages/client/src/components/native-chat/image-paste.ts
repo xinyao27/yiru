@@ -1,5 +1,5 @@
 // Pure decision layer for image paste. The composer persists a pasted image to
-// a temp file (via the preload clipboard API) and then needs to know, per
+// a temp file (via the shell clipboard capability) and then needs to know, per
 // agent, whether that file can be sent as a TUI image attachment. Confirmed
 // agents get a native attachment chip; unsupported/custom agents get a clear
 // message instead of silently injecting a path that the model reads as text.

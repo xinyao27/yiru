@@ -43,7 +43,7 @@ const electronShellAccountsApi: ShellAccountsApi = {
 
 function unavailableOnWeb<TResult>(): Promise<TResult> {
   return Promise.reject(
-    new Error(translate('auto.web.web.preload.api.fb290366b2', 'Unavailable on web.'))
+    new Error(translate('auto.web.runtime.shellBoundary.unavailable', 'Unavailable on web.'))
   )
 }
 

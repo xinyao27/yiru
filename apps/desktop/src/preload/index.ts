@@ -2,6 +2,8 @@ import type { RuntimeConnectionBootstrap } from '@yiru/shared/preload/bootstrap-
 import { contextBridge, ipcRenderer } from 'electron'
 import { RUNTIME_LOOPBACK_CREDENTIALS_CHANNEL } from '~shared/runtime-loopback'
 
+import { installNativeFileDropAdapter } from './native-file-drop'
+
 const runtimeConnection: RuntimeConnectionBootstrap = {
   // Why: renderer chrome is selected while application modules evaluate, before
   // an oRPC round trip can finish. Keep immutable host identity in bootstrap.
@@ -21,6 +23,8 @@ const runtimeConnection: RuntimeConnectionBootstrap = {
   // every capability call after this bootstrap is authenticated oRPC over WS.
   getCredentials: () => ipcRenderer.invoke(RUNTIME_LOOPBACK_CREDENTIALS_CHANNEL)
 }
+
+installNativeFileDropAdapter()
 
 if (process.contextIsolated) {
   contextBridge.exposeInMainWorld('runtimeConnection', runtimeConnection)

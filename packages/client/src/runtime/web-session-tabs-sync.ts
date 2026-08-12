@@ -2812,14 +2812,9 @@ export function useWebSessionTabsSync(): void {
     }
 
     let unsubscribe: (() => void) | null = null
-    // Why: `session.tabs.subscribe` runs on both the web browser client and
-    // Electron's desktop-as-remote-client path. On web the bare
-    // compatibility string subscription skips
-    // capability negotiation and always lands on the legacy dispatcher, which
-    // no longer serves this method once its domain retires from it (Phase 6
-    // D-stage) — dispatch through the negotiated oRPC client instead.
-    // Electron's own routing for the same preload member is already
-    // capability-aware, so that path is left untouched.
+    // Why: the browser compatibility subscription skips capability negotiation,
+    // while Electron's local shell transport already negotiates it. Web must use
+    // the direct oRPC subscription after the legacy dispatcher retires this method.
     if (isWebRuntimeClient()) {
       const controller = new AbortController()
       unsubscribe = () => controller.abort()

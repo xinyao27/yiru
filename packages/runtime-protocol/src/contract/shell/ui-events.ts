@@ -80,6 +80,7 @@ export type ShellUiEvent =
   | { type: 'uiEditableContextPaste'; plainTextOnly: boolean }
   | { type: 'uiTerminalZoom'; direction: 'in' | 'out' | 'reset' }
   | { type: 'uiSystemResumed' }
+  | { type: 'uiWindowFocused' }
   | { type: 'uiFileDrop'; payload: ShellNativeFileDropPayload }
   | {
       type: 'uiRichMarkdownContextCommand'

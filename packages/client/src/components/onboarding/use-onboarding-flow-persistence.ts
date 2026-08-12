@@ -1,6 +1,5 @@
 import { useCallback, useRef } from 'react'
 import { track } from '~renderer/lib/telemetry'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 import { ONBOARDING_FINAL_STEP, ONBOARDING_FLOW_VERSION } from '~shared/constants'
@@ -148,7 +147,7 @@ export function useCloseWith({
         // Why: closeWith updates parent state synchronously from this hook's
         // perspective, but the modal unmounts on the next React commit.
         window.setTimeout(() => {
-          void rendererHostClient.starNag.onboardingCompleted()
+          void shellClient.starNag.onboardingCompleted()
         }, 0)
       } else if (outcome === 'dismissed') {
         trackOnboardingDismissed(lastStepReached, dismissedExtras)

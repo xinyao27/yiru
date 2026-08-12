@@ -22,12 +22,9 @@ export async function subscribeRuntimeClientEvents(
   // per-environment SSH bucket) may have missed transitions and must resync.
   onReplayedAfterReconnect?: () => void
 ): Promise<RuntimeClientEventSubscription> {
-  // Why: on web, the compatibility subscription sends the raw
-  // `{id, method, params}` legacy envelope with no capability negotiation, so
-  // a host that has retired `runtime.clientEvents` from its legacy dispatcher
-  // (Phase 6 D-stage) would answer `method_not_found` — dispatch through the
-  // negotiated oRPC client instead. Electron's routing for the same preload
-  // member is already capability-aware, so that path below is left untouched.
+  // Why: the browser compatibility subscription skips capability negotiation,
+  // while Electron's local shell transport already negotiates it. Web must use
+  // the direct oRPC subscription after the legacy dispatcher retires this method.
   if (isWebRuntimeClient()) {
     return subscribeRuntimeClientEventsViaOrpc(environmentId, onEvent, onError)
   }

@@ -3,7 +3,7 @@ import { useRef, useState } from 'react'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import type { GlobalSettings } from '~shared/types'
 
 import { Button } from '../ui/button'
@@ -35,7 +35,7 @@ export function AdvancedPane({ settings, updateSettings }: AdvancedPaneProps): R
 
   const handleHttp1CompatibilityRelaunch = (): void => {
     setHttp1CompatibilityRelaunching(true)
-    void rendererHostClient.app.relaunch().catch((error) => {
+    void shellClient.app.relaunch().catch((error) => {
       console.error('[settings] failed to relaunch for HTTP/1.1 compatibility:', error)
       if (mountedRef.current) {
         setHttp1CompatibilityRelaunching(false)

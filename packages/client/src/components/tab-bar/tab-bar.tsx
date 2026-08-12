@@ -1046,8 +1046,8 @@ function TabBarInner({
       className="flex h-full min-w-0 flex-1 items-stretch overflow-hidden"
       // Why: only drops aimed at the top tab/session strip should open files in
       // Yiru's editor. Terminal-pane drops need to keep inserting file paths
-      // into the active coding CLI, so preload routes native OS drops based on
-      // this explicit surface marker instead of treating the whole app as an
+      // into the active coding CLI, so the Electron adapter routes native OS
+      // drops by this marker instead of treating the whole app as an
       // editor drop zone.
       data-native-file-drop-target="editor"
     >

@@ -2171,12 +2171,9 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
   const applyLocalComposerDropRef = useRef(applyLocalComposerDrop)
   applyLocalComposerDropRef.current = applyLocalComposerDrop
 
-  // Why: native OS file drops onto the composer are captured by the preload
-  // bridge (see `data-native-file-drop-target="composer"` markers) and relayed
-  // as a gesture-scoped IPC event. Files become attachments (matching the
-  // manual picker behavior); folders are pasted inline at the textarea caret
-  // so the user can reference them as working directories in their prompt
-  // without attaching a path we can't embed as file content.
+  // Why: the narrow Electron file-drop adapter resolves native absolute paths
+  // at the composer marker. Files become attachments like the manual picker;
+  // folders are pasted at the caret because their contents cannot be embedded.
   const instanceIdRef = useRef<symbol>(Symbol('composer'))
   useEffect(() => {
     const instanceId = instanceIdRef.current

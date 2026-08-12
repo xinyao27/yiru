@@ -1,4 +1,3 @@
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import { shellClient } from '~renderer/runtime/shell-client'
 import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
 import {
@@ -167,7 +166,7 @@ export async function resolveLocalhostHttpLinkDisplayUrl(url: string): Promise<s
     return null
   }
   try {
-    const result = await rendererHostClient.localhostWorktreeLabels.register(localhostRoute)
+    const result = await shellClient.localhostWorktreeLabels.register(localhostRoute)
     return result.url
   } catch {
     return null
@@ -180,7 +179,7 @@ async function openLabeledLocalhostLink(
   open: (url: string) => void
 ): Promise<void> {
   try {
-    const result = await rendererHostClient.localhostWorktreeLabels.register(route)
+    const result = await shellClient.localhostWorktreeLabels.register(route)
     open(result.url)
   } catch {
     open(fallbackUrl)

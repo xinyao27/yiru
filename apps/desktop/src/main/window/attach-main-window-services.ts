@@ -26,6 +26,7 @@ import {
   setWorktreeBaseDirectoryWatcherSyncContext
 } from '../worktree/base-directory-watcher'
 import { getKnownWorktreeIdsForHistoryGc } from './history-gc-worktree-ids'
+import { registerNativeFileDropAdapter } from './native-file-drop'
 
 const UPDATER_SETUP_FALLBACK_MS = 15_000
 
@@ -57,6 +58,7 @@ export function attachMainWindowServices(
   }
 ): void {
   registerAppReloadHandler(mainWindow, options?.onBeforeRendererReload)
+  registerNativeFileDropAdapter(mainWindow)
   initializeShellRepoHostService(store, runtime, {
     pickDirectory: async (pickerOptions) => {
       const properties: NonNullable<OpenDialogOptions['properties']> = ['openDirectory']

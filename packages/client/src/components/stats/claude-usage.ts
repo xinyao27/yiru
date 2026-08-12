@@ -1,5 +1,5 @@
 import type { StateCreator } from 'zustand'
-import { claudeUsageClient } from '~renderer/runtime/usage-analytics-client'
+import { claudeProviderUsageClient } from '~renderer/runtime/provider-usage-client'
 import type { AppState } from '~renderer/store/types'
 import type {
   ClaudeUsageBreakdownRow,
@@ -45,7 +45,7 @@ export const createClaudeUsageSlice: StateCreator<AppState, [], [], ClaudeUsageS
 
   setClaudeUsageEnabled: async (enabled) => {
     try {
-      const nextScanState = await claudeUsageClient.setEnabled({
+      const nextScanState = await claudeProviderUsageClient.setEnabled({
         enabled
       })
       set({
@@ -88,7 +88,7 @@ export const createClaudeUsageSlice: StateCreator<AppState, [], [], ClaudeUsageS
   fetchClaudeUsage: async (opts) => {
     set({ claudeUsageSnapshotReady: false })
     try {
-      const scanState = await claudeUsageClient.getScanState()
+      const scanState = await claudeProviderUsageClient.getScanState()
       const currentScanState = get().claudeUsageScanState
       const shouldPreserveLoadingState =
         opts?.forceRefresh === true &&
@@ -109,7 +109,7 @@ export const createClaudeUsageSlice: StateCreator<AppState, [], [], ClaudeUsageS
       }
 
       const { claudeUsageScope, claudeUsageRange } = get()
-      const snapshot = await claudeUsageClient.getSnapshot({
+      const snapshot = await claudeProviderUsageClient.getSnapshot({
         scope: claudeUsageScope,
         range: claudeUsageRange,
         limit: 10
@@ -146,11 +146,11 @@ export const createClaudeUsageSlice: StateCreator<AppState, [], [], ClaudeUsageS
         })
       }
 
-      await claudeUsageClient.refresh({
+      await claudeProviderUsageClient.refresh({
         force: opts?.forceRefresh ?? false
       })
       const { claudeUsageScope: refreshedScope, claudeUsageRange: refreshedRange } = get()
-      const refreshedSnapshot = await claudeUsageClient.getSnapshot({
+      const refreshedSnapshot = await claudeProviderUsageClient.getSnapshot({
         scope: refreshedScope,
         range: refreshedRange,
         limit: 10

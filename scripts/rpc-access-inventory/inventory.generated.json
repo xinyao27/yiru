@@ -6473,6 +6473,186 @@
       ]
     },
     {
+      "method": "providerUsage.claude.getScanState",
+      "access": {
+        "scope": "host",
+        "tier": "read"
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/provider-usage.ts"
+        }
+      ]
+    },
+    {
+      "method": "providerUsage.claude.getSnapshot",
+      "access": {
+        "scope": "host",
+        "tier": "read"
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/provider-usage.ts"
+        }
+      ]
+    },
+    {
+      "method": "providerUsage.claude.refresh",
+      "access": {
+        "scope": "host",
+        "tier": "host"
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/provider-usage.ts"
+        }
+      ]
+    },
+    {
+      "method": "providerUsage.claude.setEnabled",
+      "access": {
+        "scope": "host",
+        "tier": "host"
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/provider-usage.ts"
+        }
+      ]
+    },
+    {
+      "method": "providerUsage.codex.getScanState",
+      "access": {
+        "scope": "host",
+        "tier": "read"
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/provider-usage.ts"
+        }
+      ]
+    },
+    {
+      "method": "providerUsage.codex.getSnapshot",
+      "access": {
+        "scope": "host",
+        "tier": "read"
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/provider-usage.ts"
+        }
+      ]
+    },
+    {
+      "method": "providerUsage.codex.refresh",
+      "access": {
+        "scope": "host",
+        "tier": "host"
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/provider-usage.ts"
+        }
+      ]
+    },
+    {
+      "method": "providerUsage.codex.setEnabled",
+      "access": {
+        "scope": "host",
+        "tier": "host"
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/provider-usage.ts"
+        }
+      ]
+    },
+    {
+      "method": "providerUsage.openCode.getScanState",
+      "access": {
+        "scope": "host",
+        "tier": "read"
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/provider-usage.ts"
+        }
+      ]
+    },
+    {
+      "method": "providerUsage.openCode.getSnapshot",
+      "access": {
+        "scope": "host",
+        "tier": "read"
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/provider-usage.ts"
+        }
+      ]
+    },
+    {
+      "method": "providerUsage.openCode.refresh",
+      "access": {
+        "scope": "host",
+        "tier": "host"
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/provider-usage.ts"
+        }
+      ]
+    },
+    {
+      "method": "providerUsage.openCode.setEnabled",
+      "access": {
+        "scope": "host",
+        "tier": "host"
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/provider-usage.ts"
+        }
+      ]
+    },
+    {
       "method": "rateLimitResume.cancel",
       "access": {
         "scope": "host",
@@ -11181,186 +11361,6 @@
         {
           "kind": "orpc",
           "file": "packages/runtime-protocol/src/contract/updater.ts"
-        }
-      ]
-    },
-    {
-      "method": "usage.analytics.claude.getScanState",
-      "access": {
-        "scope": "host",
-        "tier": "read"
-      },
-      "mobile": false,
-      "streaming": false,
-      "sources": [
-        {
-          "kind": "orpc",
-          "file": "packages/runtime-protocol/src/contract/provider-usage.ts"
-        }
-      ]
-    },
-    {
-      "method": "usage.analytics.claude.getSnapshot",
-      "access": {
-        "scope": "host",
-        "tier": "read"
-      },
-      "mobile": false,
-      "streaming": false,
-      "sources": [
-        {
-          "kind": "orpc",
-          "file": "packages/runtime-protocol/src/contract/provider-usage.ts"
-        }
-      ]
-    },
-    {
-      "method": "usage.analytics.claude.refresh",
-      "access": {
-        "scope": "host",
-        "tier": "host"
-      },
-      "mobile": false,
-      "streaming": false,
-      "sources": [
-        {
-          "kind": "orpc",
-          "file": "packages/runtime-protocol/src/contract/provider-usage.ts"
-        }
-      ]
-    },
-    {
-      "method": "usage.analytics.claude.setEnabled",
-      "access": {
-        "scope": "host",
-        "tier": "host"
-      },
-      "mobile": false,
-      "streaming": false,
-      "sources": [
-        {
-          "kind": "orpc",
-          "file": "packages/runtime-protocol/src/contract/provider-usage.ts"
-        }
-      ]
-    },
-    {
-      "method": "usage.analytics.codex.getScanState",
-      "access": {
-        "scope": "host",
-        "tier": "read"
-      },
-      "mobile": false,
-      "streaming": false,
-      "sources": [
-        {
-          "kind": "orpc",
-          "file": "packages/runtime-protocol/src/contract/provider-usage.ts"
-        }
-      ]
-    },
-    {
-      "method": "usage.analytics.codex.getSnapshot",
-      "access": {
-        "scope": "host",
-        "tier": "read"
-      },
-      "mobile": false,
-      "streaming": false,
-      "sources": [
-        {
-          "kind": "orpc",
-          "file": "packages/runtime-protocol/src/contract/provider-usage.ts"
-        }
-      ]
-    },
-    {
-      "method": "usage.analytics.codex.refresh",
-      "access": {
-        "scope": "host",
-        "tier": "host"
-      },
-      "mobile": false,
-      "streaming": false,
-      "sources": [
-        {
-          "kind": "orpc",
-          "file": "packages/runtime-protocol/src/contract/provider-usage.ts"
-        }
-      ]
-    },
-    {
-      "method": "usage.analytics.codex.setEnabled",
-      "access": {
-        "scope": "host",
-        "tier": "host"
-      },
-      "mobile": false,
-      "streaming": false,
-      "sources": [
-        {
-          "kind": "orpc",
-          "file": "packages/runtime-protocol/src/contract/provider-usage.ts"
-        }
-      ]
-    },
-    {
-      "method": "usage.analytics.openCode.getScanState",
-      "access": {
-        "scope": "host",
-        "tier": "read"
-      },
-      "mobile": false,
-      "streaming": false,
-      "sources": [
-        {
-          "kind": "orpc",
-          "file": "packages/runtime-protocol/src/contract/provider-usage.ts"
-        }
-      ]
-    },
-    {
-      "method": "usage.analytics.openCode.getSnapshot",
-      "access": {
-        "scope": "host",
-        "tier": "read"
-      },
-      "mobile": false,
-      "streaming": false,
-      "sources": [
-        {
-          "kind": "orpc",
-          "file": "packages/runtime-protocol/src/contract/provider-usage.ts"
-        }
-      ]
-    },
-    {
-      "method": "usage.analytics.openCode.refresh",
-      "access": {
-        "scope": "host",
-        "tier": "host"
-      },
-      "mobile": false,
-      "streaming": false,
-      "sources": [
-        {
-          "kind": "orpc",
-          "file": "packages/runtime-protocol/src/contract/provider-usage.ts"
-        }
-      ]
-    },
-    {
-      "method": "usage.analytics.openCode.setEnabled",
-      "access": {
-        "scope": "host",
-        "tier": "host"
-      },
-      "mobile": false,
-      "streaming": false,
-      "sources": [
-        {
-          "kind": "orpc",
-          "file": "packages/runtime-protocol/src/contract/provider-usage.ts"
         }
       ]
     },
