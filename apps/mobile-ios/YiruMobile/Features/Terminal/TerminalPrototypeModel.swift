@@ -20,6 +20,10 @@ final class TerminalPrototypeModel {
                 self?.inputByteCount += data.count
                 self?.lastEvent = String(localized: "Keyboard input received")
             },
+            onQueryReply: { [weak self] data in
+                self?.inputByteCount += data.count
+                self?.lastEvent = String(localized: "Terminal query reply sent")
+            },
             onResize: { [weak self] size in
                 self?.gridSize = size
             },

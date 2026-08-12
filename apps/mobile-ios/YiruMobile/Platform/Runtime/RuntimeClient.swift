@@ -1,9 +1,12 @@
 import Foundation
 
-actor RuntimeClient: HomeRuntime, HostConnectionRuntime, TerminalRepository, WorkspaceRepository {
+actor RuntimeClient: HomeRuntime, HostConnectionRuntime, TerminalRepository, TerminalSessionRuntime,
+    WorkspaceRepository
+{
     private let hosts: any HostRepository
     private let timeout: Duration
     private let revivalMonitor: ConnectionRevivalMonitor
+    private let terminalClientInstanceID = UUID().uuidString.lowercased()
     private var sessions: [String: ManagedSession] = [:]
     private var snapshots: [String: RuntimeConnectionSnapshot] = [:]
     private var homeContinuations: [UUID: AsyncStream<RuntimeConnectionState>.Continuation] = [:]
@@ -113,6 +116,17 @@ actor RuntimeClient: HomeRuntime, HostConnectionRuntime, TerminalRepository, Wor
 
     func reconnectTerminalHost(hostID: String) async {
         await reconnect(hostID: hostID)
+    }
+
+    func terminalConnectionContext(for hostID: String) async throws
+        -> RuntimeTerminalConnectionContext
+    {
+        let credential = try await credential(for: hostID)
+        return RuntimeTerminalConnectionContext(
+            credential: credential,
+            controlSession: await session(for: credential),
+            clientInstanceID: terminalClientInstanceID
+        )
     }
 
     private func fetchWorkspaces(for hostID: String) async throws -> WorkspaceSnapshot {

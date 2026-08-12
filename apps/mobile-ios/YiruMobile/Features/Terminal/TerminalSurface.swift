@@ -17,6 +17,7 @@ nonisolated struct TerminalSurfaceConfiguration: Equatable, Sendable {
 @MainActor
 struct TerminalSurfaceEvents {
     var onInput: (Data) -> Void
+    var onQueryReply: (Data) -> Void
     var onResize: (TerminalGridSize) -> Void
     var onTitleChange: (String) -> Void
     var onDirectoryChange: (String?) -> Void
@@ -26,6 +27,7 @@ struct TerminalSurfaceEvents {
 
     static let inactive = TerminalSurfaceEvents(
         onInput: { _ in },
+        onQueryReply: { _ in },
         onResize: { _ in },
         onTitleChange: { _ in },
         onDirectoryChange: { _ in },
@@ -41,6 +43,8 @@ protocol TerminalSurface: AnyObject {
     var view: UIView { get }
 
     func feed(_ bytes: Data)
+    func restore(_ snapshot: TerminalReplaySnapshot)
+    func clear()
     func focus()
 }
 

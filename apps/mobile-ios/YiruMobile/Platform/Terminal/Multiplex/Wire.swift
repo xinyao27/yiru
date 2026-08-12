@@ -6,6 +6,7 @@ nonisolated enum TerminalMultiplexWireEvent: Sendable {
 }
 
 nonisolated enum TerminalMultiplexWireError: Error, Sendable {
+    case correlationIDsExhausted
     case duplicateEpoch
     case epochMismatch
     case frameBeforeAcceptance
@@ -91,10 +92,22 @@ actor TerminalMultiplexWire {
         try await sendBytes(TerminalMultiplexFrameCodec.encode(frame))
     }
 
-    func allocateCorrelationID() -> UInt32 {
+    func allocateCorrelationID() throws -> UInt32 {
+        guard nextCorrelationID != 0 else {
+            throw TerminalMultiplexWireError.correlationIDsExhausted
+        }
         let allocated = nextCorrelationID
-        nextCorrelationID = nextCorrelationID == UInt32.max ? 1 : nextCorrelationID + 1
+        if nextCorrelationID == UInt32.max {
+            nextCorrelationID = 0
+        } else {
+            nextCorrelationID += 1
+        }
         return allocated
+    }
+
+    func isFresh() -> Bool {
+        guard let lastAuthenticatedFrameAt else { return false }
+        return lastAuthenticatedFrameAt.duration(to: clock.now) <= heartbeatDuration()
     }
 
     func setAppState(_ state: TerminalMultiplexAppState) {
@@ -133,7 +146,7 @@ actor TerminalMultiplexWire {
             routeID: 0,
             payload: TerminalMultiplexConnectionRecordCodec.encode(accept)
         )
-        let heartbeatID = allocateCorrelationID()
+        let heartbeatID = try allocateCorrelationID()
         initialHeartbeatID = heartbeatID
         try await sendHeartbeat(phase: .offer, correlationID: heartbeatID)
         startHeartbeatLoop()

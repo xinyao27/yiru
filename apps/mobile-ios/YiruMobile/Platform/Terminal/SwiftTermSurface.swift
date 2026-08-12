@@ -6,14 +6,19 @@ import UIKit
 final class SwiftTermSurface: NSObject, TerminalSurface, TerminalViewDelegate {
     var events: TerminalSurfaceEvents = .inactive
 
-    private let terminalView: TerminalView
+    private let terminalView: YiruTerminalView
+    private var isRestoringSnapshot = false
 
     init(configuration: TerminalSurfaceConfiguration) {
-        terminalView = TerminalView(
+        terminalView = YiruTerminalView(
             frame: .zero,
             font: .monospacedSystemFont(ofSize: configuration.fontSize, weight: .regular)
         )
         super.init()
+        terminalView.onQueryReply = { [weak self] data in
+            guard let self, !isRestoringSnapshot else { return }
+            events.onQueryReply(data)
+        }
         terminalView.terminalDelegate = self
         terminalView.optionAsMetaKey = false
         terminalView.allowMouseReporting = true
@@ -42,11 +47,24 @@ final class SwiftTermSurface: NSObject, TerminalSurface, TerminalViewDelegate {
         terminalView.feed(byteArray: buffer[...])
     }
 
+    func restore(_ snapshot: TerminalReplaySnapshot) {
+        isRestoringSnapshot = true
+        terminalView.resize(cols: snapshot.columns, rows: snapshot.rows)
+        feed(Data([0x1B, 0x63]))
+        feed(snapshot.replayBytes)
+        isRestoringSnapshot = false
+    }
+
+    func clear() {
+        terminalView.clearScrollback()
+    }
+
     func focus() {
         terminalView.becomeFirstResponder()
     }
 
     func sizeChanged(source: TerminalView, newCols: Int, newRows: Int) {
+        guard !isRestoringSnapshot else { return }
         events.onResize(TerminalGridSize(columns: newCols, rows: newRows))
     }
 
@@ -83,6 +101,14 @@ final class SwiftTermSurface: NSObject, TerminalSurface, TerminalViewDelegate {
     func iTermContent(source: TerminalView, content: ArraySlice<UInt8>) {}
 
     func rangeChanged(source: TerminalView, startY: Int, endY: Int) {}
+}
+
+private final class YiruTerminalView: TerminalView {
+    var onQueryReply: (Data) -> Void = { _ in }
+
+    override func send(source: Terminal, data: ArraySlice<UInt8>) {
+        onQueryReply(Data(data))
+    }
 }
 
 nonisolated struct SwiftTermSurfaceFactory: TerminalSurfaceFactory {

@@ -3,13 +3,16 @@ import SwiftUI
 struct TerminalListView: View {
     let workspace: WorkspaceSummary
     @State private var model: TerminalListModel
+    private let selectTerminal: (TerminalSummary) -> Void
 
     init(
         host: HostProfile,
         workspace: WorkspaceSummary,
-        repository: any TerminalRepository
+        repository: any TerminalRepository,
+        selectTerminal: @escaping (TerminalSummary) -> Void
     ) {
         self.workspace = workspace
+        self.selectTerminal = selectTerminal
         _model = State(
             initialValue: TerminalListModel(
                 hostID: host.id,
@@ -71,7 +74,12 @@ struct TerminalListView: View {
                 }
 
                 ForEach(snapshot.terminals) { terminal in
-                    TerminalRow(terminal: terminal)
+                    Button {
+                        selectTerminal(terminal)
+                    } label: {
+                        TerminalRow(terminal: terminal)
+                    }
+                    .buttonStyle(.plain)
                 }
             }
             .refreshable {
@@ -110,6 +118,10 @@ private struct TerminalRow: View {
                 systemImage: terminal.isConnected ? "waveform.path" : "stop.circle",
                 tint: terminal.isConnected ? .green : .secondary
             )
+
+            Image(systemName: "chevron.forward")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.tertiary)
         }
         .accessibilityElement(children: .combine)
     }

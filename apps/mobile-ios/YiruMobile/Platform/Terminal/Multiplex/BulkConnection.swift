@@ -10,10 +10,14 @@ nonisolated enum TerminalBulkConnectionError: Error, Sendable {
     case invalidPeerMessage
     case iteratorEnded
     case server(status: Int)
+    case staleAfterBackground
 }
 
 actor TerminalBulkConnection {
+    typealias IsControlGenerationCurrent = @Sendable () async -> Bool
+
     private let connection: AuthenticatedRuntimeConnection
+    private let isControlGenerationCurrent: IsControlGenerationCurrent
     private let requestID = UUID().uuidString.lowercased()
     private let stream: AsyncThrowingStream<TerminalBulkConnectionEvent, Error>
     private let continuation: AsyncThrowingStream<TerminalBulkConnectionEvent, Error>.Continuation
@@ -22,18 +26,24 @@ actor TerminalBulkConnection {
     private var hasAcceptedEpoch = false
     private var hasIteratorReady = false
     private var hasPublishedReady = false
+    private var backgroundedAt: Date?
     private var isClosed = false
 
-    private init(connection: AuthenticatedRuntimeConnection) {
+    private init(
+        connection: AuthenticatedRuntimeConnection,
+        isControlGenerationCurrent: @escaping IsControlGenerationCurrent
+    ) {
         let pair = AsyncThrowingStream.makeStream(of: TerminalBulkConnectionEvent.self)
         stream = pair.stream
         continuation = pair.continuation
         self.connection = connection
+        self.isControlGenerationCurrent = isControlGenerationCurrent
     }
 
     static func connect(
         ticket: MobileTerminalOpenMultiplexWire,
-        credential: HostCredential
+        credential: HostCredential,
+        isControlGenerationCurrent: @escaping IsControlGenerationCurrent
     ) async throws -> TerminalBulkConnection {
         guard ticket.expiresAt > Int64(Date().timeIntervalSince1970 * 1_000) else {
             throw TerminalBulkConnectionError.expiredTicket
@@ -43,7 +53,10 @@ actor TerminalBulkConnection {
             desktopPublicKeyBase64: credential.profile.publicKeyBase64,
             deviceToken: credential.deviceToken
         )
-        let bulk = TerminalBulkConnection(connection: connection)
+        let bulk = TerminalBulkConnection(
+            connection: connection,
+            isControlGenerationCurrent: isControlGenerationCurrent
+        )
         try await bulk.start(ticket: ticket)
         return bulk
     }
@@ -53,7 +66,9 @@ actor TerminalBulkConnection {
     }
 
     func send(_ frame: TerminalMultiplexFrame) async throws {
-        guard let wire else { throw TerminalBulkConnectionError.invalidPeerMessage }
+        guard hasPublishedReady, let wire else {
+            throw TerminalBulkConnectionError.invalidPeerMessage
+        }
         try await wire.send(
             opcode: frame.opcode,
             routeID: frame.routeID,
@@ -65,11 +80,25 @@ actor TerminalBulkConnection {
 
     func allocateCorrelationID() async throws -> UInt32 {
         guard let wire else { throw TerminalBulkConnectionError.invalidPeerMessage }
-        return await wire.allocateCorrelationID()
+        return try await wire.allocateCorrelationID()
     }
 
     func setAppState(_ state: TerminalMultiplexAppState) async {
-        await wire?.setAppState(state)
+        guard let wire, !isClosed else { return }
+        if state == .background {
+            backgroundedAt = Date()
+            await wire.setAppState(state)
+            return
+        }
+        let backgroundSeconds = backgroundedAt.map { Date().timeIntervalSince($0) } ?? 0
+        backgroundedAt = nil
+        guard backgroundSeconds <= 5, await wire.isFresh(), await connection.isOpen(),
+            await isControlGenerationCurrent()
+        else {
+            await fail(TerminalBulkConnectionError.staleAfterBackground)
+            return
+        }
+        await wire.setAppState(state)
     }
 
     func close() async {
@@ -149,7 +178,10 @@ actor TerminalBulkConnection {
             throw TerminalBulkConnectionError.invalidPeerMessage
         }
         let data = Data(text.dropFirst(MobileRuntimeWireContract.textPrefix.count).utf8)
-        let message = try JSONDecoder().decode(TerminalMultiplexPeerMessage.self, from: data)
+        guard let message = try? JSONDecoder().decode(TerminalMultiplexPeerMessage.self, from: data)
+        else {
+            throw TerminalBulkConnectionError.invalidPeerMessage
+        }
         guard message.i == requestID else {
             throw TerminalBulkConnectionError.invalidPeerMessage
         }
@@ -166,7 +198,7 @@ actor TerminalBulkConnection {
             guard message.p.e == "message" else {
                 throw TerminalBulkConnectionError.invalidPeerMessage
             }
-            guard message.p.d?.type == "ready" else {
+            guard message.p.d?.json.type == "ready" else {
                 throw TerminalBulkConnectionError.invalidPeerMessage
             }
             hasIteratorReady = true
@@ -214,7 +246,8 @@ actor TerminalBulkConnection {
         receiveTask?.cancel()
         receiveTask = nil
         await wire?.close()
-        await connection.close()
+        let details = closeDetails(error)
+        await connection.close(code: details.code, reason: details.reason)
         continuation.finish(throwing: error)
     }
 }
@@ -251,5 +284,39 @@ nonisolated private struct TerminalMultiplexPeerPayload: Decodable {
 }
 
 nonisolated private struct TerminalMultiplexPeerEvent: Decodable {
+    let json: TerminalMultiplexReadyEvent
+}
+
+nonisolated private struct TerminalMultiplexReadyEvent: Decodable {
     let type: String
+}
+
+nonisolated private func closeDetails(_ error: Error) -> (code: Int, reason: String) {
+    if let frameError = error as? TerminalMultiplexFrameError {
+        switch frameError {
+        case .invalidLength:
+            return (1009, "invalid terminal frame length")
+        case .invalidHeader, .invalidRoute, .unsupportedOpcode:
+            return (1002, "invalid terminal frame")
+        }
+    }
+    if let wireError = error as? TerminalMultiplexWireError {
+        switch wireError {
+        case .heartbeatTimedOut, .correlationIDsExhausted:
+            return (1001, "terminal epoch expired")
+        case .duplicateEpoch, .epochMismatch, .frameBeforeAcceptance, .invalidEpoch,
+            .invalidHeartbeat:
+            return (1002, "terminal protocol violation")
+        }
+    }
+    if let bulkError = error as? TerminalBulkConnectionError {
+        if case .staleAfterBackground = bulkError {
+            return (1001, "terminal epoch stale after background")
+        }
+        return (1002, "invalid terminal peer message")
+    }
+    if error is RuntimeOrpcSideChannelError {
+        return (1002, "invalid terminal side channel")
+    }
+    return (1001, "terminal connection closed")
 }

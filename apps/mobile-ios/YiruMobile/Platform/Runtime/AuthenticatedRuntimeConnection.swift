@@ -142,10 +142,16 @@ actor AuthenticatedRuntimeConnection {
         }
     }
 
-    func close() {
+    func isOpen() -> Bool {
+        !isClosed && socket.state == .running
+    }
+
+    func close(code: Int = 1001, reason: String? = nil) {
         guard !isClosed else { return }
         isClosed = true
-        socket.cancel(with: .goingAway, reason: nil)
+        let closeCode = URLSessionWebSocketTask.CloseCode(rawValue: code) ?? .goingAway
+        let closeReason = reason.map { Data($0.utf8.prefix(123)) }
+        socket.cancel(with: closeCode, reason: closeReason)
     }
 
     private static func sendPlaintext<Value: Encodable>(

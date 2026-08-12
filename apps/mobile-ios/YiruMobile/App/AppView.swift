@@ -35,7 +35,15 @@ struct AppView: View {
                     TerminalListView(
                         host: host,
                         workspace: workspace,
-                        repository: model.dependencies.terminalRepository
+                        repository: model.dependencies.terminalRepository,
+                        selectTerminal: { model.showTerminal(host: host, terminal: $0) }
+                    )
+                case .terminal(let host, let terminal):
+                    TerminalLiveView(
+                        host: host,
+                        terminal: terminal,
+                        runtime: model.dependencies.terminalSessionRuntime,
+                        surfaceFactory: model.dependencies.terminalSurfaceFactory
                     )
                 case .pair:
                     PairingScanView(onOffer: model.confirmPairing)
