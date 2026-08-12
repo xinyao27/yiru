@@ -1,27 +1,69 @@
 import { shellClient } from './shell-client'
 
-// Why: legacy feature modules still share this name, but every member now
-// resolves through an explicit shell or host client instead of a preload fallback.
+// Why: lazy accessors keep this legacy facade safe across the web bundle's
+// shell-client import cycle while every member resolves through an explicit client.
 export const rendererHostClient = {
-  claudeAccounts: shellClient.accounts.claude,
-  codexAccounts: shellClient.accounts.codex,
-  automations: shellClient.automations,
-  app: shellClient.app,
-  crashReports: shellClient.crashReports,
-  developerPermissions: shellClient.developerPermissions,
-  diagnostics: shellClient.diagnostics,
-  export: shellClient.export,
-  feedback: shellClient.feedback,
-  friday: shellClient.friday,
-  repoHost: shellClient.repoHost,
-  runtime: shellClient.runtime,
-  gh: shellClient.gh,
-  localhostWorktreeLabels: shellClient.localhostWorktreeLabels,
-  minimaxCredentials: shellClient.minimaxCredentials,
-  mobile: shellClient.mobile,
-  notifications: shellClient.notifications,
-  pet: shellClient.pet,
-  speech: shellClient.speech,
-  starNag: shellClient.starNag,
-  updater: shellClient.updater
+  get claudeAccounts() {
+    return shellClient.accounts.claude
+  },
+  get codexAccounts() {
+    return shellClient.accounts.codex
+  },
+  get automations() {
+    return shellClient.automations
+  },
+  get app() {
+    return shellClient.app
+  },
+  get crashReports() {
+    return shellClient.crashReports
+  },
+  get developerPermissions() {
+    return shellClient.developerPermissions
+  },
+  get diagnostics() {
+    return shellClient.diagnostics
+  },
+  get export() {
+    return shellClient.export
+  },
+  get feedback() {
+    return shellClient.feedback
+  },
+  get friday() {
+    return shellClient.friday
+  },
+  get repoHost() {
+    return shellClient.repoHost
+  },
+  get runtime() {
+    return shellClient.runtime
+  },
+  get gh() {
+    return shellClient.gh
+  },
+  get localhostWorktreeLabels() {
+    return shellClient.localhostWorktreeLabels
+  },
+  get minimaxCredentials() {
+    return shellClient.minimaxCredentials
+  },
+  get mobile() {
+    return shellClient.mobile
+  },
+  get notifications() {
+    return shellClient.notifications
+  },
+  get pet() {
+    return shellClient.pet
+  },
+  get speech() {
+    return shellClient.speech
+  },
+  get starNag() {
+    return shellClient.starNag
+  },
+  get updater() {
+    return shellClient.updater
+  }
 }
