@@ -56,7 +56,7 @@ struct TerminalAccessoryBar: View {
     private var keyStrip: some View {
         ScrollView(.horizontal) {
             HStack(spacing: Theme.Glass.groupSpacing) {
-                ForEach(TerminalAccessoryKey.allCases) { key in
+                ForEach(state.keys) { key in
                     keyButton(key)
                 }
             }

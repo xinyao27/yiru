@@ -1,11 +1,16 @@
 import Foundation
 
 actor RuntimeTerminalMultiplexer {
+    private struct ConnectedBulk: Sendable {
+        let connection: TerminalBulkConnection
+        let controlGeneration: Int
+    }
+
     private let credential: HostCredential
     private let controlSession: RuntimeHostSession
     private let clientInstanceID: String
     private var bulk: TerminalBulkConnection?
-    private var connectionTask: Task<TerminalBulkConnection, Error>?
+    private var connectionTask: Task<ConnectedBulk, Error>?
     private var connectionAttempt: UUID?
     private var bulkControlGeneration: Int?
     private var isShutdown = false
@@ -73,10 +78,12 @@ actor RuntimeTerminalMultiplexer {
         if let connectionTask {
             let connected = try await connectionTask.value
             guard !isShutdown, connectionAttempt != nil else {
-                await connected.close()
+                await connected.connection.close()
                 throw CancellationError()
             }
-            return connected
+            bulk = connected.connection
+            bulkControlGeneration = connected.controlGeneration
+            return connected.connection
         }
         let attempt = UUID()
         connectionAttempt = attempt
@@ -85,13 +92,13 @@ actor RuntimeTerminalMultiplexer {
         do {
             let connected = try await task.value
             guard connectionAttempt == attempt, !isShutdown else {
-                await connected.close()
+                await connected.connection.close()
                 throw CancellationError()
             }
-            bulk = connected
-            bulkControlGeneration = await controlSession.generation()
+            bulk = connected.connection
+            bulkControlGeneration = connected.controlGeneration
             connectionTask = nil
-            return connected
+            return connected.connection
         } catch {
             if connectionAttempt == attempt {
                 connectionTask = nil
@@ -100,11 +107,12 @@ actor RuntimeTerminalMultiplexer {
         }
     }
 
-    private func makeConnectionTask() -> Task<TerminalBulkConnection, Error> {
+    private func makeConnectionTask() -> Task<ConnectedBulk, Error> {
         let credential = credential
         let controlSession = controlSession
         let clientInstanceID = clientInstanceID
         return Task {
+            let controlGeneration = try await controlSession.connectedGeneration()
             let status: MobileRuntimeStatusWire = try await controlSession.call(
                 path: MobileTerminalWireContract.statusPath,
                 input: RuntimeNullWire(),
@@ -116,7 +124,9 @@ actor RuntimeTerminalMultiplexer {
             else {
                 throw RuntimeTerminalMultiplexerError.capabilityUnavailable
             }
-            let controlGeneration = await controlSession.generation()
+            guard await controlSession.generation() == controlGeneration else {
+                throw RuntimeTerminalMultiplexerError.controlGenerationChanged
+            }
             let ticket: MobileTerminalOpenMultiplexWire = try await controlSession.call(
                 path: MobileTerminalWireContract.openMultiplexPath,
                 input: MobileTerminalOpenMultiplexRequestWire(
@@ -128,12 +138,20 @@ actor RuntimeTerminalMultiplexer {
             guard await controlSession.generation() == controlGeneration else {
                 throw RuntimeTerminalMultiplexerError.controlGenerationChanged
             }
-            return try await TerminalBulkConnection.connect(
+            let connection = try await TerminalBulkConnection.connect(
                 ticket: ticket,
                 credential: credential,
                 isControlGenerationCurrent: {
                     await controlSession.generation() == controlGeneration
                 }
+            )
+            guard await controlSession.generation() == controlGeneration else {
+                await connection.close()
+                throw RuntimeTerminalMultiplexerError.controlGenerationChanged
+            }
+            return ConnectedBulk(
+                connection: connection,
+                controlGeneration: controlGeneration
             )
         }
     }

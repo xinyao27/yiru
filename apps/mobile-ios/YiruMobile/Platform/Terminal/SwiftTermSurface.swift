@@ -16,8 +16,10 @@ final class SwiftTermSurface: NSObject, TerminalSurface, TerminalViewDelegate {
             frame: .zero,
             font: .monospacedSystemFont(ofSize: configuration.fontSize, weight: .regular)
         )
+        configuredTerminalView.captureModeAwareAccessory()
         terminalView = configuredTerminalView
         accessoryState = TerminalAccessoryState(
+            keys: configuration.accessoryKeys,
             onSend: { [weak terminalView = configuredTerminalView] key in
                 terminalView?.sendAccessoryKey(key)
             },
@@ -89,6 +91,17 @@ final class SwiftTermSurface: NSObject, TerminalSurface, TerminalViewDelegate {
         accessoryState.setEnabled(isEnabled)
     }
 
+    func apply(_ configuration: TerminalSurfaceConfiguration) {
+        if terminalView.font.pointSize != configuration.fontSize {
+            terminalView.font = .monospacedSystemFont(
+                ofSize: configuration.fontSize,
+                weight: .regular
+            )
+        }
+        terminalView.changeScrollback(configuration.scrollbackLines)
+        accessoryState.setKeys(configuration.accessoryKeys)
+    }
+
     func sizeChanged(source: TerminalView, newCols: Int, newRows: Int) {
         guard !isRestoringSnapshot else { return }
         events.onResize(TerminalGridSize(columns: newCols, rows: newRows))
@@ -131,6 +144,11 @@ final class SwiftTermSurface: NSObject, TerminalSurface, TerminalViewDelegate {
 
 private final class YiruTerminalView: TerminalView {
     var onQueryReply: (Data) -> Void = { _ in }
+    private var modeAwareAccessory: TerminalAccessory?
+
+    func captureModeAwareAccessory() {
+        modeAwareAccessory = inputAccessoryView as? TerminalAccessory
+    }
 
     func sendAccessoryKey(_ key: TerminalAccessoryKey) {
         switch key {
@@ -139,13 +157,13 @@ private final class YiruTerminalView: TerminalView {
         case .tab:
             send([0x09])
         case .arrowLeft:
-            sendArrow(finalByte: 0x44)
+            sendModeAwareArrow(selectorName: "left:")
         case .arrowDown:
-            sendArrow(finalByte: 0x42)
+            sendModeAwareArrow(selectorName: "down:")
         case .arrowUp:
-            sendArrow(finalByte: 0x41)
+            sendModeAwareArrow(selectorName: "up:")
         case .arrowRight:
-            sendArrow(finalByte: 0x43)
+            sendModeAwareArrow(selectorName: "right:")
         case .backspace:
             send([0x7F])
         case .interrupt:
@@ -163,9 +181,22 @@ private final class YiruTerminalView: TerminalView {
         onQueryReply(Data(data))
     }
 
-    private func sendArrow(finalByte: UInt8) {
-        let introducer: UInt8 = getTerminal().applicationCursor ? 0x4F : 0x5B
-        send([0x1B, introducer, finalByte])
+    private func sendModeAwareArrow(selectorName: String) {
+        guard let modeAwareAccessory else { return }
+        // Why: SwiftTerm's arrow actions are internal, but its public accessory exposes them to
+        // UIKit. Routing through those actions preserves application-cursor and bidi state.
+        UIApplication.shared.sendAction(
+            NSSelectorFromString(selectorName),
+            to: modeAwareAccessory,
+            from: nil,
+            for: nil
+        )
+        UIApplication.shared.sendAction(
+            NSSelectorFromString("cancelTimer"),
+            to: modeAwareAccessory,
+            from: nil,
+            for: nil
+        )
     }
 }
 

@@ -13,7 +13,7 @@ final class TerminalPrototypeModel {
     private var hasLoadedFixture = false
 
     init(factory: any TerminalSurfaceFactory) {
-        let surface = factory.makeSurface(configuration: .standard)
+        let surface = factory.makeSurface(configuration: .standard())
         self.surface = surface
         surface.events = TerminalSurfaceEvents(
             onInput: { [weak self] data in

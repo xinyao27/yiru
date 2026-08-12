@@ -1,6 +1,6 @@
 import Foundation
 
-enum TerminalAccessoryKey: CaseIterable, Identifiable {
+nonisolated enum TerminalAccessoryKey: String, CaseIterable, Identifiable, Sendable {
     case escape
     case tab
     case arrowLeft

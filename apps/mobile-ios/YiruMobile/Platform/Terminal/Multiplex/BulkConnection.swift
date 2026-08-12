@@ -90,6 +90,7 @@ actor TerminalBulkConnection {
     }
 
     func send(_ frame: TerminalMultiplexFrame) async throws {
+        try await requireCurrentControlGeneration()
         guard hasPublishedReady, routeContinuations[frame.routeID] != nil, let wire else {
             throw TerminalBulkConnectionError.invalidPeerMessage
         }
@@ -175,6 +176,7 @@ actor TerminalBulkConnection {
     }
 
     private func sendInvocation(bulkTicket: String) async throws {
+        try await requireCurrentControlGeneration()
         let input = TerminalMultiplexInvocationInput(bulkTicket: bulkTicket)
         let request = TerminalMultiplexInvocation(
             i: requestID,
@@ -257,11 +259,20 @@ actor TerminalBulkConnection {
     }
 
     private func sendInner(_ bytes: Data) async throws {
+        try await requireCurrentControlGeneration()
         let sideChannel = try RuntimeOrpcSideChannelCodec.encode(
             requestID: requestID,
             payload: bytes
         )
         try await connection.sendBinary(sideChannel)
+    }
+
+    private func requireCurrentControlGeneration() async throws {
+        guard await isControlGenerationCurrent() else {
+            let error = TerminalBulkConnectionError.staleControlGeneration
+            await fail(error)
+            throw error
+        }
     }
 
     private func publish(_ event: TerminalMultiplexWireEvent) async {

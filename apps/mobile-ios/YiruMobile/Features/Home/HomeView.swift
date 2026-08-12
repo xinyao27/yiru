@@ -5,6 +5,7 @@ struct HomeView: View {
     private let refreshRevision: Int
     private let showHosts: () -> Void
     private let showPairing: () -> Void
+    private let showTerminalSettings: () -> Void
     private let showTerminalPrototype: () -> Void
     private let showDesignSystemCatalog: () -> Void
 
@@ -13,6 +14,7 @@ struct HomeView: View {
         refreshRevision: Int,
         showHosts: @escaping () -> Void,
         showPairing: @escaping () -> Void,
+        showTerminalSettings: @escaping () -> Void,
         showTerminalPrototype: @escaping () -> Void,
         showDesignSystemCatalog: @escaping () -> Void
     ) {
@@ -20,6 +22,7 @@ struct HomeView: View {
         self.refreshRevision = refreshRevision
         self.showHosts = showHosts
         self.showPairing = showPairing
+        self.showTerminalSettings = showTerminalSettings
         self.showTerminalPrototype = showTerminalPrototype
         self.showDesignSystemCatalog = showDesignSystemCatalog
     }
@@ -45,8 +48,20 @@ struct HomeView: View {
                 Button("Pair", systemImage: "qrcode.viewfinder", action: showPairing)
             }
             ToolbarItem(placement: .topBarTrailing) {
-                Button(
-                    "Design System", systemImage: "paintpalette", action: showDesignSystemCatalog)
+                Menu("More", systemImage: "ellipsis.circle") {
+                    Button(
+                        "Terminal Settings",
+                        systemImage: "gearshape",
+                        action: showTerminalSettings
+                    )
+                    #if DEBUG
+                        Button(
+                            "Design System",
+                            systemImage: "paintpalette",
+                            action: showDesignSystemCatalog
+                        )
+                    #endif
+                }
             }
         }
         .task(id: refreshRevision) {

@@ -10,8 +10,18 @@ nonisolated struct TerminalGridSize: Equatable, Sendable {
 nonisolated struct TerminalSurfaceConfiguration: Equatable, Sendable {
     let fontSize: CGFloat
     let scrollbackLines: Int
+    let accessoryKeys: [TerminalAccessoryKey]
 
-    static let standard = TerminalSurfaceConfiguration(fontSize: 13, scrollbackLines: 10_000)
+    static func standard(
+        textScale: Double = 1,
+        accessoryKeys: [TerminalAccessoryKey] = TerminalAccessoryKey.allCases
+    ) -> TerminalSurfaceConfiguration {
+        TerminalSurfaceConfiguration(
+            fontSize: 13 * textScale,
+            scrollbackLines: 10_000,
+            accessoryKeys: accessoryKeys
+        )
+    }
 }
 
 @MainActor
@@ -46,6 +56,7 @@ protocol TerminalSurface: AnyObject {
     func restore(_ snapshot: TerminalReplaySnapshot)
     func clear()
     func focus()
+    func apply(_ configuration: TerminalSurfaceConfiguration)
     func setInputEnabled(_ isEnabled: Bool)
 }
 

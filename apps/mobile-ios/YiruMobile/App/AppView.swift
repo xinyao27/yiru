@@ -11,6 +11,7 @@ struct AppView: View {
                 refreshRevision: model.homeRevision,
                 showHosts: model.showHosts,
                 showPairing: model.showPairing,
+                showTerminalSettings: model.showTerminalSettings,
                 showTerminalPrototype: model.showTerminalPrototype,
                 showDesignSystemCatalog: model.showDesignSystemCatalog
             )
@@ -43,8 +44,12 @@ struct AppView: View {
                         host: host,
                         terminal: terminal,
                         runtime: model.dependencies.terminalSessionRuntime,
-                        surfaceFactory: model.dependencies.terminalSurfaceFactory
+                        surfaceFactory: model.dependencies.terminalSurfaceFactory,
+                        preferences: model.dependencies.terminalPreferences,
+                        showSettings: model.showTerminalSettings
                     )
+                case .terminalSettings:
+                    TerminalSettingsView(preferences: model.dependencies.terminalPreferences)
                 case .pair:
                     PairingScanView(onOffer: model.confirmPairing)
                 case .pairConfirm(let offer):

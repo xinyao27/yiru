@@ -4,21 +4,28 @@ struct TerminalLiveView: View {
     @Environment(\.openURL) private var openURL
     @Environment(\.scenePhase) private var scenePhase
     @State private var model: TerminalLiveModel
+    private let preferences: TerminalPreferences
+    private let showSettings: () -> Void
 
     init(
         host: HostProfile,
         terminal: TerminalSummary,
         runtime: any TerminalSessionRuntime,
-        surfaceFactory: any TerminalSurfaceFactory
+        surfaceFactory: any TerminalSurfaceFactory,
+        preferences: TerminalPreferences,
+        showSettings: @escaping () -> Void
     ) {
         _model = State(
             initialValue: TerminalLiveModel(
                 host: host,
                 terminal: terminal,
                 runtime: runtime,
-                surfaceFactory: surfaceFactory
+                surfaceFactory: surfaceFactory,
+                surfaceConfiguration: preferences.surfaceConfiguration
             )
         )
+        self.preferences = preferences
+        self.showSettings = showSettings
     }
 
     var body: some View {
@@ -31,6 +38,11 @@ struct TerminalLiveView: View {
         }
         .navigationTitle(Text(model.title))
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Terminal Settings", systemImage: "gearshape", action: showSettings)
+            }
+        }
         .task(id: model.connectionAttempt) {
             await model.connect(attempt: model.connectionAttempt)
         }
@@ -52,6 +64,9 @@ struct TerminalLiveView: View {
             }
         }
         .sensoryFeedback(.warning, trigger: model.bellRevision)
+        .onChange(of: preferences.surfaceConfiguration) { _, configuration in
+            model.apply(configuration)
+        }
     }
 
     private var statusOverlay: some View {

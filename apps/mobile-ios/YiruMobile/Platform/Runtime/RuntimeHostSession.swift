@@ -42,6 +42,11 @@ actor RuntimeHostSession {
         connectionGeneration
     }
 
+    func connectedGeneration() async throws -> Int {
+        _ = try await connectIfNeeded()
+        return connectionGeneration
+    }
+
     func start() async {
         guard !isStopped, phase != .authenticationFailed else { return }
         if peer == nil && connectTask == nil {

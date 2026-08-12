@@ -55,14 +55,15 @@ final class TerminalLiveModel {
         host: HostProfile,
         terminal: TerminalSummary,
         runtime: any TerminalSessionRuntime,
-        surfaceFactory: any TerminalSurfaceFactory
+        surfaceFactory: any TerminalSurfaceFactory,
+        surfaceConfiguration: TerminalSurfaceConfiguration
     ) {
         hostID = host.id
         terminalID = terminal.id
         isWritable = terminal.isWritable
         self.runtime = runtime
         title = terminal.displayTitle
-        let surface = surfaceFactory.makeSurface(configuration: .standard)
+        let surface = surfaceFactory.makeSurface(configuration: surfaceConfiguration)
         self.surface = surface
         surface.events = TerminalSurfaceEvents(
             onInput: { [weak self] bytes in
@@ -143,6 +144,10 @@ final class TerminalLiveModel {
     func focus() {
         guard canAcceptUserInput else { return }
         surface.focus()
+    }
+
+    func apply(_ configuration: TerminalSurfaceConfiguration) {
+        surface.apply(configuration)
     }
 
     func setAppState(_ state: TerminalSessionAppState) async {

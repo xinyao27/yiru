@@ -36,6 +36,10 @@ final class AppModel {
         routes.append(.terminal(host, terminal))
     }
 
+    func showTerminalSettings() {
+        routes.append(.terminalSettings)
+    }
+
     func showTerminalPrototype() {
         routes.append(.terminalPrototype)
     }

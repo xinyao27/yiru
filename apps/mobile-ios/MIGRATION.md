@@ -59,5 +59,6 @@ Transport 是后续所有 feature 的地基，不能在 Swift 中凭 UI 需要�
 - [x] Terminal multiplex、双屏 snapshot replay、parse ACK、flow control 与远程 PTY session
 - [x] Terminal 断线后重建 ticket / bulk / epoch，并由 authoritative snapshot 自动恢复
 - [x] 每 host 共享 terminal bulk、独立 route 生命周期与 server `maxStreams` 限制
+- [x] SwiftTerm 原生输入附件、系统 Liquid Glass 快捷键、设备字号与内置键布局持久化
 - [ ] Terminal tab / accessory 输入与设置 parity
 - [ ] 其余功能切片
