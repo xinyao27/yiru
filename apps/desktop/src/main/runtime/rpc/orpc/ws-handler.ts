@@ -51,6 +51,7 @@ type RuntimeOrpcWsHandlerOptions = {
     socket: AuthenticatedMobileSocket,
     input: Parameters<NonNullable<RuntimeOrpcContext['openTerminalMultiplex']>>[0]
   ) => ReturnType<NonNullable<RuntimeOrpcContext['openTerminalMultiplex']>>
+  allowUnadvertisedTerminalMultiplex?: true
   activateTerminalMultiplexEpoch?: (socket: AuthenticatedMobileSocket) => boolean
   handlerHooks?: RuntimeOrpcHandlerHooks
 }
@@ -165,6 +166,7 @@ export class RuntimeOrpcWsHandler {
       openTerminalMultiplex: this.options.openTerminalMultiplex
         ? (input) => this.options.openTerminalMultiplex!(socket, input)
         : undefined,
+      allowUnadvertisedTerminalMultiplex: this.options.allowUnadvertisedTerminalMultiplex,
       activateTerminalMultiplexEpoch: this.options.activateTerminalMultiplexEpoch
         ? () => this.options.activateTerminalMultiplexEpoch!(socket)
         : undefined,

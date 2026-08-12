@@ -51,6 +51,7 @@ type RuntimeOrpcConnectionState = Pick<
   | 'sendBinary'
   | 'registerBinaryStreamHandler'
   | 'openTerminalMultiplex'
+  | 'allowUnadvertisedTerminalMultiplex'
   | 'activateTerminalMultiplexEpoch'
   | 'closeTerminalMultiplexConnection'
   | 'terminalMultiplexQueueBytes'
@@ -201,6 +202,7 @@ export async function invokeRuntimeOrpcOperation<TInput, TOutput>(
               sendBinary,
               registerBinaryStreamHandler: context.registerBinaryStreamHandler,
               openTerminalMultiplex: context.openTerminalMultiplex,
+              allowUnadvertisedTerminalMultiplex: context.allowUnadvertisedTerminalMultiplex,
               activateTerminalMultiplexEpoch: context.activateTerminalMultiplexEpoch,
               closeTerminalMultiplexConnection: context.closeTerminalMultiplexConnection,
               terminalMultiplexQueueBytes: context.terminalMultiplexQueueBytes,

@@ -115,6 +115,10 @@ export type RpcContext = {
   // transports and non-E2EE WebSocket paths.
   sendBinary?: (bytes: Uint8Array<ArrayBufferLike>) => boolean | void
   openTerminalMultiplex?: (input: TerminalOpenMultiplexInput) => TerminalOpenMultiplexResult
+  // Why: production hides the canary capability from paired/Web clients, while
+  // the hardened Electron loopback and OS-local runtime socket still carry the
+  // desktop's core terminal traffic. Only those transports may set this bit.
+  allowUnadvertisedTerminalMultiplex?: true
   activateTerminalMultiplexEpoch?: () => boolean
   closeTerminalMultiplexConnection?: (code: number, reason: string) => void
   terminalMultiplexQueueBytes?: () => number

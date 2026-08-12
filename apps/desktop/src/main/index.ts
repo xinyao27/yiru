@@ -189,6 +189,7 @@ import { YiruRuntimeRpcServer } from './runtime/rpc'
 import { setSettingsEventPublisher } from './runtime/settings-events'
 import { setSkillUpdateRunEventPublisher } from './runtime/skill-update-run-events'
 import { setSpeechEventPublisher } from './runtime/speech-events'
+import { terminalMultiplexCanaryDisabledCapabilities } from './runtime/terminal-multiplex-release-gate'
 import { setUIEventPublisher } from './runtime/ui-events'
 import { setWorkspacePortEventPublisher } from './runtime/workspace-port-events'
 import { YiruRuntimeService } from './runtime/yiru-runtime'
@@ -2213,6 +2214,7 @@ app.whenReady().then(async () => {
     getHostProcessMetrics: () => app.getAppMetrics(),
     createBrowserCommands: (host) =>
       new RuntimeBrowserCommands(host, electronRuntimeBrowserShellAdapter),
+    disabledCapabilities: terminalMultiplexCanaryDisabledCapabilities(),
     // Why: hook-reported agent status is the same source the desktop sidebar
     // reads. worktree.ps pulls it at query time so mobile shows the same agents.
     getAgentStatusSnapshot: () =>

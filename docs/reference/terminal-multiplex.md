@@ -1171,6 +1171,22 @@ D2 验收基线：raw PTY 119.57 MiB/s，headless xterm 111.15 MiB/s；8 KiB pay
 window 在 1 ms ACK 为 241.2 MiB/s，4 ms 仅 88.4 MiB/s。MessagePort 不支持 transferable
 ArrayBuffer；30 分钟 GC soak、真 DOM、Windows 和低配机仍是硬闸门。
 
+### 25.1 当前发布状态
+
+`terminal.multiplex` 目前仅是受控 canary capability。所有 desktop、packaged desktop 和
+headless `serve` 进程默认不 advertise；仅在启动进程显式设置
+`YIRU_TERMINAL_MULTIPLEX_CANARY=1` 时 advertise。该开关只用于开发和手工 canary，不是
+production rollout 开关。未看到 capability 的 client 必须拒绝打开 bulk ticket；server 也必须
+以 `capability_unsupported` 拒绝 `terminal.openMultiplex` 和 `terminal.multiplex`。唯一例外是
+Electron 的 hardened loopback 与它连接所选 runtime 的 authenticated OS-local socket；
+这条不 advertise 的内部路径保留桌面核心 terminal，但不会向 Web/mobile/paired RPC 开放。
+
+已有 canary 证据仅包括：macOS packaged 真实 xterm 的 CJK/emoji、hidden→reveal、
+renderer reload 和 100 MiB 输出；以及 iOS 模拟器 echo、50 MiB 输出、后台超过 10 秒恢复、
+host restart 后 E2EE 重连和 snapshot。这些不满足本节全部闸门。Windows
+ConPTY/CJK/TUI/SIGWINCH、低配机、30 分钟 flood/GC、各 RTT 档、relay-moved，iOS
+2/15 分钟恢复、产物 legacy sweep 和跨平台 packaged Origin 仍待真实验证。
+
 ## 26. 开放问题
 
 以下问题不能由本设计包单方面定案；实现开始前必须指定 owner、记录选择与证据。
@@ -1179,22 +1195,42 @@ ArrayBuffer；30 分钟 GC soak、真 DOM、Windows 和低配机仍是硬闸门�
 
 推荐在目标 Electron 上 probe packaged `loadFile` 与 dev URL 的实际 Origin，只 allowlist exact value；若 packaged 为 null，优先用受信 custom scheme。备选是额外绑定 WebContents nonce 后接受 null，或由 preload/main 建 socket。Owner：desktop security；证据：macOS/Windows/Linux probe。
 
+当前选择：development 精确匹配 `ELECTRON_RENDERER_URL` origin，packaged 精确匹配
+Chromium `loadFile` WebSocket 序列化的 `file://`。macOS canary 已验证伪造 Origin/Host 和错误
+token 被拒绝；Windows/Linux packaged probe 未完成，因此发布闸门仍关闭。
+
 ### OQ-2：统一 snapshot 默认 cap
 
 推荐所有 lane 先用 2 MiB，以 telemetry 决定 desktop 是否升到 4/8 MiB。备选是本地 8 MiB、远程 2 MiB，或全部 8 MiB。Owner：mobile memory；证据：mandatory 双屏分布与 30 分钟 soak。无论选择何值，8 MiB hard cap 和确定性截断不变。
+
+当前选择：所有 lane 默认 2 MiB，hard cap 8 MiB。模拟器 50 MiB 输出未等价于
+mandatory 双屏 snapshot 分布或 30 分钟 soak；证据未完整。
 
 ### OQ-3：E2EE framing 是否直接复用现有 82 B secretbox
 
 推荐首版复用 mobile 的 82 B secretbox framing/key schedule。备选是带显式 AAD 的 XChaCha20-Poly1305，或协商 AES-GCM。Owner：security；若换 suite，必须冻结新的 overhead、counter、nonce、downgrade 规则，decoder 不得猜 suite。
 
+当前选择：复用 mobile secretbox framing/key schedule；iOS 模拟器已证明 host restart
+后重新握手。relay/cellular 上的逐帧 fail-closed 和不可见性未验证。
+
 ### OQ-4：relay 的 bulk QoS class
 
 推荐 relay 认证 control/terminal-bulk lane class，control 优先，bulk 独立 32 MiB 并按连接公平调度；不看 encrypted opcode。备选是单 tunnel 双 queue，或独立连接/配额。Owner：relay；证据：cell memory、连接数和迁移约束。任何方案都不得让 bulk 拖垮 control。
+
+当前状态：control 与 bulk 已用独立 WebSocket 隔离；relay QoS class、配额和公平调度
+未定案，不得视为已完成。
 
 ### OQ-5：多 viewer 下 producer pause 的产品策略
 
 推荐仅在所有 interested viewer 阻塞时 pause；慢 viewer 自行 snapshot-heal。备选是仅 lossless primary 可 pause，或 remote 永不 pause。Owner：terminal product；必须决定远程观察者能否改变 shell 物理速度，并把选择做成 host policy，不能信任 client 自报 primary。
 
+当前选择：host 仅在所有参与压力决策的 viewer 均阻塞时 pause producer。多 viewer
+与慢 viewer canary 证据未完成。
+
 ### OQ-6：是否增加跨 epoch raw resume
 
 推荐首版永远 snapshot；有数据证明它是瓶颈后，才以 terminal.multiplex.resume 增加 bounded replay。备选是首版每 PTY 保留 8 MiB，或仅 loopback/LAN resume。Owner：performance；证据：snapshot serialize/apply、内存和断线长度。任何 resume 必须保留 gap→snapshot fallback，且不改本协议的 seq 定义。评审必须记录协议结论、六项 owner/选择/证据、冻结的 frame/opcode、canary 与回滚 owner；在此之前 production MUST NOT advertise terminal.multiplex。
+
+当前选择：跨 epoch 永远 snapshot，不实现 raw replay。renderer reload 和 iOS host restart
+canary 已观察到 snapshot 恢复；长断线与完整内存证据仍缺失。回滚 owner 和 production
+rollout 仍未定，所以 §25.1 的显式 canary gate 保持关闭。

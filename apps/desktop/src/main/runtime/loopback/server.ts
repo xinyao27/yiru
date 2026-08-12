@@ -225,6 +225,7 @@ export class RuntimeLoopbackServer {
       // paired-device principal here would misclassify it as a remote runtime
       // and deny every local-only shell.* procedure.
       resolveAdmission: () => ({}),
+      allowUnadvertisedTerminalMultiplex: true,
       beforeInvocation: (socket, invocation) => {
         const admission = this.options.connections.admitInvocation(
           socket.connectionId,

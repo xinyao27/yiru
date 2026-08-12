@@ -1,8 +1,10 @@
+import { TERMINAL_MULTIPLEX_RUNTIME_CAPABILITY } from '@yiru/runtime-protocol/capabilities'
 import type { TerminalShowResult } from '@yiru/runtime-protocol/contract'
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
+import type { RuntimeStatusResult } from '@yiru/runtime-protocol/status'
 import type { TerminalMultiplexOpcode as TerminalMultiplexOpcodeValue } from '@yiru/runtime-protocol/terminal-multiplex/frame'
 
-import { callRuntimeOrpcByPath, type RuntimeClientTarget } from '../orpc-client'
+import { callRuntimeOrpcByPath, isWebRuntimeClient, type RuntimeClientTarget } from '../orpc-client'
 import { unwrapRuntimeRpcResult } from '../rpc-client'
 import {
   openTerminalMultiplexSubscription,
@@ -124,6 +126,13 @@ export class RemoteRuntimeTerminalMultiplexer {
   private async openConnection(): Promise<void> {
     const attempt = ++this.connectionAttempt
     try {
+      const status = await this.callRuntime<RuntimeStatusResult>('status.get', undefined)
+      if (
+        isWebRuntimeClient() &&
+        !status.capabilities?.includes(TERMINAL_MULTIPLEX_RUNTIME_CAPABILITY)
+      ) {
+        throw new Error('Runtime host does not advertise terminal.multiplex.')
+      }
       const subscription = await openTerminalMultiplexSubscription({
         target: this.target,
         environmentIdentity: this.target.kind === 'local' ? 'local' : this.target.environmentId,

@@ -70,6 +70,7 @@ export function createRuntimeOrpcHandlerOptions({
         sendBinary: context.sendBinary,
         registerBinaryStreamHandler: context.registerBinaryStreamHandler,
         openTerminalMultiplex: context.openTerminalMultiplex,
+        allowUnadvertisedTerminalMultiplex: context.allowUnadvertisedTerminalMultiplex,
         activateTerminalMultiplexEpoch: context.activateTerminalMultiplexEpoch,
         closeTerminalMultiplexConnection: context.closeTerminalMultiplexConnection,
         terminalMultiplexQueueBytes: context.terminalMultiplexQueueBytes,
