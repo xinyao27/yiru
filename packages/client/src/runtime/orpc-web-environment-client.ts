@@ -5,7 +5,8 @@ import type {
   RuntimeOrpcClient,
   RuntimeOrpcClientConnection,
   RuntimeOrpcClientContext
-} from './orpc-message-port-client'
+} from './orpc-connection'
+import { runtimeEnvironmentsClient } from './runtime-environments-client'
 
 // Why: a paired web client already negotiates a real oRPC peer (or falls back
 // to its own JSON-RPC wrapper) once per host in
@@ -20,7 +21,7 @@ export function createWebEnvironmentRuntimeOrpcClient(
 ): RuntimeOrpcClientConnection {
   const link: ClientLink<RuntimeOrpcClientContext> = {
     call: (path, input, callOptions) =>
-      window.api.runtimeEnvironments.callOrpcProcedure(
+      runtimeEnvironmentsClient.callOrpcProcedure(
         {
           selector: target.environmentId,
           path,

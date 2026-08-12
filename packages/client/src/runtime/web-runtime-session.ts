@@ -13,7 +13,7 @@ import { getRuntimeEnvironmentIdForWorktree } from '../lib/worktree-runtime-owne
 import { useAppStore } from '../store'
 import type { AppState } from '../store/types'
 import { callRuntimeOrpc } from './orpc-client'
-import { parseRemoteRuntimePtyId } from './terminal-stream'
+import { parseRuntimeTerminalPtyId } from './terminal-stream'
 import { recordWebSessionCloseIntent } from './web-session-close-intent'
 import {
   closeWebSessionTabCommand,
@@ -486,7 +486,7 @@ export function splitWebRuntimeTerminal(
   if (!ptyId) {
     return false
   }
-  const remote = parseRemoteRuntimePtyId(ptyId)
+  const remote = parseRuntimeTerminalPtyId(ptyId)
   const environmentId = remote?.environmentId?.trim()
   if (!remote || !environmentId || !isWebRuntimeSessionActive(environmentId)) {
     return false
@@ -502,7 +502,7 @@ export function splitWebRuntimeTerminal(
     pendingMirrorSuppressionId
   )
   // Why: dispatches by contract path through the negotiated oRPC client
-  // instead of `window.api.runtimeEnvironments.call` with a bare method
+  // instead of the compatibility bridge with a bare method
   // string — the bare-string channel skips capability negotiation and
   // always lands on the legacy dispatcher, which no longer serves domains
   // retired from it (see docs/runtime-orpc-migration.md Phase 6 D-stage).
@@ -600,7 +600,7 @@ export function closeWebRuntimeTerminal(ptyId: string | null | undefined): boole
   if (!ptyId) {
     return false
   }
-  const remote = parseRemoteRuntimePtyId(ptyId)
+  const remote = parseRuntimeTerminalPtyId(ptyId)
   const environmentId = remote?.environmentId?.trim()
   if (!remote || !environmentId || !isWebRuntimeSessionActive(environmentId)) {
     return false
@@ -610,7 +610,7 @@ export function closeWebRuntimeTerminal(ptyId: string | null | undefined): boole
   // the host owns the real pane graph. Close the host terminal first so later
   // session snapshots cannot resurrect the locally removed pane.
   // Why: dispatches by contract path through the negotiated oRPC client
-  // instead of `window.api.runtimeEnvironments.call` with a bare method
+  // instead of the compatibility bridge with a bare method
   // string — the bare-string channel skips capability negotiation and
   // always lands on the legacy dispatcher, which no longer serves domains
   // retired from it (see docs/runtime-orpc-migration.md Phase 6 D-stage).
@@ -723,13 +723,13 @@ export function clearWebRuntimeTerminalBuffer(ptyId: string | null | undefined):
   if (!ptyId) {
     return false
   }
-  const remote = parseRemoteRuntimePtyId(ptyId)
+  const remote = parseRuntimeTerminalPtyId(ptyId)
   const environmentId = remote?.environmentId?.trim()
   if (!remote || !environmentId || !isWebRuntimeSessionActive(environmentId)) {
     return false
   }
   // Why: dispatches by contract path through the negotiated oRPC client
-  // instead of `window.api.runtimeEnvironments.call` with a bare method
+  // instead of the compatibility bridge with a bare method
   // string — the bare-string channel skips capability negotiation and
   // always lands on the legacy dispatcher, which no longer serves domains
   // retired from it (see docs/runtime-orpc-migration.md Phase 6 D-stage).

@@ -12,7 +12,8 @@ import type {
   TerminalStopExactInput,
   TerminalStopExactResult,
   TerminalStopInput,
-  TerminalStopResult
+  TerminalStopResult,
+  TerminalUpdateViewAttributesInput
 } from '@yiru/runtime-protocol/contract'
 
 import type { RpcContext } from '../core'
@@ -40,6 +41,8 @@ export async function handleTerminalCreate(
       cols: params.viewport?.cols,
       rows: params.viewport?.rows,
       command: params.command,
+      cwd: params.cwd,
+      cwdFallback: params.cwdFallback,
       startupCommandDelivery: params.startupCommandDelivery,
       env: params.env,
       envToDelete: params.envToDelete,
@@ -55,6 +58,14 @@ export async function handleTerminalCreate(
       leafId: params.leafId
     })
   }
+}
+
+export function handleTerminalUpdateViewAttributes(
+  params: TerminalUpdateViewAttributesInput,
+  { runtime }: RpcContext
+): { updated: true } {
+  runtime.updateTerminalViewAttributes(params)
+  return { updated: true }
 }
 
 export async function handleTerminalSplit(

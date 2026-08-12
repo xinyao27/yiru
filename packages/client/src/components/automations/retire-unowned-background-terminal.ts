@@ -1,4 +1,5 @@
 import { callRuntimeOrpc, type RuntimeClientTarget } from '~renderer/runtime/orpc-client'
+import { closeRuntimeTerminal } from '~renderer/runtime/terminal-inspection'
 import { useAppStore } from '~renderer/store'
 import { isTerminalTabPresent } from '~renderer/store/slices/terminal-tab-retirement'
 
@@ -30,7 +31,7 @@ export async function retireProvider(args: {
         terminal: args.runtimeTerminalHandle
       })
     } else if (args.runtimeTarget.kind === 'local') {
-      await window.api.pty.kill(args.ptyId)
+      await closeRuntimeTerminal(args.ptyId)
     }
   } catch {
     // Best-effort provider teardown; the retired tab must not be recreated.

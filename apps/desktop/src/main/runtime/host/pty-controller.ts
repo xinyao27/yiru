@@ -152,10 +152,7 @@ export function attachNodeRuntimeHostPtyController(
     listProcesses: () => provider.listProcesses(),
     serializeProviderBuffer: provider.getBufferSnapshot
       ? (ptyId, options) => provider.getBufferSnapshot!(ptyId, options)
-      : undefined,
-    hasRendererSerializer: () => false,
-    getRendererSerializerGeneration: () => 0,
-    waitForRendererSerializer: async () => false
+      : undefined
   })
 
   return {

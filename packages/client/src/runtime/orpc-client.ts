@@ -116,7 +116,7 @@ export async function createRuntimeOrpcClient(
   const environmentId = target.environmentId.trim()
   const environmentTarget = { kind: 'environment', environmentId } as const
   if (isWebRuntimeClient()) {
-    // Why: the web renderer has no Electron preload to accept a MessagePort,
+    // Why: the web renderer has no Electron preload credentials,
     // so it cannot reuse `acquireEnvironmentRuntimeOrpcClient` below — but it
     // does not need to. `WebRuntimeClient` already terminates an encrypted
     // oRPC peer for the paired host (falling back to its own legacy JSON-RPC
@@ -144,7 +144,7 @@ export function isWebRuntimeClient(): boolean {
 // a runtime procedure by a dot-joined method string instead of a statically
 // known contract path. Walk the negotiated client the same way the web shim's
 // `callOrpcProcedure` does, instead of each of those call sites hand-rolling
-// its own dispatcher that reaches for `window.api.runtimeEnvironments.call`
+// its own compatibility dispatcher
 // directly — that bare-string channel skips capability negotiation entirely
 // (see docs/runtime-orpc-migration.md Phase 6 D-stage).
 export async function callRuntimeOrpcByPath<TResult = unknown>(

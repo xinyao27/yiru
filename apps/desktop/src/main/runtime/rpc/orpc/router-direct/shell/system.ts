@@ -3,6 +3,13 @@ import { BrowserWindow } from 'electron'
 import { getShellGitHubService } from '~main/github/github'
 import { getShellNotificationsService } from '~main/notifications/notifications'
 import { getShellRepoHostService } from '~main/project-groups/repos'
+import {
+  disconnectPublicRuntimeEnvironment,
+  getPublicRuntimeEnvironmentStatus,
+  listPublicRuntimeEnvironments,
+  removePublicRuntimeEnvironment,
+  resolvePublicRuntimeEnvironment
+} from '~main/runtime/environments'
 import { runtimeImplementation } from '~main/runtime/rpc/orpc/access-middleware'
 import { getShellAppService } from '~main/shell/app'
 import { reloadShellApp } from '~main/shell/app-reload'
@@ -119,6 +126,23 @@ export const shellSystemRuntimeHandlers = {
     ),
     reclaimBrowserForDesktop: runtimeImplementation.shell.runtime.reclaimBrowserForDesktop.handler(
       ({ input }) => getShellRuntimeStateService().reclaimBrowserForDesktop(input.browserPageId)
+    )
+  },
+  runtimeEnvironments: {
+    list: runtimeImplementation.shell.runtimeEnvironments.list.handler(() =>
+      listPublicRuntimeEnvironments()
+    ),
+    resolve: runtimeImplementation.shell.runtimeEnvironments.resolve.handler(({ input }) =>
+      resolvePublicRuntimeEnvironment(input.selector)
+    ),
+    remove: runtimeImplementation.shell.runtimeEnvironments.remove.handler(({ input }) =>
+      removePublicRuntimeEnvironment(input.selector)
+    ),
+    disconnect: runtimeImplementation.shell.runtimeEnvironments.disconnect.handler(({ input }) =>
+      disconnectPublicRuntimeEnvironment(input.selector)
+    ),
+    getStatus: runtimeImplementation.shell.runtimeEnvironments.getStatus.handler(({ input }) =>
+      getPublicRuntimeEnvironmentStatus(input.selector, input.timeoutMs)
     )
   },
   gh: {

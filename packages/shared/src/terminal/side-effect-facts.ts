@@ -29,7 +29,7 @@ export type TerminalSideEffectFact =
   | { kind: 'command-code-working'; prompt: string }
   | { kind: 'command-code-done'; prompt: string }
   /** DECSET 2031 color-scheme subscribe observed in the byte stream. Emitted
-   *  so hidden-delivery-gated views (whose bytes never arrive) can still send
+   *  so multiplex-gated views (whose bytes never arrive) can still send
    *  the theme reply — the reply stays renderer-side because query authority
    *  belongs to the view (model/view contract invariant 6). */
   | { kind: '2031-subscribe' }

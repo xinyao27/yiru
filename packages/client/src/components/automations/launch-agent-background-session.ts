@@ -1,11 +1,9 @@
 import { resolveLocalWindowsAgentStartupShell } from '@yiru/workbench-model/platform'
-import { isMainTerminalSideEffectAuthorityForPty } from '~renderer/components/terminal-pane/terminal-side-effect-facts-handler'
 import { requestBackgroundTerminalWorktreeMount } from '~renderer/components/terminal/background-terminal-worktree-mount'
 import { getAgentLaunchPlatformForRepo } from '~renderer/lib/agent-launch-platform'
 import { createBrowserUuid } from '~renderer/lib/browser-uuid'
 import { getLocalProjectExecutionRuntimeContext } from '~renderer/lib/local-preflight-context'
 import { CLIENT_PLATFORM } from '~renderer/lib/new-workspace'
-import { tuiAgentToAgentKind } from '~renderer/lib/telemetry'
 import { buildAgentStartupPlan } from '~renderer/lib/tui-agent-startup'
 import { getSettingsForWorktreeRuntimeOwner } from '~renderer/lib/worktree-runtime-owner'
 import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
@@ -13,7 +11,7 @@ import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
 import {
   subscribeToRuntimeTerminalData,
-  toRemoteRuntimePtyId
+  toRuntimeTerminalPtyId
 } from '~renderer/runtime/terminal-stream'
 import { toRuntimeWorktreeSelector } from '~renderer/runtime/worktree-selector'
 import { useAppStore } from '~renderer/store'
@@ -27,12 +25,6 @@ import {
   resolveTuiAgentLaunchEnv
 } from '~shared/tui-agent/launch-defaults'
 
-import { subscribeToPtyData } from '../terminal-pane/pty/data-sidecar-subscriptions'
-import {
-  registerEagerPtyBuffer,
-  subscribeToPtyExit,
-  type EagerPtyHandle
-} from '../terminal-pane/pty/dispatcher'
 import { scheduleAgentBackgroundDraft } from './agent-background-draft-delivery'
 import { runBestEffortAgentBackgroundCleanups } from './agent-background-session-cleanup'
 import type {
@@ -44,7 +36,7 @@ import { retireProvider, retireUnownedTerminal } from './retire-unowned-backgrou
 export async function launchAgentBackgroundSession(
   args: LaunchAgentBackgroundSessionArgs
 ): Promise<LaunchAgentBackgroundSessionResult | null> {
-  const { agent, worktreeId, prompt, launchSource, title, onData, onExit, onAgentStatus } = args
+  const { agent, worktreeId, prompt, title, onData, onExit, onAgentStatus } = args
   const store = useAppStore.getState()
   const worktree = store.allWorktrees().find((entry) => entry.id === worktreeId)
   const repo = worktree ? store.repos.find((entry) => entry.id === worktree.repoId) : null
@@ -133,9 +125,7 @@ export async function launchAgentBackgroundSession(
   )
   let ptyId = ''
   let runtimeTerminalHandle: string | null = null
-  let returnedLaunchConfig: typeof startupPlan.launchConfig | undefined
   let exitHandled = false
-  let eagerPtyBuffer: EagerPtyHandle | null = null
   let unsubscribeExit = (): void => {},
     unsubscribeData = (): void => {}
   const handleExit = (exitPtyId: string, code: number): void => {
@@ -149,80 +139,44 @@ export async function launchAgentBackgroundSession(
     useAppStore.getState().clearAgentLaunchConfig(paneKey)
     onExit?.(exitPtyId, code)
   }
-  // Why: local status facts already pass through main's authoritative
-  // scanner; remote-runtime bytes still need this renderer-side store write.
-  const mainOwnsAgentStatusWrites = isMainTerminalSideEffectAuthorityForPty({
-    settings: store.settings,
-    runtimeEnvironmentId: runtimeTarget.kind === 'environment' ? runtimeTarget.environmentId : null
-  })
   const processAgentStatus = createAgentStatusOscProcessor()
   const handleData = (data: string): void => {
     onData?.(data)
     const processed = processAgentStatus(data)
     for (const payload of processed.payloads) {
-      if (!mainOwnsAgentStatusWrites) {
-        useAppStore.getState().setAgentStatus(paneKey, payload, undefined, undefined, undefined, {
-          launchToken
-        })
-      }
+      useAppStore.getState().setAgentStatus(paneKey, payload, undefined, undefined, undefined, {
+        launchToken
+      })
       onAgentStatus?.(payload)
     }
   }
   try {
-    if (runtimeTarget.kind === 'environment') {
-      // Why: runtime environments execute on the server; using local pty.spawn
-      // would silently run automation on the client for a remote workspace.
-      const created = await callRuntimeOrpc(
-        runtimeTarget,
-        (client) => client.terminal.create,
-        {
-          worktree: toRuntimeWorktreeSelector(worktreeId),
-          command: startupPlan.launchCommand,
-          launchConfig: startupPlan.launchConfig,
-          launchToken,
-          launchAgent: agent,
-          ...(startupPlan.startupCommandDelivery
-            ? { startupCommandDelivery: startupPlan.startupCommandDelivery }
-            : {}),
-          env: paneEnv,
-          title,
-          tabId: tab.id,
-          leafId,
-          // Why: local renderer owns the hidden tab; remote runtime should not reveal UI.
-          presentation: 'background'
-        },
-        { timeoutMs: 15_000 }
-      )
-      runtimeTerminalHandle = created.terminal.handle
-      ptyId = toRemoteRuntimePtyId(runtimeTerminalHandle, runtimeTarget.environmentId)
-    } else {
-      const result = await window.api.pty.spawn({
-        cols: 120,
-        rows: 40,
-        cwd: worktree.path,
+    const created = await callRuntimeOrpc(
+      runtimeTarget,
+      (client) => client.terminal.create,
+      {
+        worktree: toRuntimeWorktreeSelector(worktreeId),
+        viewport: { cols: 120, rows: 40 },
         command: startupPlan.launchCommand,
-        ...(!startupPlan.startupCommandDelivery
-          ? {}
-          : { startupCommandDelivery: startupPlan.startupCommandDelivery }),
-        env: paneEnv,
         launchConfig: startupPlan.launchConfig,
         launchToken,
         launchAgent: agent,
-        // Why: Repo.connectionId is dead — nothing sets it since remote hosts
-        // were removed (#63) — a background agent session's repo is never SSH.
-        connectionId: null,
-        worktreeId,
+        ...(startupPlan.startupCommandDelivery
+          ? { startupCommandDelivery: startupPlan.startupCommandDelivery }
+          : {}),
+        env: paneEnv,
+        title,
         tabId: tab.id,
         leafId,
-        telemetry: {
-          agent_kind: tuiAgentToAgentKind(agent),
-          launch_source: launchSource ?? 'unknown',
-          request_kind: 'new'
-        }
-      })
-      ptyId = result.id
-      returnedLaunchConfig = result.launchConfig
-    }
+        presentation: 'background'
+      },
+      { timeoutMs: 15_000 }
+    )
+    runtimeTerminalHandle = created.terminal.handle
+    ptyId = toRuntimeTerminalPtyId(
+      runtimeTerminalHandle,
+      runtimeTarget.kind === 'environment' ? runtimeTarget.environmentId : null
+    )
     if (
       await retireUnownedTerminal({
         tabId: tab.id,
@@ -236,9 +190,6 @@ export async function launchAgentBackgroundSession(
       })
     ) {
       return null
-    }
-    if (returnedLaunchConfig) {
-      store.registerAgentLaunchConfig(paneKey, returnedLaunchConfig, launchRegistration)
     }
     store.updateTabPtyId(tab.id, ptyId)
     store.setTabLayout(tab.id, singlePaneLayoutSnapshot(leafId, ptyId))
@@ -259,32 +210,20 @@ export async function launchAgentBackgroundSession(
       )
     }
 
-    if (runtimeTarget.kind === 'environment') {
-      if (!runtimeTerminalHandle) {
-        throw new Error('Runtime terminal id is invalid.')
-      }
-      unsubscribeData = await subscribeToRuntimeTerminalData(
-        store.settings,
-        ptyId,
-        `desktop:background:${tab.id}`,
-        handleData
-      )
-      void callRuntimeOrpc(
-        runtimeTarget,
-        (client) => client.terminal.wait,
-        { terminal: runtimeTerminalHandle, for: 'exit' },
-        { timeoutMs: 24 * 60 * 60 * 1000 }
-      )
-        .then((result) => handleExit(ptyId, result.wait.exitCode ?? 0))
-        .catch(() => {})
-    } else {
-      eagerPtyBuffer = registerEagerPtyBuffer(ptyId, handleExit)
-      unsubscribeData = subscribeToPtyData(ptyId, handleData)
-      // Why: opening the workspace attaches a real terminal transport and disposes
-      // the eager exit handler. This sidecar keeps automation completion tracking
-      // alive regardless of whether the tab is hidden or mounted.
-      unsubscribeExit = subscribeToPtyExit(ptyId, (code) => handleExit(ptyId, code))
-    }
+    unsubscribeData = await subscribeToRuntimeTerminalData(
+      store.settings,
+      ptyId,
+      `desktop:background:${tab.id}`,
+      handleData
+    )
+    void callRuntimeOrpc(
+      runtimeTarget,
+      (client) => client.terminal.wait,
+      { terminal: runtimeTerminalHandle, for: 'exit' },
+      { timeoutMs: 24 * 60 * 60 * 1000 }
+    )
+      .then((result) => handleExit(ptyId, result.wait.exitCode ?? 0))
+      .catch(() => {})
 
     // Why: mount only after the explicit PTY is bound. Mounting at the earlier
     // createTab boundary lets a slow remote spawn race TerminalPane's fresh
@@ -301,7 +240,6 @@ export async function launchAgentBackgroundSession(
     // A failure between them must not strand an invisible runtime terminal.
     exitHandled = true
     runBestEffortAgentBackgroundCleanups(unsubscribeExit, unsubscribeData)
-    runBestEffortAgentBackgroundCleanups(() => eagerPtyBuffer?.dispose())
     runBestEffortAgentBackgroundCleanups(() => store.clearTabPtyId(tab.id, ptyId))
     runBestEffortAgentBackgroundCleanups(() => store.clearAgentLaunchConfig(paneKey))
     if (ptyId) {

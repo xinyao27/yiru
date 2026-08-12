@@ -2,12 +2,12 @@ import { createORPCClient, type ClientLink } from '@orpc/client'
 import { runtimeContract } from '@yiru/runtime-protocol/contract'
 
 import type { RuntimeClientTarget, RuntimeOrpcCallOptions } from './orpc-client'
-import { createLegacyRuntimeOrpcStream } from './orpc-legacy-stream'
 import type {
   RuntimeOrpcClient,
   RuntimeOrpcClientConnection,
   RuntimeOrpcClientContext
-} from './orpc-message-port-client'
+} from './orpc-connection'
+import { createLegacyRuntimeOrpcStream } from './orpc-legacy-stream'
 import { callRuntimeRpc } from './rpc-client'
 
 export function createLegacyRuntimeOrpcClient(

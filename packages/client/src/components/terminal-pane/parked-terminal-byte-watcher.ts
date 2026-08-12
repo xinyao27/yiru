@@ -6,44 +6,24 @@ import { useAppStore } from '~renderer/store'
  * Why: parking unmounts the TerminalPane subtree, which tears down the pane's
  * side-effect consumers — the parked tab's only source of bell, title,
  * agent-completion, and PR-link policy. (Losing them is the gap that sank the
- * first parking attempt.) Under main side-effect authority the watcher is
- * purely fact-driven (one pty:sideEffect consumer, no byte parsing); with the
- * kill switch off it registers the legacy byte parsers on the dispatcher
- * sidecar channel. DECSET 2031 ownership follows the hidden-delivery gate:
- * gate ON answers from main's '2031-subscribe' fact (no parked bytes exist),
- * gate OFF keeps the byte sidecar (parked-terminal-mode2031-responder.ts).
- * Either way the reply is sent from the renderer — query authority never
- * moves to main. See docs/reference/terminal-hidden-view-parking.md and
- * docs/reference/terminal-side-effect-authority.md.
+ * first parking attempt.) The multiplex subscription remains fact-driven
+ * while output delivery is gated; reveal restores the authoritative snapshot.
  */
 import { isClaudeAgent } from '~shared/agent/detection'
-import { createCommandCodeOutputStatusDetector } from '~shared/command-code-output-status'
 import { makePaneKey } from '~shared/stable-pane-id'
 import {
   mode2031SequenceFor,
   resolveTerminalColorSchemeMode
 } from '~shared/terminal/color-scheme-protocol'
-import { createTerminalGitHubPRLinkDetector } from '~shared/terminal/github-pr-link-detector'
-import { createOsc133CommandFinishedScanner } from '~shared/terminal/osc133-command-finished'
 
 import {
   AGENT_TASK_COMPLETE_NOTIFICATION_GRACE_MS,
   isAgentTaskCompleteOsNotificationEnabledFromState,
   isAgentTaskCompleteTrackingEnabledFromState
 } from './agent/task-complete-policy'
-import {
-  createParkedTerminalCommandStatusPolicy,
-  readInFlightCommandCodeTurn
-} from './parked-command-status'
-import { startParkedTerminalMode2031Responder } from './parked-terminal-mode2031-responder'
+import { createParkedTerminalCommandStatusPolicy } from './parked-command-status'
 import { subscribeToPtyData } from './pty/data-sidecar-subscriptions'
-import { acquireHiddenRendererPtyDeliveryClaim } from './pty/renderer-delivery-claims'
-import { createPtyOutputProcessor } from './pty/transport'
-import { isRendererHiddenPtyDeliveryGateEnabled } from './terminal-hidden-delivery-gate'
-import {
-  isMainTerminalSideEffectAuthorityForPty,
-  registerTerminalSideEffectFactConsumer
-} from './terminal-side-effect-facts-handler'
+import { registerTerminalSideEffectFactConsumer } from './terminal-side-effect-facts-handler'
 import { dispatchTerminalNotification } from './use-notification-dispatch'
 
 // Why: mirrors AGENT_TASK_COMPLETE_NOTIFICATION_GRACE_MS in pty-connection.ts.
@@ -238,131 +218,35 @@ export function startParkedTerminalByteWatcher(
     paneKey
   })
 
-  // Why: watched PTY bytes transit local main, including direct SSH — when the authority switch is on,
-  // the watcher must NOT register byte parsers (the fact consumer below is
-  // the single policy consumer; double registration would double-fire bells).
-  const mainSideEffectAuthority = isMainTerminalSideEffectAuthorityForPty({
-    settings: useAppStore.getState().settings,
-    runtimeEnvironmentId: null
-  })
-  // Why: under the Phase-4 gate a parked PTY needs no renderer bytes at all —
-  // facts carry side effects and the reveal remount restores from the model
-  // snapshot. Decided once at watcher start: it picks which 2031 responder
-  // (byte sidecar vs fact reply) exists, so it must never flip per chunk.
-  const hiddenDeliveryGateActive =
-    mainSideEffectAuthority &&
-    isRendererHiddenPtyDeliveryGateEnabled(useAppStore.getState().settings)
-
   const sendMode2031Reply = (): void => {
     const settings = useAppStore.getState().settings
     sendInput(mode2031SequenceFor(resolveTerminalColorSchemeMode(settings, getSystemPrefersDark())))
   }
 
-  // Why (byte-parser mode only): reuse the transport's output processor so
-  // the parked path keeps the exact live-path parsing semantics — all-titles
-  // ordering, normalization, the cursor-agent native-title drop, the
-  // OSC-aware stateful bell detector, and the working/idle agent tracker.
-  // initialAgentTitle: an agent already working at park time must still
-  // produce a working→idle transition; main's continuous tracker covers this
-  // in fact-consumer mode.
-  const processor = mainSideEffectAuthority
-    ? null
-    : createPtyOutputProcessor({
-        ...(options.initialTitle !== undefined ? { initialAgentTitle: options.initialTitle } : {}),
-        ...sideEffectCallbacks
-      })
-  // Why (byte-parser mode only): with main authority, pr-link facts arrive on
-  // the channel below; byte-scanning too would observe every link twice.
-  const observeTerminalGitHubPRLink = mainSideEffectAuthority
-    ? null
-    : createTerminalGitHubPRLinkDetector()
-  const commandFinishedScanner = mainSideEffectAuthority
-    ? null
-    : createOsc133CommandFinishedScanner(commandStatusPolicy.onCommandFinished)
-  const commandCodeOutputStatusDetector = mainSideEffectAuthority
-    ? null
-    : createCommandCodeOutputStatusDetector({
-        inFlightTurn: readInFlightCommandCodeTurn(paneKey),
-        onWorking: commandStatusPolicy.onCommandCodeWorking,
-        onDone: commandStatusPolicy.onCommandCodeDone
-      })
-  const unregisterFactConsumer = mainSideEffectAuthority
-    ? registerTerminalSideEffectFactConsumer({
-        ptyId,
-        // Why: ordinary park already has a current pane-owned title; the cold
-        // activation flag below requests a snapshot only when no pane did.
-        callbacks: {
-          ...sideEffectCallbacks,
-          onCommandFinished: commandStatusPolicy.onCommandFinished,
-          onCommandCodeWorking: commandStatusPolicy.onCommandCodeWorking,
-          onCommandCodeDone: commandStatusPolicy.onCommandCodeDone,
-          onPrLink: (link) =>
-            useAppStore.getState().observeTerminalGitHubPullRequestLink(worktreeId, link),
-          // Why (gate mode only): bytes never arrive while gated, so the 2031
-          // subscribe arrives as a main-tracker fact instead of a byte scan.
-          // The reply is still sent from here — query authority stays with
-          // the view/watcher (model/view contract invariant 6).
-          ...(hiddenDeliveryGateActive ? { onMode2031Subscribe: sendMode2031Reply } : {})
-        },
-        // Why: activation-deferred tabs can start a watcher before any pane
-        // restored the current title; ordinary parked tabs avoid this IPC.
-        restoreTitleOnRegister: options.restoreTitleOnRegister === true
-      })
-    : null
-
-  // Why: no xterm exists while parked, so nothing answers a DECSET 2031
-  // subscription. With the hidden-delivery gate OFF the byte responder is the
-  // parked path's only byte consumer under main authority. With the gate ON it
-  // must NOT register: its subscribeToPtyData sidecar doubles as a
-  // delivery-interest signal that would force-feed bytes to the gated PTY —
-  // the fact callback above replaces the byte scan.
-  const stopMode2031Responder = hiddenDeliveryGateActive
-    ? null
-    : startParkedTerminalMode2031Responder({ ptyId, sendInput })
-
-  // Why: parked tabs are the canonical hidden view — mark the PTY gated so
-  // main stops renderer byte delivery; dispose clears the bit before the
-  // reveal remount re-registers pane handlers (existing dispose ordering).
-  const releaseHiddenDeliveryClaim = hiddenDeliveryGateActive
-    ? acquireHiddenRendererPtyDeliveryClaim(ptyId)
-    : null
-
-  // Why (byte-parser mode only): with main authority the watcher consumes
-  // pty:sideEffect facts exclusively and registers NO byte parsers here —
-  // title/bell/agent parsing and the PR-link scan would double-fire policy.
-  const unsubscribeByteParsers =
-    processor === null
-      ? null
-      : subscribeToPtyData(ptyId, (data) => {
-          // Why: empty pane callbacks — the watcher wants only the parser
-          // side effects; there is no xterm to deliver bytes to.
-          processor.processData(data, {})
-          commandFinishedScanner?.scan(data)
-          commandCodeOutputStatusDetector?.observe(data)
-          if (observeTerminalGitHubPRLink) {
-            for (const link of observeTerminalGitHubPRLink(data)) {
-              useAppStore.getState().observeTerminalGitHubPullRequestLink(worktreeId, link)
-            }
-          }
-        })
+  const unregisterFactConsumer = registerTerminalSideEffectFactConsumer({
+    ptyId,
+    callbacks: {
+      ...sideEffectCallbacks,
+      onCommandFinished: commandStatusPolicy.onCommandFinished,
+      onCommandCodeWorking: commandStatusPolicy.onCommandCodeWorking,
+      onCommandCodeDone: commandStatusPolicy.onCommandCodeDone,
+      onPrLink: (link) =>
+        useAppStore.getState().observeTerminalGitHubPullRequestLink(worktreeId, link),
+      onMode2031Subscribe: sendMode2031Reply
+    },
+    restoreTitleOnRegister: options.restoreTitleOnRegister === true
+  })
+  // Why: the parked subscription carries side-effect batches while its
+  // output delivery stays gated; the byte callback intentionally does nothing.
+  const unsubscribeRuntimeEvents = subscribeToPtyData(ptyId, () => {})
 
   const dispose = (): void => {
     if (disposed) {
       return
     }
     disposed = true
-    // Why: unhide BEFORE the reveal remount registers pane handlers — main
-    // resumes delivery and (if bytes were dropped) emits the restore marker
-    // the remounted pane's restore machinery consumes.
-    releaseHiddenDeliveryClaim?.()
-    stopMode2031Responder?.()
-    unsubscribeByteParsers?.()
-    unregisterFactConsumer?.()
-    // Why: cancels the deferred side-effect drain, stale-title timer, and
-    // tracker/bell-detector state so the watcher cannot fire after the
-    // revealed pane's live parsers take over.
-    processor?.clearAccumulatedState()
-    commandFinishedScanner?.reset()
+    unsubscribeRuntimeEvents()
+    unregisterFactConsumer()
     commandStatusPolicy.dispose()
     clearBellNotificationTimer()
     clearAgentTaskCompleteTimer()

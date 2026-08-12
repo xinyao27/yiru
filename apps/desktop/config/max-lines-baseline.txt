@@ -136,7 +136,6 @@ inline packages/client/src/components/tab-group/use-tab-group-workspace-model.ts
 inline packages/client/src/components/terminal-pane/agent/completion-coordinator.ts
 inline packages/client/src/components/terminal-pane/keyboard-handlers.ts
 inline packages/client/src/components/terminal-pane/pty/connection.ts
-inline packages/client/src/components/terminal-pane/pty/transport.ts
 inline packages/client/src/components/terminal-pane/remote-runtime-pty-transport.ts
 inline packages/client/src/components/terminal-pane/terminal-pane.tsx
 inline packages/client/src/components/terminal-pane/use-terminal-pane-context-menu.ts

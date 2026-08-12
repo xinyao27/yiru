@@ -21,7 +21,7 @@ import { reportTerminalDropUploadSkipsAndFailures } from './drop/upload-report'
 import { joinRuntimeTerminalDropDir, resolveTerminalDropWorktreePath } from './drop/worktree-path'
 import { showTerminalDropWriteFailure } from './drop/write-failure'
 import { isWorktreeUsingLocalWslRuntime, toLocalWslDropPath } from './drop/wsl-path'
-import type { PtyTransport } from './pty/transport'
+import type { PtyTransport } from './pty/transport-types'
 import { recordTerminalUserInputForLeaf } from './terminal-input-activity'
 
 export type NativeTerminalFileDropArgs = {

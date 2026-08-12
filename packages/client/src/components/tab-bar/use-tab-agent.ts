@@ -1,6 +1,6 @@
 import { resolveExplicitTerminalTitleAgentType } from '@yiru/workbench-model/agent'
 import { useEffect, useRef, useState } from 'react'
-import { parseRemoteRuntimePtyId } from '~renderer/runtime/terminal-stream'
+import { parseRuntimeTerminalPtyId } from '~renderer/runtime/terminal-stream'
 import { useAppStore } from '~renderer/store'
 import { worktreeUsesRemoteConnection } from '~renderer/store/slices/terminals'
 import { isShellProcess } from '~shared/agent/detection'
@@ -291,7 +291,7 @@ export function useTabAgent(tab: TerminalTab): TuiAgent | null {
     for (const ptyId of Object.values(layout?.ptyIdsByLeafId ?? {})) {
       ptyIds.add(ptyId)
     }
-    return [...ptyIds].some((ptyId) => parseRemoteRuntimePtyId(ptyId) !== null)
+    return [...ptyIds].some((ptyId) => parseRuntimeTerminalPtyId(ptyId) !== null)
   })
   const isRemoteWorktree = useAppStore((s) => worktreeUsesRemoteConnection(s, tab.worktreeId))
   const isRemoteLike = isRemoteWorktree || hasRemoteRuntimePty

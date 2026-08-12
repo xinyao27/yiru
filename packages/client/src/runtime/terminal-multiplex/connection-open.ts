@@ -12,6 +12,7 @@ import {
   runtimeLoopbackEventBytes,
   sendRuntimeLoopbackSocketFrame
 } from '../orpc-loopback-socket'
+import { runtimeEnvironmentsClient } from '../runtime-environments-client'
 
 export type RuntimeTerminalMultiplexHandle = {
   unsubscribe: () => void
@@ -120,7 +121,7 @@ async function openWebRuntimeTerminalMultiplex(
   if (options.target.kind !== 'environment') {
     throw new Error('The web runtime cannot open a local terminal bulk connection.')
   }
-  return window.api.runtimeEnvironments.subscribe(
+  return runtimeEnvironmentsClient.subscribe(
     {
       selector: options.target.environmentId,
       method: 'terminal.multiplex',

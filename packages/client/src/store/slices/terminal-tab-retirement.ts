@@ -3,7 +3,10 @@ import {
   getRuntimeEnvironmentIdForWorktree,
   type WorktreeRuntimeOwnerState
 } from '~renderer/lib/worktree-runtime-owner'
-import { parseRemoteRuntimePtyId } from '~renderer/runtime/terminal-stream'
+import {
+  isRuntimeTerminalPtyId,
+  parseRuntimeTerminalPtyId
+} from '~renderer/runtime/terminal-stream'
 
 import type { AppState } from '../types'
 
@@ -46,7 +49,7 @@ export function getTerminalPtyOwnershipIdentity(
   ptyId: string,
   worktreeId: string | null
 ): string {
-  const remote = parseRemoteRuntimePtyId(ptyId)
+  const remote = parseRuntimeTerminalPtyId(ptyId)
   if (!remote?.handle) {
     return `pty:${ptyId}`
   }
@@ -170,7 +173,7 @@ export function buildTerminalTabRetirementPlans(
         continue
       }
       scheduledPtyOwners.add(ownerIdentity)
-      const remote = parseRemoteRuntimePtyId(ptyId)
+      const remote = parseRuntimeTerminalPtyId(ptyId)
       if (remote) {
         if (!remote.handle) {
           unroutablePtyIds.push(ptyId)
@@ -181,7 +184,7 @@ export function buildTerminalTabRetirementPlans(
           environmentId: remote.environmentId?.trim() || null,
           handle: remote.handle
         })
-      } else if (ptyId.startsWith('remote:')) {
+      } else if (isRuntimeTerminalPtyId(ptyId)) {
         unroutablePtyIds.push(ptyId)
       } else {
         localOrSshPtyIds.push(ptyId)

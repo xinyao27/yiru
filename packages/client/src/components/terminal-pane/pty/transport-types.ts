@@ -2,9 +2,6 @@ import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
 import type { ParsedAgentStatusPayload } from '@yiru/workbench-model/agent'
 import type { PtyDataMeta } from '~renderer/runtime/pty-data-meta'
 import type { StartupCommandDelivery } from '~shared/codex-startup-delivery'
-import type { ProjectExecutionRuntimeResolution } from '~shared/project-execution-runtime'
-import type { EventProps } from '~shared/telemetry-events'
-import type { TerminalOscColorQueryReplyColors } from '~shared/terminal/osc-color-reply'
 import type { TuiAgent } from '~shared/types'
 
 export type PtyBufferSnapshot = {
@@ -17,7 +14,7 @@ export type PtyBufferSnapshot = {
    *  are delivered once and in order, so a post-restore chunk at or below
    *  this seq can never be a duplicate the snapshot already covers. */
   pendingDeliveryStartSeq?: number
-  source?: 'headless' | 'renderer' | 'provider'
+  source?: 'headless' | 'provider'
   /** True when the snapshot captures an alternate-screen TUI (Claude Code,
    *  vim). Restore must NOT clear xterm's buffer in that case — the TUI's
    *  scrollback lives in xterm and a clear destroys scroll-up after a tab
@@ -127,16 +124,19 @@ export type PtyTransport = {
       claim?: boolean
     }
   ) => boolean
+  setDeliveryState?: (state: {
+    visible: boolean
+    interested: boolean
+    priority: 'parked' | 'visible' | 'active'
+  }) => boolean
   isConnected: () => boolean
   getPtyId: () => string | null
   getConnectionId?: () => string | null | undefined
-  /** The runtime captured by this transport; legacy remote PTY ids do not
-   * encode their owner, and current worktree settings may have changed. */
+  /** The runtime captured by this transport; current worktree settings may
+   * have changed since the terminal was created. */
   getRuntimeEnvironmentId?: () => string | null
   getLocalSessionMetadata?: () => LocalPtySessionMetadata | null
-  /** Drop cross-chunk parser carries (partial OSC-9999 prefix). Called when a
-   *  model-restore marker reports dropped bytes — a carry spanning the gap
-   *  would corrupt the next live chunk. IPC transports only. */
+  /** Drop cross-chunk parser carries after a model-restore gap. */
   resetCrossChunkParserState?: () => void
   serializeBuffer?: (opts?: { scrollbackRows?: number }) => Promise<PtyBufferSnapshot | null>
   preserve?: () => void
@@ -144,7 +144,7 @@ export type PtyTransport = {
   destroy?: () => void | Promise<void>
 }
 
-export type IpcPtyTransportOptions = {
+export type RuntimePtyTransportOptions = {
   cwd?: string
   cwdFallback?: 'worktree'
   env?: Record<string, string>
@@ -154,21 +154,11 @@ export type IpcPtyTransportOptions = {
   launchToken?: string
   launchAgent?: TuiAgent
   startupCommandDelivery?: StartupCommandDelivery
-  connectionId?: string | null
   worktreeId?: string
   tabId?: string
   leafId?: string
   activate?: boolean
-  shellOverride?: string
-  projectRuntime?: ProjectExecutionRuntimeResolution
-  terminalColorQueryReplies?: TerminalOscColorQueryReplyColors
-  telemetry?: EventProps<'agent_started'>
   onPtyExit?: (ptyId: string) => void
-  onTitleChange?: (title: string, rawTitle: string) => void
   onPtySpawn?: (ptyId: string) => void
-  onBell?: () => void
-  onAgentBecameIdle?: (title: string) => void
-  onAgentBecameWorking?: () => void
-  onAgentExited?: () => void
   onAgentStatus?: (payload: ParsedAgentStatusPayload) => void
 }

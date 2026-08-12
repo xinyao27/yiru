@@ -1,26 +1,22 @@
 import type { TerminalSideEffectBatch } from '~shared/terminal/side-effect-facts'
 
+const subscribers = new Set<(batch: TerminalSideEffectBatch) => void>()
+
 export function subscribeRendererTerminalSideEffects(
   callback: (batch: TerminalSideEffectBatch) => void
-): (() => void) | null {
-  if (typeof window === 'undefined') {
-    return null
-  }
+): () => void {
+  subscribers.add(callback)
+  return () => subscribers.delete(callback)
+}
 
-  try {
-    return window.api.pty.onSideEffect(callback)
-  } catch {
-    // Why: the optional shell transport can be absent on non-preload surfaces
-    // and can race renderer teardown.
-    return null
+export function publishRendererTerminalSideEffects(batch: TerminalSideEffectBatch): void {
+  for (const subscriber of subscribers) {
+    subscriber(batch)
   }
 }
 
 export async function getRendererTerminalSideEffectSnapshot(
-  ptyId: string
+  _ptyId: string
 ): Promise<TerminalSideEffectBatch | null> {
-  if (typeof window === 'undefined') {
-    return null
-  }
-  return window.api.pty.getSideEffectSnapshot(ptyId)
+  return null
 }

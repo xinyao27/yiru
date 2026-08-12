@@ -1,4 +1,5 @@
 import { recordRendererCrashBreadcrumb } from '~renderer/lib/crash-breadcrumb-recorder'
+import { hasRuntimeTerminal } from '~renderer/runtime/terminal-inspection'
 import { useAppStore } from '~renderer/store'
 
 // Why this module exists: a terminal pane can die renderer-side while its PTY
@@ -194,7 +195,7 @@ export async function requestTerminalPaneRecovery(request: RecoveryRequest): Pro
       return false
     }
     try {
-      const live = await window.api.pty.hasPty(request.ptyId)
+      const live = await hasRuntimeTerminal(request.ptyId)
       if (live === false) {
         return false
       }

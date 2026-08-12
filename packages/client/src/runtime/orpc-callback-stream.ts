@@ -7,7 +7,7 @@ import {
   type RuntimeClientTarget,
   type RuntimeOrpcCallOptions
 } from './orpc-client'
-import type { RuntimeOrpcClient } from './orpc-message-port-client'
+import type { RuntimeOrpcClient } from './orpc-connection'
 
 export type RuntimeOrpcStreamResponse<TResult> =
   | { ok: true; result: TResult }
@@ -31,7 +31,7 @@ type RuntimeOrpcStreamProcedure<TInput, TResult> = (
 ) => Promise<AsyncIterable<TResult>>
 
 // Why: `browser.screencast.subscribe` is the one call site still shaped like
-// `window.api.runtimeEnvironments.subscribe`'s callback API
+// the compatibility subscription's callback API
 // (onResponse/onBinary/onError/onClose) rather than a for-await loop over an
 // event iterator. Wrapping `callRuntimeOrpc` here — instead of rewriting the
 // call site around iteration — keeps the diff to "which transport", not "how

@@ -9,6 +9,7 @@
  * are app-global, so identical snapshots publish once.
  */
 import type { ITheme } from '@xterm/xterm'
+import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
 import type { TerminalColorSchemeMode } from '~shared/terminal/color-scheme-protocol'
 import type { TerminalViewAttributes, TerminalViewRgb } from '~shared/terminal/view-attributes'
 import type { GlobalSettings } from '~shared/types'
@@ -210,13 +211,21 @@ export function composeTerminalViewAttributes(
 
 let lastPublishedSnapshot: string | null = null
 
-function sendViaPreload(attributes: TerminalViewAttributes): boolean {
-  // Guarded: unit tests and the web client run without the preload bridge
-  // (remote-runtime PTYs are never hidden-gate markable anyway).
-  if (typeof window === 'undefined' || !window.api?.pty?.publishTerminalViewAttributes) {
-    return false
-  }
-  window.api.pty.publishTerminalViewAttributes(attributes)
+function publishHostViewAttributes(
+  attributes: TerminalViewAttributes,
+  environmentId: string | null | undefined
+): boolean {
+  const targets = [
+    { kind: 'local' } as const,
+    ...(environmentId ? [{ kind: 'environment' as const, environmentId }] : [])
+  ]
+  void Promise.all(
+    targets.map((target) =>
+      callRuntimeOrpc(target, (client) => client.terminal.updateViewAttributes, attributes).catch(
+        () => null
+      )
+    )
+  )
   return true
 }
 
@@ -226,8 +235,12 @@ function sendViaPreload(attributes: TerminalViewAttributes): boolean {
 export function publishTerminalViewAttributes(
   theme: ITheme | null,
   mode: TerminalColorSchemeMode,
-  settings: Pick<GlobalSettings, 'terminalCursorStyle' | 'terminalCursorBlink'>,
-  send: (attributes: TerminalViewAttributes) => boolean = sendViaPreload
+  settings: Pick<
+    GlobalSettings,
+    'activeRuntimeEnvironmentId' | 'terminalCursorStyle' | 'terminalCursorBlink'
+  >,
+  send: (attributes: TerminalViewAttributes) => boolean = (attributes) =>
+    publishHostViewAttributes(attributes, settings.activeRuntimeEnvironmentId)
 ): boolean {
   const attributes = composeTerminalViewAttributes(theme, mode, settings)
   const serialized = JSON.stringify(attributes)

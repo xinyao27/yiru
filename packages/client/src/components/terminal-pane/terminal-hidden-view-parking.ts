@@ -1,5 +1,5 @@
 import { PTY_SESSION_ID_SEPARATOR } from '@yiru/workbench-model/workspace'
-import { isRemoteRuntimePtyId } from '~renderer/runtime/terminal-inspection'
+import { isRuntimeTerminalPtyId } from '~renderer/runtime/terminal-inspection'
 import { parseAppSshPtyId } from '~shared/ssh-pty-id'
 import type { TerminalTab } from '~shared/types'
 
@@ -57,7 +57,7 @@ export function isSnapshotBackedTerminalPty(ptyId: string | null, worktreeId: st
   if (!ptyId) {
     return false
   }
-  if (isRemoteRuntimePtyId(ptyId) || parseAppSshPtyId(ptyId)) {
+  if (isRuntimeTerminalPtyId(ptyId) || parseAppSshPtyId(ptyId)) {
     return false
   }
   // Why: separator-less ids come from the daemon-fail-open LocalPtyProvider;

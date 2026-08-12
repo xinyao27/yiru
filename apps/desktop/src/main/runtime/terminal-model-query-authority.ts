@@ -1,57 +1,9 @@
 import { isWslUncPath } from '@yiru/workbench-model/platform'
-/**
- * Phase 5 of the terminal model/view architecture: main-side terminal query
- * authority (docs/reference/terminal-query-authority.md).
- *
- * The delivery decision is the reply decision: main answers a query iff the
- * hidden-delivery gate dropped the chunk that carried it. This module owns
- * the responder kill-switch predicate and the main-side mirror of the
- * renderer's native-Windows-ConPTY determination, recorded per PTY at spawn
- * so the runtime emulator can register the DA1 override before byte zero.
- */
-import type { GlobalSettings } from '~shared/types'
 
-import {
-  isHiddenPtyDeliveryGateEnabled,
-  shouldDropHiddenRendererPtyData
-} from '../pty/hidden-delivery-gate'
+export type TerminalQueryReplyOwner = 'model' | 'remote-view'
 
-export type TerminalModelQueryAuthoritySettings = Pick<
-  GlobalSettings,
-  'terminalMainSideEffectAuthority' | 'terminalHiddenDeliveryGate' | 'terminalModelQueryAuthority'
->
-
-export type TerminalQueryReplyOwner = 'model' | 'remote-view' | 'renderer'
-
-/** Responder kill switch: requires BOTH Phase-4 gate switches (no marks/drops
- *  exist without them) plus the Phase-5-specific independent off switch. */
-export function isTerminalModelQueryAuthorityEnabled(
-  settings: TerminalModelQueryAuthoritySettings | null | undefined
-): boolean {
-  return isHiddenPtyDeliveryGateEnabled(settings) && settings?.terminalModelQueryAuthority !== false
-}
-
-/** Per-chunk reply-ownership predicate, evaluated once at ingestion in
- *  YiruRuntimeService.onPtyData — the same module state and tick as the
- *  hidden-gate drop sites, so "chunk dropped" and "main answers" cannot
- *  diverge for live chunks. Remote view subscribers (mobile/web/remote
- *  desktop xterms on the multiplexed stream) keep view authority, so main
- *  yields while one is attached. */
-export function resolveTerminalQueryReplyOwner(opts: {
-  ptyId: string
-  settings: TerminalModelQueryAuthoritySettings | null | undefined
-  hasRemoteViewSubscriber: boolean
-}): TerminalQueryReplyOwner {
-  if (opts.hasRemoteViewSubscriber) {
-    return 'remote-view'
-  }
-  if (
-    isTerminalModelQueryAuthorityEnabled(opts.settings) &&
-    shouldDropHiddenRendererPtyData(opts.ptyId, opts.settings)
-  ) {
-    return 'model'
-  }
-  return 'renderer'
+export function resolveTerminalQueryReplyOwner(hasActiveViewer: boolean): TerminalQueryReplyOwner {
+  return hasActiveViewer ? 'remote-view' : 'model'
 }
 
 /** Main-side mirror of the renderer's isLocalNativeWindowsPty
@@ -78,8 +30,8 @@ export function isNativeWindowsLocalPtySpawn(opts: {
   return true
 }
 
-// Why module state (pattern of pty-hidden-delivery-gate.ts): pty.ts records
-// the determination at spawn, the runtime consults it at emulator creation.
+// Why module state: the provider records the determination at spawn, and the
+// runtime consults it at emulator creation.
 // Daemon-adopted PTYs from a previous app run carry no mark — acceptable:
 // ConPTY's blocking DA1 only fires at spawn, which happened in a prior life.
 const nativeWindowsConptyPtys = new Set<string>()

@@ -1,5 +1,5 @@
 import { translate } from '~renderer/i18n/i18n'
-import { isRemoteRuntimePtyId } from '~renderer/runtime/terminal-inspection'
+import { isRuntimeTerminalPtyId } from '~renderer/runtime/terminal-inspection'
 
 import type { getSettingsForAgentTabRuntimeOwner } from '../agent-paste-draft'
 
@@ -26,7 +26,7 @@ export function nativeChatComposerPlaceholder(hasPty: boolean, canSend: boolean)
 }
 
 export function nativeChatComposerTargetIsRemote(ptyId: string | null): boolean {
-  return ptyId !== null && isRemoteRuntimePtyId(ptyId)
+  return ptyId !== null && isRuntimeTerminalPtyId(ptyId)
 }
 
 export function formatNativeChatFileReference(filePath: string): string {

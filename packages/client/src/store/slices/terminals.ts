@@ -35,11 +35,8 @@ import {
 } from '~renderer/lib/workspace-session-hydration-keys'
 import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
 import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
-import {
-  restorePtyDataHandlersAfterFailedShutdown,
-  unregisterPtyDataHandlers
-} from '~renderer/runtime/pty-handler-registry'
 import { scheduleRuntimeGraphSync } from '~renderer/runtime/sync-runtime-graph'
+import { closeRuntimeTerminal } from '~renderer/runtime/terminal-inspection'
 // Why: import the store-free registry, not terminal-parked-tab-watchers —
 // that module imports @/store, and a slice importing it would re-enter store
 // creation before this slice finishes evaluating.
@@ -48,7 +45,7 @@ import {
   retireParkedTerminalTab
 } from '~renderer/runtime/terminal-parked-watcher-registry'
 import { shutdownBufferCaptures } from '~renderer/runtime/terminal-shutdown-buffer-captures'
-import { parseRemoteRuntimePtyId, toRemoteRuntimePtyId } from '~renderer/runtime/terminal-stream'
+import { parseRuntimeTerminalPtyId } from '~renderer/runtime/terminal-stream'
 import {
   createWebSessionTerminalCommand,
   setWebSessionTabPropsCommand
@@ -129,8 +126,8 @@ function getNextTerminalOrdinal(tabs: TerminalTab[]): number {
   return nextOrdinal
 }
 
-function isRemoteRuntimePtyId(ptyId: string | null | undefined): boolean {
-  return typeof ptyId === 'string' && parseRemoteRuntimePtyId(ptyId) !== null
+function isRuntimeTerminalPtyId(ptyId: string | null | undefined): boolean {
+  return typeof ptyId === 'string' && parseRuntimeTerminalPtyId(ptyId) !== null
 }
 
 function getPendingActivationSpawnCount(value: boolean | number | undefined): number {
@@ -1231,7 +1228,7 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
         : null
       const retirementTasks: Promise<unknown>[] = opts?.localPtyTeardownOwnedExternally
         ? []
-        : retirementPlan.localOrSshPtyIds.map(async (ptyId) => window.api.pty.kill(ptyId))
+        : retirementPlan.localOrSshPtyIds.map(closeRuntimeTerminal)
       const localOrSshTaskCount = retirementTasks.length
       if (!opts?.remoteCloseOwnedByHost) {
         for (const terminal of retirementPlan.runtimeTerminals) {
@@ -2005,21 +2002,14 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
     }
     let worktreeId: string | null = null
     let wasActivationSpawn = false
-    const isRemoteRuntimeMirror = isRemoteRuntimePtyId(ptyId)
+    const isRemoteRuntimeMirror = isRuntimeTerminalPtyId(ptyId)
     set((s) => {
       const existingPtyIds = (s.ptyIdsByTabId[tabId] ?? []).filter(
         (existingPtyId) => existingPtyId !== replacedPtyId
       )
-      const remote = parseRemoteRuntimePtyId(ptyId)
-      const legacyRemotePtyId = remote?.environmentId ? toRemoteRuntimePtyId(remote.handle) : null
-      const hasLegacyPtyBinding = legacyRemotePtyId
-        ? existingPtyIds.includes(legacyRemotePtyId)
-        : false
-      const nextPtyIds = hasLegacyPtyBinding
-        ? [...new Set(existingPtyIds.map((id) => (id === legacyRemotePtyId ? ptyId : id)))]
-        : existingPtyIds.includes(ptyId)
-          ? existingPtyIds
-          : [...existingPtyIds, ptyId]
+      const nextPtyIds = existingPtyIds.includes(ptyId)
+        ? existingPtyIds
+        : [...existingPtyIds, ptyId]
       let nextTabsByWorktree = s.tabsByWorktree
       for (const [wId, tabs] of Object.entries(s.tabsByWorktree)) {
         const index = tabs.findIndex((t) => t.id === tabId)
@@ -2036,12 +2026,11 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
         // PTY callback must be suppressed without hiding later real activity.
         const { pendingActivationSpawn: _unused, ...rest } = tab
         void _unused
-        // Why: tab.ptyId is the single-pane fallback used by legacy attach
+        // Why: tab.ptyId is the single-pane fallback used by attach
         // paths. In split panes, later pane spawns must not steal that
         // primary binding from the original pane or remount/close flows can
         // reattach the tab to the wrong PTY and appear to "reset" panes.
-        const currentTabPtyId = tab.ptyId === legacyRemotePtyId ? ptyId : tab.ptyId
-        const nextTabPtyId = currentTabPtyId ?? nextPtyIds[0] ?? null
+        const nextTabPtyId = tab.ptyId ?? nextPtyIds[0] ?? null
         const nextPendingActivationSpawn = consumePendingActivationSpawn(tab.pendingActivationSpawn)
         if (tab.pendingActivationSpawn || tab.ptyId !== nextTabPtyId) {
           const nextTabs = [...tabs]
@@ -2067,46 +2056,6 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
       const shouldBumpSortEpoch = isFirstPty && isActiveWorktree && !wasActivationSpawn
       const nextSuppressedPtyExitIds = { ...s.suppressedPtyExitIds }
       delete nextSuppressedPtyExitIds[ptyId]
-      if (legacyRemotePtyId) {
-        delete nextSuppressedPtyExitIds[legacyRemotePtyId]
-      }
-      const hasLegacyPendingRestart = legacyRemotePtyId
-        ? legacyRemotePtyId in s.pendingCodexPaneRestartIds
-        : false
-      const hasLegacyRestartNotice = legacyRemotePtyId
-        ? legacyRemotePtyId in s.codexRestartNoticeByPtyId
-        : false
-      const hasLegacyMigrationUnsupported = legacyRemotePtyId
-        ? legacyRemotePtyId in s.migrationUnsupportedByPtyId
-        : false
-      const nextPendingCodexPaneRestartIds = hasLegacyPendingRestart
-        ? { ...s.pendingCodexPaneRestartIds }
-        : s.pendingCodexPaneRestartIds
-      const nextCodexRestartNoticeByPtyId = hasLegacyRestartNotice
-        ? { ...s.codexRestartNoticeByPtyId }
-        : s.codexRestartNoticeByPtyId
-      const nextMigrationUnsupportedByPtyId = hasLegacyMigrationUnsupported
-        ? { ...s.migrationUnsupportedByPtyId }
-        : s.migrationUnsupportedByPtyId
-      if (legacyRemotePtyId) {
-        if (hasLegacyPendingRestart) {
-          nextPendingCodexPaneRestartIds[ptyId] = true
-          delete nextPendingCodexPaneRestartIds[legacyRemotePtyId]
-        }
-        if (hasLegacyRestartNotice) {
-          const legacyNotice = nextCodexRestartNoticeByPtyId[legacyRemotePtyId]
-          nextCodexRestartNoticeByPtyId[ptyId] ??= legacyNotice
-          delete nextCodexRestartNoticeByPtyId[legacyRemotePtyId]
-        }
-        if (hasLegacyMigrationUnsupported) {
-          const legacyMigrationUnsupported = nextMigrationUnsupportedByPtyId[legacyRemotePtyId]
-          nextMigrationUnsupportedByPtyId[ptyId] ??= {
-            ...legacyMigrationUnsupported,
-            ptyId
-          }
-          delete nextMigrationUnsupportedByPtyId[legacyRemotePtyId]
-        }
-      }
       return {
         ...(nextTabsByWorktree !== s.tabsByWorktree ? { tabsByWorktree: nextTabsByWorktree } : {}),
         ptyIdsByTabId: {
@@ -2118,9 +2067,6 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
           [tabId]: ptyId
         },
         suppressedPtyExitIds: nextSuppressedPtyExitIds,
-        pendingCodexPaneRestartIds: nextPendingCodexPaneRestartIds,
-        codexRestartNoticeByPtyId: nextCodexRestartNoticeByPtyId,
-        migrationUnsupportedByPtyId: nextMigrationUnsupportedByPtyId,
         ...(shouldBumpSortEpoch ? { sortEpoch: s.sortEpoch + 1 } : {})
       }
     })
@@ -2138,7 +2084,7 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
   clearTabPtyId: (tabId, ptyId) => {
     let worktreeId: string | null = null
     let wasActivationSpawn = false
-    let isRemoteRuntimeMirror = isRemoteRuntimePtyId(ptyId)
+    let isRemoteRuntimeMirror = isRuntimeTerminalPtyId(ptyId)
     set((s) => {
       const existingPtyIds = s.ptyIdsByTabId[tabId] ?? []
       const remainingPtyIds = ptyId ? existingPtyIds.filter((id) => id !== ptyId) : []
@@ -2155,7 +2101,7 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
         }
         if (!ptyId) {
           isRemoteRuntimeMirror =
-            existingPtyIds.length > 0 && existingPtyIds.every((id) => isRemoteRuntimePtyId(id))
+            existingPtyIds.length > 0 && existingPtyIds.every((id) => isRuntimeTerminalPtyId(id))
         }
         // Why: consume pendingActivationSpawn for real activation-time clears,
         // but keep it when clearing a stale wake-hint id that was not live in
@@ -2371,15 +2317,10 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
         rollbackTargetShutdownState()
         throw new Error(stopResult.postStopFailure ?? 'exact_terminal_stop_unverified')
       }
-      unregisterPtyDataHandlers(rendererShutdownPtyIds)
-    } else if (!opts.ptyId.startsWith('remote:')) {
-      // Why: pty.kill can flush final data before exit; unregister first so
-      // pane hibernation cannot fire phantom notifications from stale handlers.
-      const handlerSnapshots = unregisterPtyDataHandlers(rendererShutdownPtyIds)
+    } else if (!isRuntimeTerminalPtyId(opts.ptyId)) {
       try {
-        await window.api.pty.kill(opts.ptyId, { keepHistory: true })
+        await closeRuntimeTerminal(opts.ptyId)
       } catch (err) {
-        restorePtyDataHandlersAfterFailedShutdown(handlerSnapshots)
         rollbackTargetShutdownState()
         throw err
       }
@@ -2496,7 +2437,6 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
     // the "phantom alerts" users see after shutting down worktrees.
     // Removing the data handlers first ensures the final flush is a no-op.
     if (expectedRuntimePtyIds.length === 0) {
-      unregisterPtyDataHandlers(rendererShutdownPtyIds)
       // Why: parked-tab byte watchers observe the same flush through dispatcher
       // sidecars, which the call above does not touch — dispose them now or a
       // just-slept/deleted worktree still gets unread marks and delayed
@@ -2591,7 +2531,6 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
         })
         throw new Error(stopResult.postStopFailure ?? 'exact_terminal_stop_unverified')
       }
-      unregisterPtyDataHandlers(rendererShutdownPtyIds)
     }
 
     set((s) => {
@@ -2788,8 +2727,8 @@ export const createTerminalSlice: StateCreator<AppState, [], [], TerminalSlice> 
 
     await Promise.allSettled(
       rendererShutdownPtyIds
-        .filter((ptyId) => !ptyId.startsWith('remote:'))
-        .map((ptyId) => window.api.pty.kill(ptyId, { keepHistory: keepIdentifiers }))
+        .filter((ptyId) => !isRuntimeTerminalPtyId(ptyId))
+        .map(closeRuntimeTerminal)
     )
   },
 

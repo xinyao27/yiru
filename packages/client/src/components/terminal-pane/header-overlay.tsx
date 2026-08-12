@@ -23,7 +23,7 @@ import type { ManagedPane, PaneManager } from '~renderer/lib/pane-manager/pane-m
 
 import { handleInternalTerminalFileDrop } from './drop/handler'
 import { carriesWorkspaceFilePaths } from './drop/workspace-file-payload'
-import type { PtyTransport } from './pty/transport'
+import type { PtyTransport } from './pty/transport-types'
 
 export type PaneTitleOverlayRect = {
   left: number

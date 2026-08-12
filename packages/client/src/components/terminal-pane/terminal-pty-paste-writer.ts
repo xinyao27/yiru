@@ -1,4 +1,4 @@
-import type { PtyTransport } from './pty/transport'
+import type { PtyTransport } from './pty/transport-types'
 
 type TerminalPastePtyWriter = Pick<PtyTransport, 'sendInput' | 'sendInputAccepted'>
 

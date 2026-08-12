@@ -2,7 +2,7 @@ import { isWslUncPath } from '@yiru/workbench-model/platform'
 import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
 import { getConnectionIdFromState } from '~renderer/lib/connection-context'
 import { getExecutionHostIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
-import { getRemoteRuntimePtyEnvironmentId } from '~renderer/runtime/terminal-stream'
+import { getRuntimeTerminalEnvironmentId } from '~renderer/runtime/terminal-stream'
 import type { AppState } from '~renderer/store/types'
 
 import { isWslShellOverride } from './paste/runtime'
@@ -45,7 +45,7 @@ export function resolveTerminalInputHostPlatform(args: {
   const ptyId = args.transport?.getPtyId?.() ?? null
   const runtimeEnvironmentId =
     args.transport?.getRuntimeEnvironmentId?.() ??
-    (ptyId ? getRemoteRuntimePtyEnvironmentId(ptyId) : null)
+    (ptyId ? getRuntimeTerminalEnvironmentId(ptyId) : null)
   if (runtimeEnvironmentId) {
     return (
       args.state.runtimeStatusByEnvironmentId.get(runtimeEnvironmentId)?.status?.hostPlatform ??

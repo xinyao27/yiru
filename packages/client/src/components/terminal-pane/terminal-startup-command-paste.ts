@@ -6,7 +6,7 @@ import {
   type TerminalPasteExecutionResult,
   type TerminalPasteRuntime
 } from './paste/coordinator'
-import type { PtyTransport } from './pty/transport'
+import type { PtyTransport } from './pty/transport-types'
 import { writeTerminalPastePtyInput } from './terminal-pty-paste-writer'
 
 type StartupCommandPane = {

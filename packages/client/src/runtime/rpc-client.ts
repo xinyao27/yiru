@@ -15,6 +15,7 @@ import {
 import { ensureRuntimeEnvironmentCompatible } from './environment-compatibility'
 import type { RuntimeClientTarget } from './orpc-client'
 import { unwrapRuntimeRpcResult } from './rpc-response'
+import { runtimeEnvironmentsClient } from './runtime-environments-client'
 
 export {
   assertRuntimeEnvironmentCapability,
@@ -55,7 +56,7 @@ export function settingsForRuntimeOwner(
 // Why: the only caller (orpc-legacy-client.ts) reaches this exclusively for
 // environment targets whose oRPC negotiation fell back to the legacy JSON-RPC
 // envelope. A local target never needs a legacy fallback — the local peer
-// always speaks oRPC over its pooled MessagePort (orpc-client.ts) — so this
+// always speaks oRPC over its loopback connection (orpc-client.ts) — so this
 // dispatcher no longer carries a 'local' branch at all.
 type EnvironmentRuntimeClientTarget = Extract<RuntimeClientTarget, { kind: 'environment' }>
 
@@ -110,7 +111,7 @@ export async function callRuntimeRpc<TResult>(
         options.timeoutMs,
         options.signal
       )
-    : await window.api.runtimeEnvironments.call({
+    : await runtimeEnvironmentsClient.call({
         selector: target.environmentId,
         method,
         params: nextParams,

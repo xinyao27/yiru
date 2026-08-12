@@ -31,6 +31,8 @@ import {
 } from '~renderer/runtime/rpc-client'
 import { runtimeEnvironmentsClient } from '~renderer/runtime/runtime-environments-client'
 import { shellClient } from '~renderer/runtime/shell-client'
+import { closeRuntimeTerminal } from '~renderer/runtime/terminal-inspection'
+import { isRuntimeTerminalPtyId } from '~renderer/runtime/terminal-stream'
 import { setRuntimeUIState } from '~renderer/runtime/ui-client'
 import { workspaceHostClient } from '~renderer/runtime/workspace-host-client'
 import { toRuntimeWorktreeSelector } from '~renderer/runtime/worktree-selector'
@@ -2488,8 +2490,8 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
         for (const tab of tabs) {
           killedTabIds.add(tab.id)
           for (const ptyId of get().ptyIdsByTabId[tab.id] ?? []) {
-            if (!ptyId.startsWith('remote:')) {
-              window.api.pty.kill(ptyId)
+            if (!isRuntimeTerminalPtyId(ptyId)) {
+              void closeRuntimeTerminal(ptyId)
             }
           }
         }

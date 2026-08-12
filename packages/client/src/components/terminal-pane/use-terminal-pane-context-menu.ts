@@ -29,7 +29,7 @@ import {
 import { formatTerminalPasteExecutionError } from './paste/errors'
 import { resolveTerminalPasteRuntime } from './paste/runtime'
 import { isTerminalPanePasteTargetCurrent } from './paste/target-state'
-import type { PtyTransport } from './pty/transport'
+import type { PtyTransport } from './pty/transport-types'
 import type { PaneCwdMap } from './resolve-split-cwd'
 import { recordCreatedTerminalPaneSplit } from './split-completion'
 import { splitTerminalPaneWithInheritedCwd } from './split-with-inherited-cwd'

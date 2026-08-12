@@ -8,7 +8,7 @@ import type { SetupSplitDirection, TuiAgent } from '~shared/types'
 import type { AgentCompletionStatusSnapshot } from '../agent/completion-coordinator-types'
 import type { ReplayingPanesRef } from '../replay-guard'
 import type { RestoredViewportBlankingPanesRef } from '../terminal-restored-viewport'
-import type { PtyTransport } from './transport'
+import type { PtyTransport } from './transport-types'
 
 export type PtyConnectionDeps = {
   tabId: string

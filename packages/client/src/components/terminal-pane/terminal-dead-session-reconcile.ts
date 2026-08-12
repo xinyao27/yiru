@@ -4,7 +4,7 @@
 // this routes such panes through the same exit teardown an observed exit runs.
 // See design-docs/terminal-dead-pane-on-bg-exit.md.
 
-const REMOTE_PTY_ID_PREFIX = 'remote:'
+import { isRuntimeTerminalPtyId } from '~renderer/runtime/terminal-stream'
 
 /**
  * A pane binding that exposes its bound transport identity plus a reconcile
@@ -24,7 +24,7 @@ export type HasPty = (ptyId: string) => Promise<boolean | null>
  *
  * Reconcile ONLY when every guard passes:
  * - `ptyId` is non-null (a mid-spawn pane has no id to prove dead).
- * - `ptyId` is not `remote:`-prefixed (web-runtime liveness is owned by the
+ * - `ptyId` is not runtime-owned (runtime liveness is owned by the
  *   host snapshot, not `listSessions`).
  * - `connectionId === null` — the id is local/daemon-backed. SSH-backed ids
  *   (non-null connectionId) are deferred: the flat `listSessions` shape cannot
@@ -42,7 +42,7 @@ export function shouldReconcileDeadSession(args: {
   if (ptyId === null || ptyId === undefined) {
     return false
   }
-  if (ptyId.startsWith(REMOTE_PTY_ID_PREFIX)) {
+  if (isRuntimeTerminalPtyId(ptyId)) {
     return false
   }
   // Why: only local/daemon-backed ids (connectionId null/undefined) are

@@ -41,10 +41,9 @@ import {
   getGroupVisibleTabOrder,
   type VisibleTabRef
 } from '../components/tab-bar/group-tab-order'
-import { getEagerPtyBufferHandle } from '../components/terminal-pane/pty/dispatcher'
 import { resolveTerminalLayoutRoot } from './remote-terminal-layout-resolution'
 import { shellClient } from './shell-client'
-import { parseRemoteRuntimePtyId } from './terminal-stream'
+import { parseRuntimeTerminalPtyId } from './terminal-stream'
 
 type RegisteredTerminalTab = {
   tabId: string
@@ -672,10 +671,7 @@ async function syncRuntimeGraph(): Promise<void> {
       }
       const liveLeaves = Object.entries(savedPtyIdsByLeafId).filter(
         ([leafId, ptyId]) =>
-          typeof ptyId === 'string' &&
-          ptyId.length > 0 &&
-          isTerminalLeafId(leafId) &&
-          Boolean(getEagerPtyBufferHandle(ptyId))
+          typeof ptyId === 'string' && ptyId.length > 0 && isTerminalLeafId(leafId)
       )
       if (liveLeaves.length === 0) {
         continue
@@ -1032,8 +1028,8 @@ function appendFallbackEditorTabsToGroups(
   })
 }
 
-function isRemoteRuntimePtyId(ptyId: string | null | undefined): boolean {
-  return typeof ptyId === 'string' && parseRemoteRuntimePtyId(ptyId) !== null
+function isRuntimeTerminalPtyId(ptyId: string | null | undefined): boolean {
+  return typeof ptyId === 'string' && parseRuntimeTerminalPtyId(ptyId) !== null
 }
 
 function isWebOnlyMirroredTerminalTab(
@@ -1051,7 +1047,7 @@ function isWebOnlyMirroredTerminalTab(
   // id has only remote/no PTYs, it is a mirror and must not be published back
   // as host state. Legacy leaked host tabs with local PTYs still publish so
   // existing sessions keep desktop/web parity.
-  return ptyIds.every(isRemoteRuntimePtyId)
+  return ptyIds.every(isRuntimeTerminalPtyId)
 }
 
 function getOpenFileIndexes(openFiles: AppState['openFiles']): OpenFileIndexes {

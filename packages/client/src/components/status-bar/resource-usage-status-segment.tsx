@@ -34,6 +34,10 @@ import { translate } from '~renderer/i18n/i18n'
 import { activateTabAndFocusPane } from '~renderer/lib/activate-tab-and-focus-pane'
 import { cn } from '~renderer/lib/class-names'
 import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
+import {
+  killRuntimeTerminalSession,
+  listRuntimeTerminalSessions
+} from '~renderer/runtime/terminal-inspection'
 import { useAppStore } from '~renderer/store'
 import { useWorktreeMap } from '~renderer/store/selectors'
 import { ORPHAN_WORKTREE_ID } from '~shared/constants'
@@ -833,11 +837,17 @@ export function ResourceUsageStatusSegment({
 
   const refreshSessions = useCallback(async () => {
     try {
-      const result = await window.api.pty.listSessions()
+      const result = await listRuntimeTerminalSessions()
       if (!mountedRef.current) {
         return
       }
-      setSessions(result)
+      setSessions(
+        result.sessions.map((session) => ({
+          id: session.sessionId,
+          cwd: session.cwd ?? '',
+          title: session.cwd ?? session.sessionId
+        }))
+      )
       setSessionsError(false)
     } catch {
       if (mountedRef.current) {
@@ -1091,7 +1101,7 @@ export function ResourceUsageStatusSegment({
         // kill lands and re-adds the row that was just removed.
         void (async () => {
           try {
-            await window.api.pty.kill(session.sessionId)
+            await killRuntimeTerminalSession(session.sessionId)
           } catch {
             /* already dead */
           }
@@ -1117,7 +1127,7 @@ export function ResourceUsageStatusSegment({
     // for the next explicit daemon-side list refresh.
     const orphanIds = new Set(orphans.map((s) => s.id))
     setSessions((prev) => prev.filter((s) => !orphanIds.has(s.id)))
-    await Promise.allSettled(orphans.map((s) => window.api.pty.kill(s.id)))
+    await Promise.allSettled(orphans.map((session) => killRuntimeTerminalSession(session.id)))
     void refreshSessions()
   }, [sessions, resourceSessionBindings, workspaceSessionReady, refreshSessions])
 
@@ -1132,7 +1142,7 @@ export function ResourceUsageStatusSegment({
     // dialog closes but the killed row waits for the next list refresh.
     setSessions((prev) => prev.filter((s) => s.id !== target.sessionId))
     try {
-      await window.api.pty.kill(target.sessionId)
+      await killRuntimeTerminalSession(target.sessionId)
     } catch {
       /* already dead — fall through */
     } finally {

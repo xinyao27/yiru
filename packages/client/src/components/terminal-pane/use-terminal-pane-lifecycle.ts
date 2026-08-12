@@ -39,7 +39,6 @@ import {
   isPrimarySelectionEnabled,
   setPrimarySelectionText
 } from '~renderer/lib/primary-selection'
-import { resolveEffectiveTerminalAppearance } from '~renderer/lib/terminal-theme'
 import { getExecutionHostIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
 import { acquireWebviewsDragPassthrough } from '~renderer/runtime/browser-webview-registry'
 import { shellClient } from '~renderer/runtime/shell-client'
@@ -48,7 +47,7 @@ import {
   registerRuntimeTerminalTab,
   scheduleRuntimeGraphSync
 } from '~renderer/runtime/sync-runtime-graph'
-import { getRemoteRuntimePtyEnvironmentId } from '~renderer/runtime/terminal-stream'
+import { getRuntimeTerminalEnvironmentId } from '~renderer/runtime/terminal-stream'
 import { consumePendingWebRuntimeSplitMirrorTelemetry } from '~renderer/runtime/web-runtime-session'
 import { useAppStore } from '~renderer/store'
 import type { StartupCommandDelivery } from '~shared/codex-startup-delivery'
@@ -99,17 +98,13 @@ import { showOsc52ClipboardBlockedToast } from './osc52-clipboard-blocked-toast'
 import { fitAndFocusPanes, fitPanes } from './pane-helpers'
 import { parseOsc7 } from './parse-osc7'
 import { connectPanePty } from './pty/connection'
-import type { PtyTransport } from './pty/transport'
+import type { PtyTransport } from './pty/transport-types'
 import { isPaneReplaying, type ReplayingPanesRef } from './replay-guard'
 import { canReleaseReplayedScrollbackFromStore } from './replayed-scrollback-store-release'
 import type { PaneCwdMap } from './resolve-split-cwd'
 import { seedStartupSessionRestoredBanner } from './session-restored-banner-pane-state'
 import { recordCreatedTerminalPaneSplit } from './split-completion'
 import { applyTerminalAppearance, installMode2031Handlers } from './terminal-appearance'
-import {
-  reconcileMissingSessions,
-  type ReconcilableBinding
-} from './terminal-dead-session-reconcile'
 import { createTerminalHandleLinkProvider } from './terminal-handle-links'
 import { resolveTerminalJisYenInput } from './terminal-jis-yen-input'
 import { resolvePaneKeyboardProtocolAgent } from './terminal-keyboard-protocol-pane-agent'
@@ -119,7 +114,6 @@ import {
 } from './terminal-link-handlers'
 import type { LinkHandlerDeps } from './terminal-link-handlers'
 import { getTerminalFileOpenHint, getTerminalUrlOpenHint } from './terminal-link-open-hints'
-import { pushMode2031SeedReply } from './terminal-mode-2031-replies'
 import { handleOscLink } from './terminal-osc-link-routing'
 import { captureParkedTerminalPaneCandidates } from './terminal-parked-tab-watchers'
 import { guardParserHandler } from './terminal-parser-handler-guard'
@@ -175,19 +169,6 @@ export function applyTerminalScrollbackRowsToMountedPanes(
 function extractUncHost(value: string | undefined): string | null {
   const match = /^(?:\\\\|\/\/)([^\\/]+)/.exec(value ?? '')
   return match?.[1] || null
-}
-
-function reportActiveRendererPtyForPane(
-  paneTransports: Map<number, PtyTransport>,
-  activePaneId: number | null
-): void {
-  for (const [paneId, transport] of paneTransports) {
-    const ptyId = transport.getPtyId()
-    if (!ptyId || ptyId.startsWith('remote:')) {
-      continue
-    }
-    window.api.pty.setActiveRendererPty?.(ptyId, activePaneId === paneId)
-  }
 }
 
 async function formatTerminalUrlTooltip(url: string, openLinkHint: string): Promise<string | null> {
@@ -552,7 +533,6 @@ export function useTerminalPaneLifecycle({
   const selectionDisposablesRef = useRef(new Map<number, IDisposable>())
   const selectionCaptureTimersRef = useRef(new Map<number, number>())
   const mode2031DisposablesRef = useRef(new Map<number, IDisposable[]>())
-  const mode2031SeedAttemptTokensRef = useRef(new Map<number, symbol>())
   const osc52DisposablesRef = useRef(new Map<number, IDisposable>())
   const osc7DisposablesRef = useRef(new Map<number, IDisposable>())
   const mouseHideDisposablesRef = useRef(new Map<number, IDisposable>())
@@ -576,30 +556,6 @@ export function useTerminalPaneLifecycle({
       paneMode2031Ref.current,
       paneLastThemeModeRef.current
     )
-  }
-
-  const pushMode2031ForPane = (paneId: number): void => {
-    const attemptToken = Symbol()
-    mode2031SeedAttemptTokensRef.current.set(paneId, attemptToken)
-    pushMode2031SeedReply(paneId, {
-      hasPane: (candidateId) =>
-        managerRef.current?.getPanes().some((pane) => pane.id === candidateId) === true,
-      isSubscribed: (candidateId) => paneMode2031Ref.current.get(candidateId) === true,
-      // Why: an older connect retry must not answer a later resubscription.
-      isCurrentAttempt: (candidateId) =>
-        mode2031SeedAttemptTokensRef.current.get(candidateId) === attemptToken,
-      getTransport: (candidateId) => paneTransportsRef.current.get(candidateId),
-      getMode: () => {
-        const currentSettings = settingsRef.current
-        return currentSettings
-          ? resolveEffectiveTerminalAppearance(currentSettings, systemPrefersDarkRef.current).mode
-          : null
-      },
-      recordMode: (candidateId, mode) => paneLastThemeModeRef.current.set(candidateId, mode),
-      schedule: (callback, delayMs) => {
-        window.setTimeout(callback, delayMs)
-      }
-    })
   }
 
   // Initialize PaneManager instance once
@@ -653,7 +609,7 @@ export function useTerminalPaneLifecycle({
       pathExistsCache,
       getRuntimeEnvironmentIdForPane: (paneId) => {
         const ptyId = paneTransportsRef.current.get(paneId)?.getPtyId()
-        return ptyId ? getRemoteRuntimePtyEnvironmentId(ptyId) : null
+        return ptyId ? getRuntimeTerminalEnvironmentId(ptyId) : null
       }
     }
     let resizeRaf: number | null = null
@@ -769,19 +725,9 @@ export function useTerminalPaneLifecycle({
         const mode2031Disposables = installMode2031Handlers({
           paneId: pane.id,
           parser: pane.terminal.parser,
-          onSubscribe: () => {
-            // Why: for hidden-delivery-gate-managed PTYs main's
-            // '2031-subscribe' fact is the sole responder — bytes reaching
-            // xterm live (foreground, sidecar interest) must not produce a
-            // second reply. The CSI handler still records the subscription.
-            const binding = panePtyBindings.get(pane.id) as
-              | (IDisposable & { isHiddenDeliveryGateManagedPty?: () => boolean })
-              | undefined
-            if (binding?.isHiddenDeliveryGateManagedPty?.()) {
-              return
-            }
-            pushMode2031ForPane(pane.id)
-          },
+          // Why: multiplex emits the matching side-effect fact in output
+          // order; the fact handler owns the one renderer reply.
+          onSubscribe: () => {},
           isReplaying: () => isPaneReplaying(replayingPanesRef, pane.id),
           paneMode2031: paneMode2031Ref.current,
           paneLastThemeMode: paneLastThemeModeRef.current
@@ -1234,7 +1180,6 @@ export function useTerminalPaneLifecycle({
           mode2031DisposablesRef.current.delete(paneId)
         }
         paneMode2031Ref.current.delete(paneId)
-        mode2031SeedAttemptTokensRef.current.delete(paneId)
         paneKittyKeyboardModesRef.current.delete(paneId)
         paneLastThemeModeRef.current.delete(paneId)
         const osc52Disposable = osc52DisposablesRef.current.get(paneId)
@@ -1327,7 +1272,6 @@ export function useTerminalPaneLifecycle({
         // stay stuck on the closed pane's last title.
         const newActivePane = managerRef.current?.getActivePane()
         if (newActivePane) {
-          reportActiveRendererPtyForPane(paneTransportsRef.current, newActivePane.id)
           const paneTitles = useAppStore.getState().runtimePaneTitlesByTabId[tabId] ?? {}
           updateTabTitle(tabId, resolveTabTitleAfterPaneClose(paneTitles, newActivePane.id))
         }
@@ -1359,7 +1303,6 @@ export function useTerminalPaneLifecycle({
         if (shouldPersistLayout) {
           persistLayoutSnapshot()
         }
-        reportActiveRendererPtyForPane(paneTransportsRef.current, pane.id)
         // Why: the tab icon resolves from the active leaf's process identity;
         // focusing a shell-marked pane whose agent is still running must
         // re-sample it, since no further OSC boundary will.
@@ -1811,14 +1754,6 @@ export function useTerminalPaneLifecycle({
       if (resumedFromHidden) {
         bindingWithVisibility.noteVisibilityResume?.()
       }
-    }
-    if (resumedFromHidden && typeof window.api.pty.hasPty === 'function') {
-      // Why: preserve missed-exit recovery without daemon-wide listSessions;
-      // providers can answer a single-PTY liveness check from in-memory state.
-      reconcileMissingSessions({
-        bindings: panePtyBindingsRef.current.values() as Iterable<ReconcilableBinding>,
-        hasPty: window.api.pty.hasPty
-      })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- Why: visibility and terminal identity changes must refresh existing PTY process tracking even though the ref object identity is stable.
   }, [cwd, isVisible, isVisibleRef, panePtyBindingsRef, tabId])

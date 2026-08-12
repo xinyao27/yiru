@@ -35,9 +35,8 @@ import { callRuntimeEnvironmentUnaryOrpc } from './rpc/orpc/environment-orpc-una
 
 // Why: main-process↔main-process callers (ai-vault's session scanner,
 // provider-usage's cursor fetcher) pool one oRPC tunnel per environment under
-// this namespace — distinct from the renderer's per-webContents `ownerId`s on
-// the same shared-control connection (`environment-message-port.ts`) and from
-// `callRuntimeEnvironmentExistingRoute`'s own namespace below, so neither can
+// this namespace — distinct from other routes on the shared-control connection
+// and from `callRuntimeEnvironmentExistingRoute`'s own namespace below, so neither can
 // replace the other's tunnel.
 const MAIN_PROCESS_UNARY_ORPC_POOL_NAMESPACE = 'main-process-unary'
 

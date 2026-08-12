@@ -11,7 +11,6 @@
  * registered consumer are dropped — mirroring today's eager-buffer behavior
  * where pre-mount output produces no attention side effects.
  */
-import { getRendererSettingsSnapshot } from '~renderer/runtime/settings-client'
 import {
   getRendererTerminalSideEffectSnapshot,
   subscribeRendererTerminalSideEffects
@@ -21,45 +20,6 @@ import type {
   TerminalSideEffectBatch,
   TerminalSideEffectFact
 } from '~shared/terminal/side-effect-facts'
-import type { GlobalSettings } from '~shared/types'
-
-// Why: cached once per session — the blocking read should only ever run on
-// the pre-hydration startup path, never per pane bind.
-let persistedAuthorityFlagCache: boolean | null | undefined
-
-function readPersistedSideEffectAuthorityFlagSync(): boolean | null {
-  if (persistedAuthorityFlagCache === undefined) {
-    persistedAuthorityFlagCache =
-      getRendererSettingsSnapshot()?.terminalMainSideEffectAuthority ?? null
-  }
-  return persistedAuthorityFlagCache
-}
-
-/**
- * Structural authority predicate: main owns side effects for a PTY when its
- * bytes transit local main (everything except remote-runtime PTYs) and the
- * kill switch is on. Decided at transport/watcher creation — never per chunk —
- * so each fact has one consumer with no race.
- */
-export function isMainTerminalSideEffectAuthorityForPty(args: {
-  settings: Pick<GlobalSettings, 'terminalMainSideEffectAuthority'> | null
-  /** Remote-runtime owner environment; null means bytes transit local main. */
-  runtimeEnvironmentId: string | null
-}): boolean {
-  if (args.runtimeEnvironmentId !== null) {
-    return false
-  }
-  if (args.settings !== null) {
-    return args.settings.terminalMainSideEffectAuthority !== false
-  }
-  // Why: settings hydrate asynchronously, and the authority decision made
-  // here at transport/watcher creation is never revisited. A pane bound
-  // before hydration must honor the persisted kill switch — otherwise a user
-  // who turned main authority off gets startup panes with no byte parsers
-  // and a fact consumer they disabled. Surfaces without the sync read keep
-  // the default-on behavior.
-  return readPersistedSideEffectAuthorityFlagSync() !== false
-}
 
 export type TerminalSideEffectFactConsumerCallbacks = {
   /** `meta.staleWorkingTitleClear` marks facts derived from main's 3s
@@ -83,7 +43,7 @@ export type TerminalSideEffectFactConsumerCallbacks = {
   onCommandCodeWorking?: (prompt: string) => void
   onCommandCodeDone?: (prompt: string) => void
   /** DECSET 2031 subscribe observed by main's tracker. Registered only by
-   *  hidden-delivery-gated consumers (their bytes never arrive); the theme
+   *  multiplex-gated consumers (their bytes never arrive); the theme
    *  reply is sent renderer-side — query authority stays with the view. */
   onMode2031Subscribe?: () => void
 }

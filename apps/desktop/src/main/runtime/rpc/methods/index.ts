@@ -77,7 +77,7 @@ import { SESSION_TAB_METHODS } from './session-tabs'
 // code's `callRuntimeOrpc` with an explicit `{ kind: 'local' }` target (the
 // `computer.*`/`emulator.*` action leaves — same reasoning as `cli` in 切片
 // 59: a `{ kind: 'local' }` target never leaves the process via the
-// MessagePort connection, so it can't reach a bare-string channel at all),
+// typed oRPC connection, so it can't reach a bare-string channel at all),
 // or `callRuntimeOrpc` + an environment target that 切片 63/64 moved onto the
 // negotiated peer (`getActiveRuntimeTarget()` call sites across
 // `hosted-review.ts`/`repos.ts`/`memory-state.ts`/`state.ts`/`file-client.ts`-

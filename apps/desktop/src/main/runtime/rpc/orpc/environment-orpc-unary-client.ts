@@ -49,12 +49,9 @@ type PooledOrpcEnvironmentClient = {
 // registered under the same owner id.
 const pooledClients = new Map<string, Promise<PooledOrpcEnvironmentClient>>()
 
-// Why: the tunnel callbacks (`onText`/`onBinary`) hand back plain oRPC wire
-// frames identical to what `environment-message-port.ts` forwards verbatim
-// to a real Electron `MessagePortMain` — no extra `yiru-orpc-v1:` framing is
-// involved at this layer, so a minimal duck-typed adapter satisfying
-// `@orpc/client/message-port`'s `MessagePortMainLike` (`on`/`postMessage`) is
-// enough to let `RPCLink` treat the tunnel as if it were a real port.
+// Why: the unchanged main-to-remote E2EE tunnel hands back plain oRPC wire
+// frames. Its internal adapter satisfies the oRPC MessagePort-like interface;
+// this is not an Electron renderer transport and never leaves main.
 class RuntimeOrpcTunnelPort {
   private readonly messageListeners = new Set<(event: { data: unknown }) => void>()
   private readonly closeListeners = new Set<() => void>()

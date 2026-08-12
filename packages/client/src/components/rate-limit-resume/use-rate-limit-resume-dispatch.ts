@@ -65,7 +65,7 @@ export async function handleRateLimitResumeDispatchRequest(
 }
 
 // Why: `rendererReady` still matters even though the dispatch push moved to
-// the shellServices reverse link (connected earlier, at the local MessagePort
+// the shellServices reverse link (connected earlier, at the local runtime
 // handshake, before rateLimitResumes are loaded into the store). This
 // mount-time signal both flushes any resume that came due while the app was
 // closed and tells RateLimitResumeService the renderer can execute one now.

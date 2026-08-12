@@ -43,7 +43,8 @@ import type { AppState } from '../store'
 import { useAppStore } from '../store'
 import { callRuntimeOrpc, createRuntimeOrpcClient, isWebRuntimeClient } from './orpc-client'
 import { resolveTerminalLayoutRoot } from './remote-terminal-layout-resolution'
-import { getRemoteRuntimePtyEnvironmentId, toRemoteRuntimePtyId } from './terminal-stream'
+import { runtimeEnvironmentsClient } from './runtime-environments-client'
+import { getRuntimeTerminalEnvironmentId, toRuntimeTerminalPtyId } from './terminal-stream'
 import {
   beginWebRuntimeWakeTerminalRespawn,
   clearAllWebRuntimeWakeTerminalRespawn,
@@ -384,7 +385,7 @@ function isRuntimeTerminalTabForEnvironment(tab: TerminalTab, environmentId: str
   if (!tab.ptyId) {
     return false
   }
-  return getRemoteRuntimePtyEnvironmentId(tab.ptyId) === environmentId
+  return getRuntimeTerminalEnvironmentId(tab.ptyId) === environmentId
 }
 
 function isMirroredTerminalSurfaceId(tabId: string): boolean {
@@ -515,7 +516,7 @@ function buildMirroredTerminalTabs(
     const ptyIdsByLeafId = Object.fromEntries(
       surfaces
         .filter((surface): surface is ReadyTerminalSurface => surface.status === 'ready')
-        .map((surface) => [surface.leafId, toRemoteRuntimePtyId(surface.terminal, environmentId)])
+        .map((surface) => [surface.leafId, toRuntimeTerminalPtyId(surface.terminal, environmentId)])
     )
     const ptyIds = surfaces
       .map((surface) => ptyIdsByLeafId[surface.leafId]!)
@@ -1700,7 +1701,7 @@ export function applyWebSessionTabsSnapshot(
   const terminalSurfaceTabs = snapshot.tabs.filter(isTerminalSurfaceTab)
   const readyTerminalTabs = terminalSurfaceTabs.filter(isReadyTerminalTab)
   const nextRemotePtyIds = new Set(
-    readyTerminalTabs.map((tab) => toRemoteRuntimePtyId(tab.terminal, environmentId))
+    readyTerminalTabs.map((tab) => toRuntimeTerminalPtyId(tab.terminal, environmentId))
   )
   const nextMirroredTerminalIds = new Set(
     terminalSurfaceTabs.map((tab) => toWebTerminalSurfaceTabId(tab.parentTabId))
@@ -2596,7 +2597,7 @@ function subscribeAllWebSessionTabs(
     return
   }
 
-  void window.api.runtimeEnvironments
+  void runtimeEnvironmentsClient
     .subscribe(
       {
         selector: environmentId,
@@ -2819,7 +2820,7 @@ export function useWebSessionTabsSync(): void {
     let unsubscribe: (() => void) | null = null
     // Why: `session.tabs.subscribe` runs on both the web browser client and
     // Electron's desktop-as-remote-client path. On web the bare
-    // `window.api.runtimeEnvironments.subscribe` string channel skips
+    // compatibility string subscription skips
     // capability negotiation and always lands on the legacy dispatcher, which
     // no longer serves this method once its domain retires from it (Phase 6
     // D-stage) — dispatch through the negotiated oRPC client instead.
@@ -2857,7 +2858,7 @@ export function useWebSessionTabsSync(): void {
         }
       })()
     } else {
-      void window.api.runtimeEnvironments
+      void runtimeEnvironmentsClient
         .subscribe(
           {
             selector: environmentId,

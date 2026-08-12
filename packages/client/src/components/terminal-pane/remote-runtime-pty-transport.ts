@@ -8,11 +8,12 @@ import {
   type RemoteRuntimeMultiplexedTerminal
 } from '~renderer/runtime/terminal-multiplex/multiplexer'
 import { getRuntimeTerminalMultiplexer } from '~renderer/runtime/terminal-multiplex/registry'
+import { publishRendererTerminalSideEffects } from '~renderer/runtime/terminal-side-effect-client'
 import {
-  getRemoteRuntimePtyEnvironmentId,
-  getRemoteRuntimeTerminalHandle,
+  getRuntimeTerminalEnvironmentId,
+  getRuntimeTerminalHandle,
   runtimeTerminalErrorMessage,
-  toRemoteRuntimePtyId
+  toRuntimeTerminalPtyId
 } from '~renderer/runtime/terminal-stream'
 import {
   isWebTerminalSurfaceTabId,
@@ -32,8 +33,12 @@ import {
   iterateTerminalInputChunks
 } from '~shared/terminal/input'
 
-import { createPtyOutputProcessor } from './pty/transport'
-import type { IpcPtyTransportOptions, PtyConnectResult, PtyTransport } from './pty/transport-types'
+import { createPtyOutputProcessor } from './pty/output-processor'
+import type {
+  PtyConnectResult,
+  PtyTransport,
+  RuntimePtyTransportOptions
+} from './pty/transport-types'
 import {
   createRemoteRuntimePtyTextBatcher,
   createRemoteRuntimeViewportBatcher
@@ -62,10 +67,12 @@ function isRemoteTerminalGoneMessage(message: string): boolean {
  */
 export function createRuntimePtyTransport(
   runtimeTarget: RuntimeClientTarget,
-  opts: IpcPtyTransportOptions = {}
+  opts: RuntimePtyTransportOptions = {}
 ): PtyTransport {
   const {
     command,
+    cwd,
+    cwdFallback,
     startupCommandDelivery,
     env,
     envToDelete,
@@ -78,11 +85,6 @@ export function createRuntimePtyTransport(
     activate,
     onPtyExit,
     onPtySpawn,
-    onTitleChange,
-    onBell,
-    onAgentBecameIdle,
-    onAgentBecameWorking,
-    onAgentExited,
     onAgentStatus
   } = opts
   let connected = false
@@ -93,6 +95,12 @@ export function createRuntimePtyTransport(
   let multiplexedStream: RemoteRuntimeMultiplexedTerminal | null = null
   let multiplexedStreamHandle: string | null = null
   let desiredViewport: { cols: number; rows: number } | null = null
+  let desiredDelivery: Parameters<NonNullable<PtyTransport['setDeliveryState']>>[0] = {
+    visible: true,
+    interested: true,
+    priority: 'active' as const
+  }
+  let sideEffectSeq = 0
   let storedCallbacks: Parameters<PtyTransport['connect']>[0]['callbacks'] = {}
   let resubscribing = false
   let resubscribeRequested = false
@@ -225,7 +233,7 @@ export function createRuntimePtyTransport(
     }
 
     handle = hostHandle
-    remotePtyId = toRemoteRuntimePtyId(hostHandle, environmentIdForTarget(currentRuntimeTarget))
+    remotePtyId = toRuntimeTerminalPtyId(hostHandle, environmentIdForTarget(currentRuntimeTarget))
     connected = true
     desiredViewport = {
       cols: options.cols ?? 80,
@@ -446,7 +454,10 @@ export function createRuntimePtyTransport(
       }
       if (nextHandle !== previousHandle) {
         handle = nextHandle
-        remotePtyId = toRemoteRuntimePtyId(nextHandle, environmentIdForTarget(currentRuntimeTarget))
+        remotePtyId = toRuntimeTerminalPtyId(
+          nextHandle,
+          environmentIdForTarget(currentRuntimeTarget)
+        )
         onPtySpawn?.(remotePtyId)
       }
     }
@@ -547,22 +558,16 @@ export function createRuntimePtyTransport(
           }
         },
         onSideEffectBatch: (batch) => {
-          if (!isCurrentSubscription()) {
+          if (!isCurrentSubscription() || !subscribedPtyId) {
             return
           }
-          for (const fact of batch.facts) {
-            if (fact.kind === 'title') {
-              onTitleChange?.(fact.normalizedTitle, fact.rawTitle)
-            } else if (fact.kind === 'bell') {
-              onBell?.()
-            } else if (fact.kind === 'agent-idle') {
-              onAgentBecameIdle?.(fact.title)
-            } else if (fact.kind === 'agent-working') {
-              onAgentBecameWorking?.()
-            } else if (fact.kind === 'agent-exited') {
-              onAgentExited?.()
-            }
-          }
+          sideEffectSeq += 1
+          publishRendererTerminalSideEffects({
+            ptyId: subscribedPtyId,
+            seq: sideEffectSeq,
+            facts: batch.facts,
+            replay: batch.replay
+          })
         },
         onClearBuffer: () => {
           if (isCurrentSubscription()) {
@@ -641,6 +646,7 @@ export function createRuntimePtyTransport(
     closeMultiplexedStream()
     multiplexedStream = nextStream
     multiplexedStreamHandle = subscribedHandle
+    nextStream.setDeliveryState(desiredDelivery)
     // Why: a viewport change that landed during the subscribe round-trip took
     // the now-no-op one-shot fallback, so the stream record is still at the
     // subscribe-time size. Replay the latest remembered viewport so the PTY
@@ -690,6 +696,8 @@ export function createRuntimePtyTransport(
           worktree: toRuntimeTerminalWorktreeSelector(worktreeId),
           viewport: { cols: options.cols ?? 80, rows: options.rows ?? 24 },
           ...(commandToSend !== undefined ? { command: commandToSend } : {}),
+          ...(cwd !== undefined ? { cwd } : {}),
+          ...(cwdFallback !== undefined ? { cwdFallback } : {}),
           ...(startupCommandDeliveryToSend !== undefined
             ? { startupCommandDelivery: startupCommandDeliveryToSend }
             : {}),
@@ -714,7 +722,7 @@ export function createRuntimePtyTransport(
           return
         }
 
-        remotePtyId = toRemoteRuntimePtyId(handle, environmentIdForTarget(currentRuntimeTarget))
+        remotePtyId = toRuntimeTerminalPtyId(handle, environmentIdForTarget(currentRuntimeTarget))
         connected = true
         desiredViewport = {
           cols: options.cols ?? 80,
@@ -729,7 +737,10 @@ export function createRuntimePtyTransport(
 
         return {
           id: remotePtyId,
-          replay: ''
+          replay: '',
+          ...(created.terminal.restore.startupCwdFallback
+            ? { startupCwdFallback: created.terminal.restore.startupCwdFallback }
+            : {})
         } satisfies PtyConnectResult
       } catch (error) {
         storedCallbacks.onError?.(runtimeTerminalErrorMessage(error))
@@ -739,12 +750,12 @@ export function createRuntimePtyTransport(
 
     attach(options) {
       storedCallbacks = options.callbacks
-      const restoredEnvironmentId = getRemoteRuntimePtyEnvironmentId(options.existingPtyId)
+      const restoredEnvironmentId = getRuntimeTerminalEnvironmentId(options.existingPtyId)
       currentRuntimeTarget = restoredEnvironmentId
         ? { kind: 'environment', environmentId: restoredEnvironmentId }
         : runtimeTarget
       const previousHandle = handle
-      const nextHandle = getRemoteRuntimeTerminalHandle(options.existingPtyId)
+      const nextHandle = getRuntimeTerminalHandle(options.existingPtyId)
       if (previousHandle && previousHandle !== nextHandle) {
         // Why: debounced input is scoped by the current terminal handle at flush time.
         inputBatcher.clear()
@@ -759,7 +770,7 @@ export function createRuntimePtyTransport(
       }
       // Why: legacy restored ids omitted their runtime owner. Canonicalize at
       // attach so renderer stores and lifecycle guards never share raw aliases.
-      remotePtyId = toRemoteRuntimePtyId(handle, environmentIdForTarget(currentRuntimeTarget))
+      remotePtyId = toRuntimeTerminalPtyId(handle, environmentIdForTarget(currentRuntimeTarget))
       connected = true
       desiredViewport = {
         cols: options.cols ?? 80,
@@ -896,6 +907,14 @@ export function createRuntimePtyTransport(
       // restores layouts. Remote runtimes only need the last viewport in a frame.
       viewportBatcher.queue(cols, rows)
       return true
+    },
+
+    setDeliveryState(state): boolean {
+      desiredDelivery = state
+      if (!handle) {
+        return false
+      }
+      return getCurrentMultiplexedStream(handle)?.setDeliveryState(state) ?? false
     },
 
     isConnected() {

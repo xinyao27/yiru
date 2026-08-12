@@ -13,6 +13,6 @@ export type RuntimeOrpcClient = ContractRouterClient<
 
 export type RuntimeOrpcClientConnection = {
   client: RuntimeOrpcClient
-  transport: 'loopback' | 'message-port' | 'legacy' | 'web-peer'
+  transport: 'loopback' | 'legacy' | 'web-peer'
   close: () => void
 }

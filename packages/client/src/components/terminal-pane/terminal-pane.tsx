@@ -77,9 +77,10 @@ import {
 } from '~renderer/lib/workspace-file-drag'
 import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
 import { shellClient } from '~renderer/runtime/shell-client'
+import { clearRuntimeTerminalBuffer } from '~renderer/runtime/terminal-inspection'
 import {
   inspectRuntimeTerminalProcess,
-  isRemoteRuntimePtyId
+  isRuntimeTerminalPtyId
 } from '~renderer/runtime/terminal-inspection'
 import {
   clearWebRuntimeTerminalBuffer,
@@ -126,7 +127,7 @@ import { shouldShowMobileDriverOverlay } from './mobile-driver-overlay-visibilit
 import { getOverrideAffectedPanes, getPanesNeedingOverrideFit } from './override-affected-panes'
 import { fitPanes, isWindowsUserAgent } from './pane-helpers'
 import { connectPanePty } from './pty/connection'
-import type { PtyTransport } from './pty/transport'
+import type { PtyTransport } from './pty/transport-types'
 import {
   addSessionRestoredBannerPaneId,
   dismissSessionRestoredBannerPaneIds,
@@ -1039,7 +1040,7 @@ export default function TerminalPane({
     // ratios/expand/titles to the host or they revert on the next snapshot.
     // Gate on a remote pty to avoid an RPC for purely-local tabs.
     const hasRemotePane = Object.values(mergedPtyIds).some(
-      (ptyId) => typeof ptyId === 'string' && isRemoteRuntimePtyId(ptyId)
+      (ptyId) => typeof ptyId === 'string' && isRuntimeTerminalPtyId(ptyId)
     )
     if (hasRemotePane) {
       void updateWebRuntimePaneLayout({
@@ -1067,7 +1068,7 @@ export default function TerminalPane({
         // Why: local/daemon/SSH PTYs keep their own screen state (ConPTY on
         // Windows), and a stale host cursor row makes the next prompt repaint
         // land below a blank gap after a frontend-only clear.
-        window.api.pty.clearBuffer(ptyId)
+        void clearRuntimeTerminalBuffer(ptyId)
       }
       persistLayoutSnapshot()
     },

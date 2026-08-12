@@ -7,7 +7,8 @@ import {
   handleTerminalRename,
   handleTerminalSplit,
   handleTerminalStop,
-  handleTerminalStopExact
+  handleTerminalStopExact,
+  handleTerminalUpdateViewAttributes
 } from '~main/runtime/rpc/methods/terminal-lifecycle-methods'
 
 import { runtimeImplementation } from '../access-middleware'
@@ -28,6 +29,9 @@ export function terminalLifecycleLeaves() {
     ),
     create: runtimeImplementation.terminal.create.handler(
       wireRuntimeMethod('terminal.create', handleTerminalCreate)
+    ),
+    updateViewAttributes: runtimeImplementation.terminal.updateViewAttributes.handler(
+      wireRuntimeMethod('terminal.updateViewAttributes', handleTerminalUpdateViewAttributes)
     ),
     split: runtimeImplementation.terminal.split.handler(
       wireRuntimeMethod('terminal.split', handleTerminalSplit)

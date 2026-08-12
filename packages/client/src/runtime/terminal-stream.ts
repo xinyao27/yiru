@@ -1,50 +1,58 @@
 import type { GlobalSettings } from '~shared/types'
 
+import { callRuntimeOrpc } from './orpc-client'
 import { RuntimeRpcCallError, getActiveRuntimeTarget } from './rpc-client'
 import { getRuntimeTerminalMultiplexer } from './terminal-multiplex/registry'
+import { publishRendererTerminalSideEffects } from './terminal-side-effect-client'
 
-const REMOTE_PTY_ID_PREFIX = 'remote:'
-const REMOTE_PTY_OWNER_SEPARATOR = '@@'
+const RUNTIME_TERMINAL_PTY_ID_PREFIX = 'runtime:'
+const RUNTIME_TERMINAL_OWNER_SEPARATOR = '@@'
 const LIVE_TAIL_SUBSCRIPTION_TIMEOUT_MS = 10_000
 
-export type RemoteRuntimePtyIdParts = {
+export type RuntimeTerminalPtyIdParts = {
   environmentId: string | null
   handle: string
 }
 
-export function toRemoteRuntimePtyId(handle: string, environmentId?: string | null): string {
+export function toRuntimeTerminalPtyId(handle: string, environmentId?: string | null): string {
   const owner = environmentId?.trim()
   if (!owner) {
-    return `${REMOTE_PTY_ID_PREFIX}${handle}`
+    return `${RUNTIME_TERMINAL_PTY_ID_PREFIX}${handle}`
   }
-  return `${REMOTE_PTY_ID_PREFIX}${encodeURIComponent(owner)}${REMOTE_PTY_OWNER_SEPARATOR}${encodeURIComponent(handle)}`
+  return `${RUNTIME_TERMINAL_PTY_ID_PREFIX}${encodeURIComponent(owner)}${RUNTIME_TERMINAL_OWNER_SEPARATOR}${encodeURIComponent(handle)}`
 }
 
-export function parseRemoteRuntimePtyId(ptyId: string): RemoteRuntimePtyIdParts | null {
-  if (!ptyId.startsWith(REMOTE_PTY_ID_PREFIX)) {
+export function parseRuntimeTerminalPtyId(ptyId: string): RuntimeTerminalPtyIdParts | null {
+  if (!ptyId.startsWith(RUNTIME_TERMINAL_PTY_ID_PREFIX)) {
     return null
   }
-  const rest = ptyId.slice(REMOTE_PTY_ID_PREFIX.length)
-  const separatorIndex = rest.indexOf(REMOTE_PTY_OWNER_SEPARATOR)
+  const rest = ptyId.slice(RUNTIME_TERMINAL_PTY_ID_PREFIX.length)
+  const separatorIndex = rest.indexOf(RUNTIME_TERMINAL_OWNER_SEPARATOR)
   if (separatorIndex === -1) {
     return { environmentId: null, handle: rest }
   }
   try {
     return {
       environmentId: decodeURIComponent(rest.slice(0, separatorIndex)),
-      handle: decodeURIComponent(rest.slice(separatorIndex + REMOTE_PTY_OWNER_SEPARATOR.length))
+      handle: decodeURIComponent(
+        rest.slice(separatorIndex + RUNTIME_TERMINAL_OWNER_SEPARATOR.length)
+      )
     }
   } catch {
     return null
   }
 }
 
-export function getRemoteRuntimeTerminalHandle(ptyId: string): string | null {
-  return parseRemoteRuntimePtyId(ptyId)?.handle ?? null
+export function isRuntimeTerminalPtyId(ptyId: string | null | undefined): ptyId is string {
+  return typeof ptyId === 'string' && parseRuntimeTerminalPtyId(ptyId) !== null
 }
 
-export function getRemoteRuntimePtyEnvironmentId(ptyId: string): string | null {
-  return parseRemoteRuntimePtyId(ptyId)?.environmentId ?? null
+export function getRuntimeTerminalHandle(ptyId: string): string | null {
+  return parseRuntimeTerminalPtyId(ptyId)?.handle ?? null
+}
+
+export function getRuntimeTerminalEnvironmentId(ptyId: string): string | null {
+  return parseRuntimeTerminalPtyId(ptyId)?.environmentId ?? null
 }
 
 export function runtimeTerminalErrorMessage(error: unknown): string {
@@ -59,14 +67,21 @@ export async function subscribeToRuntimeTerminalData(
   ptyId: string,
   clientId: string,
   watcher: (data: string) => void,
-  options?: { startAtLiveTail?: boolean }
+  options?: {
+    startAtLiveTail?: boolean
+    delivery?: {
+      visible: boolean
+      interested: boolean
+      priority: 'parked' | 'visible' | 'active'
+    }
+  }
 ): Promise<() => void> {
-  const terminal = getRemoteRuntimeTerminalHandle(ptyId)
-  const ownerEnvironmentId = getRemoteRuntimePtyEnvironmentId(ptyId)
+  const terminal = getRuntimeTerminalHandle(ptyId)
+  const ownerEnvironmentId = getRuntimeTerminalEnvironmentId(ptyId)
   const target = ownerEnvironmentId
     ? ({ kind: 'environment', environmentId: ownerEnvironmentId } as const)
     : getActiveRuntimeTarget(settings)
-  if (target.kind !== 'environment' || !terminal) {
+  if (!terminal) {
     return () => {}
   }
 
@@ -84,6 +99,7 @@ export async function subscribeToRuntimeTerminalData(
     rejectLiveTail = null
   }
 
+  let sideEffectSeq = 0
   const stream = await getRuntimeTerminalMultiplexer(target).subscribeTerminal({
     terminal,
     client: { id: clientId, type: 'desktop' },
@@ -98,6 +114,15 @@ export async function subscribeToRuntimeTerminalData(
         }
         onParsed()
       },
+      onSideEffectBatch: (batch) => {
+        sideEffectSeq += 1
+        publishRendererTerminalSideEffects({
+          ptyId,
+          seq: sideEffectSeq,
+          facts: batch.facts,
+          replay: batch.replay
+        })
+      },
       onSubscribed: () => {
         resolveLiveTail?.()
         resolveLiveTail = null
@@ -109,6 +134,9 @@ export async function subscribeToRuntimeTerminalData(
         rejectPendingLiveTail('Remote terminal closed before live output was ready.')
     }
   })
+  if (options?.delivery) {
+    stream.setDeliveryState(options.delivery)
+  }
 
   if (liveTailReady) {
     let timeout: ReturnType<typeof setTimeout> | null = setTimeout(
@@ -131,4 +159,33 @@ export async function subscribeToRuntimeTerminalData(
   }
 
   return () => stream.close()
+}
+
+export function subscribeToRuntimeTerminalExit(
+  settings: Pick<GlobalSettings, 'activeRuntimeEnvironmentId'> | null | undefined,
+  ptyId: string,
+  onExit: (code: number) => void
+): () => void {
+  const terminal = getRuntimeTerminalHandle(ptyId)
+  if (!terminal) {
+    return () => {}
+  }
+  const environmentId = getRuntimeTerminalEnvironmentId(ptyId)
+  const target = environmentId
+    ? ({ kind: 'environment', environmentId } as const)
+    : getActiveRuntimeTarget(settings)
+  const controller = new AbortController()
+  void callRuntimeOrpc(
+    target,
+    (client) => client.terminal.wait,
+    { terminal, for: 'exit' },
+    { signal: controller.signal, timeoutMs: 24 * 60 * 60 * 1_000 }
+  )
+    .then((result) => {
+      if (!controller.signal.aborted) {
+        onExit(result.wait.exitCode ?? 0)
+      }
+    })
+    .catch(() => {})
+  return () => controller.abort()
 }
