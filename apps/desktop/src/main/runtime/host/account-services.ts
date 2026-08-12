@@ -78,7 +78,7 @@ export function attachNodeRuntimeHostAccountServices(
       .map((account) => ({ id: account.id, managedHomePath: account.managedHomePath }))
   })
 
-  runtime.setAccountServices({ claudeAccounts, codexAccounts, rateLimits })
+  runtime.accounts.configure({ claudeAccounts, codexAccounts, rateLimits })
   return {
     dispose: () => {
       rateLimits.stop()

@@ -173,12 +173,6 @@ import type {
   RateLimitHit,
   RateLimitResumeSchedule
 } from '~shared/rate-limit-resume/types'
-import type {
-  CodexRateLimitResetResult,
-  CursorRateLimitRefreshContext,
-  RateLimitRuntimeTarget,
-  RateLimitState
-} from '~shared/rate-limit-types'
 import { isFolderRepo } from '~shared/repo-kind'
 import type { RuntimeClientEvent } from '~shared/runtime-client-events'
 import { toRuntimeActivateWorktreeEvent } from '~shared/runtime-client-events'
@@ -339,11 +333,7 @@ import type {
   ListWorkItemsResult,
   MRListState
 } from '~shared/types'
-import type {
-  ClaudeRateLimitAccountsState,
-  CodexRateLimitAccountsState,
-  GhosttyImportPreview
-} from '~shared/types'
+import type { GhosttyImportPreview } from '~shared/types'
 import type {
   WorkspaceCleanupDismissal,
   WorkspaceCleanupScanArgs,
@@ -391,10 +381,6 @@ import type { AiVaultSessionRuntimeTarget } from '../ai-vault/session/root-confi
 import type { AutomationService } from '../automations/service'
 import type { AgentBrowserBridge } from '../browser/agent-browser-bridge'
 import type { BrowserBackend } from '../browser/backend'
-import type { ClaudeAccountSelectionTarget } from '../claude/accounts/runtime-selection'
-import type { ClaudeAccountAddTarget, ClaudeAccountService } from '../claude/accounts/service'
-import type { CodexAccountSelectionTarget } from '../codex/accounts/runtime-selection'
-import type { CodexAccountAddTarget, CodexAccountService } from '../codex/accounts/service'
 import { HeadlessEmulator } from '../daemon/headless-emulator'
 import { parseFileUriPathParts } from '../daemon/osc7-file-uri'
 import { extractLastOsc7Uri, extractOscScanTail } from '../daemon/osc7-uri-extraction'
@@ -554,7 +540,6 @@ import {
 import type { PtyProviderBufferSnapshot } from '../providers/types'
 import type { IPtyProvider, PtyProcessInfo, PtyTransientFact } from '../providers/types'
 import type { RateLimitResumeService } from '../rate-limit-resume/service'
-import type { RateLimitService } from '../rate-limits/service'
 import { enrichMissingRepoGitRemoteIdentities } from '../repo-git-remote-identity-enrichment'
 import { detectRepoIconAndUpstream } from '../repo-icon-autodetect'
 import { listRepoWorktrees } from '../repo-worktrees'
@@ -646,6 +631,7 @@ import {
   findExistingWorktreeSymlinkPaths,
   removeWorktreeLinkedPaths
 } from '../worktree/symlinks'
+import { RuntimeAccounts } from './accounts/capabilities'
 import { ClaudeAgentTeamsService } from './claude-agent-teams-service'
 import type {
   AgentTeamsTmuxCompatRequest,
@@ -723,12 +709,6 @@ function sanitizeNestedRepoRuntimeImportError(context: string, error: unknown): 
   return 'Repository could not be imported'
 }
 
-type RuntimeAccountServices = {
-  claudeAccounts: ClaudeAccountService
-  codexAccounts: CodexAccountService
-  rateLimits: RateLimitService
-}
-
 export type RemoteFetchResult = { ok: true } | { ok: false; errorKind: 'git_error' }
 
 export type RemoteTrackingBase = {
@@ -736,12 +716,6 @@ export type RemoteTrackingBase = {
   branch: string
   ref: string
   base: string
-}
-
-export type AccountsSnapshot = {
-  claude: ClaudeRateLimitAccountsState
-  codex: CodexRateLimitAccountsState
-  rateLimits: RateLimitState
 }
 
 type RuntimeStore = {
@@ -2137,7 +2111,6 @@ export class YiruRuntimeService {
   private readonly previewWarpThemeImportForClientFn:
     | ((source: WarpThemeImportSource) => Promise<WarpThemeImportPreview>)
     | null
-  private accountServices: RuntimeAccountServices | null = null
   private rateLimitResumeService: RateLimitResumeService | null = null
   private commitMessageAgentEnv: CommitMessageAgentEnvironmentResolvers | null = null
   private automationService: AutomationService | null = null
@@ -7790,6 +7763,7 @@ export class YiruRuntimeService {
   }
 
   readonly mobileNotifications = new MobileNotificationChannel()
+  readonly accounts = new RuntimeAccounts()
   // Why: notifications.report's job1 (throttle/dedup) moved here from the
   // legacy notifications:dispatch ipcMain closure — Phase 5 slice S3. Two
   // independent trackers because the desktop-notification cooldown and the
@@ -7800,12 +7774,6 @@ export class YiruRuntimeService {
 
   getNotificationSettings(): GlobalSettings['notifications'] | undefined {
     return this.store?.getSettings ? this.store.getSettings().notifications : undefined
-  }
-
-  // ─── Account Services (mobile RPC bridge) ─────────────────────
-
-  setAccountServices(services: RuntimeAccountServices): void {
-    this.accountServices = services
   }
 
   setCommitMessageAgentEnvironmentResolvers(
@@ -8171,153 +8139,6 @@ export class YiruRuntimeService {
       return
     }
     this.cancelMobileDictationSession(session)
-  }
-
-  private requireAccountServices(): RuntimeAccountServices {
-    if (!this.accountServices) {
-      throw new Error('Account services are not configured on this runtime')
-    }
-    return this.accountServices
-  }
-
-  getAccountsSnapshot(): AccountsSnapshot {
-    const { claudeAccounts, codexAccounts, rateLimits } = this.requireAccountServices()
-    return {
-      claude: claudeAccounts.listAccounts(),
-      codex: codexAccounts.listAccounts(),
-      rateLimits: rateLimits.getState()
-    }
-  }
-
-  listCachedClaudeAccounts(): ClaudeRateLimitAccountsState {
-    return this.requireAccountServices().claudeAccounts.listAccounts()
-  }
-
-  listCachedCodexAccounts(): CodexRateLimitAccountsState {
-    return this.requireAccountServices().codexAccounts.listAccounts()
-  }
-
-  addClaudeAccount(target?: ClaudeAccountAddTarget): Promise<ClaudeRateLimitAccountsState> {
-    return this.requireAccountServices().claudeAccounts.addAccount(target)
-  }
-
-  cancelPendingClaudeAccountLogin(): boolean {
-    return this.requireAccountServices().claudeAccounts.cancelPendingLogin()
-  }
-
-  reauthenticateClaudeAccount(accountId: string): Promise<ClaudeRateLimitAccountsState> {
-    return this.requireAccountServices().claudeAccounts.reauthenticateAccount(accountId)
-  }
-
-  addCodexAccount(target?: CodexAccountAddTarget): Promise<CodexRateLimitAccountsState> {
-    return this.requireAccountServices().codexAccounts.addAccount(target)
-  }
-
-  reauthenticateCodexAccount(accountId: string): Promise<CodexRateLimitAccountsState> {
-    return this.requireAccountServices().codexAccounts.reauthenticateAccount(accountId)
-  }
-
-  // Why: RateLimitService polls only when the Electron window is visible AND
-  // focused, and the inactive-account caches fill lazily when the user opens
-  // the desktop AccountsPane. Mobile has neither trigger, so without this the
-  // phone shows 0% / "—" against a backgrounded desktop. Errors swallowed
-  // because partial usage is still useful for the rest of the snapshot.
-  async refreshAccountsForMobile(): Promise<void> {
-    const { rateLimits } = this.requireAccountServices()
-    await Promise.allSettled([
-      rateLimits.refresh(),
-      rateLimits.fetchInactiveClaudeAccountsOnOpen(),
-      rateLimits.fetchInactiveCodexAccountsOnOpen()
-    ])
-  }
-
-  // Why: connection migration replays subscriptions; use the stale-aware lane
-  // so a reconnect cannot turn one mobile viewer into continuous forced fetches.
-  async refreshAccountsForMobileSubscriber(): Promise<void> {
-    const { rateLimits } = this.requireAccountServices()
-    await Promise.allSettled([
-      rateLimits.refreshIfStale(),
-      rateLimits.fetchInactiveClaudeAccountsOnOpen(),
-      rateLimits.fetchInactiveCodexAccountsOnOpen()
-    ])
-  }
-
-  // Why: `target.runtime` is omitted by older/mobile callers; treat a missing
-  // runtime as "let the service infer it" instead of defaulting to host,
-  // mirroring the ipcMain `claudeAccounts:select` handler this replaces.
-  selectClaudeAccount(
-    accountId: string | null,
-    target?: ClaudeAccountSelectionTarget
-  ): Promise<ClaudeRateLimitAccountsState> {
-    const { claudeAccounts } = this.requireAccountServices()
-    if (!target?.runtime) {
-      return claudeAccounts.selectAccount(accountId)
-    }
-    return claudeAccounts.selectAccountForTarget(accountId, target)
-  }
-
-  selectCodexAccount(
-    accountId: string | null,
-    target?: CodexAccountSelectionTarget
-  ): Promise<CodexRateLimitAccountsState> {
-    const { codexAccounts } = this.requireAccountServices()
-    if (!target?.runtime) {
-      return codexAccounts.selectAccount(accountId)
-    }
-    return codexAccounts.selectAccountForTarget(accountId, target)
-  }
-
-  removeClaudeAccount(accountId: string): Promise<ClaudeRateLimitAccountsState> {
-    return this.requireAccountServices().claudeAccounts.removeAccount(accountId)
-  }
-
-  removeCodexAccount(accountId: string): Promise<CodexRateLimitAccountsState> {
-    return this.requireAccountServices().codexAccounts.removeAccount(accountId)
-  }
-
-  // Why: rate-limit polling fires every 5 minutes and on account switch.
-  // Mobile clients subscribe to receive a fresh AccountsSnapshot whenever
-  // RateLimitService pushes new usage data. Desktop, mobile, and web consume
-  // the same `accounts.subscribe` stream.
-  onAccountsChanged(listener: (snapshot: AccountsSnapshot) => void): () => void {
-    const services = this.requireAccountServices()
-    return services.rateLimits.onStateChange((rateLimits) => {
-      listener({
-        claude: services.claudeAccounts.listAccounts(),
-        codex: services.codexAccounts.listAccounts(),
-        rateLimits
-      })
-    })
-  }
-
-  // Why: thin passthroughs let the `accounts.*` contract force the same
-  // RateLimitService fetches without duplicating its fetch/dedupe/backoff logic.
-  refreshRateLimits(cursorContext?: CursorRateLimitRefreshContext | null): Promise<RateLimitState> {
-    return this.requireAccountServices().rateLimits.refresh(cursorContext ?? undefined)
-  }
-
-  refreshCodexRateLimitsForTarget(target: RateLimitRuntimeTarget): Promise<RateLimitState> {
-    return this.requireAccountServices().rateLimits.refreshCodexForTarget(target)
-  }
-
-  refreshClaudeRateLimitsForTarget(target: RateLimitRuntimeTarget): Promise<RateLimitState> {
-    return this.requireAccountServices().rateLimits.refreshClaudeForTarget(target)
-  }
-
-  consumeCodexRateLimitResetCredit(): Promise<CodexRateLimitResetResult> {
-    return this.requireAccountServices().rateLimits.consumeCodexRateLimitResetCredit()
-  }
-
-  fetchInactiveClaudeRateLimitAccounts(): Promise<void> {
-    return this.requireAccountServices().rateLimits.fetchInactiveClaudeAccountsOnOpen()
-  }
-
-  fetchInactiveCodexRateLimitAccounts(): Promise<void> {
-    return this.requireAccountServices().rateLimits.fetchInactiveCodexAccountsOnOpen()
-  }
-
-  refreshGrokRateLimits(): Promise<RateLimitState> {
-    return this.requireAccountServices().rateLimits.refreshGrok()
   }
 
   // Why: thin passthroughs for the `rateLimitResume.*` oRPC contract —

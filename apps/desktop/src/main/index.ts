@@ -2285,7 +2285,7 @@ app.whenReady().then(async () => {
     headlessDispatcher: isServeMode ? createHeadlessAutomationDispatcher(runtimeService) : undefined
   })
   runtimeService.setAutomationService(automations)
-  runtimeService.setAccountServices({ claudeAccounts, codexAccounts, rateLimits })
+  runtimeService.accounts.configure({ claudeAccounts, codexAccounts, rateLimits })
   runtimeService.setCommitMessageAgentEnvironmentResolvers({
     // Why: local Codex hooks and auth now live in Yiru's managed runtime home
     // even for the system-default path, so every Yiru-launched Codex process
