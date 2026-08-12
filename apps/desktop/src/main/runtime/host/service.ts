@@ -42,7 +42,7 @@ import { previewWarpThemeImport } from '~main/warp-themes/import-preview'
 
 import { setGitHubEventPublisher } from '../github-events'
 import { subscribeShellServicesConnectionLifecycle } from '../rpc/orpc/shell-services-reverse-link'
-import { terminalMultiplexCanaryDisabledCapabilities } from '../terminal-multiplex-release-gate'
+import { terminalMultiplexCanaryDisabledCapabilities } from '../terminal-multiplex/release-gate'
 import { YiruRuntimeService } from '../yiru-runtime'
 import { attachNodeRuntimeHostAccountServices } from './account-services'
 import { NodeRuntimeBrowserCommands } from './browser-commands'
