@@ -140,19 +140,27 @@ export function openMobileTerminalBulkConnection(options: OpenBulkConnectionOpti
       fail(new Error('Mobile terminal bulk received an invalid handshake frame.'))
       return
     }
+
+    // Why: the runtime sends e2ee_ready in plaintext before either side can
+    // authenticate encrypted frames; all later handshake messages are sealed.
     try {
-      const plaintext = decrypt(rawData, sharedKey)
-      const message: unknown = JSON.parse(plaintext ?? rawData)
+      const message: unknown = JSON.parse(rawData)
       if (isMessageType(message, 'e2ee_ready')) {
         sendText(JSON.stringify({ type: 'e2ee_auth', deviceToken: options.deviceToken }))
         return
       }
-      if (!isMessageType(message, 'e2ee_authenticated')) {
-        fail(new Error('Mobile terminal bulk authentication was rejected.'))
-        return
-      }
     } catch {
+      // Encrypted handshake responses are not JSON until opened below.
+    }
+
+    const plaintext = decrypt(rawData, sharedKey)
+    if (!plaintext) {
       fail(new Error('Mobile terminal bulk received an invalid handshake response.'))
+      return
+    }
+    const message: unknown = JSON.parse(plaintext)
+    if (!isMessageType(message, 'e2ee_authenticated')) {
+      fail(new Error('Mobile terminal bulk authentication was rejected.'))
       return
     }
     authenticated = true
