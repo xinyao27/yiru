@@ -1,7 +1,6 @@
+import { isJsonRecord, readLocalJson, writeLocalJson } from '~renderer/web/storage/local-json'
 import { getDefaultOnboardingState, ONBOARDING_FLOW_VERSION } from '~shared/constants'
 import type { OnboardingState } from '~shared/types'
-
-import { isJsonRecord, readLocalJson, writeLocalJson } from '../../storage/local-json'
 
 const ONBOARDING_STORAGE_KEY = 'yiru.web.onboarding.v1'
 

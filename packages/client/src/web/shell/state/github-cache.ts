@@ -1,6 +1,5 @@
+import { isJsonRecord, readLocalJson, writeLocalJson } from '~renderer/web/storage/local-json'
 import type { PRInfo } from '~shared/types'
-
-import { isJsonRecord, readLocalJson, writeLocalJson } from '../../storage/local-json'
 
 const GITHUB_CACHE_STORAGE_KEY = 'yiru.web.githubCache.v1'
 

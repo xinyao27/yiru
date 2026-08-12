@@ -3,13 +3,12 @@ import {
   normalizeExecutionHostId,
   type ExecutionHostId
 } from '@yiru/workbench-model/workspace'
+import { readWebUIState } from '~renderer/runtime/web-ui-state'
+import { getWebActiveEnvironment } from '~renderer/web/runtime-connection'
+import { readLocalJson, writeLocalJson } from '~renderer/web/storage/local-json'
+import { sanitizeWebRuntimeWorkspaceSession } from '~renderer/web/workspace-session'
 import { getDefaultWorkspaceSession } from '~shared/constants'
 import type { WorkspaceSessionPatch, WorkspaceSessionState } from '~shared/types'
-
-import { readWebUIState } from '../../../runtime/web-ui-state'
-import { getWebActiveEnvironment } from '../../runtime-connection'
-import { readLocalJson, writeLocalJson } from '../../storage/local-json'
-import { sanitizeWebRuntimeWorkspaceSession } from '../../workspace-session'
 
 const SESSION_STORAGE_KEY = 'yiru.web.workspaceSession.v1'
 
