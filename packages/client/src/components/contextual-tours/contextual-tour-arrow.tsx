@@ -35,7 +35,7 @@ export function ContextualTourArrow({
       width={ARROW_WIDTH}
       height={ARROW_HEIGHT}
       viewBox={`0 0 ${ARROW_WIDTH} ${ARROW_HEIGHT}`}
-      className="absolute block overflow-visible fill-(--contextual-tour-panel-surface) stroke-(--contextual-tour-panel-border)"
+      className="fill-popover stroke-border absolute block overflow-visible"
       style={{ ...style, transform: PLACEMENT_TRANSFORM[placement] }}
     >
       {/* Why: an open path fills as a triangle but strokes only the two slanted
