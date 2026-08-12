@@ -2070,8 +2070,6 @@ function App(): React.JSX.Element {
                 </TooltipContent>
               </Tooltip>
             </>
-          ) : !isMac ? (
-            <div className="pl-2" />
           ) : null}
           {!showWorktreeHistoryControls ? sidebarToggleControl : null}
         </div>

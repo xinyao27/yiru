@@ -6,6 +6,7 @@ import type {
 } from '@yiru/runtime-protocol/contract'
 
 import { callShellOrpc, isWebRuntimeClient } from './orpc-client'
+import { getRuntimeRenderingHost } from './runtime-loopback-bootstrap'
 
 export type ShellPlatformApi = {
   openPath: (path: string) => Promise<void>
@@ -25,31 +26,22 @@ export type ShellPlatformApi = {
   pickDirectory: (args: { defaultPath?: string }) => Promise<string | null>
 }
 
-let renderingHostSnapshot: ShellRenderingHost = {
-  platform: 'linux',
-  osRelease: '',
-  displayServer: null
+function resolveRenderingHost(): ShellRenderingHost {
+  if (!isWebRuntimeClient()) {
+    return getRuntimeRenderingHost()
+  }
+  const userAgent = navigator.userAgent.toLowerCase()
+  return {
+    platform: userAgent.includes('mac') ? 'darwin' : userAgent.includes('win') ? 'win32' : 'linux',
+    osRelease: '',
+    displayServer: null
+  }
 }
 
+let renderingHostSnapshot = resolveRenderingHost()
+
 export function hydrateRenderingHost(): void {
-  if (isWebRuntimeClient()) {
-    const userAgent = navigator.userAgent.toLowerCase()
-    renderingHostSnapshot = {
-      platform: userAgent.includes('mac')
-        ? 'darwin'
-        : userAgent.includes('win')
-          ? 'win32'
-          : 'linux',
-      osRelease: '',
-      displayServer: null
-    }
-    return
-  }
-  void callShellOrpc((client) => client.shell.platform.renderingHost, undefined)
-    .then((snapshot) => {
-      renderingHostSnapshot = snapshot
-    })
-    .catch(() => {})
+  renderingHostSnapshot = resolveRenderingHost()
 }
 
 export function getRenderingHostSnapshot(): ShellRenderingHost {

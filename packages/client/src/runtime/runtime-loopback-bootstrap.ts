@@ -1,10 +1,18 @@
 import type { RuntimeConnectionBootstrap } from '~shared/preload/bootstrap-contract'
 
-export function getRuntimeLoopbackCredentials(): ReturnType<
-  RuntimeConnectionBootstrap['getCredentials']
-> {
+function getRuntimeConnectionBootstrap(): RuntimeConnectionBootstrap {
   const hostWindow = window as unknown as {
     runtimeConnection: RuntimeConnectionBootstrap
   }
-  return hostWindow.runtimeConnection.getCredentials()
+  return hostWindow.runtimeConnection
+}
+
+export function getRuntimeLoopbackCredentials(): ReturnType<
+  RuntimeConnectionBootstrap['getCredentials']
+> {
+  return getRuntimeConnectionBootstrap().getCredentials()
+}
+
+export function getRuntimeRenderingHost(): RuntimeConnectionBootstrap['renderingHost'] {
+  return getRuntimeConnectionBootstrap().renderingHost
 }
