@@ -46,7 +46,7 @@ struct AppView: View {
         .onOpenURL(perform: model.handleOpenURL)
         .onChange(of: scenePhase) { _, nextPhase in
             guard nextPhase == .active else { return }
-            Task { await model.dependencies.runtimeLifecycle.applicationDidBecomeActive() }
+            Task { await model.dependencies.runtimeClient.applicationDidBecomeActive() }
         }
     }
 }

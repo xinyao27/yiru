@@ -1,6 +1,6 @@
 import Foundation
 
-actor RuntimeClient: HomeRuntime, RuntimeLifecycle, WorkspaceRepository {
+actor RuntimeClient: HomeRuntime, WorkspaceRepository {
     private let hosts: any HostRepository
     private let timeout: Duration
     private let revivalMonitor: ConnectionRevivalMonitor
@@ -23,13 +23,9 @@ actor RuntimeClient: HomeRuntime, RuntimeLifecycle, WorkspaceRepository {
 
     func currentConnectionState() async -> RuntimeConnectionState {
         guard let credential = try? await primaryCredential() else { return .unpaired }
-        do {
-            let session = try await session(for: credential)
-            await session.start()
-            return map(await session.snapshot())
-        } catch {
-            return .unavailable(hostName: credential.profile.name, reconnectAttempt: 0)
-        }
+        let session = await session(for: credential)
+        await session.start()
+        return map(await session.snapshot())
     }
 
     func connectionStates() -> AsyncStream<RuntimeConnectionState> {
@@ -47,11 +43,8 @@ actor RuntimeClient: HomeRuntime, RuntimeLifecycle, WorkspaceRepository {
     }
 
     func reconnectMostRecentHost() async {
-        guard let credential = try? await primaryCredential(),
-            let session = try? await session(for: credential)
-        else {
-            return
-        }
+        guard let credential = try? await primaryCredential() else { return }
+        let session = await session(for: credential)
         await session.forceReconnect()
     }
 
@@ -73,17 +66,14 @@ actor RuntimeClient: HomeRuntime, RuntimeLifecycle, WorkspaceRepository {
     }
 
     func reconnect(hostID: String) async {
-        guard let credential = try? await credential(for: hostID),
-            let session = try? await session(for: credential)
-        else {
-            return
-        }
+        guard let credential = try? await credential(for: hostID) else { return }
+        let session = await session(for: credential)
         await session.forceReconnect()
     }
 
     private func fetchWorkspaces(for hostID: String) async throws -> WorkspaceSnapshot {
         let credential = try await credential(for: hostID)
-        let session = try await session(for: credential)
+        let session = await session(for: credential)
         let wire: MobileWorkspaceListWire = try await session.call(
             path: MobileRuntimeWireContract.worktreeListPath,
             input: MobileWorkspaceListRequestWire(limit: 10_000),
@@ -119,7 +109,7 @@ actor RuntimeClient: HomeRuntime, RuntimeLifecycle, WorkspaceRepository {
         return credential
     }
 
-    private func session(for credential: HostCredential) async throws -> RuntimeHostSession {
+    private func session(for credential: HostCredential) async -> RuntimeHostSession {
         beginMonitoringNetworkIfNeeded()
         if let managed = sessions[credential.profile.id], managed.credential == credential {
             return managed.session
