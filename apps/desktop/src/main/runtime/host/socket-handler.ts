@@ -41,10 +41,6 @@ export function createNodeRuntimeHostSocketHandler({
       return createRuntimeOrpcContext(runtime, {
         connectionId,
         mobileDevelopmentPairing,
-        // Why: Electron reaches selected runtimes through this authenticated
-        // OS-local socket. Paired Web and mobile sockets never receive this
-        // production-canary bypass.
-        allowUnadvertisedTerminalMultiplex: true,
         beforeInvocation: (invocation) => {
           if (
             terminalMultiplex.admitInvocation(

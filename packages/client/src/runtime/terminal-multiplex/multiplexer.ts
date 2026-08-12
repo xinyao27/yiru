@@ -128,7 +128,7 @@ export class RemoteRuntimeTerminalMultiplexer {
     try {
       const status = await this.callRuntime<RuntimeStatusResult>('status.get', undefined)
       if (
-        isWebRuntimeClient() &&
+        (isWebRuntimeClient() || this.target.kind !== 'local') &&
         !status.capabilities?.includes(TERMINAL_MULTIPLEX_RUNTIME_CAPABILITY)
       ) {
         throw new Error('Runtime host does not advertise terminal.multiplex.')

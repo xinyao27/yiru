@@ -12,7 +12,3 @@ export function getRuntimeLoopbackCredentials(): ReturnType<
 > {
   return getRuntimeConnectionBootstrap().getCredentials()
 }
-
-export function getRuntimeRenderingHost(): RuntimeConnectionBootstrap['renderingHost'] {
-  return getRuntimeConnectionBootstrap().renderingHost
-}

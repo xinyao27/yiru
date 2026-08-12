@@ -4,9 +4,9 @@ import type {
   ShellOpenLocalPathResult,
   ShellRenderingHost
 } from '@yiru/runtime-protocol/contract'
+import { parseRenderingHostBootstrap } from '~shared/rendering-host-bootstrap'
 
 import { callShellOrpc, isWebRuntimeClient } from './orpc-client'
-import { getRuntimeRenderingHost } from './runtime-loopback-bootstrap'
 
 export type ShellPlatformApi = {
   openPath: (path: string) => Promise<void>
@@ -27,8 +27,11 @@ export type ShellPlatformApi = {
 }
 
 function resolveRenderingHost(): ShellRenderingHost {
-  if (!isWebRuntimeClient()) {
-    return getRuntimeRenderingHost()
+  if (!isWebRuntimeClient() && typeof location !== 'undefined') {
+    const bootstrap = parseRenderingHostBootstrap(location.search)
+    if (bootstrap) {
+      return bootstrap
+    }
   }
   const userAgent = navigator.userAgent.toLowerCase()
   return {
@@ -38,11 +41,7 @@ function resolveRenderingHost(): ShellRenderingHost {
   }
 }
 
-let renderingHostSnapshot = resolveRenderingHost()
-
-export function hydrateRenderingHost(): void {
-  renderingHostSnapshot = resolveRenderingHost()
-}
+const renderingHostSnapshot = resolveRenderingHost()
 
 export function getRenderingHostSnapshot(): ShellRenderingHost {
   return renderingHostSnapshot

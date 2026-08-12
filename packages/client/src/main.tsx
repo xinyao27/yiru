@@ -15,13 +15,11 @@ import {
 } from './lib/crash-diagnostics'
 import { shouldEnableReactGrab } from './react-grab-dev-gate'
 import { startShellEventStream } from './runtime/shell-events-client'
-import { hydrateRenderingHost } from './runtime/shell-platform-client'
 import { hydrateShellSettings } from './runtime/shell-state-client'
 import { hydrateShellUi } from './runtime/shell-ui-client'
 
 recordRendererCrashBreadcrumb('renderer_bootstrap_started', { dev: import.meta.env.DEV })
 startShellEventStream()
-hydrateRenderingHost()
 const shellUiHydration = hydrateShellUi()
 installRendererCrashDiagnostics()
 

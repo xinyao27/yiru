@@ -1178,8 +1178,9 @@ headless `serve` 进程默认不 advertise；仅在启动进程显式设置
 `YIRU_TERMINAL_MULTIPLEX_CANARY=1` 时 advertise。该开关只用于开发和手工 canary，不是
 production rollout 开关。未看到 capability 的 client 必须拒绝打开 bulk ticket；server 也必须
 以 `capability_unsupported` 拒绝 `terminal.openMultiplex` 和 `terminal.multiplex`。唯一例外是
-Electron 的 hardened loopback 与它连接所选 runtime 的 authenticated OS-local socket；
-这条不 advertise 的内部路径保留桌面核心 terminal，但不会向 Web/mobile/paired RPC 开放。
+Electron 的 hardened loopback；这条不 advertise 的内部路径保留本机桌面核心 terminal，但
+不会向 Web/mobile、普通 runtime socket 或 paired RPC 开放。所选 runtime 必须显式启用 canary
+并 advertise 后，Electron 才连接其 multiplex transport。
 
 已有 canary 证据仅包括：macOS packaged 真实 xterm 的 CJK/emoji、hidden→reveal、
 renderer reload 和 100 MiB 输出；以及 iOS 模拟器 echo、50 MiB 输出、后台超过 10 秒恢复、
