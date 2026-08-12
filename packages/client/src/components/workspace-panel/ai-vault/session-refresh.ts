@@ -1,7 +1,7 @@
 import type { AiVaultListResult, AiVaultSession } from '@yiru/workbench-model/agent'
 import type { ExecutionHostScope } from '@yiru/workbench-model/workspace'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { listAiVaultSessions } from '~renderer/runtime/ai-vault-client'
 import { useAppStore } from '~renderer/store'
 
 const SESSION_LIMIT = 500
@@ -86,9 +86,9 @@ export function useAiVaultSessionRefresh(
       const hostScope = executionHostScopeRef.current
       const scanKey = `${hostScope}\n${scopeKey}`
       try {
-        const result = await rendererHostClient.aiVault.listSessions({
+        const result = await listAiVaultSessions({
           limit: SESSION_LIMIT,
-          scopePaths: scopePathsRef.current,
+          scopePaths: [...scopePathsRef.current],
           executionHostScope: hostScope,
           force: args.force
         })
@@ -198,10 +198,8 @@ export function useAiVaultSessionRefresh(
       }
       requestForcedRescan()
     }
-    const unsubscribeWindowFocus = rendererHostClient.aiVault.onWindowFocused?.(onRefocus)
     document.addEventListener('visibilitychange', onRefocus)
     return () => {
-      unsubscribeWindowFocus?.()
       document.removeEventListener('visibilitychange', onRefocus)
     }
   }, [requestForcedRescan])

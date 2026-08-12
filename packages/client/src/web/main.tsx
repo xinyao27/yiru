@@ -14,7 +14,7 @@ import {
   decideWebPairingStartup,
   readPairingInputFromLocation
 } from './pairing'
-import { installWebPreloadApi } from './preload-api'
+import { initializeWebRuntimeConnection } from './runtime-connection'
 import {
   createStoredWebRuntimeEnvironment,
   readStoredWebRuntimeEnvironment,
@@ -61,7 +61,7 @@ function WebRoot(): React.JSX.Element {
     )
   }
 
-  installWebPreloadApi()
+  initializeWebRuntimeConnection()
   return (
     <Suspense fallback={<div className="bg-background min-h-dvh" />}>
       <App />

@@ -16,7 +16,7 @@ import {
   type AgentStartupPlan
 } from '~renderer/lib/tui-agent-startup'
 import { activateAndRevealFolderWorkspace } from '~renderer/lib/worktree-activation'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { markAgentWorkspaceTrusted } from '~renderer/runtime/agent-trust-client'
 import type { SessionOptionValue } from '~shared/native-chat/session-options'
 import type { LaunchSource } from '~shared/telemetry-events'
 import { TUI_AGENT_CONFIG } from '~shared/tui-agent/config'
@@ -137,7 +137,7 @@ async function preflightFolderWorkspaceAgentTrust(args: {
   agent: TuiAgent | null
   workspacePath: string | null
 }): Promise<void> {
-  if (!args.agent || !rendererHostClient.agentTrust?.markTrusted) {
+  if (!args.agent) {
     return
   }
   const preflight = TUI_AGENT_CONFIG[args.agent].preflightTrust
@@ -145,7 +145,7 @@ async function preflightFolderWorkspaceAgentTrust(args: {
     return
   }
   try {
-    await rendererHostClient.agentTrust.markTrusted({
+    await markAgentWorkspaceTrusted({
       preset: preflight,
       workspacePath: args.workspacePath
     })

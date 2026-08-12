@@ -1220,9 +1220,6 @@ function openMainWindow(): BrowserWindow {
     store,
     runtime,
     stats,
-    claudeUsage,
-    codexUsage,
-    openCodeUsage,
     rateLimits,
     rendererWebContentsId,
     automations,
@@ -1880,14 +1877,6 @@ app.whenReady().then(async () => {
       })
     }
   )
-  // Why: DOM focus events do not fire when macOS reactivates the app. Keep
-  // this Electron-only signal in the shell adapter, outside the ai-vault
-  // capability module that also runs in a Node runtime host.
-  app.on('browser-window-focus', (_event, window) => {
-    if (!window.isDestroyed()) {
-      window.webContents.send('aiVault:windowFocused')
-    }
-  })
   electronApp.setAppUserModelId(devInstanceIdentity.appUserModelId)
   app.setName(devInstanceIdentity.name)
   configureSpeechDownloadRequestFactory((url) => {

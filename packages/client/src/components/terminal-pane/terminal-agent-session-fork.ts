@@ -6,7 +6,7 @@ import { launchAgentInNewTab } from '~renderer/lib/launch-agent-in-new-tab'
 import { getLocalProjectExecutionRuntimeContext } from '~renderer/lib/local-preflight-context'
 import type { ManagedPane } from '~renderer/lib/pane-manager/pane-manager'
 import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { markAgentWorkspaceTrusted } from '~renderer/runtime/agent-trust-client'
 import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
@@ -115,11 +115,11 @@ async function preflightForkAgentTrust(args: {
 }): Promise<void> {
   const { agent, workspacePath } = args
   const preflight = TUI_AGENT_CONFIG[agent].preflightTrust
-  if (!preflight || !workspacePath || !rendererHostClient.agentTrust?.markTrusted) {
+  if (!preflight || !workspacePath) {
     return
   }
   try {
-    await rendererHostClient.agentTrust.markTrusted({
+    await markAgentWorkspaceTrusted({
       preset: preflight,
       workspacePath
     })

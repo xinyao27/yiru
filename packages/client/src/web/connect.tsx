@@ -70,7 +70,7 @@ export default function WebConnect({
     }
     setConnecting(true)
     const environment = createStoredWebRuntimeEnvironment({ name, offer: parsedOffer })
-    // Why: this pre-app probe runs before installWebPreloadApi, so it is an
+    // Why: this pre-app probe runs before the runtime connection is initialized, so it is an
     // authenticated runtime client but not yet a renderer shell.
     const client = new WebRuntimeClient(parsedOffer, undefined, { enableShellServices: false })
     try {

@@ -4,7 +4,7 @@ import { getAgentLabel } from '~renderer/lib/agent-catalog'
 import { getConnectionIdFromState } from '~renderer/lib/connection-context'
 import { launchAgentInNewTab } from '~renderer/lib/launch-agent-in-new-tab'
 import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { markAgentWorkspaceTrusted } from '~renderer/runtime/agent-trust-client'
 import { useAppStore } from '~renderer/store'
 import type { SessionOptionValue } from '~shared/native-chat/session-options'
 import type { LaunchSource } from '~shared/telemetry-events'
@@ -78,11 +78,11 @@ async function preflightAgentTrust(args: {
   workspacePath: string
 }): Promise<void> {
   const preset = TUI_AGENT_CONFIG[args.agent].preflightTrust
-  if (!preset || !args.workspacePath || !rendererHostClient.agentTrust?.markTrusted) {
+  if (!preset || !args.workspacePath) {
     return
   }
   try {
-    await rendererHostClient.agentTrust.markTrusted({
+    await markAgentWorkspaceTrusted({
       preset,
       workspacePath: args.workspacePath
     })

@@ -1,3 +1,5 @@
+import type { AgentTrustInput } from '@yiru/runtime-protocol/contract'
+import { markAgentWorkspaceTrusted } from '~main/agent-trust-presets'
 import { isGitBashAvailable } from '~main/git-bash'
 import { isPwshAvailable } from '~main/pwsh'
 import { isWslAvailable, listWslDistros } from '~main/wsl'
@@ -37,4 +39,11 @@ export async function handleHostGitBashIsAvailable(
   _context: RpcContext
 ): Promise<boolean> {
   return isGitBashAvailable()
+}
+
+export async function handleAgentTrustMarkTrusted(
+  params: AgentTrustInput,
+  _context: RpcContext
+): Promise<void> {
+  markAgentWorkspaceTrusted(params)
 }

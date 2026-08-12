@@ -1,7 +1,7 @@
 import { app, BrowserWindow, dialog, shell } from 'electron'
 
 import type { AgentAwakeService } from '../agent-awake-service'
-import { registerAgentTrustHandlers } from '../agent-trust'
+import { configureAiVaultHandlers } from '../ai-vault/ai-vault'
 import {
   getSavedRuntimeAiVaultHostInfos,
   scanRuntimeAiVaultSessions
@@ -11,21 +11,13 @@ import type { AutomationService } from '../automations/service'
 import { initializeShellAutomationService } from '../automations/shell-service'
 import { setTrustedBrowserRendererWebContentsId } from '../browser/browser'
 import { setAgentBrowserBridgeRef } from '../browser/page/control'
-import { registerClaudeUsageHandlers } from '../claude/usage/claude-usage'
-import type { ClaudeUsageStore } from '../claude/usage/store'
-import { registerCodexUsageHandlers } from '../codex/usage/codex-usage'
-import type { CodexUsageStore } from '../codex/usage/store'
 import type { CrashReportStore } from '../crash-reporting/crash-report-store'
 import { initializeShellCrashReportingService } from '../crash-reporting/crash-reporting'
-import { registerEmulatorFrameStreamHandlers } from '../emulator/frame-stream'
-import { registerEmulatorVideoStreamHandlers } from '../emulator/video-stream'
 import type { KeybindingService } from '../keybindings/keybinding-service'
 import { initializeShellKeybindingsService } from '../keybindings/keybindings'
 import { initializeShellMiniMaxCredentialsService } from '../minimax/credentials'
 import { initializeNotebookAuthorizedStore } from '../notebook'
 import { initializeShellNotificationsService } from '../notifications/notifications'
-import { registerOpenCodeUsageHandlers } from '../opencode/usage/opencode-usage'
-import type { OpenCodeUsageStore } from '../opencode/usage/store'
 import { initializeShellOnboardingService } from '../persisted-state/onboarding'
 import { initializeShellSessionService } from '../persisted-state/session'
 import type { Store } from '../persistence'
@@ -33,6 +25,7 @@ import { initializeShellLocalhostWorktreeLabelService } from '../ports/localhost
 import { registerWorkspacePortHandlers } from '../ports/workspace-ports'
 import type { RateLimitService } from '../rate-limits/service'
 import { initializeRuntimeEnvironmentRegistry } from '../runtime/environments'
+import { initializeRuntimeUIEventSource } from '../runtime/ui-events'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'
 import { initializeShellAppService } from '../shell/app'
 import { initializeShellClipboardService } from '../shell/clipboard'
@@ -43,9 +36,7 @@ import { initializeShellRuntimeStateService } from '../shell/runtime-state'
 import { initializeShellSettingsService } from '../shell/settings'
 import type { StatsCollector } from '../stats/collector'
 import { initializeShellTelemetryService } from '../telemetry/telemetry'
-import { registerUIHandlers } from '../window/ui'
 import { initializeShellYiruProfilesService } from '../yiru-profiles/yiru-profiles'
-import { registerAiVaultHandlers } from './ai-vault'
 
 let registered = false
 
@@ -61,9 +52,6 @@ export function registerCoreHandlers(
   store: Store,
   runtime: YiruRuntimeService,
   stats: StatsCollector,
-  claudeUsage: ClaudeUsageStore,
-  codexUsage: CodexUsageStore,
-  openCodeUsage: OpenCodeUsageStore,
   rateLimits: RateLimitService,
   mainWindowWebContentsId: number | null = null,
   automations?: AutomationService,
@@ -84,10 +72,6 @@ export function registerCoreHandlers(
   registered = true
 
   initializeShellAppService(store, { onBeforeRelaunch: lifecycleOptions.onBeforeRelaunch })
-  registerClaudeUsageHandlers(claudeUsage)
-  registerCodexUsageHandlers(codexUsage)
-  registerOpenCodeUsageHandlers(openCodeUsage)
-  registerAgentTrustHandlers()
   initializeShellMiniMaxCredentialsService(rateLimits)
   initializeShellGitHubWindowService(store, stats)
   if (crashReports) {
@@ -115,9 +99,7 @@ export function registerCoreHandlers(
   })
   initializeShellPlatformService()
   initializeShellSessionService(store)
-  registerUIHandlers(store)
-  registerEmulatorFrameStreamHandlers()
-  registerEmulatorVideoStreamHandlers()
+  initializeRuntimeUIEventSource(store)
   registerWorkspacePortHandlers(store)
   initializeShellLocalhostWorktreeLabelService(store)
   initializeShellFilesService(store, {
@@ -141,7 +123,7 @@ export function registerCoreHandlers(
   })
   initializeShellRuntimeStateService(runtime)
   initializeRuntimeEnvironmentRegistry(store)
-  registerAiVaultHandlers({
+  configureAiVaultHandlers({
     getAdditionalCodexHomePaths: lifecycleOptions.getAdditionalAiVaultCodexHomePaths,
     resolveClaudeProjectsDirs: lifecycleOptions.resolveAiVaultClaudeProjectsDirs,
     getActiveRuntimeAiVaultHostInfos: () =>

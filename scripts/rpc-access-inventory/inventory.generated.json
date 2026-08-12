@@ -1,9 +1,9 @@
 {
   "schemaVersion": 2,
-  "methodCount": 755,
+  "methodCount": 771,
   "sourceCounts": {
     "legacy": 0,
-    "orpc": 755
+    "orpc": 771
   },
   "methods": [
     {
@@ -3022,6 +3022,21 @@
       ]
     },
     {
+      "method": "emulator.frameStream.subscribe",
+      "access": {
+        "scope": "host",
+        "tier": "host"
+      },
+      "mobile": false,
+      "streaming": true,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/emulator.ts"
+        }
+      ]
+    },
+    {
       "method": "emulator.gesture",
       "access": {
         "scope": "host",
@@ -3224,6 +3239,21 @@
       },
       "mobile": false,
       "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/emulator.ts"
+        }
+      ]
+    },
+    {
+      "method": "emulator.videoStream.subscribe",
+      "access": {
+        "scope": "host",
+        "tier": "host"
+      },
+      "mobile": false,
+      "streaming": true,
       "sources": [
         {
           "kind": "orpc",
@@ -5223,6 +5253,21 @@
         {
           "kind": "orpc",
           "file": "packages/runtime-protocol/src/contract/gitlab.ts"
+        }
+      ]
+    },
+    {
+      "method": "host.agentTrust.markTrusted",
+      "access": {
+        "scope": "host",
+        "tier": "host"
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/host-capabilities.ts"
         }
       ]
     },
@@ -7284,6 +7329,22 @@
         {
           "kind": "orpc",
           "file": "packages/runtime-protocol/src/contract/shell/accounts.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.aiVault.listSessions",
+      "access": {
+        "scope": "host",
+        "tier": "read",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/ai-vault.ts"
         }
       ]
     },
@@ -11104,6 +11165,186 @@
         {
           "kind": "orpc",
           "file": "packages/runtime-protocol/src/contract/updater.ts"
+        }
+      ]
+    },
+    {
+      "method": "usage.analytics.claude.getScanState",
+      "access": {
+        "scope": "host",
+        "tier": "read"
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/provider-usage.ts"
+        }
+      ]
+    },
+    {
+      "method": "usage.analytics.claude.getSnapshot",
+      "access": {
+        "scope": "host",
+        "tier": "read"
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/provider-usage.ts"
+        }
+      ]
+    },
+    {
+      "method": "usage.analytics.claude.refresh",
+      "access": {
+        "scope": "host",
+        "tier": "host"
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/provider-usage.ts"
+        }
+      ]
+    },
+    {
+      "method": "usage.analytics.claude.setEnabled",
+      "access": {
+        "scope": "host",
+        "tier": "host"
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/provider-usage.ts"
+        }
+      ]
+    },
+    {
+      "method": "usage.analytics.codex.getScanState",
+      "access": {
+        "scope": "host",
+        "tier": "read"
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/provider-usage.ts"
+        }
+      ]
+    },
+    {
+      "method": "usage.analytics.codex.getSnapshot",
+      "access": {
+        "scope": "host",
+        "tier": "read"
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/provider-usage.ts"
+        }
+      ]
+    },
+    {
+      "method": "usage.analytics.codex.refresh",
+      "access": {
+        "scope": "host",
+        "tier": "host"
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/provider-usage.ts"
+        }
+      ]
+    },
+    {
+      "method": "usage.analytics.codex.setEnabled",
+      "access": {
+        "scope": "host",
+        "tier": "host"
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/provider-usage.ts"
+        }
+      ]
+    },
+    {
+      "method": "usage.analytics.openCode.getScanState",
+      "access": {
+        "scope": "host",
+        "tier": "read"
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/provider-usage.ts"
+        }
+      ]
+    },
+    {
+      "method": "usage.analytics.openCode.getSnapshot",
+      "access": {
+        "scope": "host",
+        "tier": "read"
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/provider-usage.ts"
+        }
+      ]
+    },
+    {
+      "method": "usage.analytics.openCode.refresh",
+      "access": {
+        "scope": "host",
+        "tier": "host"
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/provider-usage.ts"
+        }
+      ]
+    },
+    {
+      "method": "usage.analytics.openCode.setEnabled",
+      "access": {
+        "scope": "host",
+        "tier": "host"
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/provider-usage.ts"
         }
       ]
     },

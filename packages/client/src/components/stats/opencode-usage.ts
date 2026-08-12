@@ -1,5 +1,5 @@
 import type { StateCreator } from 'zustand'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { openCodeUsageClient } from '~renderer/runtime/usage-analytics-client'
 import type { AppState } from '~renderer/store/types'
 import type {
   OpenCodeUsageBreakdownRow,
@@ -8,7 +8,6 @@ import type {
   OpenCodeUsageScanState,
   OpenCodeUsageScope,
   OpenCodeUsageSessionRow,
-  OpenCodeUsageSnapshot,
   OpenCodeUsageSummary
 } from '~shared/opencode-usage-types'
 
@@ -46,14 +45,9 @@ export const createOpenCodeUsageSlice: StateCreator<AppState, [], [], OpenCodeUs
 
   setOpenCodeUsageEnabled: async (enabled) => {
     try {
-      const nextScanState = (await rendererHostClient.openCodeUsage.setEnabled({
+      const nextScanState = await openCodeUsageClient.setEnabled({
         enabled
-      })) as OpenCodeUsageScanState | undefined
-      // Why: HTTP Web has no desktop usage bridge, so its fallback resolves
-      // undefined; keep the unavailable state stable instead of fabricating one.
-      if (!nextScanState) {
-        return
-      }
+      })
       set({
         openCodeUsageScanState: enabled
           ? {
@@ -91,12 +85,7 @@ export const createOpenCodeUsageSlice: StateCreator<AppState, [], [], OpenCodeUs
   fetchOpenCodeUsage: async (opts) => {
     set({ openCodeUsageSnapshotReady: false })
     try {
-      const scanState = (await rendererHostClient.openCodeUsage.getScanState()) as
-        | OpenCodeUsageScanState
-        | undefined
-      if (!scanState) {
-        return
-      }
+      const scanState = await openCodeUsageClient.getScanState()
       const currentScanState = get().openCodeUsageScanState
       const shouldPreserveLoadingState =
         opts?.forceRefresh === true &&
@@ -117,11 +106,11 @@ export const createOpenCodeUsageSlice: StateCreator<AppState, [], [], OpenCodeUs
       }
 
       const { openCodeUsageScope, openCodeUsageRange } = get()
-      const snapshot = (await rendererHostClient.openCodeUsage.getSnapshot({
+      const snapshot = await openCodeUsageClient.getSnapshot({
         scope: openCodeUsageScope,
         range: openCodeUsageRange,
         limit: 10
-      })) as OpenCodeUsageSnapshot
+      })
       const hasCachedSnapshot =
         snapshot.scanState.lastScanCompletedAt !== null || snapshot.scanState.hasAnyOpenCodeData
 
@@ -154,15 +143,15 @@ export const createOpenCodeUsageSlice: StateCreator<AppState, [], [], OpenCodeUs
         })
       }
 
-      await rendererHostClient.openCodeUsage.refresh({
+      await openCodeUsageClient.refresh({
         force: opts?.forceRefresh ?? false
       })
       const { openCodeUsageScope: refreshedScope, openCodeUsageRange: refreshedRange } = get()
-      const refreshedSnapshot = (await rendererHostClient.openCodeUsage.getSnapshot({
+      const refreshedSnapshot = await openCodeUsageClient.getSnapshot({
         scope: refreshedScope,
         range: refreshedRange,
         limit: 10
-      })) as OpenCodeUsageSnapshot
+      })
 
       set({
         openCodeUsageScanState: refreshedSnapshot.scanState,

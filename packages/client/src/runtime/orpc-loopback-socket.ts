@@ -7,6 +7,7 @@ import {
 } from '~shared/runtime-loopback'
 
 import { createRuntimeRpcAbortError } from './abortable-runtime-environment-call'
+import { getRuntimeLoopbackCredentials } from './runtime-loopback-bootstrap'
 
 const DEFAULT_LOOPBACK_CONNECT_TIMEOUT_MS = 15_000
 
@@ -14,7 +15,7 @@ export async function openAuthenticatedRuntimeLoopbackSocket(
   target: RuntimeLoopbackTarget,
   options: { timeoutMs?: number; signal?: AbortSignal } = {}
 ): Promise<WebSocket> {
-  const credentials = await window.api.runtimeConnection.getCredentials()
+  const credentials = await getRuntimeLoopbackCredentials()
   const ws = new WebSocket(credentials.endpoint)
   ws.binaryType = 'arraybuffer'
   const ready = waitForLoopbackBootstrap(ws, options.timeoutMs, options.signal)

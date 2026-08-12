@@ -20,16 +20,18 @@ import {
   handleEmulatorUnregisterActive
 } from '~main/runtime/rpc/methods/emulator'
 import { handleEmulatorEventsSubscribe } from '~main/runtime/rpc/methods/emulator-events'
+import {
+  handleEmulatorFrameStream,
+  handleEmulatorVideoStream
+} from '~main/runtime/rpc/methods/emulator-streams'
 
 import { runtimeImplementation } from '../access-middleware'
 import { wireRuntimeMethod } from '../registered-method'
 import { wireRuntimeStream } from '../registered-stream'
 
 // Why: `emulator` controls the mobile simulator/AVD sessions a worktree can
-// spin up (attach/tap/type/install/…) plus the auto-attach event feed. MJPEG
-// frame bytes deliberately stay off this contract — they use their own
-// binary side-channel (`window.api.emulator.startFrameStream`) untouched by
-// this migration, per the contract's own `events` comment.
+// spin up (attach/tap/type/install/…) plus auto-attach and request-scoped
+// binary video streams.
 export const emulatorRuntimeHandlers = {
   emulator: {
     list: runtimeImplementation.emulator.list.handler(
@@ -92,6 +94,16 @@ export const emulatorRuntimeHandlers = {
     events: {
       subscribe: runtimeImplementation.emulator.events.subscribe.handler(
         wireRuntimeStream('emulator.events.subscribe', handleEmulatorEventsSubscribe)
+      )
+    },
+    frameStream: {
+      subscribe: runtimeImplementation.emulator.frameStream.subscribe.handler(
+        wireRuntimeStream('emulator.frameStream.subscribe', handleEmulatorFrameStream)
+      )
+    },
+    videoStream: {
+      subscribe: runtimeImplementation.emulator.videoStream.subscribe.handler(
+        wireRuntimeStream('emulator.videoStream.subscribe', handleEmulatorVideoStream)
       )
     }
   }

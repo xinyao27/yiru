@@ -1,7 +1,6 @@
 /* eslint-disable max-lines -- Why: this file is the central main-window IPC wiring point; splitting it during the mobile release compatibility rebase would increase release risk. */
-import { dialog, ipcMain, type OpenDialogOptions } from 'electron'
+import { dialog, type OpenDialogOptions } from 'electron'
 import type { BrowserWindow } from 'electron'
-import { isNativeFileDropPayload, type NativeFileDropPayload } from '~shared/native-file-drop'
 
 import { browserManager } from '../browser/manager'
 import { hasSystemMediaAccess, requestSystemMediaAccess } from '../browser/media-access'
@@ -18,7 +17,6 @@ import { electronShellServicesConnectionId } from '../runtime/rpc/orpc/shell-ser
 import { subscribeShellServicesConnectionLifecycle } from '../runtime/rpc/orpc/shell-services-reverse-link'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'
 import { registerShellAppReloader } from '../shell/app-reload'
-import { publishShellEvent } from '../shell/events'
 import { setShellUpdaterConfiguration } from '../shell/updater'
 import { logStartupMilestone } from '../startup/diagnostics'
 import { scheduleHistoryGc } from '../terminal-history'
@@ -121,7 +119,6 @@ export function attachMainWindowServices(
         )
       })
   }
-  registerFileDropRelay(mainWindow)
   // Why: setupAutoUpdater's first getAutoUpdater() call synchronously
   // require()s electron-updater in packaged builds — seconds on a cold
   // Windows disk under Defender scanning (part of issue #7225's pre-paint
@@ -248,31 +245,5 @@ function registerRuntimeWindowLifecycle(
     unsubscribeShellConnectionLifecycle()
     runtime.markGraphUnavailable(mainWindow.id)
     runtime.detachShellConnection(shellConnectionId)
-  })
-}
-
-function registerFileDropRelay(mainWindow: BrowserWindow): void {
-  const channel = 'terminal:file-dropped-from-preload'
-  const mainWebContents = mainWindow.webContents
-  ipcMain.removeAllListeners(channel)
-  const relayFileDrop = (event: Electron.IpcMainEvent, args: NativeFileDropPayload): void => {
-    if (
-      mainWindow.isDestroyed() ||
-      mainWebContents.isDestroyed() ||
-      event.sender !== mainWebContents
-    ) {
-      return
-    }
-    if (!isNativeFileDropPayload(args)) {
-      return
-    }
-
-    publishShellEvent(mainWebContents.id, { type: 'uiFileDrop', payload: args })
-  }
-  ipcMain.on(channel, relayFileDrop)
-  mainWindow.on('closed', () => {
-    // Why: macOS can keep the app process alive after the window closes; drop
-    // the relay closure so a destroyed BrowserWindow is not retained.
-    ipcMain.removeListener(channel, relayFileDrop)
   })
 }

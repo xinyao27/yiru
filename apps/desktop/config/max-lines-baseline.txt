@@ -88,7 +88,6 @@ inline apps/desktop/src/main/window/attach-main-window-services.ts
 inline apps/desktop/src/main/window/create-main-window.ts
 inline apps/desktop/src/main/workspace-space-analysis.ts
 inline apps/desktop/src/main/worktree/remote.ts
-inline apps/desktop/src/preload/index.ts
 inline apps/desktop/src/relay/agent-hook-server.ts
 inline apps/desktop/src/relay/dispatcher.ts
 inline apps/mobile/src/constants/marine-creatures.ts
@@ -158,7 +157,6 @@ inline packages/client/src/store/slices/tabs.ts
 inline packages/client/src/store/slices/terminals.ts
 inline packages/client/src/store/slices/ui.ts
 inline packages/client/src/store/slices/worktrees.ts
-inline packages/client/src/web/preload-api.ts
 inline packages/client/src/web/runtime-client.ts
 inline packages/shared/src/agent/hook-listener.ts
 inline packages/shared/src/automation/schedules.ts

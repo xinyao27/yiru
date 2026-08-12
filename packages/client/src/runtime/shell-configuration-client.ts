@@ -11,7 +11,7 @@ import type {
   YiruProfileListResult
 } from '~shared/yiru-profiles'
 
-import { getWebShellConfigurationApis } from '../web/preload-api'
+import { getWebShellConfigurationApis } from '../web/shell-configuration'
 import { callShellOrpc } from './orpc-client'
 import { subscribeShellEvent } from './shell-events-client'
 

@@ -1,5 +1,5 @@
 import type { StateCreator } from 'zustand'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { codexUsageClient } from '~renderer/runtime/usage-analytics-client'
 import type { AppState } from '~renderer/store/types'
 import type {
   CodexUsageBreakdownRow,
@@ -8,7 +8,6 @@ import type {
   CodexUsageScanState,
   CodexUsageScope,
   CodexUsageSessionRow,
-  CodexUsageSnapshot,
   CodexUsageSummary
 } from '~shared/codex-usage-types'
 
@@ -46,14 +45,9 @@ export const createCodexUsageSlice: StateCreator<AppState, [], [], CodexUsageSli
 
   setCodexUsageEnabled: async (enabled) => {
     try {
-      const nextScanState = (await rendererHostClient.codexUsage.setEnabled({
+      const nextScanState = await codexUsageClient.setEnabled({
         enabled
-      })) as CodexUsageScanState | undefined
-      // Why: HTTP Web has no desktop usage bridge, so its fallback resolves
-      // undefined; keep the unavailable state stable instead of fabricating one.
-      if (!nextScanState) {
-        return
-      }
+      })
       set({
         codexUsageScanState: enabled
           ? {
@@ -91,12 +85,7 @@ export const createCodexUsageSlice: StateCreator<AppState, [], [], CodexUsageSli
   fetchCodexUsage: async (opts) => {
     set({ codexUsageSnapshotReady: false })
     try {
-      const scanState = (await rendererHostClient.codexUsage.getScanState()) as
-        | CodexUsageScanState
-        | undefined
-      if (!scanState) {
-        return
-      }
+      const scanState = await codexUsageClient.getScanState()
       const currentScanState = get().codexUsageScanState
       const shouldPreserveLoadingState =
         opts?.forceRefresh === true &&
@@ -117,11 +106,11 @@ export const createCodexUsageSlice: StateCreator<AppState, [], [], CodexUsageSli
       }
 
       const { codexUsageScope, codexUsageRange } = get()
-      const snapshot = (await rendererHostClient.codexUsage.getSnapshot({
+      const snapshot = await codexUsageClient.getSnapshot({
         scope: codexUsageScope,
         range: codexUsageRange,
         limit: 10
-      })) as CodexUsageSnapshot
+      })
       const hasCachedSnapshot =
         snapshot.scanState.lastScanCompletedAt !== null || snapshot.scanState.hasAnyCodexData
 
@@ -154,15 +143,15 @@ export const createCodexUsageSlice: StateCreator<AppState, [], [], CodexUsageSli
         })
       }
 
-      await rendererHostClient.codexUsage.refresh({
+      await codexUsageClient.refresh({
         force: opts?.forceRefresh ?? false
       })
       const { codexUsageScope: refreshedScope, codexUsageRange: refreshedRange } = get()
-      const refreshedSnapshot = (await rendererHostClient.codexUsage.getSnapshot({
+      const refreshedSnapshot = await codexUsageClient.getSnapshot({
         scope: refreshedScope,
         range: refreshedRange,
         limit: 10
-      })) as CodexUsageSnapshot
+      })
 
       set({
         codexUsageScanState: refreshedSnapshot.scanState,

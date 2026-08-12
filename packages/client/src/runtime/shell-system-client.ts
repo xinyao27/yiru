@@ -21,7 +21,7 @@ import {
   YIRU_UPDATER_QUIT_AND_INSTALL_STARTED_EVENT
 } from '~shared/updater-renderer-events'
 
-import { getWebShellSystemApis } from '../web/preload-api'
+import { getWebShellSystemApis } from '../web/shell-system'
 import { callShellOrpc, isWebRuntimeClient } from './orpc-client'
 import { subscribeShellEvent } from './shell-events-client'
 import {

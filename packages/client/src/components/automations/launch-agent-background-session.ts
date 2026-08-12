@@ -6,8 +6,8 @@ import { getLocalProjectExecutionRuntimeContext } from '~renderer/lib/local-pref
 import { CLIENT_PLATFORM } from '~renderer/lib/new-workspace'
 import { buildAgentStartupPlan } from '~renderer/lib/tui-agent-startup'
 import { getSettingsForWorktreeRuntimeOwner } from '~renderer/lib/worktree-runtime-owner'
+import { markAgentWorkspaceTrusted } from '~renderer/runtime/agent-trust-client'
 import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
 import {
   subscribeToRuntimeTerminalData,
@@ -44,9 +44,9 @@ export async function launchAgentBackgroundSession(
     throw new Error('The target workspace is no longer available.')
   }
   const preflight = TUI_AGENT_CONFIG[agent].preflightTrust
-  if (preflight && worktree.path && rendererHostClient.agentTrust?.markTrusted) {
+  if (preflight && worktree.path) {
     try {
-      await rendererHostClient.agentTrust.markTrusted({
+      await markAgentWorkspaceTrusted({
         preset: preflight,
         workspacePath: worktree.path
       })

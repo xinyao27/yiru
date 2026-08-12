@@ -1,6 +1,5 @@
+import { runtimeImplementation } from '~main/runtime/rpc/orpc/access-middleware'
 import { requireShellRenderer } from '~main/shell/files'
-
-import { runtimeImplementation } from '../../access-middleware'
 
 export const shellAccountsRuntimeHandlers = {
   accounts: {

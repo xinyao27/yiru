@@ -2860,6 +2860,13 @@ export class YiruRuntimeService {
     return listAiVaultSessions(args)
   }
 
+  getStatsUsageStores(): StatsUsageStores {
+    if (!this.statsUsageStores) {
+      throw new Error('usage_analytics_unavailable')
+    }
+    return this.statsUsageStores
+  }
+
   setPtyController(controller: RuntimePtyController | null): void {
     // Why: CLI terminal writes must go through the main-owned PTY registry
     // instead of tunneling back through renderer IPC, or live handles could

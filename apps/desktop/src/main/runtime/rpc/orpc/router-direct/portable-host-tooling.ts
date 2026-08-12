@@ -8,6 +8,7 @@ import {
 } from '~main/runtime/rpc/methods/cli'
 import { openRuntimeRemoteSshEditor } from '~main/runtime/rpc/methods/external-editor'
 import {
+  handleAgentTrustMarkTrusted,
   handleHostGitBashIsAvailable,
   handleHostPlatform,
   handleHostPwshIsAvailable,
@@ -72,6 +73,11 @@ export const portableHostToolingRuntimeHandlers = {
     gitBash: {
       isAvailable: runtimeImplementation.host.gitBash.isAvailable.handler(
         wireRuntimeMethod('host.gitBash.isAvailable', handleHostGitBashIsAvailable)
+      )
+    },
+    agentTrust: {
+      markTrusted: runtimeImplementation.host.agentTrust.markTrusted.handler(
+        wireRuntimeMethod('host.agentTrust.markTrusted', handleAgentTrustMarkTrusted)
       )
     }
   },

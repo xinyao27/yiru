@@ -16,7 +16,7 @@ import {
   type ActivateAndRevealResult,
   type WorktreeStartupPayload
 } from '~renderer/lib/worktree-activation'
-import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
+import { markAgentWorkspaceTrusted } from '~renderer/runtime/agent-trust-client'
 import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
 import { useAppStore } from '~renderer/store'
 import { TUI_AGENT_CONFIG } from '~shared/tui-agent/config'
@@ -98,7 +98,7 @@ async function preflightAgentTrust(request: WorktreeCreationRequest, path: strin
   // as menu input on first launch. Pre-write the trust artifact before any
   // terminal spawns. Best-effort — the worktree already exists, so a failure
   // here must not strand it.
-  if (!request.agent || !rendererHostClient.agentTrust?.markTrusted) {
+  if (!request.agent) {
     return
   }
   const preflight = TUI_AGENT_CONFIG[request.agent].preflightTrust
@@ -106,7 +106,7 @@ async function preflightAgentTrust(request: WorktreeCreationRequest, path: strin
     return
   }
   try {
-    await rendererHostClient.agentTrust.markTrusted({
+    await markAgentWorkspaceTrusted({
       preset: preflight,
       workspacePath: path
     })

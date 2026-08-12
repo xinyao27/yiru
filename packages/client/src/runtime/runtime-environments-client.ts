@@ -1,4 +1,4 @@
-import { getWebRuntimeEnvironmentApi } from '../web/preload-api'
+import { getWebRuntimeEnvironmentApi } from '../web/runtime-connection'
 import { callShellOrpc, isWebRuntimeClient } from './orpc-client'
 import type { RuntimeEnvironmentApi } from './runtime-environment-api'
 

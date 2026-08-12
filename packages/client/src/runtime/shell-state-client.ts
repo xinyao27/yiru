@@ -2,7 +2,7 @@ import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 import type { PRInfo, GlobalSettings, OnboardingState } from '~shared/types'
 import type { WorkspaceSessionPatch, WorkspaceSessionState } from '~shared/types'
 
-import { getWebShellStateApis } from '../web/preload-api'
+import { getWebShellStateApis } from '../web/shell-state'
 import { callShellOrpc } from './orpc-client'
 
 type GitHubCache = { pr: Record<string, { data: PRInfo | null; fetchedAt: number }> }
