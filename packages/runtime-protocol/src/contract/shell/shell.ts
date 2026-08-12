@@ -1,6 +1,7 @@
 import type { ContractRouter } from '@orpc/contract'
 
 import type { RuntimeProcedureMeta } from '../access-meta.js'
+import { shellAccountsContract } from './accounts.js'
 import { shellBrowserContract } from './browser.js'
 import { shellKeybindingsContract, shellYiruProfilesContract } from './configuration.js'
 import { shellEventsContract } from './events.js'
@@ -40,6 +41,7 @@ import {
 import { shellUiContract } from './ui.js'
 
 export const shellContract = {
+  accounts: shellAccountsContract,
   app: shellAppContract,
   browser: shellBrowserContract,
   automations: shellAutomationsContract,
@@ -75,6 +77,7 @@ export const shellContract = {
 } satisfies ContractRouter<RuntimeProcedureMeta>
 
 export * from './browser.js'
+export * from './accounts.js'
 export * from './configuration.js'
 export * from './events.js'
 export * from './files.js'

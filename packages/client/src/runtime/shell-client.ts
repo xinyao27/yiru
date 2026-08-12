@@ -1,3 +1,4 @@
+import { shellAccountsApi, type ShellAccountsApi } from './shell-accounts-client'
 import {
   shellKeybindingsApi,
   shellYiruProfilesApi,
@@ -65,6 +66,7 @@ import { getWebShellApi } from './web-shell-client'
 import { getWebShellUIApi } from './web-ui-shell-client'
 
 type RendererShellClient = {
+  accounts: ShellAccountsApi
   automations: ShellAutomationsApi
   app: ShellAppApi
   crashReports: ShellCrashReportsApi
@@ -99,9 +101,10 @@ function isWebShellClient(): boolean {
   return (globalThis as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__ === true
 }
 
-// Why: feature code targets the shell adapter, not Electron's preload object.
-// Desktop delegates to preload; the web build supplies the same shell shape.
+// Why: feature code targets one shell adapter. Desktop calls the fixed local
+// oRPC host; the web build supplies the same shape explicitly.
 export const shellClient: RendererShellClient = {
+  accounts: shellAccountsApi,
   automations: shellAutomationsApi,
   app: shellAppApi,
   crashReports: shellCrashReportsApi,

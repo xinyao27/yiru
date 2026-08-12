@@ -2,10 +2,10 @@ import { shellClient } from './shell-client'
 
 // Why: feature modules depend on one renderer-host facade. Shell-owned
 // capabilities come from typed oRPC; remaining data-plane domains stay on the
-// audited preload bridge until their own migration package lands. The web entry
-// installs Window.api after startup modules load, so preload-backed lookups must
-// stay live instead of capturing the initial undefined value.
+// audited preload bridge until their own migration package lands.
 const shellOwnedDomains = {
+  claudeAccounts: shellClient.accounts.claude,
+  codexAccounts: shellClient.accounts.codex,
   automations: shellClient.automations,
   app: shellClient.app,
   crashReports: shellClient.crashReports,

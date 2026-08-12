@@ -1223,8 +1223,6 @@ function openMainWindow(): BrowserWindow {
     claudeUsage,
     codexUsage,
     openCodeUsage,
-    codexAccounts,
-    claudeAccounts,
     rateLimits,
     rendererWebContentsId,
     automations,

@@ -24,8 +24,6 @@ import type { ResolvedSourceControlAiGenerationParams } from '../source-control/
 import type { SourceControlAiSettings } from '../source-control/ai-types'
 import type {
   BrowserSessionProfileSource,
-  ClaudeRateLimitAccountsState,
-  CodexRateLimitAccountsState,
   GitBranchCompareResult,
   GitCommitCompareResult,
   GitConflictOperation,
@@ -465,31 +463,6 @@ export type PreloadApi = {
   // end-to-end and never touches this preload surface. A paired web client
   // always has an environment id, so it never takes the
   // `createIpcPtyTransport` branch these stubs would otherwise serve.
-  codexAccounts: {
-    list: () => Promise<CodexRateLimitAccountsState>
-    add: (args?: {
-      runtime?: 'host' | 'wsl'
-      wslDistro?: string | null
-    }) => Promise<CodexRateLimitAccountsState>
-    reauthenticate: (args: { accountId: string }) => Promise<CodexRateLimitAccountsState>
-  }
-  // Why: select/remove moved to the runtime contract (`accounts.selectClaude` /
-  // `accounts.removeClaude`) — see provider-accounts-client.ts. add/reauthenticate/
-  // cancelPendingLogin stay here because they spawn `claude login` PTYs that need
-  // a desktop browser. `list` stays too, same reason as `codexAccounts.list`
-  // above: `accounts.list` is not a duplicate route to it, it forces a
-  // provider-usage refresh first and can hang behind broken auth, which is why
-  // `watchProviderAccounts` (provider-accounts-client.ts) reads this IPC member
-  // for the local target instead of the contract call of the same-shaped name.
-  claudeAccounts: {
-    list: () => Promise<ClaudeRateLimitAccountsState>
-    add: (args?: {
-      runtime?: 'host' | 'wsl'
-      wslDistro?: string | null
-    }) => Promise<ClaudeRateLimitAccountsState>
-    cancelPendingLogin: () => Promise<boolean>
-    reauthenticate: (args: { accountId: string }) => Promise<ClaudeRateLimitAccountsState>
-  }
   // Why: shell-only — pre-writes the same trust-marker files cursor-agent/
   // Copilot CLI/Codex write into this machine's homedir() config
   // (~/.cursor, ~/.copilot, ~/.codex) ahead of a locally-spawned PTY, so the

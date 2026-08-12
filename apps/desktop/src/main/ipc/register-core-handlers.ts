@@ -11,12 +11,8 @@ import type { AutomationService } from '../automations/service'
 import { initializeShellAutomationService } from '../automations/shell-service'
 import { setTrustedBrowserRendererWebContentsId } from '../browser/browser'
 import { setAgentBrowserBridgeRef } from '../browser/page/control'
-import { registerClaudeAccountHandlers } from '../claude/accounts/claude-accounts'
-import type { ClaudeAccountService } from '../claude/accounts/service'
 import { registerClaudeUsageHandlers } from '../claude/usage/claude-usage'
 import type { ClaudeUsageStore } from '../claude/usage/store'
-import { registerCodexAccountHandlers } from '../codex/accounts/codex-accounts'
-import type { CodexAccountService } from '../codex/accounts/service'
 import { registerCodexUsageHandlers } from '../codex/usage/codex-usage'
 import type { CodexUsageStore } from '../codex/usage/store'
 import type { CrashReportStore } from '../crash-reporting/crash-report-store'
@@ -68,8 +64,6 @@ export function registerCoreHandlers(
   claudeUsage: ClaudeUsageStore,
   codexUsage: CodexUsageStore,
   openCodeUsage: OpenCodeUsageStore,
-  codexAccounts: CodexAccountService,
-  claudeAccounts: ClaudeAccountService,
   rateLimits: RateLimitService,
   mainWindowWebContentsId: number | null = null,
   automations?: AutomationService,
@@ -93,9 +87,7 @@ export function registerCoreHandlers(
   registerClaudeUsageHandlers(claudeUsage)
   registerCodexUsageHandlers(codexUsage)
   registerOpenCodeUsageHandlers(openCodeUsage)
-  registerCodexAccountHandlers(codexAccounts)
   registerAgentTrustHandlers()
-  registerClaudeAccountHandlers(claudeAccounts)
   initializeShellMiniMaxCredentialsService(rateLimits)
   initializeShellGitHubWindowService(store, stats)
   if (crashReports) {

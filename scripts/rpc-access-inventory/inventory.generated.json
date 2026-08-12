@@ -1,9 +1,9 @@
 {
   "schemaVersion": 2,
-  "methodCount": 748,
+  "methodCount": 755,
   "sourceCounts": {
     "legacy": 0,
-    "orpc": 748
+    "orpc": 755
   },
   "methods": [
     {
@@ -73,6 +73,36 @@
         "tier": "host"
       },
       "mobile": true,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/accounts.ts"
+        }
+      ]
+    },
+    {
+      "method": "accounts.listCachedClaude",
+      "access": {
+        "scope": "host",
+        "tier": "read"
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/accounts.ts"
+        }
+      ]
+    },
+    {
+      "method": "accounts.listCachedCodex",
+      "access": {
+        "scope": "host",
+        "tier": "read"
+      },
+      "mobile": false,
       "streaming": false,
       "sources": [
         {
@@ -7174,6 +7204,86 @@
         {
           "kind": "orpc",
           "file": "packages/runtime-protocol/src/contract/settings.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.accounts.claude.add",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/accounts.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.accounts.claude.cancelPendingLogin",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/accounts.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.accounts.claude.reauthenticate",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/accounts.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.accounts.codex.add",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/accounts.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.accounts.codex.reauthenticate",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/accounts.ts"
         }
       ]
     },

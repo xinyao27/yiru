@@ -230,9 +230,19 @@ export type RemoveAccountInput = z.output<typeof RemoveAccountInputSchema>
 export type AccountsUnsubscribeInput = z.output<typeof AccountsUnsubscribeInputSchema>
 
 const ACCOUNTS_ACCESS = { scope: 'host', tier: 'host' } as const
+const ACCOUNTS_READ_ACCESS = { scope: 'host', tier: 'read' } as const
 const MOBILE_CLIENT = { mobile: true } as const
 
 export const accountsContract = {
+  // Why: the settings pane needs the services' cached rosters without the
+  // provider usage refresh performed by `list`. Keep the providers separate
+  // so one damaged local credential store cannot hide the healthy roster.
+  listCachedClaude: withAccess(ACCOUNTS_READ_ACCESS)
+    .input(z.void())
+    .output(type<ClaudeRateLimitAccountsState>()),
+  listCachedCodex: withAccess(ACCOUNTS_READ_ACCESS)
+    .input(z.void())
+    .output(type<CodexRateLimitAccountsState>()),
   subscribe: withAccess(ACCOUNTS_ACCESS, MOBILE_CLIENT)
     .input(z.void())
     .output(eventIterator(type<AccountsSubscriptionEvent>())),

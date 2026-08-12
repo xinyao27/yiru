@@ -7,12 +7,14 @@ import { requireShellWindowUi } from '~main/shell/ui'
 
 import { runtimeImplementation } from '../access-middleware'
 import { wireRuntimeStream } from '../registered-stream'
+import { shellAccountsRuntimeHandlers } from './shell/accounts'
 import { shellConfigurationRuntimeHandlers } from './shell/configuration'
 import { shellSystemRuntimeHandlers } from './shell/system'
 import { shellToolsRuntimeHandlers } from './shell/tools'
 
 export const shellRuntimeHandlers = {
   shell: {
+    ...shellAccountsRuntimeHandlers,
     ...shellConfigurationRuntimeHandlers,
     ...shellSystemRuntimeHandlers,
     ...shellToolsRuntimeHandlers,

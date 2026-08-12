@@ -362,9 +362,7 @@ function createWebPreloadApi(): Partial<PreloadApi> {
   return {
     git: createGitApi(),
     emulator: createEmulatorApi(),
-    aiVault: createAiVaultApi(),
-    codexAccounts: createAccountsApi(),
-    claudeAccounts: createAccountsApi()
+    aiVault: createAiVaultApi()
   }
 }
 
@@ -1362,23 +1360,6 @@ function createNotificationsApi(): ShellNotificationsApi {
     probeDelivery: () => Promise.resolve({ state: 'unsupported' as const, authoritative: false }),
     playSound: () => Promise.resolve({ played: false, reason: 'missing-path' })
   }
-}
-
-// Why: select/remove aren't stubbed here — they moved to the runtime contract
-// (`accounts.selectClaude`/`selectCodex`, `removeClaude`/`removeCodex`) and web
-// calls them through provider-accounts-client.ts, never through window.api.
-function createAccountsApi(): never {
-  const empty = {
-    accounts: [],
-    activeAccountId: null,
-    activeAccountIdsByRuntime: { host: null, wsl: {} }
-  }
-  return {
-    list: () => Promise.resolve(empty),
-    add: () => Promise.resolve(empty),
-    cancelPendingLogin: () => Promise.resolve(false),
-    reauthenticate: () => Promise.resolve(empty)
-  } as never
 }
 
 function createUpdaterApi(): ShellUpdaterApi {

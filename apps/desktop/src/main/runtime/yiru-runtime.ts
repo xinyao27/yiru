@@ -392,9 +392,9 @@ import type { AutomationService } from '../automations/service'
 import type { AgentBrowserBridge } from '../browser/agent-browser-bridge'
 import type { BrowserBackend } from '../browser/backend'
 import type { ClaudeAccountSelectionTarget } from '../claude/accounts/runtime-selection'
-import type { ClaudeAccountService } from '../claude/accounts/service'
+import type { ClaudeAccountAddTarget, ClaudeAccountService } from '../claude/accounts/service'
 import type { CodexAccountSelectionTarget } from '../codex/accounts/runtime-selection'
-import type { CodexAccountService } from '../codex/accounts/service'
+import type { CodexAccountAddTarget, CodexAccountService } from '../codex/accounts/service'
 import { HeadlessEmulator } from '../daemon/headless-emulator'
 import { parseFileUriPathParts } from '../daemon/osc7-file-uri'
 import { extractLastOsc7Uri, extractOscScanTail } from '../daemon/osc7-uri-extraction'
@@ -8180,6 +8180,34 @@ export class YiruRuntimeService {
       codex: codexAccounts.listAccounts(),
       rateLimits: rateLimits.getState()
     }
+  }
+
+  listCachedClaudeAccounts(): ClaudeRateLimitAccountsState {
+    return this.requireAccountServices().claudeAccounts.listAccounts()
+  }
+
+  listCachedCodexAccounts(): CodexRateLimitAccountsState {
+    return this.requireAccountServices().codexAccounts.listAccounts()
+  }
+
+  addClaudeAccount(target?: ClaudeAccountAddTarget): Promise<ClaudeRateLimitAccountsState> {
+    return this.requireAccountServices().claudeAccounts.addAccount(target)
+  }
+
+  cancelPendingClaudeAccountLogin(): boolean {
+    return this.requireAccountServices().claudeAccounts.cancelPendingLogin()
+  }
+
+  reauthenticateClaudeAccount(accountId: string): Promise<ClaudeRateLimitAccountsState> {
+    return this.requireAccountServices().claudeAccounts.reauthenticateAccount(accountId)
+  }
+
+  addCodexAccount(target?: CodexAccountAddTarget): Promise<CodexRateLimitAccountsState> {
+    return this.requireAccountServices().codexAccounts.addAccount(target)
+  }
+
+  reauthenticateCodexAccount(accountId: string): Promise<CodexRateLimitAccountsState> {
+    return this.requireAccountServices().codexAccounts.reauthenticateAccount(accountId)
   }
 
   // Why: RateLimitService polls only when the Electron window is visible AND

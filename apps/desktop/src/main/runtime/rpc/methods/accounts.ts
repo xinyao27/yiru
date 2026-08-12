@@ -39,6 +39,20 @@ export async function listRuntimeAccounts(
   return runtime.getAccountsSnapshot()
 }
 
+export function listCachedRuntimeClaudeAccounts(
+  _params: void,
+  { runtime }: RpcContext
+): ClaudeRateLimitAccountsState {
+  return runtime.listCachedClaudeAccounts()
+}
+
+export function listCachedRuntimeCodexAccounts(
+  _params: void,
+  { runtime }: RpcContext
+): CodexRateLimitAccountsState {
+  return runtime.listCachedCodexAccounts()
+}
+
 async function waitForAccountRefreshBudget(refresh: Promise<void>): Promise<void> {
   let timer: ReturnType<typeof setTimeout> | null = null
   await Promise.race([

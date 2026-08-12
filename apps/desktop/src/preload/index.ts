@@ -134,24 +134,6 @@ const api = {
       processToken: Uint8Array<ArrayBuffer>
     }> => ipcRenderer.invoke(RUNTIME_LOOPBACK_CREDENTIALS_CHANNEL)
   },
-  codexAccounts: {
-    list: (): Promise<unknown> => ipcRenderer.invoke('codexAccounts:list'),
-    add: (args?: { runtime?: 'host' | 'wsl'; wslDistro?: string | null }): Promise<unknown> =>
-      ipcRenderer.invoke('codexAccounts:add', args),
-    reauthenticate: (args: { accountId: string }): Promise<unknown> =>
-      ipcRenderer.invoke('codexAccounts:reauthenticate', args)
-  },
-
-  claudeAccounts: {
-    list: (): Promise<unknown> => ipcRenderer.invoke('claudeAccounts:list'),
-    add: (args?: { runtime?: 'host' | 'wsl'; wslDistro?: string | null }): Promise<unknown> =>
-      ipcRenderer.invoke('claudeAccounts:add', args),
-    cancelPendingLogin: (): Promise<boolean> =>
-      ipcRenderer.invoke('claudeAccounts:cancelPendingLogin'),
-    reauthenticate: (args: { accountId: string }): Promise<unknown> =>
-      ipcRenderer.invoke('claudeAccounts:reauthenticate', args)
-  },
-
   agentTrust: {
     markTrusted: (args: {
       preset: 'cursor' | 'copilot' | 'codex'

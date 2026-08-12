@@ -4,6 +4,8 @@ import {
   fetchRuntimeInactiveCodexRateLimitAccounts,
   getRuntimeGrokAccountStatus,
   handleAccountsSubscribe,
+  listCachedRuntimeClaudeAccounts,
+  listCachedRuntimeCodexAccounts,
   listRuntimeAccounts,
   refreshRuntimeClaudeRateLimitsForTarget,
   refreshRuntimeCodexRateLimitsForTarget,
@@ -64,6 +66,12 @@ import { wireRuntimeStream } from '../registered-stream'
 // workspace/session state they get invoked from.
 export const providerToolingRuntimeHandlers = {
   accounts: {
+    listCachedClaude: runtimeImplementation.accounts.listCachedClaude.handler(
+      wireRuntimeMethod('accounts.listCachedClaude', listCachedRuntimeClaudeAccounts)
+    ),
+    listCachedCodex: runtimeImplementation.accounts.listCachedCodex.handler(
+      wireRuntimeMethod('accounts.listCachedCodex', listCachedRuntimeCodexAccounts)
+    ),
     list: runtimeImplementation.accounts.list.handler(
       wireRuntimeMethod('accounts.list', listRuntimeAccounts)
     ),

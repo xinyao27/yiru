@@ -80,8 +80,8 @@ export function watchProviderAccounts(
   if (target.kind === 'local') {
     let closed = false
     void Promise.allSettled([
-      window.api.claudeAccounts.list(),
-      window.api.codexAccounts.list()
+      callRuntimeOrpc(target, (client) => client.accounts.listCachedClaude, undefined),
+      callRuntimeOrpc(target, (client) => client.accounts.listCachedCodex, undefined)
     ]).then(([claudeResult, codexResult]) => {
       if (closed) {
         return
