@@ -21,6 +21,20 @@ enum TerminalMultiplexInitialState: String, Codable, Sendable {
 ${cases(contract.initialStates)}
 }
 
+enum TerminalMultiplexPtyState: String, Codable, Sendable {
+${cases(contract.ptyStates)}
+}
+
+enum TerminalMultiplexDisplayMode: String, Codable, Sendable {
+${cases(contract.displayModes)}
+}
+
+enum TerminalMultiplexDriverKind: String, Codable, Sendable {
+    case idle
+    case desktop
+    case mobile
+}
+
 enum TerminalMultiplexResizeReason: String, Codable, Sendable {
 ${cases(contract.resizeReasons)}
 }
@@ -69,8 +83,19 @@ struct TerminalMultiplexSubscribeRecord: Encodable, Sendable {
 struct TerminalMultiplexSubscribedRecord: Decodable, Sendable {
     let terminal: String
     let transportGeneration: String
+    let ptyState: TerminalMultiplexPtyState
+    let cols: Int
+    let rows: Int
+    let displayMode: TerminalMultiplexDisplayMode
+    let driver: TerminalMultiplexDriverRecord
     let initialState: TerminalMultiplexInitialState
-    let snapshotId: UInt32
+    let snapshotId: UInt32?
+    let truncated: Bool
+}
+
+struct TerminalMultiplexDriverRecord: Decodable, Sendable {
+    let kind: TerminalMultiplexDriverKind
+    let clientId: String?
 }
 
 struct TerminalMultiplexResizeRecord: Encodable, Sendable {
@@ -85,6 +110,11 @@ struct TerminalMultiplexErrorRecord: Decodable, Sendable {
 
 struct TerminalMultiplexRevealRecord: Encodable, Sendable {
     let stateVersion: UInt32
+}
+
+struct TerminalMultiplexSnapshotRequestRecord: Encodable, Sendable {
+    let requestedScrollbackRows: UInt32
+    let snapshotMaxBytes: UInt32?
 }
 
 struct TerminalMultiplexEndRecord: Decodable, Sendable {

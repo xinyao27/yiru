@@ -43,6 +43,7 @@ final class TerminalPrototypeModel {
                 self?.lastEvent = String(localized: "Terminal bell received")
             }
         )
+        surface.setInputEnabled(true)
     }
 
     func loadFixture() {

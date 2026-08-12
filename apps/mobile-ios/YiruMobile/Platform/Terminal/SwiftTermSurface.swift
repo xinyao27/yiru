@@ -7,12 +7,33 @@ final class SwiftTermSurface: NSObject, TerminalSurface, TerminalViewDelegate {
     var events: TerminalSurfaceEvents = .inactive
 
     private let terminalView: YiruTerminalView
+    private let accessoryState: TerminalAccessoryState
+    private let accessoryView: TerminalAccessoryInputView
     private var isRestoringSnapshot = false
 
     init(configuration: TerminalSurfaceConfiguration) {
-        terminalView = YiruTerminalView(
+        let configuredTerminalView = YiruTerminalView(
             frame: .zero,
             font: .monospacedSystemFont(ofSize: configuration.fontSize, weight: .regular)
+        )
+        terminalView = configuredTerminalView
+        accessoryState = TerminalAccessoryState(
+            onSend: { [weak terminalView = configuredTerminalView] key in
+                terminalView?.sendAccessoryKey(key)
+            },
+            onControlChange: { [weak terminalView = configuredTerminalView] isActive in
+                terminalView?.controlModifier = isActive
+            },
+            onPaste: { [weak terminalView = configuredTerminalView] in
+                terminalView?.paste(nil)
+            },
+            onDismiss: { [weak terminalView = configuredTerminalView] in
+                terminalView?.resignFirstResponder()
+            }
+        )
+        accessoryView = TerminalAccessoryInputView(
+            state: accessoryState,
+            terminalView: configuredTerminalView
         )
         super.init()
         terminalView.onQueryReply = { [weak self] data in
@@ -36,6 +57,7 @@ final class SwiftTermSurface: NSObject, TerminalSurface, TerminalViewDelegate {
         )
         terminalView.backgroundOpacity = 1
         terminalView.changeScrollback(configuration.scrollbackLines)
+        terminalView.inputAccessoryView = accessoryView
     }
 
     var view: UIView {
@@ -61,6 +83,10 @@ final class SwiftTermSurface: NSObject, TerminalSurface, TerminalViewDelegate {
 
     func focus() {
         _ = terminalView.becomeFirstResponder()
+    }
+
+    func setInputEnabled(_ isEnabled: Bool) {
+        accessoryState.setEnabled(isEnabled)
     }
 
     func sizeChanged(source: TerminalView, newCols: Int, newRows: Int) {
@@ -106,8 +132,40 @@ final class SwiftTermSurface: NSObject, TerminalSurface, TerminalViewDelegate {
 private final class YiruTerminalView: TerminalView {
     var onQueryReply: (Data) -> Void = { _ in }
 
+    func sendAccessoryKey(_ key: TerminalAccessoryKey) {
+        switch key {
+        case .escape:
+            send([0x1B])
+        case .tab:
+            send([0x09])
+        case .arrowLeft:
+            sendArrow(finalByte: 0x44)
+        case .arrowDown:
+            sendArrow(finalByte: 0x42)
+        case .arrowUp:
+            sendArrow(finalByte: 0x41)
+        case .arrowRight:
+            sendArrow(finalByte: 0x43)
+        case .backspace:
+            send([0x7F])
+        case .interrupt:
+            send([0x03])
+        case .endOfFile:
+            send([0x04])
+        case .clearScreen:
+            send([0x0C])
+        case .suspend:
+            send([0x1A])
+        }
+    }
+
     override func send(source: Terminal, data: ArraySlice<UInt8>) {
         onQueryReply(Data(data))
+    }
+
+    private func sendArrow(finalByte: UInt8) {
+        let introducer: UInt8 = getTerminal().applicationCursor ? 0x4F : 0x5B
+        send([0x1B, introducer, finalByte])
     }
 }
 

@@ -8,6 +8,7 @@ nonisolated enum TerminalBulkConnectionError: Error, Sendable {
     case routeIDsExhausted
     case server(status: Int)
     case staleAfterBackground
+    case staleControlGeneration
 }
 
 actor TerminalBulkConnection {
@@ -25,6 +26,7 @@ actor TerminalBulkConnection {
     private var hasAcceptedEpoch = false
     private var hasIteratorReady = false
     private var hasPublishedReady = false
+    private var readyWaiters: [CheckedContinuation<Void, Error>] = []
     private var backgroundedAt: Date?
     private var isClosed = false
 
@@ -54,6 +56,7 @@ actor TerminalBulkConnection {
             isControlGenerationCurrent: isControlGenerationCurrent
         )
         try await bulk.start(ticket: ticket)
+        try await bulk.waitUntilReady()
         return bulk
     }
 
@@ -101,7 +104,12 @@ actor TerminalBulkConnection {
 
     func allocateCorrelationID() async throws -> UInt32 {
         guard let wire else { throw TerminalBulkConnectionError.invalidPeerMessage }
-        return try await wire.allocateCorrelationID()
+        do {
+            return try await wire.allocateCorrelationID()
+        } catch TerminalMultiplexWireError.correlationIDsExhausted {
+            await fail(TerminalMultiplexWireError.correlationIDsExhausted)
+            throw TerminalMultiplexWireError.correlationIDsExhausted
+        }
     }
 
     func setAppState(_ state: TerminalMultiplexAppState) async {
@@ -157,12 +165,20 @@ actor TerminalBulkConnection {
         }
     }
 
+    private func waitUntilReady() async throws {
+        if hasPublishedReady { return }
+        guard !isClosed else { throw TerminalBulkConnectionError.invalidPeerMessage }
+        try await withCheckedThrowingContinuation {
+            (continuation: CheckedContinuation<Void, Error>) in
+            readyWaiters.append(continuation)
+        }
+    }
+
     private func sendInvocation(bulkTicket: String) async throws {
         let input = TerminalMultiplexInvocationInput(bulkTicket: bulkTicket)
         let request = TerminalMultiplexInvocation(
             i: requestID,
             p: TerminalMultiplexInvocationPayload(
-                u: MobileTerminalWireContract.multiplexPath,
                 b: TerminalMultiplexInvocationBody(json: input),
                 h: [
                     MobileRuntimeWireContract.requestIdHeader: requestID,
@@ -213,13 +229,13 @@ actor TerminalBulkConnection {
                 throw TerminalBulkConnectionError.server(status: status)
             }
         case 3:
-            if message.p.e == "error" || message.p.e == "done" {
+            if message.p.e == .error || message.p.e == .done {
                 throw TerminalBulkConnectionError.iteratorEnded
             }
-            guard message.p.e == "message" else {
+            guard message.p.e == .message else {
                 throw TerminalBulkConnectionError.invalidPeerMessage
             }
-            guard message.p.d?.json.type == "ready" else {
+            guard message.p.d?.json.type == .ready else {
                 throw TerminalBulkConnectionError.invalidPeerMessage
             }
             hasIteratorReady = true
@@ -230,6 +246,9 @@ actor TerminalBulkConnection {
     }
 
     private func receiveBinary(_ data: Data) async throws {
+        guard await isControlGenerationCurrent() else {
+            throw TerminalBulkConnectionError.staleControlGeneration
+        }
         let sideChannel = try RuntimeOrpcSideChannelCodec.decode(data)
         guard sideChannel.requestID == requestID, let wire else {
             throw TerminalBulkConnectionError.invalidPeerMessage
@@ -264,6 +283,9 @@ actor TerminalBulkConnection {
         guard hasAcceptedEpoch, hasIteratorReady, !hasPublishedReady else { return }
         hasPublishedReady = true
         routeContinuations.values.forEach { $0.yield(.accepted) }
+        let waiters = readyWaiters
+        readyWaiters.removeAll()
+        waiters.forEach { $0.resume() }
     }
 
     private func fail(_ error: Error) async {
@@ -274,6 +296,9 @@ actor TerminalBulkConnection {
         await wire?.close()
         let details = terminalBulkCloseDetails(error)
         await connection.close(code: details.code, reason: details.reason)
+        let waiters = readyWaiters
+        readyWaiters.removeAll()
+        waiters.forEach { $0.resume(throwing: error) }
         finishRoutes(throwing: error)
     }
 

@@ -235,7 +235,10 @@ actor TerminalMultiplexDelivery {
         try await setOutputCredit(0)
         let correlationID = try await route.allocateCorrelationID()
         let payload = try JSONEncoder().encode(
-            TerminalSnapshotRequestRecord(requestedScrollbackRows: 1_000)
+            TerminalMultiplexSnapshotRequestRecord(
+                requestedScrollbackRows: 1_000,
+                snapshotMaxBytes: nil
+            )
         )
         try await send(
             opcode: .snapshotRequest,
@@ -305,8 +308,4 @@ actor TerminalMultiplexDelivery {
         self.pendingEndSequence = nil
         await publishEvent(.ended)
     }
-}
-
-nonisolated private struct TerminalSnapshotRequestRecord: Encodable {
-    let requestedScrollbackRows: UInt32
 }

@@ -7,6 +7,7 @@ actor RuntimeTerminalMultiplexer {
     private var bulk: TerminalBulkConnection?
     private var connectionTask: Task<TerminalBulkConnection, Error>?
     private var connectionAttempt: UUID?
+    private var bulkControlGeneration: Int?
     private var isShutdown = false
 
     init(
@@ -26,10 +27,19 @@ actor RuntimeTerminalMultiplexer {
             input: MobileTerminalHandleRequestWire(terminal: terminalID),
             output: MobileTerminalShowWire.self
         )
-        let activeBulk = try await activeBulk()
         let shown = try await shownTerminal
         guard !isShutdown else { throw RuntimeTerminalMultiplexerError.closed }
-        let route = try await activeBulk.openRoute()
+        var activeBulk = try await activeBulk()
+        let route: TerminalBulkRoute
+        do {
+            route = try await activeBulk.openRoute()
+        } catch TerminalBulkConnectionError.routeIDsExhausted {
+            await activeBulk.close()
+            bulk = nil
+            bulkControlGeneration = nil
+            activeBulk = try await self.activeBulk()
+            route = try await activeBulk.openRoute()
+        }
         let session = TerminalMultiplexSession(
             route: route,
             terminalID: terminalID,
@@ -48,14 +58,18 @@ actor RuntimeTerminalMultiplexer {
         connectionTask = nil
         let closingBulk = bulk
         bulk = nil
+        bulkControlGeneration = nil
         await closingBulk?.close()
     }
 
     private func activeBulk() async throws -> TerminalBulkConnection {
-        if let bulk, await bulk.isOpen() {
+        let currentGeneration = await controlSession.generation()
+        if let bulk, await bulk.isOpen(), bulkControlGeneration == currentGeneration {
             return bulk
         }
+        await bulk?.close()
         bulk = nil
+        bulkControlGeneration = nil
         if let connectionTask {
             let connected = try await connectionTask.value
             guard !isShutdown, connectionAttempt != nil else {
@@ -75,6 +89,7 @@ actor RuntimeTerminalMultiplexer {
                 throw CancellationError()
             }
             bulk = connected
+            bulkControlGeneration = await controlSession.generation()
             connectionTask = nil
             return connected
         } catch {
@@ -110,6 +125,9 @@ actor RuntimeTerminalMultiplexer {
                 ),
                 output: MobileTerminalOpenMultiplexWire.self
             )
+            guard await controlSession.generation() == controlGeneration else {
+                throw RuntimeTerminalMultiplexerError.controlGenerationChanged
+            }
             return try await TerminalBulkConnection.connect(
                 ticket: ticket,
                 credential: credential,
@@ -124,4 +142,5 @@ actor RuntimeTerminalMultiplexer {
 nonisolated enum RuntimeTerminalMultiplexerError: Error, Sendable {
     case capabilityUnavailable
     case closed
+    case controlGenerationChanged
 }

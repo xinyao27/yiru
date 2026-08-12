@@ -20,7 +20,11 @@ nonisolated private enum TerminalSurfaceAction: Sendable {
 @MainActor
 final class TerminalLiveModel {
     let surface: any TerminalSurface
-    private(set) var phase: TerminalLivePhase = .connecting
+    private(set) var phase: TerminalLivePhase = .connecting {
+        didSet {
+            surface.setInputEnabled(canAcceptUserInput)
+        }
+    }
     private(set) var title: String
     private(set) var currentDirectory: String?
     private(set) var gridSize: TerminalGridSize?
@@ -87,6 +91,7 @@ final class TerminalLiveModel {
                 self?.bellRevision += 1
             }
         )
+        surface.setInputEnabled(false)
     }
 
     var canAcceptUserInput: Bool {

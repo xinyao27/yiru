@@ -22,6 +22,9 @@ nonisolated func terminalBulkCloseDetails(_ error: Error) -> (code: Int, reason:
         if case .staleAfterBackground = bulkError {
             return (1001, "terminal epoch stale after background")
         }
+        if case .staleControlGeneration = bulkError {
+            return (1001, "terminal epoch stale after control reconnect")
+        }
         return (1002, "invalid terminal peer message")
     }
     if error is RuntimeOrpcSideChannelError {

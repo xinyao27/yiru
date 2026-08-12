@@ -46,6 +46,7 @@ protocol TerminalSurface: AnyObject {
     func restore(_ snapshot: TerminalReplaySnapshot)
     func clear()
     func focus()
+    func setInputEnabled(_ isEnabled: Bool)
 }
 
 nonisolated protocol TerminalSurfaceFactory: Sendable {

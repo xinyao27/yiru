@@ -220,8 +220,14 @@ actor TerminalMultiplexSession: TerminalSession {
         )
         guard record.terminal == terminalID,
             record.transportGeneration == transportGeneration,
+            record.ptyState == .running,
+            record.cols >= TerminalMultiplexStreamRecordWire.columnsMin,
+            record.cols <= TerminalMultiplexStreamRecordWire.columnsMax,
+            record.rows >= TerminalMultiplexStreamRecordWire.rowsMin,
+            record.rows <= TerminalMultiplexStreamRecordWire.rowsMax,
             record.initialState == .snapshot,
-            record.snapshotId != 0
+            let snapshotID = record.snapshotId,
+            snapshotID != 0
         else {
             throw TerminalMultiplexSessionError.invalidSubscription
         }
@@ -229,7 +235,7 @@ actor TerminalMultiplexSession: TerminalSession {
         if let viewport, viewport != sentViewport {
             try await sendResize(viewport)
         }
-        try await delivery.beginInitialSnapshot(id: record.snapshotId)
+        try await delivery.beginInitialSnapshot(id: snapshotID)
         try await deliveryState.reconcileAfterSubscription()
     }
 

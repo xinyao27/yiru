@@ -25,6 +25,12 @@ export function loadTerminalWireSource(packageRequire, z) {
       terminal.MobileTerminalOpenMultiplexRequestSchema
     ),
     MobileTerminalOpenMultiplexSchema: z.toJSONSchema(terminal.MobileTerminalOpenMultiplexSchema),
+    MobileTerminalMultiplexInvocationSchema: z.toJSONSchema(
+      terminal.MobileTerminalMultiplexInvocationSchema
+    ),
+    MobileTerminalMultiplexPeerMessageSchema: z.toJSONSchema(
+      terminal.MobileTerminalMultiplexPeerMessageSchema
+    ),
     TerminalMultiplexViewportRecordSchema: z.toJSONSchema(
       streamRecords.TerminalMultiplexViewportRecordSchema
     ),
@@ -51,6 +57,9 @@ export function loadTerminalWireSource(packageRequire, z) {
     ),
     TerminalMultiplexRevealRecordSchema: z.toJSONSchema(
       streamRecords.TerminalMultiplexRevealRecordSchema
+    ),
+    TerminalMultiplexSnapshotRequestRecordSchema: z.toJSONSchema(
+      streamRecords.TerminalMultiplexSnapshotRequestRecordSchema
     ),
     TerminalMultiplexEndRecordSchema: z.toJSONSchema(
       streamRecords.TerminalMultiplexEndRecordSchema
@@ -145,6 +154,16 @@ function readTerminalWireContract(schemas, domains) {
     'MobileTerminalOpenMultiplexSchema'
   )
   assertShape(open, ['bulkTicket', 'bulkEndpoint', 'expiresAt', 'maxFrameBytes'])
+  const invocation = requireObject(
+    schemas.MobileTerminalMultiplexInvocationSchema,
+    'MobileTerminalMultiplexInvocationSchema'
+  )
+  assertShape(invocation, ['i', 'p'])
+  const peerMessage = requireObject(
+    schemas.MobileTerminalMultiplexPeerMessageSchema,
+    'MobileTerminalMultiplexPeerMessageSchema'
+  )
+  assertShape(peerMessage, ['i', 't', 'p'], ['i', 'p'])
   const stream = readStreamRecordContract(schemas, domains.TERMINAL_MULTIPLEX_STREAM_RECORD_WIRE)
 
   const opcodes = Object.entries(domains.TerminalMultiplexOpcode)
@@ -170,7 +189,7 @@ function readTerminalWireContract(schemas, domains) {
   return { ...domains, opcodes, stream }
 }
 
-export function renderTerminalWireContract(contract) {
+export function renderTerminalWireContract(contract, schemas) {
   const opcodeCases = contract.opcodes
     .map(([name, value]) => `    case ${lowerFirst(name)} = ${value}`)
     .join('\n')
@@ -178,6 +197,7 @@ export function renderTerminalWireContract(contract) {
   const flow = contract.TERMINAL_MULTIPLEX_FLOW_RECORD_WIRE
   const snapshot = contract.TERMINAL_MULTIPLEX_SNAPSHOT_RECORD_WIRE
   const stream = contract.stream
+  const invocation = renderBulkInvocation(schemas)
   const handshakeCases = Object.entries(connection.phase)
     .map(([name, value]) => `    case ${name} = ${value}`)
     .join('\n')
@@ -333,7 +353,79 @@ enum TerminalMultiplexCrc32cWire {
 }
 
 ${renderTerminalStreamRecords(stream)}
+
+${invocation}
 `
+}
+
+function renderBulkInvocation(schemas) {
+  const invocation = requireObject(
+    schemas.MobileTerminalMultiplexInvocationSchema,
+    'MobileTerminalMultiplexInvocationSchema'
+  )
+  const invocationPayload = requireObject(
+    invocation.properties.p,
+    'MobileTerminalMultiplexInvocationSchema.p'
+  )
+  const path = requireStringLiteral(
+    invocationPayload.properties.u,
+    'MobileTerminalMultiplexInvocationSchema.p.u'
+  )
+  const peer = requireObject(
+    schemas.MobileTerminalMultiplexPeerMessageSchema,
+    'MobileTerminalMultiplexPeerMessageSchema'
+  )
+  const peerPayload = requireObject(peer.properties.p, 'MobileTerminalMultiplexPeerMessageSchema.p')
+  const peerEvents = requireStringEnum(
+    peerPayload.properties.e,
+    'MobileTerminalMultiplexPeerMessageSchema.p.e'
+  )
+  return `enum TerminalMultiplexPeerEventKind: String, Codable, Sendable {
+${peerEvents.map((value) => `    case ${value}`).join('\n')}
+}
+
+struct TerminalMultiplexInvocation: Encodable, Sendable {
+    let i: String
+    let p: TerminalMultiplexInvocationPayload
+}
+
+struct TerminalMultiplexInvocationPayload: Encodable, Sendable {
+    let u = ${JSON.stringify(path)}
+    let b: TerminalMultiplexInvocationBody
+    let h: [String: String]
+}
+
+struct TerminalMultiplexInvocationBody: Encodable, Sendable {
+    let json: TerminalMultiplexInvocationInput
+}
+
+struct TerminalMultiplexInvocationInput: Encodable, Sendable {
+    let bulkTicket: String
+}
+
+struct TerminalMultiplexPeerMessage: Decodable, Sendable {
+    let i: String
+    let t: Int?
+    let p: TerminalMultiplexPeerPayload
+}
+
+struct TerminalMultiplexPeerPayload: Decodable, Sendable {
+    let s: Int?
+    let e: TerminalMultiplexPeerEventKind?
+    let d: TerminalMultiplexPeerEvent?
+}
+
+struct TerminalMultiplexPeerEvent: Decodable, Sendable {
+    let json: TerminalMultiplexReadyEvent
+}
+
+struct TerminalMultiplexReadyEvent: Decodable, Sendable {
+    let type: TerminalMultiplexReadyType
+}
+
+enum TerminalMultiplexReadyType: String, Codable, Sendable {
+    case ready
+}`
 }
 
 function readStreamRecordContract(schemas, wire) {
@@ -369,11 +461,38 @@ function readStreamRecordContract(schemas, wire) {
     ],
     [
       'TerminalMultiplexSubscribedRecordSchema',
-      ['terminal', 'transportGeneration', 'initialState', 'snapshotId']
+      [
+        'terminal',
+        'transportGeneration',
+        'ptyState',
+        'cols',
+        'rows',
+        'displayMode',
+        'driver',
+        'initialState',
+        'snapshotId',
+        'truncated'
+      ],
+      [
+        'terminal',
+        'transportGeneration',
+        'ptyState',
+        'cols',
+        'rows',
+        'displayMode',
+        'driver',
+        'initialState',
+        'truncated'
+      ]
     ],
     ['TerminalMultiplexResizeRecordSchema', ['cols', 'rows', 'reason']],
     ['TerminalMultiplexErrorRecordSchema', ['message'], []],
     ['TerminalMultiplexRevealRecordSchema', ['stateVersion']],
+    [
+      'TerminalMultiplexSnapshotRequestRecordSchema',
+      ['requestedScrollbackRows', 'snapshotMaxBytes'],
+      ['requestedScrollbackRows']
+    ],
     ['TerminalMultiplexEndRecordSchema', ['exitCode', 'reason', 'historyKept']],
     ['TerminalMultiplexModelRestoreRecordSchema', ['reason', 'markerSeq', 'snapshotFollows']]
   ]
@@ -404,12 +523,9 @@ function readStreamRecordContract(schemas, wire) {
         'explicitWriteAck'
       )
     },
-    initialStates: [
-      requireStringLiteral(
-        objects.TerminalMultiplexSubscribedRecordSchema.properties.initialState,
-        'TerminalMultiplexSubscribedRecordSchema.initialState'
-      )
-    ],
+    ptyStates: enumValues('TerminalMultiplexSubscribedRecordSchema', 'ptyState'),
+    displayModes: enumValues('TerminalMultiplexSubscribedRecordSchema', 'displayMode'),
+    initialStates: enumValues('TerminalMultiplexSubscribedRecordSchema', 'initialState'),
     resizeReasons: enumValues('TerminalMultiplexResizeRecordSchema', 'reason'),
     endReasons: enumValues('TerminalMultiplexEndRecordSchema', 'reason'),
     restoreReasons: enumValues('TerminalMultiplexModelRestoreRecordSchema', 'reason')

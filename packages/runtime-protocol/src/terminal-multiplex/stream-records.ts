@@ -47,8 +47,17 @@ export const TerminalMultiplexSubscribeRecordSchema = z.object({
 export const TerminalMultiplexSubscribedRecordSchema = z.object({
   terminal: z.string().min(1),
   transportGeneration: z.uuid(),
-  initialState: z.literal('snapshot'),
-  snapshotId: z.number().int().min(1).max(U32_MAX)
+  ptyState: z.enum(['running', 'exited']),
+  cols: z.number().int().min(1).max(1_000),
+  rows: z.number().int().min(1).max(500),
+  displayMode: z.enum(['auto', 'desktop']),
+  driver: z.discriminatedUnion('kind', [
+    z.object({ kind: z.enum(['idle', 'desktop']) }),
+    z.object({ kind: z.literal('mobile'), clientId: z.string().min(1) })
+  ]),
+  initialState: z.enum(['snapshot', 'resume', 'empty']),
+  snapshotId: z.number().int().min(1).max(U32_MAX).optional(),
+  truncated: z.boolean()
 })
 
 export const TerminalMultiplexResizeRecordSchema = TerminalMultiplexViewportRecordSchema.extend({
@@ -59,6 +68,11 @@ export const TerminalMultiplexErrorRecordSchema = z.object({ message: z.string()
 
 export const TerminalMultiplexRevealRecordSchema = z.object({
   stateVersion: z.number().int().min(1).max(U32_MAX)
+})
+
+export const TerminalMultiplexSnapshotRequestRecordSchema = z.object({
+  requestedScrollbackRows: z.number().int().min(0).max(U32_MAX),
+  snapshotMaxBytes: z.number().int().min(0).max(U32_MAX).optional()
 })
 
 export const TerminalMultiplexEndRecordSchema = z.object({
