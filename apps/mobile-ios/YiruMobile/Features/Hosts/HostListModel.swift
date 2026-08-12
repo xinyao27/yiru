@@ -10,12 +10,16 @@ nonisolated enum HostListPhase {
 @Observable
 final class HostListModel {
     private(set) var phase: HostListPhase = .loading
+    private(set) var connectionSnapshots: [String: RuntimeConnectionSnapshot] = [:]
 
     @ObservationIgnored
     private let repository: any HostRepository
+    @ObservationIgnored
+    private let connectionRuntime: any HostConnectionRuntime
 
-    init(repository: any HostRepository) {
+    init(repository: any HostRepository, connectionRuntime: any HostConnectionRuntime) {
         self.repository = repository
+        self.connectionRuntime = connectionRuntime
     }
 
     func load() async {
@@ -28,5 +32,21 @@ final class HostListModel {
             guard !Task.isCancelled else { return }
             phase = .failed("Yiru could not read the hosts stored on this device.")
         }
+    }
+
+    func observe() async {
+        await load()
+        guard case .loaded(let hosts) = phase else { return }
+        let snapshots = await connectionRuntime.connectionSnapshots(
+            forHostIDs: hosts.map(\.id)
+        )
+        for await snapshots in snapshots {
+            guard !Task.isCancelled else { return }
+            connectionSnapshots = snapshots
+        }
+    }
+
+    func reconnect(hostID: String) async {
+        await connectionRuntime.reconnect(hostID: hostID)
     }
 }

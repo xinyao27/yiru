@@ -1,12 +1,13 @@
 import Foundation
 
-actor RuntimeClient: HomeRuntime, WorkspaceRepository {
+actor RuntimeClient: HomeRuntime, HostConnectionRuntime, WorkspaceRepository {
     private let hosts: any HostRepository
     private let timeout: Duration
     private let revivalMonitor: ConnectionRevivalMonitor
     private var sessions: [String: ManagedSession] = [:]
     private var snapshots: [String: RuntimeConnectionSnapshot] = [:]
     private var homeContinuations: [UUID: AsyncStream<RuntimeConnectionState>.Continuation] = [:]
+    private var snapshotSubscriptions: [UUID: SnapshotSubscription] = [:]
     private var primaryHostID: String?
     private var primaryHostName: String?
     private var isMonitoringNetwork = false
@@ -46,6 +47,32 @@ actor RuntimeClient: HomeRuntime, WorkspaceRepository {
         guard let credential = try? await primaryCredential() else { return }
         let session = await session(for: credential)
         await session.forceReconnect()
+    }
+
+    func connectionSnapshots(forHostIDs hostIDs: [String]) async -> AsyncStream<
+        [String: RuntimeConnectionSnapshot]
+    > {
+        let id = UUID()
+        let hostIDs = Set(hostIDs)
+        let (stream, continuation) = AsyncStream.makeStream(
+            of: [String: RuntimeConnectionSnapshot].self,
+            bufferingPolicy: .bufferingNewest(1)
+        )
+        snapshotSubscriptions[id] = SnapshotSubscription(
+            hostIDs: hostIDs,
+            continuation: continuation
+        )
+        continuation.onTermination = { [weak self] _ in
+            Task { await self?.removeSnapshotSubscription(id) }
+        }
+
+        for hostID in hostIDs {
+            guard let credential = try? await credential(for: hostID) else { continue }
+            let session = await session(for: credential)
+            await session.start()
+        }
+        continuation.yield(filteredSnapshots(hostIDs: hostIDs))
+        return stream
     }
 
     func applicationDidBecomeActive() async {
@@ -127,6 +154,12 @@ actor RuntimeClient: HomeRuntime, WorkspaceRepository {
 
     private func record(_ snapshot: RuntimeConnectionSnapshot) {
         snapshots[snapshot.hostID] = snapshot
+        for subscription in snapshotSubscriptions.values
+        where subscription.hostIDs.contains(snapshot.hostID) {
+            subscription.continuation.yield(
+                filteredSnapshots(hostIDs: subscription.hostIDs)
+            )
+        }
         guard snapshot.hostID == primaryHostID else { return }
         let state = map(snapshot)
         homeContinuations.values.forEach { $0.yield(state) }
@@ -180,11 +213,24 @@ actor RuntimeClient: HomeRuntime, WorkspaceRepository {
     private func removeHomeContinuation(_ id: UUID) {
         homeContinuations.removeValue(forKey: id)
     }
+
+    private func removeSnapshotSubscription(_ id: UUID) {
+        snapshotSubscriptions.removeValue(forKey: id)
+    }
+
+    private func filteredSnapshots(hostIDs: Set<String>) -> [String: RuntimeConnectionSnapshot] {
+        snapshots.filter { hostIDs.contains($0.key) }
+    }
 }
 
 nonisolated private struct ManagedSession: Sendable {
     let credential: HostCredential
     let session: RuntimeHostSession
+}
+
+nonisolated private struct SnapshotSubscription: Sendable {
+    let hostIDs: Set<String>
+    let continuation: AsyncStream<[String: RuntimeConnectionSnapshot]>.Continuation
 }
 
 nonisolated private enum RuntimeClientError: Error {

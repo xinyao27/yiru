@@ -21,6 +21,7 @@ struct AppView: View {
                 case .hosts:
                     HostListView(
                         repository: model.dependencies.hostRepository,
+                        connectionRuntime: model.dependencies.hostConnectionRuntime,
                         selectHost: model.showWorkspaces,
                         showPairing: model.showPairing
                     )
