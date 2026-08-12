@@ -1033,7 +1033,7 @@ Why：现有 snapshot > replay > coldRestore 优先级由 renderer 分支决定�
 3. Host header 必须精确匹配 main 分配的 127.0.0.1:port。
 4. HTTP upgrade Origin 必须在 main 生成的精确 allowlist 中： - packaged build 为实际 Electron file renderer origin；- dev build 为 ELECTRON_RENDERER_URL 的 exact origin；- 缺失、null、通配和普通网页 origin 默认拒绝。
 5. 首个应用 frame 在 2 秒内提交至少 256 bit 的 process-scoped token。
-6. token 由 main 通过 audited preload contract 交给 renderer；不得进入 URL、localStorage、日志、crash breadcrumb 或 analytics。
+6. token 由 main 通过 audited bootstrap adapter 交给 renderer；不得进入 URL、localStorage、日志、crash breadcrumb 或 analytics。
 7. token 比较使用 constant-time compare；连续失败受速率限制。
 8. BrowserWindow 保持 contextIsolation、sandbox 和 webSecurity。任一条件不满足时必须拒绝连接，不能自动降级为“loopback 所以可信”。token 每次 app 启动轮换；renderer reload 可以复用同一 process token，app restart 不可复用。
 

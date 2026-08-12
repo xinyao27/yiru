@@ -84,13 +84,8 @@ function toRuntimeAutomationUpdateInput(
   }
 }
 
-// Why: the local target used to shortcut through `rendererHostClient.automations.*`
-// (raw preload IPC) instead of the oRPC contract, even though every one of
-// these procedures is already direct-wired and the `environment` branch below
-// proves the contract shape is correct. That left the local path as the only
-// caller still on the legacy channel, and left automations unreachable from
-// web builds (whose preload has no `automations` group at all). Routing local
-// through the same `callRuntimeOrpc` client as remote hosts closes both gaps.
+// Why: local and remote targets must use the same oRPC procedure. A local-only
+// shortcut would bypass host selection and make the browser path diverge.
 export async function listAutomationsForTarget(
   target: AutomationHostTarget
 ): Promise<Automation[]> {
@@ -166,12 +161,9 @@ export async function runAutomationNowForTarget(
   return result.run
 }
 
-// Why: external (Hermes/OpenClaw) cron managers were still on raw preload IPC
-// with no host-target concept at all — always asking whichever process the
-// renderer happened to be running in. The contract's own `target: {type:
-// 'local'}` field only means "the answering host's own managers"; which host
-// answers is still this call's `AutomationHostTarget`, same as every other
-// automation procedure above.
+// Why: the contract's `target: {type: 'local'}` means the answering host's own
+// managers. `AutomationHostTarget` still decides which host answers, matching
+// every other automation procedure above.
 export async function listExternalAutomationManagersForTarget(
   target: AutomationHostTarget
 ): Promise<ExternalAutomationManager[]> {

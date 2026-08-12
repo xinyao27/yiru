@@ -19,7 +19,7 @@ hosts. It deliberately has no JavaScript distribution build:
 
 Consumers use only these exports; they never import `@yiru/client/src/*`. The package owns its
 typecheck, lint, i18n generation, and UI policy gates. A client implementation change should not
-require a desktop edit unless it also changes the `@yiru/shared` preload contract.
+require a desktop edit unless it also changes a host-facing runtime or shell contract.
 
 ## Host setup
 

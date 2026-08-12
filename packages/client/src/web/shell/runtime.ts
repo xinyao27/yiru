@@ -1,6 +1,6 @@
+import type { ShellRuntimeStateApi } from '~renderer/runtime/shell-system-client'
 import type { RuntimeSyncWindowGraph } from '~shared/runtime-types'
 
-import type { ShellRuntimeStateApi } from '../../runtime/shell-system-client'
 import { callWebRuntimeProcedure } from '../runtime-connection'
 
 export function createWebShellRuntimeApi(): ShellRuntimeStateApi {

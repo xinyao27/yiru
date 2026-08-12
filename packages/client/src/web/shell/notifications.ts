@@ -1,4 +1,4 @@
-import type { ShellNotificationsApi } from '../../runtime/shell-notifications-client'
+import type { ShellNotificationsApi } from '~renderer/runtime/shell-notifications-client'
 
 export function createWebShellNotificationsApi(): ShellNotificationsApi {
   return {

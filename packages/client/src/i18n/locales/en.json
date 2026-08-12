@@ -214,26 +214,23 @@
         "feedbackUnavailable": "Feedback is unavailable in the web client.",
         "exportHtmlToPdfUnavailable": "Exporting to PDF is unavailable in the web client."
       },
+      "runtime": {
+        "shellBoundary": {
+          "unavailable": "Unavailable on web."
+        }
+      },
       "web": {
-        "preload": {
-          "api": {
-            "31bfe8ae1a": "Unavailable in the web client.",
-            "67ec964791": "Cookie import is unavailable in the web client.",
-            "275a776357": "Hover extraction is unavailable in the web client.",
-            "8dfcb7a351": "Selection screenshots are unavailable in the web client.",
-            "31bea294d5": "Grab mode is unavailable in the web client.",
-            "b8a1618172": "Pull request detail generation is unavailable in the web client.",
-            "e57c82d276": "Commit message model discovery is unavailable in the web client.",
-            "9fc90740b6": "Commit message generation is unavailable in the web client.",
-            "52bee9d8a0": "Conflicting custom shortcuts were ignored: {{value0}}.",
-            "32f15bdb0f": "Unknown platform \"{{value0}}\" was ignored.",
-            "0a69fcd8bc": "platforms must be an object with darwin, linux, or win32 sections.",
-            "10898045f3": "Shortcut for \"{{value0}}\" was ignored: Use a string array.",
-            "36761d9604": "Unknown keybinding action \"{{value0}}\" was ignored.",
-            "d2e43e426a": "{{value0}} must be an object.",
-            "fb290366b2": "Unavailable on web.",
-            "76122208ca": "Shortcut for \"{{value0}}\" was ignored: {{value1}}"
-          }
+        "keybindings": {
+          "conflictingShortcuts": "Conflicting custom shortcuts were ignored: {{value0}}.",
+          "invalidObject": "{{value0}} must be an object.",
+          "invalidPlatforms": "platforms must be an object with darwin, linux, or win32 sections.",
+          "invalidShortcut": "Shortcut for \"{{value0}}\" was ignored: {{value1}}",
+          "invalidShortcutList": "Shortcut for \"{{value0}}\" was ignored: Use a string array.",
+          "unknownAction": "Unknown keybinding action \"{{value0}}\" was ignored.",
+          "unknownPlatform": "Unknown platform \"{{value0}}\" was ignored."
+        },
+        "shell": {
+          "repoHostUnavailable": "Unavailable in the web client."
         },
         "runtime": {
           "environment": {

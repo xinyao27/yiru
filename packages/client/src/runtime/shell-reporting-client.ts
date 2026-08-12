@@ -165,18 +165,18 @@ const webCrashReportsApi: ShellCrashReportsApi = {
     Promise.resolve({
       ok: false,
       status: null,
-      error: translate('auto.web.web.preload.api.fb290366b2', 'Unavailable on web.'),
+      error: translate('auto.web.runtime.shellBoundary.unavailable', 'Unavailable on web.'),
       report: null
     }),
   copyLatestDiagnostics: () =>
     Promise.resolve({
       ok: false,
-      error: translate('auto.web.web.preload.api.fb290366b2', 'Unavailable on web.')
+      error: translate('auto.web.runtime.shellBoundary.unavailable', 'Unavailable on web.')
     })
 }
 
 const diagnosticsUnavailableOnWeb = (): Error =>
-  new Error(translate('auto.web.web.preload.api.fb290366b2', 'Unavailable on web.'))
+  new Error(translate('auto.web.runtime.shellBoundary.unavailable', 'Unavailable on web.'))
 
 const webDiagnosticsApi: ShellDiagnosticsApi = {
   getStatus: () =>

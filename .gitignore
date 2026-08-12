@@ -9,8 +9,6 @@ apps/desktop/src/**/*.d.ts
 /apps/desktop/electron.vite.config.js
 /apps/desktop/electron.vite.config.d.ts
 !apps/desktop/src/main/types/hosted-git-info.d.ts
-!apps/desktop/src/preload/api-types.d.ts
-!apps/desktop/src/preload/index.d.ts
 !packages/client/src/env.d.ts
 !packages/client/src/mermaid.d.ts
 !apps/desktop/src/types/build-constants.d.ts

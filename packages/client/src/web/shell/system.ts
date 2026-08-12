@@ -1,4 +1,4 @@
-import type { ShellNotificationsApi } from '../../runtime/shell-notifications-client'
+import type { ShellNotificationsApi } from '~renderer/runtime/shell-notifications-client'
 import type {
   ShellAppApi,
   ShellGitHubApi,
@@ -6,7 +6,8 @@ import type {
   ShellRuntimeStateApi,
   ShellStarNagApi,
   ShellUpdaterApi
-} from '../../runtime/shell-system-client'
+} from '~renderer/runtime/shell-system-client'
+
 import { webShellAppApi } from './app'
 import { createWebShellGitHubApi } from './github'
 import { createWebShellNotificationsApi } from './notifications'

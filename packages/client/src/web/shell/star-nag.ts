@@ -1,4 +1,4 @@
-import type { ShellStarNagApi } from '../../runtime/shell-system-client'
+import type { ShellStarNagApi } from '~renderer/runtime/shell-system-client'
 
 const noopUnsubscribe = (): void => {}
 

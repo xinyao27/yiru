@@ -1,4 +1,4 @@
-import type { ShellGitHubApi } from '../../runtime/shell-system-client'
+import type { ShellGitHubApi } from '~renderer/runtime/shell-system-client'
 
 export function createWebShellGitHubApi(): ShellGitHubApi {
   return {

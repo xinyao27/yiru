@@ -1,4 +1,4 @@
-import type { ShellUpdaterApi } from '../../runtime/shell-system-client'
+import type { ShellUpdaterApi } from '~renderer/runtime/shell-system-client'
 
 const noopUnsubscribe = (): void => {}
 

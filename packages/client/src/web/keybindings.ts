@@ -135,9 +135,13 @@ function normalizeOverrides(
     diagnostics.push({
       severity: 'error',
       section,
-      message: translate('auto.web.web.preload.api.d2e43e426a', '{{value0}} must be an object.', {
-        value0: section
-      })
+      message: translate(
+        'auto.web.web.keybindings.invalidObject',
+        '{{value0}} must be an object.',
+        {
+          value0: section
+        }
+      )
     })
     return {}
   }
@@ -149,7 +153,7 @@ function normalizeOverrides(
         section,
         actionId,
         message: translate(
-          'auto.web.web.preload.api.36761d9604',
+          'auto.web.web.keybindings.unknownAction',
           'Unknown keybinding action "{{value0}}" was ignored.',
           { value0: actionId }
         )
@@ -162,7 +166,7 @@ function normalizeOverrides(
         section,
         actionId,
         message: translate(
-          'auto.web.web.preload.api.10898045f3',
+          'auto.web.web.keybindings.invalidShortcutList',
           'Shortcut for "{{value0}}" was ignored: Use a string array.',
           { value0: actionId }
         )
@@ -176,7 +180,7 @@ function normalizeOverrides(
         section,
         actionId,
         message: translate(
-          'auto.web.web.preload.api.76122208ca',
+          'auto.web.web.keybindings.invalidShortcut',
           'Shortcut for "{{value0}}" was ignored: {{value1}}',
           {
             value0: actionId,
@@ -203,7 +207,7 @@ function normalizePlatformOverrides(
       severity: 'error',
       section: 'platforms',
       message: translate(
-        'auto.web.web.preload.api.0a69fcd8bc',
+        'auto.web.web.keybindings.invalidPlatforms',
         'platforms must be an object with darwin, linux, or win32 sections.'
       )
     })
@@ -216,7 +220,7 @@ function normalizePlatformOverrides(
         severity: 'warning',
         section: `platforms.${platform}`,
         message: translate(
-          'auto.web.web.preload.api.32f15bdb0f',
+          'auto.web.web.keybindings.unknownPlatform',
           'Unknown platform "{{value0}}" was ignored.',
           { value0: platform }
         )
@@ -249,7 +253,7 @@ function removeConflicts(
     diagnostics.push({
       severity: 'error',
       message: translate(
-        'auto.web.web.preload.api.52bee9d8a0',
+        'auto.web.web.keybindings.conflictingShortcuts',
         'Conflicting custom shortcuts were ignored: {{value0}}.',
         { value0: Array.from(conflicting).join(', ') }
       )

@@ -101,7 +101,7 @@ export function findImportPolicyViolations(gitRoot, files) {
         sourceArea?.alias === '~renderer'
       ) {
         violations.push(
-          `${file}: '${specifier}' — client must reach its host through the preload contract`
+          `${file}: '${specifier}' — client must reach its host through shell/runtime contracts`
         )
         continue
       }

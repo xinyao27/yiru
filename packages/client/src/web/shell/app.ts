@@ -1,4 +1,4 @@
-import type { ShellAppApi } from '../../runtime/shell-system-client'
+import type { ShellAppApi } from '~renderer/runtime/shell-system-client'
 
 export const webShellAppApi: ShellAppApi = {
   getIdentity: () =>
