@@ -46,7 +46,7 @@ function tryMakePaneKey(tabId: string, leafId: string): string | null {
 export function revealTerminalSessionViaShell(
   input: ShellServicesTerminalRevealInput
 ): ShellServicesTerminalRevealOutput {
-  if (isRuntimeEnvironmentActive()) {
+  if (isRuntimeEnvironmentActive() && input.source !== 'runtime-session') {
     throw new Error(
       translate(
         'auto.hooks.useIpcEvents.60428567b4',

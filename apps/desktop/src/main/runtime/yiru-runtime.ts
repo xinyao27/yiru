@@ -668,7 +668,10 @@ import {
 import { selectExactWorkerProviderSession } from './orchestration/worker-provider-session'
 import { RuntimeProviderUsage } from './provider-usage/capabilities'
 import { joinWorktreeRelativePath } from './relative-paths'
-import type { ShellServicesConnectionId } from './rpc/orpc/shell-services-identity'
+import {
+  isWebShellServicesConnectionId,
+  type ShellServicesConnectionId
+} from './rpc/orpc/shell-services-identity'
 import {
   dispatchShellUICommand,
   readMobileMarkdownViaShell,
@@ -17139,7 +17142,10 @@ export class YiruRuntimeService {
             activate: presentation === 'focused',
             ...(presentation ? { presentation } : {}),
             tabId,
-            leafId
+            leafId,
+            ...(isWebShellServicesConnectionId(this.shellConnectionId)
+              ? { source: 'runtime-session' as const }
+              : {})
           })
           if (!revealResult.ok) {
             throw new Error('renderer_unavailable')
@@ -18048,7 +18054,10 @@ export class YiruRuntimeService {
             ...(pty.pty.launchToken ? { launchToken: pty.pty.launchToken } : {}),
             ...(pty.pty.launchAgent ? { launchAgent: pty.pty.launchAgent } : {}),
             ...(pty.pty.tabId !== null ? { tabId: pty.pty.tabId } : {}),
-            ...(parsedPaneKey ? { leafId: parsedPaneKey.leafId } : {})
+            ...(parsedPaneKey ? { leafId: parsedPaneKey.leafId } : {}),
+            ...(isWebShellServicesConnectionId(this.shellConnectionId)
+              ? { source: 'runtime-session' as const }
+              : {})
           })
         : null
       return {
@@ -18098,7 +18107,10 @@ export class YiruRuntimeService {
       viewMode: 'chat',
       isFriday: true,
       activate: false,
-      presentation: 'background'
+      presentation: 'background',
+      ...(isWebShellServicesConnectionId(this.shellConnectionId)
+        ? { source: 'runtime-session' as const }
+        : {})
     })
     if (!revealed.ok) {
       throw new Error('runtime_unavailable')
@@ -18262,7 +18274,10 @@ export class YiruRuntimeService {
         leafId,
         splitFromLeafId: parsedPaneKey.leafId,
         splitDirection: direction,
-        splitTelemetrySource: opts.telemetrySource
+        splitTelemetrySource: opts.telemetrySource,
+        ...(isWebShellServicesConnectionId(this.shellConnectionId)
+          ? { source: 'runtime-session' as const }
+          : {})
       })
       if (!revealResult.ok) {
         throw new Error('renderer_unavailable')

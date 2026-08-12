@@ -56,9 +56,8 @@ export const ShellServicesTerminalCreateInputSchema = z
     title: z.string().optional(),
     activate: z.boolean().optional(),
     presentation: z.enum(['background', 'focused']).optional(),
-    // Why: only the host-owned runtime-session bridge (mobile) may bypass the
-    // renderer's active-remote-runtime local-terminal guard; desktop-originated
-    // creates must omit this.
+    // Why: only host-owned runtime-session requests may bypass the shell's
+    // active-remote-runtime local-terminal guard; desktop-originated creates omit this.
     source: z.literal('runtime-session').optional()
   })
   .strict()
@@ -109,7 +108,10 @@ export const ShellServicesTerminalRevealInputSchema = z
     leafId: z.string().optional(),
     splitFromLeafId: z.string().optional(),
     splitDirection: z.enum(['horizontal', 'vertical']).optional(),
-    splitTelemetrySource: z.enum(SHELL_SERVICES_TERMINAL_PANE_SPLIT_SOURCES).optional()
+    splitTelemetrySource: z.enum(SHELL_SERVICES_TERMINAL_PANE_SPLIT_SOURCES).optional(),
+    // Why: a headless runtime owns the PTY that its paired Web shell adopts.
+    // Desktop-local reveals omit this so an active remote environment still blocks them.
+    source: z.literal('runtime-session').optional()
   })
   .strict()
 
