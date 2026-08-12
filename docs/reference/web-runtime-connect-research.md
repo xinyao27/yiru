@@ -20,17 +20,14 @@ yiru connect
 ```
 
 Web 端应该实时观察配对状态，CLI 一连上就自动进入下一步，不要求用户把 runtime 地址、
-WebSocket URL、API key 或机器 ID 再复制回浏览器。需要常驻的用户再选择：
-
-```bash
-yiru connect service install
-```
+WebSocket URL、API key 或机器 ID 再复制回浏览器。连接生命周期完全由用户当前执行的
+`yiru connect` 管理：命令运行时在线，用户退出命令后离线，不创建开机启动项或后台服务。
 
 这套设计综合了几种经过验证的做法：
 
 - GitHub CLI / VS Code Remote Tunnels：首次浏览器授权，凭据落入本机安全存储；以后命令不再带
   token。
-- Cloudflare Tunnel / ngrok：本机只建立出站连接，服务模式负责开机启动、崩溃恢复和日志。
+- Cloudflare Tunnel / ngrok：本机只建立出站连接，不要求开放公网端口。
 - Tailscale：注册凭据和注册后的设备身份分离；一次性 key 用完自动失效，删除设备才真正撤销
   已注册节点。
 - Gitpod Runner：Web 控制面签发一次性 `exchangeToken`，runner 用它换取自己的长期身份；这是
@@ -107,8 +104,8 @@ Linux keyring 调用还专门设了 5 秒超时并提供权限为 `0600` 的文�
 对 Yiru 的启示：
 
 - `yiru connect` 应把“启动 runtime + 建立云连接 + 输出 Web ready 状态”合并成一次动作。
-- 服务管理属于 `connect` 命令组，且 status/log/uninstall 必须与 install 同期提供。
 - 连接成功后输出一个用户真正想打开的 URL，比输出底层 endpoint/pairing file 更顺畅。
+- VS Code 的常驻服务是其产品选择，不纳入 Yiru 当前范围。
 
 ### 2.3 Cloudflare Tunnel / cloudflared
 
@@ -199,7 +196,7 @@ launchd，并使用系统日志。来源：
 对 Yiru 的启示：
 
 - “设置一次，日常命令只有两个词”是正确目标。
-- 独立 machine credential 和 OS 原生日志/服务管理值得直接采用。
+- 独立 machine credential 值得直接采用；ngrok 的后台服务模式不纳入 Yiru 当前范围。
 - 不采用 ngrok 的长期 authtoken copy/paste；它比一次性 exchange grant 更容易进入历史或截图。
 
 ### 2.6 Gitpod Runner
@@ -224,7 +221,6 @@ exchange secret，本机兑换后拥有独立身份；Web 不需要把长期 run
 | 安装 | dashboard 按 OS/arch 显示包管理器或脚本 | 一行脚本为主，旁边提供“查看脚本”和包管理器选项 |
 | 首次授权 | 浏览器授权或 Web 生成短期注册 token | Web-first single-use `--pair`；CLI-first 用浏览器/device flow |
 | 日常运行 | 凭据本地保存，命令不再带 secret | `yiru connect` |
-| 后台常驻 | systemd / launchd / Windows Service | 同一用户身份下的 systemd user / LaunchAgent / Windows per-user startup |
 | 网络 | 主机主动建立出站加密长连接 | `wss://...:443`，不开放入站端口 |
 | 恢复 | heartbeat + 有抖动的指数退避 + 服务监督 | 自动重连，终端沿用 epoch/snapshot recovery |
 | 身份 | enrollment secret 与 device key 分离 | 本机生成 machine key；pair code 不成为长期 credential |
@@ -250,8 +246,6 @@ exchange secret，本机兑换后拥有独立身份；Web 不需要把长期 run
 6. CLI 建立出站 WSS；Web 通过自己已认证的 WebSocket/SSE 看到 `waiting → paired → online`，无需
    用户再点“继续”。
 7. Web 自动打开这台机器；终端显示机器名、Web URL 和“保持此终端运行”的简短提示。
-8. Web 询问是否开机自动连接；选择后给出 `yiru connect service install`，不要在首次配对时偷偷
-   请求 sudo。
 
 ### 4.2 CLI-first：无 Web 页面时的兜底
 
@@ -267,18 +261,14 @@ exchange secret，本机兑换后拥有独立身份；Web 不需要把长期 run
 [RFC 7636 PKCE](https://www.rfc-editor.org/rfc/rfc7636)、
 [RFC 9449 DPoP](https://www.rfc-editor.org/rfc/rfc9449)。
 
-### 4.3 日常与服务命令
+### 4.3 日常命令
 
 建议命令面固定为：
 
 ```text
 yiru connect                         前台连接；无身份时进入首次授权
 yiru connect --pair <grant>          Web-first 首次配对并继续前台连接
-yiru connect status                  本机身份、服务和云连接状态
-yiru connect service install         注册并启动用户级系统服务
-yiru connect service logs            打开/输出系统服务日志
-yiru connect service restart         重启服务
-yiru connect service uninstall       停止并移除服务，保留机器身份
+yiru connect status                  本机身份和当前云连接状态
 yiru connect forget                  删除本机身份并请求服务端撤销机器
 ```
 
@@ -299,7 +289,7 @@ yiru connect forget                  删除本机身份并请求服务端撤销�
 ### 5.2 Machine identity
 
 - CLI 本机生成 Ed25519 identity key；服务端只保存 public key。
-- private key 与普通设置分开。macOS/Windows 优先 OS keychain；headless Linux/user service 使用
+- private key 与普通设置分开。macOS/Windows 优先 OS keychain；headless Linux 使用
   owner-only `0600` 文件，并在 TPM/Secret Service 可用时加密。keyring 超时必须是可诊断错误。
 - 不把长期 bearer 放进 argv、环境变量、URL 或普通 JSON 配置。
 - 每次建立云连接先完成 challenge/signature，再签发几分钟有效的 session token；token 绑定
@@ -344,7 +334,6 @@ Yiru 已有自有 CLI spec/parser、`undici`、`ws`、`zod`、`tweetnacl`、oRPC
 | schema | `zod` 只放在网络边界；协议类型放 `packages/runtime-protocol` |
 | machine key | Node `crypto` 的 Ed25519；现有 `tweetnacl` 继续负责跨端 E2EE，不混用职责 |
 | control RPC | 延续 oRPC；pair/exchange 是云控制面 API，不伪装成本地 preload capability |
-| service | 薄 OS adapter：LaunchAgent、systemd user service、Windows per-user Scheduled Task/startup；配置只含非秘密参数和 identity path |
 
 如果未来把 standalone connector 拆成原生二进制，VS Code 已验证的 Rust 组合
 `clap + reqwest + tokio + tokio-tungstenite + keyring` 是合理参考；当前没有足够收益支撑先重写。
@@ -390,7 +379,7 @@ Web 页面建议只有三步，并且每一步都由服务端状态自动完成�
 
 1. **安装 Yiru**：OS tabs、复制按钮、`yiru --version` 自检、查看脚本链接。
 2. **连接这台电脑**：创建 grant 并显示唯一一行 `yiru connect --pair ...`；倒计时和重新生成。
-3. **已连接**：显示机器名/OS/version，自动进入 workbench；可选“开机自动连接”。
+3. **已连接**：显示机器名/OS/version，自动进入 workbench。
 
 流畅度要求：
 
@@ -452,15 +441,13 @@ Web auth，local storage 只记最后选择的 machine ID 和非秘密 UI 设置
 完成标准：用户只复制两条命令（安装与首次 connect），不复制 endpoint、pairing file 或 API key；
 CLI online 后 Web 自动前进并打开机器；移动端宽度也可完成流程。
 
-### Phase 5：installer 与系统服务
+### Phase 5：installer 与发布产物
 
-发布 macOS/Linux/Windows headless artifact、manifest 和 install script；实现 LaunchAgent、
-systemd user service、Windows per-user startup 的 install/status/log/restart/uninstall。Yiru 必须以
-执行配对的同一用户运行，才能访问该用户的 repo、SSH key 和 agent 凭据；需要无人登录运行的
-Windows Service 作为后续显式 admin 模式，不作为默认路径。
+发布 macOS/Linux/Windows headless artifact、manifest 和 install script。`yiru connect` 始终以前台
+进程运行，并使用执行配对的同一用户身份访问该用户的 repo、SSH key 和 agent 凭据。
 
-完成标准：脚本幂等升级、校验签名、失败不破坏旧版本；服务重启机器后上线；uninstall 不误删
-用户 repo；service 和 foreground 模式有 singleton/ownership 防冲突。
+完成标准：脚本幂等升级、校验签名、失败不破坏旧版本；uninstall 不误删用户 repo；同一机器重复
+运行 `yiru connect` 时有明确的 singleton/ownership 行为。
 
 ### Phase 6：安全与运维闸门
 
@@ -476,12 +463,12 @@ Windows Service 作为后续显式 admin 模式，不作为默认路径。
 流程验证。
 
 发布顺序：内部账号 → opt-in canary → 小比例 Web 用户 → 默认开放。每阶段验证 macOS、Linux、
-Windows，前台/服务，代理网络，睡眠唤醒，断网重连，密钥撤销，terminal 长流和多浏览器竞争。
+Windows、代理网络、断网重连、密钥撤销、terminal 长流和多浏览器竞争。
 
 ## 9. 不建议做的事
 
 - 不把长期 `--api-key`、runtime token 或 refresh token 放进复制命令。
-- 不让安装脚本同时静默 sudo、配对并安装常驻服务；权限提升必须是单独且可解释的用户选择。
+- 不让安装脚本静默配对、创建后台进程或修改系统启动项。
 - 不要求最终用户理解 `ws://127.0.0.1:6768`、pairing file、端口转发或 mixed content。
 - 不把完整 runtime credential 存进 Web local storage；云 Web 应使用账号 session 和 machine ACL。
 - 不为第一版先做 QUIC、P2P 或自研 OAuth；先让出站 WSS/443、撤销和自动重连可靠。
@@ -501,6 +488,6 @@ yiru.ai/app 创建 single-use grant
   → Web revoke 后 socket 立即断开且不能重连
 ```
 
-先把这条链路做到跨网络、可撤销、可恢复、无长期命令行 secret，再增加 service installer、
-CLI-first device flow 和多机器管理。这样每一个阶段都有完整用户价值，同时不会把未经验证的
-relay、安装与身份方案一次性耦合。
+先把这条链路做到跨网络、可撤销、可恢复、无长期命令行 secret，再增加 CLI-first device flow
+和多机器管理。这样每一个阶段都有完整用户价值，同时不会把未经验证的 relay、安装与身份方案
+一次性耦合。
