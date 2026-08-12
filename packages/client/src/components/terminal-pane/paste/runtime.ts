@@ -1,8 +1,7 @@
 import { parseWslUncPath } from '@yiru/workbench-model/platform'
+import { isRuntimeTerminalPtyId } from '~renderer/runtime/terminal-stream'
 
 import type { TerminalPasteRuntime } from './model'
-
-const REMOTE_PTY_ID_PREFIX = 'remote:'
 
 type TerminalPasteRuntimeTransport = {
   getConnectionId?: () => string | null | undefined
@@ -35,8 +34,8 @@ export function resolveTerminalPasteRuntime({
 }: ResolveTerminalPasteRuntimeArgs): TerminalPasteRuntime {
   const windowsConpty = isWindowsConpty === undefined ? {} : { isWindowsConpty }
 
-  if (isRemoteRuntimePastePtyId(ptyId)) {
-    return { platform, runtimeKey: `remote:${ptyId}`, kind: 'remote-runtime', ...windowsConpty }
+  if (isRuntimeTerminalPtyId(ptyId)) {
+    return { platform, runtimeKey: ptyId, kind: 'remote-runtime', ...windowsConpty }
   }
 
   const transportConnectionId = transport?.getConnectionId?.()
@@ -61,10 +60,6 @@ export function resolveTerminalPasteRuntime({
   }
 
   return { platform, runtimeKey: `local:${platform}`, kind: 'local', ...windowsConpty }
-}
-
-export function isRemoteRuntimePastePtyId(ptyId: string | null | undefined): boolean {
-  return typeof ptyId === 'string' && ptyId.startsWith(REMOTE_PTY_ID_PREFIX)
 }
 
 function resolveWslRuntimeKey(

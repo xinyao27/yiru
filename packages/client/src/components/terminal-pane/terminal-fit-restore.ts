@@ -1,8 +1,8 @@
 import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
 import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import {
-  getRemoteRuntimePtyEnvironmentId,
-  getRemoteRuntimeTerminalHandle
+  getRuntimeTerminalEnvironmentId,
+  getRuntimeTerminalHandle
 } from '~renderer/runtime/terminal-stream'
 import { mapWithConcurrency } from '~shared/map-with-concurrency'
 import type { GlobalSettings } from '~shared/types'
@@ -25,9 +25,9 @@ export async function restoreTerminalFitToDesktop(
   ptyId: string,
   settings: TerminalFitRestoreSettings
 ): Promise<boolean> {
-  const remoteHandle = getRemoteRuntimeTerminalHandle(ptyId)
+  const remoteHandle = getRuntimeTerminalHandle(ptyId)
   const environmentId =
-    getRemoteRuntimePtyEnvironmentId(ptyId) ?? settings?.activeRuntimeEnvironmentId ?? null
+    getRuntimeTerminalEnvironmentId(ptyId) ?? settings?.activeRuntimeEnvironmentId ?? null
   const result =
     remoteHandle && environmentId
       ? await callRuntimeOrpc(

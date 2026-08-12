@@ -8,6 +8,7 @@ import {
   classifyTitleActivity,
   isExplicitAgentStatusFresh
 } from '~renderer/lib/pane-agent-evidence'
+import { inspectRuntimeTerminalProcess } from '~renderer/runtime/terminal-inspection'
 import {
   clearWorkspaceCleanupDismissals as clearRuntimeWorkspaceCleanupDismissals,
   dismissWorkspaceCleanupCandidates as dismissRuntimeWorkspaceCleanupCandidates,
@@ -916,10 +917,10 @@ async function probeTerminalLiveness(
   let unknown = false
   for (const { tab, ptyId } of ptyChecks) {
     try {
-      const [hasChildProcesses, foregroundProcess] = await Promise.all([
-        window.api.pty.hasChildProcesses(ptyId),
-        window.api.pty.getForegroundProcess(ptyId)
-      ])
+      const { hasChildProcesses, foregroundProcess } = await inspectRuntimeTerminalProcess(
+        state.settings,
+        ptyId
+      )
       const processName = normalizeProcessName(foregroundProcess)
       if (!hasChildProcesses && (!processName || SHELL_PROCESS_NAMES.has(processName))) {
         continue

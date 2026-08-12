@@ -13,7 +13,7 @@ export async function saveLocalClipboardImageAsTempFile(
     return null
   }
 
-  const connection = createLocalRuntimeOrpcClient()
+  const connection = await createLocalRuntimeOrpcClient()
   const signal = AbortSignal.timeout(CLIPBOARD_IMAGE_SAVE_TIMEOUT_MS)
   let uploadId: string | null = null
   try {

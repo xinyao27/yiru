@@ -1,9 +1,9 @@
 {
   "schemaVersion": 2,
-  "methodCount": 742,
+  "methodCount": 748,
   "sourceCounts": {
     "legacy": 0,
-    "orpc": 742
+    "orpc": 748
   },
   "methods": [
     {
@@ -9018,6 +9018,86 @@
       ]
     },
     {
+      "method": "shell.runtimeEnvironments.disconnect",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/runtime-environments.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.runtimeEnvironments.getStatus",
+      "access": {
+        "scope": "host",
+        "tier": "read",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/runtime-environments.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.runtimeEnvironments.list",
+      "access": {
+        "scope": "host",
+        "tier": "read",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/runtime-environments.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.runtimeEnvironments.remove",
+      "access": {
+        "scope": "host",
+        "tier": "host",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/runtime-environments.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.runtimeEnvironments.resolve",
+      "access": {
+        "scope": "host",
+        "tier": "read",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/runtime-environments.ts"
+        }
+      ]
+    },
+    {
       "method": "shell.session.flush",
       "access": {
         "scope": "host",
@@ -10744,6 +10824,21 @@
         "tier": "read"
       },
       "mobile": true,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/terminal.ts"
+        }
+      ]
+    },
+    {
+      "method": "terminal.updateViewAttributes",
+      "access": {
+        "scope": "host",
+        "tier": "host"
+      },
+      "mobile": false,
       "streaming": false,
       "sources": [
         {

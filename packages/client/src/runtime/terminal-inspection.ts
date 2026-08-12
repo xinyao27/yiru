@@ -5,22 +5,23 @@ import type { GlobalSettings } from '~shared/types'
 import { useAppStore } from '../store'
 import { callRuntimeOrpc, isRuntimeOrpcErrorCode } from './orpc-client'
 import { getActiveRuntimeTarget } from './rpc-client'
-import { getRemoteRuntimePtyEnvironmentId, getRemoteRuntimeTerminalHandle } from './terminal-stream'
+import { getRuntimeTerminalEnvironmentId, getRuntimeTerminalHandle } from './terminal-stream'
 
 export type RuntimeTerminalProcessInspection = {
   foregroundProcess: string | null
   hasChildProcesses: boolean
 }
 
-const REMOTE_PTY_ID_PREFIX = 'remote:'
+type TerminalTarget = Parameters<typeof callRuntimeOrpc>[0]
+
 const DESKTOP_RUNTIME_CLIENT = { id: 'yiru-desktop', type: 'desktop' } as const
 
 function isRuntimePtyInputTooLarge(data: string): boolean | Promise<boolean> {
   return isTerminalInputTooLargeWithDeferredMeasurement(data)
 }
 
-export function isRemoteRuntimePtyId(ptyId: string): boolean {
-  return ptyId.startsWith(REMOTE_PTY_ID_PREFIX)
+export function isRuntimeTerminalPtyId(ptyId: string): boolean {
+  return getRuntimeTerminalHandle(ptyId) !== null
 }
 
 function isTerminalGoneError(error: unknown): boolean {
@@ -34,6 +35,82 @@ function isTerminalGoneError(error: unknown): boolean {
     message.includes('terminal_gone') ||
     message.includes('no_connected_pty')
   )
+}
+
+function targetForRuntimePty(
+  ptyId: string,
+  settings:
+    | Pick<GlobalSettings, 'activeRuntimeEnvironmentId'>
+    | null
+    | undefined = useAppStore.getState().settings
+): TerminalTarget {
+  const environmentId = getRuntimeTerminalEnvironmentId(ptyId)
+  return environmentId ? { kind: 'environment', environmentId } : getActiveRuntimeTarget(settings)
+}
+
+export async function hasRuntimeTerminal(ptyId: string): Promise<boolean> {
+  const terminal = getRuntimeTerminalHandle(ptyId)
+  if (!terminal) {
+    return false
+  }
+  try {
+    await callRuntimeOrpc(targetForRuntimePty(ptyId), (client) => client.terminal.show, {
+      terminal
+    })
+    return true
+  } catch (error) {
+    if (isTerminalGoneError(error)) {
+      return false
+    }
+    throw error
+  }
+}
+
+export async function closeRuntimeTerminal(ptyId: string): Promise<void> {
+  const terminal = getRuntimeTerminalHandle(ptyId)
+  if (!terminal) {
+    return
+  }
+  await callRuntimeOrpc(targetForRuntimePty(ptyId), (client) => client.terminal.close, { terminal })
+}
+
+export async function clearRuntimeTerminalBuffer(ptyId: string): Promise<void> {
+  const terminal = getRuntimeTerminalHandle(ptyId)
+  if (!terminal) {
+    return
+  }
+  await callRuntimeOrpc(targetForRuntimePty(ptyId), (client) => client.terminal.clearBuffer, {
+    terminal
+  })
+}
+
+export async function readRuntimeTerminalBuffer(
+  ptyId: string,
+  limit = 10_000
+): Promise<string | null> {
+  const terminal = getRuntimeTerminalHandle(ptyId)
+  if (!terminal) {
+    return null
+  }
+  const result = await callRuntimeOrpc(
+    targetForRuntimePty(ptyId),
+    (client) => client.terminal.read,
+    { terminal, limit }
+  )
+  return result.terminal.tail.join('\n')
+}
+
+export async function listRuntimeTerminalSessions() {
+  return callRuntimeOrpc({ kind: 'local' }, (client) => client.terminal.management.listSessions, {})
+}
+
+export async function killRuntimeTerminalSession(sessionId: string): Promise<boolean> {
+  const result = await callRuntimeOrpc(
+    { kind: 'local' },
+    (client) => client.terminal.management.killOne,
+    { sessionId }
+  )
+  return result.success
 }
 
 export function recordRuntimeTerminalInputForPtyId(ptyId: string, timestamp = Date.now()): void {
@@ -60,17 +137,10 @@ export async function inspectRuntimeTerminalProcess(
   settings: Pick<GlobalSettings, 'activeRuntimeEnvironmentId'> | null | undefined,
   ptyId: string
 ): Promise<RuntimeTerminalProcessInspection> {
-  const ownerEnvironmentId = getRemoteRuntimePtyEnvironmentId(ptyId)
-  const target = ownerEnvironmentId
-    ? ({ kind: 'environment', environmentId: ownerEnvironmentId } as const)
-    : getActiveRuntimeTarget(settings)
-  const terminal = getRemoteRuntimeTerminalHandle(ptyId)
-  if (target.kind !== 'environment' || !terminal) {
-    const [foregroundProcess, hasChildProcesses] = await Promise.all([
-      window.api.pty.getForegroundProcess(ptyId),
-      window.api.pty.hasChildProcesses(ptyId)
-    ])
-    return { foregroundProcess, hasChildProcesses }
+  const target = targetForRuntimePty(ptyId, settings)
+  const terminal = getRuntimeTerminalHandle(ptyId)
+  if (!terminal) {
+    return { foregroundProcess: null, hasChildProcesses: false }
   }
 
   try {
@@ -118,15 +188,10 @@ function sendRuntimePtyInputWithinLimit(
   ptyId: string,
   data: string
 ): boolean {
-  const ownerEnvironmentId = getRemoteRuntimePtyEnvironmentId(ptyId)
-  const target = ownerEnvironmentId
-    ? ({ kind: 'environment', environmentId: ownerEnvironmentId } as const)
-    : getActiveRuntimeTarget(settings)
-  const terminal = getRemoteRuntimeTerminalHandle(ptyId)
-  if (target.kind !== 'environment' || !terminal) {
-    window.api.pty.write(ptyId, data)
-    recordRuntimeTerminalInputForPtyId(ptyId)
-    return true
+  const target = targetForRuntimePty(ptyId, settings)
+  const terminal = getRuntimeTerminalHandle(ptyId)
+  if (!terminal) {
+    return false
   }
 
   void callRuntimeOrpc(
@@ -156,22 +221,10 @@ export async function sendRuntimePtyInputVerified(
   if (typeof tooLarge === 'boolean' ? tooLarge : await tooLarge) {
     return false
   }
-  const ownerEnvironmentId = getRemoteRuntimePtyEnvironmentId(ptyId)
-  const target = ownerEnvironmentId
-    ? ({ kind: 'environment', environmentId: ownerEnvironmentId } as const)
-    : getActiveRuntimeTarget(settings)
-  const terminal = getRemoteRuntimeTerminalHandle(ptyId)
-  if (target.kind !== 'environment' || !terminal) {
-    const accepted = await window.api.pty.writeAccepted(ptyId, data)
-    if (!accepted) {
-      window.api.pty.write(ptyId, data)
-      // Why: SSH/local fallback writes are fire-and-forget. Callers use this
-      // boolean to continue UX flow, while hook telemetry confirms real turns.
-      recordRuntimeTerminalInputForPtyId(ptyId)
-      return true
-    }
-    recordRuntimeTerminalInputForPtyId(ptyId)
-    return accepted
+  const target = targetForRuntimePty(ptyId, settings)
+  const terminal = getRuntimeTerminalHandle(ptyId)
+  if (!terminal) {
+    return false
   }
 
   try {

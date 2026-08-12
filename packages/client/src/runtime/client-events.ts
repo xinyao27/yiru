@@ -6,6 +6,7 @@ import type {
 } from '~shared/runtime-client-events'
 
 import { createRuntimeOrpcClient, isWebRuntimeClient } from './orpc-client'
+import { runtimeEnvironmentsClient } from './runtime-environments-client'
 
 export type RuntimeClientEventSubscription = {
   unsubscribe: () => void
@@ -21,7 +22,7 @@ export async function subscribeRuntimeClientEvents(
   // per-environment SSH bucket) may have missed transitions and must resync.
   onReplayedAfterReconnect?: () => void
 ): Promise<RuntimeClientEventSubscription> {
-  // Why: on web, `window.api.runtimeEnvironments.subscribe` sends the raw
+  // Why: on web, the compatibility subscription sends the raw
   // `{id, method, params}` legacy envelope with no capability negotiation, so
   // a host that has retired `runtime.clientEvents` from its legacy dispatcher
   // (Phase 6 D-stage) would answer `method_not_found` — dispatch through the
@@ -30,7 +31,7 @@ export async function subscribeRuntimeClientEvents(
   if (isWebRuntimeClient()) {
     return subscribeRuntimeClientEventsViaOrpc(environmentId, onEvent, onError)
   }
-  const handle = await window.api.runtimeEnvironments.subscribe(
+  const handle = await runtimeEnvironmentsClient.subscribe(
     {
       selector: environmentId,
       method: 'runtime.clientEvents.subscribe',

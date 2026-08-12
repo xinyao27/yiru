@@ -40,7 +40,6 @@ import {
   type KeybindingOverrides,
   type KeybindingPlatform
 } from '~shared/keybindings'
-import { EMPTY_PTY_MAIN_DELIVERY_DIAGNOSTICS } from '~shared/pty-delivery-diagnostics'
 import type { RuntimeStatus, RuntimeSyncWindowGraph } from '~shared/runtime-types'
 import { normalizeTerminalCursorStyleDefault } from '~shared/terminal/cursor-style-settings'
 import { normalizeTerminalCustomThemes } from '~shared/terminal/custom-themes'
@@ -66,6 +65,7 @@ import {
   type TransferYiruProfileProjectArgs
 } from '~shared/yiru-profiles'
 
+import type { RuntimeEnvironmentApi } from '../runtime/runtime-environment-api'
 import type { ShellNotificationsApi } from '../runtime/shell-notifications-client'
 import type {
   ShellAppApi,
@@ -354,15 +354,17 @@ export function installWebPreloadApi(): void {
   window.api = withFallback(createWebPreloadApi(), []) as PreloadApi
 }
 
+export function getWebRuntimeEnvironmentApi(): RuntimeEnvironmentApi {
+  return createRuntimeEnvironmentsApi()
+}
+
 function createWebPreloadApi(): Partial<PreloadApi> {
   return {
-    runtimeEnvironments: createRuntimeEnvironmentsApi(),
     git: createGitApi(),
     emulator: createEmulatorApi(),
     aiVault: createAiVaultApi(),
     codexAccounts: createAccountsApi(),
-    claudeAccounts: createAccountsApi(),
-    pty: createPtyApi()
+    claudeAccounts: createAccountsApi()
   }
 }
 
@@ -668,7 +670,7 @@ function createWebKeybindingsApi(): WebKeybindingsApi {
 }
 
 // Why: the web client keeps readSession on its compatibility adapter because
-// it has no local MessagePort. Live tailing uses the typed runtime client from
+// it has no Electron preload transport. Live tailing uses the typed runtime client from
 // the native-chat feature directly.
 function createRuntimeApi(): ShellRuntimeStateApi {
   return {
@@ -681,7 +683,7 @@ function createRuntimeApi(): ShellRuntimeStateApi {
   }
 }
 
-function createRuntimeEnvironmentsApi(): NonNullable<Partial<PreloadApi>['runtimeEnvironments']> {
+function createRuntimeEnvironmentsApi(): RuntimeEnvironmentApi {
   return {
     list: async () => {
       const environment = requireActiveEnvironmentOrNull()
@@ -1389,90 +1391,6 @@ function createUpdaterApi(): ShellUpdaterApi {
     dismissNudge: () => Promise.resolve(),
     onStatus: () => noopUnsubscribe,
     onClearDismissal: () => noopUnsubscribe
-  }
-}
-
-function createPtyApi(): NonNullable<Partial<PreloadApi>['pty']> {
-  return {
-    spawn: () => Promise.reject(new Error('Local PTYs are unavailable in the web client.')),
-    write: () => {},
-    writeAccepted: () => Promise.resolve(false),
-    resize: () => {},
-    claimViewport: () => {},
-    reportGeometry: () => {},
-    signal: () => {},
-    // Web panes clear the host buffer via the terminal.clearBuffer runtime RPC.
-    clearBuffer: () => {},
-    kill: () => Promise.resolve(),
-    ackColdRestore: () => {},
-    ackData: () => {},
-    onDeliveryResyncRequest: () => noopUnsubscribe,
-    respondDeliveryResync: () => {},
-    // Why healthy stub: web terminals ride the remote-runtime transport, not
-    // main's delivery gate — a zero-in-flight reply keeps the watchdog idle.
-    reportRendererDeliveryState: () =>
-      Promise.resolve({ inFlightTotalChars: 0, inFlightPtyCount: 0, msSinceLastAck: null }),
-    getPtyDataListenerCount: () => 0,
-    rendererDispatcherReady: () => {},
-    setActiveRendererPty: () => {},
-    setRendererPtyVisible: () => {},
-    setHiddenRendererPty: () => {},
-    setPtyDeliveryInterest: () => {},
-    // Why no-op: remote-runtime PTYs are never hidden-gate markable, so the
-    // web client has no main-side responder to feed.
-    publishTerminalViewAttributes: () => {},
-    hasChildProcesses: () => Promise.resolve(false),
-    getForegroundProcess: () => Promise.resolve(null),
-    // Why: paired web panes cannot provide a local post-boundary process scan.
-    confirmForegroundProcess: () => Promise.resolve(null),
-    getCwd: () => Promise.resolve('~'),
-    getSize: () => Promise.resolve(null),
-    listSessions: () => Promise.resolve([]),
-    getAuthoritativeBufferSnapshotCapabilities: (ids) =>
-      ids.map((id) => ({ id, authoritative: false })),
-    hasPty: () => Promise.resolve(null),
-    getMainBufferSnapshot: () => Promise.resolve(null),
-    // Why: remote-runtime PTYs never transit local main, so the web client has
-    // no side-effect facts source; renderer byte parsing stays authoritative.
-    onSideEffect: () => noopUnsubscribe,
-    getSideEffectSnapshot: () => Promise.resolve(null),
-    getRendererDeliveryDebugSnapshot: () =>
-      Promise.resolve({
-        pendingPtyCount: 0,
-        pendingChars: 0,
-        maxPendingCharsByPty: 0,
-        rendererInFlightPtyCount: 0,
-        rendererInFlightChars: 0,
-        maxRendererInFlightCharsByPty: 0,
-        activeRendererPtyCount: 0,
-        flushScheduled: false,
-        peakPendingChars: 0,
-        peakMaxPendingCharsByPty: 0,
-        peakRendererInFlightChars: 0,
-        peakMaxRendererInFlightCharsByPty: 0,
-        ackGatedFlushSkipCount: 0,
-        hiddenDeliveryGatedPtyCount: 0,
-        hiddenDeliveryGatedVisiblePtyCount: 0,
-        hiddenDeliveryGatedActivePtyCount: 0,
-        deliveryInterestPtyCount: 0,
-        hiddenDeliveryDroppedChars: 0,
-        hiddenDeliveryDroppedChunks: 0,
-        pendingDroppedChars: 0,
-        diagnostics: EMPTY_PTY_MAIN_DELIVERY_DIAGNOSTICS,
-        rendererLifecycleResetCount: 0,
-        lastLifecycleResetClearedChars: 0,
-        rendererPtyDispatcherReady: false,
-        rendererDispatcherReadyForcedCount: 0
-      }),
-    onData: () => noopUnsubscribe,
-    onReplay: () => noopUnsubscribe,
-    onModelRestoreNeeded: () => noopUnsubscribe,
-    onExit: () => noopUnsubscribe,
-    onClearBufferRequest: () => noopUnsubscribe,
-    declarePendingPaneSerializer: () => Promise.resolve(0),
-    settlePaneSerializer: () => Promise.resolve(),
-    clearPendingPaneSerializer: () => Promise.resolve(),
-    reportRendererSerializerReady: () => Promise.resolve()
   }
 }
 

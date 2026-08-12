@@ -1,5 +1,6 @@
 import type { AgentType } from '@yiru/workbench-model/agent'
 import { useEffect, useMemo, useSyncExternalStore } from 'react'
+import { readRuntimeTerminalBuffer } from '~renderer/runtime/terminal-inspection'
 import { useAppStore } from '~renderer/store'
 import { updateNativeChatSessionOptionDefaults } from '~shared/native-chat/session-option-defaults'
 import type { SessionOptionDescriptor } from '~shared/native-chat/session-options'
@@ -105,14 +106,9 @@ export function useNativeChatSessionOptions(args: {
     let cancelled = false
     const reportCurrentValues = async (): Promise<void> => {
       let authoritativeScreen: string | null = null
-      if (targetPtyId && window.api?.pty?.getMainBufferSnapshot) {
+      if (targetPtyId) {
         try {
-          const snapshot = await window.api.pty.getMainBufferSnapshot(targetPtyId, {
-            scrollbackRows: 0
-          })
-          // Why: the API snapshots the main buffer, which is stale while a TUI
-          // owns the alternate screen. The mounted xterm is authoritative then.
-          authoritativeScreen = snapshot?.alternateScreen ? null : (snapshot?.data ?? null)
+          authoritativeScreen = await readRuntimeTerminalBuffer(targetPtyId, 200)
         } catch {
           // The mounted renderer buffer remains a transport-neutral fallback.
         }

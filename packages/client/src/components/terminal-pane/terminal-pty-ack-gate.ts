@@ -7,9 +7,6 @@ const processedPtyCharTotals = new Map<string, number>()
 function sendPtyAck(ptyId: string, chars: number): void {
   const processedChars = (processedPtyCharTotals.get(ptyId) ?? 0) + chars
   processedPtyCharTotals.set(ptyId, processedChars)
-  // Why: keep the legacy per-chunk delta alongside the cumulative total so an
-  // older main (dev hot-reload mix) still credits deltas.
-  window.api.pty.ackData?.(ptyId, chars, processedChars)
 }
 
 export function ackPtyData(ptyId: string, chars: number): void {
@@ -43,7 +40,7 @@ function creditDeferredPtyAck(credit: DeferredPtyAckCredit): void {
   credit.credit()
 }
 
-/** Runs one pty:data delivery with a parse-deferred ACK credit. If the
+/** Runs one terminal output delivery with a parse-deferred ACK credit. If the
  *  handler hands bytes to the output scheduler, the claimed credit fires when
  *  the scheduler consumes (writes or discards) them; any credit left
  *  unclaimed fires here at return, so a chunk the handler drops outright can

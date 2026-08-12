@@ -60,6 +60,9 @@ export const terminalContract = {
   create: withAccess(WORKTREE_CONTROL_ACCESS, MOBILE_CLIENT)
     .input(inputs.TerminalCreateInputSchema)
     .output(type<results.TerminalCreateResult>()),
+  updateViewAttributes: withAccess(HOST_HOST_ACCESS)
+    .input(inputs.TerminalUpdateViewAttributesInputSchema)
+    .output(type<{ updated: true }>()),
   split: withAccess(WORKTREE_CONTROL_ACCESS)
     .input(inputs.TerminalSplitInputSchema)
     .output(type<results.TerminalSplitResult>()),

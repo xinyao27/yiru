@@ -6,11 +6,10 @@ import {
   getExecutionHostIdForWorktree,
   type WorktreeRuntimeOwnerState
 } from '~renderer/lib/worktree-runtime-owner'
+import { isRuntimeTerminalPtyId } from '~renderer/runtime/terminal-stream'
 
 import type { PtyTransport } from './pty/transport-types'
 import type { PaneCwdMap } from './resolve-split-cwd'
-
-const REMOTE_RUNTIME_PTY_ID_PREFIX = 'remote:'
 
 type TerminalTabShellState = {
   tabsByWorktree: Record<
@@ -40,10 +39,6 @@ type TerminalCtrlArrowConptyArgs = {
   transport: TerminalCtrlArrowConptyTransport | null
 }
 
-function isRemoteRuntimePtyId(ptyId: string): boolean {
-  return ptyId.startsWith(REMOTE_RUNTIME_PTY_ID_PREFIX)
-}
-
 export function isLocalWindowsConptyPaneForCtrlArrow({
   isWindows,
   userAgent,
@@ -60,7 +55,7 @@ export function isLocalWindowsConptyPaneForCtrlArrow({
   }
 
   const ptyId = transport?.getPtyId() ?? null
-  if (ptyId !== null && isRemoteRuntimePtyId(ptyId)) {
+  if (ptyId !== null && isRuntimeTerminalPtyId(ptyId)) {
     return false
   }
 

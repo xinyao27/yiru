@@ -41,7 +41,7 @@ function mergeRuntimeUIIntoWebState(incoming: RuntimePersistedUIState): Persiste
 }
 
 const uiEvents = createRuntimeStreamFanOut({
-  resolveClient: async () => createLocalRuntimeOrpcClient().client,
+  resolveClient: async () => (await createLocalRuntimeOrpcClient()).client,
   open: (client, signal) => client.ui.events.subscribe(undefined, { signal })
 })
 

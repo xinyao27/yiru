@@ -2,7 +2,10 @@ import { isWindowsAbsolutePathLike } from '@yiru/workbench-model/platform'
 import { translate } from '~renderer/i18n/i18n'
 import { createBrowserUuid } from '~renderer/lib/browser-uuid'
 import { getSettingsForWorktreeRuntimeOwner } from '~renderer/lib/worktree-runtime-owner'
+import { callRuntimeOrpc, type RuntimeClientTarget } from '~renderer/runtime/orpc-client'
 import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
+import { toRuntimeTerminalPtyId } from '~renderer/runtime/terminal-stream'
+import { toRuntimeWorktreeSelector } from '~renderer/runtime/worktree-selector'
 import { useAppStore } from '~renderer/store'
 import { singlePaneLayoutSnapshot } from '~renderer/store/slices/terminal-helpers'
 import { buildSetupRunnerCommand } from '~shared/setup/runner-command'
@@ -14,12 +17,13 @@ import type {
   WorktreeSetupLaunch
 } from '~shared/types'
 
-import { registerEagerPtyBuffer, type EagerPtyHandle } from '../terminal-pane/pty/dispatcher'
+import { registerBackgroundTerminalBuffer } from './background-terminal-buffer'
 import { retireUnownedTerminal } from './retire-unowned-background-terminal'
 
 type BackgroundPane = {
   leafId: string
   ptyId: string
+  terminal: string
 }
 
 type BackgroundTab = {
@@ -83,40 +87,6 @@ function buildSplitLayout(
   }
 }
 
-function persistExitedPaneOutput(tabId: string, leafId: string, output: string): void {
-  const store = useAppStore.getState()
-  const layout = store.terminalLayoutsByTabId[tabId]
-  if (!layout) {
-    return
-  }
-  const { ptyIdsByLeafId: existingPtyIds, buffersByLeafId: existingBuffers, ...rest } = layout
-  const nextPtyIds = { ...existingPtyIds }
-  delete nextPtyIds[leafId]
-  const trimmedOutput = output.trim() ? output : ''
-  store.setTabLayout(tabId, {
-    ...rest,
-    ...(Object.keys(nextPtyIds).length > 0 ? { ptyIdsByLeafId: nextPtyIds } : {}),
-    ...(trimmedOutput
-      ? {
-          buffersByLeafId: {
-            ...existingBuffers,
-            [leafId]: output
-          }
-        }
-      : existingBuffers
-        ? { buffersByLeafId: existingBuffers }
-        : {})
-  })
-}
-
-function registerBackgroundPaneBuffer(tabId: string, leafId: string, ptyId: string): void {
-  let eagerBuffer: EagerPtyHandle | null = null
-  eagerBuffer = registerEagerPtyBuffer(ptyId, (exitPtyId) => {
-    persistExitedPaneOutput(tabId, leafId, eagerBuffer?.flush() ?? '')
-    useAppStore.getState().clearTabPtyId(tabId, exitPtyId)
-  })
-}
-
 function buildSetupCommand(setup: WorktreeSetupLaunch): string {
   return buildSetupRunnerCommand(
     setup.runnerScriptPath,
@@ -126,29 +96,34 @@ function buildSetupCommand(setup: WorktreeSetupLaunch): string {
 
 async function spawnPane(args: {
   worktree: Worktree
-  connectionId: string | null
+  runtimeTarget: RuntimeClientTarget
   tabId: string
   leafId: string
   command?: string
   env?: Record<string, string>
-}): Promise<string> {
-  const result = await window.api.pty.spawn({
-    cols: 120,
-    rows: 40,
-    cwd: args.worktree.path,
+}): Promise<BackgroundPane> {
+  const result = await callRuntimeOrpc(args.runtimeTarget, (client) => client.terminal.create, {
+    worktree: toRuntimeWorktreeSelector(args.worktree.id),
+    viewport: { cols: 120, rows: 40 },
     ...(args.command ? { command: args.command } : {}),
     env: buildPaneEnv(args.worktree.id, args.tabId, args.leafId, args.env),
-    connectionId: args.connectionId,
-    worktreeId: args.worktree.id,
     tabId: args.tabId,
-    leafId: args.leafId
+    leafId: args.leafId,
+    presentation: 'background'
   })
-  return result.id
+  return {
+    leafId: args.leafId,
+    terminal: result.terminal.handle,
+    ptyId: toRuntimeTerminalPtyId(
+      result.terminal.handle,
+      args.runtimeTarget.kind === 'environment' ? args.runtimeTarget.environmentId : null
+    )
+  }
 }
 
 async function createBackgroundTab(args: {
   worktree: Worktree
-  connectionId: string | null
+  runtimeTarget: RuntimeClientTarget
   launch: BackgroundTerminalLaunch
 }): Promise<BackgroundTab> {
   const store = useAppStore.getState()
@@ -165,11 +140,11 @@ async function createBackgroundTab(args: {
 
   const leafId = createBrowserUuid()
   store.setTabLayout(tab.id, singlePaneLayoutSnapshot(leafId))
-  let ptyId: string
+  let pane: BackgroundPane
   try {
-    ptyId = await spawnPane({
+    pane = await spawnPane({
       worktree: args.worktree,
-      connectionId: args.connectionId,
+      runtimeTarget: args.runtimeTarget,
       tabId: tab.id,
       leafId,
       command: args.launch.command,
@@ -182,30 +157,37 @@ async function createBackgroundTab(args: {
   if (
     await retireUnownedTerminal({
       tabId: tab.id,
-      ptyId,
-      runtimeTarget: { kind: 'local' }
+      ptyId: pane.ptyId,
+      runtimeTarget: args.runtimeTarget,
+      runtimeTerminalHandle: pane.terminal
     })
   ) {
     throw new Error('The terminal tab was closed before its session finished starting.')
   }
-  store.updateTabPtyId(tab.id, ptyId)
-  store.setTabLayout(tab.id, singlePaneLayoutSnapshot(leafId, ptyId))
-  registerBackgroundPaneBuffer(tab.id, leafId, ptyId)
-  return { tabId: tab.id, primary: { leafId, ptyId } }
+  store.updateTabPtyId(tab.id, pane.ptyId)
+  store.setTabLayout(tab.id, singlePaneLayoutSnapshot(leafId, pane.ptyId))
+  registerBackgroundTerminalBuffer({
+    tabId: tab.id,
+    leafId: pane.leafId,
+    ptyId: pane.ptyId,
+    terminal: pane.terminal,
+    runtimeTarget: args.runtimeTarget
+  })
+  return { tabId: tab.id, primary: pane }
 }
 
 async function addSetupSplit(args: {
   worktree: Worktree
-  connectionId: string | null
+  runtimeTarget: RuntimeClientTarget
   tab: BackgroundTab
   setup: WorktreeSetupLaunch
   direction: 'horizontal' | 'vertical'
 }): Promise<void> {
   const store = useAppStore.getState()
   const setupLeafId = createBrowserUuid()
-  const setupPtyId = await spawnPane({
+  const setupPane = await spawnPane({
     worktree: args.worktree,
-    connectionId: args.connectionId,
+    runtimeTarget: args.runtimeTarget,
     tabId: args.tab.tabId,
     leafId: setupLeafId,
     command: buildSetupCommand(args.setup),
@@ -214,23 +196,25 @@ async function addSetupSplit(args: {
   if (
     await retireUnownedTerminal({
       tabId: args.tab.tabId,
-      ptyId: setupPtyId,
-      runtimeTarget: { kind: 'local' }
+      ptyId: setupPane.ptyId,
+      runtimeTarget: args.runtimeTarget,
+      runtimeTerminalHandle: setupPane.terminal
     })
   ) {
     return
   }
-  store.updateTabPtyId(args.tab.tabId, setupPtyId)
+  store.updateTabPtyId(args.tab.tabId, setupPane.ptyId)
   store.setTabLayout(
     args.tab.tabId,
-    buildSplitLayout(
-      args.tab.primary,
-      { leafId: setupLeafId, ptyId: setupPtyId },
-      args.direction,
-      getSetupTabTitle()
-    )
+    buildSplitLayout(args.tab.primary, setupPane, args.direction, getSetupTabTitle())
   )
-  registerBackgroundPaneBuffer(args.tab.tabId, setupLeafId, setupPtyId)
+  registerBackgroundTerminalBuffer({
+    tabId: args.tab.tabId,
+    leafId: setupPane.leafId,
+    ptyId: setupPane.ptyId,
+    terminal: setupPane.terminal,
+    runtimeTarget: args.runtimeTarget
+  })
 }
 
 function getDefaultTabLaunches(
@@ -256,24 +240,16 @@ export async function launchWorktreeBackgroundTerminals(
   const runtimeTarget = getActiveRuntimeTarget(
     getSettingsForWorktreeRuntimeOwner(store, args.worktreeId)
   )
-  if (runtimeTarget.kind === 'environment') {
-    // Runtime-owned worktrees materialize setup/defaultTabs inside createManagedWorktree.
-    return
-  }
-
   const worktree = store.allWorktrees().find((entry) => entry.id === args.worktreeId)
   if (!worktree) {
     throw new Error('The target workspace is no longer available.')
   }
-  // Why: Repo.connectionId is dead — nothing sets it since remote hosts were
-  // removed (#63) — a background terminal's owning repo is never SSH.
-  const connectionId = null
   const defaultLaunches = getDefaultTabLaunches(args.defaultTabs)
   const launchedTabs: BackgroundTab[] = []
 
   for (const launch of defaultLaunches) {
     try {
-      launchedTabs.push(await createBackgroundTab({ worktree, connectionId, launch }))
+      launchedTabs.push(await createBackgroundTab({ worktree, runtimeTarget, launch }))
     } catch (error) {
       console.warn('[automations] Failed to launch workspace default tab:', error)
     }
@@ -284,10 +260,10 @@ export async function launchWorktreeBackgroundTerminals(
     args.setup && (setupMode === 'split-horizontal' || setupMode === 'split-vertical')
   if (shouldSplitSetup) {
     const primaryTab =
-      launchedTabs[0] ?? (await createBackgroundTab({ worktree, connectionId, launch: {} }))
+      launchedTabs[0] ?? (await createBackgroundTab({ worktree, runtimeTarget, launch: {} }))
     await addSetupSplit({
       worktree,
-      connectionId,
+      runtimeTarget,
       tab: primaryTab,
       setup: args.setup!,
       direction: setupMode === 'split-horizontal' ? 'horizontal' : 'vertical'
@@ -297,11 +273,11 @@ export async function launchWorktreeBackgroundTerminals(
 
   if (args.setup) {
     if (launchedTabs.length === 0) {
-      launchedTabs.push(await createBackgroundTab({ worktree, connectionId, launch: {} }))
+      launchedTabs.push(await createBackgroundTab({ worktree, runtimeTarget, launch: {} }))
     }
     await createBackgroundTab({
       worktree,
-      connectionId,
+      runtimeTarget,
       launch: {
         title: getSetupTabTitle(),
         command: buildSetupCommand(args.setup),

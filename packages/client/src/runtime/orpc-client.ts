@@ -1,37 +1,20 @@
 import { ORPCError } from '@orpc/client'
-import {
-  REMOTE_RUNTIME_SHARED_CONTROL_CAPABILITY,
-  RUNTIME_ORPC_RUNTIME_CAPABILITY
-} from '@yiru/runtime-protocol/capabilities'
-import {
-  RUNTIME_ORPC_CONNECT_PORT_MESSAGE,
-  type RuntimeOrpcConnectPortRequest
-} from '~shared/runtime-orpc-message-port'
 import { withBrowserPaneUiRuntimeRpcSource } from '~shared/runtime-rpc-feature-interaction-source'
 
 import { createRuntimeRpcAbortError } from './abortable-runtime-environment-call'
-import {
-  ensureRuntimeEnvironmentCompatible,
-  runtimeEnvironmentSupportsCapability
-} from './environment-compatibility'
+import { ensureRuntimeEnvironmentCompatible } from './environment-compatibility'
 import {
   retainRuntimeOrpcBinaryRoute,
   type RuntimeOrpcBinaryListener
 } from './orpc-binary-side-channel'
-import {
-  acquireEnvironmentRuntimeOrpcClient,
-  RuntimeOrpcBootstrapError
-} from './orpc-environment-client'
-import { createLegacyRuntimeOrpcClient } from './orpc-legacy-client'
-import {
-  createRuntimeOrpcMessagePortConnection,
-  type RuntimeOrpcClient,
-  type RuntimeOrpcClientConnection,
-  type RuntimeOrpcClientContext
-} from './orpc-message-port-client'
+import type {
+  RuntimeOrpcClient,
+  RuntimeOrpcClientConnection,
+  RuntimeOrpcClientContext
+} from './orpc-connection'
+import { openRuntimeLoopbackOrpcConnection } from './orpc-loopback-client'
 import { createWebEnvironmentRuntimeOrpcClient } from './orpc-web-environment-client'
 import { RuntimeRpcCallError } from './rpc-response'
-import { mountShellServicesHandler } from './shell-services-handler'
 
 const DEFAULT_ENVIRONMENT_TIMEOUT_MS = 15_000
 
@@ -41,7 +24,7 @@ export type {
   RuntimeOrpcClient,
   RuntimeOrpcClientConnection,
   RuntimeOrpcClientContext
-} from './orpc-message-port-client'
+} from './orpc-connection'
 
 export type RuntimeOrpcCallOptions = {
   timeoutMs?: number
@@ -132,49 +115,25 @@ export async function createRuntimeOrpcClient(
   }
   const environmentId = target.environmentId.trim()
   const environmentTarget = { kind: 'environment', environmentId } as const
-  await abortable(ensureRuntimeEnvironmentCompatible(environmentId, options), options.signal)
   if (isWebRuntimeClient()) {
-    // Why: the web renderer has no Electron preload to accept a MessagePort,
+    // Why: the web renderer has no Electron preload credentials,
     // so it cannot reuse `acquireEnvironmentRuntimeOrpcClient` below — but it
     // does not need to. `WebRuntimeClient` already terminates an encrypted
     // oRPC peer for the paired host (falling back to its own legacy JSON-RPC
     // wrapper when that host doesn't advertise oRPC support); dispatching
     // through it inherits that negotiation instead of going straight to the
     // legacy dispatcher unconditionally.
+    await abortable(ensureRuntimeEnvironmentCompatible(environmentId, options), options.signal)
     return createWebEnvironmentRuntimeOrpcClient(environmentTarget, options)
   }
-  const supportsOrpc = await abortable(
-    runtimeEnvironmentSupportsCapability(
+  return openRuntimeLoopbackOrpcConnection(
+    {
+      kind: 'environment',
       environmentId,
-      RUNTIME_ORPC_RUNTIME_CAPABILITY,
-      options.timeoutMs
-    ),
-    options.signal
+      timeoutMs: options.timeoutMs ?? DEFAULT_ENVIRONMENT_TIMEOUT_MS
+    },
+    options
   )
-  const supportsSharedControl =
-    supportsOrpc &&
-    (await abortable(
-      runtimeEnvironmentSupportsCapability(
-        environmentId,
-        REMOTE_RUNTIME_SHARED_CONTROL_CAPABILITY,
-        options.timeoutMs
-      ),
-      options.signal
-    ))
-  if (!supportsSharedControl) {
-    return createLegacyRuntimeOrpcClient(environmentTarget, options)
-  }
-  try {
-    return await acquireEnvironmentRuntimeOrpcClient(environmentId, {
-      timeoutMs: options.timeoutMs ?? DEFAULT_ENVIRONMENT_TIMEOUT_MS,
-      signal: options.signal
-    })
-  } catch (error) {
-    if (error instanceof RuntimeOrpcBootstrapError && error.code === 'unsupported') {
-      return createLegacyRuntimeOrpcClient(environmentTarget, options)
-    }
-    throw error
-  }
 }
 
 export function isWebRuntimeClient(): boolean {
@@ -185,7 +144,7 @@ export function isWebRuntimeClient(): boolean {
 // a runtime procedure by a dot-joined method string instead of a statically
 // known contract path. Walk the negotiated client the same way the web shim's
 // `callOrpcProcedure` does, instead of each of those call sites hand-rolling
-// its own dispatcher that reaches for `window.api.runtimeEnvironments.call`
+// its own compatibility dispatcher
 // directly — that bare-string channel skips capability negotiation entirely
 // (see docs/runtime-orpc-migration.md Phase 6 D-stage).
 export async function callRuntimeOrpcByPath<TResult = unknown>(
@@ -213,48 +172,41 @@ function resolveRuntimeOrpcProcedureByPath<TResult>(
   return node as RuntimeOrpcProcedure<unknown, TResult>
 }
 
-// Why: the local target is one long-lived in-process peer, so it gets one
-// MessagePort for the renderer's lifetime. Opening a channel per call made main
+// Why: the local target is one long-lived loopback peer for the renderer's
+// lifetime. Opening a socket per call made main
 // stand up a fresh oRPC handler for every request — at startup that churn spiked
 // the renderer past 3 GB and tripped V8's heap limit. Callers still get a
 // connection whose `close()` is a no-op, so ownership semantics are unchanged.
-let pooledLocalConnection: RuntimeOrpcClientConnection | null = null
+let pooledLocalConnection: Promise<RuntimeOrpcClientConnection> | null = null
 
-function openLocalRuntimeOrpcConnection(): RuntimeOrpcClientConnection {
-  // Why: must be mounted before the connect request goes out — main hands
-  // back the shell-services port over the same handshake, and Phase 5's
-  // reverse contract needs a listener already registered to receive it.
-  mountShellServicesHandler()
-  const channel = new MessageChannel()
-  const connection = createRuntimeOrpcMessagePortConnection(channel.port1)
-  const request = {
-    type: RUNTIME_ORPC_CONNECT_PORT_MESSAGE,
-    target: { kind: 'local' }
-  } satisfies RuntimeOrpcConnectPortRequest
-  channel.port1.start()
-  window.postMessage(request, '*', [channel.port2])
-  return connection
-}
-
-export function createLocalRuntimeOrpcClient(): RuntimeOrpcClientConnection {
+export function createLocalRuntimeOrpcClient(): Promise<RuntimeOrpcClientConnection> {
   if (isWebRuntimeClient()) {
-    return createWebEnvironmentRuntimeOrpcClient(
-      { kind: 'environment', environmentId: 'active' },
-      {}
+    return Promise.resolve(
+      createWebEnvironmentRuntimeOrpcClient({ kind: 'environment', environmentId: 'active' }, {})
     )
   }
   const existing = pooledLocalConnection
   if (existing) {
     return existing
   }
-  const opened = openLocalRuntimeOrpcConnection()
-  const shared: RuntimeOrpcClientConnection = {
-    client: opened.client,
-    transport: opened.transport,
-    close: () => {}
-  }
-  pooledLocalConnection = shared
-  return shared
+  let pending: Promise<RuntimeOrpcClientConnection>
+  pending = openRuntimeLoopbackOrpcConnection(
+    { kind: 'local' },
+    {
+      onClose: () => {
+        if (pooledLocalConnection === pending) {
+          pooledLocalConnection = null
+        }
+      }
+    }
+  ).then((opened) => ({ client: opened.client, transport: opened.transport, close: () => {} }))
+  pooledLocalConnection = pending
+  void pending.catch(() => {
+    if (pooledLocalConnection === pending) {
+      pooledLocalConnection = null
+    }
+  })
+  return pending
 }
 
 function createRuntimeOrpcCallSignal(

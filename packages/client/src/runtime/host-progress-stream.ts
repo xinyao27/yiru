@@ -4,7 +4,7 @@ import { createLocalRuntimeOrpcClient } from './orpc-client'
 import { createRuntimeStreamFanOut } from './stream-fan-out'
 
 const localHostProgressEvents = createRuntimeStreamFanOut({
-  resolveClient: async () => createLocalRuntimeOrpcClient().client,
+  resolveClient: async () => (await createLocalRuntimeOrpcClient()).client,
   open: (client, signal) => client.runtime.progressEvents.subscribe(undefined, { signal })
 })
 

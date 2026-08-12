@@ -4,7 +4,7 @@ import { wrapTerminalBracketedPasteText } from '~renderer/lib/terminal-bracketed
 import { shellEscapePath } from '../pane-helpers'
 import { TERMINAL_PASTE_OPERATION_TIMEOUT_MS } from '../paste/limits'
 import { runTerminalPasteOperationWithTimeout } from '../paste/operation-timeout'
-import type { PtyTransport } from '../pty/transport'
+import type { PtyTransport } from '../pty/transport-types'
 import { writeTerminalPastePtyInput } from '../terminal-pty-paste-writer'
 import { canPasteImageDropPathRaw, isImageDropPath } from './image-path'
 import type { TerminalTargetShell } from './shell'

@@ -1,4 +1,4 @@
-import { isRemoteRuntimePtyId } from '~renderer/runtime/terminal-inspection'
+import { isRuntimeTerminalPtyId } from '~renderer/runtime/terminal-inspection'
 import { subscribeToRuntimeTerminalData } from '~renderer/runtime/terminal-stream'
 import { createDraftPasteReadyScanner } from '~shared/draft-paste-ready-scanner'
 import type { DraftPasteReadySignal } from '~shared/tui-agent/config'
@@ -64,7 +64,7 @@ export function waitForAgentDraftInputReady(
       }
     }
 
-    if (isRemoteRuntimePtyId(ptyId)) {
+    if (isRuntimeTerminalPtyId(ptyId)) {
       void subscribeToRuntimeTerminalData(
         settings,
         ptyId,

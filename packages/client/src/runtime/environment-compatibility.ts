@@ -10,6 +10,7 @@ import type { RuntimeMethodResult } from '~shared/runtime-method-contract'
 
 import { assertRuntimeStatusCompatible } from './protocol-compat'
 import { unwrapRuntimeRpcResult } from './rpc-response'
+import { runtimeEnvironmentsClient } from './runtime-environments-client'
 
 type RuntimeEnvironmentStatus = RuntimeMethodResult<typeof STATUS_GET_CONTRACT>
 
@@ -84,7 +85,7 @@ export async function ensureRuntimeEnvironmentCompatible(
     statusCheckedAt: null
   }
   const check = (async () => {
-    const response = await window.api.runtimeEnvironments.call({
+    const response = await runtimeEnvironmentsClient.call({
       selector: environmentId,
       method: STATUS_GET_CONTRACT.name,
       timeoutMs: options.timeoutMs
@@ -217,7 +218,7 @@ export async function getRuntimeEnvironmentStatus(
   // Why: publish the in-flight probe before awaiting so concurrent cold-cache
   // capability lookups coalesce onto this one status.get instead of duplicating probes.
   const check = (async () => {
-    const response = await window.api.runtimeEnvironments.call({
+    const response = await runtimeEnvironmentsClient.call({
       selector: trimmed,
       method: STATUS_GET_CONTRACT.name,
       timeoutMs

@@ -6,7 +6,7 @@ import { pasteTerminalText } from '~renderer/lib/terminal-bracketed-paste'
 import { executeTerminalPastePlan, planTerminalPasteWithYield } from './paste/coordinator'
 import { resolveTerminalPasteRuntime } from './paste/runtime'
 import { isTerminalPanePasteTargetCurrent } from './paste/target-state'
-import type { PtyTransport } from './pty/transport'
+import type { PtyTransport } from './pty/transport-types'
 import { recordTerminalUserInputForLeaf } from './terminal-input-activity'
 import { writeTerminalPastePtyInput } from './terminal-pty-paste-writer'
 

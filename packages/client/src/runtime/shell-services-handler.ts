@@ -1,16 +1,13 @@
 import { implement } from '@orpc/server'
-import { RPCHandler } from '@orpc/server/message-port'
 import { shellServicesContract } from '@yiru/runtime-protocol/contract'
 import { handleAutomationDispatchRequest } from '~renderer/components/automations/use-automation-dispatch-events'
 import { buildWorkspaceSessionPayload } from '~renderer/components/editor/workspace-session'
 import { persistWorkspaceSessionByHost } from '~renderer/components/editor/workspace-session-host-persistence'
 import { handleRateLimitResumeDispatchRequest } from '~renderer/components/rate-limit-resume/use-rate-limit-resume-dispatch'
-import { serializePtyBufferForRequest } from '~renderer/components/terminal-pane/pty/buffer-serializer'
 import { closeTerminalTab } from '~renderer/components/terminal/tab-actions'
 import { useAppStore } from '~renderer/store'
 import type { Automation, AutomationRun } from '~shared/automations-types'
 import type { RateLimitResumeSchedule } from '~shared/rate-limit-resume/types'
-import { parseShellServicesConnectMessage } from '~shared/shell-services-message-port'
 
 import {
   closeBrowserTabViaShell,
@@ -27,42 +24,12 @@ import { revealTerminalSessionViaShell } from './terminal-reveal-shell-request'
 import { handleShellServicesUICommand } from './ui-command-shell-request'
 import { getWebShellApi, pickWebShellDirectories } from './web-shell-client'
 
-// Why: the renderer holds exactly one shell-services handler for its
-// lifetime — mounting is idempotent so calling it again (e.g. a second local
-// connection attempt) never double-registers the window listener.
-let mounted = false
-
 function isWebShell(): boolean {
   return (globalThis as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__ === true
 }
 
 function getShellApi(): ShellPlatformApi {
   return isWebShell() ? getWebShellApi() : electronShellPlatformApi
-}
-
-export function mountShellServicesHandler(): void {
-  if (mounted) {
-    return
-  }
-  mounted = true
-  window.addEventListener('message', handleShellServicesConnect)
-}
-
-function handleShellServicesConnect(event: MessageEvent<unknown>): void {
-  const request = parseShellServicesConnectMessage(event.data)
-  if (!request) {
-    return
-  }
-  if (event.source !== window || event.ports.length !== 1) {
-    for (const port of event.ports) {
-      port.close()
-    }
-    return
-  }
-  const [port] = event.ports
-  const router = createShellServicesRouter()
-  new RPCHandler(router).upgrade(port)
-  port.start()
 }
 
 export function createShellServicesRouter() {
@@ -225,15 +192,6 @@ export function createShellServicesRouter() {
         void handleRateLimitResumeDispatchRequest(input as RateLimitResumeSchedule)
         return { accepted: true }
       })
-    },
-    // Why: Phase 5 step 4, `pty` group A — the actual serialize logic (entry
-    // lookup, staleness check, title merge) already lived in
-    // buffer-serializer.ts's self-contained registry; this is a direct call,
-    // same shape as mobileMarkdown above.
-    pty: {
-      serializeBuffer: implementer.pty.serializeBuffer.handler(async ({ input }) => ({
-        snapshot: await serializePtyBufferForRequest(input.ptyId, input.opts)
-      }))
     }
   })
 }

@@ -32,7 +32,6 @@ import {
   shouldDriveSyntheticAgentTitleFromHook,
   type SyntheticAgentTitleProfile
 } from '~shared/synthetic-agent-title'
-import type { TerminalSideEffectBatch } from '~shared/terminal/side-effect-facts'
 import { resolveTuiAgentPermissionMode } from '~shared/tui-agent/permissions'
 import type { UpdateCheckOptions } from '~shared/types'
 import { parseWorkspaceKey } from '~shared/workspace/scope'
@@ -178,6 +177,7 @@ import { setGitHubEventPublisher } from './runtime/github-events'
 import { setHostProgressEventPublisher } from './runtime/host-progress-events'
 import { setRuntimeHostPathsProvider } from './runtime/host/paths-provider'
 import { setRuntimeHostSecureStorageProvider } from './runtime/host/secure-storage-provider'
+import { registerRuntimeLoopbackCredentials } from './runtime/loopback/credentials'
 import { clearRuntimeMetadataIfOwned } from './runtime/metadata'
 import { setNotificationShellAttentionSignal } from './runtime/notification-shell-attention'
 import {
@@ -255,7 +255,6 @@ import { createWslCliReconciliationStartupBarrier } from './startup/wsl-cli-reco
 import { StatsCollector, initStatsPath } from './stats/collector'
 import { fetchCursorUsageForStats } from './stats/cursor-usage'
 import { getUsageScopePaths } from './stats/usage-scope'
-import { shouldCopySyntheticTitleFrameToPtyData } from './synthetic-title-frame-routing'
 import {
   advanceSyntheticTitleSpinnerEntries,
   type SyntheticTitleSpinnerEntry
@@ -1715,12 +1714,6 @@ function sendSyntheticTitle(ptyId: string, data: string, options: { force?: bool
   // titles/BELs reach pty:sideEffect consumers when main holds side-effect
   // authority.
   runtime?.ingestSyntheticTitleFrame(ptyId, data)
-  // Why: only the kill-switch-off renderer still byte-parses synthetic frames;
-  // under main authority the copy would just mint phantom ACKs for unmetered
-  // bytes (see synthetic-title-frame-routing.ts).
-  if (shouldCopySyntheticTitleFrameToPtyData(store?.getSettings())) {
-    mainWindow.webContents.send('pty:data', { id: ptyId, data })
-  }
 }
 
 function isSyntheticTitleWindowVisible(): boolean {
@@ -2225,13 +2218,6 @@ app.whenReady().then(async () => {
     onTerminalAgentStatus: (event) => {
       agentHookServer.ingestTerminalStatus(event)
     },
-    // Why: serve can be promoted in place, so keep the listener wired from
-    // startup; runtime enables desktop-only scanners only for a ready renderer.
-    onTerminalSideEffects: (batch: TerminalSideEffectBatch) => {
-      if (mainWindow && !mainWindow.isDestroyed()) {
-        mainWindow.webContents.send('pty:sideEffect', batch)
-      }
-    },
     getDesktopWindowStatus: getDesktopWindowStatus,
     getWindowById: (windowId) => BrowserWindow.fromId(windowId),
     getHostProcessMetrics: () => app.getAppMetrics(),
@@ -2500,6 +2486,7 @@ app.whenReady().then(async () => {
       : {}),
     webClientRoot: getBundledWebClientRoot()
   })
+  registerRuntimeLoopbackCredentials(runtimeRpc)
   initializeShellMobileService(runtimeRpc, {
     openWindowsNetworkSettings: () => shell.openExternal('ms-settings:network-status')
   })

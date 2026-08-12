@@ -12,11 +12,7 @@ import { useAppStore } from '~renderer/store'
 
 import { handleTerminalFileDrop } from './drop/handler'
 import { handleFocusTerminalPaneDetail } from './focus-terminal-pane-event'
-import {
-  releaseRendererPtyVisibilityClaim,
-  setRendererPtyVisibilityClaim
-} from './pty/renderer-delivery-claims'
-import type { PtyTransport } from './pty/transport'
+import type { PtyTransport } from './pty/transport-types'
 import { surfaceStaleAgentRow } from './stale-agent-row'
 import { handleTerminalProgrammaticTextPaste } from './terminal-programmatic-text-paste'
 import {
@@ -47,16 +43,15 @@ type UseTerminalPaneGlobalEffectsArgs = {
 
 function reportRendererPtyVisibility(
   paneTransports: ReadonlyMap<number, PtyTransport>,
-  visible: boolean
+  visible: boolean,
+  active: boolean
 ): void {
   for (const transport of paneTransports.values()) {
-    const ptyId = transport.getPtyId()
-    if (!ptyId || ptyId.startsWith('remote:')) {
-      // Why: remote-runtime PTYs use a relay path outside main's local
-      // renderer-visibility registry, so reporting them here is misleading.
-      continue
-    }
-    setRendererPtyVisibilityClaim(transport, ptyId, visible)
+    transport.setDeliveryState?.({
+      visible,
+      interested: visible,
+      priority: visible ? (active ? 'active' : 'visible') : 'parked'
+    })
   }
 }
 
@@ -90,17 +85,6 @@ export function useTerminalPaneGlobalEffects({
   const renderingSuspendedByVisibilityRef = useRef(false)
   const hiddenReasonRef = useRef<TerminalHiddenReason | null>(null)
   const rendererVisible = isVisible && isWorktreeActive
-  // Why: the active pane can rebind to a new PTY (deferred reattach / eager
-  // adopt) or switch active leaf without isActive/isVisible/isWorktreeActive
-  // flipping. Derive the active leaf's live PTY reactively from the same
-  // leaf→PTY binding the reattach path writes, so the active-renderer-pty report
-  // below re-fires on rebind — otherwise main keeps the stale id and the live
-  // PTY loses its interactive reserve.
-  const activeLeafPtyId = useAppStore((state) => {
-    const layout = state.terminalLayoutsByTabId[tabId]
-    const activeLeafId = layout?.activeLeafId
-    return activeLeafId ? (layout.ptyIdsByLeafId?.[activeLeafId] ?? null) : null
-  })
   const {
     captureViewportPositions,
     withSuppressedScrollTracking,
@@ -127,13 +111,13 @@ export function useTerminalPaneGlobalEffects({
 
   useEffect(() => {
     const paneTransports = paneTransportsRef.current
-    reportRendererPtyVisibility(paneTransports, rendererVisible)
+    reportRendererPtyVisibility(paneTransports, rendererVisible, isActive)
     return () => {
       for (const transport of paneTransports.values()) {
-        releaseRendererPtyVisibilityClaim(transport)
+        transport.setDeliveryState?.({ visible: false, interested: false, priority: 'parked' })
       }
     }
-  }, [rendererVisible, paneTransportsRef])
+  }, [isActive, rendererVisible, paneTransportsRef])
 
   useEffect(() => {
     const manager = managerRef.current
@@ -181,18 +165,6 @@ export function useTerminalPaneGlobalEffects({
     wasWorktreeActiveRef.current = isWorktreeActive
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isActive, isWorktreeActive, rendererVisible])
-
-  useEffect(() => {
-    const ptyId = isActive && isVisible && isWorktreeActive ? activeLeafPtyId : null
-    if (!ptyId || ptyId.startsWith('remote:')) {
-      return
-    }
-    // Why: main uses this as a scheduler hint only, so the foreground pane's
-    // renderer output gets first chance at the bounded ACK reserve. The cleanup
-    // reports the old PTY inactive before the effect re-runs for a rebind.
-    window.api.pty.setActiveRendererPty?.(ptyId, true)
-    return () => window.api.pty.setActiveRendererPty?.(ptyId, false)
-  }, [isActive, isVisible, isWorktreeActive, activeLeafPtyId])
 
   useEffect(() => {
     const onToggleExpand = (event: Event): void => {

@@ -7,7 +7,6 @@ import { hasRegisteredRuntimeTerminalTab } from '~renderer/runtime/sync-runtime-
 import { useAppStore } from '~renderer/store'
 
 import { canWatcherCoverParkedTerminalTab } from '../terminal-pane/terminal-parked-tab-watchers'
-import { isMainTerminalSideEffectAuthorityForPty } from '../terminal-pane/terminal-side-effect-facts-handler'
 import {
   applyBackgroundMountTabRestriction,
   canDeferColdActivationTabsForHost,
@@ -56,12 +55,7 @@ export function useTerminalWorktreeMounting({
   const activeTabIdByWorktree = useAppStore((s) => s.activeTabIdByWorktree)
   const workspaceSessionReady = useAppStore((s) => s.workspaceSessionReady)
   const terminalParkingEnabled = useAppStore((s) => s.settings?.terminalHiddenViewParking !== false)
-  const terminalTitleSnapshotAuthorityEnabled = useAppStore((s) =>
-    isMainTerminalSideEffectAuthorityForPty({
-      settings: s.settings,
-      runtimeEnvironmentId: null
-    })
-  )
+  const terminalTitleSnapshotAuthorityEnabled = true
   const activeWorktreeDeferralHostId = useAppStore((s) =>
     getResolvedExecutionHostIdForWorktree(s, activeWorktreeId)
   )

@@ -477,7 +477,7 @@ export async function handleAutomationDispatchRequest({
 
 // Why: `rendererReady` still matters even though the dispatch push itself
 // moved to the shellServices reverse link (connected far earlier, at the
-// local MessagePort handshake, well before the store is hydrated). This
+// local runtime handshake, well before the store is hydrated). This
 // mount-time signal is what tells AutomationService the renderer is actually
 // ready to execute a dispatch, and it kicks an immediate catch-up sweep for
 // runs that came due while the window was closed rather than waiting for the

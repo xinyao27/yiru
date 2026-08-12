@@ -9,7 +9,7 @@ import { createRuntimeStreamFanOut } from './stream-fan-out'
 // Why: these locks describe terminals and BrowserViews owned by the shell's
 // runtime. A remote PTY carries its own driver state on its dedicated stream.
 const runtimeDriverEvents = createRuntimeStreamFanOut({
-  resolveClient: async () => createLocalRuntimeOrpcClient().client,
+  resolveClient: async () => (await createLocalRuntimeOrpcClient()).client,
   open: (client, signal) => client.runtime.driverEvents.subscribe(undefined, { signal })
 })
 

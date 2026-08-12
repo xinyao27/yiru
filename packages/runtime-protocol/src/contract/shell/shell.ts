@@ -11,6 +11,7 @@ import {
   shellSessionContract
 } from './persisted-state.js'
 import { shellPlatformContract } from './platform.js'
+import { shellRuntimeEnvironmentsContract } from './runtime-environments.js'
 import { shellSettingsContract } from './settings.js'
 import {
   shellAppContract,
@@ -60,6 +61,7 @@ export const shellContract = {
   pet: shellPetContract,
   repoHost: shellRepoHostContract,
   runtime: shellRuntimeStateContract,
+  runtimeEnvironments: shellRuntimeEnvironmentsContract,
   settings: shellSettingsContract,
   session: shellSessionContract,
   starNag: shellStarNagContract,
@@ -79,6 +81,7 @@ export * from './files.js'
 export * from './platform.js'
 export * from './persisted-state.js'
 export * from './settings.js'
+export * from './runtime-environments.js'
 export * from './system.js'
 export * from './tools.js'
 export * from './ui.js'

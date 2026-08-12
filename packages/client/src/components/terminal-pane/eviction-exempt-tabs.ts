@@ -1,4 +1,4 @@
-import { isRemoteRuntimePtyId } from '~renderer/runtime/terminal-inspection'
+import { isRuntimeTerminalPtyId } from '~renderer/runtime/terminal-inspection'
 import { useAppStore } from '~renderer/store'
 import { parseAppSshPtyId } from '~shared/ssh-pty-id'
 
@@ -12,7 +12,7 @@ function isEvictionExemptTerminalPty(
   ptyId: string | null | undefined,
   worktreeId: string
 ): boolean {
-  if (!ptyId || isRemoteRuntimePtyId(ptyId) || parseAppSshPtyId(ptyId)) {
+  if (!ptyId || isRuntimeTerminalPtyId(ptyId) || parseAppSshPtyId(ptyId)) {
     return false
   }
   return !isSnapshotBackedTerminalPty(ptyId, worktreeId)

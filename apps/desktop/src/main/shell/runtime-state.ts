@@ -5,11 +5,9 @@ import type {
   RuntimeTerminalDriverState
 } from '~shared/runtime-types'
 
-import { registerRuntimeOrpcMessagePortHandler } from '../runtime/rpc/orpc/message-port-handler'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'
 
 export function initializeShellRuntimeStateService(runtime: YiruRuntimeService): void {
-  registerRuntimeOrpcMessagePortHandler(runtime)
   shellRuntimeStateService = createShellRuntimeStateService(runtime)
 }
 

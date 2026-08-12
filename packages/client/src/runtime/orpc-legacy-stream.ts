@@ -4,13 +4,14 @@ import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 import { createRuntimeRpcAbortError } from './abortable-runtime-environment-call'
 import type { RuntimeOrpcBinaryListener } from './orpc-binary-side-channel'
 import { unwrapRuntimeRpcResult } from './rpc-response'
+import { runtimeEnvironmentsClient } from './runtime-environments-client'
 
 type LegacyStreamItem =
   | { type: 'value'; value: unknown }
   | { type: 'error'; error: unknown }
   | { type: 'done' }
 
-type LegacySubscriptionHandle = Awaited<ReturnType<typeof window.api.runtimeEnvironments.subscribe>>
+type LegacySubscriptionHandle = Awaited<ReturnType<typeof runtimeEnvironmentsClient.subscribe>>
 
 export async function createLegacyRuntimeOrpcStream(args: {
   environmentId: string
@@ -41,7 +42,7 @@ export async function createLegacyRuntimeOrpcStream(args: {
   }
   args.signal?.addEventListener('abort', onAbort, { once: true })
 
-  const pending = window.api.runtimeEnvironments.subscribe(
+  const pending = runtimeEnvironmentsClient.subscribe(
     {
       selector: args.environmentId,
       method: args.method,

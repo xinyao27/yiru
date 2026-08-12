@@ -72,7 +72,7 @@ export async function createWebSessionBrowserTabCommand(args: {
 }): Promise<WebSessionCommandResult<BrowserTabCreateResult>> {
   try {
     // Why: dispatches by contract path through the negotiated oRPC client
-    // instead of `window.api.runtimeEnvironments.call` with a bare method
+    // instead of the compatibility bridge with a bare method
     // string — the bare-string channel skips capability negotiation and
     // always lands on the legacy dispatcher, which no longer serves domains
     // retired from it (see docs/runtime-orpc-migration.md Phase 6 D-stage).

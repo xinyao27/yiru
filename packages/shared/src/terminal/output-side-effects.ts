@@ -76,7 +76,7 @@ export type TerminalTitleTrackerCallbacks = {
   onPrLink?: (link: TerminalGitHubPRLink) => void
   /**
    * Fired per chunk containing a DECSET 2031 subscribe (chunk-boundary-safe).
-   * Lets hidden-delivery-gated renderer views answer the color-scheme query
+   * Lets multiplex-gated renderer views answer the color-scheme query
    * without byte access; the reply itself stays with the view.
    */
   onMode2031Subscribe?: () => void

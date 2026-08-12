@@ -2,11 +2,11 @@ import type { TerminalShowResult } from '@yiru/runtime-protocol/contract'
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 import type { TerminalMultiplexOpcode as TerminalMultiplexOpcodeValue } from '@yiru/runtime-protocol/terminal-multiplex/frame'
 
-import { callRuntimeOrpcByPath } from '../orpc-client'
+import { callRuntimeOrpcByPath, type RuntimeClientTarget } from '../orpc-client'
 import { unwrapRuntimeRpcResult } from '../rpc-client'
 import {
-  openRemoteTerminalMultiplexSubscription,
-  type RuntimeEnvironmentSubscriptionHandle
+  openTerminalMultiplexSubscription,
+  type RuntimeTerminalMultiplexHandle
 } from './connection-open'
 import { RemoteTerminalMultiplexWire } from './connection-wire'
 import { RemoteTerminalMultiplexedStream } from './stream'
@@ -24,14 +24,15 @@ export {
 const RECONNECT_DELAY_MS = 250
 
 export class RemoteRuntimeTerminalMultiplexer {
-  private readonly environmentId: string
+  private readonly target: RuntimeClientTarget
+  private readonly targetKey: string
   private readonly releaseIfCurrent: (
-    environmentId: string,
+    targetKey: string,
     multiplexer: RemoteRuntimeTerminalMultiplexer
   ) => void
   private readonly streams = new Map<number, RemoteTerminalMultiplexedStream>()
   private readonly wire: RemoteTerminalMultiplexWire
-  private subscription: RuntimeEnvironmentSubscriptionHandle | null = null
+  private subscription: RuntimeTerminalMultiplexHandle | null = null
   private connectPromise: Promise<void> | null = null
   private resolveReady: (() => void) | null = null
   private rejectReady: ((error: Error) => void) | null = null
@@ -44,10 +45,12 @@ export class RemoteRuntimeTerminalMultiplexer {
   private pendingFrames: Uint8Array<ArrayBufferLike>[] = []
 
   constructor(
-    environmentId: string,
-    releaseIfCurrent: (environmentId: string, multiplexer: RemoteRuntimeTerminalMultiplexer) => void
+    target: RuntimeClientTarget,
+    targetKey: string,
+    releaseIfCurrent: (targetKey: string, multiplexer: RemoteRuntimeTerminalMultiplexer) => void
   ) {
-    this.environmentId = environmentId
+    this.target = target
+    this.targetKey = targetKey
     this.releaseIfCurrent = releaseIfCurrent
     this.wire = new RemoteTerminalMultiplexWire({
       sendBytes: (bytes) => {
@@ -121,8 +124,9 @@ export class RemoteRuntimeTerminalMultiplexer {
   private async openConnection(): Promise<void> {
     const attempt = ++this.connectionAttempt
     try {
-      const subscription = await openRemoteTerminalMultiplexSubscription({
-        environmentId: this.environmentId,
+      const subscription = await openTerminalMultiplexSubscription({
+        target: this.target,
+        environmentIdentity: this.target.kind === 'local' ? 'local' : this.target.environmentId,
         callRuntime: (method, params) => this.callRuntime(method, params),
         onResponse: (response) => this.handleResponse(attempt, response),
         onBinary: (bytes) => this.handleBinary(attempt, bytes),
@@ -231,7 +235,7 @@ export class RemoteRuntimeTerminalMultiplexer {
       this.rejectReady?.(new Error(message))
       this.resetConnection()
       subscription?.unsubscribe()
-      this.releaseIfCurrent(this.environmentId, this)
+      this.releaseIfCurrent(this.targetKey, this)
       return
     }
     for (const stream of this.streams.values()) {
@@ -251,7 +255,7 @@ export class RemoteRuntimeTerminalMultiplexer {
       const subscription = this.subscription
       this.resetConnection()
       subscription?.unsubscribe()
-      this.releaseIfCurrent(this.environmentId, this)
+      this.releaseIfCurrent(this.targetKey, this)
     }
   }
 
@@ -272,12 +276,9 @@ export class RemoteRuntimeTerminalMultiplexer {
   }
 
   private callRuntime<TResult>(method: string, params: unknown): Promise<TResult> {
-    return callRuntimeOrpcByPath<TResult>(
-      { kind: 'environment', environmentId: this.environmentId },
-      method.split('.'),
-      params,
-      { timeoutMs: 15_000 }
-    )
+    return callRuntimeOrpcByPath<TResult>(this.target, method.split('.'), params, {
+      timeoutMs: 15_000
+    })
   }
 }
 

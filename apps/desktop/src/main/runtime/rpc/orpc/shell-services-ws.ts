@@ -68,7 +68,8 @@ export class RuntimeShellServicesWsLinks {
 
   private connect(socket: AuthenticatedMobileSocket): void {
     this.states.get(socket.ws)?.connection.close()
-    const shellConnectionId = webShellServicesConnectionId(socket.connectionId)
+    const shellConnectionId =
+      socket.shellConnectionId ?? webShellServicesConnectionId(socket.connectionId)
     const peer = new RuntimeShellServicesWsPeer(socket)
     const link = new RPCLink<Record<never, never>>({ websocket: peer })
     const client = createORPCClient<ShellServicesClient>(link)

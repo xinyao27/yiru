@@ -5,6 +5,8 @@ import type {
   RuntimeMethodResult
 } from '~shared/runtime-method-contract'
 
+import { runtimeEnvironmentsClient } from './runtime-environments-client'
+
 export function createRuntimeRpcAbortError(): Error {
   const error = new Error('Runtime request aborted')
   error.name = 'AbortError'
@@ -64,7 +66,7 @@ export async function callAbortableRuntimeEnvironment(
     }
     const onAbort = (): void => finish(() => reject(createRuntimeRpcAbortError()))
     signal.addEventListener('abort', onAbort, { once: true })
-    void window.api.runtimeEnvironments
+    void runtimeEnvironmentsClient
       .subscribe(
         { selector: environmentId, method, params, timeoutMs },
         {

@@ -3,8 +3,8 @@ export type AgentPaneAuthorityOwnershipSources = {
   getRuntimeTerminalHandleForPaneKey?: (paneKey: string) => string | undefined
 }
 
-function getRemoteRuntimeHandle(ptyId: string): string | null {
-  if (!ptyId.startsWith('remote:')) {
+function getRuntimeHandle(ptyId: string): string | null {
+  if (!ptyId.startsWith('runtime:')) {
     return null
   }
   const rest = ptyId.slice(7)
@@ -23,7 +23,7 @@ function getRemoteRuntimeHandle(ptyId: string): string | null {
     if (!owner || owner.trim() !== owner || !handle || handle.trim() !== handle) {
       return null
     }
-    return `remote:${encodeURIComponent(owner)}@@${encodeURIComponent(handle)}` === ptyId
+    return `runtime:${encodeURIComponent(owner)}@@${encodeURIComponent(handle)}` === ptyId
       ? handle
       : null
   } catch {
@@ -39,6 +39,6 @@ export function createAgentPaneAuthorityOwnership(
       return true
     }
     const runtimeHandle = sources.getRuntimeTerminalHandleForPaneKey?.(paneKey)
-    return Boolean(runtimeHandle && getRemoteRuntimeHandle(ptyId) === runtimeHandle)
+    return Boolean(runtimeHandle && getRuntimeHandle(ptyId) === runtimeHandle)
   }
 }

@@ -44,7 +44,7 @@ export class WebRuntimeOrpcChannel {
   // Why: `browser.screencast.subscribe` pushes video frames out-of-band from
   // its event-iterator values, over a request-id-tagged side channel that
   // shares this wire with ordinary oRPC messages (see
-  // `orpc-binary-side-channel.ts`, the Electron/MessagePort sibling of this
+  // `orpc-binary-side-channel.ts`, the shared binary sibling of this
   // registry).
   private readonly binaryListeners = new Map<string, (bytes: Uint8Array<ArrayBufferLike>) => void>()
   private sendQueue = Promise.resolve()
@@ -200,7 +200,7 @@ export function createWebRuntimeOrpcConnection(
       }
     ]
   })
-  // Why: mirrors `orpc-message-port-client.ts`'s outer wrapping link — a
+  // Why: mirrors the outer wrapping link — a
   // per-call request id both tags the transport-level header above and keys
   // the binary listener registration, so a screencast frame arriving on this
   // one shared WS connection routes to the call that asked for it instead of

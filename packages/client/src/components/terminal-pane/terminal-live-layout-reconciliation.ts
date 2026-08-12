@@ -1,4 +1,4 @@
-import { isRemoteRuntimePtyId } from '~renderer/runtime/terminal-inspection'
+import { isRuntimeTerminalPtyId } from '~renderer/runtime/terminal-inspection'
 import type { TerminalPaneLayoutNode, TerminalPaneSplitDirection } from '~shared/types'
 
 /**
@@ -16,7 +16,7 @@ export function isHostAuthoritativeLayout(args: {
     return true
   }
   return Object.values(args.ptyIdsByLeafId ?? {}).some(
-    (ptyId) => typeof ptyId === 'string' && isRemoteRuntimePtyId(ptyId)
+    (ptyId) => typeof ptyId === 'string' && isRuntimeTerminalPtyId(ptyId)
   )
 }
 

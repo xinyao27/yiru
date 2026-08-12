@@ -2,7 +2,7 @@ import type { ILink, ILinkProvider, Terminal } from '@xterm/xterm'
 import { activateTabAndFocusPane } from '~renderer/lib/activate-tab-and-focus-pane'
 import { focusTerminalTabSurface } from '~renderer/lib/focus-terminal-tab-surface'
 import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
-import { parseRemoteRuntimePtyId } from '~renderer/runtime/terminal-stream'
+import { parseRuntimeTerminalPtyId } from '~renderer/runtime/terminal-stream'
 import type { AppState } from '~renderer/store'
 import { useAppStore } from '~renderer/store'
 
@@ -242,7 +242,7 @@ function ptyIdMatchesTerminalHandle(
   if (ptyId === handle) {
     return targetEnvironmentId === null
   }
-  const remotePty = parseRemoteRuntimePtyId(ptyId)
+  const remotePty = parseRuntimeTerminalPtyId(ptyId)
   if (!remotePty || remotePty.handle !== handle) {
     return false
   }

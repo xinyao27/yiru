@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { getConnectionId } from '~renderer/lib/connection-context'
 import { isIntentionalAppRestartInProgress } from '~renderer/lib/updater-beforeunload'
 import { shellClient } from '~renderer/runtime/shell-client'
-import { isRemoteRuntimePtyId } from '~renderer/runtime/terminal-inspection'
+import { inspectRuntimeTerminalProcess } from '~renderer/runtime/terminal-inspection'
 import { useAppStore } from '~renderer/store'
 
 import type { OpenFile } from '../editor/state'
@@ -44,27 +43,23 @@ export function useWindowCloseGuard(): WindowCloseGuard {
     window.dispatchEvent(new Event('beforeunload'))
     if (!isQuitting) {
       const state = useAppStore.getState()
-      const localPtyIds = Object.entries(state.tabsByWorktree).flatMap(
-        ([worktreeId, worktreeTabs]) => {
-          const connectionId = getConnectionId(worktreeId)
-          if (connectionId !== null) {
-            return []
-          }
-          return worktreeTabs
-            .flatMap((tab) => state.ptyIdsByTabId[tab.id] ?? [])
-            .filter((ptyId) => !isRemoteRuntimePtyId(ptyId))
-        }
+      const terminalPtyIds = Object.values(state.tabsByWorktree).flatMap((worktreeTabs) =>
+        worktreeTabs.flatMap((tab) => state.ptyIdsByTabId[tab.id] ?? [])
       )
-      if (localPtyIds.length > 0) {
-        void Promise.all(localPtyIds.map((id) => window.api.pty.hasChildProcesses(id))).then(
-          (results) => {
-            if (results.some(Boolean)) {
-              setWindowCloseDialogOpen(true)
-            } else {
-              shellClient.ui.confirmWindowClose()
-            }
+      if (terminalPtyIds.length > 0) {
+        void Promise.all(
+          terminalPtyIds.map((id) =>
+            inspectRuntimeTerminalProcess(state.settings, id).then(
+              (process) => process.hasChildProcesses
+            )
+          )
+        ).then((results) => {
+          if (results.some(Boolean)) {
+            setWindowCloseDialogOpen(true)
+          } else {
+            shellClient.ui.confirmWindowClose()
           }
-        )
+        })
         return
       }
     }

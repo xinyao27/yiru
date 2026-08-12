@@ -64,7 +64,7 @@ export function transferAgentPaneAuthorityOnHost(args: {
 
 function dispatchAgentStatusMutation(mutate: (client: RuntimeOrpcClient) => Promise<void>): void {
   void Promise.resolve()
-    .then(() => mutate(createLocalRuntimeOrpcClient().client))
+    .then(async () => mutate((await createLocalRuntimeOrpcClient()).client))
     .catch(() => {
       // Why: these mirror the old fire-and-forget IPC teardown messages. A
       // disconnect must not turn routine pane disposal into an unhandled rejection.

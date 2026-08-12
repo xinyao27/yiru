@@ -4,7 +4,7 @@ import {
   type SleepingAgentSessionRecord
 } from '@yiru/workbench-model/agent'
 import type { AgentStatusEntry } from '@yiru/workbench-model/agent'
-import { parseRemoteRuntimePtyId } from '~renderer/runtime/terminal-stream'
+import { parseRuntimeTerminalPtyId } from '~renderer/runtime/terminal-stream'
 import { parsePaneKey } from '~shared/stable-pane-id'
 import type { GlobalSettings, TerminalLayoutSnapshot, TerminalTab } from '~shared/types'
 
@@ -62,7 +62,7 @@ type EligiblePane = {
 }
 
 function toRuntimePtyId(ptyId: string): string {
-  return parseRemoteRuntimePtyId(ptyId)?.handle ?? ptyId
+  return parseRuntimeTerminalPtyId(ptyId)?.handle ?? ptyId
 }
 
 function getLivePtyIdsForTab(

@@ -1,10 +1,7 @@
-import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
-import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
 /* eslint-disable max-lines -- Why: the preload contract is intentionally centralized in one declaration file so renderer and preload stay in lockstep when IPC surfaces change. */
 import type { HostedReviewProvider } from '@yiru/workbench-model/review'
 
 import type { AppIdentity } from '../app-identity'
-import type { StartupCommandDelivery } from '../codex-startup-delivery'
 import type {
   CommitMessageAgentCapability,
   CommitMessageModelCapability
@@ -23,18 +20,8 @@ import type {
   GitRevertResult
 } from '../git/write-op-results'
 import type { ProjectExecutionRuntimeResolution } from '../project-execution-runtime'
-import type { PtyMainDeliveryDiagnostics } from '../pty-delivery-diagnostics'
-import type { PtyModelRestoreNeededEvent } from '../pty-model-restore-marker'
-import type {
-  PtyRendererDeliveryHealthReply,
-  PtyRendererDeliveryStateReport
-} from '../pty-renderer-delivery-health'
-import type { PublicKnownRuntimeEnvironment } from '../runtime-environments'
-import type { RuntimeStatus } from '../runtime-types'
 import type { ResolvedSourceControlAiGenerationParams } from '../source-control/ai'
 import type { SourceControlAiSettings } from '../source-control/ai-types'
-import type { TerminalSideEffectBatch } from '../terminal/side-effect-facts'
-import type { TerminalViewAttributes } from '../terminal/view-attributes'
 import type {
   BrowserSessionProfileSource,
   ClaudeRateLimitAccountsState,
@@ -64,10 +51,6 @@ export type {
   ShellOpenLocalPathResult
 } from '../shell-open-types'
 
-type RuntimeEnvironmentSubscriptionHandle = {
-  unsubscribe: () => void
-  sendBinary: (bytes: Uint8Array<ArrayBufferLike>) => void
-}
 import type {
   AiVaultListArgs,
   AiVaultListResult,
@@ -108,7 +91,6 @@ import type {
   OpenCodeUsageSnapshot,
   OpenCodeUsageSummary
 } from '../opencode-usage-types'
-import type { AgentKind, LaunchSource, RequestKind } from '../telemetry-events'
 
 export type EmulatorApi = {
   // Why: startFrameStream/stopFrameStream (+ onFrameStreamFrame/
@@ -460,12 +442,18 @@ export type RepoHostAdapter = {
 }
 
 export type PreloadApi = {
+  runtimeConnection: {
+    getCredentials: () => Promise<{
+      endpoint: string
+      processToken: Uint8Array<ArrayBuffer>
+    }>
+  }
   // Why: this group's `on*` members (onDeliveryResyncRequest, onData,
   // onReplay, onModelRestoreNeeded, onSideEffect, onExit,
   // onClearBufferRequest) are never a runtime migration gap.
   // `onSerializeBufferRequest`/`sendSerializedBuffer` moved to the
   // shell-services reverse contract (Phase 5 step 4, `pty` group A —
-  // contract/shell-services-pty.ts) and no longer live here. Per-keystroke
+  // typed runtime contracts) and no longer live here. Per-keystroke
   // terminal I/O is Appendix A's explicit
   // binary/flow-control exemption (`pty:data`, §1.5's "明确豁免" bucket), and
   // Phase 3's "误报更正 2" found the whole control-plane batch already
@@ -477,188 +465,6 @@ export type PreloadApi = {
   // end-to-end and never touches this preload surface. A paired web client
   // always has an environment id, so it never takes the
   // `createIpcPtyTransport` branch these stubs would otherwise serve.
-  pty: {
-    spawn: (opts: {
-      cols: number
-      rows: number
-      cwd?: string
-      cwdFallback?: 'worktree'
-      env?: Record<string, string>
-      envToDelete?: string[]
-      command?: string
-      launchConfig?: SleepingAgentLaunchConfig
-      launchToken?: string
-      launchAgent?: TuiAgent
-      startupCommandDelivery?: StartupCommandDelivery
-      connectionId?: string | null
-      worktreeId?: string
-      sessionId?: string
-      // Why: lets a single tab open in a different shell than the user's default.
-      // Preserved from the deleted index.d.ts PtyApi duplicate during the
-      // single-source-of-truth collapse (see docs/preload-typecheck-hole.md §1).
-      shellOverride?: string
-      projectRuntime?: ProjectExecutionRuntimeResolution
-      terminalColorQueryReplies?: { foreground?: string; background?: string }
-      // Why: hidden-at-spawn declaration — main marks the PTY hidden before
-      // its first byte so the delivery gate + model responder own spawn-time
-      // queries (terminal-query-authority.md §races).
-      initiallyHidden?: boolean
-      // Why: closes the SIGKILL race documented in INVESTIGATION.md — main
-      // sync-flushes the (worktreeId, tabId, leafId → ptyId) binding before
-      // pty:spawn returns. Only the renderer's daemon-host path threads these.
-      tabId?: string
-      leafId?: string
-      // Why: telemetry-plan.md§Agent launch semantics — main emits
-      // `agent_started` only after the PTY/session is created successfully,
-      // so the renderer threads the launch metadata through this field and
-      // the IPC handler fires the event from the spawn-success branch.
-      telemetry?: { agent_kind: AgentKind; launch_source: LaunchSource; request_kind: RequestKind }
-    }) => Promise<{
-      id: string
-      launchAgent?: TuiAgent
-      launchConfig?: SleepingAgentLaunchConfig
-      snapshot?: string
-      snapshotCols?: number
-      snapshotRows?: number
-      isReattach?: boolean
-      isAlternateScreen?: boolean
-      replay?: string
-      sessionExpired?: boolean
-      coldRestore?: { scrollback: string; cwd: string }
-      startupCwdFallback?: { kind: 'worktree'; cwd: string }
-    }>
-    write: (id: string, data: string) => void
-    writeAccepted: (id: string, data: string) => Promise<boolean>
-    resize: (id: string, cols: number, rows: number) => void
-    claimViewport: (id: string, cols: number, rows: number) => void
-    reportGeometry: (id: string, cols: number, rows: number) => void
-    signal: (id: string, signal: string) => void
-    clearBuffer: (id: string) => void
-    kill: (id: string, opts?: { keepHistory?: boolean }) => Promise<void>
-    ackColdRestore: (id: string) => void
-    ackData: (id: string, charCount: number, processedChars?: number) => void
-    onDeliveryResyncRequest: (callback: (payload: { requestId: number }) => void) => () => void
-    respondDeliveryResync: (payload: {
-      requestId: number
-      processedCharsByPty: Record<string, number>
-    }) => void
-    /** Renderer-initiated delivery health/heal lane over invoke — reaches main
-     *  even when every main→renderer push channel is dead (field wedge). */
-    reportRendererDeliveryState: (
-      report: PtyRendererDeliveryStateReport
-    ) => Promise<PtyRendererDeliveryHealthReply>
-    /** Live pty:data listener count on the preload emitter (sync) — heal-time
-     *  discriminator between a detached listener and a dead channel. */
-    getPtyDataListenerCount: () => number
-    /** One-shot signal that this page's pty:data dispatcher is registered, so
-     *  main can release sends held during the load/reload boot window. */
-    rendererDispatcherReady: () => void
-    setActiveRendererPty: (id: string, active: boolean) => void
-    setRendererPtyVisible: (id: string, visible: boolean) => void
-    /** Hidden-delivery gate (Phase 4): hidden=true lets main drop renderer
-     *  byte delivery after model ingestion; reveal restores from snapshots. */
-    setHiddenRendererPty: (id: string, hidden: boolean) => void
-    /** Ref-counted-on-the-renderer delivery-interest signal that suppresses
-     *  the hidden-delivery gate while any raw-byte consumer is registered. */
-    setPtyDeliveryInterest: (id: string, interested: boolean) => void
-    /** View-attribute bridge (Phase 5 slice 2): app-global composed terminal
-     *  appearance push backing main's hidden-PTY OSC/DSR color replies. */
-    publishTerminalViewAttributes: (attributes: TerminalViewAttributes) => void
-    hasChildProcesses: (id: string) => Promise<boolean>
-    getForegroundProcess: (id: string) => Promise<string | null>
-    confirmForegroundProcess: (id: string) => Promise<string | null>
-    getCwd: (id: string) => Promise<string>
-    getSize: (id: string) => Promise<{ cols: number; rows: number } | null>
-    listSessions: () => Promise<{ id: string; cwd: string; title: string }[]>
-    getAuthoritativeBufferSnapshotCapabilities?: (
-      ids: string[]
-    ) => { id: string; authoritative: boolean | null }[]
-    hasPty: (id: string) => Promise<boolean | null>
-    getMainBufferSnapshot: (
-      id: string,
-      opts?: { scrollbackRows?: number }
-    ) => Promise<{
-      data: string
-      cols: number
-      rows: number
-      cwd?: string | null
-      seq?: number
-      /** Start of main's pending renderer-delivery queue at snapshot time
-       *  (equals `seq` when empty) — bounds the renderer's post-restore
-       *  duplicate window. */
-      pendingDeliveryStartSeq?: number
-      source?: 'headless' | 'renderer'
-      alternateScreen?: boolean
-      /** Authoritative normal buffer paired with an alternate-screen frame. */
-      scrollbackAnsi?: string
-      /** Trailing incomplete escape the emulator ingested; the restorer must
-       *  write it after its post-replay resets, last before live chunks. */
-      pendingEscapeTailAnsi?: string
-    } | null>
-    getRendererDeliveryDebugSnapshot: () => Promise<{
-      pendingPtyCount: number
-      pendingChars: number
-      maxPendingCharsByPty: number
-      rendererInFlightPtyCount: number
-      rendererInFlightChars: number
-      maxRendererInFlightCharsByPty: number
-      activeRendererPtyCount: number
-      flushScheduled: boolean
-      peakPendingChars: number
-      peakMaxPendingCharsByPty: number
-      peakRendererInFlightChars: number
-      peakMaxRendererInFlightCharsByPty: number
-      ackGatedFlushSkipCount: number
-      hiddenDeliveryGatedPtyCount: number
-      hiddenDeliveryGatedVisiblePtyCount: number
-      hiddenDeliveryGatedActivePtyCount: number
-      deliveryInterestPtyCount: number
-      hiddenDeliveryDroppedChars: number
-      hiddenDeliveryDroppedChunks: number
-      pendingDroppedChars: number
-      diagnostics: PtyMainDeliveryDiagnostics
-      rendererLifecycleResetCount: number
-      lastLifecycleResetClearedChars: number
-      rendererPtyDispatcherReady: boolean
-      rendererDispatcherReadyForcedCount: number
-    }>
-    onData: (
-      callback: (data: {
-        id: string
-        data: string
-        seq?: number
-        rawLength?: number
-        background?: boolean
-        droppedOutput?: boolean
-      }) => void
-    ) => () => void
-    onReplay: (callback: (data: { id: string; data: string }) => void) => () => void
-    /** Out-of-band main→renderer signal that renderer-bound bytes were
-     *  dropped (hidden-delivery gate / pending cap); the pane restores from
-     *  the model snapshot. Never delivered in-band on pty:data. */
-    onModelRestoreNeeded: (callback: (event: PtyModelRestoreNeededEvent) => void) => () => void
-    /** Batched derived side-effect facts for PTYs whose bytes transit local
-     *  main; see docs/reference/terminal-side-effect-authority.md. */
-    onSideEffect: (callback: (batch: TerminalSideEffectBatch) => void) => () => void
-    /** Title-only replay snapshot for (re)attach; attention facts never replay. */
-    getSideEffectSnapshot: (id: string) => Promise<TerminalSideEffectBatch | null>
-    onExit: (callback: (data: { id: string; code: number }) => void) => () => void
-    onClearBufferRequest: (callback: (data: { ptyId: string }) => void) => () => void
-    declarePendingPaneSerializer: (paneKey: string) => Promise<number>
-    settlePaneSerializer: (paneKey: string, gen: number) => Promise<void>
-    clearPendingPaneSerializer: (paneKey: string, gen: number) => Promise<void>
-    reportRendererSerializerReady?: (ptyId: string) => Promise<void>
-  }
-  // Why: select/remove moved to the runtime contract (`accounts.selectCodex` /
-  // `accounts.removeCodex`) — see provider-accounts-client.ts. add/reauthenticate
-  // stay here because they spawn `codex login` PTYs that need a desktop browser.
-  // `list` stays too: it is a plain, non-blocking read of `CodexAccountService`'s
-  // own cache with no equivalent on the contract — `accounts.list` looks
-  // same-shaped but is a different call, not a duplicate route to this one: it
-  // forces `runtime.refreshAccountsForMobile()` before returning and can hang
-  // for minutes behind broken provider auth (see the `Why:` on
-  // `watchProviderAccounts` in provider-accounts-client.ts, which deliberately
-  // avoids it for the local target for exactly that reason).
   codexAccounts: {
     list: () => Promise<CodexRateLimitAccountsState>
     add: (args?: {
@@ -1010,77 +816,6 @@ export type PreloadApi = {
     get: () => Promise<PersistedUIState>
     set: (args: Partial<PersistedUIState>) => Promise<void>
     recordFeatureInteraction: (id: FeatureInteractionId) => Promise<PersistedUIState>
-  }
-  // Why: shell-only by construction — this group IS the transport, not a
-  // capability a runtime could provide. `list`/`resolve`/`remove`/
-  // `disconnect`/`getStatus` manage *which* runtime environment to connect to
-  // (deciding the target), so they cannot themselves be routed through a
-  // target's contract without circularity. `call`/`subscribe` are the legacy
-  // bare-method-name dispatcher this migration spent many slices eliminating
-  // from feature call sites; the only remaining direct callers are
-  // infrastructure that must precede or bypass typed oRPC negotiation by
-  // design: `environment-compatibility.ts`'s two `call` sites pass
-  // `STATUS_GET_CONTRACT.name`, the capability-negotiation bootstrap probe
-  // itself (negotiating oRPC before negotiation is impossible), and
-  // `orpc-legacy-client.ts`'s `callRuntimeRpc`/`createLegacyRuntimeOrpcClient`
-  // is the oRPC `ClientLink` adapter for hosts that fell back to the legacy
-  // JSON-RPC envelope — its "method" is `procedure.method` read off
-  // `runtimeContract` by walking the oRPC path, not a literal string authored
-  // in feature code. No remaining feature call site passes a bare method name.
-  runtimeEnvironments: {
-    list: () => Promise<PublicKnownRuntimeEnvironment[]>
-    resolve: (args: { selector: string }) => Promise<PublicKnownRuntimeEnvironment>
-    remove: (args: { selector: string }) => Promise<{ removed: PublicKnownRuntimeEnvironment }>
-    disconnect: (args: {
-      selector: string
-    }) => Promise<{ disconnected: PublicKnownRuntimeEnvironment }>
-    getStatus: (args: {
-      selector: string
-      timeoutMs?: number
-    }) => Promise<RuntimeRpcResponse<RuntimeStatus>>
-    call: (args: {
-      selector: string
-      method: string
-      params?: unknown
-      timeoutMs?: number
-    }) => Promise<RuntimeRpcResponse<unknown>>
-    subscribe: (
-      args: {
-        selector: string
-        method: string
-        params?: unknown
-        timeoutMs?: number
-      },
-      callbacks: {
-        onResponse: (response: RuntimeRpcResponse<unknown>) => void
-        onBinary?: (bytes: Uint8Array<ArrayBufferLike>) => void
-        onError?: (error: { code: string; message: string }) => void
-        onClose?: () => void
-      }
-    ) => Promise<RuntimeEnvironmentSubscriptionHandle>
-    // Why: lets shared renderer code (`renderer/runtime/orpc-client.ts`) reach a
-    // paired web client's already-negotiated oRPC peer by contract path instead
-    // of the legacy string-method dispatcher that `call`/`subscribe` above still
-    // speak. Desktop never calls this — its environment oRPC goes through the
-    // MessagePort tunnel in `orpc-environment-client.ts` — so the real
-    // implementation lives only in the web preload shim.
-    callOrpcProcedure: (
-      args: {
-        selector: string
-        path: readonly string[]
-        input: unknown
-        timeoutMs?: number
-      },
-      options?: {
-        signal?: AbortSignal
-        // Why: carries `browser.screencast.subscribe` video frames — the one
-        // event-iterator leaf a paired web client dispatches through this
-        // member. `window.api` is a same-realm object on web (no
-        // contextBridge boundary), so passing the callback through costs
-        // nothing extra; Electron never calls this member at all.
-        onBinary?: (bytes: Uint8Array<ArrayBufferLike>) => void
-      }
-    ) => Promise<unknown>
   }
   // Why: already-covered, verified against `contract/host-capabilities.ts` —
   // `host.wsl.isAvailable`/`listDistros`, `host.pwsh.isAvailable`,

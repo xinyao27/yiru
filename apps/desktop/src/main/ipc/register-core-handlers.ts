@@ -36,7 +36,7 @@ import type { Store } from '../persistence'
 import { initializeShellLocalhostWorktreeLabelService } from '../ports/localhost-worktree-labels'
 import { registerWorkspacePortHandlers } from '../ports/workspace-ports'
 import type { RateLimitService } from '../rate-limits/service'
-import { registerRuntimeEnvironmentHandlers } from '../runtime/environments'
+import { initializeRuntimeEnvironmentRegistry } from '../runtime/environments'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'
 import { initializeShellAppService } from '../shell/app'
 import { initializeShellClipboardService } from '../shell/clipboard'
@@ -148,7 +148,7 @@ export function registerCoreHandlers(
     trashPath: (targetPath) => shell.trashItem(targetPath)
   })
   initializeShellRuntimeStateService(runtime)
-  registerRuntimeEnvironmentHandlers(store)
+  initializeRuntimeEnvironmentRegistry(store)
   registerAiVaultHandlers({
     getAdditionalCodexHomePaths: lifecycleOptions.getAdditionalAiVaultCodexHomePaths,
     resolveClaudeProjectsDirs: lifecycleOptions.resolveAiVaultClaudeProjectsDirs,

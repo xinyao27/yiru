@@ -1826,23 +1826,6 @@ export type GlobalSettings = {
   terminalHiddenViewParking?: boolean
   terminalSshViewParking?: boolean
   terminalHiddenWorktreeRetentionBudget?: boolean
-  /** Kill switch for main-process terminal side-effect authority: when true
-   *  (default), local-daemon/SSH PTY title/bell/agent facts are consumed from
-   *  the `pty:sideEffect` channel and renderer byte parsers stay unregistered
-   *  for those PTYs; `false` restores renderer byte parsing.
-   *  See docs/reference/terminal-side-effect-authority.md. */
-  terminalMainSideEffectAuthority?: boolean
-  /** Kill switch for main's hidden-delivery gate (Phase 4): when true
-   *  (default) AND terminalMainSideEffectAuthority is on, main drops PTY byte
-   *  delivery to hidden renderer views after model ingestion; reveal restores
-   *  from the model snapshot. `false` restores hidden byte delivery. */
-  terminalHiddenDeliveryGate?: boolean
-  /** Kill switch for the main model query responder (Phase 5): when true
-   *  (default) AND both Phase-4 gate switches are on, main answers terminal
-   *  queries (DA1/CPR/DECRPM, …) embedded in hidden-dropped chunks from the
-   *  runtime emulator. `false` silences the responder without changing drops.
-   *  See docs/reference/terminal-query-authority.md. */
-  terminalModelQueryAuthority?: boolean
   /** Which agent to pre-select in the new-workspace composer.
    *  - null: auto (first detected agent)
    *  - 'blank': blank terminal (no agent launched)

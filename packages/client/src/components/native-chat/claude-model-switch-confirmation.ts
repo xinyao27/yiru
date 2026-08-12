@@ -1,4 +1,4 @@
-import { isRemoteRuntimePtyId, sendRuntimePtyInput } from '~renderer/runtime/terminal-inspection'
+import { isRuntimeTerminalPtyId, sendRuntimePtyInput } from '~renderer/runtime/terminal-inspection'
 import { subscribeToRuntimeTerminalData } from '~renderer/runtime/terminal-stream'
 import type { GlobalSettings } from '~shared/types'
 
@@ -62,7 +62,7 @@ function subscribeToClaudeModelSwitchData(args: {
   if (args.subscribeToData) {
     return args.subscribeToData(args.watcher)
   }
-  if (isRemoteRuntimePtyId(args.ptyId)) {
+  if (isRuntimeTerminalPtyId(args.ptyId)) {
     return subscribeToRuntimeTerminalData(
       args.settings,
       args.ptyId,

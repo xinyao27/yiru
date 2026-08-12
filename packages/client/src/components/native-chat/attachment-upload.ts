@@ -16,7 +16,7 @@ import { findTerminalTabWorktreeId, resolveNativeChatFileLinkContext } from './f
 export type NativeChatAttachmentOwner =
   | { kind: 'local' }
   | { kind: 'ssh'; connectionId: string; worktreePath: string }
-  /** Runtime-owned (`remote:`) panes keep the composer's existing
+  /** Runtime-owned panes keep the composer's existing
    *  local-attachment block; runtime upload support is a separate seam. */
   | { kind: 'runtime' }
   /** Store not hydrated / worktree unknown. Callers must not attach local

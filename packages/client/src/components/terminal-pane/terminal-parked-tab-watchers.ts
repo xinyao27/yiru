@@ -1,11 +1,13 @@
 import { collectLeafIdsInOrder } from '~renderer/components/terminal-pane/terminal-layout-leaf-ids'
 import { discardPreHandlerPtyState } from '~renderer/runtime/pty-pre-handler-buffer'
+import { sendRuntimePtyInput } from '~renderer/runtime/terminal-inspection'
 import {
   capturedPanesByTabId,
   disposeParkedTabWatchers,
   parkedWatchersByTabId,
   type ParkedTerminalPaneCapture
 } from '~renderer/runtime/terminal-parked-watcher-registry'
+import { subscribeToRuntimeTerminalExit } from '~renderer/runtime/terminal-stream'
 import { useAppStore } from '~renderer/store'
 /**
  * Parked terminal tab watcher lifecycle.
@@ -28,7 +30,6 @@ import {
   shouldClearLaunchAgentForClosedPane
 } from './close-identity'
 import { startParkedTerminalByteWatcher } from './parked-terminal-byte-watcher'
-import { subscribeToPtyExit } from './pty/dispatcher'
 import {
   isParkRestorableTerminalPty,
   type TerminalParkRestorePolicy
@@ -175,11 +176,12 @@ function startParkedTabWatchers(
       ...(restoreTitleOnRegister ? { restoreTitleOnRegister: true } : {}),
       // Why: no pane transport exists while parked; write straight to the
       // PTY, the same channel background agent launches use.
-      sendInput: (data) => window.api.pty.write(ptyId, data)
+      sendInput: (data) => sendRuntimePtyInput(state.settings, ptyId, data)
     })
     // Why: a PTY that exits while parked has no pane to run exit cleanup; at
     // minimum its watcher must not outlive it.
-    const unsubscribeExit = subscribeToPtyExit(ptyId, (_code, { hadPrimary }) => {
+    const unsubscribeExit = subscribeToRuntimeTerminalExit(state.settings, ptyId, () => {
+      const hadPrimary = true
       // Why: while parked this sidecar is the ONLY exit observer — the hosts'
       // onPtyExit runs from a mounted TerminalPane. Run the observed-exit
       // teardown here or a sole tab survives, while a dead split leaf can

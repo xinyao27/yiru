@@ -1,4 +1,5 @@
 import { killAllRuntimeDaemonSessions } from '~renderer/runtime/daemon-sessions-client'
+import { closeRuntimeTerminal } from '~renderer/runtime/terminal-inspection'
 import { useAppStore, type AppState } from '~renderer/store'
 import {
   buildTerminalTabRetirementPlans,
@@ -127,7 +128,7 @@ function createDefaultDependencies(): KillAllTerminalSurfaceDependencies {
     getState: useAppStore.getState,
     killDaemonSessions: () => killAllRuntimeDaemonSessions(),
     closeSurface: closeTerminalTab,
-    killPty: (ptyId) => window.api.pty.kill(ptyId),
+    killPty: closeRuntimeTerminal,
     now: () => globalThis.performance?.now() ?? Date.now(),
     yieldToRenderer: () =>
       new Promise((resolve) => {
