@@ -286,6 +286,7 @@ import {
 } from './updater'
 import { recordUpdaterLifecycle } from './updater-lifecycle-diagnostics'
 import { previewWarpThemeImport } from './warp-themes/electron-import-preview'
+import { registerWindowFocusBroadcast } from './window-focus-broadcast'
 import {
   attachMainWindowServices,
   ensureAutoUpdaterConfigured
@@ -333,6 +334,7 @@ let agentAwakeService: AgentAwakeService | null = null
 let crashReports: CrashReportStore | null = null
 let unsubscribeAgentAwakeStatusChanges: (() => void) | null = null
 let unsubscribeSystemResumeBroadcast: (() => void) | null = null
+let unsubscribeWindowFocusBroadcast: (() => void) | null = null
 let watcherShutdownPromise: Promise<void> | null = null
 let watcherShutdownDone = false
 let automations: AutomationService | null = null
@@ -2030,6 +2032,7 @@ app.whenReady().then(async () => {
     profileDirectory: activeYiruProfile.profileDirectory
   })
   unsubscribeSystemResumeBroadcast = registerSystemResumeBroadcast()
+  unsubscribeWindowFocusBroadcast = registerWindowFocusBroadcast()
   agentAwakeService = new AgentAwakeService()
   agentAwakeService.setEnabled(store.getSettings().keepComputerAwakeWhileAgentsRun)
   // Why: disk-hydrated status rows are UI continuity only. The service starts
@@ -2631,6 +2634,8 @@ app.on('before-quit', () => {
   isQuitting = true
   unsubscribeSystemResumeBroadcast?.()
   unsubscribeSystemResumeBroadcast = null
+  unsubscribeWindowFocusBroadcast?.()
+  unsubscribeWindowFocusBroadcast = null
   unsubscribeAgentAwakeStatusChanges?.()
   unsubscribeAgentAwakeStatusChanges = null
   agentAwakeService?.dispose()

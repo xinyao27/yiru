@@ -2,6 +2,7 @@ import type { AiVaultListResult, AiVaultSession } from '@yiru/workbench-model/ag
 import type { ExecutionHostScope } from '@yiru/workbench-model/workspace'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { listAiVaultSessions } from '~renderer/runtime/ai-vault-client'
+import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 
 const SESSION_LIMIT = 500
@@ -198,8 +199,10 @@ export function useAiVaultSessionRefresh(
       }
       requestForcedRescan()
     }
+    const unsubscribeWindowFocus = shellClient.ui.onWindowFocused(onRefocus)
     document.addEventListener('visibilitychange', onRefocus)
     return () => {
+      unsubscribeWindowFocus()
       document.removeEventListener('visibilitychange', onRefocus)
     }
   }, [requestForcedRescan])

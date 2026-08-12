@@ -53,6 +53,7 @@ export type ShellUiApi = {
   onEditableContextPaste: (callback: (data: { plainTextOnly: boolean }) => void) => Unsubscribe
   onTerminalZoom: (callback: (direction: 'in' | 'out' | 'reset') => void) => Unsubscribe
   onSystemResumed: (callback: () => void) => Unsubscribe
+  onWindowFocused: (callback: () => void) => Unsubscribe
   onFileDrop: (callback: (data: NativeFileDropPayload) => void) => Unsubscribe
   onRichMarkdownContextCommand: (
     callback: (payload: RichMarkdownContextMenuCommandPayload) => void
@@ -222,6 +223,7 @@ export const electronShellUiApi: ShellUiApi = {
       }
     }),
   onSystemResumed: (callback) => subscribeType('uiSystemResumed', callback),
+  onWindowFocused: (callback) => subscribeType('uiWindowFocused', callback),
   onFileDrop: (callback) =>
     subscribeShellEvent((event) => {
       if (event.type === 'uiFileDrop') {
