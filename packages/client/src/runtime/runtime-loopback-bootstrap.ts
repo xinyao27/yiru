@@ -1,10 +1,10 @@
-import type { PreloadApi } from '~shared/preload/api-types'
+import type { RuntimeConnectionBootstrap } from '~shared/preload/bootstrap-contract'
 
 export function getRuntimeLoopbackCredentials(): ReturnType<
-  PreloadApi['runtimeConnection']['getCredentials']
+  RuntimeConnectionBootstrap['getCredentials']
 > {
   const hostWindow = window as unknown as {
-    runtimeConnection: PreloadApi['runtimeConnection']
+    runtimeConnection: RuntimeConnectionBootstrap
   }
   return hostWindow.runtimeConnection.getCredentials()
 }

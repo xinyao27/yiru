@@ -1,13 +1,13 @@
 import { FileText } from '@phosphor-icons/react'
-import type {
-  DiagnosticsBundlePayload,
-  DiagnosticsStatusPayload
-} from '@yiru/shared/preload/api-types'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { translate } from '~renderer/i18n/i18n'
 import { rendererHostClient } from '~renderer/runtime/renderer-host-client'
 import { shellClient } from '~renderer/runtime/shell-client'
+import type {
+  DiagnosticsBundlePayload,
+  DiagnosticsStatusPayload
+} from '~renderer/runtime/shell-reporting-client'
 
 import { Label } from '../ui/label'
 import { Separator } from '../ui/separator'

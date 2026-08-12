@@ -1,4 +1,3 @@
-import type { RepoHostAdapter } from '@yiru/shared/preload/api-types'
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 import type {
   CreateWorktreeArgs,
@@ -18,7 +17,9 @@ import type {
   WorkspaceLineage
 } from '~shared/types'
 
-export type RepoWorkspaceApi = RepoHostAdapter & {
+import type { ShellRepoHostApi } from './shell-system-client'
+
+export type RepoWorkspaceApi = ShellRepoHostApi & {
   list: () => Promise<Repo[]>
   add: (args: {
     path: string

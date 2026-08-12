@@ -1,8 +1,8 @@
-import type { PreloadApi } from '@yiru/shared/preload/api-types'
+import type { RuntimeConnectionBootstrap } from '@yiru/shared/preload/bootstrap-contract'
 import { contextBridge, ipcRenderer } from 'electron'
 import { RUNTIME_LOOPBACK_CREDENTIALS_CHANNEL } from '~shared/runtime-loopback'
 
-const runtimeConnection: PreloadApi['runtimeConnection'] = {
+const runtimeConnection: RuntimeConnectionBootstrap = {
   // Why: terminal-multiplex.md §21.1 permits plaintext loopback only when the
   // process token reaches this isolated renderer through the audited preload.
   // The token never enters a URL, storage, logs, breadcrumbs, or analytics;
@@ -13,6 +13,6 @@ const runtimeConnection: PreloadApi['runtimeConnection'] = {
 if (process.contextIsolated) {
   contextBridge.exposeInMainWorld('runtimeConnection', runtimeConnection)
 } else {
-  ;(window as unknown as { runtimeConnection: PreloadApi['runtimeConnection'] }).runtimeConnection =
+  ;(window as unknown as { runtimeConnection: RuntimeConnectionBootstrap }).runtimeConnection =
     runtimeConnection
 }

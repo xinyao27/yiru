@@ -1,5 +1,5 @@
+import type { AppIdentity } from '~shared/app-identity'
 import type { AppStarSource } from '~shared/gh-star-source'
-import type { AppApi, RepoHostAdapter } from '~shared/preload/api-types'
 import type {
   RuntimeBrowserDriverState,
   RuntimeSyncWindowGraph,
@@ -11,6 +11,8 @@ import type {
   GitHubPRRefreshEnqueueResult,
   GitHubPRRefreshReason,
   GitHubViewer,
+  FloatingTerminalCwdRequest,
+  MarkdownDocument,
   UpdateCheckOptions,
   UpdateStatus
 } from '~shared/types'
@@ -30,8 +32,32 @@ import {
 } from './shell-notifications-client'
 import { prepareShellRestart } from './shell-restart-client'
 
-export type ShellAppApi = AppApi
-export type ShellRepoHostApi = RepoHostAdapter
+export type ShellAppApi = {
+  getIdentity: () => Promise<AppIdentity>
+  relaunch: () => Promise<void>
+  restart: () => Promise<void>
+  reload: () => Promise<void>
+  awaitFirstWindowStartupServices: () => Promise<void>
+  startupDiagnostic: (event: string, details?: Record<string, unknown>) => Promise<void>
+  getKeyboardInputSourceId: () => Promise<string | null>
+  setUnreadDockBadgeCount: (count: number) => Promise<void>
+  getFloatingTerminalCwd: (args?: FloatingTerminalCwdRequest) => Promise<string>
+  getFloatingMarkdownDirectory: () => Promise<string>
+  pickFloatingMarkdownDocument: () => Promise<MarkdownDocument | null>
+  pickFloatingWorkspaceDirectory: () => Promise<string | null>
+}
+export type ShellRepoHostApi = {
+  pickFolder: () => Promise<string | null>
+  pickFolders: () => Promise<string[]>
+  pickDirectory: () => Promise<string | null>
+  removeForHost: (args: { repoId: string; hostId: string }) => Promise<void>
+  reorderForHost: (args: {
+    orderedIds: string[]
+    hostId: string
+  }) => Promise<{ status: 'applied' | 'rejected' }>
+  cloneAbort: () => Promise<void>
+  getDefaultCreateProjectParent: () => Promise<string>
+}
 export type ShellRuntimeStateApi = {
   syncWindowGraph: (graph: RuntimeSyncWindowGraph) => Promise<RuntimeSyncWindowGraphResult>
   getTerminalFitOverrides: () => Promise<

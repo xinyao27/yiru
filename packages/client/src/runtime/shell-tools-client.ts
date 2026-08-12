@@ -14,7 +14,6 @@ import type {
   LocalhostWorktreeLabelResult,
   LocalhostWorktreeLabelRoute
 } from '~shared/localhost-worktree-labels'
-import type { ExportApi } from '~shared/preload/api-types'
 import type { CustomPet } from '~shared/types'
 
 import { callShellOrpc, isWebRuntimeClient } from './orpc-client'
@@ -69,6 +68,14 @@ export type ShellLocalhostWorktreeLabelsApi = {
 }
 export type ShellSpeechApi = {
   ensureMicrophoneAccess: () => Promise<void>
+}
+export type ShellExportApi = {
+  htmlToPdf: (args: {
+    html: string
+    title: string
+  }) => Promise<
+    { success: true; filePath: string } | { success: false; cancelled?: boolean; error?: string }
+  >
 }
 
 function restoreShellDocument<T>(value: unknown): T {
@@ -142,7 +149,7 @@ const electronFridayApi: ShellFridayApi = {
   restart: async () =>
     restoreShellDocument(await callShellOrpc((client) => client.shell.friday.restart, undefined))
 }
-const electronExportApi: ExportApi = {
+const electronExportApi: ShellExportApi = {
   htmlToPdf: async (input) =>
     restoreShellDocument(await callShellOrpc((client) => client.shell.export.htmlToPdf, input))
 }
@@ -188,12 +195,12 @@ const webFridayApi: ShellFridayApi = {
   getOrCreate: () => Promise.reject(unavailableOnWeb()),
   restart: () => Promise.reject(unavailableOnWeb())
 }
-const webExportApi: ExportApi = {
+const webExportApi: ShellExportApi = {
   htmlToPdf: () =>
     Promise.resolve({
       success: false,
       error: translate(
-        'auto.web.webPreloadApi.exportHtmlToPdfUnavailable',
+        'auto.web.webShell.exportHtmlToPdfUnavailable',
         'Exporting to PDF is unavailable in the web client.'
       )
     })

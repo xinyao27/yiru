@@ -54,6 +54,7 @@ import {
   shellSpeechApi,
   type ShellAutomationsApi,
   type ShellDeveloperPermissionsApi,
+  type ShellExportApi,
   type ShellFridayApi,
   type ShellLocalhostWorktreeLabelsApi,
   type ShellMiniMaxCredentialsApi,
@@ -72,7 +73,7 @@ type RendererShellClient = {
   crashReports: ShellCrashReportsApi
   developerPermissions: ShellDeveloperPermissionsApi
   diagnostics: ShellDiagnosticsApi
-  export: ExportApi
+  export: ShellExportApi
   feedback: ShellFeedbackApi
   friday: ShellFridayApi
   repoHost: ShellRepoHostApi
@@ -138,4 +139,3 @@ export const shellClient: RendererShellClient = {
   keybindings: shellKeybindingsApi,
   yiruProfiles: shellYiruProfilesApi
 }
-import type { ExportApi } from '~shared/preload/api-types'

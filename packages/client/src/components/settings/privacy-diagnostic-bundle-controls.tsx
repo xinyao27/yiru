@@ -6,12 +6,12 @@ import {
   CloudArrowUp as UploadCloud,
   X
 } from '@phosphor-icons/react'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { translate } from '~renderer/i18n/i18n'
 import type {
   DiagnosticsBundlePayload,
   DiagnosticsStatusPayload
-} from '@yiru/shared/preload/api-types'
-import { LoadingIndicator } from '~renderer/components/loading-indicator'
-import { translate } from '~renderer/i18n/i18n'
+} from '~renderer/runtime/shell-reporting-client'
 
 import { Button } from '../ui/button'
 

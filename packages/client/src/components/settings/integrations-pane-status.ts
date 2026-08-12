@@ -1,4 +1,4 @@
-import type { PreflightStatus } from '@yiru/shared/preload/api-types'
+import type { PreflightStatus } from '@yiru/runtime-protocol/contract'
 
 export type GhStatus = 'checking' | 'connected' | 'not-installed' | 'not-authenticated'
 // Why: parallel to GhStatus — GitLab uses glab and the same three failure

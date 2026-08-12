@@ -1,4 +1,4 @@
-import type { PreflightStatus } from '@yiru/shared/preload/api-types'
+import type { PreflightStatus } from '@yiru/runtime-protocol/contract'
 import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
 import type { ProjectSourceContext, ProjectSourceProvider } from '~shared/project-source-context'
 

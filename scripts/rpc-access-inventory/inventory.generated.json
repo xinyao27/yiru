@@ -1,9 +1,9 @@
 {
   "schemaVersion": 2,
-  "methodCount": 771,
+  "methodCount": 772,
   "sourceCounts": {
     "legacy": 0,
-    "orpc": 771
+    "orpc": 772
   },
   "methods": [
     {
@@ -7334,6 +7334,22 @@
     },
     {
       "method": "shell.aiVault.listSessions",
+      "access": {
+        "scope": "host",
+        "tier": "read",
+        "principals": ["local"]
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/shell/ai-vault.ts"
+        }
+      ]
+    },
+    {
+      "method": "shell.aiVault.listSubagentSessions",
       "access": {
         "scope": "host",
         "tier": "read",

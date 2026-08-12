@@ -8,11 +8,6 @@ import type {
   ReactErrorBoundaryReportArgs,
   ReactErrorBoundaryReportResult
 } from '~shared/crash-reporting'
-import type {
-  DiagnosticsBundlePayload,
-  DiagnosticsStatusPayload,
-  DiagnosticsUploadPayload
-} from '~shared/preload/api-types'
 import type { TelemetryConsentState } from '~shared/telemetry-consent-types'
 
 import { callShellOrpc, isWebRuntimeClient } from './orpc-client'
@@ -25,6 +20,24 @@ export type ShellFeedbackApi = {
     githubEmail: string | null
   }) => Promise<{ ok: true } | { ok: false; status: number | null; error: string }>
 }
+
+export type DiagnosticsStatusPayload = {
+  readonly localFileEnabled: boolean
+  readonly bundleEnabled: boolean
+  readonly traceFilePath: string
+  readonly traceFamilySize: number
+  readonly disabledReason?:
+    | 'do_not_track'
+    | 'yiru_telemetry_disabled'
+    | 'yiru_diagnostics_disabled'
+    | 'ci'
+}
+export type DiagnosticsBundlePayload = {
+  readonly bundleSubmissionId: string
+  readonly bytes: number
+  readonly spanCount: number
+}
+export type DiagnosticsUploadPayload = { readonly ticketId: string } | { readonly canceled: true }
 
 export type ShellCrashReportsApi = {
   getLatestPending: () => Promise<CrashReportRecord | null>
@@ -136,7 +149,7 @@ const webFeedbackApi: ShellFeedbackApi = {
       ok: false,
       status: null,
       error: translate(
-        'auto.web.webPreloadApi.feedbackUnavailable',
+        'auto.web.webShell.feedbackUnavailable',
         'Feedback is unavailable in the web client.'
       )
     })

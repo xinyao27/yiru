@@ -1,4 +1,4 @@
-import type { PreflightRuntimeContext, PreflightStatus } from '@yiru/shared/preload/api-types'
+import type { PreflightCheckInput, PreflightStatus } from '@yiru/runtime-protocol/contract'
 import type { StateCreator } from 'zustand'
 import {
   getLocalPreflightContext,
@@ -31,7 +31,7 @@ function getErrorMessage(error: unknown): string {
 function buildPreflightArgs(
   force: boolean,
   context: LocalPreflightContext
-): (PreflightRuntimeContext & { force?: boolean }) | undefined {
+): PreflightCheckInput | undefined {
   const wslDistro = context?.wslDistro
   const wslDefault = context?.wslDefault === true
   const projectRuntime = context?.projectRuntime

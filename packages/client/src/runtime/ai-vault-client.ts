@@ -1,5 +1,9 @@
 import type { AiVaultListSessionsInput } from '@yiru/runtime-protocol/ai-vault'
-import type { AiVaultListResult } from '@yiru/workbench-model/agent'
+import type {
+  AiVaultListResult,
+  AiVaultSubagentListArgs,
+  AiVaultSubagentListResult
+} from '@yiru/workbench-model/agent'
 import { toRuntimeExecutionHostId } from '@yiru/workbench-model/workspace'
 import { useAppStore } from '~renderer/store'
 
@@ -20,4 +24,13 @@ export function listAiVaultSessions(input: AiVaultListSessionsInput): Promise<Ai
     scopePaths: input.scopePaths,
     executionHostId: toRuntimeExecutionHostId(target.environmentId)
   })
+}
+
+export function listAiVaultSubagentSessions(
+  input: AiVaultSubagentListArgs
+): Promise<AiVaultSubagentListResult> {
+  if (isWebRuntimeClient()) {
+    return Promise.resolve({ sessions: [], issues: [] })
+  }
+  return callShellOrpc((client) => client.shell.aiVault.listSubagentSessions, input)
 }

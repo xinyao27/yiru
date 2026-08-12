@@ -164,7 +164,6 @@ inline packages/shared/src/commit-message/agent-spec.ts
 inline packages/shared/src/constants.ts
 inline packages/shared/src/keybindings.ts
 inline packages/shared/src/marine-creatures.ts
-inline packages/shared/src/preload/api-types.ts
 inline packages/shared/src/remote-runtime/client.ts
 inline packages/shared/src/runtime-types.ts
 inline packages/shared/src/source-control/ai.ts

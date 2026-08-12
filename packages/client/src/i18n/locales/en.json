@@ -209,7 +209,7 @@
         "mobileScopeRejected": "This connection has limited mobile access. Ask the host owner to authorize this client through Coworking for full web access.",
         "mixedContentRejected": "This HTTPS page cannot connect to a plain ws:// runtime host. Open the web client over HTTP or use a wss:// endpoint."
       },
-      "webPreloadApi": {
+      "webShell": {
         "aiVaultUnavailableForHost": "Agent Session History is not available for this execution host.",
         "feedbackUnavailable": "Feedback is unavailable in the web client.",
         "exportHtmlToPdfUnavailable": "Exporting to PDF is unavailable in the web client."

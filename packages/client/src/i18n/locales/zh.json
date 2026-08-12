@@ -173,7 +173,7 @@
         "mobileScopeRejected": "此连接仅有受限的移动端访问权限。请让主机所有者通过 Coworking 授权此客户端，以使用完整 Web 应用。",
         "mixedContentRejected": "This HTTPS page cannot connect to a plain ws:// runtime host. Open the web client over HTTP or use a wss:// endpoint."
       },
-      "webPreloadApi": {
+      "webShell": {
         "aiVaultUnavailableForHost": "此执行主机不支持 Agent 会话历史记录。",
         "feedbackUnavailable": "Feedback is unavailable in the web client.",
         "exportHtmlToPdfUnavailable": "Exporting to PDF is unavailable in the web client."
