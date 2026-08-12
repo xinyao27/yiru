@@ -1,35 +1,45 @@
 import { execFileSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { readFile, writeFile } from 'node:fs/promises'
+import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 
-import {
+const packageRequire = createRequire(new URL('../apps/mobile-ios/package.json', import.meta.url))
+const {
   DeviceCredentialInstalledSchema,
   DeviceResumeConfirmedSchema,
   MobileRelayEndpointSchema,
   PairingGetEndpointsParamsSchema,
   PairingProvisionRelayParamsSchema
-} from '@yiru/mobile-relay-protocol/credential-contract'
-import {
+} = packageRequire('@yiru/mobile-relay-protocol/credential-contract')
+const {
   MOBILE_E2EE_V2_KDF_DOMAIN,
   MOBILE_E2EE_V2_TRANSCRIPT_DOMAIN,
   MobileE2EEV2ContextSchema,
   MobileE2EEV2HelloSchema,
   MobileE2EEV2ReadySchema
-} from '@yiru/mobile-relay-protocol/e2ee-contract'
-import { PairingOfferSchema } from '@yiru/mobile-relay-protocol/pairing-offer'
-import { RelayMovedSchema } from '@yiru/mobile-relay-protocol/phone-protocol'
-import { z } from 'zod'
+} = packageRequire('@yiru/mobile-relay-protocol/e2ee-contract')
+const { PairingOfferSchema } = packageRequire('@yiru/mobile-relay-protocol/pairing-offer')
+const { RelayMovedSchema } = packageRequire('@yiru/mobile-relay-protocol/phone-protocol')
+const {
+  MOBILE_WORKTREE_PS_ORPC_PATH,
+  MobileWorkspaceListRequestSchema,
+  MobileWorkspaceListSchema
+} = packageRequire('@yiru/runtime-protocol/mobile-worktree-wire')
+const { RUNTIME_ORPC_REQUEST_ID_HEADER, RUNTIME_ORPC_TEXT_PREFIX } = packageRequire(
+  '@yiru/runtime-protocol/orpc-peer-frame'
+)
+const { z } = packageRequire('zod')
 
 const OUTPUT_URL = new URL(
-  '../YiruMobile/Platform/Wire/Generated/MobileWire.generated.swift',
+  '../apps/mobile-ios/YiruMobile/Platform/Wire/Generated/MobileWire.generated.swift',
   import.meta.url
 )
-const FORMAT_CONFIGURATION_URL = new URL('../.swift-format', import.meta.url)
+const FORMAT_CONFIGURATION_URL = new URL('../apps/mobile-ios/.swift-format', import.meta.url)
 
 const mode = process.argv[2]
 if (mode !== '--write' && mode !== '--check') {
-  throw new Error('Usage: node apps/mobile-ios/scripts/generate-wire-contracts.mjs --write|--check')
+  throw new Error('Usage: node scripts/generate-mobile-ios-wire-contracts.mjs --write|--check')
 }
 
 const schemas = {
@@ -42,7 +52,9 @@ const schemas = {
   RelayMovedSchema: z.toJSONSchema(RelayMovedSchema),
   MobileE2EEV2ContextSchema: z.toJSONSchema(MobileE2EEV2ContextSchema),
   MobileE2EEV2HelloSchema: z.toJSONSchema(MobileE2EEV2HelloSchema),
-  MobileE2EEV2ReadySchema: z.toJSONSchema(MobileE2EEV2ReadySchema)
+  MobileE2EEV2ReadySchema: z.toJSONSchema(MobileE2EEV2ReadySchema),
+  MobileWorkspaceListSchema: z.toJSONSchema(MobileWorkspaceListSchema),
+  MobileWorkspaceListRequestSchema: z.toJSONSchema(MobileWorkspaceListRequestSchema)
 }
 const pairingContract = readPairingContract(schemas.PairingOfferSchema)
 const e2eeContract = readE2EEContract(
@@ -52,16 +64,25 @@ const e2eeContract = readE2EEContract(
   MOBILE_E2EE_V2_KDF_DOMAIN,
   MOBILE_E2EE_V2_TRANSCRIPT_DOMAIN
 )
+const runtimeContract = readRuntimeContract(
+  schemas.MobileWorkspaceListSchema,
+  schemas.MobileWorkspaceListRequestSchema
+)
 const contractSource = {
   schemas,
   domains: {
     MOBILE_E2EE_V2_KDF_DOMAIN,
-    MOBILE_E2EE_V2_TRANSCRIPT_DOMAIN
+    MOBILE_E2EE_V2_TRANSCRIPT_DOMAIN,
+    MOBILE_WORKTREE_PS_ORPC_PATH,
+    RUNTIME_ORPC_REQUEST_ID_HEADER,
+    RUNTIME_ORPC_TEXT_PREFIX
   }
 }
 const contractJSON = `${JSON.stringify(contractSource, null, 2)}\n`
 const digest = createHash('sha256').update(contractJSON).digest('hex')
-const generated = formatSwift(renderWireContract(pairingContract, e2eeContract, schemas, digest))
+const generated = formatSwift(
+  renderWireContract(pairingContract, e2eeContract, runtimeContract, schemas, digest)
+)
 
 if (mode === '--write') {
   await writeFile(OUTPUT_URL, generated)
@@ -261,14 +282,70 @@ function readE2EEContract(contextValue, helloValue, readyValue, kdfDomain, trans
   }
 }
 
-function renderWireContract(pairing, e2ee, sourceSchemas, digest) {
+function readRuntimeContract(value, requestValue) {
+  const root = requireObjectSchema(value, 'MobileWorkspaceListSchema')
+  assertExactKeys(
+    root.properties,
+    ['worktrees', 'totalCount', 'truncated'],
+    'MobileWorkspaceListSchema.properties'
+  )
+  assertRequired(root, Object.keys(root.properties), 'MobileWorkspaceListSchema')
+  const worktrees = requireArraySchema(
+    root.properties.worktrees,
+    'MobileWorkspaceListSchema.worktrees'
+  )
+  const item = requireObjectSchema(worktrees.items, 'MobileWorkspaceListItemSchema')
+  const expected = [
+    'worktreeId',
+    'repo',
+    'path',
+    'branch',
+    'displayName',
+    'workspaceStatus',
+    'isArchived',
+    'isMainWorktree',
+    'isPinned',
+    'isActive',
+    'unread',
+    'liveTerminalCount',
+    'lastActivityAt',
+    'lastOutputAt',
+    'preview',
+    'status'
+  ]
+  assertExactKeys(item.properties, expected, 'MobileWorkspaceListItemSchema.properties')
+  assertRequired(
+    item,
+    expected.filter((key) => key !== 'isMainWorktree' && key !== 'lastActivityAt'),
+    'MobileWorkspaceListItemSchema'
+  )
+  const request = requireObjectSchema(requestValue, 'MobileWorkspaceListRequestSchema')
+  assertExactKeys(request.properties, ['limit'], 'MobileWorkspaceListRequestSchema.properties')
+  assertRequired(request, [], 'MobileWorkspaceListRequestSchema')
+  return {
+    statuses: requireStringEnum(item.properties.status, 'MobileWorkspaceListItemSchema.status'),
+    path: MOBILE_WORKTREE_PS_ORPC_PATH,
+    requestIdHeader: RUNTIME_ORPC_REQUEST_ID_HEADER,
+    textPrefix: RUNTIME_ORPC_TEXT_PREFIX
+  }
+}
+
+function renderWireContract(pairing, e2ee, runtime, sourceSchemas, digest) {
   if (e2ee.readyVersion !== e2ee.version) {
     throw new Error('E2EE hello and ready versions must match')
   }
   const pairingSource = renderPairingContract(pairing, sourceSchemas)
   const e2eeSource = renderE2EEContract(e2ee)
-  const source = `// Generated by apps/mobile-ios/scripts/generate-wire-contracts.mjs. Do not edit.\n// Mobile wire schemas SHA-256: ${digest}\n\nimport Foundation\n\n${pairingSource}\n${e2eeSource}`
+  const runtimeSource = renderRuntimeContract(runtime)
+  const source = `// Generated by scripts/generate-mobile-ios-wire-contracts.mjs. Do not edit.\n// Mobile wire schemas SHA-256: ${digest}\n\nimport Foundation\n\n${pairingSource}\n${e2eeSource}\n${runtimeSource}`
   return source.replace(/^(enum|struct) /gm, 'nonisolated $1 ')
+}
+
+function renderRuntimeContract(contract) {
+  const statusCases = contract.statuses
+    .map((status) => `    case ${swiftCase(status)} = ${JSON.stringify(status)}`)
+    .join('\n')
+  return `enum MobileWorkspaceActivityWire: String, Codable, Equatable, Sendable {\n${statusCases}\n}\n\nstruct MobileWorkspaceListRequestWire: Codable, Equatable, Sendable {\n    let limit: Int?\n}\n\nstruct MobileWorkspaceListItemWire: Codable, Equatable, Sendable {\n    let worktreeId: String\n    let repo: String\n    let path: String\n    let branch: String\n    let displayName: String\n    let workspaceStatus: String\n    let isArchived: Bool\n    let isMainWorktree: Bool?\n    let isPinned: Bool\n    let isActive: Bool\n    let unread: Bool\n    let liveTerminalCount: Int\n    let lastActivityAt: Int64?\n    let lastOutputAt: Int64?\n    let preview: String\n    let status: MobileWorkspaceActivityWire\n}\n\nstruct MobileWorkspaceListWire: Codable, Equatable, Sendable {\n    let worktrees: [MobileWorkspaceListItemWire]\n    let totalCount: Int\n    let truncated: Bool\n}\n\nenum MobileRuntimeWireContract {\n    static let textPrefix = ${JSON.stringify(contract.textPrefix)}\n    static let requestIdHeader = ${JSON.stringify(contract.requestIdHeader)}\n    static let worktreeListPath = ${JSON.stringify(contract.path)}\n}\n`
 }
 
 function renderPairingContract(contract, sourceSchemas) {
@@ -366,6 +443,13 @@ function requireObjectSchema(value, label) {
   return value
 }
 
+function requireArraySchema(value, label) {
+  if (!isRecord(value) || value.type !== 'array' || !isRecord(value.items)) {
+    throw new Error(`${label} must remain an array schema`)
+  }
+  return value
+}
+
 function assertExactKeys(properties, expected, label) {
   const actual = Object.keys(properties)
   if (actual.length !== expected.length || actual.some((key, index) => key !== expected[index])) {
@@ -376,7 +460,7 @@ function assertExactKeys(properties, expected, label) {
 }
 
 function assertRequired(schemaValue, expected, label) {
-  const actual = schemaValue.required
+  const actual = schemaValue.required ?? []
   if (
     !Array.isArray(actual) ||
     actual.length !== expected.length ||

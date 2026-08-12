@@ -24,6 +24,14 @@ final class AppModel {
         routes.append(.hosts)
     }
 
+    func showWorkspaces(_ host: HostProfile) {
+        routes.append(.workspaces(host))
+    }
+
+    func showTerminalPrototype() {
+        routes.append(.terminalPrototype)
+    }
+
     func confirmPairing(_ offer: PairingOffer) {
         routes.append(.pairConfirm(offer))
     }

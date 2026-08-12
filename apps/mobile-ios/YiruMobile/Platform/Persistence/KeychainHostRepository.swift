@@ -21,6 +21,7 @@ actor KeychainHostRepository: HostRepository {
 
     func saveAuthenticatedOffer(_ offer: PairingOffer, connectedAt: Date) throws -> HostProfile {
         var current = try storedHosts()
+        let previous = current
         let existing = current.first(where: { $0.publicKeyBase64 == offer.publicKeyBase64 })
         let profile = HostProfile(
             id: existing?.id ?? UUID().uuidString.lowercased(),
@@ -38,8 +39,7 @@ actor KeychainHostRepository: HostRepository {
         do {
             try writeToken(offer.deviceToken, hostID: profile.id)
         } catch {
-            current.removeAll { $0.id == profile.id }
-            try? writeHosts(current)
+            try? writeHosts(previous)
             throw error
         }
         return profile
@@ -73,7 +73,7 @@ actor KeychainHostRepository: HostRepository {
             }
             return max(current, number)
         }
-        return "Host \(largest + 1)"
+        return String(localized: "Host \(largest + 1)")
     }
 
     private func hasToken(hostID: String) throws -> Bool {

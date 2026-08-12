@@ -45,9 +45,11 @@ App ───────→ Features ───────→ DesignSystem
   多个 feature 手抄一套相似 JSON 结构。
 
 Pairing 是第一个完整纵向切片：`PairingCodeDecoder` 只负责边界校验，`PairingModel` 只负责
-页面状态，`DirectPairingClient` 负责一次认证生命周期，`KeychainHostRepository` 负责持久
-身份。E2EE schema 与 domain constant 从 TypeScript source of truth 生成 Swift wire model；
-domain model 不向 UI 暴露 wire 类型。
+页面状态，`DirectPairingClient` 负责配对用例，`KeychainHostRepository` 负责持久身份。
+`AuthenticatedRuntimeConnection` 集中拥有公钥钉扎、E2EE 握手和 cipher counter，配对与后续
+runtime capability 不各写一套 transport。E2EE 和移动工作区 schema、domain constant、oRPC
+method identifier 从 TypeScript source of truth 生成 Swift wire model；domain model 不向 UI 暴露
+wire 类型。
 
 ## 状态与并发
 
@@ -78,8 +80,9 @@ TerminalMultiplexTransport actor
       → SwiftTermSurface
 ```
 
-当前技术决策是 pin SwiftTerm 1.18.0，并由 Yiru 自己维护正式的 `UIViewRepresentable`
-adapter；首版使用默认 Core Text/Core Graphics renderer，性能数据证明有收益后再评估 Metal。
+当前实现 pin SwiftTerm 1.18.0，并由 Yiru 自己维护正式的 `UIViewRepresentable` adapter 与
+renderer-neutral `TerminalSurface`；首版使用默认 Core Text/Core Graphics renderer，性能数据
+证明有收益后再评估 Metal。
 `WKWebView + xterm.js` 只作为 prototype 未通过时的功能保真回退，Ghostty 与自研 renderer
 暂不采用。完整证据和验收闸门见
 [`docs/terminal-technology-research.md`](./docs/terminal-technology-research.md)。

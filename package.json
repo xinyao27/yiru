@@ -38,7 +38,7 @@
     "verify:bundled-skill-guides": "node scripts/generate-bundled-skill-guides.mjs --check",
     "verify:skill-bundle-manifest": "node scripts/generate-skill-bundle-manifest.mjs",
     "typecheck": "vp run --cache -r typecheck",
-    "check": "vp check --fix && vp run typecheck && vp run verify:workspace-contracts && vp run yiru#verify:repository-contracts && vp run yiru-mobile#verify:repository-contracts",
+    "check": "vp check --fix && vp run typecheck && vp run verify:workspace-contracts && vp run yiru#verify:repository-contracts && vp run yiru-mobile#verify:repository-contracts && vp run yiru-mobile-ios#verify",
     "lint": "vp lint --fix",
     "lint:check": "vp lint",
     "fmt": "vp fmt",

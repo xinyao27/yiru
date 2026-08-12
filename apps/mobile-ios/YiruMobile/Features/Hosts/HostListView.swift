@@ -2,10 +2,16 @@ import SwiftUI
 
 struct HostListView: View {
     @State private var model: HostListModel
+    private let selectHost: (HostProfile) -> Void
     private let showPairing: () -> Void
 
-    init(repository: any HostRepository, showPairing: @escaping () -> Void) {
+    init(
+        repository: any HostRepository,
+        selectHost: @escaping (HostProfile) -> Void,
+        showPairing: @escaping () -> Void
+    ) {
         _model = State(initialValue: HostListModel(repository: repository))
+        self.selectHost = selectHost
         self.showPairing = showPairing
     }
 
@@ -53,7 +59,12 @@ struct HostListView: View {
             }
         } else {
             List(hosts, id: \.id) { host in
-                HostRow(host: host)
+                Button {
+                    selectHost(host)
+                } label: {
+                    HostRow(host: host)
+                }
+                .buttonStyle(.plain)
             }
             .refreshable {
                 await model.load()

@@ -969,6 +969,9 @@ importers:
       '@yiru/mobile-relay-protocol':
         specifier: workspace:*
         version: link:../../packages/mobile-relay-protocol
+      '@yiru/runtime-protocol':
+        specifier: workspace:*
+        version: link:../../packages/runtime-protocol
     devDependencies:
       zod:
         specifier: 'catalog:'

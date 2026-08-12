@@ -96,6 +96,15 @@
       "require": "./dist/mobile-runtime-types.js",
       "default": "./dist/mobile-runtime-types.js"
     },
+    "./mobile-worktree-wire": {
+      "types": "./src/mobile-worktree-wire.ts",
+      "react-native": "./src/mobile-worktree-wire.ts",
+      "browser": "./src/mobile-worktree-wire.ts",
+      "development": "./src/mobile-worktree-wire.ts",
+      "import": "./dist/esm/mobile-worktree-wire.mjs",
+      "require": "./dist/mobile-worktree-wire.js",
+      "default": "./dist/mobile-worktree-wire.js"
+    },
     "./mobile-development-pairing": {
       "types": "./src/mobile-development-pairing.ts",
       "react-native": "./src/mobile-development-pairing.ts",

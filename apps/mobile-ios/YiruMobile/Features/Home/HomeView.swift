@@ -5,6 +5,7 @@ struct HomeView: View {
     private let refreshRevision: Int
     private let showHosts: () -> Void
     private let showPairing: () -> Void
+    private let showTerminalPrototype: () -> Void
     private let showDesignSystemCatalog: () -> Void
 
     init(
@@ -12,12 +13,14 @@ struct HomeView: View {
         refreshRevision: Int,
         showHosts: @escaping () -> Void,
         showPairing: @escaping () -> Void,
+        showTerminalPrototype: @escaping () -> Void,
         showDesignSystemCatalog: @escaping () -> Void
     ) {
         _model = State(initialValue: HomeModel(runtime: runtime))
         self.refreshRevision = refreshRevision
         self.showHosts = showHosts
         self.showPairing = showPairing
+        self.showTerminalPrototype = showTerminalPrototype
         self.showDesignSystemCatalog = showDesignSystemCatalog
     }
 
@@ -64,6 +67,15 @@ struct HomeView: View {
                     "The iOS 26 app shell, architecture, and Liquid Glass design system are ready for feature-by-feature migration."
                 )
                 .foregroundStyle(.secondary)
+
+                #if DEBUG
+                    Button(
+                        "Terminal prototype",
+                        systemImage: "terminal",
+                        action: showTerminalPrototype
+                    )
+                    .buttonStyle(.glass)
+                #endif
             }
         }
     }

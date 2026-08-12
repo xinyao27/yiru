@@ -19,6 +19,9 @@ packages:
   Sodium:
     url: https://github.com/jedisct1/swift-sodium.git
     exactVersion: 0.11.0
+  SwiftTerm:
+    url: https://github.com/migueldeicaza/SwiftTerm.git
+    exactVersion: 1.18.0
 
 schemes:
   YiruMobile:
@@ -37,6 +40,7 @@ targets:
           - '**/*.md'
     dependencies:
       - package: Sodium
+      - package: SwiftTerm
     info:
       path: YiruMobile/Resources/Info.plist
       properties:

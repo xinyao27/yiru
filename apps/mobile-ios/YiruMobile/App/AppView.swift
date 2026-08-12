@@ -10,6 +10,7 @@ struct AppView: View {
                 refreshRevision: model.homeRevision,
                 showHosts: model.showHosts,
                 showPairing: model.showPairing,
+                showTerminalPrototype: model.showTerminalPrototype,
                 showDesignSystemCatalog: model.showDesignSystemCatalog
             )
             .navigationDestination(for: AppRoute.self) { route in
@@ -19,7 +20,13 @@ struct AppView: View {
                 case .hosts:
                     HostListView(
                         repository: model.dependencies.hostRepository,
+                        selectHost: model.showWorkspaces,
                         showPairing: model.showPairing
+                    )
+                case .workspaces(let host):
+                    WorkspaceListView(
+                        host: host,
+                        repository: model.dependencies.workspaceRepository
                     )
                 case .pair:
                     PairingScanView(onOffer: model.confirmPairing)
@@ -29,6 +36,8 @@ struct AppView: View {
                         runtime: model.dependencies.pairingRuntime,
                         onPaired: model.finishPairing
                     )
+                case .terminalPrototype:
+                    TerminalPrototypeView(factory: model.dependencies.terminalSurfaceFactory)
                 }
             }
         }

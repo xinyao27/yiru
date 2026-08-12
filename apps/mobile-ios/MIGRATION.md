@@ -45,9 +45,12 @@ Transport 是后续所有 feature 的地基，不能在 Swift 中凭 UI 需要�
 - [x] App composition root 与 typed route
 - [x] Liquid Glass token、surface、action group 和 catalog
 - [x] Terminal renderer 技术选型与 prototype 验收清单
+- [x] SwiftTerm 1.18.0、Yiru-owned `TerminalSurface` 与可运行 renderer prototype
 - [x] Transport contract generation 与 drift check
 - [x] QR / paste / deep-link pairing、E2EE v2 direct authentication 与 Keychain host credential
 - [x] Host 列表、重复桌面身份复用与安全凭据读取
+- [x] 加密 oRPC unary transport 与 `worktree.ps` 工作区只读列表
 - [ ] Relay provisioning、endpoint rotation 与断线恢复
-- [ ] Workspace runtime capability 与 host/worktree 操作
+- [ ] Workspace create、activate、sleep、pin 与 host edit 操作
+- [ ] Terminal multiplex、snapshot replay、flow control 与远程 PTY session
 - [ ] 其余功能切片
