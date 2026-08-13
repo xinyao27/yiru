@@ -2,6 +2,8 @@ import { ScrollArea as ScrollAreaPrimitive } from '@base-ui/react/scroll-area'
 import * as React from 'react'
 import { cn } from '~renderer/lib/class-names'
 
+import './scroll-area.css'
+
 function ScrollArea({
   className,
   horizontalScrollBar,
@@ -34,8 +36,7 @@ function ScrollArea({
         tabIndex={viewportTabIndex}
         data-slot="scroll-area-viewport"
         className={cn(
-          // Why: the Web CSP blocks Base UI's inline scrollbar-hiding stylesheet.
-          'size-full rounded-[inherit] border border-transparent transition-[color] outline-none [scrollbar-width:none] focus-visible:border-ring [&::-webkit-scrollbar]:hidden',
+          'size-full rounded-[inherit] border border-transparent transition-[color] outline-none focus-visible:border-ring',
           viewportClassName
         )}
         {...viewportProps}
