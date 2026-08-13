@@ -2195,6 +2195,7 @@
             "notSignedIn": "not signed in",
             "allAgents": "visible agents",
             "usageDetails": "用量概览",
+            "statusBarSettings": "状态栏设置…",
             "loadingUsage": "Loading usage…",
             "usageUnavailable": "Usage unavailable",
             "noUsageData": "No usage data",

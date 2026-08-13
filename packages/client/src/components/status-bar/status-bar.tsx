@@ -19,6 +19,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { FloatingTerminalIconContextMenu } from '~renderer/components/floating-terminal/icon-context-menu'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
+import { USAGE_PERCENTAGE_DISPLAY_SETTING_ID } from '~renderer/components/settings/appearance/usage-percentage-search'
 import { Button } from '~renderer/components/ui/button'
 import { Checkbox } from '~renderer/components/ui/checkbox'
 import {
@@ -1938,6 +1939,16 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
     openHomePage()
   }, [openHomePage])
 
+  const handleStatusBarSettings = useCallback((): void => {
+    setUsageMenuOpen(false)
+    openSettingsTarget({
+      pane: 'appearance',
+      repoId: null,
+      sectionId: USAGE_PERCENTAGE_DISPLAY_SETTING_ID
+    })
+    openSettingsPage()
+  }, [openSettingsPage, openSettingsTarget])
+
   const handleOpenProviderAccounts = useCallback(
     (provider: ProviderRateLimits['provider']): void => {
       const sectionId = getUsageProviderAccountsSectionId(provider)
@@ -2174,6 +2185,7 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
                           getUsageProviderAccountsSectionId(provider) !== null
                         }
                         onManageAccounts={handleManageAccounts}
+                        onStatusBarSettings={handleStatusBarSettings}
                         onUsageDetails={handleUsageDetails}
                         renderRow={(provider, row) => {
                           if (provider.provider === 'claude') {

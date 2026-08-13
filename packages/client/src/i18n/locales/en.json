@@ -2231,6 +2231,7 @@
             "notSignedIn": "not signed in",
             "allAgents": "visible agents",
             "usageDetails": "Usage overview",
+            "statusBarSettings": "Status bar settings…",
             "loadingUsage": "Loading usage…",
             "usageUnavailable": "Usage unavailable",
             "noUsageData": "No usage data",

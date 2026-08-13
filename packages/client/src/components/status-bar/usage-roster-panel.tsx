@@ -98,6 +98,7 @@ export function UsageRosterPanel({
   onSignIn,
   canSignIn,
   onManageAccounts,
+  onStatusBarSettings,
   onUsageDetails,
   renderRow
 }: {
@@ -111,6 +112,7 @@ export function UsageRosterPanel({
   onSignIn: (provider: ProviderId) => void
   canSignIn: (provider: ProviderId) => boolean
   onManageAccounts: () => void
+  onStatusBarSettings: () => void
   onUsageDetails: () => void
   renderRow?: (provider: ProviderRateLimits, row: ReactNode) => ReactNode
 }): React.JSX.Element {
@@ -221,6 +223,13 @@ export function UsageRosterPanel({
       <DropdownMenuSeparator className="my-0" />
       <DropdownMenuItem onClick={onUsageDetails} className="w-full justify-between">
         {translate('auto.components.status.bar.UsageRosterPanel.usageDetails', 'Usage overview')}
+        <CaretRight className="text-muted-foreground" />
+      </DropdownMenuItem>
+      <DropdownMenuItem onClick={onStatusBarSettings} className="w-full justify-between">
+        {translate(
+          'auto.components.status.bar.UsageRosterPanel.statusBarSettings',
+          'Status bar settings…'
+        )}
         <CaretRight className="text-muted-foreground" />
       </DropdownMenuItem>
       <DropdownMenuItem onClick={onManageAccounts} className="w-full justify-between">
