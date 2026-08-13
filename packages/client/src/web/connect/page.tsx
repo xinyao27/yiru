@@ -2,6 +2,8 @@ import { Check, Copy } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
+import { ButtonGroup, ButtonGroupText } from '~renderer/components/ui/button-group'
+import { ScrollArea } from '~renderer/components/ui/scroll-area'
 import { translate } from '~renderer/i18n/i18n'
 
 import {
@@ -286,21 +288,29 @@ type CommandBlockProps = {
 
 function CommandBlock(props: CommandBlockProps): React.JSX.Element {
   return (
-    <div className="border-border bg-muted flex min-w-0 items-stretch border">
-      <code className="min-w-0 flex-1 overflow-x-auto px-4 py-3 font-mono text-xs leading-5 whitespace-nowrap">
-        {props.command}
-      </code>
+    <ButtonGroup className="border-border bg-muted h-12 w-full min-w-0 border">
+      <ButtonGroupText className="h-full min-w-0 flex-1 overflow-hidden border-0 bg-transparent p-0 font-normal">
+        <ScrollArea
+          className="h-full min-w-0 flex-1"
+          horizontalScrollBar
+          hasVerticalScrollBar={false}
+        >
+          <code className="block w-max min-w-full px-4 py-3 font-mono text-xs leading-5 whitespace-nowrap">
+            {props.command}
+          </code>
+        </ScrollArea>
+      </ButtonGroupText>
       <Button
         type="button"
         variant="ghost"
         size="icon"
-        className="border-border h-auto w-12 shrink-0 border-l"
+        className="h-full w-12 bg-transparent"
         onClick={() => void props.onCopy(props.command)}
         aria-label={translate('auto.web.WebConnect.copyCommand', 'Copy command')}
       >
         {props.copied ? <Check size={16} aria-hidden /> : <Copy size={16} aria-hidden />}
       </Button>
-    </div>
+    </ButtonGroup>
   )
 }
 

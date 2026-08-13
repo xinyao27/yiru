@@ -34,7 +34,8 @@ function ScrollArea({
         tabIndex={viewportTabIndex}
         data-slot="scroll-area-viewport"
         className={cn(
-          'size-full rounded-[inherit] border border-transparent transition-[color] outline-none focus-visible:border-ring',
+          // Why: the Web CSP blocks Base UI's inline scrollbar-hiding stylesheet.
+          'size-full rounded-[inherit] border border-transparent transition-[color] outline-none [scrollbar-width:none] focus-visible:border-ring [&::-webkit-scrollbar]:hidden',
           viewportClassName
         )}
         {...viewportProps}
