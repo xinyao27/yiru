@@ -1,4 +1,5 @@
 import '../assets/main.css'
+import { CSPProvider } from '@base-ui/react/csp-provider'
 import { Suspense, useState } from 'react'
 import ReactDOM from 'react-dom/client'
 import { lazyWithRetry as lazy } from '~renderer/lib/lazy-with-retry'
@@ -51,9 +52,11 @@ function WebRootBoundary(): React.JSX.Element {
 }
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
-  <PhosphorIconContextProvider>
-    <I18nProvider>
-      <WebRootBoundary />
-    </I18nProvider>
-  </PhosphorIconContextProvider>
+  <CSPProvider disableStyleElements>
+    <PhosphorIconContextProvider>
+      <I18nProvider>
+        <WebRootBoundary />
+      </I18nProvider>
+    </PhosphorIconContextProvider>
+  </CSPProvider>
 )

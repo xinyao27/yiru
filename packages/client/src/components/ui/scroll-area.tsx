@@ -40,7 +40,7 @@ function ScrollArea({
         )}
         {...viewportProps}
       >
-        {children}
+        <ScrollAreaPrimitive.Content>{children}</ScrollAreaPrimitive.Content>
       </ScrollAreaPrimitive.Viewport>
       {hasVerticalScrollBar ? <ScrollBar /> : null}
       {horizontalScrollBar ? <ScrollBar orientation="horizontal" /> : null}
