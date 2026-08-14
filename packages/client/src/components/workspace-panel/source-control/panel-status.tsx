@@ -28,6 +28,7 @@ export function SourceControlPanelStatus({
     normalizedFilter,
     openConflictReview,
     repositoryHuge,
+    resolveConflictsComposerOpen,
     sourceControlAiActionsVisible,
     unresolvedConflictReviewEntries,
     workspacePanelTabId,
@@ -42,7 +43,7 @@ export function SourceControlPanelStatus({
             conflictOperation={conflictOperation}
             unresolvedCount={unresolvedConflictReviewEntries.length}
             sourceControlAiActionsVisible={sourceControlAiActionsVisible}
-            isResolvingWithAI={false}
+            isResolvingWithAI={resolveConflictsComposerOpen}
             isAbortingOperation={isAbortingOperation}
             onAbortOperation={handleAbortOperationForConflict}
             onResolveWithAI={() => void handleResolveConflictsWithAI()}

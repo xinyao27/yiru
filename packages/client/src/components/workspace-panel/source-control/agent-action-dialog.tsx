@@ -91,9 +91,10 @@ export function SourceControlAgentActionDialog(
   } = useSourceControlAgentActionDialog(props)
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      {/* Why: saved receipts auto-start in the background, so the fallback content
-          stays unmounted to avoid flashing a dialog the user already skipped. */}
+    <Dialog open={open && shouldRenderDialog} onOpenChange={handleOpenChange}>
+      {/* Why: an open modal with no popup makes the workbench look frozen while
+          a saved recipe waits for agent detection. Keep the modal closed while
+          that recipe auto-starts in the background. */}
       {shouldRenderDialog ? (
         <DialogContent className="flex max-h-[min(82vh,42rem)] min-w-0 flex-col overflow-hidden sm:max-w-2xl">
           <DialogHeader className="shrink-0">
