@@ -6,7 +6,6 @@ import { useTabAgent } from '~renderer/components/tab-bar/use-tab-agent'
 import { Button } from '~renderer/components/ui/button'
 import { ContextMenu, ContextMenuTrigger } from '~renderer/components/ui/context-menu'
 import { Input } from '~renderer/components/ui/input'
-import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
 import { isImeCompositionKeyDown } from '~renderer/lib/ime-composition-keyboard-event'
@@ -19,8 +18,9 @@ import { preventMiddleButtonDefault } from './middle-button-default-guard'
 import { SortableTabContextMenu } from './sortable-tab-context-menu'
 import { getTitlebarTabStateClasses, TAB_ROOT_CLASSES } from './tab-chrome-classes'
 import { TabCloseButton } from './tab-close-button'
+import { TabLabel } from './tab-label'
 import { useTabStripPointerActivation } from './tab-strip-pointer-activation'
-import { TAB_CONTAINER_WIDTH_CLASSES, TAB_LABEL_WIDTH_CLASSES } from './tab-width-rules'
+import { TAB_CONTAINER_WIDTH_CLASSES } from './tab-width-rules'
 import {
   hasUnreadAgentCompletionForTerminalTab,
   isTerminalTabActivityLive,
@@ -359,21 +359,8 @@ export default function SortableTab({
           className="mr-1 min-w-[72px] flex-1"
           spellCheck={false}
         />
-      ) : isEditing || menuOpen ? (
-        <span className={cn(TAB_LABEL_WIDTH_CLASSES, 'mr-1')}>{displayTitle}</span>
       ) : (
-        <Tooltip>
-          <TooltipTrigger
-            render={<span className={cn(TAB_LABEL_WIDTH_CLASSES, 'mr-1')}>{displayTitle}</span>}
-          />
-          <TooltipContent
-            side="bottom"
-            sideOffset={6}
-            className="max-w-80 text-left break-words whitespace-normal"
-          >
-            {displayTitle}
-          </TooltipContent>
-        </Tooltip>
+        <TabLabel label={displayTitle} showTooltip={!menuOpen} />
       )}
       {tab.color && !isEditing && (
         <span className="mr-1.5 size-2 shrink-0" style={{ backgroundColor: tab.color }} />
@@ -407,11 +394,8 @@ export default function SortableTab({
             <Minimize2 className="size-3.5" />
           </Button>
         )}
-      {/* Why: terminal tabs keep trailing close chrome compact beside activity controls. */}
       {!isEditing && !isPinned && (
         <TabCloseButton
-          className="right-1 size-5"
-          iconClassName="size-3.5"
           ariaLabel={translate(
             'auto.components.tab.bar.SortableTab.6df69d9388',
             'Close tab {{value0}}',

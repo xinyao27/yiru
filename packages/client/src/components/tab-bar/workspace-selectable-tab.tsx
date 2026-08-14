@@ -1,6 +1,4 @@
 import type React from 'react'
-import { Button } from '~renderer/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { cn } from '~renderer/lib/class-names'
 
 import {
@@ -8,7 +6,8 @@ import {
   TAB_LEADING_ICON_CLASSES,
   TAB_ROOT_CLASSES
 } from './tab-chrome-classes'
-import { TAB_CONTAINER_WIDTH_CLASSES, TAB_LABEL_WIDTH_CLASSES } from './tab-width-rules'
+import { TabLabel } from './tab-label'
+import { TAB_CONTAINER_WIDTH_CLASSES } from './tab-width-rules'
 
 type WorkspaceSelectableTabProps = {
   id: string
@@ -31,21 +30,20 @@ export function WorkspaceSelectableTab({
   // close, rename, pin, or persistence behavior.
   return (
     <div className={TAB_CONTAINER_WIDTH_CLASSES}>
-      <Button
-        variant="ghost"
-        size="xs"
-        type="button"
+      <div
         role="tab"
         aria-selected={active}
         tabIndex={tabIndex}
         data-tab-id={id}
         data-active={active ? 'true' : 'false'}
-        className={cn(
-          TAB_ROOT_CLASSES,
-          'p-0 h-auto border-0 justify-start gap-0 whitespace-normal font-normal w-full text-left',
-          getTitlebarTabStateClasses(active)
-        )}
+        className={cn(TAB_ROOT_CLASSES, getTitlebarTabStateClasses(active))}
         onClick={() => onSelect(id)}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault()
+            onSelect(id)
+          }
+        }}
       >
         <span
           className={cn(TAB_LEADING_ICON_CLASSES, 'flex items-center justify-center')}
@@ -53,19 +51,8 @@ export function WorkspaceSelectableTab({
         >
           {icon}
         </span>
-        <Tooltip>
-          <TooltipTrigger
-            render={<span className={cn(TAB_LABEL_WIDTH_CLASSES, 'mr-1 text-left')}>{title}</span>}
-          />
-          <TooltipContent
-            side="bottom"
-            sideOffset={6}
-            className="max-w-80 text-left break-words whitespace-normal"
-          >
-            {title}
-          </TooltipContent>
-        </Tooltip>
-      </Button>
+        <TabLabel label={title} />
+      </div>
     </div>
   )
 }

@@ -6,11 +6,8 @@ import {
   TAB_ROOT_CLASSES
 } from '~renderer/components/tab-bar/tab-chrome-classes'
 import { TabCloseButton } from '~renderer/components/tab-bar/tab-close-button'
-import {
-  TAB_CONTAINER_WIDTH_CLASSES,
-  TAB_LABEL_WIDTH_CLASSES
-} from '~renderer/components/tab-bar/tab-width-rules'
-import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { TabLabel } from '~renderer/components/tab-bar/tab-label'
+import { TAB_CONTAINER_WIDTH_CLASSES } from '~renderer/components/tab-bar/tab-width-rules'
 import type { ActivityBarItem } from '~renderer/components/workspace-panel/activity-bar-buttons'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
@@ -43,7 +40,7 @@ export function CoworkingWorkspacePanelTab({
         tabIndex={tabIndex}
         data-tab-id={id}
         data-active={active ? 'true' : 'false'}
-        className={cn(TAB_ROOT_CLASSES, 'w-full', getTitlebarTabStateClasses(active))}
+        className={cn(TAB_ROOT_CLASSES, getTitlebarTabStateClasses(active))}
         onClick={onSelect}
         onKeyDown={(event) => {
           if (event.key === 'Enter' || event.key === ' ') {
@@ -66,16 +63,8 @@ export function CoworkingWorkspacePanelTab({
         }}
       >
         <Icon className={TAB_LEADING_ICON_CLASSES} />
-        <Tooltip>
-          <TooltipTrigger
-            render={<span className={cn(TAB_LABEL_WIDTH_CLASSES, 'mr-1')}>{item.title}</span>}
-          />
-          <TooltipContent side="bottom" sideOffset={6}>
-            {item.title}
-          </TooltipContent>
-        </Tooltip>
+        <TabLabel label={item.title} />
         <TabCloseButton
-          className="right-1"
           ariaLabel={translate(
             'auto.components.tab.bar.SortableTab.6df69d9388',
             'Close tab {{value0}}',

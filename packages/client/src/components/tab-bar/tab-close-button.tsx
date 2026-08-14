@@ -4,19 +4,14 @@ import { Button } from '~renderer/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { useShortcutKeyDetails } from '~renderer/hooks/use-shortcut-label'
 import { translate } from '~renderer/i18n/i18n'
-import { cn } from '~renderer/lib/class-names'
 
 import { TAB_CLOSE_BUTTON_CLASSES } from './tab-close-button-classes'
 
 export function TabCloseButton({
   ariaLabel,
-  className,
-  iconClassName,
   onClose
 }: {
   ariaLabel: string
-  className?: string
-  iconClassName?: string
   onClose: () => void
 }): React.JSX.Element {
   const closeShortcut = useShortcutKeyDetails('tab.close')
@@ -26,7 +21,7 @@ export function TabCloseButton({
       <TooltipTrigger
         render={
           <Button
-            className={cn(TAB_CLOSE_BUTTON_CLASSES, className)}
+            className={TAB_CLOSE_BUTTON_CLASSES}
             variant="ghost"
             size="icon-xs"
             type="button"
@@ -47,7 +42,7 @@ export function TabCloseButton({
               onClose()
             }}
           >
-            <X className={cn('size-4', iconClassName)} />
+            <X className="size-3.5" />
           </Button>
         }
       />

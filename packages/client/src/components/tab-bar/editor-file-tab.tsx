@@ -12,7 +12,6 @@ import { canOpenMarkdownPreview } from '~renderer/components/editor/markdown-pre
 import { getUntitledFileRoot } from '~renderer/components/editor/untitled-file-rename-path'
 import { ContextMenu, ContextMenuTrigger } from '~renderer/components/ui/context-menu'
 import { Input } from '~renderer/components/ui/input'
-import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
 import { getFileTypeIcon } from '~renderer/lib/file-type-icons'
@@ -37,8 +36,9 @@ import {
   TAB_ROOT_CLASSES
 } from './tab-chrome-classes'
 import { TabCloseButton } from './tab-close-button'
+import { TabLabel } from './tab-label'
 import { useTabStripPointerActivation } from './tab-strip-pointer-activation'
-import { TAB_CONTAINER_WIDTH_CLASSES, TAB_LABEL_WIDTH_CLASSES } from './tab-width-rules'
+import { TAB_CONTAINER_WIDTH_CLASSES } from './tab-width-rules'
 
 export default function EditorFileTab({
   file,
@@ -276,7 +276,7 @@ export default function EditorFileTab({
         <FileIcon className={tabIconClassName} />
       )}
       {isPinned && <Pin className="text-muted-foreground mr-1 size-3.5 shrink-0" aria-hidden />}
-      <span className="mr-1 flex min-w-0 flex-1 items-baseline gap-1">
+      <span className="flex min-w-0 flex-1 items-baseline">
         {isRenaming ? (
           <Input
             ref={setRenameInputElement}
@@ -317,12 +317,10 @@ export default function EditorFileTab({
             onBlur={commitRename}
           />
         ) : (
-          <span
-            className={cn(
-              TAB_LABEL_WIDTH_CLASSES,
-              file.isPreview && 'italic',
-              isMissingFileMutation && 'line-through'
-            )}
+          <TabLabel
+            label={tabLabel}
+            showTooltip={!menuOpen}
+            className={cn(file.isPreview && 'italic', isMissingFileMutation && 'line-through')}
             style={tabStatusColor ? { color: tabStatusColor } : undefined}
             onDoubleClick={(e) => {
               if (file.isPreview && onMakePermanent) {
@@ -339,9 +337,7 @@ export default function EditorFileTab({
               e.stopPropagation()
               openRenameInput()
             }}
-          >
-            {tabLabel}
-          </span>
+          />
         )}
         {isMissingFileMutation && !isRenaming && (
           <span className="text-muted-foreground shrink-0 text-[10px] leading-none font-semibold tracking-wide">
@@ -357,32 +353,27 @@ export default function EditorFileTab({
           </span>
         )}
       </span>
-      {/* Why: clean tabs keep close outside layout; dirty tabs reserve only the
-          status dot's slot, which the hover close affordance replaces in place. */}
-      {file.isDirty ? (
+      {/* Why: the dirty dot may reserve layout, but close stays rooted to the
+          tab like every other content type so its hover chrome cannot drift. */}
+      {file.isDirty && (
         <div className="relative flex h-4 w-4 shrink-0 items-center justify-center">
-          <span className="bg-foreground/60 absolute size-1.5 group-focus-within:hidden group-hover:hidden" />
-          {!isPinned && (
-            <TabCloseButton
-              className="right-0"
-              ariaLabel={translate(
-                'auto.components.tab.bar.EditorFileTabCloseButton.4655cf570e',
-                'Close tab'
-              )}
-              onClose={onClose}
-            />
-          )}
+          <span
+            className={cn(
+              'bg-foreground/60 absolute size-1.5',
+              !isPinned && 'group-focus-within:hidden group-hover:hidden'
+            )}
+          />
         </div>
-      ) : !isPinned ? (
+      )}
+      {!isPinned && (
         <TabCloseButton
-          className="right-0"
           ariaLabel={translate(
             'auto.components.tab.bar.EditorFileTabCloseButton.4655cf570e',
             'Close tab'
           )}
           onClose={onClose}
         />
-      ) : null}
+      )}
     </div>
   )
 
@@ -392,24 +383,7 @@ export default function EditorFileTab({
         onContextMenu={() => {
           window.dispatchEvent(new Event(CLOSE_ALL_CONTEXT_MENUS_EVENT))
         }}
-        render={
-          <div className={TAB_CONTAINER_WIDTH_CLASSES}>
-            {isRenaming || menuOpen ? (
-              tabRoot
-            ) : (
-              <Tooltip>
-                <TooltipTrigger render={tabRoot} />
-                <TooltipContent
-                  side="bottom"
-                  sideOffset={6}
-                  className="max-w-80 text-left break-words whitespace-normal"
-                >
-                  {tabLabel}
-                </TooltipContent>
-              </Tooltip>
-            )}
-          </div>
-        }
+        render={<div className={TAB_CONTAINER_WIDTH_CLASSES}>{tabRoot}</div>}
       />
 
       <EditorFileTabContextMenu

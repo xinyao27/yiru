@@ -1,6 +1,5 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { GitBranch } from '@phosphor-icons/react'
-import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
 
@@ -13,8 +12,9 @@ import {
   TAB_ROOT_CLASSES
 } from './tab-chrome-classes'
 import { TabCloseButton } from './tab-close-button'
+import { TabLabel } from './tab-label'
 import { useTabStripPointerActivation } from './tab-strip-pointer-activation'
-import { TAB_CONTAINER_WIDTH_CLASSES, TAB_LABEL_WIDTH_CLASSES } from './tab-width-rules'
+import { TAB_CONTAINER_WIDTH_CLASSES } from './tab-width-rules'
 
 export function GitGraphTab({
   id,
@@ -71,16 +71,8 @@ export function GitGraphTab({
         }}
       >
         <GitBranch className={TAB_LEADING_ICON_CLASSES} />
-        <Tooltip>
-          <TooltipTrigger
-            render={<span className={cn(TAB_LABEL_WIDTH_CLASSES, 'mr-1')}>{label}</span>}
-          />
-          <TooltipContent side="bottom" sideOffset={6}>
-            {label}
-          </TooltipContent>
-        </Tooltip>
+        <TabLabel label={label} />
         <TabCloseButton
-          className="right-1"
           ariaLabel={translate(
             'auto.components.tab.bar.SortableTab.6df69d9388',
             'Close tab {{value0}}',

@@ -16,7 +16,6 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger
 } from '~renderer/components/ui/context-menu'
-import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
 import { getLiveBrowserUrl } from '~renderer/runtime/browser-live-url'
@@ -35,8 +34,9 @@ import {
   TAB_ROOT_CLASSES
 } from './tab-chrome-classes'
 import { TabCloseButton } from './tab-close-button'
+import { TabLabel } from './tab-label'
 import { useTabStripPointerActivation } from './tab-strip-pointer-activation'
-import { TAB_CONTAINER_WIDTH_CLASSES, TAB_LABEL_WIDTH_CLASSES } from './tab-width-rules'
+import { TAB_CONTAINER_WIDTH_CLASSES } from './tab-width-rules'
 import { TabWorkspaceLayoutMenuSection } from './tab-workspace-layout-menu-section'
 
 function formatBrowserTabUrlLabel(url: string): string {
@@ -223,28 +223,12 @@ export default function BrowserTab({
           muted-foreground made the icon read as "disabled" in practice. */}
       <BrowserTabFavicon tabId={tab.id} faviconUrl={tab.faviconUrl} />
       {isPinned && <Pin className="text-muted-foreground mr-1 size-3.5 shrink-0" aria-hidden />}
-      {menuOpen ? (
-        <span className={cn(TAB_LABEL_WIDTH_CLASSES, 'mr-1')}>{tabLabel}</span>
-      ) : (
-        <Tooltip>
-          <TooltipTrigger
-            render={<span className={cn(TAB_LABEL_WIDTH_CLASSES, 'mr-1')}>{tabLabel}</span>}
-          />
-          <TooltipContent
-            side="bottom"
-            sideOffset={6}
-            className="max-w-80 text-left break-words whitespace-normal"
-          >
-            {tabLabel}
-          </TooltipContent>
-        </Tooltip>
-      )}
+      <TabLabel label={tabLabel} showTooltip={!menuOpen} />
       {tab.loading && !tab.loadError && !isBlankBrowserTab(tab) && (
         <span className="mr-1 size-1.5 shrink-0 bg-sky-500/80" />
       )}
       {!isPinned && (
         <TabCloseButton
-          className="right-1"
           ariaLabel={translate(
             'auto.components.tab.bar.SortableTab.6df69d9388',
             'Close tab {{value0}}',
