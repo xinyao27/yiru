@@ -1,7 +1,5 @@
-// Cross-process contract for rate-limit resume: the renderer detects a
-// provider limit banner in a pane's output and reports it; main resolves the
-// reset time, persists a schedule, and dispatches the resume back when the
-// window rolls over.
+// Cross-process types for Codex's structured usage-limit event and the
+// optional prompt resume that can follow it.
 
 import type { AgentType } from '@yiru/workbench-model/agent'
 
@@ -20,24 +18,28 @@ export type RateLimitResumeProvider =
 
 export type RateLimitResumeWindow = 'session' | 'weekly'
 
-/** What the renderer observed. Deliberately carries the raw banner lines
- *  rather than a parsed time: reset parsing needs the main-side usage service
- *  as a fallback, so it happens in one place after the report crosses IPC. */
-export type RateLimitBannerReport = {
+/** Identifies the active Codex turn whose rollout the runtime should inspect. */
+export type CodexUsageLimitProbe = {
+  ptyId: string
+  tabId: string
+  paneKey: string
+  worktreeId: string
+  sessionId: string
+  transcriptPath?: string
+  turnId: string
+  prompt: string
+}
+
+/** A verified structured limit hit plus whatever reset time the host recovered. */
+export type RateLimitHit = {
   agent: AgentType
   ptyId: string
   tabId: string
   /** `${tabId}:${leafId}` — lets the notification reveal the blocked pane. */
   paneKey: string
   worktreeId: string
-  /** ANSI-stripped lines around the banner, banner line first. */
-  bannerLines: string[]
   /** The user message that was cut short, replayed verbatim on resume. */
   prompt: string
-}
-
-/** A resolved limit hit: the report plus whatever reset time main recovered. */
-export type RateLimitHit = RateLimitBannerReport & {
   provider: RateLimitResumeProvider | null
   detectedAt: number
   /** Epoch ms the quota window rolls over, or null when unrecoverable — the

@@ -1,6 +1,6 @@
 import { useAppStore } from '~renderer/store'
 import type {
-  RateLimitBannerReport,
+  CodexUsageLimitProbe,
   RateLimitHit,
   RateLimitResumeSchedule
 } from '~shared/rate-limit-resume/types'
@@ -12,8 +12,8 @@ function activeTarget() {
   return getActiveRuntimeTarget(useAppStore.getState().settings)
 }
 
-export function reportRateLimitBanner(report: RateLimitBannerReport): Promise<RateLimitHit> {
-  return callRuntimeOrpc(activeTarget(), (client) => client.rateLimitResume.report, report)
+export function inspectCodexUsageLimit(probe: CodexUsageLimitProbe): Promise<RateLimitHit | null> {
+  return callRuntimeOrpc(activeTarget(), (client) => client.rateLimitResume.inspectCodex, probe)
 }
 
 export function listRateLimitResumes(): Promise<RateLimitResumeSchedule[]> {

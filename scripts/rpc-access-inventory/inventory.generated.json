@@ -6668,6 +6668,21 @@
       ]
     },
     {
+      "method": "rateLimitResume.inspectCodex",
+      "access": {
+        "scope": "host",
+        "tier": "read"
+      },
+      "mobile": false,
+      "streaming": false,
+      "sources": [
+        {
+          "kind": "orpc",
+          "file": "packages/runtime-protocol/src/contract/rate-limit-resume.ts"
+        }
+      ]
+    },
+    {
       "method": "rateLimitResume.list",
       "access": {
         "scope": "host",
@@ -6732,21 +6747,6 @@
       "access": {
         "scope": "host",
         "tier": "host"
-      },
-      "mobile": false,
-      "streaming": false,
-      "sources": [
-        {
-          "kind": "orpc",
-          "file": "packages/runtime-protocol/src/contract/rate-limit-resume.ts"
-        }
-      ]
-    },
-    {
-      "method": "rateLimitResume.report",
-      "access": {
-        "scope": "host",
-        "tier": "read"
       },
       "mobile": false,
       "streaming": false,

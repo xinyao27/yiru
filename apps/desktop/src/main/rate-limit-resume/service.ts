@@ -3,13 +3,14 @@ import { requestShellRateLimitResumeDispatch } from '~main/runtime/rpc/orpc/shel
 import {
   buildRateLimitResumeAt,
   isFinalRateLimitResumeStatus,
-  type RateLimitBannerReport,
+  type CodexUsageLimitProbe,
   type RateLimitHit,
   type RateLimitResumeSchedule
 } from '~shared/rate-limit-resume/types'
 
 import type { Store } from '../persistence'
-import { resolveRateLimitHit, type RateLimitResumeUsageState } from './reset-resolution'
+import { readCodexUsageLimitEvent } from './codex-rollout'
+import { resolveCodexRateLimitHit, type RateLimitResumeUsageState } from './reset-resolution'
 
 const DEFAULT_TICK_MS = 30 * 1000
 
@@ -76,9 +77,11 @@ export class RateLimitResumeService {
     this.unsubscribeResume()
   }
 
-  /** Resolve a renderer-reported banner into a hit with a reset time. */
-  reportBanner(report: RateLimitBannerReport): RateLimitHit {
-    return resolveRateLimitHit(report, this.rateLimits.getState(), Date.now())
+  async inspectCodex(probe: CodexUsageLimitProbe): Promise<RateLimitHit | null> {
+    const event = await readCodexUsageLimitEvent(probe)
+    return event
+      ? resolveCodexRateLimitHit(probe, event, this.rateLimits.getState(), Date.now())
+      : null
   }
 
   list(): RateLimitResumeSchedule[] {

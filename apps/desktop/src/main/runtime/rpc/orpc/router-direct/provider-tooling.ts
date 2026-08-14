@@ -24,7 +24,7 @@ import {
   markRuntimeRateLimitResumeStale,
   cancelRuntimeRateLimitResume,
   listRuntimeRateLimitResumes,
-  reportRuntimeRateLimitBanner,
+  inspectRuntimeCodexUsageLimit,
   runRuntimeRateLimitResumeNow,
   scheduleRuntimeRateLimitResume
 } from '~main/runtime/rpc/methods/rate-limit-resume'
@@ -125,8 +125,8 @@ export const providerToolingRuntimeHandlers = {
     )
   },
   rateLimitResume: {
-    report: runtimeImplementation.rateLimitResume.report.handler(
-      wireRuntimeMethod('rateLimitResume.report', reportRuntimeRateLimitBanner)
+    inspectCodex: runtimeImplementation.rateLimitResume.inspectCodex.handler(
+      wireRuntimeMethod('rateLimitResume.inspectCodex', inspectRuntimeCodexUsageLimit)
     ),
     list: runtimeImplementation.rateLimitResume.list.handler(
       wireRuntimeMethod('rateLimitResume.list', listRuntimeRateLimitResumes)

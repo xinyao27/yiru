@@ -4017,6 +4017,9 @@ export function normalizeHookPayload(
       payload = normalizeClaudeEvent(state, eventName, promptText, paneKey, hookPayloadRecord)
       break
     case 'codex':
+      // Why: Codex writes the same turn id into its structured task_complete
+      // rollout event, giving consumers an exact join without reading TUI text.
+      promptInteractionKey = readFirstString(hookPayloadRecord, ['turn_id', 'turnId'])
       payload = normalizeCodexEvent(state, eventName, promptText, paneKey, hookPayloadRecord)
       break
     case 'gemini':

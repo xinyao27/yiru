@@ -169,7 +169,7 @@ import {
   getProjectHostSetupWorktreeMeta
 } from '~shared/project-host-setup-projection'
 import type {
-  RateLimitBannerReport,
+  CodexUsageLimitProbe,
   RateLimitHit,
   RateLimitResumeSchedule
 } from '~shared/rate-limit-resume/types'
@@ -8153,8 +8153,8 @@ export class YiruRuntimeService {
     return this.rateLimitResumeService
   }
 
-  reportRateLimitBanner(report: RateLimitBannerReport): RateLimitHit {
-    return this.requireRateLimitResumeService().reportBanner(report)
+  inspectCodexUsageLimit(probe: CodexUsageLimitProbe): Promise<RateLimitHit | null> {
+    return this.requireRateLimitResumeService().inspectCodex(probe)
   }
 
   listRateLimitResumes(): RateLimitResumeSchedule[] {

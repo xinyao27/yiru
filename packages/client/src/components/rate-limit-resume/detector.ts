@@ -1,33 +1,32 @@
-import type { AgentStatusEntry, AgentType } from '@yiru/workbench-model/agent'
-// Watches every live agent pane's output for a provider limit banner and
-// reports it to main, which resolves the reset time.
+import type { AgentStatusEntry } from '@yiru/workbench-model/agent'
+// Uses output only as a wake-up signal, then asks the runtime to inspect the
+// exact Codex turn's structured rollout completion.
 //
-// Why the renderer and not main: pane bytes reach main through four different
-// providers (local, WSL, SSH, relay) but converge on one dispatcher here, so a
-// single sidecar covers every host and every agent.
+// Why the renderer initiates the probe: pane activity from local, WSL, SSH,
+// and relay sessions already converges on this dispatcher. Classification
+// happens host-side and never reads terminal text.
 import { useEffect } from 'react'
 import { subscribeToPtyData } from '~renderer/components/terminal-pane/pty/data-sidecar-subscriptions'
-import { reportRateLimitBanner } from '~renderer/runtime/rate-limit-resume-client'
+import { inspectCodexUsageLimit } from '~renderer/runtime/rate-limit-resume-client'
 import { useAppStore } from '~renderer/store'
-import {
-  createRateLimitBannerScanner,
-  type RateLimitBannerScanner
-} from '~shared/rate-limit-resume/banner-scanner'
+import type { RateLimitHit } from '~shared/rate-limit-resume/types'
 
-import { stripScrollbackAnsi } from '../native-chat/scrape-fallback'
+const INSPECTION_DEBOUNCE_MS = 250
+const INSPECTION_RETRY_MS = 750
 
 type PaneTarget = {
   ptyId: string
   tabId: string
   paneKey: string
   worktreeId: string
-  agent: AgentType
+  sessionId: string
+  transcriptPath?: string
+  turnId: string
   prompt: string
 }
 
 type Attachment = {
-  agent: AgentType
-  scanner: RateLimitBannerScanner
+  key: string
   unsubscribe: () => void
 }
 
@@ -35,7 +34,7 @@ function tabIdForEntry(entry: AgentStatusEntry): string | null {
   return entry.tabId ?? entry.paneKey.split(':')[0] ?? null
 }
 
-/** Agent panes worth watching: a live agent, a known pty, and a prompt to replay. */
+/** Codex panes with enough structured identity to join a hook turn to its rollout. */
 export function collectRateLimitPaneTargets(
   agentStatusByPaneKey: Record<string, AgentStatusEntry>,
   ptyIdsByTabId: Record<string, string[]>
@@ -43,10 +42,17 @@ export function collectRateLimitPaneTargets(
   const targets: PaneTarget[] = []
   for (const entry of Object.values(agentStatusByPaneKey)) {
     const tabId = tabIdForEntry(entry)
-    const agent = entry.agentType
-    // Why: a resume replays the prompt that was cut short. With no prompt on
-    // record there is nothing to send back, so the pane is not worth watching.
-    if (!tabId || !agent || !entry.prompt.trim() || !entry.worktreeId) {
+    const session = entry.providerSession
+    const turnId = entry.promptInteractionKey
+    if (
+      entry.agentType !== 'codex' ||
+      entry.state === 'done' ||
+      !tabId ||
+      !entry.prompt.trim() ||
+      !entry.worktreeId ||
+      !session ||
+      !turnId
+    ) {
       continue
     }
     for (const ptyId of ptyIdsByTabId[tabId] ?? []) {
@@ -55,7 +61,9 @@ export function collectRateLimitPaneTargets(
         tabId,
         paneKey: entry.paneKey,
         worktreeId: entry.worktreeId,
-        agent,
+        sessionId: session.id,
+        ...(session.transcriptPath ? { transcriptPath: session.transcriptPath } : {}),
+        turnId,
         prompt: entry.prompt
       })
     }
@@ -63,28 +71,90 @@ export function collectRateLimitPaneTargets(
   return targets
 }
 
-async function reportBanner(target: PaneTarget, bannerLines: string[]): Promise<void> {
+function targetKey(target: PaneTarget): string {
+  return [target.sessionId, target.turnId, target.prompt].join('\0')
+}
+
+async function inspectTarget(target: PaneTarget): Promise<RateLimitHit | null> {
   try {
-    const hit = await reportRateLimitBanner({
-      agent: target.agent,
+    return await inspectCodexUsageLimit({
       ptyId: target.ptyId,
       tabId: target.tabId,
       paneKey: target.paneKey,
       worktreeId: target.worktreeId,
-      bannerLines,
+      sessionId: target.sessionId,
+      ...(target.transcriptPath ? { transcriptPath: target.transcriptPath } : {}),
+      turnId: target.turnId,
       prompt: target.prompt
     })
-    useAppStore.getState().recordRateLimitHit(hit)
   } catch (error) {
-    console.error('Failed to report rate-limit banner:', error)
+    console.error('Failed to inspect Codex usage-limit event:', error)
+  }
+  return null
+}
+
+function attach(target: PaneTarget): Attachment {
+  let timer: ReturnType<typeof setTimeout> | null = null
+  let inFlight = false
+  let closed = false
+  let detected = false
+  let retryPending = false
+
+  const schedule = (delayMs: number): void => {
+    if (closed || detected) {
+      return
+    }
+    if (timer) {
+      clearTimeout(timer)
+    }
+    timer = setTimeout(() => {
+      timer = null
+      void inspect()
+    }, delayMs)
+  }
+
+  const inspect = async (): Promise<void> => {
+    if (closed || detected) {
+      return
+    }
+    if (inFlight) {
+      retryPending = true
+      return
+    }
+    inFlight = true
+    const hit = await inspectTarget(target)
+    inFlight = false
+    if (closed) {
+      return
+    }
+    detected = hit !== null
+    if (hit) {
+      useAppStore.getState().recordRateLimitHit(hit)
+    }
+    if (!closed && !detected && retryPending) {
+      retryPending = false
+      schedule(INSPECTION_RETRY_MS)
+    }
+  }
+
+  const requestInspection = (): void => {
+    retryPending = true
+    schedule(INSPECTION_DEBOUNCE_MS)
+  }
+  const unsubscribePty = subscribeToPtyData(target.ptyId, requestInspection)
+  requestInspection()
+  return {
+    key: targetKey(target),
+    unsubscribe: () => {
+      closed = true
+      if (timer) {
+        clearTimeout(timer)
+      }
+      unsubscribePty()
+    }
   }
 }
 
-/**
- * Keep one banner scanner attached per live agent pane. Runs once at App level;
- * the store subscription is a plain listener so pane churn never re-renders the
- * tree.
- */
 export function useRateLimitResumeDetector(): void {
   useEffect(() => {
     const attachments = new Map<string, Attachment>()
@@ -101,26 +171,11 @@ export function useRateLimitResumeDetector(): void {
       for (const target of targets) {
         seen.add(target.ptyId)
         const existing = attachments.get(target.ptyId)
-        if (existing && existing.agent === target.agent) {
+        if (existing && existing.key === targetKey(target)) {
           continue
         }
-        // The pane changed agents; the old wordings no longer apply.
         detach(target.ptyId)
-        const scanner = createRateLimitBannerScanner(target.agent)
-        const unsubscribe = subscribeToPtyData(target.ptyId, (data) => {
-          const banner = scanner.push(stripScrollbackAnsi(data))
-          if (!banner) {
-            return
-          }
-          // Read the prompt at detection time — the pane's last prompt may have
-          // advanced since the sidecar attached.
-          const live = collectRateLimitPaneTargets(
-            useAppStore.getState().agentStatusByPaneKey,
-            useAppStore.getState().ptyIdsByTabId
-          ).find((entry) => entry.ptyId === target.ptyId)
-          void reportBanner(live ?? target, banner)
-        })
-        attachments.set(target.ptyId, { agent: target.agent, scanner, unsubscribe })
+        attachments.set(target.ptyId, attach(target))
       }
       for (const ptyId of attachments.keys()) {
         if (!seen.has(ptyId)) {
