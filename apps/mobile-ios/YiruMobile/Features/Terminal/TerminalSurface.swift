@@ -14,7 +14,7 @@ nonisolated struct TerminalSurfaceConfiguration: Equatable, Sendable {
 
     static func standard(
         textScale: Double = 1,
-        accessoryKeys: [TerminalAccessoryKey] = TerminalAccessoryKey.allCases
+        accessoryKeys: [TerminalAccessoryKey] = TerminalAccessoryKey.standardVisibleOrder
     ) -> TerminalSurfaceConfiguration {
         TerminalSurfaceConfiguration(
             fontSize: 13 * textScale,

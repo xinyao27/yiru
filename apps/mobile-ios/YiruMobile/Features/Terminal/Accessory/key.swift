@@ -3,15 +3,51 @@ import Foundation
 nonisolated enum TerminalAccessoryKey: String, CaseIterable, Identifiable, Sendable {
     case escape
     case tab
-    case arrowLeft
-    case arrowDown
-    case arrowUp
-    case arrowRight
+    case enter
+    case shiftTab
+    case space
     case backspace
-    case interrupt
-    case endOfFile
-    case clearScreen
-    case suspend
+    case delete
+    case arrowUp
+    case arrowDown
+    case arrowLeft
+    case arrowRight
+    case interrupt = "ctrlC"
+    case endOfFile = "ctrlD"
+    case clearScreen = "ctrlL"
+    case suspend = "ctrlZ"
+    case reverseSearch = "ctrlR"
+    case startOfLine = "ctrlA"
+    case endOfLine = "ctrlE"
+    case deleteWordBackward = "ctrlW"
+    case clearLineBeforeCursor = "ctrlU"
+
+    static let standardOrder: [Self] = [
+        .tab,
+        .enter,
+        .escape,
+        .shiftTab,
+        .arrowUp,
+        .arrowDown,
+        .arrowLeft,
+        .arrowRight,
+        .delete,
+        .interrupt,
+        .endOfFile,
+        .clearScreen,
+        .reverseSearch,
+        .startOfLine,
+        .endOfLine,
+        .deleteWordBackward,
+        .clearLineBeforeCursor,
+        .suspend,
+        .backspace,
+        .space,
+    ]
+
+    static let legacyStandardOrder = allCases
+    static let standardVisibleKeys = Set(allCases).subtracting([.backspace, .space])
+    static let standardVisibleOrder = standardOrder.filter(standardVisibleKeys.contains)
 
     var id: Self { self }
 
@@ -20,25 +56,43 @@ nonisolated enum TerminalAccessoryKey: String, CaseIterable, Identifiable, Senda
         case .escape:
             "Esc"
         case .tab:
-            "Tab"
-        case .arrowLeft:
-            "Left"
-        case .arrowDown:
-            "Down"
-        case .arrowUp:
-            "Up"
-        case .arrowRight:
-            "Right"
+            "⇥"
+        case .enter:
+            "↵"
+        case .shiftTab:
+            "⇧⇥"
+        case .space:
+            "␣"
         case .backspace:
-            "Delete"
+            "⌫"
+        case .delete:
+            "⌦"
+        case .arrowUp:
+            "↑"
+        case .arrowDown:
+            "↓"
+        case .arrowLeft:
+            "←"
+        case .arrowRight:
+            "→"
         case .interrupt:
-            "Ctrl+C"
+            "⌃C"
         case .endOfFile:
-            "Ctrl+D"
+            "⌃D"
         case .clearScreen:
-            "Ctrl+L"
+            "⌃L"
         case .suspend:
-            "Ctrl+Z"
+            "⌃Z"
+        case .reverseSearch:
+            "⌃R"
+        case .startOfLine:
+            "⌃A"
+        case .endOfLine:
+            "⌃E"
+        case .deleteWordBackward:
+            "⌃W"
+        case .clearLineBeforeCursor:
+            "⌃U"
         }
     }
 
@@ -48,16 +102,24 @@ nonisolated enum TerminalAccessoryKey: String, CaseIterable, Identifiable, Senda
             "Escape"
         case .tab:
             "Tab"
-        case .arrowLeft:
-            "Arrow left"
-        case .arrowDown:
-            "Arrow down"
-        case .arrowUp:
-            "Arrow up"
-        case .arrowRight:
-            "Arrow right"
+        case .enter:
+            "Enter"
+        case .shiftTab:
+            "Shift Tab"
+        case .space:
+            "Space"
         case .backspace:
             "Backspace"
+        case .delete:
+            "Forward delete"
+        case .arrowUp:
+            "Arrow up"
+        case .arrowDown:
+            "Arrow down"
+        case .arrowLeft:
+            "Arrow left"
+        case .arrowRight:
+            "Arrow right"
         case .interrupt:
             "Interrupt process"
         case .endOfFile:
@@ -66,31 +128,75 @@ nonisolated enum TerminalAccessoryKey: String, CaseIterable, Identifiable, Senda
             "Clear screen"
         case .suspend:
             "Suspend process"
+        case .reverseSearch:
+            "Reverse search"
+        case .startOfLine:
+            "Start of line"
+        case .endOfLine:
+            "End of line"
+        case .deleteWordBackward:
+            "Delete word backward"
+        case .clearLineBeforeCursor:
+            "Clear line before cursor"
         }
     }
 
-    var systemImage: String? {
+    var controlChordSuffix: String? {
         switch self {
-        case .arrowLeft:
-            "arrow.left"
-        case .arrowDown:
-            "arrow.down"
-        case .arrowUp:
-            "arrow.up"
-        case .arrowRight:
-            "arrow.right"
-        case .backspace:
-            "delete.left"
-        case .escape, .tab, .interrupt, .endOfFile, .clearScreen, .suspend:
+        case .interrupt:
+            "C"
+        case .endOfFile:
+            "D"
+        case .clearScreen:
+            "L"
+        case .suspend:
+            "Z"
+        case .reverseSearch:
+            "R"
+        case .startOfLine:
+            "A"
+        case .endOfLine:
+            "E"
+        case .deleteWordBackward:
+            "W"
+        case .clearLineBeforeCursor:
+            "U"
+        case .escape, .tab, .enter, .shiftTab, .space, .backspace, .delete, .arrowUp,
+            .arrowDown, .arrowLeft, .arrowRight:
             nil
+        }
+    }
+
+    var isCircular: Bool {
+        switch self {
+        case .tab, .enter, .space, .backspace, .delete, .arrowLeft, .arrowDown, .arrowUp,
+            .arrowRight:
+            true
+        case .escape, .shiftTab, .interrupt, .endOfFile, .clearScreen, .suspend,
+            .reverseSearch, .startOfLine, .endOfLine, .deleteWordBackward,
+            .clearLineBeforeCursor:
+            false
+        }
+    }
+
+    var isGlyph: Bool {
+        switch self {
+        case .tab, .enter, .shiftTab, .space, .backspace, .delete, .arrowLeft, .arrowDown,
+            .arrowUp, .arrowRight:
+            true
+        case .escape, .interrupt, .endOfFile, .clearScreen, .suspend, .reverseSearch,
+            .startOfLine, .endOfLine, .deleteWordBackward, .clearLineBeforeCursor:
+            false
         }
     }
 
     var repeatsWhilePressed: Bool {
         switch self {
-        case .arrowLeft, .arrowDown, .arrowUp, .arrowRight, .backspace:
+        case .arrowLeft, .arrowDown, .arrowUp, .arrowRight, .backspace, .delete:
             true
-        case .escape, .tab, .interrupt, .endOfFile, .clearScreen, .suspend:
+        case .escape, .tab, .enter, .shiftTab, .space, .interrupt, .endOfFile, .clearScreen,
+            .suspend, .reverseSearch, .startOfLine, .endOfLine, .deleteWordBackward,
+            .clearLineBeforeCursor:
             false
         }
     }

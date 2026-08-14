@@ -10,14 +10,25 @@ nonisolated struct TerminalAccessoryLayout: Equatable, Sendable {
     ) {
         var seen: Set<TerminalAccessoryKey> = []
         let knownOrder = orderedKeys.filter { seen.insert($0).inserted }
+        let preferredOrder =
+            knownOrder == TerminalAccessoryKey.legacyStandardOrder
+            ? TerminalAccessoryKey.standardOrder
+            : knownOrder
+        let shouldAdoptStandardVisibility =
+            visibleKeys == Set(TerminalAccessoryKey.allCases)
+            && (knownOrder == TerminalAccessoryKey.legacyStandardOrder
+                || knownOrder == TerminalAccessoryKey.standardOrder)
         self.orderedKeys =
-            knownOrder + TerminalAccessoryKey.allCases.filter { seen.insert($0).inserted }
-        self.visibleKeys = visibleKeys.intersection(TerminalAccessoryKey.allCases)
+            preferredOrder + TerminalAccessoryKey.standardOrder.filter { seen.insert($0).inserted }
+        self.visibleKeys =
+            (shouldAdoptStandardVisibility
+            ? TerminalAccessoryKey.standardVisibleKeys : visibleKeys).intersection(
+                TerminalAccessoryKey.allCases)
     }
 
     static let standard = TerminalAccessoryLayout(
-        orderedKeys: TerminalAccessoryKey.allCases,
-        visibleKeys: Set(TerminalAccessoryKey.allCases)
+        orderedKeys: TerminalAccessoryKey.standardOrder,
+        visibleKeys: TerminalAccessoryKey.standardVisibleKeys
     )
 
     var visibleOrderedKeys: [TerminalAccessoryKey] {
