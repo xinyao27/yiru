@@ -205,7 +205,7 @@ nonisolated private func lineageRows(
 
     var rows: [WorkspaceListRowState] = []
     var emitted: Set<String> = []
-    func emit(_ workspace: WorkspaceSummary, depth: Int, isLastChild: Bool) {
+    func emit(_ workspace: WorkspaceSummary, depth: Int) {
         let workspaceIdentity = identity(workspace)
         guard emitted.insert(workspaceIdentity).inserted else { return }
         let children = childrenByParent[workspaceIdentity] ?? []
@@ -214,21 +214,30 @@ nonisolated private func lineageRows(
                 id: "\(sectionID):\(workspaceIdentity)",
                 workspace: workspace,
                 lineageDepth: depth,
-                endsProjectRail: isLastChild
+                endsProjectRail: false
             )
         )
-        children.enumerated().forEach { index, child in
-            emit(child, depth: depth + 1, isLastChild: index == children.count - 1)
+        children.forEach { child in
+            emit(child, depth: depth + 1)
         }
     }
     let roots = workspaces.filter { !childIDs.contains(identity($0)) }
-    roots.enumerated().forEach { index, root in
-        emit(root, depth: 0, isLastChild: index == roots.count - 1)
+    roots.forEach { root in
+        emit(root, depth: 0)
     }
     workspaces.filter { !emitted.contains(identity($0)) }.forEach {
-        emit($0, depth: 0, isLastChild: true)
+        emit($0, depth: 0)
     }
-    return rows
+    // Why: the project rail spans the flattened section. A parent can be the last root while
+    // still having descendants below it, so only the final emitted row may terminate the rail.
+    return rows.enumerated().map { index, row in
+        WorkspaceListRowState(
+            id: row.id,
+            workspace: row.workspace,
+            lineageDepth: row.lineageDepth,
+            endsProjectRail: index == rows.count - 1
+        )
+    }
 }
 
 nonisolated private func hasValidLineageParent(
