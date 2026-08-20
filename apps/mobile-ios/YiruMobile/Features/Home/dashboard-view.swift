@@ -168,13 +168,8 @@ private struct HomePrimaryAction: View {
                     iconID: snapshot.primaryConnectedSnapshot == nil ? .monitor : .add
                 )
                 .padding(.horizontal, 20)
-                .frame(height: Theme.Control.largeHeight)
-                // Why: the plain untinted `.glass` style — a light neutral glass surface with
-                // standard label-color content, not the prominent variant and not tinted to the
-                // app's dark foreground color.
-                .glassEffect(.regular.interactive(), in: .capsule)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.glass)
             .appButtonContext(.large)
             Spacer(minLength: 0)
         }

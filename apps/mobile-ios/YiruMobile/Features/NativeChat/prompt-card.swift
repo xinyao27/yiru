@@ -55,9 +55,24 @@ private struct NativeChatPermissionCard: View {
                         .lineSpacing(4)
                 }
                 GlassEffectContainer(spacing: 8) {
-                    HStack(spacing: 8) {
-                        ForEach(prompt.options, id: \.self) { option in
-                            optionButton(option, isPrimary: option == prompt.options.first)
+                    ViewThatFits(in: .horizontal) {
+                        HStack(spacing: 8) {
+                            ForEach(prompt.options, id: \.self) { option in
+                                optionButton(
+                                    option,
+                                    isPrimary: option == prompt.options.first,
+                                    fillsWidth: false
+                                )
+                            }
+                        }
+                        VStack(spacing: 8) {
+                            ForEach(prompt.options, id: \.self) { option in
+                                optionButton(
+                                    option,
+                                    isPrimary: option == prompt.options.first,
+                                    fillsWidth: true
+                                )
+                            }
                         }
                     }
                 }
@@ -70,13 +85,19 @@ private struct NativeChatPermissionCard: View {
     }
 
     @ViewBuilder
-    private func optionButton(_ option: NativeChatPermissionOption, isPrimary: Bool) -> some View {
+    private func optionButton(
+        _ option: NativeChatPermissionOption,
+        isPrimary: Bool,
+        fillsWidth: Bool
+    ) -> some View {
         if isPrimary {
             Button {
                 respond(option)
             } label: {
                 Text(option.label)
                     .padding(.horizontal, 8)
+                    .fixedSize(horizontal: !fillsWidth, vertical: false)
+                    .frame(maxWidth: fillsWidth ? .infinity : nil)
             }
             .appProminentGlassButton()
             .appButtonContext(.regular)
@@ -87,6 +108,8 @@ private struct NativeChatPermissionCard: View {
             } label: {
                 Text(option.label)
                     .padding(.horizontal, 8)
+                    .fixedSize(horizontal: !fillsWidth, vertical: false)
+                    .frame(maxWidth: fillsWidth ? .infinity : nil)
             }
             .buttonStyle(.glass)
             .appButtonContext(.regular)

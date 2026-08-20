@@ -25,6 +25,7 @@ struct DesignSystemCatalogView: View {
             }
         }
         .navigationTitle(Text("Design System"))
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
