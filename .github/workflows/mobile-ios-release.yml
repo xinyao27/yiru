@@ -9,7 +9,9 @@ on:
   workflow_dispatch:
     inputs:
       bump_patch_version:
-        description: 'Bump the highest iOS marketing version found on the existing App Store app. Tick this after the current version has shipped (closed trains fail fast).'
+        description: 'Bump the highest iOS marketing version found on the existing App
+          Store app. Tick this after the current version has shipped (closed
+          trains fail fast).'
         required: false
         default: false
         type: boolean
@@ -18,7 +20,8 @@ on:
         required: false
         type: string
       testflight_distribution:
-        description: 'TestFlight audience. Internal is the safe default; external uses the peeps group and may require Beta App Review.'
+        description: 'TestFlight audience. Internal is the safe default; external uses
+          the peeps group and may require Beta App Review.'
         required: true
         default: internal
         type: choice
@@ -26,7 +29,8 @@ on:
           - internal
           - external
       testflight_changelog:
-        description: 'Optional external TestFlight tester changelog; ignored for internal uploads'
+        description: 'Optional external TestFlight tester changelog; ignored for
+          internal uploads'
         required: false
         type: string
 
@@ -48,7 +52,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
 
@@ -58,7 +62,7 @@ jobs:
           xcode-version: '26.5'
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version-file: package.json
 
@@ -100,7 +104,7 @@ jobs:
         run: xcodebuild -downloadComponent MetalToolchain
 
       - name: Setup Ruby and fastlane
-        uses: ruby/setup-ruby@v1
+        uses: ruby/setup-ruby@v1.321.0
         with:
           ruby-version: '3.3'
           bundler-cache: true
@@ -148,7 +152,8 @@ jobs:
           ASC_API_KEY_P8: ${{ secrets.ASC_API_KEY_P8 }}
           MOBILE_IOS_RELEASE_VERSION: ${{ github.event.inputs.release_version }}
           MOBILE_IOS_BUMP_PATCH_VERSION: ${{ github.event.inputs.bump_patch_version }}
-          TESTFLIGHT_DISTRIBUTION: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.testflight_distribution || 'internal' }}
+          TESTFLIGHT_DISTRIBUTION: ${{ github.event_name == 'workflow_dispatch' &&
+            github.event.inputs.testflight_distribution || 'internal' }}
           TESTFLIGHT_CHANGELOG: ${{ github.event.inputs.testflight_changelog }}
           FASTLANE_SKIP_UPDATE_CHECK: '1'
           FASTLANE_HIDE_CHANGELOG: '1'

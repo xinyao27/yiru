@@ -119,7 +119,7 @@
     "vite-plus": "catalog:",
     "zustand": "catalog:desktop"
   },
-  "packageManager": "pnpm@11.15.0",
+  "packageManager": "pnpm@11.22.0",
   "//": "Why: Electron and browser consumers bundle this TS/TSX source directly; wildcard exports cannot model TSX plus CSS, fonts, and ?url assets, so the supported host entrypoints stay explicit and there is deliberately no dist build.",
   "reactDoctor": {
     "rules": {

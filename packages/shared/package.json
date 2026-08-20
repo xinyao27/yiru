@@ -39,6 +39,6 @@
     "typescript": "catalog:desktop",
     "vite": "catalog:"
   },
-  "packageManager": "pnpm@11.15.0",
+  "packageManager": "pnpm@11.22.0",
   "//": "Why: 425 source modules make explicit subpath enumeration impractical, so one wildcard preserves every module boundary."
 }

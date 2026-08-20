@@ -21,8 +21,8 @@ on:
   # Cloudflare-side incidents do not come with a source change.
   workflow_dispatch:
 
-# Why: two overlapping deploys race to publish the same Worker, and the loser
-# can land last. Serialize them and let the newer commit win.
+    # Why: two overlapping deploys race to publish the same Worker, and the loser
+    # can land last. Serialize them and let the newer commit win.
 concurrency:
   group: web-deploy
   cancel-in-progress: true
@@ -33,7 +33,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
 
