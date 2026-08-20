@@ -3,6 +3,7 @@ import { YIRU_GITHUB_RELEASES_URL } from '@yiru/workbench-model/product'
    renderer surface. Keeping the state machine and its presentation variants together avoids
    scattering tightly coupled update behavior across multiple files. */
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { openHttpLink } from '~renderer/components/editor/http-link-routing'
 import {
   WarningCircle as AlertCircle,
   Check,
@@ -89,7 +90,7 @@ function CompactCardContent({
             variant="ghost"
             size="xs"
             className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent mt-0.5 h-auto border-0 p-0 underline"
-            onClick={() => void shellClient.shell.openUrl(action.url)}
+            onClick={(event) => openHttpLink(action.url, { event })}
           >
             {action.label}
           </UiButton>
@@ -714,7 +715,7 @@ function RichCardContent({
               variant="ghost"
               size="xs"
               className="text-muted-foreground/70 hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent inline h-auto border-0 p-0 underline"
-              onClick={() => void shellClient.shell.openUrl(release.releaseNotesUrl)}
+              onClick={(event) => openHttpLink(release.releaseNotesUrl, { event })}
             >
               +{releasesBehind - 1}{' '}
               {translate('auto.components.UpdateCard.ccd8b0a793', 'more since your last update')}
@@ -727,7 +728,7 @@ function RichCardContent({
         variant="ghost"
         size="xs"
         className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent h-auto self-start border-0 p-0 underline"
-        onClick={() => void shellClient.shell.openUrl(release.releaseNotesUrl)}
+        onClick={(event) => openHttpLink(release.releaseNotesUrl, { event })}
       >
         {translate('auto.components.UpdateCard.aad383aecc', 'Read the full release notes')}
       </UiButton>
@@ -782,7 +783,7 @@ function SimpleCardContent({
       <UiButton
         variant="ghost"
         size="xs"
-        onClick={() => void shellClient.shell.openUrl(releaseUrl)}
+        onClick={(event) => openHttpLink(releaseUrl, { event })}
         className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent h-auto self-start border-0 p-0 underline underline-offset-2"
       >
         {translate('auto.components.UpdateCard.44324ef542', 'Release notes')}
@@ -879,10 +880,8 @@ function DownloadingContent({
         variant="ghost"
         size="xs"
         className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent h-auto self-start border-0 p-0 underline"
-        onClick={() =>
-          void shellClient.shell.openUrl(
-            release ? release.releaseNotesUrl : releaseUrlForVersion(version)
-          )
+        onClick={(event) =>
+          openHttpLink(release ? release.releaseNotesUrl : releaseUrlForVersion(version), { event })
         }
       >
         {release
@@ -989,7 +988,7 @@ function ErrorCardContent({
         <Button
           variant="outline"
           size="sm"
-          onClick={() => void shellClient.shell.openUrl(releaseUrl)}
+          onClick={(event) => openHttpLink(releaseUrl, { event })}
           className={primaryAction ? 'flex-1' : 'w-full'}
         >
           {translate('auto.components.UpdateCard.47126bcf57', 'Download Manually')}

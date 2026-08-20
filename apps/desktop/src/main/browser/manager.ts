@@ -285,6 +285,7 @@ export class BrowserManager {
     { token: symbol; webContentsId: number }
   >()
   private readonly clickedLinkFrameNameByGuestId = new Map<number, string>()
+  private readonly externalClickedLinkFrameNameByGuestId = new Map<number, string>()
   private readonly loadErrorsByGuestId = new Map<number, BrowserLoadError>()
   // Why: did-start-navigation optimistically hides the overlay, but an aborted
   // nav never commits — stash the cleared error so did-fail-load(-3) can restore
@@ -726,10 +727,16 @@ export class BrowserManager {
     const clickedLinkFrameName = inheritedOwnerContext
       ? null
       : `__yiru_clicked_link_foreground_${randomUUID()}`
+    const externalClickedLinkFrameName = inheritedOwnerContext
+      ? null
+      : `__yiru_clicked_link_external_${randomUUID()}`
     if (clickedLinkFrameName) {
       this.clickedLinkFrameNameByGuestId.set(guest.id, clickedLinkFrameName)
     }
-    let clickedLinkRoutingActive = Boolean(clickedLinkFrameName)
+    if (externalClickedLinkFrameName) {
+      this.externalClickedLinkFrameNameByGuestId.set(guest.id, externalClickedLinkFrameName)
+    }
+    let clickedLinkRoutingActive = Boolean(clickedLinkFrameName && externalClickedLinkFrameName)
 
     // Why: anti-detection can install at attach time, while the sessionStorage
     // script waits for renderer registration to supply the stable page id.
@@ -741,7 +748,12 @@ export class BrowserManager {
     // the compositor stops producing frames and capturePage() returns empty.
     guest.setBackgroundThrottling(false)
     const installClickedLinkRouting = (): void => {
-      if (!clickedLinkRoutingActive || !clickedLinkFrameName || guest.isDestroyed()) {
+      if (
+        !clickedLinkRoutingActive ||
+        !clickedLinkFrameName ||
+        !externalClickedLinkFrameName ||
+        guest.isDestroyed()
+      ) {
         return
       }
       // Why: an isolated-world click listener can label real anchor clicks
@@ -755,6 +767,7 @@ export class BrowserManager {
               // routing must use the actual desktop host platform from main.
               code: buildBrowserClickedLinkRoutingScript(
                 clickedLinkFrameName,
+                externalClickedLinkFrameName,
                 process.platform === 'darwin'
               )
             }
@@ -767,33 +780,48 @@ export class BrowserManager {
       guest.on('dom-ready', installClickedLinkRouting)
     }
     const pendingIframeRoutingInstalls = new Map<Electron.WebFrameMain, () => void>()
-    const iframeFrameNameByFrame = new Map<Electron.WebFrameMain, string>()
+    const iframeFrameNamesByFrame = new Map<
+      Electron.WebFrameMain,
+      { external: string; yiru: string }
+    >()
     const iframeFrameByFrameName = new Map<string, Electron.WebFrameMain>()
+    const externalIframeFrameNames = new Set<string>()
     const clearIframeFrameName = (frame: Electron.WebFrameMain): void => {
-      const name = iframeFrameNameByFrame.get(frame)
-      if (!name) {
+      const names = iframeFrameNamesByFrame.get(frame)
+      if (!names) {
         return
       }
-      iframeFrameNameByFrame.delete(frame)
-      iframeFrameByFrameName.delete(name)
+      iframeFrameNamesByFrame.delete(frame)
+      iframeFrameByFrameName.delete(names.yiru)
+      iframeFrameByFrameName.delete(names.external)
+      externalIframeFrameNames.delete(names.external)
     }
     const installIframeClickedLinkRouting = (frame: Electron.WebFrameMain): void => {
       clearIframeFrameName(frame)
       if (!clickedLinkRoutingActive || frame.isDestroyed()) {
         return
       }
-      const name = `__yiru_clicked_link_iframe_foreground_${randomUUID()}`
-      iframeFrameNameByFrame.set(frame, name)
-      iframeFrameByFrameName.set(name, frame)
+      const names = {
+        yiru: `__yiru_clicked_link_iframe_foreground_${randomUUID()}`,
+        external: `__yiru_clicked_link_iframe_external_${randomUUID()}`
+      }
+      iframeFrameNamesByFrame.set(frame, names)
+      iframeFrameByFrameName.set(names.yiru, frame)
+      iframeFrameByFrameName.set(names.external, frame)
+      externalIframeFrameNames.add(names.external)
       // Why: child-frame tokens live in the page world, so they are consumed
       // after one trusted click and replaced before another can be routed.
       void frame
         .executeJavaScript(
-          buildBrowserIframeClickedLinkRoutingScript(name, process.platform === 'darwin'),
+          buildBrowserIframeClickedLinkRoutingScript(
+            names.yiru,
+            names.external,
+            process.platform === 'darwin'
+          ),
           false
         )
         .catch(() => {
-          if (iframeFrameNameByFrame.get(frame) === name) {
+          if (iframeFrameNamesByFrame.get(frame)?.yiru === names.yiru) {
             clearIframeFrameName(frame)
           }
         })
@@ -805,7 +833,7 @@ export class BrowserManager {
       if (!clickedLinkFrameName || !frame || frame.parent === null) {
         return
       }
-      for (const knownFrame of iframeFrameNameByFrame.keys()) {
+      for (const knownFrame of iframeFrameNamesByFrame.keys()) {
         if (knownFrame.isDestroyed()) {
           clearIframeFrameName(knownFrame)
         }
@@ -832,19 +860,41 @@ export class BrowserManager {
       const browserUrl = normalizeBrowserNavigationUrl(url)
       const externalUrl = normalizeExternalBrowserUrl(url)
       const expectedClickedLinkFrameName = this.clickedLinkFrameNameByGuestId.get(guest.id)
-      const iframeFrame = frameName ? iframeFrameByFrameName.get(frameName) : undefined
-      let isClickedLink = Boolean(
-        expectedClickedLinkFrameName && frameName === expectedClickedLinkFrameName
+      const expectedExternalClickedLinkFrameName = this.externalClickedLinkFrameNameByGuestId.get(
+        guest.id
       )
-      if (!isClickedLink && iframeFrame) {
-        isClickedLink = true
+      const iframeFrame = frameName ? iframeFrameByFrameName.get(frameName) : undefined
+      let clickedLinkTarget: 'external' | 'yiru' | null =
+        expectedClickedLinkFrameName && frameName === expectedClickedLinkFrameName
+          ? 'yiru'
+          : expectedExternalClickedLinkFrameName &&
+              frameName === expectedExternalClickedLinkFrameName
+            ? 'external'
+            : null
+      if (!clickedLinkTarget && iframeFrame) {
+        clickedLinkTarget = externalIframeFrameNames.has(frameName) ? 'external' : 'yiru'
         clearIframeFrameName(iframeFrame)
         queueMicrotask(() => installIframeClickedLinkRouting(iframeFrame))
       }
 
-      if (isClickedLink) {
-        if (browserTabId && browserUrl) {
+      if (clickedLinkTarget) {
+        if (clickedLinkTarget === 'yiru' && browserTabId && browserUrl) {
           this.forwardClickedLink(browserTabId, browserUrl)
+        } else if (clickedLinkTarget === 'external' && externalUrl) {
+          const shellConnectionId = this.shellConnectionIdByGuestId.get(guest.id)
+          void requestShellOpenExternal(shellConnectionId, {
+            url: redactKagiSessionToken(externalUrl)
+          }).then(({ opened }) => {
+            this.forwardOrQueuePopupEvent(guest.id, {
+              origin: safeOrigin(externalUrl),
+              action: opened ? 'opened-external' : 'blocked'
+            })
+          })
+        } else if (clickedLinkTarget === 'external') {
+          this.forwardOrQueuePopupEvent(guest.id, {
+            origin: safeOrigin(url),
+            action: 'blocked'
+          })
         }
         // Why: a recognized user gesture must never fall through to a native
         // popup merely because its renderer disappeared during the click.
@@ -1055,8 +1105,9 @@ export class BrowserManager {
             }
           }
           pendingIframeRoutingInstalls.clear()
-          iframeFrameNameByFrame.clear()
+          iframeFrameNamesByFrame.clear()
           iframeFrameByFrameName.clear()
+          externalIframeFrameNames.clear()
         }
       } catch {
         // guest may already be destroyed
@@ -1118,6 +1169,7 @@ export class BrowserManager {
     }
     this.policyAttachedGuestIds.delete(guestWebContentsId)
     this.clickedLinkFrameNameByGuestId.delete(guestWebContentsId)
+    this.externalClickedLinkFrameNameByGuestId.delete(guestWebContentsId)
     this.offscreenGuestIds.delete(guestWebContentsId)
     this.popupOwnerContextByGuestId.delete(guestWebContentsId)
     // Why: a popup must stop inheriting authorization as soon as its primary
@@ -1466,6 +1518,7 @@ export class BrowserManager {
     }
     this.policyCleanupByGuestId.clear()
     this.clickedLinkFrameNameByGuestId.clear()
+    this.externalClickedLinkFrameNameByGuestId.clear()
     this.guestRegistrationAttemptByTabId.clear()
     this.tabIdByWebContentsId.clear()
     this.popupOwnerContextByGuestId.clear()

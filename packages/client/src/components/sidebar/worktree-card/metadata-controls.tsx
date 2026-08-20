@@ -61,7 +61,7 @@ export function MetadataActionIcon({
           onClick={(event) => {
             event.preventDefault()
             event.stopPropagation()
-            openHttpLink(href)
+            openHttpLink(href, { event })
           }}
           className="focus-visible:bg-accent outline-none"
         />

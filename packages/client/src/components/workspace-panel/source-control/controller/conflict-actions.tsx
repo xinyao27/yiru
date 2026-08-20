@@ -251,7 +251,7 @@ export function useSourceControlConflictActions(scope: SourceControlRemoteAction
                 'Open on {{value0}}',
                 { value0: copy.providerName }
               ),
-              onClick: () => openHttpLink(result.url, { worktreeId: activeWorktreeId })
+              onClick: (event) => openHttpLink(result.url, { event, worktreeId: activeWorktreeId })
             }
           }
         )

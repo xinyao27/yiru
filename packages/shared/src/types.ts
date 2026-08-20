@@ -1716,10 +1716,6 @@ export type GlobalSettings = {
   /** Why: corporate TLS-intercepting proxies can break Electron HTTP/2 downloads;
    *  this opt-in compatibility mode applies Chromium's process-wide HTTP/1.1 switch. */
   electronHttp1CompatibilityMode?: boolean
-  /** Why: opening arbitrary links inside Yiru uses an isolated guest browser surface.
-   *  The setting stays opt-in so existing workflows continue to use the system browser
-   *  until the user explicitly wants worktree-scoped in-app browsing. */
-  openLinksInApp: boolean
   /** Why: worktree-scoped localhost hostnames make same-app tabs distinguishable
    *  in external browsers. Opt-in (default off): serving the app under a different
    *  host can break dev apps that bind cookies/sessions to localhost. */

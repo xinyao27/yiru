@@ -1,5 +1,6 @@
 import type React from 'react'
 import { toast } from 'sonner'
+import { openHttpLink } from '~renderer/components/editor/http-link-routing'
 import {
   CheckCircle as CheckCircle2,
   WarningCircle as CircleAlert,
@@ -147,7 +148,7 @@ export function MobileEmulatorAvailabilityDetails({
                   type="button"
                   size="sm"
                   variant="outline"
-                  onClick={() => void shellClient.shell.openUrl(ANDROID_STUDIO_URL)}
+                  onClick={(event) => openHttpLink(ANDROID_STUDIO_URL, { event })}
                 >
                   {translate(
                     'auto.components.settings.MobileEmulatorSdkStatus.b94ff260e6',

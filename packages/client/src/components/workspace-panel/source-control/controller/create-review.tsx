@@ -131,8 +131,11 @@ export function useSourceControlCreateReview(scope: SourceControlReviewDialogCon
                 'Open on {{value0}}',
                 { value0: hostedReviewCreateCopy.providerName }
               ),
-              onClick: () =>
-                openHttpLink(result.existingReview!.url, { worktreeId: activeWorktreeId })
+              onClick: (event) =>
+                openHttpLink(result.existingReview!.url, {
+                  event,
+                  worktreeId: activeWorktreeId
+                })
             }
           }
         )

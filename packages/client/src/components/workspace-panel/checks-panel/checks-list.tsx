@@ -322,7 +322,10 @@ export function ChecksList({
                                 )}
                                 onClick={(event) => {
                                   event.stopPropagation()
-                                  openHttpLink(openUrl, { worktreeId: resolvedWorktreeId })
+                                  openHttpLink(openUrl, {
+                                    event,
+                                    worktreeId: resolvedWorktreeId
+                                  })
                                 }}
                               >
                                 <ExternalLink className="size-3" />

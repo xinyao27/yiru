@@ -53,7 +53,7 @@ export function CoworkingChecksResult({
               variant="outline"
               size="xs"
               className="bg-sidebar text-sidebar-foreground dark:bg-sidebar"
-              onClick={() => openOwnerUrl(reviewUrl)}
+              onClick={(event) => openOwnerUrl(reviewUrl, event)}
             >
               <ExternalLink aria-hidden="true" className="size-3" />
               {translate('auto.components.coworking.CoworkingChecksPane.openReview', 'Open review')}
@@ -167,6 +167,6 @@ function reviewStateLabel(state: CoworkingChecksReview['state']): string {
   }
 }
 
-function openOwnerUrl(url: string): void {
-  openHttpLink(url)
+function openOwnerUrl(url: string, event: React.MouseEvent<HTMLButtonElement>): void {
+  openHttpLink(url, { event })
 }

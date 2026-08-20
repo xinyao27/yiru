@@ -3,13 +3,6 @@ import { translate } from '~renderer/i18n/i18n'
 import type { SettingsSearchEntry } from '../search'
 import { translateSearchKeyword } from '../search-keywords'
 
-export function getBrowserLinkRoutingDescription(): string {
-  return translate(
-    'auto.components.settings.browser.search.linkRoutingDescription',
-    'Choose where HTTP(S) links open across Yiru, including terminals, reviews, Markdown, editors, ports, and Browse Tabs.'
-  )
-}
-
 export function getBrowserPaneSearchEntries(): SettingsSearchEntry[] {
   return [
     {
@@ -75,34 +68,6 @@ export function getBrowserPaneSearchEntries(): SettingsSearchEntry[] {
         ...translateSearchKeyword(
           'auto.components.settings.browser.search.95944898e0',
           'percentage'
-        )
-      ]
-    },
-    {
-      title: translate(
-        'auto.components.settings.browser.link.routing.setting.title',
-        'Open Web Links In'
-      ),
-      description: getBrowserLinkRoutingDescription(),
-      keywords: [
-        ...translateSearchKeyword('auto.components.settings.browser.search.2d2d995c58', 'browser'),
-        ...translateSearchKeyword('auto.components.settings.browser.search.44d14df30d', 'preview'),
-        ...translateSearchKeyword('auto.components.settings.browser.search.bea27bac4b', 'links'),
-        ...translateSearchKeyword(
-          'auto.components.settings.browser.search.82ba1c80ea',
-          'localhost'
-        ),
-        ...translateSearchKeyword('auto.components.settings.browser.search.72c58f7792', 'webview'),
-        ...translateSearchKeyword('auto.components.settings.browser.search.68d1db8929', 'markdown'),
-        ...translateSearchKeyword('auto.components.settings.browser.search.8dd4805991', 'file'),
-        ...translateSearchKeyword('auto.components.settings.browser.search.a7a07d5415', 'editor'),
-        ...translateSearchKeyword(
-          'auto.components.settings.browser.search.linkRoutingSystemBrowser',
-          'system browser'
-        ),
-        ...translateSearchKeyword(
-          'auto.components.settings.browser.search.linkRoutingBrowseTab',
-          'browse tab'
         )
       ]
     },

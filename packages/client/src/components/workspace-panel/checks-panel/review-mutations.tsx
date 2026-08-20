@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, type MouseEvent } from 'react'
 import { refreshHostedReviewCard } from '~renderer/store/slices/hosted-review'
 
 import type { useChecksPanelAgentActionsState } from './agent-actions'
@@ -189,14 +189,18 @@ export function useChecksPanelReviewMutations(context: useChecksPanelAgentAction
   )
 
   // Open hosted review in browser
-  const handleOpenPR = useCallback(() => {
-    if (activeReview?.url) {
-      openChecksPanelHostedReviewUrl({
-        url: activeReview.url,
-        worktreeId: activeWorktreeId
-      })
-    }
-  }, [activeReview, activeWorktreeId])
+  const handleOpenPR = useCallback(
+    (event: MouseEvent<HTMLAnchorElement>) => {
+      if (activeReview?.url) {
+        openChecksPanelHostedReviewUrl({
+          url: activeReview.url,
+          event,
+          worktreeId: activeWorktreeId
+        })
+      }
+    },
+    [activeReview, activeWorktreeId]
+  )
 
   const handleUnlinkPullRequest = useCallback(() => {
     if (!activeWorktreeId || activeReview?.provider !== 'github' || linkedPR === null) {

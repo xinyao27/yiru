@@ -1,10 +1,10 @@
+import { openHttpLink } from '~renderer/components/editor/http-link-routing'
 import {
   GitPullRequest as GitPullRequestArrow,
   ArrowSquareOut as ExternalLink
 } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
-import { shellClient } from '~renderer/runtime/shell-client'
 
 import { IntegrationCardDetails, IntegrationCardShell } from './integration-card-shell'
 import { usePreflightCardStatuses } from './source-control/preflight-card-status'
@@ -100,9 +100,10 @@ export function BitbucketIntegrationCard(): React.JSX.Element {
             <Button
               variant="outline"
               size="sm"
-              onClick={() =>
-                shellClient.shell.openUrl(
-                  'https://support.atlassian.com/bitbucket-cloud/docs/using-api-tokens/'
+              onClick={(event) =>
+                openHttpLink(
+                  'https://support.atlassian.com/bitbucket-cloud/docs/using-api-tokens/',
+                  { event }
                 )
               }
             >
@@ -227,11 +228,12 @@ export function AzureDevOpsIntegrationCard(): React.JSX.Element {
             <Button
               variant="outline"
               size="sm"
-              onClick={() =>
-                shellClient.shell.openUrl(
+              onClick={(event) =>
+                openHttpLink(
                   status === 'not-configured'
                     ? 'https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate'
-                    : 'https://learn.microsoft.com/en-us/rest/api/azure/devops/git/pull-requests/get-pull-requests'
+                    : 'https://learn.microsoft.com/en-us/rest/api/azure/devops/git/pull-requests/get-pull-requests',
+                  { event }
                 )
               }
             >
@@ -346,8 +348,8 @@ export function GiteaIntegrationCard(): React.JSX.Element {
             <Button
               variant="outline"
               size="sm"
-              onClick={() =>
-                shellClient.shell.openUrl('https://docs.gitea.com/next/development/api-usage')
+              onClick={(event) =>
+                openHttpLink('https://docs.gitea.com/next/development/api-usage', { event })
               }
             >
               <ExternalLink className="mr-1.5 size-3.5" />

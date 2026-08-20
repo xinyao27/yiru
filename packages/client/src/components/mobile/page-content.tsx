@@ -19,7 +19,7 @@ type MobilePageContentProps = {
   installQrUrl: string | null
   loadNetworkInterfaces: () => void
   networkInterfaces: MobileNetworkInterface[]
-  openInstallUrl: () => void
+  openInstallUrl: (event: React.MouseEvent<HTMLButtonElement>) => void
   pairAnotherDevice: () => void
   pairLoading: boolean
   pairQrDataUrl: string | null

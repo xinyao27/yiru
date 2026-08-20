@@ -1,3 +1,9 @@
+import { OPEN_FLOATING_WORKSPACE_EVENT } from '~renderer/lib/floating-terminal'
+import { isWebClientLocation } from '~renderer/lib/web-client-location'
+import {
+  shouldOpenWebLinkInYiruBrowser,
+  type WebLinkMouseEvent
+} from '~renderer/lib/web-link-gesture'
 import { shellClient } from '~renderer/runtime/shell-client'
 import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
 import {
@@ -8,6 +14,8 @@ import type { GlobalSettings } from '~shared/types'
 import type { WorkspacePort, WorkspacePortScanResult } from '~shared/workspace/ports'
 
 export type OpenHttpLinkOptions = {
+  event?: WebLinkMouseEvent
+  openInYiruBrowser?: boolean
   worktreeId?: string | null
   sourceOwner?: HttpLinkSourceOwner
 }
@@ -20,10 +28,7 @@ export type HttpLinkSourceOwner =
 
 type StoreAccessor = () => {
   settings?: Partial<
-    Pick<
-      GlobalSettings,
-      'openLinksInApp' | 'activeRuntimeEnvironmentId' | 'localhostWorktreeLabelsEnabled'
-    >
+    Pick<GlobalSettings, 'activeRuntimeEnvironmentId' | 'localhostWorktreeLabelsEnabled'>
   > | null
   setActiveWorktree: (worktreeId: string) => void
   createBrowserTab: (worktreeId: string, url: string, opts: { activate: boolean }) => unknown
@@ -62,15 +67,26 @@ export function registerHttpLinkStoreAccessor(fn: StoreAccessor): void {
 // Scope: http(s) URLs only. file: URIs and in-worktree markdown targets are
 // owned by resolveMarkdownLinkTarget and must stay on that path — this helper
 // is only invoked on target.kind === 'external' (and for the terminal's http
-// branch). Every caller uses the same saved destination.
+// branch). A plain activation always uses the system browser; the host-platform
+// modifier plus a left click opens a Yiru Browser tab.
 export function openHttpLink(url: string, opts: OpenHttpLinkOptions = {}): void {
   const { sourceOwner } = opts
   if (sourceOwner?.kind === 'unknown') {
     return
   }
   const state = storeAccessor?.()
-  const worktreeId = opts.worktreeId ?? state?.activeWorktreeId ?? null
-  const activeRuntimeEnvironmentId = state?.settings?.activeRuntimeEnvironmentId?.trim() || null
+  const wantsYiruBrowser =
+    opts.openInYiruBrowser === true || shouldOpenWebLinkInYiruBrowser(opts.event)
+  const canUseFloatingWorkspace =
+    !isWebClientLocation() && (!sourceOwner || sourceOwner.kind === 'local')
+  const worktreeId =
+    opts.worktreeId ??
+    state?.activeWorktreeId ??
+    (state && wantsYiruBrowser && canUseFloatingWorkspace ? FLOATING_TERMINAL_WORKTREE_ID : null)
+  const activeRuntimeEnvironmentId =
+    worktreeId === FLOATING_TERMINAL_WORKTREE_ID
+      ? null
+      : state?.settings?.activeRuntimeEnvironmentId?.trim() || null
   const runtimeEnvironmentId =
     sourceOwner?.kind === 'runtime'
       ? sourceOwner.runtimeEnvironmentId
@@ -78,7 +94,7 @@ export function openHttpLink(url: string, opts: OpenHttpLinkOptions = {}): void 
         ? null
         : activeRuntimeEnvironmentId
   const sourceIsLocal = sourceOwner ? sourceOwner.kind === 'local' : !activeRuntimeEnvironmentId
-  const routeToYiru = Boolean(worktreeId) && state?.settings?.openLinksInApp === true
+  const routeToYiru = Boolean(worktreeId) && wantsYiruBrowser
 
   if (routeToYiru && worktreeId && runtimeEnvironmentId) {
     void openRuntimeBrowserLink(url, worktreeId, runtimeEnvironmentId)
@@ -98,10 +114,12 @@ export function openHttpLink(url: string, opts: OpenHttpLinkOptions = {}): void 
     const localhostRoute = localhostLabelRouteForHttpLink(url, state, sourceOwner)
     if (!localhostRoute) {
       state.createBrowserTab(worktreeId, url, { activate: true })
+      revealFloatingWorkspace(worktreeId)
       return
     }
     void openLabeledLocalhostLink(url, localhostRoute, (labeledUrl) => {
       state.createBrowserTab(worktreeId, labeledUrl, { activate: true })
+      revealFloatingWorkspace(worktreeId)
     })
     return
   }
@@ -114,6 +132,12 @@ export function openHttpLink(url: string, opts: OpenHttpLinkOptions = {}): void 
   void openLabeledLocalhostLink(url, localhostRoute, (labeledUrl) => {
     void shellClient.shell.openUrl(labeledUrl)
   })
+}
+
+function revealFloatingWorkspace(worktreeId: string): void {
+  if (worktreeId === FLOATING_TERMINAL_WORKTREE_ID) {
+    window.dispatchEvent(new Event(OPEN_FLOATING_WORKSPACE_EVENT))
+  }
 }
 
 async function openRuntimeBrowserLink(

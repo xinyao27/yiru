@@ -10,6 +10,10 @@ import { getConnectionId } from '~renderer/lib/connection-context'
 import { detectLanguage } from '~renderer/lib/language-detect'
 import { launchAgentInNewTab } from '~renderer/lib/launch-agent-in-new-tab'
 import {
+  shouldOpenWebLinkInYiruBrowser,
+  type WebLinkMouseEvent
+} from '~renderer/lib/web-link-gesture'
+import {
   getRuntimeGitCommitCompare,
   getRuntimeGitRemoteCommitUrl,
   type RuntimeGitContext
@@ -35,7 +39,11 @@ type GitHistoryCommitActions = {
     entry: GitBranchChangeEntry,
     event?: SourceControlRowOpenEvent
   ) => void
-  handleCommitAction: (action: GitHistoryCommitAction, item: GitHistoryItem) => void
+  handleCommitAction: (
+    action: GitHistoryCommitAction,
+    item: GitHistoryItem,
+    event?: WebLinkMouseEvent
+  ) => void
 }
 
 // Commit-history panel actions (expand/load files, open diffs, context-menu
@@ -198,13 +206,14 @@ export function useGitHistoryCommitActions({
   }, [])
 
   const handleCommitAction = useCallback(
-    (action: GitHistoryCommitAction, item: GitHistoryItem): void => {
+    (action: GitHistoryCommitAction, item: GitHistoryItem, event?: WebLinkMouseEvent): void => {
       if (action === 'open-remote') {
         if (!activeWorktreeId || !worktreePath) {
           return
         }
         // Resolve the provider commit URL in the main process, which reads the
         // real origin remote (the renderer has no reliable origin identity).
+        const openInYiruBrowser = shouldOpenWebLinkInYiruBrowser(event)
         void getRuntimeGitRemoteCommitUrl(
           {
             settings: activeRepoSettings,
@@ -225,7 +234,11 @@ export function useGitHistoryCommitActions({
                   : connectionId === undefined
                     ? undefined
                     : { kind: 'ssh', connectionId }
-              openHttpLink(url, { worktreeId: activeWorktreeId, sourceOwner })
+              openHttpLink(url, {
+                openInYiruBrowser,
+                worktreeId: activeWorktreeId,
+                sourceOwner
+              })
             } else {
               toast.error(
                 translate(

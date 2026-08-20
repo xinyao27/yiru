@@ -2,6 +2,7 @@ import { YIRU_GITHUB_RELEASES_URL } from '@yiru/workbench-model/product'
 import type React from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { openHttpLink } from '~renderer/components/editor/http-link-routing'
 import { Download, ArrowClockwise as RefreshCw } from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
@@ -181,6 +182,14 @@ export function GeneralUpdateSettingsSection(): React.JSX.Element {
                 }
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={(event) => {
+                  event.preventDefault()
+                  openHttpLink(
+                    updateStatus.releaseUrl ??
+                      `${YIRU_GITHUB_RELEASES_URL}/tag/v${updateStatus.version}`,
+                    { event }
+                  )
+                }}
                 className="hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent underline outline-none"
               >
                 {translate(
@@ -219,6 +228,14 @@ export function GeneralUpdateSettingsSection(): React.JSX.Element {
                 }
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={(event) => {
+                  event.preventDefault()
+                  openHttpLink(
+                    updateStatus.releaseUrl ??
+                      `${YIRU_GITHUB_RELEASES_URL}/tag/v${updateStatus.version}`,
+                    { event }
+                  )
+                }}
                 className="hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent underline outline-none"
               >
                 {translate(

@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef, useState } from 'react'
+import { openHttpLink } from '~renderer/components/editor/http-link-routing'
 import { Check, Info, ArrowSquareOut as ExternalLink } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { Checkbox } from '~renderer/components/ui/checkbox'
@@ -11,7 +12,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui
 import { translate } from '~renderer/i18n/i18n'
 import { getAgentCatalog, AgentIcon, type AgentCatalogEntry } from '~renderer/lib/agent-catalog'
 import { cn } from '~renderer/lib/class-names'
-import { shellClient } from '~renderer/runtime/shell-client'
 import type { TuiAgent } from '~shared/types'
 
 const AGENT_GRID_MAX_ROWS = 4
@@ -147,7 +147,7 @@ export function AgentStep({
             size="xs"
             type="button"
             className="h-auto border-amber-400/40 bg-amber-400/10 py-1 text-amber-800 hover:bg-amber-400/20 focus-visible:bg-amber-400/20 dark:text-amber-100"
-            onClick={() => void shellClient.shell.openUrl(selectedEntry.homepageUrl)}
+            onClick={(event) => openHttpLink(selectedEntry.homepageUrl, { event })}
           >
             {translate('auto.components.onboarding.AgentStep.9c163bb0e0', 'Install instructions')}
             <ExternalLink className="size-3" />

@@ -25,6 +25,7 @@ import {
 } from '~renderer/components/ui/tooltip'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
+import type { WebLinkMouseEvent } from '~renderer/lib/web-link-gesture'
 import { getPortOpenBrowserTooltipLabel } from '~renderer/lib/workspace-port-actions'
 import { addressForPort } from '~renderer/lib/workspace-port-urls'
 import { shellClient } from '~renderer/runtime/shell-client'
@@ -54,7 +55,7 @@ export function LocalWorkspacePortSection({
   onToggle: () => void
   onStopPort: (port: WorkspacePort) => void
   onShowDetails: (port: WorkspacePort) => void
-  onOpenInBrowser: (port: WorkspacePort) => void
+  onOpenInBrowser: (port: WorkspacePort, event?: WebLinkMouseEvent) => void
 }): React.JSX.Element | null {
   if (ports.length === 0 && !emptyText) {
     return null
@@ -110,12 +111,11 @@ function LocalWorkspacePortRow({
   port: WorkspacePort
   onStop: (port: WorkspacePort) => void
   onShowDetails: (port: WorkspacePort) => void
-  onOpenInBrowser: (port: WorkspacePort, event?: React.MouseEvent<HTMLButtonElement>) => void
+  onOpenInBrowser: (port: WorkspacePort, event?: WebLinkMouseEvent) => void
 }): React.JSX.Element {
   const handleCopy = useCallback(() => {
     void shellClient.ui.writeClipboardText(addressForPort(port))
   }, [port])
-  const handleOpenBrowser = useCallback(() => void onOpenInBrowser(port), [onOpenInBrowser, port])
   const handleCopyButtonClick = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
       handleCopy()
@@ -127,12 +127,12 @@ function LocalWorkspacePortRow({
   )
   const handleOpenBrowserButtonClick = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
-      handleOpenBrowser()
+      onOpenInBrowser(port, event)
       if (event.detail > 0) {
         event.currentTarget.blur()
       }
     },
-    [handleOpenBrowser]
+    [onOpenInBrowser, port]
   )
   const handleStopButtonClick = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -236,7 +236,7 @@ function LocalWorkspacePortRow({
       </div>
       <ContextMenuContent className={MENU_CONTENT_CLASS}>
         <ContextMenuLabel className={MENU_LABEL_CLASS}>{`:${port.port}`}</ContextMenuLabel>
-        <ContextMenuItem className={MENU_ITEM_CLASS} onClick={() => handleOpenBrowser()}>
+        <ContextMenuItem className={MENU_ITEM_CLASS} onClick={() => onOpenInBrowser(port)}>
           <ExternalLink size={13} />
           {openBrowserLabel}
         </ContextMenuItem>

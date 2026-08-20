@@ -15,6 +15,7 @@ import type {
   WorkspacePortScanResult
 } from '~shared/workspace/ports'
 
+import { shouldOpenWebLinkInYiruBrowser, type WebLinkMouseEvent } from './web-link-gesture'
 import { browserUrlForPort } from './workspace-port-urls'
 
 export { addressForPort } from './workspace-port-urls'
@@ -43,22 +44,16 @@ function delay(ms: number): Promise<void> {
   return new Promise((resolve) => window.setTimeout(resolve, ms))
 }
 
-export function shouldOpenWorkspacePortInYiruBrowser(
-  settings: { openLinksInApp?: boolean } | null | undefined
-): boolean {
-  return settings?.openLinksInApp === true
-}
-
 export function getPortOpenBrowserTooltipLabel(openLabel: string): string {
   return openLabel
 }
 
 export function resolvePortOpenInYiruBrowser({
-  settings
+  event
 }: {
-  settings: { openLinksInApp?: boolean } | null | undefined
+  event: WebLinkMouseEvent | undefined
 }): boolean {
-  return shouldOpenWorkspacePortInYiruBrowser(settings)
+  return shouldOpenWebLinkInYiruBrowser(event)
 }
 
 export function workspacePortOwnerWorktreeId(port: WorkspacePort): string | null {

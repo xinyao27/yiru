@@ -282,7 +282,6 @@ export function getDefaultSettings(homedir: string): GlobalSettings {
     httpProxyUrl: '',
     httpProxyBypassRules: '',
     electronHttp1CompatibilityMode: false,
-    openLinksInApp: false,
     localhostWorktreeLabelsEnabled: false,
     openAgentTabsInChatByDefault: false,
     experimentalNativeChat: false,

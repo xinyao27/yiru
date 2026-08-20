@@ -8,6 +8,7 @@ import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { translate } from '~renderer/i18n/i18n'
+import type { WebLinkMouseEvent } from '~renderer/lib/web-link-gesture'
 import {
   killWorkspacePortForTarget,
   openWorkspacePortInBrowser,
@@ -146,7 +147,7 @@ export function LocalWorkspacePortsPanel({ isVisible }: { isVisible: boolean }):
     ]
   )
   const handleOpenPortInBrowser = useCallback(
-    async (port: WorkspacePort) => {
+    async (port: WorkspacePort, event?: WebLinkMouseEvent) => {
       const result = await openWorkspacePortInBrowser({
         port,
         activeWorktreeId: activeWorktree?.id,
@@ -154,7 +155,7 @@ export function LocalWorkspacePortsPanel({ isVisible }: { isVisible: boolean }):
         createBrowserTab,
         setRemoteBrowserPageHandle,
         openInYiruBrowser: resolvePortOpenInYiruBrowser({
-          settings
+          event
         }),
         localhostLabelRoute: resolveLocalhostLabelRouteForPort(useAppStore.getState(), port)
       })
@@ -168,7 +169,7 @@ export function LocalWorkspacePortsPanel({ isVisible }: { isVisible: boolean }):
         )
       }
     },
-    [activeWorktree?.id, createBrowserTab, runtimeTarget, setRemoteBrowserPageHandle, settings]
+    [activeWorktree?.id, createBrowserTab, runtimeTarget, setRemoteBrowserPageHandle]
   )
   const sections = useMemo(
     () => getLocalWorkspacePortSections(displayScan, activeRepo?.id, activeWorktree?.id),

@@ -2,6 +2,7 @@ import { YIRU_GITHUB_ISSUES_URL } from '@yiru/workbench-model/product'
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: feedback viewer details are loaded through GitHub IPC after the dialog receives the issue URL. */
 import React, { useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { openHttpLink } from '~renderer/components/editor/http-link-routing'
 import {
   GithubLogo as Github,
   ArrowSquareOut as ExternalLink
@@ -33,8 +34,8 @@ type SidebarFeedbackDialogProps = {
   onOpenChange: (open: boolean) => void
 }
 
-function openExternalUrl(url: string): void {
-  void shellClient.shell.openUrl(url)
+function openExternalUrl(url: string, event: React.MouseEvent<HTMLButtonElement>): void {
+  openHttpLink(url, { event })
 }
 
 function getSubmitIdentity(viewer: GitHubViewer | null, anonymous: boolean): SubmitIdentity {
@@ -180,7 +181,7 @@ export function SidebarFeedbackDialog({
               variant="outline"
               size="sm"
               className="h-8 text-xs"
-              onClick={() => openExternalUrl(`${YIRU_GITHUB_ISSUES_URL}/`)}
+              onClick={(event) => openExternalUrl(`${YIRU_GITHUB_ISSUES_URL}/`, event)}
             >
               <Github className="size-3.5" />
               {translate(

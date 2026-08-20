@@ -25,7 +25,7 @@ function isBareAutolink(children: React.ReactNode, href: string): boolean {
 function openAttachmentLink(event: React.MouseEvent<HTMLAnchorElement>, href: string): void {
   event.preventDefault()
   event.stopPropagation()
-  openHttpLink(href)
+  openHttpLink(href, { event })
 }
 
 export function isGitHubUserAttachmentVideoLink(

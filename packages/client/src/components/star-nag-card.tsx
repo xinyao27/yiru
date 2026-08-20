@@ -1,5 +1,6 @@
 import { YIRU_GITHUB_REPOSITORY_URL } from '@yiru/workbench-model/product'
 import { useCallback, useEffect, useState } from 'react'
+import { openHttpLink } from '~renderer/components/editor/http-link-routing'
 import { Star, ArrowSquareOut as ExternalLink, X } from '~renderer/components/icons/hugeicons'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'
@@ -94,13 +95,13 @@ export function StarNagCard(): React.JSX.Element | null {
   const primaryActionClass =
     'min-w-0 flex-1 gap-1.5 border-amber-400/60 bg-amber-400/15 text-amber-800 hover:bg-amber-400/25 dark:text-amber-100'
 
-  const handleStar = async (): Promise<void> => {
+  const handleStar = async (event: React.MouseEvent<HTMLButtonElement>): Promise<void> => {
     if (busy) {
       return
     }
     const openGithubFallback = async (): Promise<boolean> => {
       try {
-        await shellClient.shell.openUrl(YIRU_GITHUB_REPOSITORY_URL)
+        openHttpLink(YIRU_GITHUB_REPOSITORY_URL, { event })
         await shellClient.starNag.openWeb()
         if (mountedRef.current) {
           setVisible(false)
@@ -191,7 +192,7 @@ export function StarNagCard(): React.JSX.Element | null {
             <Button
               variant="default"
               size="sm"
-              onClick={() => void handleStar()}
+              onClick={(event) => void handleStar(event)}
               disabled={busy}
               className={primaryActionClass}
             >

@@ -1,6 +1,7 @@
 import { YIRU_GITHUB_STARGAZERS_URL } from '@yiru/workbench-model/product'
 import type React from 'react'
 import { useEffect, useState } from 'react'
+import { openHttpLink } from '~renderer/components/editor/http-link-routing'
 import { Star, ArrowSquareOut as ExternalLink } from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
@@ -14,7 +15,6 @@ import {
   completeShellStarNag,
   starYiruFromShell
 } from '~renderer/runtime/github-shell-client'
-import { shellClient } from '~renderer/runtime/shell-client'
 
 import { SettingsSubsectionHeader } from '../form-controls'
 import { SearchableSetting } from '../searchable-setting'
@@ -63,10 +63,10 @@ export function GeneralSupportSection({
     }
   }, [])
 
-  const handleStarClick = async (): Promise<void> => {
+  const handleStarClick = async (event: React.MouseEvent<HTMLButtonElement>): Promise<void> => {
     if (starState === 'web-fallback') {
       setStarState('opening-github')
-      await shellClient.shell.openUrl(YIRU_GITHUB_STARGAZERS_URL)
+      openHttpLink(YIRU_GITHUB_STARGAZERS_URL, { event })
       if (mountedRef.current) {
         setStarState('web-fallback')
       }
@@ -103,7 +103,7 @@ export function GeneralSupportSection({
 type SupportSectionProps = {
   state: SupportState
   hasPrecedingSections: boolean
-  onStarClick: () => void | Promise<void>
+  onStarClick: (event: React.MouseEvent<HTMLButtonElement>) => void | Promise<void>
 }
 
 function SupportSection({
@@ -159,7 +159,7 @@ function SupportRow({
   onStarClick
 }: {
   state: 'not-starred' | 'web-fallback' | 'opening-github' | 'starring' | 'starred'
-  onStarClick: () => void | Promise<void>
+  onStarClick: (event: React.MouseEvent<HTMLButtonElement>) => void | Promise<void>
 }): React.JSX.Element {
   // Why: the left-hand label is the setting's identity and must not change
   // when the user clicks. The right-hand control is what changes: before
@@ -189,7 +189,7 @@ function SupportRow({
         <Button
           variant="default"
           size="sm"
-          onClick={() => void onStarClick()}
+          onClick={(event) => void onStarClick(event)}
           disabled={state === 'starring' || state === 'opening-github'}
           className="shrink-0 gap-1.5"
         >

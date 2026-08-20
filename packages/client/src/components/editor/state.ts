@@ -523,6 +523,7 @@ export type EditorSlice = {
       worktreeId: string
       worktreeRoot: string | null
       runtimeEnvironmentId?: string | null
+      openInYiruBrowser?: boolean
       sourceOwner?: HttpLinkSourceOwner
     }
   ) => Promise<void>
@@ -4488,7 +4489,11 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
       return
     }
     if (target.kind === 'external') {
-      openHttpLink(target.url, { worktreeId: ctx.worktreeId, sourceOwner })
+      openHttpLink(target.url, {
+        openInYiruBrowser: ctx.openInYiruBrowser,
+        worktreeId: ctx.worktreeId,
+        sourceOwner
+      })
       return
     }
     if (target.kind === 'file') {

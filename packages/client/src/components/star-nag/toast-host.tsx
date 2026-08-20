@@ -1,6 +1,7 @@
 import { YIRU_GITHUB_REPOSITORY_URL } from '@yiru/workbench-model/product'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { openHttpLink } from '~renderer/components/editor/http-link-routing'
 import {
   Check,
   Star,
@@ -48,7 +49,7 @@ function StarNagToast({
     toast.dismiss(id)
   }
 
-  const act = async (): Promise<void> => {
+  const act = async (event: React.MouseEvent<HTMLButtonElement>): Promise<void> => {
     if (busy || status === 'starred') {
       return
     }
@@ -56,7 +57,7 @@ function StarNagToast({
     setDismissSuppressed(true)
     if (mode === 'web') {
       try {
-        await shellClient.shell.openUrl(YIRU_GITHUB_REPOSITORY_URL)
+        openHttpLink(YIRU_GITHUB_REPOSITORY_URL, { event })
         await shellClient.starNag.openWeb()
         markResolved()
         setStatus('opened')
@@ -149,7 +150,7 @@ function StarNagToast({
           variant="default"
           size="sm"
           className={primaryActionClass}
-          onClick={() => void act()}
+          onClick={(event) => void act(event)}
           disabled={busy || status === 'starred' || status === 'opened'}
         >
           {busy ? (

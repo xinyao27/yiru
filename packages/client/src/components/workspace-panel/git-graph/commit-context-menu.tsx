@@ -21,6 +21,7 @@ import {
   ContextMenuSeparator
 } from '~renderer/components/ui/context-menu'
 import { translate } from '~renderer/i18n/i18n'
+import type { WebLinkMouseEvent } from '~renderer/lib/web-link-gesture'
 import type { GitHistoryItem } from '~shared/git/history'
 
 import type { GitGraphCommitAction } from './commit-write-action'
@@ -33,7 +34,7 @@ export function GitGraphCommitContextMenu({
   onAction
 }: {
   item: GitHistoryItem
-  onAction: (action: GitGraphCommitAction, item: GitHistoryItem) => void
+  onAction: (action: GitGraphCommitAction, item: GitHistoryItem, event?: WebLinkMouseEvent) => void
 }): React.JSX.Element {
   // Why: nowrap + content-sized width — the longest entries ("Rebase current
   // branch on this Commit…") wrapped to two lines at a fixed menu width.
@@ -93,7 +94,7 @@ export function GitGraphCommitContextMenu({
         )}
       </ContextMenuItem>
       <ContextMenuSeparator />
-      <ContextMenuItem onClick={() => onAction('open-remote', item)}>
+      <ContextMenuItem onClick={(event) => onAction('open-remote', item, event)}>
         <Globe className="size-3.5" />
         {translate(
           'auto.components.workspace-panel.git-graph.CommitContextMenu.a1b2c3d4e5',

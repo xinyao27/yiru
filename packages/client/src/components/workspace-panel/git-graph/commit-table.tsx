@@ -5,6 +5,7 @@ import { Button } from '~renderer/components/ui/button'
 import { ContextMenu, ContextMenuTrigger } from '~renderer/components/ui/context-menu'
 import { ScrollArea } from '~renderer/components/ui/scroll-area'
 import { translate } from '~renderer/i18n/i18n'
+import type { WebLinkMouseEvent } from '~renderer/lib/web-link-gesture'
 import type { GitHistoryItem } from '~shared/git/history'
 import type { GitBranchChangeEntry } from '~shared/types'
 
@@ -102,7 +103,11 @@ export function GitGraphCommitTable({
   loadCommitFiles: (item: GitHistoryItem) => Promise<GitBranchChangeEntry[]>
   onOpenFile: (entry: GitBranchChangeEntry, event?: SourceControlRowOpenEvent) => void
   onOpenAllChanges: (item: GitHistoryItem) => void
-  onCommitAction: (action: GitGraphCommitAction, item: GitHistoryItem) => void
+  onCommitAction: (
+    action: GitGraphCommitAction,
+    item: GitHistoryItem,
+    event?: WebLinkMouseEvent
+  ) => void
   findMatchIds: ReadonlySet<string>
   currentFindCommitId: string | null
   rowRefs: React.MutableRefObject<Map<string, HTMLDivElement>>

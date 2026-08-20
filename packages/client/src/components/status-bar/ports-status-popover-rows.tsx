@@ -119,7 +119,7 @@ export function PortRow({
       event.stopPropagation()
       recordFeatureInteraction('ports')
       const openInYiruBrowser = resolvePortOpenInYiruBrowser({
-        settings
+        event
       })
       void openWorkspacePortInBrowser({
         port,
@@ -148,7 +148,6 @@ export function PortRow({
       port,
       recordFeatureInteraction,
       runtimeTarget,
-      settings,
       setRemoteBrowserPageHandle
     ]
   )

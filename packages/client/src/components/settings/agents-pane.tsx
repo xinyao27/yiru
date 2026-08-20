@@ -2,6 +2,7 @@
    selection, per-agent controls, and runtime location together so settings
    reconciliation stays visible in one file. */
 import { useId, useMemo, useState } from 'react'
+import { openHttpLink } from '~renderer/components/editor/http-link-routing'
 import {
   Check,
   Terminal,
@@ -550,6 +551,10 @@ function AgentRow({
             href={homepageUrl}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={(event) => {
+              event.preventDefault()
+              openHttpLink(homepageUrl, { event })
+            }}
             title={
               isDetected
                 ? translate('auto.components.settings.AgentsPane.fe4d630c94', 'Docs')

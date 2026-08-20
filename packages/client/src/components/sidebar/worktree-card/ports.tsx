@@ -137,7 +137,7 @@ function WorktreePortRow({ port }: { port: WorkspacePort }): React.JSX.Element {
       event.stopPropagation()
       recordFeatureInteraction('ports')
       const openInYiruBrowser = resolvePortOpenInYiruBrowser({
-        settings
+        event
       })
       void openWorkspacePortInBrowser({
         port,
@@ -164,8 +164,7 @@ function WorktreePortRow({ port }: { port: WorkspacePort }): React.JSX.Element {
       localhostLabelRoute,
       recordFeatureInteraction,
       runtimeTarget,
-      setRemoteBrowserPageHandle,
-      settings
+      setRemoteBrowserPageHandle
     ]
   )
 

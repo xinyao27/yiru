@@ -1371,10 +1371,9 @@ export default function MarkdownPreview({
             return
           }
 
-          // Why: Cmd/Ctrl+Shift-click keeps local file targets on the OS path.
-          // HTTP(S) targets still use the shared destination setting. For a
-          // dangling in-worktree .md, pre-check existence so the user sees a
-          // toast instead of the silent no-op from shell.openFileUri.
+          // Why: Cmd/Ctrl+Shift-click keeps both web and local file targets on
+          // the OS path. Pre-check dangling in-worktree Markdown files so the
+          // user sees a toast instead of shell.openFileUri's silent no-op.
           if (isMarkdownPreviewSystemBrowserModifier(event, isMac)) {
             if (sourceOwner.kind === 'unknown') {
               return
@@ -1390,10 +1389,10 @@ export default function MarkdownPreview({
               return
             }
             if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
-              openHttpLink(
-                parsed.toString(),
-                resolveMarkdownPreviewHttpOpenOptions(sourceRoutingWorktreeId, sourceOwner)
-              )
+              openHttpLink(parsed.toString(), {
+                worktreeId: sourceRoutingWorktreeId,
+                sourceOwner
+              })
               return
             }
             if (parsed.protocol === 'file:') {
@@ -1445,11 +1444,11 @@ export default function MarkdownPreview({
           }
 
           if (target.protocol === 'http:' || target.protocol === 'https:') {
-            // Why: every HTTP(S) activation uses the shared destination setting,
-            // including Browse Tabs owned by a remote runtime.
+            // Why: every HTTP(S) activation uses the shared gesture rule,
+            // including Browser tabs owned by a remote runtime.
             openHttpLink(
               target.toString(),
-              resolveMarkdownPreviewHttpOpenOptions(sourceRoutingWorktreeId, sourceOwner)
+              resolveMarkdownPreviewHttpOpenOptions(event, sourceRoutingWorktreeId, sourceOwner)
             )
             return
           }
@@ -1657,6 +1656,7 @@ export default function MarkdownPreview({
             worktreeId: sourceRoutingWorktreeId,
             worktreeRoot,
             runtimeEnvironmentId: resolvedSourceRuntimeEnvironmentId,
+            openInYiruBrowser: true,
             sourceOwner
           })
         }

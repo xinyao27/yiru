@@ -12,6 +12,7 @@ import {
 } from 'react'
 import { createPortal } from 'react-dom'
 import { useContextualTour } from '~renderer/components/contextual-tours/use-contextual-tour'
+import { openHttpLink } from '~renderer/components/editor/http-link-routing'
 import {
   CheckCircle as CircleCheck,
   Copy,
@@ -2486,7 +2487,7 @@ function RemoteBrowserPagePane({
                   onClick={() => {
                     const targetUrl = normalizeExternalBrowserUrl(contextMenu.linkUrl!)
                     if (targetUrl) {
-                      void shellClient.shell.openUrl(targetUrl)
+                      openHttpLink(targetUrl)
                     }
                     setContextMenu(null)
                   }}
@@ -2576,7 +2577,7 @@ function RemoteBrowserPagePane({
               onClick={() => {
                 const targetUrl = normalizeExternalBrowserUrl(contextMenu.pageUrl)
                 if (targetUrl) {
-                  void shellClient.shell.openUrl(targetUrl)
+                  openHttpLink(targetUrl)
                 }
                 setContextMenu(null)
               }}
@@ -2739,7 +2740,7 @@ function RemoteBrowserPagePane({
             onRetry={() => void runRemoteNavigation('reload')}
             onTryHttps={(url) => void runRemoteNavigation('goto', url)}
             onCopy={(url) => void shellClient.ui.writeClipboardText(url)}
-            onOpenExternal={(url) => void shellClient.shell.openUrl(url)}
+            onOpenExternal={openHttpLink}
             certificateFailure={certificateFailure}
             expectedBrowserPageId={
               remotePageHandle?.environmentId === activeRuntimeEnvironmentId
@@ -5143,7 +5144,7 @@ function BrowserPagePane({
                   onClick={() => {
                     const targetUrl = normalizeExternalBrowserUrl(contextMenu.linkUrl!)
                     if (targetUrl) {
-                      void shellClient.shell.openUrl(targetUrl)
+                      openHttpLink(targetUrl)
                     }
                     setContextMenu(null)
                   }}
@@ -5235,7 +5236,7 @@ function BrowserPagePane({
               onClick={() => {
                 const targetUrl = normalizeExternalBrowserUrl(contextMenu.pageUrl)
                 if (targetUrl) {
-                  void shellClient.shell.openUrl(targetUrl)
+                  openHttpLink(targetUrl)
                 }
                 setContextMenu(null)
               }}
@@ -5439,7 +5440,7 @@ function BrowserPagePane({
               if (!externalUrl) {
                 return
               }
-              void shellClient.shell.openUrl(externalUrl)
+              openHttpLink(externalUrl)
             }}
             title={translate(
               'auto.components.browser.pane.BrowserPane.0f41bf80c7',
@@ -5800,7 +5801,7 @@ function BrowserPagePane({
                       )
                     )
                   }}
-                  onOpenExternal={(url) => void shellClient.shell.openUrl(url)}
+                  onOpenExternal={openHttpLink}
                   certificateFailure={certificateFailure}
                   expectedBrowserPageId={browserTab.id}
                   onProceedCertificate={(challengeId) =>

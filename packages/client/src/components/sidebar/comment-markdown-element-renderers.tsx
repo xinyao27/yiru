@@ -37,7 +37,7 @@ function handleMarkdownAnchorClick(
   const normalizedHref = href?.trim() ?? ''
   if (/^https?:/i.test(normalizedHref)) {
     event.preventDefault()
-    openHttpLink(normalizedHref)
+    openHttpLink(normalizedHref, { event })
     return
   }
   if (normalizedHref.toLowerCase().startsWith('file:')) {

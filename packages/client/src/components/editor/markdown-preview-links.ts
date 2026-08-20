@@ -69,10 +69,11 @@ export function isMarkdownPreviewSystemBrowserModifier(
 }
 
 export function resolveMarkdownPreviewHttpOpenOptions(
+  event: Pick<MouseEvent, 'button' | 'ctrlKey' | 'metaKey'>,
   worktreeId: string | null,
   sourceOwner: HttpLinkSourceOwner
 ): OpenHttpLinkOptions {
-  return { worktreeId, sourceOwner }
+  return { event, worktreeId, sourceOwner }
 }
 
 /**

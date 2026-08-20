@@ -33,11 +33,11 @@
 // off), the notice never returns, because the cohort condition
 // (`optedIn === null`) clears in all three resolving paths.
 import { useState } from 'react'
+import { openHttpLink } from '~renderer/components/editor/http-link-routing'
 import { X } from '~renderer/components/icons/hugeicons'
 import { Button as UiButton } from '~renderer/components/ui/button'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'
-import { shellClient } from '~renderer/runtime/shell-client'
 
 import { Button } from '../components/ui/button'
 import { acknowledgeBanner, PRIVACY_URL, setOptIn as telemetrySetOptIn } from '../lib/telemetry'
@@ -151,7 +151,7 @@ export function FirstLaunchBanner({
             size="xs"
             type="button"
             className="hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent h-auto border-0 p-0 underline underline-offset-2"
-            onClick={() => void shellClient.shell.openUrl(PRIVACY_URL)}
+            onClick={(event) => openHttpLink(PRIVACY_URL, { event })}
           >
             {translate('auto.components.FirstLaunchBanner.d1deebb050', 'Privacy policy')}
           </UiButton>

@@ -235,7 +235,7 @@ export function CommentMoreMenu({
         ) : null}
         {hasQueue && (hasGoToComment || hasEdit || hasDelete) ? <DropdownMenuSeparator /> : null}
         {hasGoToComment && (
-          <DropdownMenuItem onClick={() => openHttpLink(comment.url)}>
+          <DropdownMenuItem onClick={(event) => openHttpLink(comment.url, { event })}>
             <ExternalLink />
             {translate(
               'auto.components.right.sidebar.checks.panel.content.d3923d18fe',

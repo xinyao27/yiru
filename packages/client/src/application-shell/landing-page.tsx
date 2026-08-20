@@ -1,5 +1,6 @@
 import { YIRU_GITHUB_STARGAZERS_URL } from '@yiru/workbench-model/product'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { openHttpLink } from '~renderer/components/editor/http-link-routing'
 import {
   Warning as AlertTriangle,
   Star,
@@ -16,7 +17,6 @@ import {
   completeShellStarNag,
   starYiruFromShell
 } from '~renderer/runtime/github-shell-client'
-import { shellClient } from '~renderer/runtime/shell-client'
 import { isGitRepoKind } from '~shared/repo-kind'
 import type { Repo } from '~shared/types'
 
@@ -74,13 +74,13 @@ function GitHubStarButton({ hasRepos }: { hasRepos: boolean }): React.JSX.Elemen
     return () => document.removeEventListener('mousedown', onDocClick)
   }, [menuOpen])
 
-  const handleClick = async (): Promise<void> => {
+  const handleClick = async (event: React.MouseEvent<HTMLButtonElement>): Promise<void> => {
     if (state === 'starred') {
       setMenuOpen((v) => !v)
       return
     }
     if (state === 'web-fallback') {
-      await shellClient.shell.openUrl(YIRU_GITHUB_STARGAZERS_URL)
+      openHttpLink(YIRU_GITHUB_STARGAZERS_URL, { event })
       return
     }
     if (state !== 'not-starred') {
@@ -218,7 +218,7 @@ function PreflightBanner({
               variant="ghost"
               size="xs"
               className="text-primary focus-visible:bg-accent mt-1 h-auto border-0 p-0 underline-offset-4 hover:underline"
-              onClick={() => shellClient.shell.openUrl(issue.fixUrl)}
+              onClick={(event) => openHttpLink(issue.fixUrl, { event })}
             >
               {issue.fixLabel}
               <ExternalLink className="size-3" />

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { openHttpLink } from '~renderer/components/editor/http-link-routing'
 import { ShieldCheck } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { Switch } from '~renderer/components/ui/switch'
@@ -9,7 +10,6 @@ import {
   getConsentState,
   setOptIn as telemetrySetOptIn
 } from '~renderer/lib/telemetry'
-import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 import type { TelemetryConsentState } from '~shared/telemetry-consent-types'
 import type { GlobalSettings } from '~shared/types'
@@ -114,7 +114,7 @@ export function PrivacyPane({ settings }: PrivacyPaneProps): React.JSX.Element {
               size="xs"
               type="button"
               className="hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent h-auto border-0 p-0 underline underline-offset-2"
-              onClick={() => void shellClient.shell.openUrl(PRIVACY_URL)}
+              onClick={(event) => openHttpLink(PRIVACY_URL, { event })}
             >
               {translate('auto.components.settings.PrivacyPane.77410e0566', 'Privacy policy')}
             </Button>

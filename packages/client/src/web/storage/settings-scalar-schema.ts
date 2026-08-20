@@ -160,7 +160,6 @@ export function createScalarSettingSchemas(defaults: GlobalSettings) {
     httpProxyUrl: optionalString.catch(defaults.httpProxyUrl),
     httpProxyBypassRules: optionalString.catch(defaults.httpProxyBypassRules),
     electronHttp1CompatibilityMode: optionalBoolean.catch(defaults.electronHttp1CompatibilityMode),
-    openLinksInApp: z.boolean().catch(defaults.openLinksInApp),
     localhostWorktreeLabelsEnabled: optionalBoolean.catch(defaults.localhostWorktreeLabelsEnabled),
     openAgentTabsInChatByDefault: optionalBoolean.catch(defaults.openAgentTabsInChatByDefault),
     experimentalNativeChat: optionalBoolean.catch(defaults.experimentalNativeChat),

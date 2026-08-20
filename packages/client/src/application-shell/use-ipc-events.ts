@@ -1056,10 +1056,10 @@ export function useIpcEvents(): void {
           store,
           sourcePage.worktreeId
         )
-        // Why: the legacy event name describes its original behavior. Route
-        // through the shared preference now so Browser guests match every
-        // other user-content link without ever staging a blank tab.
+        // Why: this event is emitted only for an explicit new-tab gesture from
+        // a Browser guest. Preserve that intent without staging a blank tab.
         openHttpLink(url, {
+          openInYiruBrowser: true,
           worktreeId: sourcePage.worktreeId,
           sourceOwner: runtimeEnvironmentId
             ? { kind: 'runtime', runtimeEnvironmentId }

@@ -146,7 +146,7 @@ export function useChecksPanelCreateReview(context: useChecksPanelReviewCreation
                 'Open on {{value0}}',
                 { value0: hostedReviewCreateCopy.providerName }
               ),
-              onClick: () => openHttpLink(outcome.url, { worktreeId: activeWorktreeId })
+              onClick: (event) => openHttpLink(outcome.url, { event, worktreeId: activeWorktreeId })
             }
           }
         )

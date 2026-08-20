@@ -32,7 +32,7 @@ export function handleOscLink(
     return false
   }
   // Why: xterm renders OSC 8 links as clickable anchors. Yiru must suppress
-  // default anchor navigation so link-routing settings can choose the target.
+  // default anchor navigation so the desktop activation shortcut can route it.
   // Note: we intentionally do NOT stopPropagation here — xterm's
   // SelectionService listens for mouseup on ownerDocument to clear the
   // pending drag-select state initiated by the mousedown of the same click.

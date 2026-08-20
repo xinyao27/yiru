@@ -1,3 +1,4 @@
+import { openHttpLink } from '~renderer/components/editor/http-link-routing'
 import {
   GithubLogo as Github,
   GitlabLogo as Gitlab,
@@ -6,7 +7,6 @@ import {
 } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
-import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 
 import {
@@ -111,7 +111,7 @@ export function GitHubIntegrationCard(): React.JSX.Element {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => shellClient.shell.openUrl('https://cli.github.com')}
+                  onClick={(event) => openHttpLink('https://cli.github.com', { event })}
                 >
                   <ExternalLink className="mr-1.5 size-3.5" />
                   {translate(
@@ -146,8 +146,8 @@ export function GitHubIntegrationCard(): React.JSX.Element {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() =>
-                    shellClient.shell.openUrl('https://cli.github.com/manual/gh_auth_login')
+                  onClick={(event) =>
+                    openHttpLink('https://cli.github.com/manual/gh_auth_login', { event })
                   }
                 >
                   <ExternalLink className="mr-1.5 size-3.5" />
@@ -240,8 +240,8 @@ export function GitLabIntegrationCard(): React.JSX.Element {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() =>
-                    shellClient.shell.openUrl('https://gitlab.com/gitlab-org/cli#installation')
+                  onClick={(event) =>
+                    openHttpLink('https://gitlab.com/gitlab-org/cli#installation', { event })
                   }
                 >
                   <ExternalLink className="mr-1.5 size-3.5" />
@@ -277,9 +277,10 @@ export function GitLabIntegrationCard(): React.JSX.Element {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() =>
-                    shellClient.shell.openUrl(
-                      'https://gitlab.com/gitlab-org/cli/-/blob/main/docs/source/auth/login.md'
+                  onClick={(event) =>
+                    openHttpLink(
+                      'https://gitlab.com/gitlab-org/cli/-/blob/main/docs/source/auth/login.md',
+                      { event }
                     )
                   }
                 >

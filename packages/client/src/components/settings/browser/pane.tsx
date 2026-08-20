@@ -17,11 +17,10 @@ import {
   resolveBrowserHomePageDraftState
 } from './home-page-draft-state'
 import { BrowserHomePageSetting } from './home-page-setting'
-import { BrowserLinkRoutingSetting } from './link-routing-setting'
 import { BrowserLocalhostWorktreeLabelsSetting } from './localhost-worktree-labels-setting'
 import { BrowserNewProfileDialog } from './new-profile-dialog'
 import { getBrowserPaneCombinedSearchEntries } from './pane-search'
-import { getBrowserPaneSearchEntries, getBrowserLinkRoutingDescription } from './search'
+import { getBrowserPaneSearchEntries } from './search'
 import { BrowserSearchEngineSetting } from './search-engine-setting'
 import { BrowserSessionCookiesSection } from './session-cookies-section'
 import { BrowserUseSetup } from './use-pane'
@@ -95,11 +94,9 @@ export function BrowserPane({
   const showHomePage = matchesSettingsSearch(searchQuery, [getBrowserPaneSearchEntries()[0]])
   const showSearchEngine = matchesSettingsSearch(searchQuery, [getBrowserPaneSearchEntries()[1]])
   const showDefaultZoom = matchesSettingsSearch(searchQuery, [getBrowserPaneSearchEntries()[2]])
-  const showLinkRouting = matchesSettingsSearch(searchQuery, [getBrowserPaneSearchEntries()[3]])
-  const showLocalhostLabels = matchesSettingsSearch(searchQuery, [getBrowserPaneSearchEntries()[4]])
-  const showCookies = matchesSettingsSearch(searchQuery, [getBrowserPaneSearchEntries()[5]])
+  const showLocalhostLabels = matchesSettingsSearch(searchQuery, [getBrowserPaneSearchEntries()[3]])
+  const showCookies = matchesSettingsSearch(searchQuery, [getBrowserPaneSearchEntries()[4]])
   const showBrowserUse = matchesSettingsSearch(searchQuery, getBrowserUsePaneSearchEntries())
-  const linkRoutingDescription = getBrowserLinkRoutingDescription()
   const hostLabelOverrides = useMemo(() => getHostDisplayLabelOverrides(settings), [settings])
   const browserSessionHostOptions = useMemo(
     () =>
@@ -203,14 +200,6 @@ export function BrowserPane({
         <BrowserDefaultZoomSetting
           value={browserDefaultZoomLevel}
           onChange={setBrowserDefaultZoomLevel}
-        />
-      ) : null}
-
-      {showLinkRouting ? (
-        <BrowserLinkRoutingSetting
-          settings={settings}
-          linkRoutingDescription={linkRoutingDescription}
-          updateSettings={updateSettings}
         />
       ) : null}
 

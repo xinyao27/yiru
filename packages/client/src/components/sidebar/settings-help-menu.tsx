@@ -2,6 +2,7 @@ import { YIRU_GITHUB_RELEASES_URL, YIRU_GITHUB_REPOSITORY_URL } from '@yiru/work
 import React, { useState } from 'react'
 import { toast } from 'sonner'
 import logo from '~renderer/assets/brand/yiru-wordmark.png?url'
+import { openHttpLink } from '~renderer/components/editor/http-link-routing'
 import {
   BookOpen,
   Question as CircleHelp,
@@ -44,8 +45,8 @@ import { SidebarFeedbackDialog } from './feedback-dialog'
 const DOCS_URL = 'https://yiru.ai/docs'
 const NO_UPDATE_CHECK_MODIFIERS = { ctrlKey: false, metaKey: false, shiftKey: false }
 
-function openExternalUrl(url: string): void {
-  void shellClient.shell.openUrl(url)
+function openExternalUrl(url: string, event: React.MouseEvent<HTMLElement>): void {
+  openHttpLink(url, { event })
 }
 
 function ExternalMenuItem({
@@ -58,7 +59,7 @@ function ExternalMenuItem({
   icon: React.ReactNode
 }): React.JSX.Element {
   return (
-    <DropdownMenuItem onClick={() => openExternalUrl(url)}>
+    <DropdownMenuItem onClick={(event) => openExternalUrl(url, event)}>
       {icon}
       {label}
       <ExternalLink className="text-muted-foreground ml-auto size-3" />

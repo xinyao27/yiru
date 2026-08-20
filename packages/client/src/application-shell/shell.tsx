@@ -55,7 +55,10 @@ import {
   isPairedWebClientWindow,
   shouldRenderDesktopWindowChrome
 } from '~renderer/lib/desktop-window-chrome'
-import { TOGGLE_FLOATING_TERMINAL_EVENT } from '~renderer/lib/floating-terminal'
+import {
+  OPEN_FLOATING_WORKSPACE_EVENT,
+  TOGGLE_FLOATING_TERMINAL_EVENT
+} from '~renderer/lib/floating-terminal'
 import {
   isFloatingWorkspacePanelFocused,
   isFloatingWorkspacePanelShortcut,
@@ -641,11 +644,9 @@ function App(): React.JSX.Element {
     floatingWorkspaceOpen: floatingTerminalOpen,
     setFloatingWorkspaceOpen: setFloatingTerminalOpenWithFocus
   })
-  // Why: Friday owns the same floating tab surface even when ordinary
-  // floating terminals are disabled; pending startup also needs its loading UI.
-  const shouldMountFloatingTerminalPanel =
-    (floatingTerminalEnabled || assistantPending || hasFloatingAssistantTab) &&
-    (floatingTerminalOpen || floatingVisibleTabCount > 0)
+  // Why: an explicit Browser gesture can create a floating tab even when the
+  // optional floating-terminal feature is disabled. Visible tabs own the mount.
+  const shouldMountFloatingTerminalPanel = floatingTerminalOpen || floatingVisibleTabCount > 0
 
   useEffect(() => {
     const toggleFloatingTerminal = (): void => {
@@ -658,12 +659,24 @@ function App(): React.JSX.Element {
   }, [floatingTerminalEnabled, setFloatingTerminalOpenWithFocus])
 
   useEffect(() => {
-    if (!floatingTerminalEnabled && !assistantPending && !hasFloatingAssistantTab) {
+    const openFloatingWorkspace = (): void => setFloatingTerminalOpenWithFocus(true)
+    window.addEventListener(OPEN_FLOATING_WORKSPACE_EVENT, openFloatingWorkspace)
+    return () => window.removeEventListener(OPEN_FLOATING_WORKSPACE_EVENT, openFloatingWorkspace)
+  }, [setFloatingTerminalOpenWithFocus])
+
+  useEffect(() => {
+    if (
+      !floatingTerminalEnabled &&
+      !assistantPending &&
+      !hasFloatingAssistantTab &&
+      floatingVisibleTabCount === 0
+    ) {
       setFloatingTerminalOpenWithFocus(false)
     }
   }, [
     assistantPending,
     floatingTerminalEnabled,
+    floatingVisibleTabCount,
     hasFloatingAssistantTab,
     setFloatingTerminalOpenWithFocus
   ])

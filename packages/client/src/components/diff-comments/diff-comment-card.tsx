@@ -180,7 +180,7 @@ export function DiffCommentCard({
                     onClick={(ev) => {
                       ev.preventDefault()
                       ev.stopPropagation()
-                      openHttpLink(url)
+                      openHttpLink(url, { event: ev })
                     }}
                   >
                     {translate('auto.components.diff.comments.DiffCommentCard.6978871a3d', 'Open')}

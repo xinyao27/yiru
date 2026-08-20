@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { openHttpLink } from '~renderer/components/editor/http-link-routing'
 import { Input } from '~renderer/components/ui/input'
 import { ToggleGroup, ToggleGroupItem } from '~renderer/components/ui/toggle-group'
 import { translate } from '~renderer/i18n/i18n'
@@ -245,6 +246,12 @@ export function TerminalAdvancedSection({
                       href="https://github.com/PowerShell/PowerShell/releases/latest"
                       target="_blank"
                       rel="noopener noreferrer"
+                      onClick={(event) => {
+                        event.preventDefault()
+                        openHttpLink('https://github.com/PowerShell/PowerShell/releases/latest', {
+                          event
+                        })
+                      }}
                       className="hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent underline outline-none"
                     >
                       {translate(

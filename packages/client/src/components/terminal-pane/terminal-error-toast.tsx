@@ -1,4 +1,5 @@
 import { YIRU_GITHUB_ISSUES_URL } from '@yiru/workbench-model/product'
+import { openHttpLink } from '~renderer/components/editor/http-link-routing'
 import { X } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
@@ -75,6 +76,10 @@ export function TerminalErrorToast({
               )}{' '}
               <a
                 href={YIRU_GITHUB_ISSUES_URL}
+                onClick={(event) => {
+                  event.preventDefault()
+                  openHttpLink(YIRU_GITHUB_ISSUES_URL, { event })
+                }}
                 style={{ color: '#fca5a5', textDecoration: 'underline' }}
                 className="focus-visible:bg-accent outline-none"
               >

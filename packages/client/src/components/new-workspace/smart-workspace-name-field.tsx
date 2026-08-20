@@ -9,6 +9,7 @@ search orchestration, and result rendering so the unified create flow stays
 in one predictable form control instead of splitting state across fragments. */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
+import { openHttpLink } from '~renderer/components/editor/http-link-routing'
 import {
   TextAa as CaseSensitive,
   GitMerge,
@@ -61,7 +62,6 @@ import {
   searchRuntimeRepoBaseRefDetails
 } from '~renderer/runtime/repo-client'
 import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
-import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 import {
   buildProjectSourceContextFromRepo,
@@ -1267,7 +1267,7 @@ export default function SmartWorkspaceNameField({
                             type="button"
                             variant="quiet"
                             size="icon-xs"
-                            onClick={() => void shellClient.shell.openUrl(selectedSource.url!)}
+                            onClick={(event) => openHttpLink(selectedSource.url!, { event })}
                             className="size-6 shrink-0"
                             aria-label={translate(
                               'auto.components.new.workspace.SmartWorkspaceNameField.2c69728c2a',

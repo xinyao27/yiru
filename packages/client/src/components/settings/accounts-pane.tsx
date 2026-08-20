@@ -5,6 +5,7 @@
    would scatter those flows without a meaningful abstraction boundary. */
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { openHttpLink } from '~renderer/components/editor/http-link-routing'
 import {
   Warning as AlertTriangle,
   Question as HelpCircle,
@@ -1630,6 +1631,10 @@ export function AccountsPane({
             href={MINIMAX_CONSOLE_URL}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={(event) => {
+              event.preventDefault()
+              openHttpLink(MINIMAX_CONSOLE_URL, { event })
+            }}
             className="text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:bg-accent inline-flex items-center gap-1 text-xs outline-none"
           >
             {translate('auto.components.settings.AccountsPane.0d8e77bc40', 'Open console')}

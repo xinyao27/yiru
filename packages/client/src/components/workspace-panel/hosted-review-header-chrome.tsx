@@ -25,7 +25,7 @@ export function HostedReviewHeaderLink({
       onClick={(event) => {
         event.preventDefault()
         event.stopPropagation()
-        openHttpLink(review.url)
+        openHttpLink(review.url, { event })
       }}
     >
       {label}

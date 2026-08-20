@@ -48,7 +48,7 @@ type HeroFlowProps = {
   onPlatformChange: (platform: MobilePlatform) => void
   installQrUrl: string | null
   installCopy: MobileReleaseLink
-  onOpenInstallUrl: () => void
+  onOpenInstallUrl: (event: React.MouseEvent<HTMLButtonElement>) => void
   onCopyInstallUrl: () => void
   pairQrDataUrl: string | null
   pairingUrl: string | null

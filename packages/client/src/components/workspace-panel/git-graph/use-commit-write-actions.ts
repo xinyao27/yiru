@@ -3,6 +3,7 @@ import { toast } from 'sonner'
 import { useConfirmationDialog } from '~renderer/components/confirmation-dialog'
 import { translate } from '~renderer/i18n/i18n'
 import { getConnectionId } from '~renderer/lib/connection-context'
+import type { WebLinkMouseEvent } from '~renderer/lib/web-link-gesture'
 import type { RuntimeGitContext } from '~renderer/runtime/git-client'
 import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
@@ -27,7 +28,11 @@ export type GitGraphCommitWriteDialogState = {
 }
 
 type GitGraphCommitWriteActions = {
-  handleCommitAction: (action: GitGraphCommitAction, item: GitHistoryItem) => void
+  handleCommitAction: (
+    action: GitGraphCommitAction,
+    item: GitHistoryItem,
+    event?: WebLinkMouseEvent
+  ) => void
   writeDialog: GitGraphCommitWriteDialogState | null
   isWriting: boolean
   closeWriteDialog: () => void
@@ -46,7 +51,11 @@ export function useGitGraphCommitWriteActions({
   worktreeId: string
   worktreePath: string | null
   activeRepoSettings: RuntimeGitContext['settings']
-  onReadAction: (action: GitHistoryCommitAction, item: GitHistoryItem) => void
+  onReadAction: (
+    action: GitHistoryCommitAction,
+    item: GitHistoryItem,
+    event?: WebLinkMouseEvent
+  ) => void
 }): GitGraphCommitWriteActions {
   const confirmAction = useConfirmationDialog()
   const [writeDialog, setWriteDialog] = useState<GitGraphCommitWriteDialogState | null>(null)
@@ -158,7 +167,7 @@ export function useGitGraphCommitWriteActions({
   }, [])
 
   const handleCommitAction = useCallback(
-    (action: GitGraphCommitAction, item: GitHistoryItem): void => {
+    (action: GitGraphCommitAction, item: GitHistoryItem, event?: WebLinkMouseEvent): void => {
       if (isGitGraphCommitWriteAction(action)) {
         void startWriteAction(action, item)
         return
@@ -167,7 +176,7 @@ export function useGitGraphCommitWriteActions({
         void copyCommitSubject(item)
         return
       }
-      onReadAction(action, item)
+      onReadAction(action, item, event)
     },
     [copyCommitSubject, onReadAction, startWriteAction]
   )

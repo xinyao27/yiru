@@ -299,6 +299,7 @@ function rangeContainsBufferPosition(
 
 export function openTerminalHttpLink(url: string, deps: UrlLinkHitTestDeps): void {
   openHttpLink(url, {
+    openInYiruBrowser: true,
     worktreeId: deps.worktreeId,
     sourceOwner: deps.runtimeEnvironmentId
       ? { kind: 'runtime', runtimeEnvironmentId: deps.runtimeEnvironmentId }
