@@ -34,6 +34,10 @@ const PRODUCT_APP_HOSTNAME = `app.${CANONICAL_HOSTNAME}`
 // Why: app.localhost is a browser-defined loopback origin, so local QA can
 // exercise the same origin routing and CSP without weakening the production host.
 const PRODUCT_APP_HOSTNAMES = new Set([PRODUCT_APP_HOSTNAME, 'app.localhost'])
+// Why: Sonner appends an empty style node before filling it with its pinned
+// package CSS. These hashes permit those exact two states without unsafe-inline.
+const SONNER_EMPTY_STYLE_HASH = "'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='"
+const SONNER_STYLE_HASH = "'sha256-StEaX+se6YS7pqjzrzMIA0KaX9zF/8zAhvQXZAe5epY='"
 const PRODUCT_SECURITY_HEADERS = {
   'Content-Security-Policy': [
     "default-src 'self'",
@@ -46,7 +50,7 @@ const PRODUCT_SECURITY_HEADERS = {
     "object-src 'none'",
     "require-trusted-types-for 'script'",
     "script-src 'self'",
-    "style-src 'self'",
+    `style-src 'self' ${SONNER_EMPTY_STYLE_HASH} ${SONNER_STYLE_HASH}`,
     "style-src-attr 'unsafe-inline'",
     'trusted-types default'
   ].join('; '),
@@ -96,6 +100,9 @@ export default {
         appEntryUrl.search = ''
         const appEntry = withProductSecurityHeaders(await env.ASSETS.fetch(appEntryUrl))
         appEntry.headers.set('Content-Type', 'text/html; charset=utf-8')
+        // Why: Cloudflare Web Analytics otherwise injects a third-party script
+        // that this isolated app origin deliberately refuses in script-src.
+        appEntry.headers.set('Cache-Control', 'public, max-age=0, must-revalidate, no-transform')
         return appEntry
       }
       return withProductSecurityHeaders(await env.ASSETS.fetch(request))

@@ -51,12 +51,18 @@ function WebRootBoundary(): React.JSX.Element {
   )
 }
 
-ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
-  <CSPProvider disableStyleElements>
-    <HugeiconsIconContextProvider>
-      <I18nProvider>
-        <WebRootBoundary />
-      </I18nProvider>
-    </HugeiconsIconContextProvider>
-  </CSPProvider>
-)
+export function mountWebClient(): void {
+  const rootElement = document.getElementById('root')
+  if (!rootElement) {
+    throw new Error('Web client root element is missing')
+  }
+  ReactDOM.createRoot(rootElement).render(
+    <CSPProvider disableStyleElements>
+      <HugeiconsIconContextProvider>
+        <I18nProvider>
+          <WebRootBoundary />
+        </I18nProvider>
+      </HugeiconsIconContextProvider>
+    </CSPProvider>
+  )
+}
