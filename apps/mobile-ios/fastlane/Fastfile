@@ -14,6 +14,7 @@ BUILD_OUTPUT_DIRECTORY = File.join(MOBILE_ROOT, "build")
 SCHEME = "YiruMobile"
 APP_TARGET = "YiruMobile"
 BUNDLE_ID = "com.xinyao27.yiru.mobile"
+APP_STORE_APP_ID = "6792278376"
 WIDGET_TARGET = "YiruWidgets"
 WIDGET_BUNDLE_ID = "com.xinyao27.yiru.mobile.ExpoWidgetsTarget"
 TESTFLIGHT_GROUPS = ["peeps"].freeze
@@ -77,15 +78,33 @@ rescue StandardError => error
   false
 end
 
-def app_store_app
-  Spaceship::ConnectAPI::App.find(BUNDLE_ID)
-rescue StandardError => error
-  UI.error("Could not look up App Store app #{BUNDLE_ID} (#{error.message})")
-  nil
+def existing_app_store_app!
+  app =
+    begin
+      Spaceship::ConnectAPI::App.find(BUNDLE_ID)
+    rescue StandardError => error
+      UI.user_error!(
+        "Could not verify the existing App Store app #{BUNDLE_ID}; release blocked " \
+        "(#{error.message})",
+      )
+    end
+
+  unless app
+    UI.user_error!("Existing App Store app #{BUNDLE_ID} was not found; release blocked")
+  end
+  unless app.id == APP_STORE_APP_ID
+    UI.user_error!(
+      "App Store record mismatch for #{BUNDLE_ID}: expected Apple ID #{APP_STORE_APP_ID}, " \
+      "received #{app.id}; release blocked",
+    )
+  end
+
+  UI.message("Verified existing App Store app #{BUNDLE_ID} (Apple ID #{APP_STORE_APP_ID})")
+  app
 end
 
-def ensure_open_version_train!(version)
-  return unless version_train_closed?(app_store_app, version)
+def ensure_open_version_train!(app, version)
+  return unless version_train_closed?(app, version)
 
   UI.user_error!(
     "iOS version #{version} is already submitted or released. Use bump_patch_version or " \
@@ -206,7 +225,8 @@ platform :ios do
   lane :prepare_release_version do |options|
     api_key = app_store_connect_api_key_from_env
     version = resolve_requested_version(options)
-    ensure_open_version_train!(version)
+    app = existing_app_store_app!
+    ensure_open_version_train!(app, version)
     build_number = next_testflight_build_number(api_key, version)
     UI.message("Prepared native Yiru Mobile iOS #{version} (#{build_number})")
   end
@@ -217,6 +237,7 @@ platform :ios do
     version = resolve_requested_version(options)
     build_number = resolve_archive_build_number(options)
     team_id = ENV.fetch("APPLE_TEAM_ID")
+    existing_app_store_app!
 
     build_signed_archive(
       api_key: api_key,
@@ -234,7 +255,8 @@ platform :ios do
   lane :release do |options|
     api_key = app_store_connect_api_key_from_env
     version = resolve_requested_version(options)
-    ensure_open_version_train!(version)
+    app = existing_app_store_app!
+    ensure_open_version_train!(app, version)
     build_number = next_testflight_build_number(api_key, version)
     distribution = testflight_distribution
     team_id = ENV.fetch("APPLE_TEAM_ID")

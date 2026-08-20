@@ -89,6 +89,12 @@ All six secrets the lanes read are configured (`gh secret list`, added 2026-07-1
 `APPLE_TEAM_ID`, `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_API_KEY_P8`, `IOS_DIST_CERT_P12`,
 `IOS_DIST_CERT_PASSWORD`.
 
+The release preflight is pinned to the existing App Store Connect record: bundle id
+`com.xinyao27.yiru.mobile`, Apple ID `6792278376`. Both the archive and release lanes fail closed if
+that record cannot be found or if its Apple ID differs. The Apple ID was confirmed from three
+successful legacy Expo uploads (builds 13–15); the native lane cannot create or target a new app
+record.
+
 What is left is triggering the lanes:
 
 - `.github/workflows/mobile-ios-native-archive.yml` — signed archive
