@@ -1,0 +1,9 @@
+/* Why: Web CSP disables Base UI's injected style element, so the shared
+   ScrollArea must ship the native-scrollbar suppression in an external asset. */
+.base-ui-disable-scrollbar {
+  scrollbar-width: none;
+}
+
+.base-ui-disable-scrollbar::-webkit-scrollbar {
+  display: none;
+}

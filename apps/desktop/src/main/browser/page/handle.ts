@@ -16,6 +16,11 @@ export type BrowserPageInfo = {
   browserVersion: string
 }
 
+export type BrowserPageNavigationState = {
+  canGoBack: boolean
+  canGoForward: boolean
+}
+
 export type BrowserPageEvent =
   | { type: 'closed' }
   | { type: 'load-finished' }
@@ -50,14 +55,18 @@ export type BrowserPageReloadOptions = {
   ignoreCache?: boolean
 }
 
+export type BrowserHistoryDirection = 'back' | 'forward'
+
 export type BrowserPageHandle = {
   readonly identity: BrowserPageIdentity
   isClosed: () => boolean
   getInfo: () => BrowserPageInfo
+  getNavigationState?: () => BrowserPageNavigationState | null
   getUserAgent: () => string
   subscribe: (listener: (event: BrowserPageEvent) => void) => () => void
   acquireCdp: () => BrowserPageCdpLease
   focus: () => Promise<void>
+  navigateHistory?: (direction: BrowserHistoryDirection) => Promise<void>
   reload: (options?: BrowserPageReloadOptions) => Promise<void>
   printToPdf: (options: BrowserPrintToPdfOptions) => Promise<Uint8Array<ArrayBufferLike>>
   prepareForCapture: () => void

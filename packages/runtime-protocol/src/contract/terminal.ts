@@ -3,7 +3,7 @@ import { eventIterator, type, type ContractRouter } from '@orpc/contract'
 import { withAccess, type RuntimeProcedureMeta } from './access-meta.js'
 import * as inputs from './terminal-inputs.js'
 import { terminalManagementContract } from './terminal-management.js'
-import type * as results from './terminal-results.js'
+import * as results from './terminal-results.js'
 
 const HOST_READ_ACCESS = { scope: 'host', tier: 'read' } as const
 const HOST_HOST_ACCESS = { scope: 'host', tier: 'host' } as const
@@ -12,6 +12,9 @@ const WORKTREE_CONTROL_ACCESS = { scope: 'worktree', tier: 'control' } as const
 const MOBILE_CLIENT = { mobile: true } as const
 
 export const terminalContract = {
+  openMultiplex: withAccess(HOST_READ_ACCESS, MOBILE_CLIENT)
+    .input(inputs.TerminalOpenMultiplexInputSchema)
+    .output(type<results.TerminalOpenMultiplexResult>()),
   multiplex: withAccess(WORKTREE_CONTROL_ACCESS, MOBILE_CLIENT)
     .input(inputs.TerminalMultiplexInputSchema)
     .output(eventIterator(type<results.TerminalMultiplexEvent>())),
@@ -27,7 +30,7 @@ export const terminalContract = {
   resolvePane: withAccess(WORKTREE_READ_ACCESS)
     .input(inputs.TerminalResolvePaneInputSchema)
     .output(type<results.TerminalResolvePaneResult>()),
-  show: withAccess(WORKTREE_READ_ACCESS)
+  show: withAccess(WORKTREE_READ_ACCESS, MOBILE_CLIENT)
     .input(inputs.TerminalHandleInputSchema)
     .output(type<results.TerminalShowResult>()),
   read: withAccess(WORKTREE_READ_ACCESS, MOBILE_CLIENT)
@@ -57,6 +60,9 @@ export const terminalContract = {
   create: withAccess(WORKTREE_CONTROL_ACCESS, MOBILE_CLIENT)
     .input(inputs.TerminalCreateInputSchema)
     .output(type<results.TerminalCreateResult>()),
+  updateViewAttributes: withAccess(HOST_HOST_ACCESS)
+    .input(inputs.TerminalUpdateViewAttributesInputSchema)
+    .output(type<{ updated: true }>()),
   split: withAccess(WORKTREE_CONTROL_ACCESS)
     .input(inputs.TerminalSplitInputSchema)
     .output(type<results.TerminalSplitResult>()),
@@ -80,7 +86,7 @@ export const terminalContract = {
     .output(type<results.TerminalCloseResult>()),
   setDisplayMode: withAccess(WORKTREE_CONTROL_ACCESS, MOBILE_CLIENT)
     .input(inputs.TerminalSetDisplayModeInputSchema)
-    .output(type<results.TerminalSetDisplayModeResult>()),
+    .output(results.TerminalSetDisplayModeResultSchema),
   restoreFit: withAccess(WORKTREE_CONTROL_ACCESS)
     .input(inputs.TerminalHandleInputSchema)
     .output(type<results.TerminalRestoreFitResult>()),

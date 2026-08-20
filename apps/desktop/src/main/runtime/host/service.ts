@@ -8,6 +8,7 @@ import {
   PROJECT_SOURCE_CONTEXT_RUNTIME_CAPABILITY,
   RUNTIME_CAPABILITIES,
   RUNTIME_ORPC_RUNTIME_CAPABILITY,
+  TERMINAL_MULTIPLEX_RUNTIME_CAPABILITY,
   WORKSPACE_RUN_CONTEXT_RUNTIME_CAPABILITY,
   type RuntimeCapability
 } from '@yiru/runtime-protocol/capabilities'
@@ -41,6 +42,7 @@ import { previewWarpThemeImport } from '~main/warp-themes/import-preview'
 
 import { setGitHubEventPublisher } from '../github-events'
 import { subscribeShellServicesConnectionLifecycle } from '../rpc/orpc/shell-services-reverse-link'
+import { terminalMultiplexCanaryDisabledCapabilities } from '../terminal-multiplex/release-gate'
 import { YiruRuntimeService } from '../yiru-runtime'
 import { attachNodeRuntimeHostAccountServices } from './account-services'
 import { NodeRuntimeBrowserCommands } from './browser-commands'
@@ -60,6 +62,7 @@ const NODE_RUNTIME_HOST_CAPABILITIES: ReadonlySet<RuntimeCapability> = new Set([
   PROJECT_HOST_SETUP_RUNTIME_CAPABILITY,
   PROJECT_SOURCE_CONTEXT_RUNTIME_CAPABILITY,
   RUNTIME_ORPC_RUNTIME_CAPABILITY,
+  TERMINAL_MULTIPLEX_RUNTIME_CAPABILITY,
   WORKSPACE_RUN_CONTEXT_RUNTIME_CAPABILITY
 ])
 
@@ -106,6 +109,7 @@ export function createNodeRuntimeHostService(
     getDesktopWindowStatus: () => 'blocked',
     getWindowById: () => null,
     disabledCapabilities: [
+      ...terminalMultiplexCanaryDisabledCapabilities(),
       ...RUNTIME_CAPABILITIES.filter(
         (capability) => !NODE_RUNTIME_HOST_CAPABILITIES.has(capability)
       ),
@@ -119,7 +123,7 @@ export function createNodeRuntimeHostService(
     // Why: a relay or `serve` host answers mobile's stats reads on its own, so it
     // owns the same attributed-usage stores the windowed app wires. Cursor's
     // metered spend stays desktop-only — that probe needs Electron's net stack.
-    statsUsageStores: {
+    providerUsageStores: {
       claude: new ClaudeUsageStore(store),
       codex: new CodexUsageStore(store),
       openCode: new OpenCodeUsageStore(store),

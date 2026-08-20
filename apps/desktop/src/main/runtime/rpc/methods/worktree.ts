@@ -18,8 +18,10 @@ import type {
 
 import type { RpcContext, RpcHandler } from '../core'
 
-export const handleWorktreePs = ((params, { runtime }) =>
-  runtime.getWorktreePs(params.limit)) satisfies RpcHandler<z.infer<typeof WorktreePsParams>>
+export const handleWorktreePs = ((params, { runtime, clientKind }) =>
+  runtime.getWorktreePs(params.limit, clientKind)) satisfies RpcHandler<
+  z.infer<typeof WorktreePsParams>
+>
 
 export const handleWorktreeList = ((params, { runtime }) =>
   runtime.listManagedWorktrees(params.repo, params.limit)) satisfies RpcHandler<

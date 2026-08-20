@@ -20,6 +20,7 @@ import {
   hasServeUpdateSupervisor,
   requestServeUpdateHandoff
 } from './serve-update-handoff'
+import { publishShellEvent } from './shell/events'
 import {
   armUpdateInstallExitWatchdog,
   disarmUpdateInstallExitWatchdog
@@ -65,7 +66,7 @@ const PRE_QUIT_CLEANUP_TIMEOUT_MS = 2_500
 const UPDATE_CHECK_SILENT_SETTLE_DELAY_MS = 1_000
 const UPDATE_CHECK_STALL_TIMEOUT_MS = 45_000
 
-type UpdaterStatusTarget = { webContents: { send: (channel: string, ...args: unknown[]) => void } }
+type UpdaterStatusTarget = { webContents: { id?: number } }
 
 let mainWindowRef: UpdaterStatusTarget | null = null
 let currentStatus: UpdateStatus = { state: 'idle' }
@@ -267,7 +268,12 @@ function sendStatus(status: UpdateStatus): void {
     return
   }
   currentStatus = decoratedStatus
-  mainWindowRef?.webContents.send('updater:status', decoratedStatus)
+  if (mainWindowRef?.webContents.id !== undefined) {
+    publishShellEvent(mainWindowRef.webContents.id, {
+      type: 'updaterStatus',
+      status: decoratedStatus
+    })
+  }
 }
 
 function getOptionsForUpdateCheckVariant(variant: UpdateCheckVariant): UpdateCheckOptions {

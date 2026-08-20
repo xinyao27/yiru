@@ -4,6 +4,7 @@ import type { BrowserPrintToPdfOptions } from '../cdp-print-to-pdf'
 import { acquireElectronDebugger } from '../electron-debugger-lease'
 import type {
   BrowserPageBackendKind,
+  BrowserHistoryDirection,
   BrowserPageEvent,
   BrowserPageHandle,
   BrowserPageIdentity
@@ -129,6 +130,13 @@ export function createElectronBrowserPageHandle(
       url: page.isDestroyed() ? '' : page.getURL(),
       browserVersion: process.versions.chrome ?? '134.0.0.0'
     }),
+    getNavigationState: () =>
+      page.isDestroyed()
+        ? null
+        : {
+            canGoBack: page.navigationHistory.canGoBack(),
+            canGoForward: page.navigationHistory.canGoForward()
+          },
     getUserAgent: () => (page.isDestroyed() ? '' : page.getUserAgent()),
     subscribe: (listener) => subscribeToElectronPage(page, listener),
     acquireCdp: () => acquireElectronDebugger(page),
@@ -138,6 +146,8 @@ export function createElectronBrowserPageHandle(
       }
       page.focus()
     },
+    navigateHistory: (direction: BrowserHistoryDirection) =>
+      navigateElectronHistory(page, direction),
     reload: async (reloadOptions) => {
       if (page.isDestroyed()) {
         throw new Error('Browser tab is no longer available')
@@ -176,6 +186,83 @@ export function createElectronBrowserPageHandle(
       return encodeCompositorFrame(image, params)
     }
   }
+}
+
+const ELECTRON_HISTORY_NAVIGATION_TIMEOUT_MS = 2_000
+
+function navigateElectronHistory(
+  page: WebContents,
+  direction: BrowserHistoryDirection
+): Promise<void> {
+  if (page.isDestroyed()) {
+    return Promise.reject(new Error('Browser tab is no longer available'))
+  }
+
+  const canNavigate =
+    direction === 'back'
+      ? page.navigationHistory.canGoBack()
+      : page.navigationHistory.canGoForward()
+  if (!canNavigate) {
+    return Promise.resolve()
+  }
+
+  return new Promise<void>((resolve, reject) => {
+    let settled = false
+    let timeout: ReturnType<typeof setTimeout> | null = null
+
+    const cleanup = (): void => {
+      if (timeout) {
+        clearTimeout(timeout)
+        timeout = null
+      }
+      page.removeListener('did-navigate', onDidNavigate)
+      page.removeListener('did-finish-load', onDidFinishLoad)
+      page.removeListener('did-fail-load', onDidFailLoad)
+    }
+    const finish = (): void => {
+      if (settled) {
+        return
+      }
+      settled = true
+      cleanup()
+      resolve()
+    }
+    const fail = (error: Error): void => {
+      if (settled) {
+        return
+      }
+      settled = true
+      cleanup()
+      reject(error)
+    }
+    const onDidNavigate = (): void => finish()
+    const onDidFinishLoad = (): void => finish()
+    const onDidFailLoad = (
+      _event: unknown,
+      _errorCode: number,
+      _errorDescription: string,
+      _validatedUrl: string,
+      isMainFrame: boolean
+    ): void => {
+      if (isMainFrame) {
+        finish()
+      }
+    }
+
+    timeout = setTimeout(finish, ELECTRON_HISTORY_NAVIGATION_TIMEOUT_MS)
+    page.once('did-navigate', onDidNavigate)
+    page.once('did-finish-load', onDidFinishLoad)
+    page.on('did-fail-load', onDidFailLoad)
+    try {
+      if (direction === 'back') {
+        page.navigationHistory.goBack()
+      } else {
+        page.navigationHistory.goForward()
+      }
+    } catch (error) {
+      fail(error instanceof Error ? error : new Error(String(error)))
+    }
+  })
 }
 
 function subscribeToElectronPage(

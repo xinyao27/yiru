@@ -59,7 +59,8 @@ export const BOOLEAN_FLAGS = new Set([
   'text-stdin',
   'unread',
   'value-stdin',
-  'wait'
+  'wait',
+  'yes'
 ])
 
 export const REPEATED_FLAG_SEPARATOR = '\u0000'
@@ -176,7 +177,7 @@ export function specPaths(spec: CommandSpec): string[][] {
 
 export function supportsBrowserPageFlag(commandPath: string[]): boolean {
   const joined = commandPath.join(' ')
-  if (['open', 'status'].includes(commandPath[0])) {
+  if (['connect', 'open', 'status'].includes(commandPath[0])) {
     return false
   }
   if (
@@ -247,12 +248,14 @@ export function isCommandGroup(commandPath: string[]): boolean {
         'agent',
         'environment',
         'diagnostics',
-        'skills'
+        'skills',
+        'connect'
       ].includes(commandPath[0])) ||
     (commandPath.length === 2 && commandPath[0] === 'agent' && commandPath[1] === 'hooks') ||
     (commandPath.length === 2 &&
       commandPath[0] === 'storage' &&
-      ['local', 'session'].includes(commandPath[1]))
+      ['local', 'session'].includes(commandPath[1])) ||
+    (commandPath.length === 2 && commandPath[0] === 'connect' && commandPath[1] === 'access')
   )
 }
 

@@ -2,11 +2,11 @@ import { existsSync, mkdirSync, readFileSync, realpathSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { basename, dirname, join, resolve } from 'node:path'
 
+import type { AgentTrustInput } from '@yiru/runtime-protocol/contract'
+
 import { writeFileAtomically } from './codex/accounts/fs-utils'
 import { upsertProjectTrustLevel } from './codex/config-toml-trust'
 import { getYiruManagedCodexHomePath } from './codex/home-paths'
-
-export type AgentTrustPreset = 'cursor' | 'copilot' | 'codex'
 
 /**
  * Pre-mark a workspace as trusted for cursor-agent, GitHub Copilot CLI, or
@@ -116,6 +116,21 @@ export function markCodexProjectTrusted(workspacePath: string): void {
   // Why: Yiru-launched Codex runs with a Yiru-owned CODEX_HOME, so the trust
   // preset must also update the runtime config Codex will actually read.
   upsertProjectTrustLevel(join(getYiruManagedCodexHomePath(), 'config.toml'), absPath, 'trusted')
+}
+
+export function markAgentWorkspaceTrusted(args: AgentTrustInput): void {
+  try {
+    if (args.preset === 'cursor') {
+      markCursorWorkspaceTrusted(args.workspacePath)
+    } else if (args.preset === 'copilot') {
+      markCopilotFolderTrusted(args.workspacePath)
+    } else if (args.preset === 'codex') {
+      markCodexProjectTrusted(args.workspacePath)
+    }
+  } catch {
+    // Why: a trust preset is an ergonomic preflight. The agent's own prompt
+    // remains the safe fallback when its config file cannot be written.
+  }
 }
 
 export function resolveCodexProjectTrustRoot(workspacePath: string): string {

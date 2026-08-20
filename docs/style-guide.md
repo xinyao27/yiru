@@ -4,24 +4,24 @@ Detailed cross-client reference for Yiru components, tokens, geometry, typograph
 states. Start with the binding platform contract:
 
 - [`apps/desktop/DESIGN.md`](../apps/desktop/DESIGN.md) for desktop.
-- [`apps/mobile/DESIGN.md`](../apps/mobile/DESIGN.md) for mobile.
+- [`apps/mobile-ios/DESIGN.md`](../apps/mobile-ios/DESIGN.md) for mobile.
 
 This guide expands those contracts with component inventory and implementation detail. If it
 disagrees with a platform contract, resolve both documents in the same change; do not choose a
 one-off implementation. `AGENTS.md` owns code structure and quality, so those rules are not repeated
 here.
 
-Scope: `apps/desktop/src/renderer/` and `apps/mobile/`, which share one semantic token vocabulary.
+Scope: `packages/client/src/`. Mobile is native SwiftUI with its own token vocabulary; see
+`apps/mobile-ios/DESIGN.md`.
 
 | Source | File |
 | --- | --- |
 | Desktop visual contract | `apps/desktop/DESIGN.md` |
-| Mobile visual contract | `apps/mobile/DESIGN.md` |
-| Tokens, base layer, global chrome | `apps/desktop/src/renderer/assets/main.css` |
-| Primitives | `apps/desktop/src/renderer/components/ui/` |
+| Mobile visual contract | `apps/mobile-ios/DESIGN.md` |
+| Tokens, base layer, global chrome | `packages/client/src/assets/main.css` |
+| Primitives | `packages/client/src/components/ui/` |
 | Primitive catalog and layering | `components/ui/README.md` |
-| Mobile token mirror (Uniwind) | `apps/mobile/global.css` |
-| Mobile headers, controls, and tabs | §12 of this guide |
+| Mobile headers, controls, and tabs | `apps/mobile-ios/DESIGN.md` |
 
 ---
 
@@ -56,7 +56,7 @@ Import primitives from their module (`@/components/ui/button`). The private styl
 
 ### The closed vocabulary
 
-The Tailwind theme exposes exactly the default shadcn roles, and `check-design-token-budget.mjs` keeps it that way:
+The Tailwind theme exposes exactly the default shadcn roles. This used to be kept that way by `check-design-token-budget.mjs`; that script has been deleted, so the closed vocabulary below is now a convention enforced by review, not by CI:
 
 `background` · `foreground` · `card` · `popover` · `primary` · `secondary` · `muted` · `accent` · `destructive` · `border` · `input` · `ring` · `chart-1…5` · the `sidebar` family — each with its `-foreground` pair.
 
@@ -110,8 +110,7 @@ Git status colors mirror VS Code; diff colors mirror Cursor. The two families ar
 
 **Mobile follows the device.** Mobile does not inherit desktop's zero-radius rule. Navigation bars, grouped controls, message bubbles, form sections, floating composers, sheets, and floating actions use concentric system geometry. Terminals, editors, and diff bodies may stay rectangular when rounding would clip or waste working content. Prefer the shared mobile Glass components so material availability and the opaque fallback stay one decision; features keep their role-specific geometry beside the markup.
 
-The concise mobile contract lives in [`apps/mobile/DESIGN.md`](../apps/mobile/DESIGN.md); §12 keeps
-the extended header, control-size, grouping, and tab recipes.
+The mobile contract lives in [`apps/mobile-ios/DESIGN.md`](../apps/mobile-ios/DESIGN.md).
 
 **No shadows, no outlines.** Separation is `border` plus an opaque background. No `shadow-*`, `drop-shadow-*`, `box-shadow`, `text-shadow`, or stroke-drawing outline — delete legacy declarations at the source rather than overriding them. A local `outline-none` is allowed only to suppress the UA ring on a component that supplies its own focus state.
 
@@ -168,11 +167,8 @@ Cohesion beats indirection — a reader should see a component's appearance in t
 
 `assets/main.css` is global-only: imports, `@font-face`, custom variants, `@theme inline`, `:root`/`.dark` tokens, `@layer base`, scrollbar utilities, titlebar and layout chrome. Feature CSS does not go there. The feature-wall, feature-tour, and diff-comment blocks currently sitting in it predate this rule — move them into their feature folder when you next touch them; don't add to them.
 
-Mobile mirrors the same vocabulary through Uniwind in `apps/mobile/global.css`. It has no
-desktop-style primitive layer: business features import behaviorally equivalent `@expo/ui`
-controls directly. `apps/mobile/src/components/` contains product interactions and platform
-adapters, not a shadow catalog of Expo controls. Native Glass modules own availability, grouping,
-interaction, and fallback paint; features keep layout classes at the TSX call site.
+Mobile expresses the same intent through SwiftUI `Theme` tokens rather than CSS variables, and
+has no shared primitive layer of its own; see `apps/mobile-ios/DESIGN.md`.
 
 ---
 
@@ -262,10 +258,14 @@ Pass the trigger through `render` so Base UI merges accessibility props onto the
 
 ### Icons
 
-Icons come from `@phosphor-icons/react`; don't add a second library.
+Icons come from Hugeicons free Stroke Rounded through the shared renderer adapter
+(`~renderer/components/icons/hugeicons`); don't add a second library.
 
 - **Size:** `size-4` is the default and `Button` applies it automatically to a bare `<svg>` child, so most call sites set nothing. `size-3` / `size-3.5` for metadata and dense rows; `size-7`+ for empty-state heroes only.
-- **Weight:** the renderer-wide `IconContext` defaults to `duotone`. `regular` is correct for arrows and carets (including aliases like `ChevronDown`, `ExternalLink`, `RefreshCw`), standalone `X`/close glyphs, and deliberately quiet compact chrome (new-workspace, new-tab, tab-strip overflow, terminal-tab chrome, project headers). Pass `weight="regular"` directly to each exceptional icon. `PhosphorIconContextProvider` is root infrastructure, not a local styling tool.
+- **Stroke:** the adapter defaults to `strokeWidth={1.5}` and free Stroke Rounded glyphs. Use
+  `strokeWidth={1.5}` for an explicit numeric override; the `size` prop is numeric/string while
+  Tailwind `size-*` remains the preferred layout control. Do not pass legacy weight or provider
+  settings to individual icons.
 - **Color** inherits from surrounding text — don't set a token on the SVG when the parent already carries it.
 - **Loading** is `<LoadingIndicator className="size-4" />`. It follows the user's Appearance setting and always paints `foreground`, so call sites set size and layout only. Never import a one-off spinner.
 
@@ -333,160 +333,11 @@ Check `components/ui/README.md` for a primitive that already encodes the pattern
 
 ## 12. Mobile chrome
 
-These rules are canonical for mobile controls, headers, toolbars, tabs, segmented selectors, and
-Liquid Glass. Use platform controls before reproducing their behavior or appearance:
+Mobile is a native SwiftUI app, so its visual contract is not expressible in this guide's Tailwind
+and CSS-token vocabulary. [`apps/mobile-ios/DESIGN.md`](../apps/mobile-ios/DESIGN.md) is canonical
+for it: the `Theme.Colors`/`Control`/`Spacing`/`Typography`/`Motion` tokens, `ContentSurface`,
+`AppUnavailableState`, the Hugeicons-only icon rule, sheet presentation, and Liquid Glass.
 
-1. Expo Router native headers and `Stack.Toolbar` for route navigation.
-2. Expo UI Universal controls, imported directly from `@expo/ui`, for equivalent iOS and Android
-   behavior.
-3. Expo UI Community controls, imported directly from their `@expo/ui/community/*` entry point,
-   when Universal does not expose the required behavior.
-4. Direct SwiftUI or Compose controls in platform files when the platforms genuinely differ.
-5. A shared Yiru module only for repeated product behavior, theme/platform policy, or lifecycle.
-6. React Native for content, layout, virtualized lists, gestures, editors, WebViews, and controls
-   without a behaviorally equivalent Expo UI implementation.
-
-Do not create `MobileButton`, `MobileSwitch`, `MobilePicker`, or a similar one-to-one wrapper that
-renames an Expo control and mirrors its props. A shared module earns its existence only when
-deleting it would duplicate a product invariant or platform rule across callers.
-
-Expo UI Universal controls render inside `ExpoUiHost`, which maps Yiru's semantic theme into the
-native environment. A Host is a native layout bridge, not a root React provider: put one around a
-contiguous native control cluster and never wrap the Expo Router or an arbitrary React Native tree
-with it. Inline hosts match native content on both axes; fill hosts own the available width and
-match native content height. Community controls expose a React Native boundary and do not need this
-outer Host.
-
-Expo UI 57.0.8 Switch is a temporary direct-call exception because Android/web do not reliably
-associate its visible label with the switch semantics and the Android-owned label paints black in
-dark appearance. Use Yiru's complete settings-toggle row until that package behavior is fixed; do
-not introduce a generic Switch facade.
-
-Use `className` for static layout, spacing, color, typography, and interaction states. Reserve
-`style` for animated or runtime-computed values, native bridge requirements, and platform-only
-numeric properties that cannot be expressed through Uniwind.
-
-This hierarchy follows Apple's guidance to keep custom toolbars consistent with system behavior,
-use tab bars for navigation rather than actions, and give buttons a 44×44pt hit region. Expo UI's
-native Button exposes `small`, `regular`, and `large` control sizes plus `glass` and
-`glassProminent`; glass styles require iOS 26 and an Xcode 26 build. `GlassEffectContainer` groups
-related glass shapes, and its spacing controls when neighboring shapes begin to merge.
-
-References:
-
-- [Apple Human Interface Guidelines: Toolbars](https://developer.apple.com/design/human-interface-guidelines/toolbars)
-- [Apple Human Interface Guidelines: Tab bars](https://developer.apple.com/design/human-interface-guidelines/tab-bars)
-- [Apple Human Interface Guidelines: Buttons](https://developer.apple.com/design/human-interface-guidelines/buttons)
-- [Apple: Applying Liquid Glass to custom views](https://developer.apple.com/documentation/SwiftUI/Applying-Liquid-Glass-to-custom-views)
-- [Expo UI: Button](https://docs.expo.dev/versions/latest/sdk/ui/swift-ui/button/)
-- [Expo UI: Picker](https://docs.expo.dev/versions/latest/sdk/ui/swift-ui/picker/)
-- [Expo GlassEffect](https://docs.expo.dev/versions/latest/sdk/glass-effect/)
-
-### Control sizes
-
-The semantic size is the API. Numeric dimensions below define Yiru's opaque fallback and stabilize
-custom circular geometry; feature code must not invent another visible diameter.
-
-| Size | Visible control | Glyph | Use |
-| --- | ---: | ---: | --- |
-| `large` | 44pt | 20pt | FAB and standalone primary actions |
-| `regular` | 36pt | 18pt | All header actions, document-tab actions, ordinary toolbar controls |
-| `small` | 32pt | 16pt | Space-constrained toolbars, composer accessories, filter and key rails |
-
-Every control still has a minimum 44pt hit region. A 36pt or 32pt visible control expands its hit
-region without making the glass shape larger. Use `controlSize(...)` on iOS and the matching shared
-component size elsewhere; don't put a second fixed height, width, padding, or glyph size at the call
-site.
-
-### Spacing and grouping
-
-- **8pt is the only gap between sibling chrome controls.** Use `gap-2`, `HStack(spacing={8})`, and
-  `GlassEffectContainer(spacing={8})` together. Matching layout and glass-container spacing gives
-  every group the same system-controlled blend and morph threshold.
-- Page chrome uses 12pt horizontal insets (`px-3`). Chrome immediately above working content uses
-  8pt vertical separation (`gap-2`, `py-2`, or the nearest semantic safe-area utility).
-- Put controls that act on the same scope in one glass container. Do not wrap the entire header or
-  tab region in another painted card.
-- Native Liquid Glass supplies its own edge and interaction state. Do not add a border, shadow,
-  opacity wash, or nested background on top of available native glass. The unsupported-platform and
-  Reduce Transparency fallback uses `bg-card` plus `border-border` while preserving geometry.
-- Use `glassProminent` only for the primary action or current selection. Ordinary header actions use
-  `glass`.
-
-### Headers
-
-Prefer the native route header. It owns safe areas, title placement, back behavior, control geometry,
-and the iOS material. A custom header is justified only for an embedded panel or a working surface
-whose layout cannot use route chrome.
-
-#### Custom page header
-
-- One line: leading navigation, `text-base font-semibold` title, trailing actions.
-- `regular` controls with a 44pt hit region, 8pt gaps, 12pt horizontal inset.
-- Only the page title is emphasized. Status, account, host, and action labels remain regular.
-- Keep at most two visible trailing actions; overflow the rest into a native menu.
-
-#### Embedded or panel header
-
-- A 60pt minimum row supports a two-line title without shrinking controls.
-- `regular` controls, 8pt gaps, 12pt horizontal inset.
-- Primary label is `text-sm font-semibold`; secondary context is `text-xs` regular and muted.
-- A selected panel action changes glass tint, not size, shadow, or font weight.
-
-### Tabs and adjacent controls
-
-“Tab” describes navigation, not a visual shape. Choose the category first.
-
-#### App tab bar
-
-Use the native `TabView` or Expo Router native tabs for top-level app sections. Keep labels visible,
-use familiar platform symbols, and never place commands such as Add or Refresh in the tab bar.
-
-#### Document tab rail
-
-Terminals, files, Markdown documents, and browser documents use a horizontally scrollable document
-rail because the set is dynamic and closable.
-
-- Every tab is a `regular` capsule in one glass container; tabs are separated by 8pt.
-- Show a 16pt symbol and a `text-sm` regular label. Truncate; don't shrink below `text-sm`.
-- The selected tab uses prominent or tinted glass and foreground color. Feature code does not add
-  bold text, an underline, a shadow, or a different height.
-- New-tab and overflow commands are separate `regular` circular toolbar buttons after the rail,
-  separated from it and each other by 8pt. They are not tabs.
-
-#### Segmented selector
-
-Use a segmented selector for a small fixed set of mutually exclusive local views, such as Changes /
-Pull Request / History or Preview / Source.
-
-- On iOS use SwiftUI `Picker` with `pickerStyle('segmented')`; use the shared opaque equivalent on
-  other platforms.
-- Render one grouped control, not several independent glass pills.
-- Use visible `text-sm` regular labels. Feature code does not add an underline or bold text; the
-  native control owns its selection emphasis.
-- A segmented selector is `regular` by default. Use `small` only inside a space-constrained toolbar.
-
-#### Filter and shortcut rail
-
-A scrollable set of filters, modifier keys, or terminal shortcuts is a toolbar rail, not navigation.
-Use `small` controls with 8pt gaps. Selection may use prominent glass, but accessibility role remains
-button or switch rather than tab.
-
-### Implementation rules
-
-- `apps/mobile/src/components/glass/` owns availability, native and fallback paint, control
-  dimensions, glyph dimensions, hit regions, and grouping.
-- Features own placement and product copy. Their TSX may specify flex behavior, safe-area placement,
-  width, and the standard 8pt gap; it must not restyle a shared control.
-- Universal controls use `ExpoUiHost`; SwiftUI and Compose imports stay in `.ios.tsx` and
-  `.android.tsx` files. `verify:native-control-imports` enforces these boundaries.
-- Keep one-off layout utilities directly on the TSX element. Do not create `const styles = { ... }`
-  for strings used once.
-- Prefer `className` for feature and React Native layout. `style` is reserved for native modifiers,
-  third-party controls without a class-name bridge, and required numeric native measurements; keep
-  those exceptions inside the owning adapter.
-- Use regular-weight mobile icons. Use SF Symbols through Expo UI on iOS and the shared icon mapping
-  elsewhere.
-- Verify every new chrome variant in UI Lab in light and dark appearance, with native glass and the
-  opaque fallback. Check title centering, 44pt hit regions, selected state, long labels, and a
-  horizontally crowded rail.
+What the two platforms genuinely share is design *intent*, not implementation: §1-§6 and §9-§11
+above still describe how Yiru wants to look and behave everywhere. Sections §7 and §8 are
+web-specific.

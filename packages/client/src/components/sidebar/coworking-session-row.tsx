@@ -1,0 +1,50 @@
+import type React from 'react'
+import { TerminalWindow as SquareTerminal } from '~renderer/components/icons/hugeicons'
+import { Button } from '~renderer/components/ui/button'
+import { AgentIcon } from '~renderer/lib/agent-catalog'
+import { cn } from '~renderer/lib/class-names'
+
+import type { CoworkingSessionSidebarRow } from './coworking-sidebar-rows'
+import { TruncatedSidebarLabel } from './truncated-sidebar-label'
+import {
+  DIRECT_PROJECT_WORKTREE_CONTENT_INDENT,
+  SIDEBAR_TREE_INDENT
+} from './worktree-list-indentation'
+
+type CoworkingSessionRowProps = {
+  row: CoworkingSessionSidebarRow
+  onSelect: () => void
+}
+
+export function CoworkingSessionRow({
+  row,
+  onSelect
+}: CoworkingSessionRowProps): React.JSX.Element {
+  // Why: sessions remain one tree step beneath their flattened remote worktree.
+  return (
+    <Button
+      variant="ghost"
+      size="xs"
+      type="button"
+      data-current={row.active ? 'true' : undefined}
+      data-focused-agent-pane={row.active ? 'true' : undefined}
+      aria-current={row.active ? 'page' : undefined}
+      onClick={onSelect}
+      className={cn(
+        'border-0 justify-start whitespace-normal font-normal flex w-full min-w-0 pr-1 text-left text-[11px] leading-none text-muted-foreground',
+        'focus-visible:outline-none',
+        row.active ? 'bg-accent text-accent-foreground' : ''
+      )}
+      style={{ paddingLeft: DIRECT_PROJECT_WORKTREE_CONTENT_INDENT + SIDEBAR_TREE_INDENT }}
+    >
+      <span aria-hidden="true" className="flex size-3.5 shrink-0 items-center justify-center">
+        {row.kind === 'terminal' ? (
+          <SquareTerminal className="size-3.5" />
+        ) : (
+          <AgentIcon agent={row.agent} size={13} />
+        )}
+      </span>
+      <TruncatedSidebarLabel text={row.title} className="min-w-0 flex-1" />
+    </Button>
+  )
+}

@@ -10,7 +10,10 @@ if (!profile || !supportedProfiles.has(profile)) {
 const vitePlus = process.platform === 'win32' ? 'vp.cmd' : 'vp'
 // Why: Vite+ does not accept alternate config paths; selecting the profile
 // through the child environment keeps specialized passes in vite.config.ts.
+// Running at the workspace root also lets package tasks cover sibling sources
+// without `..` path segments, which Vite+ rejects.
 const result = spawnSync(vitePlus, ['lint', ...lintArguments], {
+  cwd: new URL('..', import.meta.url),
   env: { ...process.env, YIRU_LINT_PROFILE: profile },
   stdio: ['inherit', 'pipe', 'pipe'],
   encoding: 'utf8'
@@ -28,9 +31,10 @@ if (result.stderr) {
 }
 
 // Why: `vp staged` passes every staged file to this profile pass, but profiles
-// ignore paths outside their scope (e.g. apps/mobile/** under react-doctor).
-// A mobile-only commit then leaves zero files to lint, which Vite+ reports as
-// an error; out-of-scope staged files are not a lint failure.
+// ignore paths outside their scope (each profile's `ignorePatterns` in
+// vite.config.ts). A commit that only touches ignored paths then leaves zero
+// files to lint, which Vite+ reports as an error; out-of-scope staged files
+// are not a lint failure.
 const output = `${result.stdout ?? ''}${result.stderr ?? ''}`
 if (result.status !== 0 && output.includes('No files found to lint')) {
   process.exit(0)

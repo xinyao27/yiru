@@ -33,7 +33,7 @@ async function bundleNodeEntry(input, output, external = []) {
     // has no tsconfig paths reader.
     resolve: {
       alias: {
-        '~shared': join(ROOT, 'src', 'shared')
+        '~shared': join(ROOT, '..', '..', 'packages', 'shared', 'src')
       }
     },
     transform: {

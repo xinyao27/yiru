@@ -11,10 +11,6 @@ import {
 } from './shell-services-browser.js'
 import { shellServicesPlatformContract } from './shell-services-platform.js'
 import {
-  shellServicesPtyContract,
-  type ShellServicesPtySerializeBufferOutput
-} from './shell-services-pty.js'
-import {
   shellServicesTerminalContract,
   type ShellServicesTerminalCloseTabOutput,
   type ShellServicesTerminalCreateOutput,
@@ -226,8 +222,7 @@ export const shellServicesContract = {
   mobileMarkdown: shellServicesMobileMarkdownContract,
   browser: shellServicesBrowserContract,
   automations: shellServicesAutomationsContract,
-  rateLimitResume: shellServicesRateLimitResumeContract,
-  pty: shellServicesPtyContract
+  rateLimitResume: shellServicesRateLimitResumeContract
 } satisfies ContractRouter<Record<never, never>>
 
 export type ShellServicesUnavailableReason = 'shell-unavailable'
@@ -289,8 +284,4 @@ export type ShellServicesAutomationDispatchResult =
 
 export type ShellServicesRateLimitResumeDispatchResult =
   | ({ ok: true } & ShellServicesDispatchAcceptedOutput)
-  | { ok: false; reason: ShellServicesUnavailableReason }
-
-export type ShellServicesPtySerializeBufferResult =
-  | ({ ok: true } & ShellServicesPtySerializeBufferOutput)
   | { ok: false; reason: ShellServicesUnavailableReason }

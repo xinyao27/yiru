@@ -7,7 +7,7 @@
 //
 //   (2) Per-session global ceiling (1,000 events) — defends against a
 //       compromised renderer. A renderer rendering attacker-controllable
-//       content can invoke `window.api.telemetryTrack` at any rate the
+//       content can invoke `shell.telemetry.track` at any rate the
 //       per-event-name bucket allows; without a global ceiling, 24h of
 //       abuse at the per-event cap could emit ~650K events and blow the
 //       PostHog billing cap in one session.

@@ -45,25 +45,8 @@ export function handleClientEventsUnsubscribe(
   return { unsubscribed: true }
 }
 
-// Why: kept as a plain streaming handler (not inline in a legacy
-// registration) so orpc/router-direct.ts's `wireRuntimeStream` can call it —
-// `runtime.clientEvents.*` is direct-wired in its entirety
-// (router-direct/runtime-events.ts) with no legacy registration left.
-// `subscribe` kept one through 切片 73/110 because
-// `renderer/runtime/client-events.ts`'s Electron branch reaches
-// `runtime.clientEvents.subscribe` through
-// `window.api.runtimeEnvironments.subscribe`'s bare string-method channel,
-// which never negotiates oRPC (docs/runtime-orpc-migration.md Phase 6
-// D-stage, 切片 68/73) — streaming, so outside slice 110's dispatcher-fallback
-// scope. Slice 112 gave `RpcDispatcher` the streaming sibling of that
-// fallback (legacy-dispatch-fallback.ts's
-// `LEGACY_STREAMING_DISPATCH_FALLBACK_PROCEDURES`), which drains this same
-// function through `emit` for that caller, so `subscribe` dropped its
-// registration too. `unsubscribe`'s cleanup-companion caller
-// (`shared/remote-runtime/shared-control-subscriptions.ts`) is unary and was
-// already served by the unary fallback. `driverEvents`/`progressEvents` have
-// no such caller — see driver-events.ts/host-progress-events.ts, retired 切片
-// 73.
+// Why: the direct runtime-events router and its subscription lifecycle share
+// this plain streaming handler across every authenticated oRPC client lane.
 export async function handleClientEventsSubscribe(
   _params: void,
   { runtime, connectionId, principal, signal }: RpcContext,

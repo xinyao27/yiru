@@ -11,7 +11,7 @@ import { track } from '../telemetry/client'
 // Why: install errors are about config-file shape (malformed JSON, ACL
 // denial), not user content — but messages can include paths or stack
 // fragments. The 200-char cap matches `agentHookInstallFailedSchema.error_message`
-// in `src/shared/telemetry-events.ts`; the validator drops overlength values,
+// in `packages/shared/src/telemetry-events.ts`; the validator drops overlength values,
 // so truncation must happen here at the call site.
 const ERROR_MESSAGE_MAX_LEN = 200
 

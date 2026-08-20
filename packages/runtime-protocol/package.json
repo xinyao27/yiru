@@ -96,6 +96,186 @@
       "require": "./dist/mobile-runtime-types.js",
       "default": "./dist/mobile-runtime-types.js"
     },
+    "./mobile-accounts-wire": {
+      "types": "./src/mobile-accounts-wire.ts",
+      "react-native": "./src/mobile-accounts-wire.ts",
+      "browser": "./src/mobile-accounts-wire.ts",
+      "development": "./src/mobile-accounts-wire.ts",
+      "import": "./dist/esm/mobile-accounts-wire.mjs",
+      "require": "./dist/mobile-accounts-wire.js",
+      "default": "./dist/mobile-accounts-wire.js"
+    },
+    "./mobile-agent-history-wire": {
+      "types": "./src/mobile-agent-history-wire.ts",
+      "react-native": "./src/mobile-agent-history-wire.ts",
+      "browser": "./src/mobile-agent-history-wire.ts",
+      "development": "./src/mobile-agent-history-wire.ts",
+      "import": "./dist/esm/mobile-agent-history-wire.mjs",
+      "require": "./dist/mobile-agent-history-wire.js",
+      "default": "./dist/mobile-agent-history-wire.js"
+    },
+    "./mobile-agent-status-wire": {
+      "types": "./src/mobile-agent-status-wire.ts",
+      "react-native": "./src/mobile-agent-status-wire.ts",
+      "browser": "./src/mobile-agent-status-wire.ts",
+      "development": "./src/mobile-agent-status-wire.ts",
+      "import": "./dist/esm/mobile-agent-status-wire.mjs",
+      "require": "./dist/mobile-agent-status-wire.js",
+      "default": "./dist/mobile-agent-status-wire.js"
+    },
+    "./mobile-client-events-wire": {
+      "types": "./src/mobile-client-events-wire.ts",
+      "react-native": "./src/mobile-client-events-wire.ts",
+      "browser": "./src/mobile-client-events-wire.ts",
+      "development": "./src/mobile-client-events-wire.ts",
+      "import": "./dist/esm/mobile-client-events-wire.mjs",
+      "require": "./dist/mobile-client-events-wire.js",
+      "default": "./dist/mobile-client-events-wire.js"
+    },
+    "./mobile-hosted-review-wire": {
+      "types": "./src/mobile-hosted-review-wire.ts",
+      "react-native": "./src/mobile-hosted-review-wire.ts",
+      "browser": "./src/mobile-hosted-review-wire.ts",
+      "development": "./src/mobile-hosted-review-wire.ts",
+      "import": "./dist/esm/mobile-hosted-review-wire.mjs",
+      "require": "./dist/mobile-hosted-review-wire.js",
+      "default": "./dist/mobile-hosted-review-wire.js"
+    },
+    "./mobile-github-review-wire": {
+      "types": "./src/mobile-github-review-wire.ts",
+      "react-native": "./src/mobile-github-review-wire.ts",
+      "browser": "./src/mobile-github-review-wire.ts",
+      "development": "./src/mobile-github-review-wire.ts",
+      "import": "./dist/esm/mobile-github-review-wire.mjs",
+      "require": "./dist/mobile-github-review-wire.js",
+      "default": "./dist/mobile-github-review-wire.js"
+    },
+    "./mobile-files-wire": {
+      "types": "./src/mobile-files-wire.ts",
+      "react-native": "./src/mobile-files-wire.ts",
+      "browser": "./src/mobile-files-wire.ts",
+      "development": "./src/mobile-files-wire.ts",
+      "import": "./dist/esm/mobile-files-wire.mjs",
+      "require": "./dist/mobile-files-wire.js",
+      "default": "./dist/mobile-files-wire.js"
+    },
+    "./mobile-clipboard-wire": {
+      "types": "./src/mobile-clipboard-wire.ts",
+      "react-native": "./src/mobile-clipboard-wire.ts",
+      "browser": "./src/mobile-clipboard-wire.ts",
+      "development": "./src/mobile-clipboard-wire.ts",
+      "import": "./dist/esm/mobile-clipboard-wire.mjs",
+      "require": "./dist/mobile-clipboard-wire.js",
+      "default": "./dist/mobile-clipboard-wire.js"
+    },
+    "./mobile-native-chat-wire": {
+      "types": "./src/mobile-native-chat-wire.ts",
+      "react-native": "./src/mobile-native-chat-wire.ts",
+      "browser": "./src/mobile-native-chat-wire.ts",
+      "development": "./src/mobile-native-chat-wire.ts",
+      "import": "./dist/esm/mobile-native-chat-wire.mjs",
+      "require": "./dist/mobile-native-chat-wire.js",
+      "default": "./dist/mobile-native-chat-wire.js"
+    },
+    "./mobile-notifications-wire": {
+      "types": "./src/mobile-notifications-wire.ts",
+      "react-native": "./src/mobile-notifications-wire.ts",
+      "browser": "./src/mobile-notifications-wire.ts",
+      "development": "./src/mobile-notifications-wire.ts",
+      "import": "./dist/esm/mobile-notifications-wire.mjs",
+      "require": "./dist/mobile-notifications-wire.js",
+      "default": "./dist/mobile-notifications-wire.js"
+    },
+    "./mobile-review-wire": {
+      "types": "./src/mobile-review-wire.ts",
+      "react-native": "./src/mobile-review-wire.ts",
+      "browser": "./src/mobile-review-wire.ts",
+      "development": "./src/mobile-review-wire.ts",
+      "import": "./dist/esm/mobile-review-wire.mjs",
+      "require": "./dist/mobile-review-wire.js",
+      "default": "./dist/mobile-review-wire.js"
+    },
+    "./mobile-browser-wire": {
+      "types": "./src/mobile-browser-wire.ts",
+      "react-native": "./src/mobile-browser-wire.ts",
+      "browser": "./src/mobile-browser-wire.ts",
+      "development": "./src/mobile-browser-wire.ts",
+      "import": "./dist/esm/mobile-browser-wire.mjs",
+      "require": "./dist/mobile-browser-wire.js",
+      "default": "./dist/mobile-browser-wire.js"
+    },
+    "./mobile-session-content-wire": {
+      "types": "./src/mobile-session-content-wire.ts",
+      "react-native": "./src/mobile-session-content-wire.ts",
+      "browser": "./src/mobile-session-content-wire.ts",
+      "development": "./src/mobile-session-content-wire.ts",
+      "import": "./dist/esm/mobile-session-content-wire.mjs",
+      "require": "./dist/mobile-session-content-wire.js",
+      "default": "./dist/mobile-session-content-wire.js"
+    },
+    "./mobile-session-tabs-wire": {
+      "types": "./src/mobile-session-tabs-wire.ts",
+      "react-native": "./src/mobile-session-tabs-wire.ts",
+      "browser": "./src/mobile-session-tabs-wire.ts",
+      "development": "./src/mobile-session-tabs-wire.ts",
+      "import": "./dist/esm/mobile-session-tabs-wire.mjs",
+      "require": "./dist/mobile-session-tabs-wire.js",
+      "default": "./dist/mobile-session-tabs-wire.js"
+    },
+    "./mobile-source-control-wire": {
+      "types": "./src/mobile-source-control-wire.ts",
+      "react-native": "./src/mobile-source-control-wire.ts",
+      "browser": "./src/mobile-source-control-wire.ts",
+      "development": "./src/mobile-source-control-wire.ts",
+      "import": "./dist/esm/mobile-source-control-wire.mjs",
+      "require": "./dist/mobile-source-control-wire.js",
+      "default": "./dist/mobile-source-control-wire.js"
+    },
+    "./mobile-stats-wire": {
+      "types": "./src/mobile-stats-wire.ts",
+      "react-native": "./src/mobile-stats-wire.ts",
+      "browser": "./src/mobile-stats-wire.ts",
+      "development": "./src/mobile-stats-wire.ts",
+      "import": "./dist/esm/mobile-stats-wire.mjs",
+      "require": "./dist/mobile-stats-wire.js",
+      "default": "./dist/mobile-stats-wire.js"
+    },
+    "./mobile-terminal-wire": {
+      "types": "./src/mobile-terminal-wire.ts",
+      "react-native": "./src/mobile-terminal-wire.ts",
+      "browser": "./src/mobile-terminal-wire.ts",
+      "development": "./src/mobile-terminal-wire.ts",
+      "import": "./dist/esm/mobile-terminal-wire.mjs",
+      "require": "./dist/mobile-terminal-wire.js",
+      "default": "./dist/mobile-terminal-wire.js"
+    },
+    "./mobile-terminal-quick-commands-wire": {
+      "types": "./src/mobile-terminal-quick-commands-wire.ts",
+      "react-native": "./src/mobile-terminal-quick-commands-wire.ts",
+      "browser": "./src/mobile-terminal-quick-commands-wire.ts",
+      "development": "./src/mobile-terminal-quick-commands-wire.ts",
+      "import": "./dist/esm/mobile-terminal-quick-commands-wire.mjs",
+      "require": "./dist/mobile-terminal-quick-commands-wire.js",
+      "default": "./dist/mobile-terminal-quick-commands-wire.js"
+    },
+    "./mobile-worktree-wire": {
+      "types": "./src/mobile-worktree-wire.ts",
+      "react-native": "./src/mobile-worktree-wire.ts",
+      "browser": "./src/mobile-worktree-wire.ts",
+      "development": "./src/mobile-worktree-wire.ts",
+      "import": "./dist/esm/mobile-worktree-wire.mjs",
+      "require": "./dist/mobile-worktree-wire.js",
+      "default": "./dist/mobile-worktree-wire.js"
+    },
+    "./mobile-workspace-creation-wire": {
+      "types": "./src/mobile-workspace-creation-wire.ts",
+      "react-native": "./src/mobile-workspace-creation-wire.ts",
+      "browser": "./src/mobile-workspace-creation-wire.ts",
+      "development": "./src/mobile-workspace-creation-wire.ts",
+      "import": "./dist/esm/mobile-workspace-creation-wire.mjs",
+      "require": "./dist/mobile-workspace-creation-wire.js",
+      "default": "./dist/mobile-workspace-creation-wire.js"
+    },
     "./mobile-development-pairing": {
       "types": "./src/mobile-development-pairing.ts",
       "react-native": "./src/mobile-development-pairing.ts",
@@ -113,6 +293,15 @@
       "import": "./dist/esm/orpc-peer-frame.mjs",
       "require": "./dist/runtime-orpc-peer-frame.js",
       "default": "./dist/runtime-orpc-peer-frame.js"
+    },
+    "./provider-usage": {
+      "types": "./src/provider-usage.ts",
+      "react-native": "./src/provider-usage.ts",
+      "browser": "./src/provider-usage.ts",
+      "development": "./src/provider-usage.ts",
+      "import": "./dist/esm/provider-usage.mjs",
+      "require": "./dist/provider-usage.js",
+      "default": "./dist/provider-usage.js"
     },
     "./subscription-replay": {
       "types": "./src/runtime-subscription-replay.ts",
@@ -150,6 +339,87 @@
       "require": "./dist/terminal-query-reply.js",
       "default": "./dist/terminal-query-reply.js"
     },
+    "./terminal-multiplex/connection-records": {
+      "types": "./src/terminal-multiplex/connection-records.ts",
+      "react-native": "./src/terminal-multiplex/connection-records.ts",
+      "browser": "./src/terminal-multiplex/connection-records.ts",
+      "development": "./src/terminal-multiplex/connection-records.ts",
+      "import": "./dist/esm/terminal-multiplex/connection-records.mjs",
+      "require": "./dist/terminal-multiplex/connection-records.js",
+      "default": "./dist/terminal-multiplex/connection-records.js"
+    },
+    "./terminal-multiplex/crc32c": {
+      "types": "./src/terminal-multiplex/crc32c.ts",
+      "react-native": "./src/terminal-multiplex/crc32c.ts",
+      "browser": "./src/terminal-multiplex/crc32c.ts",
+      "development": "./src/terminal-multiplex/crc32c.ts",
+      "import": "./dist/esm/terminal-multiplex/crc32c.mjs",
+      "require": "./dist/terminal-multiplex/crc32c.js",
+      "default": "./dist/terminal-multiplex/crc32c.js"
+    },
+    "./terminal-multiplex/error-codes": {
+      "types": "./src/terminal-multiplex/error-codes.ts",
+      "react-native": "./src/terminal-multiplex/error-codes.ts",
+      "browser": "./src/terminal-multiplex/error-codes.ts",
+      "development": "./src/terminal-multiplex/error-codes.ts",
+      "import": "./dist/esm/terminal-multiplex/error-codes.mjs",
+      "require": "./dist/terminal-multiplex/error-codes.js",
+      "default": "./dist/terminal-multiplex/error-codes.js"
+    },
+    "./terminal-multiplex/flow-records": {
+      "types": "./src/terminal-multiplex/flow-records.ts",
+      "react-native": "./src/terminal-multiplex/flow-records.ts",
+      "browser": "./src/terminal-multiplex/flow-records.ts",
+      "development": "./src/terminal-multiplex/flow-records.ts",
+      "import": "./dist/esm/terminal-multiplex/flow-records.mjs",
+      "require": "./dist/terminal-multiplex/flow-records.js",
+      "default": "./dist/terminal-multiplex/flow-records.js"
+    },
+    "./terminal-multiplex/frame": {
+      "types": "./src/terminal-multiplex/frame.ts",
+      "react-native": "./src/terminal-multiplex/frame.ts",
+      "browser": "./src/terminal-multiplex/frame.ts",
+      "development": "./src/terminal-multiplex/frame.ts",
+      "import": "./dist/esm/terminal-multiplex/frame.mjs",
+      "require": "./dist/terminal-multiplex/frame.js",
+      "default": "./dist/terminal-multiplex/frame.js"
+    },
+    "./terminal-multiplex/json": {
+      "types": "./src/terminal-multiplex/json.ts",
+      "react-native": "./src/terminal-multiplex/json.ts",
+      "browser": "./src/terminal-multiplex/json.ts",
+      "development": "./src/terminal-multiplex/json.ts",
+      "import": "./dist/esm/terminal-multiplex/json.mjs",
+      "require": "./dist/terminal-multiplex/json.js",
+      "default": "./dist/terminal-multiplex/json.js"
+    },
+    "./terminal-multiplex/side-effects": {
+      "types": "./src/terminal-multiplex/side-effects.ts",
+      "react-native": "./src/terminal-multiplex/side-effects.ts",
+      "browser": "./src/terminal-multiplex/side-effects.ts",
+      "development": "./src/terminal-multiplex/side-effects.ts",
+      "import": "./dist/esm/terminal-multiplex/side-effects.mjs",
+      "require": "./dist/terminal-multiplex/side-effects.js",
+      "default": "./dist/terminal-multiplex/side-effects.js"
+    },
+    "./terminal-multiplex/snapshot-records": {
+      "types": "./src/terminal-multiplex/snapshot-records.ts",
+      "react-native": "./src/terminal-multiplex/snapshot-records.ts",
+      "browser": "./src/terminal-multiplex/snapshot-records.ts",
+      "development": "./src/terminal-multiplex/snapshot-records.ts",
+      "import": "./dist/esm/terminal-multiplex/snapshot-records.mjs",
+      "require": "./dist/terminal-multiplex/snapshot-records.js",
+      "default": "./dist/terminal-multiplex/snapshot-records.js"
+    },
+    "./terminal-multiplex/stream-records": {
+      "types": "./src/terminal-multiplex/stream-records.ts",
+      "react-native": "./src/terminal-multiplex/stream-records.ts",
+      "browser": "./src/terminal-multiplex/stream-records.ts",
+      "development": "./src/terminal-multiplex/stream-records.ts",
+      "import": "./dist/esm/terminal-multiplex/stream-records.mjs",
+      "require": "./dist/terminal-multiplex/stream-records.js",
+      "default": "./dist/terminal-multiplex/stream-records.js"
+    },
     "./updater": {
       "types": "./src/updater.ts",
       "react-native": "./src/updater.ts",
@@ -158,6 +428,33 @@
       "import": "./dist/esm/updater.mjs",
       "require": "./dist/updater.js",
       "default": "./dist/updater.js"
+    },
+    "./web-connect": {
+      "types": "./src/web-connect/contracts.ts",
+      "react-native": "./src/web-connect/contracts.ts",
+      "browser": "./src/web-connect/contracts.ts",
+      "development": "./src/web-connect/contracts.ts",
+      "import": "./dist/esm/web-connect/contracts.mjs",
+      "require": "./dist/web-connect/contracts.js",
+      "default": "./dist/web-connect/contracts.js"
+    },
+    "./web-connect/relay-frames": {
+      "types": "./src/web-connect/relay-frames.ts",
+      "react-native": "./src/web-connect/relay-frames.ts",
+      "browser": "./src/web-connect/relay-frames.ts",
+      "development": "./src/web-connect/relay-frames.ts",
+      "import": "./dist/esm/web-connect/relay-frames.mjs",
+      "require": "./dist/web-connect/relay-frames.js",
+      "default": "./dist/web-connect/relay-frames.js"
+    },
+    "./web-connect/signing-messages": {
+      "types": "./src/web-connect/signing-messages.ts",
+      "react-native": "./src/web-connect/signing-messages.ts",
+      "browser": "./src/web-connect/signing-messages.ts",
+      "development": "./src/web-connect/signing-messages.ts",
+      "import": "./dist/esm/web-connect/signing-messages.mjs",
+      "require": "./dist/web-connect/signing-messages.js",
+      "default": "./dist/web-connect/signing-messages.js"
     }
   },
   "scripts": {

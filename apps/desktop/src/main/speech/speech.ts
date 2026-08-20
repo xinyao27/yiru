@@ -1,6 +1,6 @@
-import { ipcMain, systemPreferences } from 'electron'
+import { systemPreferences } from 'electron'
 
-async function ensureMicrophoneAccess(): Promise<void> {
+export async function ensureShellMicrophoneAccess(): Promise<void> {
   if (process.platform !== 'darwin') {
     return
   }
@@ -12,11 +12,4 @@ async function ensureMicrophoneAccess(): Promise<void> {
   if (systemPreferences.getMediaAccessStatus('microphone') !== 'granted') {
     throw new Error('microphone_access_not_granted')
   }
-}
-
-// Why: capture permission belongs to the Electron shell. The dictation worker
-// and audio stream are selected-runtime capabilities carried by oRPC.
-export function registerSpeechHandlers(): void {
-  ipcMain.removeHandler('speech:ensureMicrophoneAccess')
-  ipcMain.handle('speech:ensureMicrophoneAccess', ensureMicrophoneAccess)
 }

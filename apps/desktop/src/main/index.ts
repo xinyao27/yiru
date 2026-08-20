@@ -14,7 +14,6 @@ import {
   app,
   BrowserWindow,
   dialog,
-  ipcMain,
   nativeTheme,
   net,
   powerMonitor,
@@ -33,7 +32,6 @@ import {
   shouldDriveSyntheticAgentTitleFromHook,
   type SyntheticAgentTitleProfile
 } from '~shared/synthetic-agent-title'
-import type { TerminalSideEffectBatch } from '~shared/terminal/side-effect-facts'
 import { resolveTuiAgentPermissionMode } from '~shared/tui-agent/permissions'
 import type { UpdateCheckOptions } from '~shared/types'
 import { parseWorkspaceKey } from '~shared/workspace/scope'
@@ -131,8 +129,7 @@ import { previewGhosttyImport } from './ghostty/import-preview'
 import { setDefaultWslDistroOverride } from './git/runner'
 import { moveWorktree } from './git/worktree'
 import { getElectronSystemLocale } from './i18n/electron-system-locale'
-import { setMainSystemLocaleProvider, setMainUiLanguage } from './i18n/main-i18n'
-import { registerMobileHandlers } from './ipc/mobile'
+import { setMainSystemLocaleProvider, setMainUiLanguage, translateMain } from './i18n/main-i18n'
 import { registerCoreHandlers } from './ipc/register-core-handlers'
 import { KeybindingService } from './keybindings/keybinding-service'
 import {
@@ -141,6 +138,7 @@ import {
   rebuildAppMenu
 } from './menu/register-app-menu'
 import { readMiniMaxSessionCookie } from './minimax/cookie-store'
+import { initializeShellMobileService } from './mobile/shell-service'
 import { setHttpFetchProvider } from './network/http-fetch'
 import { applyElectronProxySettings } from './network/proxy-settings'
 import { triggerStartupNotificationRegistration } from './notifications/notifications'
@@ -179,6 +177,7 @@ import { setGitHubEventPublisher } from './runtime/github-events'
 import { setHostProgressEventPublisher } from './runtime/host-progress-events'
 import { setRuntimeHostPathsProvider } from './runtime/host/paths-provider'
 import { setRuntimeHostSecureStorageProvider } from './runtime/host/secure-storage-provider'
+import { registerRuntimeLoopbackCredentials } from './runtime/loopback/credentials'
 import { clearRuntimeMetadataIfOwned } from './runtime/metadata'
 import { setNotificationShellAttentionSignal } from './runtime/notification-shell-attention'
 import {
@@ -190,6 +189,7 @@ import { YiruRuntimeRpcServer } from './runtime/rpc'
 import { setSettingsEventPublisher } from './runtime/settings-events'
 import { setSkillUpdateRunEventPublisher } from './runtime/skill-update-run-events'
 import { setSpeechEventPublisher } from './runtime/speech-events'
+import { terminalMultiplexCanaryDisabledCapabilities } from './runtime/terminal-multiplex/release-gate'
 import { setUIEventPublisher } from './runtime/ui-events'
 import { setWorkspacePortEventPublisher } from './runtime/workspace-port-events'
 import { YiruRuntimeService } from './runtime/yiru-runtime'
@@ -199,6 +199,8 @@ import {
   installServeSupervisorDisconnectQuit,
   notifyServeSupervisorReady
 } from './serve-update-handoff'
+import { initializeShellAppStartupService } from './shell/app-startup'
+import { publishShellEvent } from './shell/events'
 import {
   configureSpeechDownloadRequestFactory,
   type SpeechDownloadResponse
@@ -254,7 +256,6 @@ import { createWslCliReconciliationStartupBarrier } from './startup/wsl-cli-reco
 import { StatsCollector, initStatsPath } from './stats/collector'
 import { fetchCursorUsageForStats } from './stats/cursor-usage'
 import { getUsageScopePaths } from './stats/usage-scope'
-import { shouldCopySyntheticTitleFrameToPtyData } from './synthetic-title-frame-routing'
 import {
   advanceSyntheticTitleSpinnerEntries,
   type SyntheticTitleSpinnerEntry
@@ -292,6 +293,7 @@ import {
 } from './window/attach-main-window-services'
 import { createElectronBrowserSessionProvider } from './window/browser-session'
 import { createMainWindow, loadMainWindow } from './window/create-main-window'
+import { registerWindowFocusBroadcast } from './window/focus-broadcast'
 import { focusExistingMainWindow } from './window/focus-existing-window'
 import { isMainWindowVisible, notifyMainWindowBecameVisible } from './window/main-window-visibility'
 import {
@@ -333,6 +335,7 @@ let agentAwakeService: AgentAwakeService | null = null
 let crashReports: CrashReportStore | null = null
 let unsubscribeAgentAwakeStatusChanges: (() => void) | null = null
 let unsubscribeSystemResumeBroadcast: (() => void) | null = null
+let unsubscribeWindowFocusBroadcast: (() => void) | null = null
 let watcherShutdownPromise: Promise<void> | null = null
 let watcherShutdownDone = false
 let automations: AutomationService | null = null
@@ -343,9 +346,6 @@ let keybindings: KeybindingService | null = null
 // sweep spare live sessions across that one reload (#5787).
 const expectedRendererReload = createWebContentsTimedFlag()
 const recoveryReloadInFlight = createWebContentsTimedFlag()
-// Why: a tray/menu-bar "Settings…" click can precede the renderer attaching
-// its ui:openSettings listener; the renderer pulls this one-shot on mount.
-const pendingOpenSettings = createWebContentsTimedFlag()
 let firstWindowStartupServicesReady: Promise<void> = Promise.resolve()
 let managedWslCliReconciliationReady: Promise<void> = Promise.resolve()
 let managedWslCliStartupBarrierReady: Promise<void> = Promise.resolve()
@@ -796,27 +796,19 @@ if (hasSingleInstanceLock) {
   headlessBrowserDisplayAvailable = ensureVirtualDisplayForHeadlessServe({ isServeMode })
 }
 
-ipcMain.handle('app:awaitFirstWindowStartupServices', async () => {
+initializeShellAppStartupService({
   // Why: window rendering and local RPC startup stay independent, but restored
   // WSL terminals get a bounded chance to receive launcher repairs first.
-  await Promise.all([firstWindowStartupServicesReady, managedWslCliStartupBarrierReady])
-})
-
-// Why: the renderer pulls this once its ui:openSettings listener is attached so
-// a tray/menu-bar Settings request queued before mount is not lost to a race.
-ipcMain.handle('ui:consumePendingOpenSettings', (event) =>
-  pendingOpenSettings.matches(event.sender.id, { consume: true })
-)
-
-ipcMain.handle(
-  'app:startupDiagnostic',
-  (_event, event: string, details?: Record<string, unknown>) => {
+  awaitFirstWindowStartupServices: async () => {
+    await Promise.all([firstWindowStartupServicesReady, managedWslCliStartupBarrierReady])
+  },
+  startupDiagnostic: (event, details) => {
     if (!startupDiagnosticsEnabled || !event.startsWith('renderer-')) {
       return
     }
     logStartupMilestone(event, details && typeof details === 'object' ? details : {})
   }
-)
+})
 
 // Why: a PTY that dies while Yiru is down cannot clear its persisted hook state.
 async function reapRestoredSubagentsWithoutLiveAgent(): Promise<void> {
@@ -1019,14 +1011,7 @@ function openSettingsFromSystemMenu(): void {
   }
   recordCrashBreadcrumb('settings_opened')
 
-  // Why: no main-side signal proves the renderer listener is attached, so push
-  // and leave a one-shot intent — a mounted renderer acts on the push, an
-  // unmounted one pulls the intent at mount; only one fires per renderer life.
-  targetWindow.webContents.send('ui:openSettings')
-  // Why: leave an untimed intent — any TTL can be outrun by a slow cold start and
-  // would silently drop the Settings click. webContents-id scoping plus consume-on-
-  // read still prevents the intent from leaking to a later, unrelated renderer.
-  pendingOpenSettings.mark(targetWindow.webContents.id, Number.POSITIVE_INFINITY)
+  publishShellEvent(targetWindow.webContents.id, { type: 'uiOpenSettings' })
 }
 
 function quitFromSystemTray(): void {
@@ -1238,18 +1223,9 @@ function openMainWindow(): BrowserWindow {
     store,
     runtime,
     stats,
-    claudeUsage,
-    codexUsage,
-    openCodeUsage,
-    codexAccounts,
-    claudeAccounts,
     rateLimits,
     rendererWebContentsId,
     automations,
-    {
-      prepareForCodexLaunch: prepareCodexRuntimeHomeForLaunch,
-      prepareForClaudeLaunch: (target) => claudeRuntimeAuth!.prepareForClaudeLaunch(target)
-    },
     agentAwakeService ?? undefined,
     crashReports ?? undefined,
     keybindings,
@@ -1419,19 +1395,25 @@ function openMainWindow(): BrowserWindow {
 function sendOpenFeatureTour(targetWindow?: BrowserWindow | null): void {
   const webContents =
     targetWindow && !targetWindow.isDestroyed() ? targetWindow.webContents : mainWindow?.webContents
-  webContents?.send('ui:openFeatureTour')
+  if (webContents) {
+    publishShellEvent(webContents.id, { type: 'uiOpenFeatureTour' })
+  }
 }
 
 function sendOpenSetupGuide(targetWindow?: BrowserWindow | null): void {
   const webContents =
     targetWindow && !targetWindow.isDestroyed() ? targetWindow.webContents : mainWindow?.webContents
-  webContents?.send('ui:openSetupGuide')
+  if (webContents) {
+    publishShellEvent(webContents.id, { type: 'uiOpenSetupGuide' })
+  }
 }
 
 function sendOpenCrashReport(targetWindow?: BrowserWindow | null): void {
   const webContents =
     targetWindow && !targetWindow.isDestroyed() ? targetWindow.webContents : mainWindow?.webContents
-  webContents?.send('ui:openCrashReport')
+  if (webContents) {
+    publishShellEvent(webContents.id, { type: 'uiOpenCrashReport' })
+  }
 }
 
 // Why: when the renderer crash-loops, the breaker stops auto-reloading and the
@@ -1444,12 +1426,22 @@ async function presentRendererRecoveryPrompt(recentRecoveryCount: number): Promi
   const window = mainWindow && !mainWindow.isDestroyed() ? mainWindow : undefined
   const options = {
     type: 'error' as const,
-    buttons: ['Reload', 'Quit'],
+    buttons: [
+      translateMain('app.recoverableError.reload', 'Reload'),
+      translateMain('app.recoverableError.quit', 'Quit')
+    ],
     defaultId: 0,
     cancelId: 1,
-    title: 'Yiru keeps failing to load',
-    message: 'The app window crashed repeatedly and stopped reloading automatically.',
-    detail: `Yiru tried to recover ${recentRecoveryCount} times in a row without success. This is often a graphics-driver or installation problem. Reload to try again, or quit and relaunch Yiru.`
+    title: translateMain('app.recoverableError.loadLoopTitle', 'Yiru keeps failing to load'),
+    message: translateMain(
+      'app.recoverableError.loadLoopMessage',
+      'The app window crashed repeatedly and stopped reloading automatically.'
+    ),
+    detail: translateMain(
+      'app.recoverableError.loadLoopDetail',
+      'Yiru tried to recover {{value0}} times in a row without success. This is often a graphics-driver or installation problem. Reload to try again, or quit and relaunch Yiru.',
+      { value0: recentRecoveryCount }
+    )
   }
   const { response } = window
     ? await dialog.showMessageBox(window, options)
@@ -1730,12 +1722,6 @@ function sendSyntheticTitle(ptyId: string, data: string, options: { force?: bool
   // titles/BELs reach pty:sideEffect consumers when main holds side-effect
   // authority.
   runtime?.ingestSyntheticTitleFrame(ptyId, data)
-  // Why: only the kill-switch-off renderer still byte-parses synthetic frames;
-  // under main authority the copy would just mint phantom ACKs for unmetered
-  // bytes (see synthetic-title-frame-routing.ts).
-  if (shouldCopySyntheticTitleFrameToPtyData(store?.getSettings())) {
-    mainWindow.webContents.send('pty:data', { id: ptyId, data })
-  }
 }
 
 function isSyntheticTitleWindowVisible(): boolean {
@@ -1904,14 +1890,6 @@ app.whenReady().then(async () => {
       })
     }
   )
-  // Why: DOM focus events do not fire when macOS reactivates the app. Keep
-  // this Electron-only signal in the shell adapter, outside the ai-vault
-  // capability module that also runs in a Node runtime host.
-  app.on('browser-window-focus', (_event, window) => {
-    if (!window.isDestroyed()) {
-      window.webContents.send('aiVault:windowFocused')
-    }
-  })
   electronApp.setAppUserModelId(devInstanceIdentity.appUserModelId)
   app.setName(devInstanceIdentity.name)
   configureSpeechDownloadRequestFactory((url) => {
@@ -2065,6 +2043,7 @@ app.whenReady().then(async () => {
     profileDirectory: activeYiruProfile.profileDirectory
   })
   unsubscribeSystemResumeBroadcast = registerSystemResumeBroadcast()
+  unsubscribeWindowFocusBroadcast = registerWindowFocusBroadcast()
   agentAwakeService = new AgentAwakeService()
   agentAwakeService.setEnabled(store.getSettings().keepComputerAwakeWhileAgentsRun)
   // Why: disk-hydrated status rows are UI continuity only. The service starts
@@ -2240,18 +2219,12 @@ app.whenReady().then(async () => {
     onTerminalAgentStatus: (event) => {
       agentHookServer.ingestTerminalStatus(event)
     },
-    // Why: serve can be promoted in place, so keep the listener wired from
-    // startup; runtime enables desktop-only scanners only for a ready renderer.
-    onTerminalSideEffects: (batch: TerminalSideEffectBatch) => {
-      if (mainWindow && !mainWindow.isDestroyed()) {
-        mainWindow.webContents.send('pty:sideEffect', batch)
-      }
-    },
     getDesktopWindowStatus: getDesktopWindowStatus,
     getWindowById: (windowId) => BrowserWindow.fromId(windowId),
     getHostProcessMetrics: () => app.getAppMetrics(),
     createBrowserCommands: (host) =>
       new RuntimeBrowserCommands(host, electronRuntimeBrowserShellAdapter),
+    disabledCapabilities: terminalMultiplexCanaryDisabledCapabilities(),
     // Why: hook-reported agent status is the same source the desktop sidebar
     // reads. worktree.ps pulls it at query time so mobile shows the same agents.
     getAgentStatusSnapshot: () =>
@@ -2272,7 +2245,7 @@ app.whenReady().then(async () => {
         ? previewWarpThemeImport(store, source)
         : Promise.resolve({ found: false, themes: [], skippedFiles: [] }),
     orchestrationEnvironmentTransport,
-    statsUsageStores: {
+    providerUsageStores: {
       claude: claudeUsage,
       codex: codexUsage,
       openCode: openCodeUsage,
@@ -2324,7 +2297,7 @@ app.whenReady().then(async () => {
     headlessDispatcher: isServeMode ? createHeadlessAutomationDispatcher(runtimeService) : undefined
   })
   runtimeService.setAutomationService(automations)
-  runtimeService.setAccountServices({ claudeAccounts, codexAccounts, rateLimits })
+  runtimeService.accounts.configure({ claudeAccounts, codexAccounts, rateLimits })
   runtimeService.setCommitMessageAgentEnvironmentResolvers({
     // Why: local Codex hooks and auth now live in Yiru's managed runtime home
     // even for the system-default path, so every Yiru-launched Codex process
@@ -2334,7 +2307,7 @@ app.whenReady().then(async () => {
   })
   starNag = new StarNagService(store, stats)
   starNag.start()
-  starNag.registerIpcHandlers()
+  starNag.registerShellService()
   runtimeService.setAgentBrowserBridge(
     new AgentBrowserBridge(browserManager, {
       onTabsChanged: (worktreeId) => runtimeService.notifyMobileSessionTabsChanged(worktreeId)
@@ -2412,19 +2385,32 @@ app.whenReady().then(async () => {
       sendOpenFeatureTour(targetBrowserWindow)
     },
     onZoomIn: () => {
-      mainWindow?.webContents.send('terminal:zoom', 'in')
+      if (mainWindow) {
+        publishShellEvent(mainWindow.webContents.id, { type: 'uiTerminalZoom', direction: 'in' })
+      }
     },
     onZoomOut: () => {
-      mainWindow?.webContents.send('terminal:zoom', 'out')
+      if (mainWindow) {
+        publishShellEvent(mainWindow.webContents.id, { type: 'uiTerminalZoom', direction: 'out' })
+      }
     },
     onZoomReset: () => {
-      mainWindow?.webContents.send('terminal:zoom', 'reset')
+      if (mainWindow) {
+        publishShellEvent(mainWindow.webContents.id, {
+          type: 'uiTerminalZoom',
+          direction: 'reset'
+        })
+      }
     },
     onToggleLeftSidebar: () => {
-      mainWindow?.webContents.send('ui:toggleLeftSidebar')
+      if (mainWindow) {
+        publishShellEvent(mainWindow.webContents.id, { type: 'uiToggleLeftSidebar' })
+      }
     },
     onToggleRightSidebar: () => {
-      mainWindow?.webContents.send('ui:toggleRightSidebar')
+      if (mainWindow) {
+        publishShellEvent(mainWindow.webContents.id, { type: 'uiToggleRightSidebar' })
+      }
     },
     onToggleAppearance: (key) => {
       if (!store) {
@@ -2435,7 +2421,9 @@ app.whenReady().then(async () => {
         // (ui:set/ui:get), not settings. The renderer owns the authoritative
         // toggle logic (it knows the current value and persists it back), so
         // we forward the event and let it flip + store.
-        mainWindow?.webContents.send('ui:toggleStatusBar')
+        if (mainWindow) {
+          publishShellEvent(mainWindow.webContents.id, { type: 'uiToggleStatusBar' })
+        }
         return
       }
       const current = store.getSettings()
@@ -2500,7 +2488,8 @@ app.whenReady().then(async () => {
       : {}),
     webClientRoot: getBundledWebClientRoot()
   })
-  registerMobileHandlers(runtimeRpc, {
+  registerRuntimeLoopbackCredentials(runtimeRpc)
+  initializeShellMobileService(runtimeRpc, {
     openWindowsNetworkSettings: () => shell.openExternal('ms-settings:network-status')
   })
 
@@ -2511,7 +2500,7 @@ app.whenReady().then(async () => {
     // Why: headless runtimes have no BrowserWindow to initialize updater
     // listeners, so use a silent status sink before advertising control.
     setupAutoUpdater(
-      { webContents: { send: () => undefined } },
+      { webContents: {} },
       {
         getLastUpdateCheckAt: () => store!.getUI().lastUpdateCheckAt,
         onBeforeQuit: () => store!.flush(),
@@ -2657,6 +2646,8 @@ app.on('before-quit', () => {
   isQuitting = true
   unsubscribeSystemResumeBroadcast?.()
   unsubscribeSystemResumeBroadcast = null
+  unsubscribeWindowFocusBroadcast?.()
+  unsubscribeWindowFocusBroadcast = null
   unsubscribeAgentAwakeStatusChanges?.()
   unsubscribeAgentAwakeStatusChanges = null
   agentAwakeService?.dispose()

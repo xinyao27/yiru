@@ -2,7 +2,6 @@
   "extends": "@electron-toolkit/tsconfig/tsconfig.node.json",
   "include": [
     "../src/cli/**/*",
-    "../src/shared/**/*",
     "../src/main/agent-hooks/hook-stdin-contract.ts",
     "../src/main/agent-hooks/hook-config-write-path.ts",
     "../src/main/agent-hooks/hooks-json-read.ts",
@@ -71,7 +70,7 @@
     // scripts/rewrite-emitted-aliases.mjs afterwards to turn them back into
     // relative requires. Adding an alias here means updating that script's map.
     "paths": {
-      "~shared/*": ["../src/shared/*"],
+      "~shared/*": ["../node_modules/@yiru/shared/src/*"],
       "~main/*": ["../src/main/*"]
     }
   }

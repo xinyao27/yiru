@@ -8,7 +8,7 @@ import type {
 } from '@yiru/runtime-protocol/contract'
 import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines -- Why: notification IPC keeps permission, native display/dismiss, custom sound asset, and sound-loading handlers colocated so renderer/main contracts stay auditable. */
-import { app, BrowserWindow, Notification, ipcMain, shell } from 'electron'
+import { app, BrowserWindow, Notification, shell } from 'electron'
 import { parsePaneKey } from '~shared/stable-pane-id'
 import type {
   NotificationDeliveryProbeResult,
@@ -26,6 +26,7 @@ import dingSoundPath from '../../../resources/notification-sounds/ding.mp3?asset
 import sonarSoundPath from '../../../resources/notification-sounds/sonar.mp3?asset'
 import thumpSoundPath from '../../../resources/notification-sounds/thump.mp3?asset'
 import twoToneSoundPath from '../../../resources/notification-sounds/two-tone.mp3?asset'
+import { translateMain } from '../i18n/main-i18n'
 import type { Store } from '../persistence'
 import { electronShellServicesConnectionId } from '../runtime/rpc/orpc/shell-services-identity'
 import { dispatchShellUICommand } from '../runtime/rpc/orpc/shell-services-reverse-link'
@@ -134,8 +135,11 @@ function probeNotificationDelivery(): Promise<NotificationDeliveryProbeResult> {
   permissionDialogTriggeredThisSession = true
 
   const probe = new Notification({
-    title: 'Yiru notifications are on',
-    body: 'Yiru will alert you when agents finish or terminals need attention.',
+    title: translateMain('notifications.deliveryProbe.title', 'Yiru notifications are on'),
+    body: translateMain(
+      'notifications.deliveryProbe.body',
+      'Yiru will alert you when agents finish or terminals need attention.'
+    ),
     silent: true
   })
   activeNotifications.add(probe)
@@ -287,19 +291,31 @@ function logNativeNotificationFailure(context: string, error?: string): void {
   )
 }
 
-export function registerNotificationHandlers(store: Store): void {
+type ShellNotificationsService = ReturnType<typeof createShellNotificationsService>
+
+let shellNotificationsService: ShellNotificationsService | null = null
+
+export function initializeShellNotificationsService(store: Store): void {
+  shellNotificationsService = createShellNotificationsService(store)
+}
+
+export function getShellNotificationsService(): ShellNotificationsService {
+  if (!shellNotificationsService) {
+    throw new Error('shell_notifications_service_unavailable')
+  }
+  return shellNotificationsService
+}
+
+function createShellNotificationsService(store: Store) {
   // Why: handler registration marks a fresh session — permission evidence
   // from a previous registration must not leak into the new one.
   lastObservedDeliveryOutcome = null
   deliveryProbeInFlight = null
   permissionDialogTriggeredThisSession = false
 
-  ipcMain.removeHandler('notifications:openSystemSettings')
-  ipcMain.removeHandler('notifications:getPermissionStatus')
-  ipcMain.removeHandler('notifications:probeDelivery')
-  ipcMain.handle('notifications:openSystemSettings', (): void => {
+  const openSystemSettings = (): void => {
     openNotificationSystemSettings()
-  })
+  }
 
   // Why: Electron's main-process `Notification` class exposes no synchronous
   // way to read macOS auth status — the renderer-side `Notification.permission`
@@ -314,75 +330,67 @@ export function registerNotificationHandlers(store: Store): void {
     requested: store.getUI().notificationPermissionRequested === true
   })
 
-  ipcMain.handle('notifications:getPermissionStatus', getPermissionStatus)
-  ipcMain.handle(
-    'notifications:probeDelivery',
-    async (_event, args?: { force?: boolean }): Promise<NotificationDeliveryProbeResult> => {
-      // Why: macOS-only. Windows/Linux have no equivalent first-use permission
-      // dialog, so the onboarding card that consumes this never renders there.
-      if (process.platform !== 'darwin' || !Notification.isSupported()) {
-        return { state: 'unsupported', authoritative: false }
-      }
-      // Why: probes (and the native helper's first-launch path) surface the
-      // macOS permission dialog — mark the one-shot startup registration as
-      // done so it can't fire a second prompt later.
-      if (store.getUI().notificationPermissionRequested !== true) {
-        store.updateUI({ notificationPermissionRequested: true })
-      }
-      // Preferred source: the bundled helper reads the real
-      // UNUserNotificationCenter authorization. Silent, so polling with it
-      // tracks System Settings changes live without flashing banners.
-      const authorization = await readNotificationAuthorizationStatus()
-      if (authorization === 'authorized') {
-        lastObservedDeliveryOutcome = 'delivered'
-        return { state: 'delivered', authoritative: true }
-      }
-      if (authorization === 'denied') {
-        lastObservedDeliveryOutcome = 'failed'
-        return { state: 'blocked', authoritative: true }
-      }
-      if (authorization === 'not-determined') {
-        // Why: the dialog only appears once something asks — fire a single
-        // probe per session to trigger it, then report the pending decision.
-        if (!permissionDialogTriggeredThisSession) {
-          void probeNotificationDelivery()
-        }
-        return { state: 'awaiting-decision', authoritative: true }
-      }
-      // Helper unavailable ('unknown' status is also unusable evidence):
-      // fall back to scheduling-based probes with session caching, which
-      // avoids repeated probe banners when delivery works.
-      if (!args?.force && lastObservedDeliveryOutcome !== null) {
-        return {
-          state: lastObservedDeliveryOutcome === 'delivered' ? 'delivered' : 'blocked',
-          authoritative: false
-        }
-      }
-      return probeNotificationDelivery()
+  const probeDelivery = async (args?: {
+    force?: boolean
+  }): Promise<NotificationDeliveryProbeResult> => {
+    // Why: macOS-only. Windows/Linux have no equivalent first-use permission
+    // dialog, so the onboarding card that consumes this never renders there.
+    if (process.platform !== 'darwin' || !Notification.isSupported()) {
+      return { state: 'unsupported', authoritative: false }
     }
-  )
+    // Why: probes (and the native helper's first-launch path) surface the
+    // macOS permission dialog — mark the one-shot startup registration as
+    // done so it can't fire a second prompt later.
+    if (store.getUI().notificationPermissionRequested !== true) {
+      store.updateUI({ notificationPermissionRequested: true })
+    }
+    // Preferred source: the bundled helper reads the real
+    // UNUserNotificationCenter authorization. Silent, so polling with it
+    // tracks System Settings changes live without flashing banners.
+    const authorization = await readNotificationAuthorizationStatus()
+    if (authorization === 'authorized') {
+      lastObservedDeliveryOutcome = 'delivered'
+      return { state: 'delivered', authoritative: true }
+    }
+    if (authorization === 'denied') {
+      lastObservedDeliveryOutcome = 'failed'
+      return { state: 'blocked', authoritative: true }
+    }
+    if (authorization === 'not-determined') {
+      // Why: the dialog only appears once something asks — fire a single
+      // probe per session to trigger it, then report the pending decision.
+      if (!permissionDialogTriggeredThisSession) {
+        void probeNotificationDelivery()
+      }
+      return { state: 'awaiting-decision', authoritative: true }
+    }
+    // Helper unavailable ('unknown' status is also unusable evidence):
+    // fall back to scheduling-based probes with session caching, which
+    // avoids repeated probe banners when delivery works.
+    if (!args?.force && lastObservedDeliveryOutcome !== null) {
+      return {
+        state: lastObservedDeliveryOutcome === 'delivered' ? 'delivered' : 'blocked',
+        authoritative: false
+      }
+    }
+    return probeNotificationDelivery()
+  }
 
-  ipcMain.removeHandler('notifications:dismissNative')
-  ipcMain.handle(
-    'notifications:dismissNative',
-    (_event, notificationIds: string[]): ShellServicesNotificationsDismissOutput => {
-      const uniqueIds = Array.from(
-        new Set(
-          notificationIds.filter((id): id is string => typeof id === 'string' && id.length > 0)
-        )
-      )
-      let dismissed = 0
-      for (const id of uniqueIds) {
-        const entry = activeNotificationsById.get(id)
-        if (entry) {
-          entry.notification.close()
-          entry.release()
-          dismissed += 1
-        }
+  const dismissNative = (notificationIds: string[]): ShellServicesNotificationsDismissOutput => {
+    const uniqueIds = Array.from(
+      new Set(notificationIds.filter((id): id is string => typeof id === 'string' && id.length > 0))
+    )
+    let dismissed = 0
+    for (const id of uniqueIds) {
+      const entry = activeNotificationsById.get(id)
+      if (entry) {
+        entry.notification.close()
+        entry.release()
+        dismissed += 1
       }
-      return { dismissed }
     }
-  )
+    return { dismissed }
+  }
 
   // Why: Phase 5 slice S3 — this is the shell's implementation of the
   // shellServices.notifications.display reverse procedure, reached via
@@ -392,197 +400,167 @@ export function registerNotificationHandlers(store: Store): void {
   // this handler owns only what's genuinely shell-local: window focus,
   // Notification support/authorization, and the activeNotificationsById
   // handle table.
-  ipcMain.removeHandler('notifications:displayNative')
-  ipcMain.handle(
-    'notifications:displayNative',
-    (
-      _event,
-      args: ShellServicesNotificationsDisplayInput
-    ):
+  const displayNative = (
+    args: ShellServicesNotificationsDisplayInput
+  ): ShellServicesNotificationsDisplayOutput | Promise<ShellServicesNotificationsDisplayOutput> => {
+    const browserWindow =
+      BrowserWindow.getAllWindows().find((window) => !window.isDestroyed()) ?? null
+    if (args.suppressWhenFocused && browserWindow && browserWindow.isFocused()) {
+      return { delivered: false, reason: 'suppressed-focus' }
+    }
+
+    if (!Notification.isSupported()) {
+      return { delivered: false, reason: 'not-supported' }
+    }
+
+    function deliverNativeNotification():
       | ShellServicesNotificationsDisplayOutput
-      | Promise<ShellServicesNotificationsDisplayOutput> => {
-      const browserWindow =
-        BrowserWindow.getAllWindows().find((window) => !window.isDestroyed()) ?? null
-      if (args.suppressWhenFocused && browserWindow && browserWindow.isFocused()) {
-        return { delivered: false, reason: 'suppressed-focus' }
+      | Promise<ShellServicesNotificationsDisplayOutput> {
+      const notificationOptions: {
+        title: string
+        body: string
+        silent?: boolean
+        sound?: string
+      } = { title: args.title, body: args.body }
+      if (!args.useSystemSound) {
+        notificationOptions.silent = true
+      } else if (process.platform === 'darwin') {
+        // Why: macOS treats an unset notification sound as silent. When Yiru is
+        // using the OS sound, ask Electron for the default notification sound.
+        notificationOptions.sound = 'default'
+      }
+      const notification = new Notification(notificationOptions)
+      if (args.notificationId) {
+        const previous = activeNotificationsById.get(args.notificationId)
+        if (previous) {
+          previous.notification.close()
+          previous.release()
+        }
       }
 
-      if (!Notification.isSupported()) {
-        return { delivered: false, reason: 'not-supported' }
-      }
-
-      function deliverNativeNotification():
-        | ShellServicesNotificationsDisplayOutput
-        | Promise<ShellServicesNotificationsDisplayOutput> {
-        const notificationOptions: {
-          title: string
-          body: string
-          silent?: boolean
-          sound?: string
-        } = { title: args.title, body: args.body }
-        if (!args.useSystemSound) {
-          notificationOptions.silent = true
-        } else if (process.platform === 'darwin') {
-          // Why: macOS treats an unset notification sound as silent. When Yiru is
-          // using the OS sound, ask Electron for the default notification sound.
-          notificationOptions.sound = 'default'
+      // Why: prevent GC from collecting the notification (and its click
+      // handler) while it's still visible in macOS Notification Center.
+      let clickHandler: (() => void) | null = null
+      let failedHandler: ((_event: unknown, error?: string) => void) | null = null
+      const entryForId: { notification: Notification; release: () => void } | null =
+        args.notificationId ? { notification, release: () => {} } : null
+      const release = retainNotificationUntilRelease(notification, () => {
+        if (clickHandler) {
+          notification.removeListener('click', clickHandler)
+          clickHandler = null
         }
-        const notification = new Notification(notificationOptions)
-        if (args.notificationId) {
-          const previous = activeNotificationsById.get(args.notificationId)
-          if (previous) {
-            previous.notification.close()
-            previous.release()
-          }
+        if (failedHandler) {
+          notification.removeListener('failed', failedHandler)
+          failedHandler = null
         }
-
-        // Why: prevent GC from collecting the notification (and its click
-        // handler) while it's still visible in macOS Notification Center.
-        let clickHandler: (() => void) | null = null
-        let failedHandler: ((_event: unknown, error?: string) => void) | null = null
-        const entryForId: { notification: Notification; release: () => void } | null =
-          args.notificationId ? { notification, release: () => {} } : null
-        const release = retainNotificationUntilRelease(notification, () => {
-          if (clickHandler) {
-            notification.removeListener('click', clickHandler)
-            clickHandler = null
-          }
-          if (failedHandler) {
-            notification.removeListener('failed', failedHandler)
-            failedHandler = null
-          }
-          if (
-            args.notificationId &&
-            activeNotificationsById.get(args.notificationId) === entryForId
-          ) {
-            activeNotificationsById.delete(args.notificationId)
-          }
-        })
-        if (entryForId && args.notificationId) {
-          entryForId.release = release
-          activeNotificationsById.set(args.notificationId, entryForId)
+        if (
+          args.notificationId &&
+          activeNotificationsById.get(args.notificationId) === entryForId
+        ) {
+          activeNotificationsById.delete(args.notificationId)
         }
-
-        failedHandler = (_event, error) => {
-          // Why: Electron 42's macOS UNNotification backend reports unsigned
-          // apps and native delivery errors here; release immediately instead
-          // of retaining a dead notification until the fallback timer.
-          logNativeNotificationFailure(args.source ?? 'notification', error)
-          // A definitive rejection — feeds the permission card's evidence.
-          lastObservedDeliveryOutcome = 'failed'
-          release()
-        }
-        notification.on('failed', failedHandler)
-
-        // Why: clicking a notification should bring Yiru to the foreground and
-        // switch to the worktree/pane that triggered it. Worktree activation owns
-        // repo/sidebar state; the optional focusTerminal follow-up uses the stable
-        // pane leaf id so split-pane notifications land on the exact pane.
-        // Why: worktreeId is formatted as "repoId::worktreePath".  If the
-        // separator is missing we cannot reliably extract a repoId, so skip
-        // the click-to-navigate binding — the notification still fires but
-        // clicking it will not attempt to switch to an unknown worktree.
-        const notificationWorktreeId = args.worktreeId
-        if (notificationWorktreeId && notificationWorktreeId.includes('::')) {
-          const repoId = getRepoIdFromWorktreeId(notificationWorktreeId)
-          clickHandler = () => {
-            release()
-            const win = BrowserWindow.getAllWindows().find((w) => !w.isDestroyed())
-            if (!win) {
-              return
-            }
-            if (process.platform === 'darwin') {
-              app.focus({ steal: true })
-            }
-            if (win.isMinimized()) {
-              win.restore()
-            }
-            win.focus()
-            const shellConnectionId = electronShellServicesConnectionId(win.webContents.id)
-            dispatchShellUICommand(shellConnectionId, {
-              type: 'activateWorktree',
-              repoId,
-              worktreeId: notificationWorktreeId
-            })
-            const paneTarget = args.paneKey ? parsePaneKey(args.paneKey) : null
-            if (paneTarget) {
-              dispatchShellUICommand(shellConnectionId, {
-                type: 'focusTerminal',
-                tabId: paneTarget.tabId,
-                worktreeId: notificationWorktreeId,
-                leafId: paneTarget.leafId,
-                ackPaneKeyOnSuccess: args.paneKey,
-                flashFocusedPane: true,
-                scrollToBottomIfOutputSinceLastView: true
-              })
-            }
-          }
-          notification.on('click', clickHandler)
-        }
-
-        const displayConfirmation = args.requireDisplayConfirmation
-          ? waitForNotificationDisplay(notification)
-          : null
-        notification.show()
-
-        if (displayConfirmation) {
-          return displayConfirmation.then((displayed) => {
-            if (!displayed) {
-              release()
-              return { delivered: false, reason: 'not-displayed' }
-            }
-            lastObservedDeliveryOutcome = 'delivered'
-            return { delivered: true }
-          })
-        }
-
-        return { delivered: true }
-      }
-
-      if (process.platform !== 'darwin') {
-        return deliverNativeNotification()
-      }
-      // Why: macOS silently swallows accepted notifications while permission
-      // is denied or the permission dialog is unanswered (verified on macOS
-      // 26). Skip the doomed native notification and tell the caller, so the
-      // runtime can surface `blocked-by-system` and the renderer its in-app
-      // fallback pointing at System Settings. The mobile push (job2) already
-      // happened on the runtime side before this was called — paired devices
-      // have their own notification channel, unaffected by this OS-level gate.
-      return readNotificationAuthorizationStatus().then((authorization) => {
-        if (authorization === 'denied' || authorization === 'not-determined') {
-          lastObservedDeliveryOutcome = 'failed'
-          return { delivered: false, reason: 'blocked-by-system' }
-        }
-        return deliverNativeNotification()
       })
-    }
-  )
-
-  // Why: the preload caches the decoded blob keyed by path. Returning just
-  // the validated path lets it skip the 10MB IPC round-trip on every dispatch
-  // when the user's selection hasn't changed — terminal-bell bursts can fire
-  // many notifications in seconds.
-  ipcMain.removeHandler('notifications:resolveSoundPath')
-  ipcMain.handle(
-    'notifications:resolveSoundPath',
-    ():
-      | { ok: true; path: string }
-      | { ok: false; reason: 'missing-path' | 'invalid-path' | 'unsupported-type' } => {
-      const selectedSound = getSelectedNotificationSoundPath(store.getSettings().notifications)
-      if (!selectedSound.path) {
-        return { ok: false, reason: selectedSound.reason ?? 'missing-path' }
+      if (entryForId && args.notificationId) {
+        entryForId.release = release
+        activeNotificationsById.set(args.notificationId, entryForId)
       }
-      const normalizedPath = normalize(selectedSound.path)
-      if (!NOTIFICATION_SOUND_MIME_BY_EXTENSION.has(extname(normalizedPath).toLowerCase())) {
-        return { ok: false, reason: 'unsupported-type' }
-      }
-      return { ok: true, path: normalizedPath }
-    }
-  )
 
-  ipcMain.removeHandler('notifications:loadSound')
-  ipcMain.handle('notifications:loadSound', async (): Promise<NotificationSoundDataResult> => {
+      failedHandler = (_event, error) => {
+        // Why: Electron 42's macOS UNNotification backend reports unsigned
+        // apps and native delivery errors here; release immediately instead
+        // of retaining a dead notification until the fallback timer.
+        logNativeNotificationFailure(args.source ?? 'notification', error)
+        // A definitive rejection — feeds the permission card's evidence.
+        lastObservedDeliveryOutcome = 'failed'
+        release()
+      }
+      notification.on('failed', failedHandler)
+
+      // Why: clicking a notification should bring Yiru to the foreground and
+      // switch to the worktree/pane that triggered it. Worktree activation owns
+      // repo/sidebar state; the optional focusTerminal follow-up uses the stable
+      // pane leaf id so split-pane notifications land on the exact pane.
+      // Why: worktreeId is formatted as "repoId::worktreePath".  If the
+      // separator is missing we cannot reliably extract a repoId, so skip
+      // the click-to-navigate binding — the notification still fires but
+      // clicking it will not attempt to switch to an unknown worktree.
+      const notificationWorktreeId = args.worktreeId
+      if (notificationWorktreeId && notificationWorktreeId.includes('::')) {
+        const repoId = getRepoIdFromWorktreeId(notificationWorktreeId)
+        clickHandler = () => {
+          release()
+          const win = BrowserWindow.getAllWindows().find((w) => !w.isDestroyed())
+          if (!win) {
+            return
+          }
+          if (process.platform === 'darwin') {
+            app.focus({ steal: true })
+          }
+          if (win.isMinimized()) {
+            win.restore()
+          }
+          win.focus()
+          const shellConnectionId = electronShellServicesConnectionId(win.webContents.id)
+          dispatchShellUICommand(shellConnectionId, {
+            type: 'activateWorktree',
+            repoId,
+            worktreeId: notificationWorktreeId
+          })
+          const paneTarget = args.paneKey ? parsePaneKey(args.paneKey) : null
+          if (paneTarget) {
+            dispatchShellUICommand(shellConnectionId, {
+              type: 'focusTerminal',
+              tabId: paneTarget.tabId,
+              worktreeId: notificationWorktreeId,
+              leafId: paneTarget.leafId,
+              ackPaneKeyOnSuccess: args.paneKey,
+              flashFocusedPane: true,
+              scrollToBottomIfOutputSinceLastView: true
+            })
+          }
+        }
+        notification.on('click', clickHandler)
+      }
+
+      const displayConfirmation = args.requireDisplayConfirmation
+        ? waitForNotificationDisplay(notification)
+        : null
+      notification.show()
+
+      if (displayConfirmation) {
+        return displayConfirmation.then((displayed) => {
+          if (!displayed) {
+            release()
+            return { delivered: false, reason: 'not-displayed' }
+          }
+          lastObservedDeliveryOutcome = 'delivered'
+          return { delivered: true }
+        })
+      }
+
+      return { delivered: true }
+    }
+
+    if (process.platform !== 'darwin') {
+      return deliverNativeNotification()
+    }
+    // Why: macOS silently swallows accepted notifications while permission
+    // is denied or the permission dialog is unanswered (verified on macOS
+    // 26). Skip the doomed native notification and tell the caller, so the
+    // runtime can surface `blocked-by-system` and the renderer its in-app
+    // fallback pointing at System Settings. The mobile push (job2) already
+    // happened on the runtime side before this was called — paired devices
+    // have their own notification channel, unaffected by this OS-level gate.
+    return readNotificationAuthorizationStatus().then((authorization) => {
+      if (authorization === 'denied' || authorization === 'not-determined') {
+        lastObservedDeliveryOutcome = 'failed'
+        return { delivered: false, reason: 'blocked-by-system' }
+      }
+      return deliverNativeNotification()
+    })
+  }
+
+  const loadSound = async (): Promise<NotificationSoundDataResult> => {
     const selectedSound = getSelectedNotificationSoundPath(store.getSettings().notifications)
     if (!selectedSound.path) {
       return { ok: false, reason: selectedSound.reason ?? 'missing-path' }
@@ -609,7 +587,16 @@ export function registerNotificationHandlers(store: Store): void {
     } catch {
       return { ok: false, reason: 'read-failed' }
     }
-  })
+  }
+
+  return {
+    openSystemSettings,
+    getPermissionStatus,
+    probeDelivery,
+    dismissNative,
+    displayNative,
+    loadSound
+  }
 }
 
 /**
@@ -634,8 +621,11 @@ export function triggerStartupNotificationRegistration(store: Store): void {
   store.updateUI({ notificationPermissionRequested: true })
 
   const notification = new Notification({
-    title: 'Yiru is ready to notify you',
-    body: 'Allow notifications so Yiru can alert you when agents finish or terminals need attention.'
+    title: translateMain('notifications.permissionRequest.title', 'Yiru is ready to notify you'),
+    body: translateMain(
+      'notifications.permissionRequest.body',
+      'Allow notifications so Yiru can alert you when agents finish or terminals need attention.'
+    )
   })
 
   // Why: prevent GC from collecting the notification (and its click handler)

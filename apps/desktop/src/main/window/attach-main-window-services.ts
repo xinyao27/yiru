@@ -1,39 +1,32 @@
 /* eslint-disable max-lines -- Why: this file is the central main-window IPC wiring point; splitting it during the mobile release compatibility rebase would increase release risk. */
-import { app, dialog, ipcMain, type OpenDialogOptions } from 'electron'
+import { dialog, type OpenDialogOptions } from 'electron'
 import type { BrowserWindow } from 'electron'
-import { isNativeFileDropPayload, type NativeFileDropPayload } from '~shared/native-file-drop'
-import type { UpdateCheckOptions } from '~shared/types'
 
 import { browserManager } from '../browser/manager'
 import { hasSystemMediaAccess, requestSystemMediaAccess } from '../browser/media-access'
 import type { ClaudeRuntimeAuthPreparation } from '../claude/accounts/runtime-auth-service'
 import type { ClaudeAccountSelectionTarget } from '../claude/accounts/runtime-selection'
 import type { CodexAccountSelectionTarget } from '../codex/accounts/runtime-selection'
-import { registerFridayHandlers } from '../friday/ipc'
 import type { FridayService } from '../friday/service'
-import { electronIpcRegistration } from '../ipc/electron-ipc-registration'
+import { initializeShellFridayService } from '../friday/shell-service'
 import { hydrateLocalPtyRegistryAtBoot } from '../memory/hydrate-local-pty-registry'
 import type { Store } from '../persistence'
-import { registerRepoHandlers } from '../project-groups/repos'
+import { initializeShellRepoHostService } from '../project-groups/repos'
 import { registerPtyHandlers } from '../pty/pty'
 import { electronShellServicesConnectionId } from '../runtime/rpc/orpc/shell-services-identity'
 import { subscribeShellServicesConnectionLifecycle } from '../runtime/rpc/orpc/shell-services-reverse-link'
 import type { YiruRuntimeService } from '../runtime/yiru-runtime'
+import { registerShellAppReloader } from '../shell/app-reload'
+import { setShellUpdaterConfiguration } from '../shell/updater'
 import { logStartupMilestone } from '../startup/diagnostics'
 import { scheduleHistoryGc } from '../terminal-history'
-import {
-  checkForUpdatesFromMenu,
-  downloadUpdate,
-  getUpdateStatus,
-  quitAndInstall,
-  setupAutoUpdater,
-  dismissNudge
-} from '../updater'
+import { setupAutoUpdater } from '../updater'
 import {
   scheduleWorktreeBaseDirectoryWatcherSync,
   setWorktreeBaseDirectoryWatcherSyncContext
 } from '../worktree/base-directory-watcher'
 import { getKnownWorktreeIdsForHistoryGc } from './history-gc-worktree-ids'
+import { registerNativeFileDropAdapter } from './native-file-drop'
 
 const UPDATER_SETUP_FALLBACK_MS = 15_000
 
@@ -46,9 +39,6 @@ let pendingAutoUpdaterSetup: (() => void) | null = null
 export function ensureAutoUpdaterConfigured(): void {
   pendingAutoUpdaterSetup?.()
 }
-
-let appReloadHandlerTokenCounter = 0
-let activeAppReloadHandlerToken: number | null = null
 
 export function attachMainWindowServices(
   mainWindow: BrowserWindow,
@@ -68,7 +58,8 @@ export function attachMainWindowServices(
   }
 ): void {
   registerAppReloadHandler(mainWindow, options?.onBeforeRendererReload)
-  registerRepoHandlers(electronIpcRegistration, store, runtime, {
+  registerNativeFileDropAdapter(mainWindow)
+  initializeShellRepoHostService(store, runtime, {
     pickDirectory: async (pickerOptions) => {
       const properties: NonNullable<OpenDialogOptions['properties']> = ['openDirectory']
       if (pickerOptions?.multiple === true) {
@@ -95,7 +86,7 @@ export function attachMainWindowServices(
     }
   )
   if (options?.friday) {
-    registerFridayHandlers(mainWindow, options.friday)
+    initializeShellFridayService(mainWindow, options.friday)
   }
   // Why: the Manage Sessions settings panel (docs/daemon-staleness-ux.md §Phase 1)
   // uses a narrow `pty:management:*` IPC surface that reads the live
@@ -130,7 +121,6 @@ export function attachMainWindowServices(
         )
       })
   }
-  registerFileDropRelay(mainWindow)
   // Why: setupAutoUpdater's first getAutoUpdater() call synchronously
   // require()s electron-updater in packaged builds — seconds on a cold
   // Windows disk under Defender scanning (part of issue #7225's pre-paint
@@ -175,6 +165,7 @@ export function attachMainWindowServices(
     logStartupMilestone('updater-setup-done')
   }
   pendingAutoUpdaterSetup = setupAutoUpdaterDeferred
+  setShellUpdaterConfiguration(ensureAutoUpdaterConfigured)
   mainWindow.once('ready-to-show', () => setImmediate(setupAutoUpdaterDeferred))
   const updaterSetupFallback = setTimeout(setupAutoUpdaterDeferred, UPDATER_SETUP_FALLBACK_MS)
   updaterSetupFallback.unref?.()
@@ -214,31 +205,16 @@ function registerAppReloadHandler(
   mainWindow: BrowserWindow,
   onBeforeRendererReload?: (args: { webContentsId: number; ignoreCache: boolean }) => void
 ): void {
-  // Why: the process-global IPC handler can outlive the BrowserWindow, so keep
-  // the registered WebContents and guard both lifetimes before using it.
-  const handlerToken = ++appReloadHandlerTokenCounter
-  activeAppReloadHandlerToken = handlerToken
   const mainWebContents = mainWindow.webContents
-  ipcMain.removeHandler('app:reload')
-  ipcMain.handle('app:reload', (event) => {
-    if (
-      mainWindow.isDestroyed() ||
-      mainWebContents.isDestroyed() ||
-      event.sender !== mainWebContents
-    ) {
+  const unregister = registerShellAppReloader(mainWebContents.id, () => {
+    if (mainWindow.isDestroyed() || mainWebContents.isDestroyed()) {
       return
     }
     onBeforeRendererReload?.({ webContentsId: mainWebContents.id, ignoreCache: false })
     mainWebContents.reload()
   })
   mainWindow.on('closed', () => {
-    if (activeAppReloadHandlerToken !== handlerToken) {
-      return
-    }
-    // Why: macOS can keep the process alive with no window, and this global
-    // handler otherwise keeps the closed BrowserWindow reachable until reopen.
-    ipcMain.removeHandler('app:reload')
-    activeAppReloadHandlerToken = null
+    unregister()
   })
 }
 
@@ -272,51 +248,4 @@ function registerRuntimeWindowLifecycle(
     runtime.markGraphUnavailable(mainWindow.id)
     runtime.detachShellConnection(shellConnectionId)
   })
-}
-
-function registerFileDropRelay(mainWindow: BrowserWindow): void {
-  const channel = 'terminal:file-dropped-from-preload'
-  const mainWebContents = mainWindow.webContents
-  ipcMain.removeAllListeners(channel)
-  const relayFileDrop = (event: Electron.IpcMainEvent, args: NativeFileDropPayload): void => {
-    if (
-      mainWindow.isDestroyed() ||
-      mainWebContents.isDestroyed() ||
-      event.sender !== mainWebContents
-    ) {
-      return
-    }
-    if (!isNativeFileDropPayload(args)) {
-      return
-    }
-
-    // Why: relay exactly one IPC event per drop gesture so the renderer
-    // receives the full batch of paths without timer-based reconstruction.
-    mainWindow.webContents.send('terminal:file-drop', args)
-  }
-  ipcMain.on(channel, relayFileDrop)
-  mainWindow.on('closed', () => {
-    // Why: macOS can keep the app process alive after the window closes; drop
-    // the relay closure so a destroyed BrowserWindow is not retained.
-    ipcMain.removeListener(channel, relayFileDrop)
-  })
-}
-
-export function registerUpdaterHandlers(_store: Store): void {
-  ipcMain.removeHandler('updater:getStatus')
-  ipcMain.removeHandler('updater:getVersion')
-  ipcMain.removeHandler('updater:check')
-  ipcMain.removeHandler('updater:download')
-  ipcMain.removeHandler('updater:quitAndInstall')
-  ipcMain.removeHandler('updater:dismissNudge')
-
-  ipcMain.handle('updater:getStatus', () => getUpdateStatus())
-  ipcMain.handle('updater:getVersion', () => app.getVersion())
-  ipcMain.handle('updater:check', (_event, options?: UpdateCheckOptions) => {
-    ensureAutoUpdaterConfigured()
-    return checkForUpdatesFromMenu(options)
-  })
-  ipcMain.handle('updater:download', () => downloadUpdate())
-  ipcMain.handle('updater:quitAndInstall', () => quitAndInstall())
-  ipcMain.handle('updater:dismissNudge', () => dismissNudge())
 }

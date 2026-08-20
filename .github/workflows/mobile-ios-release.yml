@@ -1,7 +1,7 @@
 name: Mobile iOS Release
 
-# Why: iOS needs Xcode and Apple signing while Android uses JDK/Gradle; separate
-# triggers keep their credentials and beta distribution independent.
+# Why: preserve the established iOS release inputs, tag pattern, TestFlight audience behavior,
+# and artifact contract while building the sole native mobile client.
 on:
   push:
     tags:
@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       bump_patch_version:
-        description: "Bump the iOS marketing version patch number before release. Tick this after a version has shipped to the App Store (the release fails fast if the current version's train is already closed)."
+        description: 'Bump the highest iOS marketing version found on the existing App Store app. Tick this after the current version has shipped (closed trains fail fast).'
         required: false
         default: false
         type: boolean
@@ -30,36 +30,39 @@ on:
         required: false
         type: string
 
+permissions:
+  contents: read
+
+concurrency:
+  group: mobile-ios-release
+  cancel-in-progress: false
+
 jobs:
   ios-build:
-    # GitHub-hosted macOS runner: required for Xcode. Expo SDK 55's
-    # expo-modules-core declares swift_version 6.0 and uses Swift 6 syntax
-    # (@MainActor isolation). Xcode 16.x (macos-15) can't even parse it
-    # ("unknown attribute 'MainActor'"), so we need Xcode 26.x → macos-26.
     runs-on: macos-26
+    timeout-minutes: 60
 
     defaults:
       run:
-        working-directory: apps/mobile
+        working-directory: apps/mobile-ios
 
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
 
       - name: Select Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          # Xcode 26.x ships the Swift 6.x toolchain Expo SDK 55 requires.
           xcode-version: '26.5'
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version-file: package.json
 
       - name: Validate TestFlight credentials
-        # Why: signing and App Store Connect failures should surface before the
-        # workflow spends time installing dependencies or compiling native code.
         env:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
@@ -67,22 +70,41 @@ jobs:
           ASC_API_KEY_P8: ${{ secrets.ASC_API_KEY_P8 }}
           IOS_DIST_CERT_P12: ${{ secrets.IOS_DIST_CERT_P12 }}
           IOS_DIST_CERT_PASSWORD: ${{ secrets.IOS_DIST_CERT_PASSWORD }}
-        run: node scripts/verify-ios-testflight-env.mjs
+        run: |
+          set -euo pipefail
+          missing=()
+          for name in APPLE_TEAM_ID ASC_KEY_ID ASC_ISSUER_ID ASC_API_KEY_P8 \
+            IOS_DIST_CERT_P12 IOS_DIST_CERT_PASSWORD; do
+            if [[ -z "${!name:-}" ]]; then
+              missing+=("$name")
+            fi
+          done
+          if (( ${#missing[@]} > 0 )); then
+            printf 'Missing iOS TestFlight credentials: %s\n' "${missing[*]}" >&2
+            exit 1
+          fi
+          echo 'iOS TestFlight credentials are configured'
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
         with:
           run_install: false
 
-      - name: Install dependencies
+      - name: Install workspace dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Install Metal toolchain
+        run: xcodebuild -downloadComponent MetalToolchain
 
       - name: Setup Ruby and fastlane
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.3'
           bundler-cache: true
-          working-directory: apps/mobile
+          working-directory: apps/mobile-ios
 
       - name: Resolve release version and build number
         env:
@@ -93,54 +115,41 @@ jobs:
           MOBILE_IOS_BUMP_PATCH_VERSION: ${{ github.event.inputs.bump_patch_version }}
           FASTLANE_SKIP_UPDATE_CHECK: '1'
           FASTLANE_HIDE_CHANGELOG: '1'
-        run: bundle exec fastlane ios prepare_release_version version:"$MOBILE_IOS_RELEASE_VERSION" bump_patch:"$MOBILE_IOS_BUMP_PATCH_VERSION"
+        run: bundle exec fastlane ios prepare_release_version
 
-      - name: Expo prebuild
-        run: npx expo prebuild --platform ios --no-install
-
-      - name: Install CocoaPods
-        run: npx pod-install ios
-
-      # Why: `-allowProvisioningUpdates` + the App Store Connect API key can
-      # create/refresh provisioning profiles, but it cannot recreate the
-      # distribution certificate's PRIVATE KEY across runs. So we import a
-      # pre-exported distribution .p12 (created once via Apple Developer) into a
-      # throwaway keychain. The keychain is ephemeral to the runner and torn
-      # down with the VM; nothing secret is written to the repo.
+      # Why: App Store Connect can issue profiles but cannot recreate the distribution
+      # private key, so import the runner-only certificate into an ephemeral keychain.
       - name: Import distribution certificate
         env:
           IOS_DIST_CERT_P12: ${{ secrets.IOS_DIST_CERT_P12 }}
           IOS_DIST_CERT_PASSWORD: ${{ secrets.IOS_DIST_CERT_PASSWORD }}
         run: |
           set -euo pipefail
-          KEYCHAIN_PATH="$RUNNER_TEMP/yiru-signing.keychain-db"
-          # Random per-run keychain password; never persisted.
+          KEYCHAIN_PATH="$RUNNER_TEMP/yiru-ios-release.keychain-db"
           KEYCHAIN_PASSWORD="$(openssl rand -base64 24)"
-          CERT_PATH="$RUNNER_TEMP/yiru-dist-cert.p12"
+          CERT_PATH="$RUNNER_TEMP/yiru-ios-release-cert.p12"
 
           echo "$IOS_DIST_CERT_P12" | base64 --decode > "$CERT_PATH"
-
           security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
           security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
           security import "$CERT_PATH" -P "$IOS_DIST_CERT_PASSWORD" \
             -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
-          # Allow codesign/xcodebuild to use the key without an interactive prompt.
           security set-key-partition-list -S apple-tool:,apple: \
             -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH" >/dev/null
-          # Put our keychain in the search list so xcodebuild can find the identity.
           security list-keychains -d user -s "$KEYCHAIN_PATH" login.keychain-db
           rm -f "$CERT_PATH"
 
       - name: Build and upload to TestFlight
         env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
           ASC_API_KEY_P8: ${{ secrets.ASC_API_KEY_P8 }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          MOBILE_IOS_RELEASE_VERSION: ${{ github.event.inputs.release_version }}
+          MOBILE_IOS_BUMP_PATCH_VERSION: ${{ github.event.inputs.bump_patch_version }}
           TESTFLIGHT_DISTRIBUTION: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.testflight_distribution || 'internal' }}
           TESTFLIGHT_CHANGELOG: ${{ github.event.inputs.testflight_changelog }}
-          # Keep fastlane non-interactive and quiet about analytics in CI.
           FASTLANE_SKIP_UPDATE_CHECK: '1'
           FASTLANE_HIDE_CHANGELOG: '1'
         run: bundle exec fastlane ios release
@@ -150,5 +159,5 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: yiru-mobile-ipa
-          path: apps/mobile/build/*.ipa
+          path: apps/mobile-ios/build/*.ipa
           if-no-files-found: ignore

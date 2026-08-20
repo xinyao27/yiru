@@ -1,38 +1,29 @@
-// Why: transcript and HKDF domains derive from one protocol root so desktop and
-// mobile cannot silently drift to different keys during future protocol changes.
-export const MOBILE_E2EE_V2_PROTOCOL = 'yiru-mobile-e2ee'
-export const MOBILE_E2EE_V2_KDF_DOMAIN = `${MOBILE_E2EE_V2_PROTOCOL}/v2`
-export const MOBILE_E2EE_V2_TRANSCRIPT_DOMAIN = `${MOBILE_E2EE_V2_KDF_DOMAIN}/transcript`
+import { MOBILE_E2EE_V2_TRANSCRIPT_DOMAIN } from './mobile-e2ee-v2-domains'
+import {
+  MobileE2EEV2HelloSchema,
+  MobileE2EEV2ReadySchema,
+  type MobileE2EEV2Context,
+  type MobileE2EEV2Hello,
+  type MobileE2EEV2Ready
+} from './mobile-e2ee-v2-schema'
+
+export {
+  MOBILE_E2EE_V2_KDF_DOMAIN,
+  MOBILE_E2EE_V2_PROTOCOL,
+  MOBILE_E2EE_V2_TRANSCRIPT_DOMAIN
+} from './mobile-e2ee-v2-domains'
 
 export type MobileE2EETransport = 'direct' | 'relay'
 export type MobileE2EEPayloadKind = 'text' | 'binary'
 
-export type MobileE2EEV2Context = {
-  protocol: typeof MOBILE_E2EE_V2_PROTOCOL
-  initiator: 'mobile'
-  responder: 'desktop'
-  transport: MobileE2EETransport
-  relayHostId?: string
-}
-
-export type MobileE2EEV2Hello = {
-  type: 'e2ee_hello'
-  v: 2
-  clientPublicKeyB64: string
-  clientNonceB64: string
-  capabilities: { framing: [2]; payloadKinds: ['text', 'binary'] }
-  context: MobileE2EEV2Context
-}
-
-export type MobileE2EEV2Ready = {
-  type: 'e2ee_ready'
-  v: 2
-  desktopPublicKeyB64: string
-  clientNonceB64: string
-  desktopNonceB64: string
-  selection: { framing: 2; payloadKinds: ['text', 'binary'] }
-  context: MobileE2EEV2Context
-}
+export {
+  MobileE2EEV2ContextSchema,
+  MobileE2EEV2HelloSchema,
+  MobileE2EEV2ReadySchema,
+  type MobileE2EEV2Context,
+  type MobileE2EEV2Hello,
+  type MobileE2EEV2Ready
+} from './mobile-e2ee-v2-schema'
 
 export type MobileE2EEV2Handshake = {
   hello: MobileE2EEV2Hello
@@ -43,66 +34,35 @@ export type MobileE2EEV2Handshake = {
   desktopNonce: Uint8Array
 }
 
-const BASE64URL_16_PATTERN = /^[A-Za-z0-9_-]{16}$/
-
 export function validateMobileE2EEV2Handshake(
   helloValue: unknown,
   readyValue: unknown
 ): MobileE2EEV2Handshake | null {
-  if (
-    !isExactRecord(helloValue, [
-      'type',
-      'v',
-      'clientPublicKeyB64',
-      'clientNonceB64',
-      'capabilities',
-      'context'
-    ])
-  ) {
+  const helloResult = MobileE2EEV2HelloSchema.safeParse(helloValue)
+  const readyResult = MobileE2EEV2ReadySchema.safeParse(readyValue)
+  if (!helloResult.success || !readyResult.success) {
     return null
   }
-  if (
-    !isExactRecord(readyValue, [
-      'type',
-      'v',
-      'desktopPublicKeyB64',
-      'clientNonceB64',
-      'desktopNonceB64',
-      'selection',
-      'context'
-    ])
-  ) {
+  const hello = helloResult.data
+  const ready = readyResult.data
+  if (!contextsEqual(hello.context, ready.context)) {
     return null
   }
-  if (helloValue.type !== 'e2ee_hello' || helloValue.v !== 2) {
-    return null
-  }
-  if (readyValue.type !== 'e2ee_ready' || readyValue.v !== 2) {
-    return null
-  }
-  if (!hasExactCapabilities(helloValue.capabilities) || !hasExactSelection(readyValue.selection)) {
-    return null
-  }
-  const helloContext = parseContext(helloValue.context)
-  const readyContext = parseContext(readyValue.context)
-  if (!helloContext || !readyContext || !contextsEqual(helloContext, readyContext)) {
-    return null
-  }
-  if (readyValue.clientNonceB64 !== helloValue.clientNonceB64) {
+  if (ready.clientNonceB64 !== hello.clientNonceB64) {
     return null
   }
 
-  const clientPublicKey = decodeCanonicalBase64Bytes(helloValue.clientPublicKeyB64, 32)
-  const desktopPublicKey = decodeCanonicalBase64Bytes(readyValue.desktopPublicKeyB64, 32)
-  const clientNonce = decodeCanonicalBase64Bytes(helloValue.clientNonceB64, 32)
-  const desktopNonce = decodeCanonicalBase64Bytes(readyValue.desktopNonceB64, 32)
+  const clientPublicKey = decodeCanonicalBase64Bytes(hello.clientPublicKeyB64, 32)
+  const desktopPublicKey = decodeCanonicalBase64Bytes(ready.desktopPublicKeyB64, 32)
+  const clientNonce = decodeCanonicalBase64Bytes(hello.clientNonceB64, 32)
+  const desktopNonce = decodeCanonicalBase64Bytes(ready.desktopNonceB64, 32)
   if (!clientPublicKey || !desktopPublicKey || !clientNonce || !desktopNonce) {
     return null
   }
 
   return {
-    hello: helloValue as MobileE2EEV2Hello,
-    ready: readyValue as MobileE2EEV2Ready,
+    hello,
+    ready,
     clientPublicKey,
     desktopPublicKey,
     clientNonce,
@@ -127,7 +87,7 @@ export function encodeMobileE2EEV2Transcript(handshake: MobileE2EEV2Handshake): 
     ['mobile-to-desktop.context.initiator', utf8(hello.context.initiator)],
     ['mobile-to-desktop.context.responder', utf8(hello.context.responder)],
     ['mobile-to-desktop.context.transport', utf8(hello.context.transport)],
-    ['mobile-to-desktop.context.relay-host-id', utf8(hello.context.relayHostId ?? '')],
+    ['mobile-to-desktop.context.relay-host-id', utf8(contextRelayHostId(hello.context))],
     ['desktop-to-mobile.type', utf8(ready.type)],
     ['desktop-to-mobile.version', uint32(ready.v)],
     ['desktop-to-mobile.desktop-public-key', handshake.desktopPublicKey],
@@ -139,65 +99,12 @@ export function encodeMobileE2EEV2Transcript(handshake: MobileE2EEV2Handshake): 
     ['desktop-to-mobile.context.initiator', utf8(ready.context.initiator)],
     ['desktop-to-mobile.context.responder', utf8(ready.context.responder)],
     ['desktop-to-mobile.context.transport', utf8(ready.context.transport)],
-    ['desktop-to-mobile.context.relay-host-id', utf8(ready.context.relayHostId ?? '')]
+    ['desktop-to-mobile.context.relay-host-id', utf8(contextRelayHostId(ready.context))]
   ]
   return concatBytes(
     fields.map(([name, value]) =>
       concatBytes([uint32(utf8(name).length), utf8(name), uint32(value.length), value])
     )
-  )
-}
-
-function parseContext(value: unknown): MobileE2EEV2Context | null {
-  if (!isRecord(value)) {
-    return null
-  }
-  const transport = value.transport
-  const keys =
-    transport === 'relay'
-      ? ['protocol', 'initiator', 'responder', 'transport', 'relayHostId']
-      : ['protocol', 'initiator', 'responder', 'transport']
-  if (!isExactRecord(value, keys)) {
-    return null
-  }
-  if (
-    value.protocol !== MOBILE_E2EE_V2_PROTOCOL ||
-    value.initiator !== 'mobile' ||
-    value.responder !== 'desktop' ||
-    (transport !== 'direct' && transport !== 'relay')
-  ) {
-    return null
-  }
-  if (
-    transport === 'relay' &&
-    (typeof value.relayHostId !== 'string' || !BASE64URL_16_PATTERN.test(value.relayHostId))
-  ) {
-    return null
-  }
-  return value as MobileE2EEV2Context
-}
-
-function hasExactCapabilities(value: unknown): boolean {
-  return (
-    isExactRecord(value, ['framing', 'payloadKinds']) &&
-    Array.isArray(value.framing) &&
-    value.framing.length === 1 &&
-    value.framing[0] === 2 &&
-    Array.isArray(value.payloadKinds) &&
-    value.payloadKinds.length === 2 &&
-    value.payloadKinds[0] === 'text' &&
-    value.payloadKinds[1] === 'binary'
-  )
-}
-
-function hasExactSelection(value: unknown): boolean {
-  return (
-    isExactRecord(value, ['framing', 'payloadKinds']) &&
-    value.framing === 2 &&
-    Array.isArray(value.payloadKinds) &&
-    value.payloadKinds.length === 2 &&
-    value.payloadKinds[0] === 'text' &&
-    value.payloadKinds[1] === 'binary'
   )
 }
 
@@ -207,8 +114,12 @@ function contextsEqual(left: MobileE2EEV2Context, right: MobileE2EEV2Context): b
     left.initiator === right.initiator &&
     left.responder === right.responder &&
     left.transport === right.transport &&
-    left.relayHostId === right.relayHostId
+    contextRelayHostId(left) === contextRelayHostId(right)
   )
+}
+
+function contextRelayHostId(context: MobileE2EEV2Context): string {
+  return context.transport === 'relay' ? context.relayHostId : ''
 }
 
 function decodeCanonicalBase64Bytes(value: unknown, length: number): Uint8Array | null {
@@ -267,17 +178,4 @@ function concatBytes(parts: readonly Uint8Array[]): Uint8Array {
     offset += part.length
   }
   return result
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value)
-}
-
-function isExactRecord(value: unknown, keys: readonly string[]): value is Record<string, unknown> {
-  if (!isRecord(value)) {
-    return false
-  }
-  const actual = Object.keys(value).sort()
-  const expected = [...keys].sort()
-  return actual.length === expected.length && actual.every((key, index) => key === expected[index])
 }

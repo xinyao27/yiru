@@ -29,6 +29,8 @@ export type AuthenticatedMobileSocket = {
   ws: WebSocket
   connectionId: string
   device: E2EEAuthenticatedDevice
+  renderingWebContentsId?: number
+  shellConnectionId?: string
   sendText: (plaintext: string) => boolean
   sendBinary: (plaintext: Uint8Array<ArrayBufferLike>) => boolean
 }

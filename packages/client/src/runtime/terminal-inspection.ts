@@ -1,0 +1,248 @@
+import { makePaneKey } from '~shared/stable-pane-id'
+import { isTerminalInputTooLargeWithDeferredMeasurement } from '~shared/terminal/input'
+import type { GlobalSettings } from '~shared/types'
+
+import { useAppStore } from '../store'
+import { callRuntimeOrpc, isRuntimeOrpcErrorCode } from './orpc-client'
+import { getActiveRuntimeTarget } from './rpc-client'
+import { getRuntimeTerminalEnvironmentId, getRuntimeTerminalHandle } from './terminal-stream'
+
+export type RuntimeTerminalProcessInspection = {
+  foregroundProcess: string | null
+  hasChildProcesses: boolean
+}
+
+type TerminalTarget = Parameters<typeof callRuntimeOrpc>[0]
+
+const DESKTOP_RUNTIME_CLIENT = { id: 'yiru-desktop', type: 'desktop' } as const
+
+function isRuntimePtyInputTooLarge(data: string): boolean | Promise<boolean> {
+  return isTerminalInputTooLargeWithDeferredMeasurement(data)
+}
+
+export function isRuntimeTerminalPtyId(ptyId: string): boolean {
+  return getRuntimeTerminalHandle(ptyId) !== null
+}
+
+function isTerminalGoneError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error)
+  return (
+    isRuntimeOrpcErrorCode(error, 'terminal_handle_stale') ||
+    isRuntimeOrpcErrorCode(error, 'terminal_exited') ||
+    isRuntimeOrpcErrorCode(error, 'terminal_gone') ||
+    message.includes('terminal_handle_stale') ||
+    message.includes('terminal_exited') ||
+    message.includes('terminal_gone') ||
+    message.includes('no_connected_pty')
+  )
+}
+
+function targetForRuntimePty(
+  ptyId: string,
+  settings:
+    | Pick<GlobalSettings, 'activeRuntimeEnvironmentId'>
+    | null
+    | undefined = useAppStore.getState().settings
+): TerminalTarget {
+  const environmentId = getRuntimeTerminalEnvironmentId(ptyId)
+  return environmentId ? { kind: 'environment', environmentId } : getActiveRuntimeTarget(settings)
+}
+
+export async function hasRuntimeTerminal(ptyId: string): Promise<boolean> {
+  const terminal = getRuntimeTerminalHandle(ptyId)
+  if (!terminal) {
+    return false
+  }
+  try {
+    await callRuntimeOrpc(targetForRuntimePty(ptyId), (client) => client.terminal.show, {
+      terminal
+    })
+    return true
+  } catch (error) {
+    if (isTerminalGoneError(error)) {
+      return false
+    }
+    throw error
+  }
+}
+
+export async function closeRuntimeTerminal(ptyId: string): Promise<void> {
+  const terminal = getRuntimeTerminalHandle(ptyId)
+  if (!terminal) {
+    return
+  }
+  await callRuntimeOrpc(targetForRuntimePty(ptyId), (client) => client.terminal.close, { terminal })
+}
+
+export async function clearRuntimeTerminalBuffer(ptyId: string): Promise<void> {
+  const terminal = getRuntimeTerminalHandle(ptyId)
+  if (!terminal) {
+    return
+  }
+  await callRuntimeOrpc(targetForRuntimePty(ptyId), (client) => client.terminal.clearBuffer, {
+    terminal
+  })
+}
+
+export async function readRuntimeTerminalBuffer(
+  ptyId: string,
+  limit = 10_000
+): Promise<string | null> {
+  const terminal = getRuntimeTerminalHandle(ptyId)
+  if (!terminal) {
+    return null
+  }
+  const result = await callRuntimeOrpc(
+    targetForRuntimePty(ptyId),
+    (client) => client.terminal.read,
+    { terminal, limit }
+  )
+  return result.terminal.tail.join('\n')
+}
+
+export async function listRuntimeTerminalSessions() {
+  return callRuntimeOrpc({ kind: 'local' }, (client) => client.terminal.management.listSessions, {})
+}
+
+export async function killRuntimeTerminalSession(sessionId: string): Promise<boolean> {
+  const result = await callRuntimeOrpc(
+    { kind: 'local' },
+    (client) => client.terminal.management.killOne,
+    { sessionId }
+  )
+  return result.success
+}
+
+export function recordRuntimeTerminalInputForPtyId(ptyId: string, timestamp = Date.now()): void {
+  const state = useAppStore.getState()
+  for (const [tabId, layout] of Object.entries(state.terminalLayoutsByTabId)) {
+    for (const [leafId, leafPtyId] of Object.entries(layout?.ptyIdsByLeafId ?? {})) {
+      if (leafPtyId !== ptyId) {
+        continue
+      }
+      try {
+        // Why: paired/runtime sends can bypass xterm.onData, so hibernation
+        // needs the same user-input marker from the PTY-id route.
+        state.recordTerminalInput(makePaneKey(tabId, leafId), timestamp)
+      } catch {
+        // Ignore malformed legacy layout data; the planner will stay
+        // conservative when a live PTY cannot be matched to an eligible pane.
+      }
+      return
+    }
+  }
+}
+
+export async function inspectRuntimeTerminalProcess(
+  settings: Pick<GlobalSettings, 'activeRuntimeEnvironmentId'> | null | undefined,
+  ptyId: string
+): Promise<RuntimeTerminalProcessInspection> {
+  const target = targetForRuntimePty(ptyId, settings)
+  const terminal = getRuntimeTerminalHandle(ptyId)
+  if (!terminal) {
+    return { foregroundProcess: null, hasChildProcesses: false }
+  }
+
+  try {
+    const result = await callRuntimeOrpc(
+      target,
+      (client) => client.terminal.inspectProcess,
+      { terminal },
+      { timeoutMs: 15_000 }
+    )
+    return result.process
+  } catch (error) {
+    if (isTerminalGoneError(error)) {
+      return { foregroundProcess: null, hasChildProcesses: false }
+    }
+    throw error
+  }
+}
+
+export function sendRuntimePtyInput(
+  settings: Pick<GlobalSettings, 'activeRuntimeEnvironmentId'> | null | undefined,
+  ptyId: string,
+  data: string
+): boolean {
+  const tooLarge = isRuntimePtyInputTooLarge(data)
+  if (tooLarge === true) {
+    return false
+  }
+  if (tooLarge !== false) {
+    // Why: this is a fire-and-forget path, so accepted paste-sized input must
+    // yield before validation and then dispatch without blocking the renderer.
+    void tooLarge
+      .then((resolvedTooLarge) => {
+        if (!resolvedTooLarge) {
+          sendRuntimePtyInputWithinLimit(settings, ptyId, data)
+        }
+      })
+      .catch(() => {})
+    return true
+  }
+  return sendRuntimePtyInputWithinLimit(settings, ptyId, data)
+}
+
+function sendRuntimePtyInputWithinLimit(
+  settings: Pick<GlobalSettings, 'activeRuntimeEnvironmentId'> | null | undefined,
+  ptyId: string,
+  data: string
+): boolean {
+  const target = targetForRuntimePty(ptyId, settings)
+  const terminal = getRuntimeTerminalHandle(ptyId)
+  if (!terminal) {
+    return false
+  }
+
+  void callRuntimeOrpc(
+    target,
+    (client) => client.terminal.send,
+    { terminal, text: data, client: DESKTOP_RUNTIME_CLIENT },
+    { timeoutMs: 15_000 }
+  )
+    .then((result) => {
+      if (result.send.accepted === true) {
+        recordRuntimeTerminalInputForPtyId(ptyId)
+      }
+    })
+    .catch(() => {
+      // Why: web session snapshots can retire a remote handle while xterm still
+      // flushes a final input event. The next host snapshot will reattach.
+    })
+  return true
+}
+
+export async function sendRuntimePtyInputVerified(
+  settings: Pick<GlobalSettings, 'activeRuntimeEnvironmentId'> | null | undefined,
+  ptyId: string,
+  data: string
+): Promise<boolean> {
+  const tooLarge = isRuntimePtyInputTooLarge(data)
+  if (typeof tooLarge === 'boolean' ? tooLarge : await tooLarge) {
+    return false
+  }
+  const target = targetForRuntimePty(ptyId, settings)
+  const terminal = getRuntimeTerminalHandle(ptyId)
+  if (!terminal) {
+    return false
+  }
+
+  try {
+    const result = await callRuntimeOrpc(
+      target,
+      (client) => client.terminal.send,
+      { terminal, text: data, client: DESKTOP_RUNTIME_CLIENT },
+      { timeoutMs: 15_000 }
+    )
+    if (result.send.accepted === true) {
+      recordRuntimeTerminalInputForPtyId(ptyId)
+      return true
+    }
+    return false
+  } catch (error) {
+    if (isTerminalGoneError(error)) {
+      return false
+    }
+    throw error
+  }
+}

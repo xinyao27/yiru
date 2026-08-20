@@ -9,6 +9,7 @@ Usage: yiru <command> [options]
 
 Startup:
   open [directory]          Open Yiru or open a directory as a workspace
+  connect                   Connect this computer to the Yiru Web app
   serve                     Start a headless Yiru runtime host
   status                    Show app/runtime/graph readiness
 
@@ -384,7 +385,7 @@ export function formatCommandHelp(spec: CommandSpec): string {
 }
 
 export function formatGroupHelp(specs: CommandSpec[], group: string): string {
-  const groupSpecs = specs.filter((spec) => spec.path[0] === group)
+  const groupSpecs = specs.filter((spec) => spec.path[0] === group && spec.path.length > 1)
   const lines = [`yiru ${group}`, '', `Usage: yiru ${group} <command> [options]`, '', 'Commands:']
   for (const spec of groupSpecs) {
     lines.push(`  ${spec.path.slice(1).join(' ').padEnd(18)} ${spec.summary}`)

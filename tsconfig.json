@@ -7,8 +7,8 @@
     "types": ["vite/client", "node"],
     "skipLibCheck": true,
     "paths": {
-      "~renderer/*": ["./apps/desktop/src/renderer/*"],
-      "~shared/*": ["./apps/desktop/src/shared/*"],
+      "~renderer/*": ["./packages/client/src/*"],
+      "~shared/*": ["./packages/shared/src/*"],
       "~main/*": ["./apps/desktop/src/main/*"],
       "~preload/*": ["./apps/desktop/src/preload/*"]
     },

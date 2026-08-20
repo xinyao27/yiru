@@ -1,0 +1,125 @@
+import { Info } from '~renderer/components/icons/hugeicons'
+import { Button } from '~renderer/components/ui/button'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '~renderer/components/ui/select'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
+import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
+
+import type { AutomationDraft } from './automation-editor-dialog'
+import { Field } from './automation-page-parts'
+
+type AutomationMissedRunGraceFieldProps = {
+  draft: AutomationDraft
+  disabled: boolean
+  pickerTriggerClassName: string
+  onDraftChange: (updater: (current: AutomationDraft) => AutomationDraft) => void
+}
+
+export function AutomationMissedRunGraceField({
+  draft,
+  disabled,
+  pickerTriggerClassName,
+  onDraftChange
+}: AutomationMissedRunGraceFieldProps): React.JSX.Element {
+  return (
+    <Field
+      label={
+        <span className="inline-flex items-center gap-1">
+          {translate(
+            'auto.components.automations.AutomationMissedRunGraceField.fc089e5fde',
+            'Grace'
+          )}
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  variant="quiet"
+                  size="xs"
+                  type="button"
+                  aria-label={translate(
+                    'auto.components.automations.AutomationMissedRunGraceField.3df53d554a',
+                    'Missed-run grace help'
+                  )}
+                  className="h-auto border-0 p-0"
+                >
+                  <Info className="size-3.5" />
+                </Button>
+              }
+            />
+            <TooltipContent side="top" sideOffset={6} className="max-w-72">
+              {translate(
+                'auto.components.automations.AutomationMissedRunGraceField.3d70c185c8',
+                'If Yiru or the execution host was unavailable at the scheduled time, Yiru runs one missed occurrence when it becomes available within this window. Older missed runs are skipped.'
+              )}
+            </TooltipContent>
+          </Tooltip>
+        </span>
+      }
+    >
+      <Select
+        value={draft.missedRunGraceMinutes}
+        disabled={disabled}
+        onValueChange={(missedRunGraceMinutes) => {
+          if (missedRunGraceMinutes == null) {
+            return
+          }
+          onDraftChange((current) => ({ ...current, missedRunGraceMinutes }))
+        }}
+      >
+        <SelectTrigger className={cn('w-full', pickerTriggerClassName)}>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent alignItemWithTrigger={false} align="start" sideOffset={4}>
+          <SelectItem value="0">
+            {translate(
+              'auto.components.automations.AutomationMissedRunGraceField.529dc6c0b7',
+              'No grace'
+            )}
+          </SelectItem>
+          <SelectItem value="30">
+            {translate(
+              'auto.components.automations.AutomationMissedRunGraceField.e5ad263ae5',
+              '30 minutes'
+            )}
+          </SelectItem>
+          <SelectItem value="60">
+            {translate(
+              'auto.components.automations.AutomationMissedRunGraceField.521f77cd58',
+              '1 hour'
+            )}
+          </SelectItem>
+          <SelectItem value="180">
+            {translate(
+              'auto.components.automations.AutomationMissedRunGraceField.2dc9ee84d0',
+              '3 hours'
+            )}
+          </SelectItem>
+          <SelectItem value="720">
+            {translate(
+              'auto.components.automations.AutomationMissedRunGraceField.ba50e2a230',
+              '12 hours'
+            )}
+          </SelectItem>
+          <SelectItem value="1440">
+            {translate(
+              'auto.components.automations.AutomationMissedRunGraceField.adbab51feb',
+              '24 hours'
+            )}
+          </SelectItem>
+          <SelectItem value="2880">
+            {translate(
+              'auto.components.automations.AutomationMissedRunGraceField.0f4459e91d',
+              '48 hours'
+            )}
+          </SelectItem>
+        </SelectContent>
+      </Select>
+    </Field>
+  )
+}

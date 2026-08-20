@@ -50,8 +50,14 @@ type RuntimeOrpcConnectionState = Pick<
   | 'grantedAccess'
   | 'sendBinary'
   | 'registerBinaryStreamHandler'
+  | 'openTerminalMultiplex'
+  | 'allowUnadvertisedTerminalMultiplex'
+  | 'activateTerminalMultiplexEpoch'
+  | 'closeTerminalMultiplexConnection'
+  | 'terminalMultiplexQueueBytes'
   | 'authenticatedCallerFingerprint'
   | 'shellConnectionId'
+  | 'renderingWebContentsId'
 >
 
 export type RuntimeOrpcInvocationDetails = {
@@ -195,7 +201,13 @@ export async function invokeRuntimeOrpcOperation<TInput, TOutput>(
               authenticatedCallerFingerprint: context.authenticatedCallerFingerprint,
               sendBinary,
               registerBinaryStreamHandler: context.registerBinaryStreamHandler,
-              shellConnectionId: context.shellConnectionId
+              openTerminalMultiplex: context.openTerminalMultiplex,
+              allowUnadvertisedTerminalMultiplex: context.allowUnadvertisedTerminalMultiplex,
+              activateTerminalMultiplexEpoch: context.activateTerminalMultiplexEpoch,
+              closeTerminalMultiplexConnection: context.closeTerminalMultiplexConnection,
+              terminalMultiplexQueueBytes: context.terminalMultiplexQueueBytes,
+              shellConnectionId: context.shellConnectionId,
+              renderingWebContentsId: context.renderingWebContentsId
             },
             featureInteractionInput
           ),

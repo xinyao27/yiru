@@ -6,7 +6,7 @@
     "rootDir": "../src",
     "outDir": "../out/relay",
     "paths": {
-      "~shared/*": ["../src/shared/*"]
+      "~shared/*": ["../../../packages/shared/src/*"]
     }
   }
 }

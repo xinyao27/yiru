@@ -5,10 +5,13 @@ import { createHash } from 'node:crypto'
  *
  * The updater's lock records the git tree sha of the skill folder it installed,
  * so hashing the observed bytes the same way lets the post-run verdict recognise
- * content the bundled registry has never seen. The algorithm is a port of
- * `gitTreeSha` in scripts/generate-skill-bundle-manifest.mjs and must
- * match it exactly — a near-miss never matches anything and silently disables
- * the verdict's lock check.
+ * content the bundled registry has never seen. The algorithm was ported from the
+ * `gitTreeSha` function in scripts/generate-skill-bundle-manifest.mjs and must still
+ * match the hash format recorded in apps/desktop/resources/skills/*.json exactly — a
+ * near-miss never matches anything and silently disables the verdict's lock check.
+ * That generator script has since been deleted, so those JSON files are now frozen
+ * snapshots nothing regenerates; this port is the only remaining implementation of
+ * the algorithm and must be changed with care.
  *
  * Hashes are over RAW bytes deliberately: a CRLF materialization (Windows
  * checkout) hashes differently from the source tree, so it fails closed to the

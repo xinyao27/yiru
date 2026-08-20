@@ -1,3 +1,5 @@
+import { z } from 'zod'
+
 import type { TerminalOscLinkRange } from '../terminal-osc-link-ranges.js'
 
 export type TerminalDriverState =
@@ -36,7 +38,7 @@ export type TerminalSubscribeEvent =
       // Why: a non-owning desktop viewer of a remotely-driven PTY resize gets
       // 'remote-desktop-fit' from `getRemoteDesktopFitHold`, not just the
       // mobile/desktop-owner pair — the renderer's own local event type
-      // (remote-runtime-terminal-multiplexer.ts) already carries all three.
+      // (terminal-multiplex/multiplexer.ts) already carries all three.
       mode: 'mobile-fit' | 'desktop-fit' | 'remote-desktop-fit'
       cols: number
       rows: number
@@ -66,6 +68,13 @@ export type TerminalMultiplexEvent =
       seq?: number
       truncated: boolean
     }
+
+export type TerminalOpenMultiplexResult = {
+  bulkTicket: string
+  bulkEndpoint: string
+  expiresAt: number
+  maxFrameBytes: number
+}
 
 export type TerminalSummary = {
   handle: string
@@ -142,6 +151,7 @@ export type TerminalShow = TerminalSummary & {
   paneRuntimeId: number
   ptyId: string | null
   rendererGraphEpoch: number
+  transportGeneration: string
 }
 
 export type TerminalState = 'running' | 'exited' | 'unknown'
@@ -186,6 +196,24 @@ export type TerminalCreate = {
   title: string | null
   surface?: 'background' | 'visible'
   warning?: string
+  transportGeneration: string
+  isReattach: boolean
+  sessionExpired: boolean
+  restore: {
+    kind: 'none' | 'snapshot' | 'replay' | 'cold-restore'
+    isAlternateScreen: boolean
+    snapshotCols?: number
+    snapshotRows?: number
+    cwd?: string
+    startupCwdFallback?: {
+      kind: 'worktree'
+      cwd: string
+    }
+  }
+  providerSequence?: {
+    value: string
+    generation: 'continued' | 'reset'
+  }
 }
 
 export type TerminalSplit = {
@@ -268,7 +296,12 @@ export type TerminalResizeForClientResult = {
 
 export type TerminalFocusResult = { focus: TerminalFocus }
 export type TerminalCloseResult = { close: TerminalClose }
-export type TerminalSetDisplayModeResult = { mode: 'auto' | 'desktop'; seq?: number }
+export const TerminalSetDisplayModeResultSchema = z.object({
+  mode: z.enum(['auto', 'desktop']),
+  seq: z.number().optional()
+})
+
+export type TerminalSetDisplayModeResult = z.infer<typeof TerminalSetDisplayModeResultSchema>
 export type TerminalRestoreFitResult = { restored: boolean }
 export type TerminalGetDisplayModeResult = {
   mode: 'auto' | 'desktop'

@@ -1,0 +1,55 @@
+import type { ComponentType } from 'react'
+import type { IconProps } from '~renderer/components/icons/hugeicons'
+import type { SettingsSearchEntry } from '~renderer/components/settings/search'
+
+export type SettingsNavIcon = ComponentType<IconProps>
+export type SettingsNavInstallStatus =
+  | 'install'
+  | 'installed'
+  | 'up-to-date'
+  | 'update-available'
+  | 'checking'
+
+export type SettingsNavTarget =
+  | 'general'
+  | 'integrations'
+  | 'accounts'
+  | 'browser'
+  | 'git'
+  | 'appearance'
+  | 'floating-workspace'
+  | 'terminal'
+  | 'quick-commands'
+  | 'notifications'
+  | 'computer-use'
+  | 'developer-permissions'
+  | 'privacy'
+  | 'advanced'
+  | 'dev'
+  | 'voice'
+  | 'shortcuts'
+  | 'experimental'
+  | 'agents'
+  | 'orchestration'
+  | 'coworking'
+  | 'mobile'
+  | 'mobile-emulator'
+  | 'repo'
+
+export type SettingsNavSection = {
+  id: string
+  title: string
+  description: string
+  icon: SettingsNavIcon
+  searchEntries: SettingsSearchEntry[]
+  group: string
+  badge?: string
+  installStatus?: SettingsNavInstallStatus
+}
+
+export type SettingsNavGroup = {
+  id: string
+  title: string
+  hideTitle?: boolean
+  sections: SettingsNavSection[]
+}

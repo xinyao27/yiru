@@ -1,47 +1,57 @@
-import { BrowserWindow, ipcMain, shell } from 'electron'
+import { shell } from 'electron'
 import type { KeybindingActionId, KeybindingFileSnapshot } from '~shared/keybindings'
 
 import { authorizeExternalPath } from '../filesystem/auth'
 import { rebuildAppMenu } from '../menu/register-app-menu'
+import { broadcastShellEvent } from '../shell/event-broadcast'
 import type { KeybindingService } from './keybinding-service'
 
 function broadcastKeybindingsChanged(snapshot: KeybindingFileSnapshot): void {
-  for (const window of BrowserWindow.getAllWindows()) {
-    if (!window.isDestroyed()) {
-      window.webContents.send('keybindings:changed', snapshot)
-    }
-  }
+  broadcastShellEvent({ type: 'keybindingsChanged', snapshot })
   rebuildAppMenu()
 }
 
-export function registerKeybindingHandlers(service: KeybindingService): void {
-  ipcMain.handle('keybindings:get', () => service.getSnapshot())
+type ShellKeybindingsService = ReturnType<typeof createShellKeybindingsService>
 
-  ipcMain.handle('keybindings:ensureFile', () => {
+let shellKeybindingsService: ShellKeybindingsService | null = null
+
+export function initializeShellKeybindingsService(service: KeybindingService): void {
+  shellKeybindingsService = createShellKeybindingsService(service)
+}
+
+export function getShellKeybindingsService(): ShellKeybindingsService {
+  if (!shellKeybindingsService) {
+    throw new Error('shell_keybindings_service_unavailable')
+  }
+  return shellKeybindingsService
+}
+
+function createShellKeybindingsService(service: KeybindingService) {
+  const ensureFile = (): KeybindingFileSnapshot => {
     const snapshot = service.ensureFile()
     // Why: keybindings.json lives in Yiru's app config directory, not inside a
     // workspace. Opening it in the editor still needs normal fs IPC access.
     authorizeExternalPath(snapshot.path)
     broadcastKeybindingsChanged(snapshot)
     return snapshot
-  })
+  }
 
-  ipcMain.handle(
-    'keybindings:setAction',
-    (_event, args: { actionId: KeybindingActionId; bindings: string[] | null }) => {
-      const snapshot = service.setActionBindings(args.actionId, args.bindings)
-      broadcastKeybindingsChanged(snapshot)
-      return snapshot
-    }
-  )
+  const setAction = (args: {
+    actionId: KeybindingActionId
+    bindings: string[] | null
+  }): KeybindingFileSnapshot => {
+    const snapshot = service.setActionBindings(args.actionId, args.bindings)
+    broadcastKeybindingsChanged(snapshot)
+    return snapshot
+  }
 
-  ipcMain.handle('keybindings:reload', () => {
+  const reload = (): KeybindingFileSnapshot => {
     const snapshot = service.reload()
     broadcastKeybindingsChanged(snapshot)
     return snapshot
-  })
+  }
 
-  ipcMain.handle('keybindings:openFile', async () => {
+  const openFile = async (): Promise<KeybindingFileSnapshot> => {
     const snapshot = service.ensureFile()
     authorizeExternalPath(snapshot.path)
     const error = await shell.openPath(snapshot.path)
@@ -49,12 +59,21 @@ export function registerKeybindingHandlers(service: KeybindingService): void {
       throw new Error(error)
     }
     return snapshot
-  })
+  }
 
-  ipcMain.handle('keybindings:revealFile', () => {
+  const revealFile = (): KeybindingFileSnapshot => {
     const snapshot = service.ensureFile()
     authorizeExternalPath(snapshot.path)
     shell.showItemInFolder(snapshot.path)
     return snapshot
-  })
+  }
+
+  return {
+    get: (): KeybindingFileSnapshot => service.getSnapshot(),
+    ensureFile,
+    setAction,
+    reload,
+    openFile,
+    revealFile
+  }
 }

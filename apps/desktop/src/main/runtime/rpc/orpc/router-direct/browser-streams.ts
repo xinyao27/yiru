@@ -9,8 +9,8 @@ import { wireRuntimeMethod } from '../registered-method'
 import { wireRuntimeStream } from '../registered-stream'
 
 // Why: the two streaming surfaces — split out of browser.ts. Both are direct-wired
-// only. `guestEvents.subscribe`'s one caller, the web shim, always negotiates real
-// oRPC (see methods/browser-guest-events.ts). `screencast.subscribe`/`unsubscribe`
+// only. `guestEvents.subscribe` uses the negotiated runtime client (see
+// methods/browser-guest-events.ts). `screencast.subscribe`/`unsubscribe`
 // used to keep a legacy twin for mobile's browser pane, which subscribed and tore
 // down through the bare `client.subscribe`/`client.sendRequest` channel; 切片 83
 // moved that call site onto `subscribeRuntimeOrpc`/`callRuntimeOrpc`, so the legacy

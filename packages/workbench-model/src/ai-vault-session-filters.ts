@@ -13,9 +13,8 @@ import {
 } from './ai-vault-types'
 import { isClipboardTextByteLengthOverLimit } from './clipboard-text'
 // Why: this is the pure filter/group/query core for Agent Session History.
-// It lives in /shared (not renderer) so the mobile package can reuse it —
-// Metro only watches mobile/ + repo-root src/shared, never src/renderer.
-// INVARIANT: /shared is a leaf — this module must NOT import from src/renderer.
+// It lives in workbench-model so the mobile package can reuse it without
+// reaching into the desktop renderer.
 import { isPathInsideOrEqual, normalizeRuntimePathSeparators } from './cross-platform-path'
 import type { ExecutionHostId } from './execution-host'
 import { parseWslUncPath } from './wsl-paths'

@@ -1,5 +1,5 @@
 import type {
-  RateLimitBannerReport,
+  CodexUsageLimitProbe,
   RateLimitHit,
   RateLimitHitInput,
   RateLimitResumeFailureInput,
@@ -9,11 +9,11 @@ import type {
 
 import type { RpcContext } from '../core'
 
-export function reportRuntimeRateLimitBanner(
-  params: RateLimitBannerReport,
+export async function inspectRuntimeCodexUsageLimit(
+  params: CodexUsageLimitProbe,
   { runtime }: RpcContext
-): RateLimitHit {
-  return runtime.reportRateLimitBanner(params)
+): Promise<RateLimitHit | null> {
+  return await runtime.inspectCodexUsageLimit(params)
 }
 
 export function listRuntimeRateLimitResumes(
@@ -74,7 +74,7 @@ export function markRuntimeRateLimitResumeRendererReady(
   }
 }
 
-// Why: report/list/schedule/cancel/runNow bridge RateLimitResumeService into
+// Why: inspectCodex/list/schedule/cancel/runNow bridge RateLimitResumeService into
 // the runtime contract. `onDispatchRequested`'s push moved to the
 // `shellServices.rateLimitResume.dispatch` reverse contract (Phase 5 slice
 // S5, see main/rate-limit-resume/service.ts `sendDispatch`), which is why

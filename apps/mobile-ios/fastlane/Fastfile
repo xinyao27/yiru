@@ -1,0 +1,333 @@
+# Yiru native iOS release lane. It signs and uploads the only mobile client while
+# refusing to target any App Store Connect record other than the existing Yiru app.
+
+require "base64"
+require "yaml"
+
+default_platform(:ios)
+
+MOBILE_ROOT = File.expand_path("..", __dir__)
+PROJECT_CONFIG_PATH = File.join(MOBILE_ROOT, "project.yml")
+PROJECT = File.join(MOBILE_ROOT, "YiruMobile.xcodeproj")
+BUILD_OUTPUT_DIRECTORY = File.join(MOBILE_ROOT, "build")
+SCHEME = "YiruMobile"
+APP_TARGET = "YiruMobile"
+BUNDLE_ID = "com.xinyao27.yiru.mobile"
+APP_STORE_APP_ID = "6792278376"
+WIDGET_TARGET = "YiruWidgets"
+# Why: this is the extension identifier already registered on the existing App Store app.
+# Renaming it would break the upgrade path and require a separate identifier migration.
+WIDGET_BUNDLE_ID = "com.xinyao27.yiru.mobile.ExpoWidgetsTarget"
+TESTFLIGHT_GROUPS = ["peeps"].freeze
+DEFAULT_TESTFLIGHT_CHANGELOG = "Latest Yiru Mobile updates and fixes.".freeze
+CLOSED_APP_STORE_STATES = %w[
+  READY_FOR_SALE
+  PENDING_DEVELOPER_RELEASE
+  PENDING_APPLE_RELEASE
+  REPLACED_WITH_NEW_VERSION
+  REMOVED_FROM_SALE
+  DEVELOPER_REMOVED_FROM_SALE
+].freeze
+
+def app_store_connect_api_key_from_env
+  app_store_connect_api_key(
+    key_id: ENV.fetch("ASC_KEY_ID"),
+    issuer_id: ENV.fetch("ASC_ISSUER_ID"),
+    key_content: ENV.fetch("ASC_API_KEY_P8"),
+    is_key_content_base64: true,
+    in_house: false,
+  )
+end
+
+def project_marketing_version
+  project = YAML.safe_load(File.read(PROJECT_CONFIG_PATH))
+  project.fetch("settings").fetch("base").fetch("MARKETING_VERSION")
+end
+
+def truthy_option?(value)
+  %w[1 true yes on].include?(value.to_s.strip.downcase)
+end
+
+def bump_patch_version(version)
+  match = version.match(/\A(\d+)\.(\d+)\.(\d+)\z/)
+  UI.user_error!("Cannot bump non-semver mobile version '#{version}'") unless match
+
+  "#{match[1]}.#{match[2]}.#{match[3].to_i + 1}"
+end
+
+def release_history(app)
+  app_store_versions = app
+    .get_app_store_versions(filter: { platform: Spaceship::ConnectAPI::Platform::IOS })
+    .map(&:version_string)
+  builds = Spaceship::ConnectAPI::Build.all(
+    app_id: app.id,
+    platform: Spaceship::ConnectAPI::Platform::IOS,
+  )
+
+  {
+    versions: (app_store_versions + builds.map(&:app_version)).compact.uniq,
+    build_numbers: builds.map { |build| build.version.to_s },
+  }
+rescue StandardError => error
+  UI.user_error!(
+    "Could not read version and build history from the existing App Store app; " \
+    "release blocked (#{error.message})",
+  )
+end
+
+def resolve_requested_version(options, history)
+  requested = options[:version].to_s.strip
+  requested = ENV.fetch("MOBILE_IOS_RELEASE_VERSION", "").strip if requested.empty?
+
+  unless requested.empty?
+    UI.user_error!("iOS release version must be x.y.z") unless requested.match?(/\A\d+\.\d+\.\d+\z/)
+    return requested
+  end
+
+  versions = [project_marketing_version, *history.fetch(:versions)]
+  unsupported_versions = versions.reject { |version| version.match?(/\A\d+\.\d+\.\d+\z/) }
+  unless unsupported_versions.empty?
+    UI.user_error!(
+      "Existing iOS version history contains unsupported versions: " \
+      "#{unsupported_versions.join(', ')}; provide an exact release_version",
+    )
+  end
+
+  version = versions.max_by { |candidate| Gem::Version.new(candidate) }
+  should_bump = truthy_option?(options[:bump_patch]) ||
+                truthy_option?(ENV["MOBILE_IOS_BUMP_PATCH_VERSION"])
+  version = bump_patch_version(version) if should_bump
+
+  UI.user_error!("iOS release version must be x.y.z") unless version.match?(/\A\d+\.\d+\.\d+\z/)
+  version
+end
+
+def version_train_closed?(app, version)
+  return false unless app
+
+  app
+    .get_app_store_versions(filter: { versionString: version })
+    .any? do |app_store_version|
+      CLOSED_APP_STORE_STATES.include?(app_store_version.app_store_state)
+    end
+rescue StandardError => error
+  UI.user_error!(
+    "Could not determine App Store state for #{version}; release blocked (#{error.message})",
+  )
+end
+
+def existing_app_store_app!
+  app =
+    begin
+      Spaceship::ConnectAPI::App.find(BUNDLE_ID)
+    rescue StandardError => error
+      UI.user_error!(
+        "Could not verify the existing App Store app #{BUNDLE_ID}; release blocked " \
+        "(#{error.message})",
+      )
+    end
+
+  unless app
+    UI.user_error!("Existing App Store app #{BUNDLE_ID} was not found; release blocked")
+  end
+  unless app.id == APP_STORE_APP_ID
+    UI.user_error!(
+      "App Store record mismatch for #{BUNDLE_ID}: expected Apple ID #{APP_STORE_APP_ID}, " \
+      "received #{app.id}; release blocked",
+    )
+  end
+
+  UI.message("Verified existing App Store app #{BUNDLE_ID} (Apple ID #{APP_STORE_APP_ID})")
+  app
+end
+
+def ensure_open_version_train!(app, version)
+  return unless version_train_closed?(app, version)
+
+  UI.user_error!(
+    "iOS version #{version} is already submitted or released. Use bump_patch_version or " \
+    "provide a higher release_version.",
+  )
+end
+
+def next_testflight_build_number(history)
+  build_numbers = history
+    .fetch(:build_numbers)
+    .select { |build_number| build_number.match?(/\A[1-9]\d*\z/) }
+    .map(&:to_i)
+
+  build_numbers.max.to_i + 1
+end
+
+def testflight_changelog
+  changelog = ENV.fetch("TESTFLIGHT_CHANGELOG", "").strip
+  changelog.empty? ? DEFAULT_TESTFLIGHT_CHANGELOG : changelog
+end
+
+def testflight_distribution
+  distribution = ENV.fetch("TESTFLIGHT_DISTRIBUTION", "internal").strip.downcase
+  return distribution if %w[internal external].include?(distribution)
+
+  UI.user_error!("TESTFLIGHT_DISTRIBUTION must be 'internal' or 'external'")
+end
+
+def resolve_archive_build_number(options, history)
+  requested = options[:build_number].to_s.strip
+  requested = ENV.fetch("NATIVE_ARCHIVE_BUILD_NUMBER", "").strip if requested.empty?
+  requested = next_testflight_build_number(history).to_s if requested.empty?
+
+  unless requested.match?(/\A[1-9]\d*\z/)
+    UI.user_error!("Archive build number must be a positive integer")
+  end
+  requested
+end
+
+def generate_project
+  Dir.chdir(MOBILE_ROOT) do
+    sh("xcodegen", "generate")
+  end
+end
+
+def build_signed_archive(api_key:, version:, build_number:, team_id:, force_profiles:)
+  app_profile = get_provisioning_profile(
+    api_key: api_key,
+    app_identifier: BUNDLE_ID,
+    force: force_profiles,
+  )
+  app_profile_name = lane_context[SharedValues::SIGH_NAME]
+  unless app_profile_name
+    UI.user_error!("Could not resolve app provisioning profile #{app_profile}")
+  end
+
+  widget_profile = get_provisioning_profile(
+    api_key: api_key,
+    app_identifier: WIDGET_BUNDLE_ID,
+    force: force_profiles,
+  )
+  widget_profile_name = lane_context[SharedValues::SIGH_NAME]
+  unless widget_profile_name
+    UI.user_error!("Could not resolve widget provisioning profile #{widget_profile}")
+  end
+
+  generate_project
+  update_code_signing_settings(
+    path: PROJECT,
+    use_automatic_signing: false,
+    team_id: team_id,
+    targets: [APP_TARGET],
+    build_configurations: ["Release"],
+    code_sign_identity: "Apple Distribution",
+    profile_name: app_profile_name,
+  )
+  update_code_signing_settings(
+    path: PROJECT,
+    use_automatic_signing: false,
+    team_id: team_id,
+    targets: [WIDGET_TARGET],
+    build_configurations: ["Release"],
+    code_sign_identity: "Apple Distribution",
+    profile_name: widget_profile_name,
+  )
+
+  build_app(
+    project: PROJECT,
+    scheme: SCHEME,
+    configuration: "Release",
+    export_method: "app-store",
+    export_options: {
+      teamID: team_id,
+      signingStyle: "manual",
+      provisioningProfiles: {
+        BUNDLE_ID => app_profile_name,
+        WIDGET_BUNDLE_ID => widget_profile_name,
+      },
+    },
+    xcargs: "MARKETING_VERSION=#{version} CURRENT_PROJECT_VERSION=#{build_number}",
+    archive_path: File.join(BUILD_OUTPUT_DIRECTORY, "Yiru.xcarchive"),
+    output_directory: BUILD_OUTPUT_DIRECTORY,
+    output_name: "Yiru.ipa",
+    clean: true,
+  )
+end
+
+def verify_signed_archive!
+  checker = File.join(MOBILE_ROOT, "scripts", "check-signed-archive.mjs")
+  archive = File.join(BUILD_OUTPUT_DIRECTORY, "Yiru.xcarchive")
+
+  # Why: release must validate the exact signed archive before fastlane uploads it to TestFlight.
+  sh("node", checker, archive)
+end
+
+platform :ios do
+  desc "Validate the requested native iOS version and report its next TestFlight build number"
+  lane :prepare_release_version do |options|
+    app_store_connect_api_key_from_env
+    app = existing_app_store_app!
+    history = release_history(app)
+    version = resolve_requested_version(options, history)
+    ensure_open_version_train!(app, version)
+    build_number = next_testflight_build_number(history)
+    UI.message("Prepared native Yiru Mobile iOS #{version} (#{build_number})")
+  end
+
+  desc "Build and export a signed native archive without uploading it"
+  lane :archive do |options|
+    api_key = app_store_connect_api_key_from_env
+    team_id = ENV.fetch("APPLE_TEAM_ID")
+    app = existing_app_store_app!
+    history = release_history(app)
+    version = resolve_requested_version(options, history)
+    build_number = resolve_archive_build_number(options, history)
+
+    build_signed_archive(
+      api_key: api_key,
+      version: version,
+      build_number: build_number,
+      team_id: team_id,
+      force_profiles: false,
+    )
+    verify_signed_archive!
+
+    UI.success("Archived native Yiru Mobile iOS #{version} (#{build_number}) without upload")
+  end
+
+  desc "Build, sign, upload, and distribute the native iOS app through TestFlight"
+  lane :release do |options|
+    api_key = app_store_connect_api_key_from_env
+    app = existing_app_store_app!
+    history = release_history(app)
+    version = resolve_requested_version(options, history)
+    ensure_open_version_train!(app, version)
+    build_number = next_testflight_build_number(history)
+    distribution = testflight_distribution
+    team_id = ENV.fetch("APPLE_TEAM_ID")
+
+    build_signed_archive(
+      api_key: api_key,
+      version: version,
+      build_number: build_number,
+      team_id: team_id,
+      force_profiles: true,
+    )
+    verify_signed_archive!
+
+    if distribution == "external"
+      upload_to_testflight(
+        api_key: api_key,
+        skip_waiting_for_build_processing: false,
+        distribute_external: true,
+        groups: TESTFLIGHT_GROUPS,
+        notify_external_testers: true,
+        changelog: testflight_changelog,
+      )
+    else
+      upload_to_testflight(
+        api_key: api_key,
+        skip_waiting_for_build_processing: true,
+        distribute_external: false,
+      )
+    end
+
+    UI.success("Uploaded native Yiru Mobile iOS #{version} (#{build_number})")
+  end
+end

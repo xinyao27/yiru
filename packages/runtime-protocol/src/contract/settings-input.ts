@@ -18,7 +18,7 @@ import {
 } from './client-state-normalization.js'
 import { isRuntimeTuiAgent } from './input-schema.js'
 
-const TerminalQuickCommandScopeUpdateSchema = z.discriminatedUnion('type', [
+export const TerminalQuickCommandScopeUpdateSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('global') }).strict(),
   z
     .object({
@@ -28,7 +28,7 @@ const TerminalQuickCommandScopeUpdateSchema = z.discriminatedUnion('type', [
     .strict()
 ])
 
-const TerminalQuickCommandUpdateItemSchema = z.union([
+export const TerminalQuickCommandUpdateItemSchema = z.union([
   z
     .object({
       id: z.string().max(MAX_QUICK_COMMAND_ID_LENGTH),

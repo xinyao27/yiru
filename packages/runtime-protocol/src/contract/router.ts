@@ -43,11 +43,16 @@ import { orchestrationContract } from './orchestration.js'
 import { preflightContract } from './preflight.js'
 import { projectGroupContract } from './project-group.js'
 import { projectContract, projectHostSetupContract } from './project.js'
-import { CURSOR_USAGE_GET_CONTRACT, providerUsageContract } from './provider-usage.js'
+import {
+  CURSOR_USAGE_GET_CONTRACT,
+  cursorUsageContract,
+  providerUsageContract
+} from './provider-usage.js'
 import { rateLimitResumeContract } from './rate-limit-resume.js'
 import { repoContract } from './repo.js'
 import { markdownContract, sessionContract } from './session-tabs.js'
 import { settingsContract } from './settings.js'
+import { shellContract } from './shell/shell.js'
 import { skillsContract } from './skills.js'
 import { speechContract } from './speech.js'
 import { statsContract } from './stats.js'
@@ -98,12 +103,13 @@ export const runtimeContract = {
   project: projectContract,
   projectGroup: projectGroupContract,
   projectHostSetup: projectHostSetupContract,
-  usage: providerUsageContract,
+  providerUsage: providerUsageContract,
   rateLimitResume: rateLimitResumeContract,
   repo: repoContract,
   runtime: runtimeNamespaceContract,
   session: sessionContract,
   settings: settingsContract,
+  shell: shellContract,
   skills: skillsContract,
   speech: speechContract,
   stats: statsContract,
@@ -111,6 +117,7 @@ export const runtimeContract = {
   terminal: terminalContract,
   ui: uiContract,
   updater: updaterContract,
+  usage: cursorUsageContract,
   workspace: workspaceContract,
   workspaceCleanup: workspaceCleanupContract,
   workspacePorts: workspacePortsContract,
@@ -151,7 +158,7 @@ export * from './git.js'
 export * from './github.js'
 export * from './gitlab.js'
 export { hostContract } from './host-capabilities.js'
-export type { RuntimeHostPlatform } from './host-capabilities.js'
+export type { AgentTrustInput, AgentTrustPreset, RuntimeHostPlatform } from './host-capabilities.js'
 export * from './hosted-review.js'
 export * from './mobile-development-pairing.js'
 export * from './native-chat.js'
@@ -166,8 +173,8 @@ export * from './rate-limit-resume.js'
 export * from './repo.js'
 export * from './session-tabs.js'
 export * from './settings.js'
+export * from './shell/shell.js'
 export * from './shell-services-browser.js'
-export * from './shell-services-pty.js'
 export * from './shell-services-platform.js'
 export * from './shell-services-terminal.js'
 export * from './shell-services-ui.js'

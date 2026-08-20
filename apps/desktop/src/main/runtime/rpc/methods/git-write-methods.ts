@@ -1,4 +1,5 @@
 import type {
+  GitAppendGitignoreInputSchema,
   GitAddTagInputSchema,
   GitCheckoutCommitInputSchema,
   GitCheckoutInputSchema,
@@ -20,6 +21,11 @@ export const handleGitAbortMerge = (
   params: z.infer<typeof GitWorktreeSelectorInputSchema>,
   { gitCommands }: RpcContext
 ) => gitCommands.abortRuntimeGitMerge(params.worktree)
+
+export const handleGitAppendGitignore = (
+  params: z.infer<typeof GitAppendGitignoreInputSchema>,
+  { gitCommands }: RpcContext
+) => gitCommands.appendRuntimeGitignore(params.worktree, params.folderName)
 
 export const handleGitAbortRebase = (
   params: z.infer<typeof GitWorktreeSelectorInputSchema>,

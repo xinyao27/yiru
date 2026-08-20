@@ -38,7 +38,7 @@ const TOKEN_UNAVAILABLE_AGENTS = [
   'rovo'
 ] as const satisfies readonly AiVaultAgent[]
 
-export type StatsUsageStores = {
+export type ProviderUsageStores = {
   claude: ClaudeUsageStore
   codex: CodexUsageStore
   openCode: OpenCodeUsageStore
@@ -69,7 +69,7 @@ export type StatsSummaryOptions = {
 
 export async function buildStatsSummary(
   stats: StatsCollector,
-  usageStores?: StatsUsageStores,
+  usageStores?: ProviderUsageStores,
   { range = 'all', refreshUsage = false }: StatsSummaryOptions = {}
 ): Promise<StatsSummary> {
   const activitySummary = stats.getSummary()
@@ -111,7 +111,7 @@ export async function buildStatsSummary(
 }
 
 async function buildUsageStats(
-  usageStores: StatsUsageStores,
+  usageStores: ProviderUsageStores,
   range: StatsUsageRange,
   forceSupplementalScan: boolean
 ): Promise<UsageStats> {
@@ -161,7 +161,7 @@ async function buildUsageStats(
 }
 
 async function prepareAttributedUsage(
-  usageStores: StatsUsageStores,
+  usageStores: ProviderUsageStores,
   force: boolean
 ): Promise<void> {
   await enableUsageScans(usageStores)
@@ -182,7 +182,7 @@ async function prepareAttributedUsage(
 // Why: a headless host has no Home page to activate provider scanning, so asking
 // for usage is what turns it on — the same activation the desktop renderer does
 // when the Home page opens.
-async function enableUsageScans(usageStores: StatsUsageStores): Promise<void> {
+async function enableUsageScans(usageStores: ProviderUsageStores): Promise<void> {
   await Promise.all([
     usageStores.claude.getScanState().enabled ? null : usageStores.claude.setEnabled(true),
     usageStores.codex.getScanState().enabled ? null : usageStores.codex.setEnabled(true),
@@ -200,7 +200,7 @@ function tokenUnavailableAgents(supplementalUsage: RuntimeStatsSupplementalUsage
 }
 
 async function scanSupplementalUsage(
-  usageStores: StatsUsageStores,
+  usageStores: ProviderUsageStores,
   force: boolean
 ): Promise<RuntimeStatsSupplementalUsage> {
   const scopePaths = usageStores.getUsageScopePaths?.() ?? []

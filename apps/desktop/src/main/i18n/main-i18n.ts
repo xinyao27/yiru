@@ -1,11 +1,10 @@
+import * as messages from '@yiru/client/paraglide/messages'
 import {
   renderCompiledMessage,
   type TranslationVariables
 } from '~shared/localization/message-renderer'
 import { UI_LANGUAGE_SYSTEM, type UiLanguage } from '~shared/ui-language'
 import { DEFAULT_UI_LOCALE, resolveUiLocale, type SupportedUiLocale } from '~shared/ui-locale'
-
-import * as messages from '../../../generated/paraglide/messages.js'
 
 export type MainSystemLocaleProvider = () => string
 

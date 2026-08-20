@@ -57,8 +57,8 @@ export type RuntimeClientWorktreeDefaultTabsLaunch = {
 }
 
 // Head/branch snapshot read from Git metadata files without spawning Git.
-// Mirrors `WorktreeHeadIdentity` (apps/desktop/src/shared/types.ts); kept as an
-// independent literal here so this package never depends on desktop's shared types.
+// Mirrors `WorktreeHeadIdentity` (packages/shared/src/types.ts); kept as an
+// independent literal here so this lower-level protocol never depends on @yiru/shared.
 export type RuntimeClientWorktreeHeadIdentity = {
   worktreePath: string
   head: string

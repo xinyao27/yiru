@@ -27,6 +27,7 @@ type MessageHandler = (
 
 export type UnixSocketProtocolConnection = {
   signal: AbortSignal
+  bufferedBytes: () => number
   send: (frame: string) => boolean
   close: () => void
   startKeepalive: (frame: string) => () => void
@@ -130,6 +131,7 @@ export class UnixSocketTransport implements RpcTransport {
     const keepaliveTimers = new Set<NodeJS.Timeout>()
     const connection: UnixSocketProtocolConnection = {
       signal: connectionAbort.signal,
+      bufferedBytes: () => socket.writableLength,
       send: (frame) => {
         if (socket.destroyed || !socket.writable) {
           return false

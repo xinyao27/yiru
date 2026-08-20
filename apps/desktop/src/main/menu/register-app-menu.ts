@@ -8,6 +8,7 @@ import {
 import type { UpdateCheckOptions } from '~shared/types'
 
 import { translateMain } from '../i18n/main-i18n'
+import { publishShellEvent } from '../shell/events'
 
 export type AppearanceMenuState = {
   showAutomationsButton: boolean
@@ -171,7 +172,10 @@ function buildAndApplyMenu(options: RegisterAppMenuOptions): void {
         click: () => {
           // Why: a focused terminal/native-chat pane is not a native editable
           // control, so raw Electron paste cannot know which Yiru surface owns it.
-          BrowserWindow.getFocusedWindow()?.webContents.send('ui:appMenuPaste')
+          const webContents = BrowserWindow.getFocusedWindow()?.webContents
+          if (webContents) {
+            publishShellEvent(webContents.id, { type: 'uiAppMenuPaste' })
+          }
         }
       },
       { role: 'selectAll' }

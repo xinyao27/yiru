@@ -145,14 +145,14 @@ export function attachNodeRuntimeHostPtyController(
         return false
       }
     },
+    pauseProducer: (ptyId) => provider.pauseProducer?.(ptyId),
+    resumeProducer: (ptyId) => provider.resumeProducer?.(ptyId),
+    sendSignal: (ptyId, signal) => provider.sendSignal(ptyId, signal),
     hasPty: (ptyId) => provider.hasPty?.(ptyId) ?? null,
     listProcesses: () => provider.listProcesses(),
     serializeProviderBuffer: provider.getBufferSnapshot
       ? (ptyId, options) => provider.getBufferSnapshot!(ptyId, options)
-      : undefined,
-    hasRendererSerializer: () => false,
-    getRendererSerializerGeneration: () => 0,
-    waitForRendererSerializer: async () => false
+      : undefined
   })
 
   return {

@@ -1,0 +1,15 @@
+{
+  "originHash" : "99c5df77503b7511fb7f6075baa588a2239252ba662d1b9e470bffcfc1d75f2d",
+  "pins" : [
+    {
+      "identity" : "hugeicons-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/iSapozhnik/hugeicons-swift.git",
+      "state" : {
+        "revision" : "81caddf04ce5352652ffaa619562f02477dbf35d",
+        "version" : "4.1.7"
+      }
+    }
+  ],
+  "version" : 3
+}

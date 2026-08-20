@@ -93,7 +93,16 @@ export const TerminalSubscribeInputSchema = TerminalHandleInputSchema.extend({
     .optional()
 })
 
-export const TerminalMultiplexInputSchema = z.object({})
+export const TerminalMultiplexInputSchema = z
+  .object({ bulkTicket: requiredString('Missing terminal bulk ticket') })
+  .strict()
+
+export const TerminalOpenMultiplexInputSchema = z
+  .object({
+    environmentId: requiredString('Missing environment ID'),
+    clientInstanceId: requiredString('Missing client instance ID')
+  })
+  .strict()
 
 export const TerminalListInputSchema = z.object({
   worktree: OptionalString,
@@ -167,7 +176,15 @@ export const TerminalWaitInputSchema = TerminalHandleInputSchema.extend({
 
 export const TerminalCreateInputSchema = z.object({
   worktree: OptionalString,
+  viewport: z
+    .object({
+      cols: z.number().int().min(1).max(1000),
+      rows: z.number().int().min(1).max(500)
+    })
+    .optional(),
   command: OptionalString,
+  cwd: OptionalString,
+  cwdFallback: z.literal('worktree').optional(),
   startupCommandDelivery: z.enum(['fast', 'shell-ready']).optional(),
   env: z.record(z.string(), z.string()).optional(),
   envToDelete: z.array(z.string().min(1).max(256)).max(32).optional(),
@@ -191,6 +208,28 @@ export const TerminalCreateInputSchema = z.object({
   tabId: OptionalString,
   leafId: OptionalString
 })
+
+const TerminalViewRgbSchema = z.tuple([
+  z.number().int().min(0).max(255),
+  z.number().int().min(0).max(255),
+  z.number().int().min(0).max(255)
+])
+
+export const TerminalUpdateViewAttributesInputSchema = z
+  .object({
+    foreground: TerminalViewRgbSchema,
+    background: TerminalViewRgbSchema,
+    cursor: TerminalViewRgbSchema,
+    ansi: z.array(TerminalViewRgbSchema).length(256),
+    colorSchemeMode: z.enum(['dark', 'light']),
+    cursorStyle: z.enum(['bar', 'block', 'underline']),
+    cursorBlink: z.boolean()
+  })
+  .strict()
+
+export type TerminalUpdateViewAttributesInput = z.infer<
+  typeof TerminalUpdateViewAttributesInputSchema
+>
 
 export const TerminalSplitInputSchema = TerminalHandleInputSchema.extend({
   direction: z
@@ -271,6 +310,7 @@ export type TerminalHandleInput = z.infer<typeof TerminalHandleInputSchema>
 export type TerminalViewportInput = z.infer<typeof TerminalViewportInputSchema>
 export type TerminalSubscribeInput = z.infer<typeof TerminalSubscribeInputSchema>
 export type TerminalMultiplexInput = z.infer<typeof TerminalMultiplexInputSchema>
+export type TerminalOpenMultiplexInput = z.infer<typeof TerminalOpenMultiplexInputSchema>
 export type TerminalListInput = z.infer<typeof TerminalListInputSchema>
 export type TerminalResolveActiveInput = z.infer<typeof TerminalResolveActiveInputSchema>
 export type TerminalResolvePaneInput = z.infer<typeof TerminalResolvePaneInputSchema>

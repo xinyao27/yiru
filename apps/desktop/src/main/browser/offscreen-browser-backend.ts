@@ -8,7 +8,7 @@ import {
 } from '~shared/browser/session-storage-persistence'
 import { YIRU_BROWSER_PARTITION } from '~shared/constants'
 
-import type { BrowserBackend, BrowserBackendCreateTab } from './backend'
+import type { BrowserBackend, BrowserBackendCreateTab, BrowserNavigationState } from './backend'
 import type { BrowserManager } from './manager'
 import { browserSessionRegistry } from './session-registry'
 
@@ -115,6 +115,17 @@ export class OffscreenBrowserBackend implements BrowserBackend {
   getWebContentsId(browserPageId: string): number | null {
     const win = this.windowsByPageId.get(browserPageId)
     return win && !win.isDestroyed() ? win.webContents.id : null
+  }
+
+  getNavigationState(browserPageId: string): BrowserNavigationState | null {
+    const win = this.windowsByPageId.get(browserPageId)
+    if (!win || win.isDestroyed()) {
+      return null
+    }
+    return {
+      canGoBack: win.webContents.navigationHistory.canGoBack(),
+      canGoForward: win.webContents.navigationHistory.canGoForward()
+    }
   }
 
   async destroyAll(): Promise<void> {

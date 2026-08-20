@@ -1402,15 +1402,11 @@ export class AgentBrowserBridge {
   }
 
   async back(worktreeId?: string, browserPageId?: string): Promise<BrowserBackResult> {
-    return this.enqueueTargetedCommand(worktreeId, browserPageId, async (sessionName) => {
-      return (await this.execAgentBrowser(sessionName, ['back'])) as BrowserBackResult
-    })
+    return this.navigateHistory('back', worktreeId, browserPageId)
   }
 
   async forward(worktreeId?: string, browserPageId?: string): Promise<BrowserBackResult> {
-    return this.enqueueTargetedCommand(worktreeId, browserPageId, async (sessionName) => {
-      return (await this.execAgentBrowser(sessionName, ['forward'])) as BrowserBackResult
-    })
+    return this.navigateHistory('forward', worktreeId, browserPageId)
   }
 
   async reload(worktreeId?: string, browserPageId?: string): Promise<BrowserReloadResult> {
@@ -2045,6 +2041,31 @@ export class AgentBrowserBridge {
   }
 
   // ── Session lifecycle ──
+
+  private async navigateHistory(
+    direction: 'back' | 'forward',
+    worktreeId?: string,
+    browserPageId?: string
+  ): Promise<BrowserBackResult> {
+    return this.enqueueTargetedCommand(
+      worktreeId,
+      browserPageId,
+      async (sessionName, target) => {
+        const page = this.browserPages.getPage(target.browserPageId)
+        if (page?.navigateHistory) {
+          await page.navigateHistory(direction)
+          const info = page.getInfo()
+          return { url: info.url, title: info.title }
+        }
+
+        // Chrome-backed remote pages do not expose Electron's navigationHistory;
+        // keep the agent-browser CDP path for those hosts.
+        await this.ensureSession(sessionName, target.browserPageId, target.backendPageId)
+        return (await this.execAgentBrowser(sessionName, [direction])) as BrowserBackResult
+      },
+      { ensureSession: false }
+    )
+  }
 
   async destroyAllSessions(): Promise<void> {
     const promises: Promise<void>[] = []

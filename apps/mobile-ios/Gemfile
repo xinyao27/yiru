@@ -1,0 +1,4 @@
+# Pins the native iOS release toolchain used by fastlane/Fastfile and CI.
+source "https://rubygems.org"
+
+gem "fastlane", "2.237.0"

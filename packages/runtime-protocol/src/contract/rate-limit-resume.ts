@@ -4,11 +4,8 @@ import { z } from 'zod'
 
 import { withAccess, type RuntimeProcedureMeta } from './access-meta.js'
 
-// Cross-process contract for rate-limit resume: a client reports a provider
-// limit banner it observed in a pane's output; the host resolves the reset
-// time, persists a schedule, and (desktop-only, see api-types.ts) dispatches
-// the resume back to the renderer that owns the pane once the window rolls
-// over. Mirrors apps/desktop/src/shared/rate-limit-resume/types.ts.
+// Cross-process contract for rate-limit resume. Codex classification comes
+// from its structured rollout event; the host never classifies terminal text.
 
 export type RateLimitResumeProvider =
   | 'claude'
@@ -23,17 +20,24 @@ export type RateLimitResumeProvider =
 
 export type RateLimitResumeWindow = 'session' | 'weekly'
 
-export type RateLimitBannerReport = {
+export type CodexUsageLimitProbe = {
+  ptyId: string
+  tabId: string
+  paneKey: string
+  worktreeId: string
+  sessionId: string
+  transcriptPath?: string
+  turnId: string
+  prompt: string
+}
+
+export type RateLimitHit = {
   agent: AgentType
   ptyId: string
   tabId: string
   paneKey: string
   worktreeId: string
-  bannerLines: string[]
   prompt: string
-}
-
-export type RateLimitHit = RateLimitBannerReport & {
   provider: RateLimitResumeProvider | null
   detectedAt: number
   resetsAt: number | null
@@ -52,23 +56,30 @@ export type RateLimitResumeSchedule = RateLimitHit & {
   failureReason: string | null
 }
 
-export const RateLimitBannerReportSchema = z.object({
+export const CodexUsageLimitProbeSchema = z.object({
+  ptyId: z.string().min(1, 'Missing ptyId'),
+  tabId: z.string().min(1, 'Missing tabId'),
+  paneKey: z.string().min(1, 'Missing paneKey'),
+  worktreeId: z.string().min(1, 'Missing worktreeId'),
+  sessionId: z.string().min(1, 'Missing sessionId'),
+  transcriptPath: z.string().min(1, 'Missing transcriptPath').optional(),
+  turnId: z.string().min(1, 'Missing turnId'),
+  prompt: z.string()
+})
+
+export const RateLimitHitInputSchema = z.object({
   agent: z
     .unknown()
     .transform((value) => (typeof value === 'string' ? value : ''))
     .pipe(z.string().min(1, 'Missing agent'))
-    // Why: the legacy wire accepts every non-empty provider id; narrowing it
-    // here would break peers, mirroring native-chat.ts's AgentType handling.
+    // Why: persisted schedules predate the Codex-only detector and can still
+    // carry another non-empty provider id while they age out.
     .transform((value) => value as AgentType),
   ptyId: z.string().min(1, 'Missing ptyId'),
   tabId: z.string().min(1, 'Missing tabId'),
   paneKey: z.string().min(1, 'Missing paneKey'),
   worktreeId: z.string().min(1, 'Missing worktreeId'),
-  bannerLines: z.array(z.string()),
-  prompt: z.string()
-})
-
-export const RateLimitHitInputSchema = RateLimitBannerReportSchema.extend({
+  prompt: z.string(),
   provider: z
     .enum([
       'claude',
@@ -105,11 +116,11 @@ const RATE_LIMIT_RESUME_READ_ACCESS = { scope: 'host', tier: 'read' } as const
 const RATE_LIMIT_RESUME_HOST_ACCESS = { scope: 'host', tier: 'host' } as const
 
 export const rateLimitResumeContract = {
-  // Why: pure computation against the host's current RateLimitService state
-  // (no persistence) — read tier, unlike schedule/cancel/runNow below.
-  report: withAccess(RATE_LIMIT_RESUME_READ_ACCESS)
-    .input(RateLimitBannerReportSchema)
-    .output(type<RateLimitHit>()),
+  // Why: this bounded, contained transcript read does not persist anything;
+  // schedule/cancel/runNow remain the host-tier mutations below.
+  inspectCodex: withAccess(RATE_LIMIT_RESUME_READ_ACCESS)
+    .input(CodexUsageLimitProbeSchema)
+    .output(type<RateLimitHit | null>()),
   list: withAccess(RATE_LIMIT_RESUME_READ_ACCESS)
     .input(z.void())
     .output(type<RateLimitResumeSchedule[]>()),

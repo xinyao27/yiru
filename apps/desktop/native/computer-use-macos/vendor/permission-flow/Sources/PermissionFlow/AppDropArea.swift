@@ -1,5 +1,6 @@
 import AppKit
 import SwiftUI
+import YiruComputerUseIcons
 
 @available(macOS 13.0, *)
 struct AppDragItemView: NSViewRepresentable {
@@ -184,8 +185,7 @@ private struct AppDragCardContent: View {
         .foregroundStyle(.primary)
       Spacer()
       VStack(spacing: 0) {
-        Image(systemName: "hand.draw")
-          .font(.system(size: 14, weight: .regular))
+        YiruComputerUseIcon(.drag, size: 14)
         Text(
           PermissionFlowLocalizer.string(
             "permission_flow.drag.label",

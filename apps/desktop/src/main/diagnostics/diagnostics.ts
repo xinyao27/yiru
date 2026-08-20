@@ -20,8 +20,9 @@ import { arch as osArch, platform as osPlatform, release as osRelease } from 'no
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
-import { app, dialog, ipcMain, shell } from 'electron'
+import { app, dialog, shell } from 'electron'
 
+import { translateMain } from '../i18n/main-i18n'
 import type { CollectedBundle } from '../observability/bundle'
 import { resolveDiagnosticYiruChannel } from '../observability/diagnostic-build-channel'
 import {
@@ -184,28 +185,36 @@ function deletePreviewFile(filePath: string): void {
 async function confirmBundleUpload(bundle: CollectedBundle): Promise<boolean> {
   const result = await dialog.showMessageBox({
     type: 'question',
-    buttons: ['Send', 'Cancel'],
+    buttons: [
+      translateMain('diagnostics.uploadConsent.send', 'Send'),
+      translateMain('diagnostics.uploadConsent.cancel', 'Cancel')
+    ],
     defaultId: 1,
     cancelId: 1,
-    title: 'Send diagnostics to support?',
-    message: 'This sends a bounded redacted excerpt and metadata to PostHog.',
+    title: translateMain('diagnostics.uploadConsent.title', 'Send diagnostics to support?'),
+    message: translateMain(
+      'diagnostics.uploadConsent.message',
+      'This sends a bounded redacted excerpt and metadata to PostHog.'
+    ),
     // Why: the full multi-megabyte preview is never attached to a PostHog
     // event; make that privacy boundary explicit at the final consent step.
-    detail: `The full review file does not leave this device.\n\nDiagnostic ID: ${bundle.bundleSubmissionId}\nDiagnostic records: ${bundle.spanCount}\nSize: ${Math.round(
-      bundle.bytes / 1024
-    )} KB`
+    detail: translateMain(
+      'diagnostics.uploadConsent.detail',
+      'The full review file does not leave this device.\n\nDiagnostic ID: {{value0}}\nDiagnostic records: {{value1}}\nSize: {{value2}} KB',
+      {
+        value0: bundle.bundleSubmissionId,
+        value1: bundle.spanCount,
+        value2: Math.round(bundle.bytes / 1024)
+      }
+    )
   })
   return result.response === 0
 }
 
-export function registerDiagnosticsHandlers(): void {
-  ipcMain.handle('diagnostics:getStatus', (): DiagnosticsStatus => {
-    return getDiagnosticsStatus()
-  })
-
-  ipcMain.handle(
-    'diagnostics:collectBundle',
-    (_event, lookbackMinutesIn: unknown): DiagnosticsBundlePreview => {
+export function getShellDiagnosticsService() {
+  return {
+    getStatus: (): DiagnosticsStatus => getDiagnosticsStatus(),
+    collectBundle: (lookbackMinutesIn?: number): DiagnosticsBundlePreview => {
       // Consent gate: main is the consent enforcement boundary; the
       // renderer-side button-hide is UX, not security. A compromised or
       // malicious renderer must not be able to assemble a bundle when the
@@ -231,12 +240,8 @@ export function registerDiagnosticsHandlers(): void {
       })
       rememberBundle(bundle)
       return toBundlePreview(bundle)
-    }
-  )
-
-  ipcMain.handle(
-    'diagnostics:uploadBundle',
-    async (_event, bundleSubmissionId: unknown): Promise<UploadBundleIpcResult> => {
+    },
+    uploadBundle: async (bundleSubmissionId: string): Promise<UploadBundleIpcResult> => {
       // Why: the renderer is in the threat model. Upload only a payload main
       // collected and retained for preview, never renderer-supplied bytes.
       const pendingForConfirmation = getPendingBundleForUpload(bundleSubmissionId)
@@ -275,22 +280,20 @@ export function registerDiagnosticsHandlers(): void {
         deletePendingBundle(bundle.bundleSubmissionId)
       }
       return { ticketId: result.reportId }
+    },
+    openBundlePreview: async (bundleSubmissionId: string): Promise<void> => {
+      const previewFilePath = getPendingPreviewFilePath(bundleSubmissionId)
+      const errorMessage = await shell.openPath(previewFilePath)
+      if (errorMessage) {
+        throw new Error('could not open review file')
+      }
+      const pending = pendingBundles.get(bundleSubmissionId)
+      if (pending) {
+        pending.previewOpened = true
+      }
+    },
+    discardBundlePreview: (bundleSubmissionId: string): void => {
+      discardPendingBundle(bundleSubmissionId)
     }
-  )
-
-  ipcMain.handle('diagnostics:openBundlePreview', async (_event, bundleSubmissionId: unknown) => {
-    const previewFilePath = getPendingPreviewFilePath(bundleSubmissionId)
-    const errorMessage = await shell.openPath(previewFilePath)
-    if (errorMessage) {
-      throw new Error('could not open review file')
-    }
-    const pending = pendingBundles.get(bundleSubmissionId as string)
-    if (pending) {
-      pending.previewOpened = true
-    }
-  })
-
-  ipcMain.handle('diagnostics:discardBundlePreview', (_event, bundleSubmissionId: unknown) => {
-    discardPendingBundle(bundleSubmissionId)
-  })
+  }
 }

@@ -152,7 +152,8 @@ const nodeRuntimeHostContract = {
     platform: runtimeContract.host.platform,
     wsl: runtimeContract.host.wsl,
     pwsh: runtimeContract.host.pwsh,
-    gitBash: runtimeContract.host.gitBash
+    gitBash: runtimeContract.host.gitBash,
+    agentTrust: runtimeContract.host.agentTrust
   },
   hostedReview: runtimeContract.hostedReview,
   markdown: runtimeContract.markdown,

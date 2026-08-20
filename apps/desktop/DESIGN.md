@@ -1,8 +1,8 @@
 # Yiru desktop design system
 
-This is the binding visual contract for the Electron renderer in `apps/desktop/src/renderer`.
-[`src/assets/main.css`](./src/renderer/assets/main.css) is the executable token source,
-[`src/components/ui/`](./src/renderer/components/ui/) owns reusable primitives, and the
+This is the binding visual contract for the Electron renderer in `packages/client/src`.
+[`src/assets/main.css`](../../packages/client/src/assets/main.css) is the executable token source,
+[`src/components/ui/`](../../packages/client/src/components/ui/) owns reusable primitives, and the
 extended cross-client reference is [`docs/style-guide.md`](../../docs/style-guide.md).
 
 If this document, the token source, and a component disagree, resolve the design decision first.
@@ -128,7 +128,11 @@ section labels. Truncate metadata before shrinking primary text.
 - Disable actions immediately; defer visible loading feedback until it can be perceived. Loading
   must not resize a control.
 - Destructive styling is only for irreversible actions. Cancel, Close, Dismiss, and Back stay quiet.
-- Use Phosphor icons through the shared renderer conventions. Do not add another icon language.
+- Use Hugeicons free Stroke Rounded icons through the shared renderer adapter
+  (`~renderer/components/icons/hugeicons`). Set `size` through the existing Tailwind size class
+  or an explicit numeric value. The adapter uses the package's default stroke sizing; feature code
+  must not pass stroke-sizing props or the legacy `weight` prop. Do not import an icon package
+  directly or add another icon language.
 
 ## 6. Platform, accessibility, and motion
 

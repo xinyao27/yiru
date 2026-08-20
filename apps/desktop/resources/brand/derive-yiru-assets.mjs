@@ -13,13 +13,14 @@ import {
 const brandDir = import.meta.dirname
 const desktopDir = dirname(dirname(brandDir))
 const repoRoot = dirname(dirname(desktopDir))
-const mobileAssetsDir = join(repoRoot, 'apps', 'mobile', 'assets')
+const clientDir = join(repoRoot, 'packages', 'client')
+const clientBrandDir = join(clientDir, 'src', 'assets', 'brand')
 const resourcesDir = join(desktopDir, 'resources')
 const appIconsDir = join(resourcesDir, 'app-icons')
 const trayDir = join(resourcesDir, 'tray')
-const rendererPublicDir = join(desktopDir, 'src', 'renderer', 'public')
+const rendererPublicDir = join(clientDir, 'src', 'public')
 const docsAssetsDir = join(repoRoot, 'docs', 'assets')
-const landingPublicDir = join(repoRoot, 'apps', 'landing', 'public')
+const sitePublicDir = join(repoRoot, 'apps', 'web', 'public')
 
 function readPng(path) {
   const png = PNG.sync.read(readFileSync(path))
@@ -203,27 +204,17 @@ const largeClassicIcon = readPng(join(resourcesDir, 'build', 'icon.png'))
 const cleanWordmark = removeMagentaSpill(readPng(join(brandDir, 'yiru-wordmark.png')))
 writePng(join(brandDir, 'yiru-wordmark.png'), cleanWordmark)
 
-const adaptiveWordmark = fitOnCanvas(cleanWordmark, 1024, 1024, 140)
-const adaptiveMask = createMask(adaptiveWordmark, [255, 255, 255])
 const squareWordmark = fitOnCanvas(cleanWordmark, 1024, 1024, 112)
 const blackSquareMask = createMask(squareWordmark, [0, 0, 0])
 const uiMask = createMask(fitOnCanvas(cleanWordmark, 1024, 640, 28), [255, 255, 255])
-const mobileIcon = readPng(join(mobileAssetsDir, 'adaptive-icon-background.png'))
-composite(mobileIcon, adaptiveWordmark, 0, 0)
 
-writePng(join(resourcesDir, 'yiru-wordmark.png'), uiMask)
-writePng(join(mobileAssetsDir, 'wordmark.png'), resizeImage(uiMask, 512, 320))
-writePng(join(mobileAssetsDir, 'icon.png'), mobileIcon)
-writePng(join(mobileAssetsDir, 'adaptive-icon.png'), adaptiveWordmark)
-writePng(join(mobileAssetsDir, 'adaptive-icon-monochrome.png'), adaptiveMask)
-writePng(join(mobileAssetsDir, 'notification-icon.png'), fitOnCanvas(adaptiveMask, 96, 96, 5))
+writePng(join(clientBrandDir, 'yiru-wordmark.png'), uiMask)
 
 const favicon = resizeImage(largeClassicIcon, 48, 48)
-writePng(join(mobileAssetsDir, 'favicon.png'), favicon)
 writePng(join(rendererPublicDir, 'favicon.png'), favicon)
 // Why: yiru.ai served its own copy of this, which had already drifted to
 // different bytes than the two the generator writes. One source, three writes.
-writePng(join(landingPublicDir, 'favicon.png'), favicon)
+writePng(join(sitePublicDir, 'favicon.png'), favicon)
 writePng(join(trayDir, 'yiru-windows-tray.png'), resizeImage(largeClassicIcon, 32, 32))
 writePng(join(trayDir, 'yiru-menu-barTemplate.png'), fitOnCanvas(blackSquareMask, 22, 14, 1))
 writePng(join(trayDir, 'yiru-menu-barTemplate@2x.png'), fitOnCanvas(blackSquareMask, 44, 28, 2))

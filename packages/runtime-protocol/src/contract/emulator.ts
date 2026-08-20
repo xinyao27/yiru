@@ -99,6 +99,16 @@ export const emulatorContract = {
     subscribe: withAccess(EMULATOR_ACCESS)
       .input(type<void>())
       .output(eventIterator(type<RuntimeEmulatorSubscriptionEvent>()))
+  },
+  frameStream: {
+    subscribe: withAccess(EMULATOR_ACCESS)
+      .input(type<RuntimeEmulatorFrameStreamInput>())
+      .output(eventIterator(type<RuntimeEmulatorFrameStreamEvent>()))
+  },
+  videoStream: {
+    subscribe: withAccess(EMULATOR_ACCESS)
+      .input(type<RuntimeEmulatorVideoStreamInput>())
+      .output(eventIterator(type<RuntimeEmulatorVideoStreamEvent>()))
   }
 } satisfies ContractRouter<RuntimeProcedureMeta>
 
@@ -170,4 +180,16 @@ export type RuntimeEmulatorEvent =
 export type RuntimeEmulatorSubscriptionEvent =
   | { type: 'ready'; subscriptionId: string }
   | RuntimeEmulatorEvent
+  | { type: 'end' }
+
+export type RuntimeEmulatorFrameStreamInput = { streamUrl: string; streamKey?: string }
+export type RuntimeEmulatorFrameStreamEvent =
+  | { type: 'ready' }
+  | { type: 'error'; message: string }
+  | { type: 'end' }
+
+export type RuntimeEmulatorVideoStreamInput = { deviceId: string }
+export type RuntimeEmulatorVideoStreamEvent =
+  | { type: 'ready' }
+  | { type: 'meta'; codecId: string; width: number; height: number }
   | { type: 'end' }

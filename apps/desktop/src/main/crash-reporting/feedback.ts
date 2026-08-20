@@ -1,5 +1,3 @@
-import { ipcMain } from 'electron'
-
 import {
   buildSupportReportDraft,
   type SupportReportDiagnosticInput
@@ -47,11 +45,8 @@ export async function submitFeedback(
   }
 }
 
-export function registerFeedbackHandlers(): void {
-  ipcMain.removeHandler('feedback:submit')
-  ipcMain.handle('feedback:submit', (_event, args: FeedbackSubmitArgs) =>
-    // Why: crash submissions are main-only. A compromised renderer can invoke
-    // this channel directly, so force the public feedback lane at the boundary.
-    submitFeedback({ ...args, submissionType: 'feedback' })
-  )
+export function submitShellFeedback(args: FeedbackSubmitArgs): Promise<FeedbackSubmitResult> {
+  // Why: crash submissions are main-only. The shell contract can only invoke
+  // this public feedback lane, so renderer input cannot select the report type.
+  return submitFeedback({ ...args, submissionType: 'feedback' })
 }

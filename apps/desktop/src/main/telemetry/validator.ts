@@ -1,6 +1,6 @@
 // Fail-closed runtime validator. Thin wrapper around
 // `eventSchemas[name].safeParse(props)` — the schema defined in
-// `src/shared/telemetry-events.ts` IS the validator. There is no parallel
+// `packages/shared/src/telemetry-events.ts` IS the validator. There is no parallel
 // `EVENT_SPEC` declaration to keep in sync with `EventMap`.
 //
 // The validator is the single enforcement point for both main-originated
@@ -93,6 +93,6 @@ export function validate<N extends EventName>(name: N, props: unknown): Validati
 }
 
 // Re-exported so `client.ts` can re-validate the merged outgoing payload
-// without reaching into `src/shared/telemetry-events.ts` directly. Keeps the
+// without reaching into `packages/shared/src/telemetry-events.ts` directly. Keeps the
 // validator as the single surface the client depends on.
 export { commonPropsSchema }

@@ -6,7 +6,7 @@ import {
   assertClipboardTextWriteWithinLimit,
   isClipboardTextWriteTooLargeError
 } from '@yiru/workbench-model/ui'
-import { app, clipboard, ipcMain } from 'electron'
+import { app, clipboard } from 'electron'
 import {
   type CrashReportBreadcrumbData,
   type CrashReportCopyDiagnosticsArgs,
@@ -349,218 +349,225 @@ function rendererErrorBreadcrumbCoalesceKey(
   return JSON.stringify([name, message, ...sourceIdentity])
 }
 
-export function registerCrashReportingHandlers(store: CrashReportStore): void {
-  ipcMain.removeHandler('crashReports:getLatestPending')
-  ipcMain.handle('crashReports:getLatestPending', () => getLatestPendingReport(store))
+let shellCrashReportStore: CrashReportStore | null = null
 
-  ipcMain.removeHandler('crashReports:getLatestReport')
-  ipcMain.handle('crashReports:getLatestReport', () => getLatestSendableReport(store))
+export function initializeShellCrashReportingService(store: CrashReportStore): void {
+  shellCrashReportStore = store
+}
 
-  ipcMain.removeHandler('crashReports:dismiss')
-  ipcMain.handle('crashReports:dismiss', async (_event, args: { reportId: string }) => {
-    if (inFlightSubmissions.has(args.reportId)) {
-      return store.getById(args.reportId)
+function requireShellCrashReportStore(): CrashReportStore {
+  if (!shellCrashReportStore) {
+    throw new Error('unavailable_on_host: crash reporting is not initialized')
+  }
+  return shellCrashReportStore
+}
+
+export function getLatestPendingShellCrashReport() {
+  return getLatestPendingReport(requireShellCrashReportStore())
+}
+
+export function getLatestShellCrashReport() {
+  return getLatestSendableReport(requireShellCrashReportStore())
+}
+
+export async function dismissShellCrashReport(args: { reportId: string }) {
+  const store = requireShellCrashReportStore()
+  if (inFlightSubmissions.has(args.reportId)) {
+    return store.getById(args.reportId)
+  }
+  if (submittedReportIds.has(args.reportId)) {
+    const report = await store.getById(args.reportId)
+    return report ? { ...report, status: 'sent' as const } : null
+  }
+  return store.dismiss(args.reportId)
+}
+
+export function recordShellCrashBreadcrumb(args?: { name?: unknown; data?: unknown }): void {
+  if (!args || typeof args.name !== 'string') {
+    return
+  }
+  const data = sanitizeRendererBreadcrumbData(args.data)
+  if (COALESCED_RENDERER_ERROR_BREADCRUMB_NAMES.has(args.name)) {
+    const coalesceKey = rendererErrorBreadcrumbCoalesceKey(args.name, data)
+    if (!coalesceKey) {
+      recordCrashBreadcrumb(args.name, data)
+      recordRendererBreadcrumbTrace(args.name, data)
+      return
     }
-    if (submittedReportIds.has(args.reportId)) {
-      const report = await store.getById(args.reportId)
-      return report ? { ...report, status: 'sent' as const } : null
+    const coalesceResult = recordCoalescedCrashBreadcrumb({
+      name: args.name,
+      data,
+      coalesceKey,
+      minIntervalMs: RENDERER_ERROR_BREADCRUMB_COALESCE_MS
+    })
+    // Why: tracing every suppressed duplicate would preserve the same
+    // serialization and disk churn that breadcrumb coalescing removes.
+    if (coalesceResult) {
+      recordRendererBreadcrumbTrace(
+        args.name,
+        coalesceResult.suppressedSinceLast > 0
+          ? { ...data, suppressedSinceLast: coalesceResult.suppressedSinceLast }
+          : data
+      )
     }
-    return store.dismiss(args.reportId)
-  })
+  } else {
+    recordCrashBreadcrumb(args.name, data)
+    recordRendererBreadcrumbTrace(args.name, data)
+  }
+}
 
-  ipcMain.removeAllListeners('crashReports:recordBreadcrumb')
-  ipcMain.on(
-    'crashReports:recordBreadcrumb',
-    (_event, args?: { name?: unknown; data?: unknown }) => {
-      if (!args || typeof args.name !== 'string') {
-        return
-      }
-      const data = sanitizeRendererBreadcrumbData(args.data)
-      if (COALESCED_RENDERER_ERROR_BREADCRUMB_NAMES.has(args.name)) {
-        const coalesceKey = rendererErrorBreadcrumbCoalesceKey(args.name, data)
-        if (!coalesceKey) {
-          recordCrashBreadcrumb(args.name, data)
-          recordRendererBreadcrumbTrace(args.name, data)
-          return
+export async function copyLatestShellCrashDiagnostics(args?: CrashReportCopyDiagnosticsArgs) {
+  const store = requireShellCrashReportStore()
+  const report = await getRequestedCrashReport(store, args)
+  const baseText = report
+    ? formatCrashReportText(report, args?.notes)
+    : buildUncapturedCrashReportText(args?.notes)
+  try {
+    clipboard.writeText(
+      assertClipboardTextWriteWithinLimit(
+        formatCrashReportCopyText(baseText, args?.submissionFailure)
+      )
+    )
+  } catch (error) {
+    if (isClipboardTextWriteTooLargeError(error)) {
+      return { ok: false as const, error: 'Crash diagnostics are too large to copy safely.' }
+    }
+    throw error
+  }
+  return { ok: true as const }
+}
+
+export async function recordShellRendererError(
+  args: unknown
+): Promise<ReactErrorBoundaryReportResult> {
+  const store = requireShellCrashReportStore()
+  try {
+    return await recordRendererErrorReport(store, args)
+  } catch (error) {
+    console.error('[crash-reporting] Failed to record renderer error report:', error)
+    return { ok: false, error: 'Failed to record renderer error report.' }
+  }
+}
+
+export async function submitShellCrashReport(
+  args: CrashReportSubmitArgs
+): Promise<CrashReportSubmitResult> {
+  const store = requireShellCrashReportStore()
+  const report = await getRequestedCrashReport(store, args)
+  if (!report) {
+    const diagnosticUpload = prepareCrashDiagnosticBundle(args.includeDiagnosticLogs !== false)
+    const diagnosticBundle = diagnosticUpload.diagnosticBundle
+    const result = await submitFeedback({
+      feedback: buildUncapturedCrashReportText(args.notes, diagnosticBundle),
+      submissionType: 'crash',
+      submitAnonymously: args.submitAnonymously,
+      githubLogin: args.githubLogin,
+      githubEmail: args.githubEmail,
+      ...(diagnosticUpload.feedbackDiagnosticBundle
+        ? {
+            diagnosticBundle: diagnosticUpload.feedbackDiagnosticBundle
+          }
+        : {})
+    })
+    const submittedDiagnosticBundle = resolveSubmittedDiagnosticBundle(diagnosticUpload, result)
+    return result.ok
+      ? { ok: true, report: null, diagnosticBundle: submittedDiagnosticBundle }
+      : {
+          // Why: the transport-only attachment failure may contain raw
+          // endpoint detail; only its sanitized bundle reason crosses IPC.
+          ok: false,
+          status: result.status,
+          error: result.error,
+          report: null,
+          diagnosticBundle: submittedDiagnosticBundle
         }
-        const coalesceResult = recordCoalescedCrashBreadcrumb({
-          name: args.name,
-          data,
-          coalesceKey,
-          minIntervalMs: RENDERER_ERROR_BREADCRUMB_COALESCE_MS
-        })
-        // Why: tracing every suppressed duplicate would preserve the same
-        // serialization and disk churn that breadcrumb coalescing removes.
-        if (coalesceResult) {
-          recordRendererBreadcrumbTrace(
-            args.name,
-            coalesceResult.suppressedSinceLast > 0
-              ? { ...data, suppressedSinceLast: coalesceResult.suppressedSinceLast }
-              : data
-          )
-        }
-      } else {
-        recordCrashBreadcrumb(args.name, data)
-        recordRendererBreadcrumbTrace(args.name, data)
+  }
+  const canSubmitDismissedReport = Boolean(args.reportId && report.status === 'dismissed')
+  if (
+    (!canSubmitDismissedReport && report.status !== 'pending') ||
+    submittedReportIds.has(report.id)
+  ) {
+    return {
+      ok: true,
+      report: submittedReportIds.has(report.id) ? { ...report, status: 'sent' } : report
+    }
+  }
+  if (inFlightSubmissions.has(report.id)) {
+    return {
+      ok: false,
+      status: null,
+      error: 'Crash report submission already in progress.',
+      report
+    }
+  }
+
+  inFlightSubmissions.add(report.id)
+  try {
+    const diagnosticUpload = prepareCrashDiagnosticBundle(args.includeDiagnosticLogs !== false)
+    const diagnosticBundle = diagnosticUpload.diagnosticBundle
+    const result = await submitFeedback({
+      feedback: formatCrashReportText(report, args.notes, diagnosticBundle),
+      submissionType: 'crash',
+      submitAnonymously: args.submitAnonymously,
+      githubLogin: args.githubLogin,
+      githubEmail: args.githubEmail,
+      ...(diagnosticUpload.feedbackDiagnosticBundle
+        ? {
+            diagnosticBundle: diagnosticUpload.feedbackDiagnosticBundle
+          }
+        : {})
+    })
+    const submittedDiagnosticBundle = resolveSubmittedDiagnosticBundle(diagnosticUpload, result)
+    if (!result.ok) {
+      return {
+        // Why: keep the renderer contract allow-listed instead of leaking
+        // the transport's internal diagnosticBundleFailure object.
+        ok: false,
+        status: result.status,
+        error: result.error,
+        report,
+        diagnosticBundle: submittedDiagnosticBundle
       }
     }
-  )
-
-  ipcMain.removeHandler('crashReports:copyLatestDiagnostics')
-  ipcMain.handle(
-    'crashReports:copyLatestDiagnostics',
-    async (_event, args?: CrashReportCopyDiagnosticsArgs) => {
-      const report = await getRequestedCrashReport(store, args)
-      const baseText = report
-        ? formatCrashReportText(report, args?.notes)
-        : buildUncapturedCrashReportText(args?.notes)
+    rememberSubmittedReportId(report.id)
+    if (report.status === 'dismissed') {
       try {
-        clipboard.writeText(
-          assertClipboardTextWriteWithinLimit(
-            formatCrashReportCopyText(baseText, args?.submissionFailure)
-          )
-        )
-      } catch (error) {
-        if (isClipboardTextWriteTooLargeError(error)) {
-          return { ok: false as const, error: 'Crash diagnostics are too large to copy safely.' }
-        }
-        throw error
-      }
-      return { ok: true as const }
-    }
-  )
-
-  ipcMain.removeHandler('crashReports:recordRendererError')
-  ipcMain.handle('crashReports:recordRendererError', async (_event, args: unknown) => {
-    try {
-      return await recordRendererErrorReport(store, args)
-    } catch (error) {
-      console.error('[crash-reporting] Failed to record renderer error report:', error)
-      return { ok: false, error: 'Failed to record renderer error report.' }
-    }
-  })
-
-  ipcMain.removeHandler('crashReports:submit')
-  ipcMain.handle(
-    'crashReports:submit',
-    async (_event, args: CrashReportSubmitArgs): Promise<CrashReportSubmitResult> => {
-      const report = await getRequestedCrashReport(store, args)
-      if (!report) {
-        const diagnosticUpload = prepareCrashDiagnosticBundle(args.includeDiagnosticLogs !== false)
-        const diagnosticBundle = diagnosticUpload.diagnosticBundle
-        const result = await submitFeedback({
-          feedback: buildUncapturedCrashReportText(args.notes, diagnosticBundle),
-          submissionType: 'crash',
-          submitAnonymously: args.submitAnonymously,
-          githubLogin: args.githubLogin,
-          githubEmail: args.githubEmail,
-          ...(diagnosticUpload.feedbackDiagnosticBundle
-            ? {
-                diagnosticBundle: diagnosticUpload.feedbackDiagnosticBundle
-              }
-            : {})
-        })
-        const submittedDiagnosticBundle = resolveSubmittedDiagnosticBundle(diagnosticUpload, result)
-        return result.ok
-          ? { ok: true, report: null, diagnosticBundle: submittedDiagnosticBundle }
-          : {
-              // Why: the transport-only attachment failure may contain raw
-              // endpoint detail; only its sanitized bundle reason crosses IPC.
-              ok: false,
-              status: result.status,
-              error: result.error,
-              report: null,
-              diagnosticBundle: submittedDiagnosticBundle
-            }
-      }
-      const canSubmitDismissedReport = Boolean(args.reportId && report.status === 'dismissed')
-      if (
-        (!canSubmitDismissedReport && report.status !== 'pending') ||
-        submittedReportIds.has(report.id)
-      ) {
+        // Why: startup prompts are dismissed before the user can send from
+        // the still-open dialog, so successful uploads must update storage.
+        const sent = await store.markDismissedSent(report.id)
         return {
           ok: true,
-          report: submittedReportIds.has(report.id) ? { ...report, status: 'sent' } : report
+          report: sent ?? { ...report, status: 'sent' },
+          diagnosticBundle: submittedDiagnosticBundle
         }
-      }
-      if (inFlightSubmissions.has(report.id)) {
+      } catch (error) {
+        console.error('[crash-reporting] Failed to mark dismissed crash report sent:', error)
         return {
-          ok: false,
-          status: null,
-          error: 'Crash report submission already in progress.',
-          report
+          ok: true,
+          report: { ...report, status: 'sent' },
+          diagnosticBundle: submittedDiagnosticBundle
         }
-      }
-
-      inFlightSubmissions.add(report.id)
-      try {
-        const diagnosticUpload = prepareCrashDiagnosticBundle(args.includeDiagnosticLogs !== false)
-        const diagnosticBundle = diagnosticUpload.diagnosticBundle
-        const result = await submitFeedback({
-          feedback: formatCrashReportText(report, args.notes, diagnosticBundle),
-          submissionType: 'crash',
-          submitAnonymously: args.submitAnonymously,
-          githubLogin: args.githubLogin,
-          githubEmail: args.githubEmail,
-          ...(diagnosticUpload.feedbackDiagnosticBundle
-            ? {
-                diagnosticBundle: diagnosticUpload.feedbackDiagnosticBundle
-              }
-            : {})
-        })
-        const submittedDiagnosticBundle = resolveSubmittedDiagnosticBundle(diagnosticUpload, result)
-        if (!result.ok) {
-          return {
-            // Why: keep the renderer contract allow-listed instead of leaking
-            // the transport's internal diagnosticBundleFailure object.
-            ok: false,
-            status: result.status,
-            error: result.error,
-            report,
-            diagnosticBundle: submittedDiagnosticBundle
-          }
-        }
-        rememberSubmittedReportId(report.id)
-        if (report.status === 'dismissed') {
-          try {
-            // Why: startup prompts are dismissed before the user can send from
-            // the still-open dialog, so successful uploads must update storage.
-            const sent = await store.markDismissedSent(report.id)
-            return {
-              ok: true,
-              report: sent ?? { ...report, status: 'sent' },
-              diagnosticBundle: submittedDiagnosticBundle
-            }
-          } catch (error) {
-            console.error('[crash-reporting] Failed to mark dismissed crash report sent:', error)
-            return {
-              ok: true,
-              report: { ...report, status: 'sent' },
-              diagnosticBundle: submittedDiagnosticBundle
-            }
-          }
-        }
-        try {
-          const sent = await store.markSent(report.id)
-          return {
-            ok: true,
-            report: sent ?? { ...report, status: 'sent' },
-            diagnosticBundle: submittedDiagnosticBundle
-          }
-        } catch (error) {
-          // Why: the upstream submission already succeeded. A local persistence
-          // failure must not present as upload failure or invite duplicate sends
-          // during this app session.
-          console.error('[crash-reporting] Failed to mark crash report sent:', error)
-          return {
-            ok: true,
-            report: { ...report, status: 'sent' },
-            diagnosticBundle: submittedDiagnosticBundle
-          }
-        }
-      } finally {
-        inFlightSubmissions.delete(report.id)
       }
     }
-  )
+    try {
+      const sent = await store.markSent(report.id)
+      return {
+        ok: true,
+        report: sent ?? { ...report, status: 'sent' },
+        diagnosticBundle: submittedDiagnosticBundle
+      }
+    } catch (error) {
+      // Why: the upstream submission already succeeded. A local persistence
+      // failure must not present as upload failure or invite duplicate sends
+      // during this app session.
+      console.error('[crash-reporting] Failed to mark crash report sent:', error)
+      return {
+        ok: true,
+        report: { ...report, status: 'sent' },
+        diagnosticBundle: submittedDiagnosticBundle
+      }
+    }
+  } finally {
+    inFlightSubmissions.delete(report.id)
+  }
 }

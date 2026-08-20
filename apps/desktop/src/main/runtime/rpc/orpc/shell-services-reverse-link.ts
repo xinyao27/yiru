@@ -10,8 +10,6 @@ import type {
   ShellServicesMobileMarkdownReadResult,
   ShellServicesMobileMarkdownSaveInput,
   ShellServicesMobileMarkdownSaveResult,
-  ShellServicesPtySerializeBufferInput,
-  ShellServicesPtySerializeBufferResult,
   ShellServicesRateLimitResumeDispatchResult,
   ShellServicesTerminalCloseTabInput,
   ShellServicesTerminalCloseTabResult,
@@ -113,6 +111,25 @@ export function dispatchShellUICommand(
   }
   void client.ui.command(input).catch(() => undefined)
   return true
+}
+
+// Why: worktree sleep owns renderer state and PTY teardown, so the runtime must
+// not acknowledge a mobile sleep request until the attached shell has finished
+// the ordered browser/terminal shutdown. Other UI commands intentionally keep
+// the fire-and-forget notifier semantics above.
+export async function requestShellSleepWorktree(
+  shellConnectionId: ShellServicesConnectionId | undefined,
+  worktreeId: string
+): Promise<boolean> {
+  const client = getConnectedShellServicesClient(shellConnectionId)
+  if (!client) {
+    return false
+  }
+  const output = await client.ui.command(
+    { type: 'sleepWorktree', worktreeId },
+    { signal: AbortSignal.timeout(30_000) }
+  )
+  return output.accepted
 }
 
 export async function requestShellOpenExternal(
@@ -311,32 +328,6 @@ export async function requestShellRateLimitResumeDispatch(
   }
   try {
     const output = await client.rateLimitResume.dispatch(input)
-    return { ok: true, ...output }
-  } catch {
-    return { ok: false, reason: 'shell-unavailable' }
-  }
-}
-
-// Why: Phase 5 step 4, `pty` group A — replaces `pty.ts`'s
-// `mainWindow.webContents.send('pty:serializeBuffer:request', …)` +
-// `ipcMain.on('pty:serializeBuffer:response', …)` request-ID dispatch table.
-// The 750ms budget mirrors the original `setTimeout`; a timeout, a missing
-// connection, and a rejected call all collapse into the same
-// `shell-unavailable` result, matching the original's uniform `null` on
-// `mainWindow.isDestroyed()` or on timeout — callers already treat "no live
-// renderer buffer" as a normal degrade, never a hang.
-export async function requestShellPtySerializeBuffer(
-  webContentsId: number,
-  input: ShellServicesPtySerializeBufferInput
-): Promise<ShellServicesPtySerializeBufferResult> {
-  const connection = getElectronShellServicesConnection(webContentsId)
-  if (!connection) {
-    return { ok: false, reason: 'shell-unavailable' }
-  }
-  try {
-    const output = await connection.client.pty.serializeBuffer(input, {
-      signal: AbortSignal.timeout(750)
-    })
     return { ok: true, ...output }
   } catch {
     return { ok: false, reason: 'shell-unavailable' }

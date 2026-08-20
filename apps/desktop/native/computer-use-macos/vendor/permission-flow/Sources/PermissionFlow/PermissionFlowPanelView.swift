@@ -1,4 +1,5 @@
 import SwiftUI
+import YiruComputerUseIcons
 
 @available(macOS 13.0, *)
 struct PermissionFlowPanelView: View {
@@ -40,9 +41,7 @@ struct PermissionFlowPanelView: View {
           Button {
             controller.reopenCurrentSettingsPane()
           } label: {
-            Image(systemName: "gear")
-              .font(.system(size: 15, weight: .semibold))
-              .symbolRenderingMode(.palette)
+            YiruComputerUseIcon(.settings, size: 15)
               .foregroundStyle(.primary, .secondary.opacity(0.35))
           }
           .buttonStyle(.borderless)
@@ -50,9 +49,7 @@ struct PermissionFlowPanelView: View {
         Button {
           controller.closePanel(returnToPreviousApp: true)
         } label: {
-          Image(systemName: "xmark.circle.fill")
-            .font(.system(size: 18, weight: .semibold))
-            .symbolRenderingMode(.palette)
+          YiruComputerUseIcon(.close, size: 18)
             .foregroundStyle(.primary, .secondary.opacity(0.35))
         }
         .buttonStyle(.borderless)
@@ -113,9 +110,7 @@ private struct HeaderDirectionIcon: View {
   @State private var scalePhase = false
 
   var body: some View {
-    Image(systemName: "arrowshape.up.fill")
-      .font(.system(size: 14, weight: .bold))
-      .symbolRenderingMode(.hierarchical)
+    YiruComputerUseIcon(.dragDirection, size: 14)
       .foregroundStyle(.tint)
       .rotationEffect(.degrees(isDragging ? 0 : (wigglePhase ? 12 : -12)))
       .offset(y: isDragging ? 0 : (wigglePhase ? -2 : 1))

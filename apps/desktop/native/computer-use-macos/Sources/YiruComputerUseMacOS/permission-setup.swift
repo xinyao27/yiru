@@ -2,6 +2,7 @@ import AppKit
 import PermissionFlow
 import PermissionFlowScreenRecordingStatus
 import SwiftUI
+import YiruComputerUseIcons
 
 private func translate(_ key: String, fallback: String) -> String {
   Bundle.main.localizedString(forKey: key, value: fallback, table: nil)
@@ -320,8 +321,7 @@ private struct ComputerUsePermissionRow: View {
         RoundedRectangle(cornerRadius: 10, style: .continuous)
           .fill(Color(nsColor: .quaternaryLabelColor).opacity(0.55))
           .frame(width: 42, height: 42)
-        Image(systemName: permission.systemImage)
-          .font(.system(size: 19, weight: .medium))
+        YiruComputerUseIcon(permission.icon, size: 19)
           .foregroundStyle(.secondary)
           .accessibilityHidden(true)
       }
@@ -344,17 +344,19 @@ private struct ComputerUsePermissionRow: View {
   private var permissionControl: some View {
     switch authorizationState {
     case .granted:
-      Label(
-        translate("permission.status.done", fallback: "Done"),
-        systemImage: "checkmark.circle"
-      )
+      Label {
+        Text(translate("permission.status.done", fallback: "Done"))
+      } icon: {
+        YiruComputerUseIcon(.checkmark, size: 16)
+      }
       .font(.system(size: 13, weight: .medium))
       .foregroundStyle(.secondary)
     case .checking:
-      Label(
-        translate("permission.status.checking", fallback: "Checking"),
-        systemImage: "clock"
-      )
+      Label {
+        Text(translate("permission.status.checking", fallback: "Checking"))
+      } icon: {
+        YiruComputerUseIcon(.pending, size: 16)
+      }
       .font(.system(size: 13, weight: .medium))
       .foregroundStyle(.secondary)
     case .notGranted, .unknown:
@@ -425,12 +427,12 @@ enum ComputerUsePermission: String, CaseIterable, Identifiable {
     }
   }
 
-  var systemImage: String {
+  var icon: YiruComputerUseIconID {
     switch self {
     case .accessibility:
-      return "figure.arms.open"
+      return .accessibility
     case .screenshots:
-      return "camera.viewfinder"
+      return .screenshots
     }
   }
 }

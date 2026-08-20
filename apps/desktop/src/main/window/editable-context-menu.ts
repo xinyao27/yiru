@@ -1,12 +1,10 @@
-import {
-  richMarkdownContextMenuCommandChannel,
-  type RichMarkdownContextMenuCommand,
-  type RichMarkdownContextMenuCommandPayload
-} from '~shared/rich-markdown-context-menu'
+import type { RichMarkdownContextMenuCommand } from '~shared/rich-markdown-context-menu'
+
+import { publishShellEvent } from '../shell/events'
 
 type EditableContextMenuWebContents = Pick<
   Electron.WebContents,
-  'replaceMisspelling' | 'send' | 'session'
+  'id' | 'replaceMisspelling' | 'session'
 >
 
 function markdownCommandItem(
@@ -18,8 +16,11 @@ function markdownCommandItem(
   return {
     label,
     click: () => {
-      const payload: RichMarkdownContextMenuCommandPayload = { command, ...point }
-      webContents.send(richMarkdownContextMenuCommandChannel, payload)
+      publishShellEvent(webContents.id, {
+        type: 'uiRichMarkdownContextCommand',
+        command,
+        ...point
+      })
     }
   }
 }
@@ -35,7 +36,8 @@ function editableContextPasteItem(
       // Why: context-menu paste must share renderer ownership with keyboard and
       // app-menu paste so large text controls can chunk and terminals cannot
       // receive duplicate native paste.
-      webContents.send('ui:editableContextPaste', {
+      publishShellEvent(webContents.id, {
+        type: 'uiEditableContextPaste',
         plainTextOnly: options?.plainTextOnly === true
       })
     }

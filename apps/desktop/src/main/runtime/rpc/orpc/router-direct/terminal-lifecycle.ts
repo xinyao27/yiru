@@ -7,7 +7,8 @@ import {
   handleTerminalRename,
   handleTerminalSplit,
   handleTerminalStop,
-  handleTerminalStopExact
+  handleTerminalStopExact,
+  handleTerminalUpdateViewAttributes
 } from '~main/runtime/rpc/methods/terminal-lifecycle-methods'
 
 import { runtimeImplementation } from '../access-middleware'
@@ -17,7 +18,7 @@ import { wireRuntimeMethod } from '../registered-method'
 // reason as terminal-read.ts. None of these nine leaves ever had a bare-string caller;
 // every real call site (desktop renderer's `remote-runtime-pty-transport.ts`, mobile's
 // `session/tab-activation.ts`) reaches them through `callRuntimeOrpc`/property access on
-// the negotiated client, never `window.api.runtimeEnvironments.call` with a literal name.
+// the negotiated oRPC client, never a parallel host bridge.
 export function terminalLifecycleLeaves() {
   return {
     rename: runtimeImplementation.terminal.rename.handler(
@@ -28,6 +29,9 @@ export function terminalLifecycleLeaves() {
     ),
     create: runtimeImplementation.terminal.create.handler(
       wireRuntimeMethod('terminal.create', handleTerminalCreate)
+    ),
+    updateViewAttributes: runtimeImplementation.terminal.updateViewAttributes.handler(
+      wireRuntimeMethod('terminal.updateViewAttributes', handleTerminalUpdateViewAttributes)
     ),
     split: runtimeImplementation.terminal.split.handler(
       wireRuntimeMethod('terminal.split', handleTerminalSplit)

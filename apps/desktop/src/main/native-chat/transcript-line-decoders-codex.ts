@@ -101,6 +101,10 @@ function codexEventMessage(
   id: string,
   timestamp: number | null
 ): NativeChatMessage | null {
+  if (payload.type === 'item_completed') {
+    const item = asRecord(payload.item)
+    return item ? codexCompletedItem(item, extractString(item.id) ?? id, timestamp) : null
+  }
   if (payload.type === 'user_message') {
     const text = extractString(payload.message)
     return text
@@ -114,6 +118,38 @@ function codexEventMessage(
       : null
   }
   return null
+}
+
+function codexCompletedItem(
+  item: Record<string, unknown>,
+  id: string,
+  timestamp: number | null
+): NativeChatMessage | null {
+  const role =
+    item.type === 'UserMessage' ? 'user' : item.type === 'AgentMessage' ? 'assistant' : null
+  if (!role) {
+    return null
+  }
+  const blocks = codexCompletedMessageBlocks(item.content)
+  return blocks.length > 0 ? { id, role, blocks, timestamp, source: 'transcript' } : null
+}
+
+function codexCompletedMessageBlocks(content: unknown): NativeChatBlock[] {
+  if (!Array.isArray(content)) {
+    return []
+  }
+  const blocks: NativeChatBlock[] = []
+  for (const value of content) {
+    const item = asRecord(value)
+    if (item?.type !== 'text' && item?.type !== 'Text') {
+      continue
+    }
+    const text = extractString(item.text)
+    if (text) {
+      blocks.push({ type: 'text', text })
+    }
+  }
+  return blocks
 }
 
 function codexCallInput(payload: Record<string, unknown>): unknown {

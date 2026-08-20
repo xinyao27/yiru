@@ -67,7 +67,7 @@ async function bundleRuntimeEntry(input, output, external = []) {
       alias: {
         'jsonc-parser': join(APP_ROOT, 'node_modules', 'jsonc-parser', 'lib', 'esm', 'main.js'),
         '~main': join(APP_ROOT, 'src', 'main'),
-        '~shared': join(APP_ROOT, 'src', 'shared')
+        '~shared': join(APP_ROOT, '..', '..', 'packages', 'shared', 'src')
       }
     },
     transform: {

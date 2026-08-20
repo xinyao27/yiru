@@ -35,8 +35,22 @@ export async function listRuntimeAccounts(
   // Why: inactive provider usage is fetched account-by-account. A large or
   // unreachable account set must not turn the unary list call into an unbounded
   // wait; the refresh continues filling the snapshot for the next poll.
-  await waitForAccountRefreshBudget(runtime.refreshAccountsForMobile())
-  return runtime.getAccountsSnapshot()
+  await waitForAccountRefreshBudget(runtime.accounts.refreshForMobile())
+  return runtime.accounts.getSnapshot()
+}
+
+export function listCachedRuntimeClaudeAccounts(
+  _params: void,
+  { runtime }: RpcContext
+): ClaudeRateLimitAccountsState {
+  return runtime.accounts.listCachedClaude()
+}
+
+export function listCachedRuntimeCodexAccounts(
+  _params: void,
+  { runtime }: RpcContext
+): CodexRateLimitAccountsState {
+  return runtime.accounts.listCachedCodex()
 }
 
 async function waitForAccountRefreshBudget(refresh: Promise<void>): Promise<void> {
@@ -57,7 +71,7 @@ export function selectRuntimeClaudeAccount(
   params: SelectAccountInput,
   { runtime }: RpcContext
 ): Promise<ClaudeRateLimitAccountsState> {
-  return runtime.selectClaudeAccount(params.accountId, {
+  return runtime.accounts.selectClaude(params.accountId, {
     runtime: params.runtime,
     wslDistro: params.wslDistro
   })
@@ -67,7 +81,7 @@ export function selectRuntimeCodexAccount(
   params: SelectAccountInput,
   { runtime }: RpcContext
 ): Promise<CodexRateLimitAccountsState> {
-  return runtime.selectCodexAccount(params.accountId, {
+  return runtime.accounts.selectCodex(params.accountId, {
     runtime: params.runtime,
     wslDistro: params.wslDistro
   })
@@ -77,14 +91,14 @@ export function removeRuntimeClaudeAccount(
   params: RemoveAccountInput,
   { runtime }: RpcContext
 ): Promise<ClaudeRateLimitAccountsState> {
-  return runtime.removeClaudeAccount(params.accountId)
+  return runtime.accounts.removeClaude(params.accountId)
 }
 
 export function removeRuntimeCodexAccount(
   params: RemoveAccountInput,
   { runtime }: RpcContext
 ): Promise<CodexRateLimitAccountsState> {
-  return runtime.removeCodexAccount(params.accountId)
+  return runtime.accounts.removeCodex(params.accountId)
 }
 
 export function unsubscribeRuntimeAccounts(
@@ -99,49 +113,49 @@ export function refreshRuntimeRateLimits(
   params: RefreshRateLimitsInput,
   { runtime }: RpcContext
 ): Promise<RateLimitState> {
-  return runtime.refreshRateLimits(params.cursorContext)
+  return runtime.accounts.refreshRateLimits(params.cursorContext)
 }
 
 export function refreshRuntimeCodexRateLimitsForTarget(
   params: RateLimitRuntimeTargetInput,
   { runtime }: RpcContext
 ): Promise<RateLimitState> {
-  return runtime.refreshCodexRateLimitsForTarget(params)
+  return runtime.accounts.refreshCodexRateLimits(params)
 }
 
 export function refreshRuntimeClaudeRateLimitsForTarget(
   params: RateLimitRuntimeTargetInput,
   { runtime }: RpcContext
 ): Promise<RateLimitState> {
-  return runtime.refreshClaudeRateLimitsForTarget(params)
+  return runtime.accounts.refreshClaudeRateLimits(params)
 }
 
 export function consumeRuntimeCodexRateLimitResetCredit(
   _params: void,
   { runtime }: RpcContext
 ): Promise<CodexRateLimitResetResult> {
-  return runtime.consumeCodexRateLimitResetCredit()
+  return runtime.accounts.consumeCodexRateLimitResetCredit()
 }
 
 export function fetchRuntimeInactiveClaudeRateLimitAccounts(
   _params: void,
   { runtime }: RpcContext
 ): Promise<void> {
-  return runtime.fetchInactiveClaudeRateLimitAccounts()
+  return runtime.accounts.fetchInactiveClaudeRateLimits()
 }
 
 export function fetchRuntimeInactiveCodexRateLimitAccounts(
   _params: void,
   { runtime }: RpcContext
 ): Promise<void> {
-  return runtime.fetchInactiveCodexRateLimitAccounts()
+  return runtime.accounts.fetchInactiveCodexRateLimits()
 }
 
 export function refreshRuntimeGrokRateLimits(
   _params: void,
   { runtime }: RpcContext
 ): Promise<RateLimitState> {
-  return runtime.refreshGrokRateLimits()
+  return runtime.accounts.refreshGrokRateLimits()
 }
 
 // Why: reads the Grok CLI's own `auth.json` off this host's disk — always the
@@ -169,7 +183,7 @@ export async function handleAccountsSubscribe(
   await new Promise<void>((resolve) => {
     let closed = false
     let removeAbortListener = (): void => {}
-    const unsubscribe = runtime.onAccountsChanged((snapshot) => {
+    const unsubscribe = runtime.accounts.onChanged((snapshot) => {
       emit({ type: 'snapshot', snapshot })
     })
 
@@ -203,7 +217,7 @@ export async function handleAccountsSubscribe(
     // something to render immediately, then refresh only stale data.
     // Connection cutovers replay this subscription and must not turn the
     // manual-force lane into an unbounded provider-fetch loop.
-    emit({ type: 'ready', subscriptionId, snapshot: runtime.getAccountsSnapshot() })
-    void runtime.refreshAccountsForMobileSubscriber()
+    emit({ type: 'ready', subscriptionId, snapshot: runtime.accounts.getSnapshot() })
+    void runtime.accounts.refreshForMobileSubscriber()
   })
 }
