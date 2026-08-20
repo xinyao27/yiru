@@ -200,6 +200,9 @@ actor TerminalMultiplexDelivery {
             let snapshot = try assembler.finish(frame)
             awaitingSnapshot = snapshot
             await publishEvent(.snapshot(snapshot))
+        } catch TerminalSnapshotAssemblerError.superseded {
+            // Why: supersession is normal snapshot arbitration; its replacement stays on this stream.
+            return
         } catch TerminalSnapshotAssemblerError.unavailable(let status) {
             throw TerminalMultiplexDeliveryError.snapshotUnavailable(status: status)
         } catch {

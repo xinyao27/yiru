@@ -3,6 +3,7 @@ import Foundation
 nonisolated enum TerminalSnapshotAssemblerError: Error, Equatable, Sendable {
     case invalidStart
     case chunkMismatch
+    case superseded
     case unavailable(status: UInt8)
     case endMismatch
     case checksumMismatch
@@ -12,6 +13,7 @@ nonisolated enum TerminalSnapshotAssemblerError: Error, Equatable, Sendable {
 
 nonisolated struct TerminalSnapshotAssembler: Sendable {
     static let maxBytes = 2 * 1024 * 1024
+    private static let supersededStatus: UInt8 = 3
 
     private var startRecord: TerminalMultiplexSnapshotStartRecord?
     private var sections: [Data]?
@@ -58,6 +60,9 @@ nonisolated struct TerminalSnapshotAssembler: Sendable {
     mutating func finish(_ frame: TerminalMultiplexFrame) throws -> TerminalReplaySnapshot {
         defer { clear() }
         let end = try TerminalMultiplexSnapshotRecordCodec.decodeEnd(frame.payload)
+        if end.status == Self.supersededStatus {
+            throw TerminalSnapshotAssemblerError.superseded
+        }
         guard end.status == 0 else {
             throw TerminalSnapshotAssemblerError.unavailable(status: end.status)
         }

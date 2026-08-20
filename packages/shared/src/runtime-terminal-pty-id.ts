@@ -16,7 +16,7 @@ export type RuntimeTerminalPtyIdParts = {
 export function toRuntimeTerminalPtyId(handle: string, environmentId?: string | null): string {
   const owner = environmentId?.trim()
   if (!owner) {
-    return `${RUNTIME_TERMINAL_PTY_ID_PREFIX}${handle}`
+    return `${RUNTIME_TERMINAL_PTY_ID_PREFIX}${encodeURIComponent(handle)}`
   }
   return `${RUNTIME_TERMINAL_PTY_ID_PREFIX}${encodeURIComponent(owner)}${RUNTIME_TERMINAL_OWNER_SEPARATOR}${encodeURIComponent(handle)}`
 }
@@ -27,10 +27,10 @@ export function parseRuntimeTerminalPtyId(ptyId: string): RuntimeTerminalPtyIdPa
   }
   const rest = ptyId.slice(RUNTIME_TERMINAL_PTY_ID_PREFIX.length)
   const separatorIndex = rest.indexOf(RUNTIME_TERMINAL_OWNER_SEPARATOR)
-  if (separatorIndex === -1) {
-    return { environmentId: null, handle: rest }
-  }
   try {
+    if (separatorIndex === -1) {
+      return { environmentId: null, handle: decodeURIComponent(rest) }
+    }
     return {
       environmentId: decodeURIComponent(rest.slice(0, separatorIndex)),
       handle: decodeURIComponent(
@@ -69,7 +69,7 @@ export function getCanonicalRuntimeTerminalHandle(ptyId: string): string | null 
     return null
   }
   if (environmentId === null) {
-    return `${RUNTIME_TERMINAL_PTY_ID_PREFIX}${handle}` === ptyId ? handle : null
+    return toRuntimeTerminalPtyId(handle) === ptyId ? handle : null
   }
   if (!environmentId || environmentId.trim() !== environmentId) {
     return null
