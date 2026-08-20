@@ -124,3 +124,6 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Verify iOS package
+        run: pnpm exec vp run yiru-mobile-ios#verify

@@ -27,8 +27,7 @@
 
 ## Visual contract
 
-- Host actions use the old Mobile system images: `arrow.clockwise`, `power`, `pencil`, `trash`.
-- Edit copy, 12/14pt type, 44pt fields, spacing and neutral loader follow
-  `apps/mobile/app/h/[hostId]/edit.tsx`.
+- Host actions use the established reconnect, disconnect, edit and delete icon semantics.
+- Edit copy uses 12/14pt type, 44pt fields, consistent spacing and a neutral loader.
 - Functional fields use interactive iOS 26 Liquid Glass. Save, actions and loaders remain neutral,
   never blue.

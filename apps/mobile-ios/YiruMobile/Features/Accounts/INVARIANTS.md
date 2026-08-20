@@ -1,8 +1,6 @@
 # Accounts invariants
 
-旧版基准：`apps/mobile/app/h/[hostId]/accounts.tsx`、
-`apps/mobile/src/components/account-usage.tsx` 和
-`apps/mobile/src/components/account-usage-details.tsx`。
+Accounts 页面同时负责 provider 选择、用量快照和 reset countdown，三者共享同一连接状态。
 
 ## Entrypoints and transport
 

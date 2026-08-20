@@ -36,7 +36,7 @@ shell-neutral for POSIX shells, PowerShell, and cmd.exe.
 
 **When NOT to use**
 - Android emulators → use the `yiru-emulator-android` skill (same `YIRU emulator` namespace, cross-platform via adb/emulator).
-- Building or installing the app itself → use `xcodebuild`, `xcrun simctl install`, `expo run:ios`, etc. (launch the app, then use `YIRU emulator` to drive it).
+- Building or installing the app itself → use `xcodebuild` and `xcrun simctl install` (launch the app, then use `YIRU emulator` to drive it).
 - In-app debugging (state, network, views) → use the app's own tools or the browser pane if it's a webview.
 - Remote/SSH worktrees for emulator control (currently out of scope / unsupported; simulator hardware is local to a Mac).
 

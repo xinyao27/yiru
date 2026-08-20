@@ -2,12 +2,12 @@ import {
   Files,
   FlowArrow as Workflow,
   GitMerge,
-  ListChecks
+  ListChecks,
+  Robot as Agent
 } from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
 
 import type { ActivityBarItem } from './activity-bar-buttons'
-import { AgentSessionHistoryIcon } from './agent-session-history-icon'
 
 export type RightSidebarActivityShortcuts = {
   explorer: string
@@ -52,7 +52,7 @@ export function createRightSidebarActivityItems(
     {
       // Why: keeping Agent last here preserves its trailing position after visibility filtering.
       id: 'vault',
-      icon: AgentSessionHistoryIcon,
+      icon: Agent,
       title: translate('auto.components.right.sidebar.index.aiVaultSessionHistory', 'Agents'),
       shortcut: ''
     }

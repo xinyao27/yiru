@@ -7,7 +7,7 @@
   WidgetKit timelines.
 - The App Group snapshot is value-only and contains no credentials or live transport handles. A
   widget can render stale data or a fallback URL without waking the host connection.
-- Snapshot keys and legacy Expo timeline conversion stay in `Shared/Widgets`; the feature writer
+- Snapshot keys and legacy timeline conversion stay in `Shared/Widgets`; the feature writer
   only maps current Home domain values and stable deep-link paths.
 
 ## Selection and ordering

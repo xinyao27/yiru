@@ -91,7 +91,7 @@ export const MobileWorktreeShowResultSchema = z.object({
   worktree: z.object({
     baseRef: z.string().nullable().optional(),
     // Why: native's Source Control / Agent History headers need the live worktree
-    // label (mirrors Expo's getLiveWorktreeDisplayName), not the snapshot handed
+    // label, not the snapshot handed
     // to the screen at navigation time — mergeWorktree guarantees this is never
     // empty (meta name || branch || repo default || folder basename).
     displayName: z.string().optional()

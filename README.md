@@ -74,7 +74,6 @@ Useful commands:
 
 ```bash
 pnpm dev:mobile          # Start the native iOS 26 mobile app and pair with Desktop
-pnpm dev:mobile:legacy   # Start the Expo rollback mobile app
 pnpm typecheck    # Type-check all workspace projects
 pnpm check        # Lint, format, typecheck, and repository contracts
 pnpm lint         # Run and fix lint checks

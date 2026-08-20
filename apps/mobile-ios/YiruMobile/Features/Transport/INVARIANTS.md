@@ -2,7 +2,7 @@
 
 ## Current product boundary
 
-- The shipping desktop and Expo client use authenticated direct `ws` / `wss` endpoints. The
+- Desktop and mobile use authenticated direct `ws` / `wss` endpoints. The
   first-party Cloud Relay implementation was retired on 2026-07-24; the native client must not
   silently revive its deleted provisioning or credential lifecycle.
 - Pairing continues to validate legacy relay fields because old QR payloads can still reach the
@@ -14,7 +14,7 @@
 
 - One `RuntimeHostSession` owns each host's physical connection generation. Feature code never
   creates a WebSocket and concurrent unary calls share one authenticated peer.
-- Reconnect delays match the Expo client: 0.5, 1, 2, 4, 8, 15, 30, and 60 seconds, capped at 12
+- Reconnect delays are 0.5, 1, 2, 4, 8, 15, 30, and 60 seconds, capped at 12
   fast attempts, followed by one 90-second trickle attempt until recovery.
 - Three consecutive explicit E2EE authentication rejections latch `authenticationFailed`.
   Network, timeout, malformed-frame, and protocol failures do not erase the saved pairing.

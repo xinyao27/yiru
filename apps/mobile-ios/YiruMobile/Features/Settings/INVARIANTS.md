@@ -14,7 +14,7 @@
 - `SettingsPreferences` is the single writer for theme, loader, default session view, and terminal
   link mode. Changes are written synchronously to `UserDefaults` and are immediately reflected in
   the shared environment.
-- `LegacyMobilePreferenceMigration` translates old Expo AsyncStorage values before dependencies
+- `LegacyMobilePreferenceMigration` translates old AsyncStorage values before dependencies
   are constructed. Native code never treats a missing migrated value as a reason to overwrite a
   user's existing choice.
 - Credential cleanup is host-scoped, retryable, and never blocks navigation through unrelated

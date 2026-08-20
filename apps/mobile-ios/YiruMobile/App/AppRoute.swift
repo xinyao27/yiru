@@ -19,7 +19,6 @@ enum AppRoute: Hashable {
     case sourceDiff(HostProfile, WorkspaceSummary, String, String, WorkspaceFileDiffSource)
     case workspaces(HostProfile, WorkspaceListPresentation)
     case workspaceSession(HostProfile, WorkspaceSummary, WorkspaceOpenTab?)
-    case terminal(HostProfile, TerminalSummary)
     case terminalSettings
     case pair
     case pairConfirm(PairingOffer)
@@ -34,7 +33,7 @@ extension AppRoute {
             .files(let host, _), .filePreview(let host, _, _),
             .sourceControl(let host, _, _), .sourceReview(let host, _, _),
             .sourceDiff(let host, _, _, _, _), .workspaces(let host, _),
-            .workspaceSession(let host, _, _), .terminal(let host, _):
+            .workspaceSession(let host, _, _):
             host.id
         case .activityInsights, .designSystemCatalog, .settings, .appearanceSettings,
             .chatSettings, .browserSettings, .connectionLog, .notificationSettings,

@@ -19,7 +19,6 @@ struct AppDependencies {
     let runtimeClient: RuntimeClient
     let sourceControlRepository: any SourceControlRepository
     let sourceReviewRepository: any SourceReviewRepository
-    let terminalRepository: any TerminalRepository
     let terminalDisplayModeRuntime: any TerminalDisplayModeRuntime
     let terminalFileRepository: any TerminalFileRepository
     let terminalPreferences: TerminalPreferences
@@ -63,7 +62,6 @@ struct AppDependencies {
             runtimeClient: runtime,
             sourceControlRepository: runtime,
             sourceReviewRepository: runtime,
-            terminalRepository: runtime,
             terminalDisplayModeRuntime: runtime,
             terminalFileRepository: runtime,
             terminalPreferences: terminalPreferences,

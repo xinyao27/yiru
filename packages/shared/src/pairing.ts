@@ -14,8 +14,8 @@ export function encodePairingOffer(offer: PairingOffer): string {
     .replace(/\+/g, '-')
     .replace(/\//g, '_')
     .replace(/=+$/, '')
-  // Why: Android camera intents and Expo Router preserve query params more
-  // reliably than URL fragments when launching a custom-scheme app.
+  // Why: mobile deep-link handlers preserve query params more reliably than URL fragments
+  // when launching a custom-scheme app.
   return `yiru://pair?code=${base64url}`
 }
 

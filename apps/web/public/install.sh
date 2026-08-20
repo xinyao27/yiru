@@ -196,6 +196,8 @@ install_macos() {
     *) echo "Yiru does not provide a macOS build for $machine_arch." >&2; exit 1 ;;
   esac
 
+  # Why: this historical workflow identity is part of the current macOS release's
+  # attestation, even though its source workflow is no longer in the active tree.
   download_verified_asset "$asset" "$TEMP_ROOT/yiru.dmg" \
     'xinyao27/yiru/.github/workflows/release-mac-build.yml'
   mkdir -p "$TEMP_ROOT/mount" "$INSTALL_ROOT"
@@ -222,6 +224,8 @@ install_linux() {
     *) echo "Yiru does not provide a Linux build for $machine_arch." >&2; exit 1 ;;
   esac
 
+  # Why: this historical workflow identity is part of the current Linux release's
+  # attestation, even though its source workflow is no longer in the active tree.
   download_verified_asset "$asset" "$TEMP_ROOT/yiru.AppImage" \
     'xinyao27/yiru/.github/workflows/release-cut.yml'
   chmod 700 "$TEMP_ROOT/yiru.AppImage"

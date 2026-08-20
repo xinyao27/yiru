@@ -2,7 +2,7 @@
 
 ## Entries
 
-- A paired host opens the same grouped Workspace list as `apps/mobile/app/h/[hostId]/index.tsx`.
+- A paired host opens a grouped Workspace list scoped to that host.
 - Search, pull-to-refresh, reconnect, section collapse, lineage collapse, open tabs and long-press
   actions remain reachable without changing the row's tap target.
 - Opening a Workspace requests `worktree.activate` with `notifyClients: false` before the Session
@@ -53,7 +53,7 @@
 
 ## Visual contract
 
-- `apps/mobile` remains canonical for type sizes, row height, spacing, colors and icons.
+- `DESIGN.md` remains canonical for type sizes, row height, spacing, colors and icons.
 - Every project icon is centered in the same fixed-width section column, and every project name
   starts at the same horizontal anchor; the project rail does not participate in icon alignment.
 - Ordinary list glyphs are muted, unread activity is amber, and hosted-review glyphs retain their

@@ -19,7 +19,7 @@ nonisolated struct TerminalSurfaceConfiguration: Equatable, Sendable {
         customAccessoryKeys: [TerminalCustomKey] = []
     ) -> TerminalSurfaceConfiguration {
         TerminalSurfaceConfiguration(
-            fontSize: 13 * textScale,
+            fontSize: Theme.Typography.code * textScale,
             scrollbackLines: 10_000,
             accessoryKeys: accessoryKeys,
             customAccessoryKeys: customAccessoryKeys

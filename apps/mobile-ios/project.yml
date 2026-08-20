@@ -10,8 +10,8 @@ settings:
   base:
     CURRENT_PROJECT_VERSION: '1'
     ENABLE_USER_SCRIPT_SANDBOXING: YES
-    # Why: keep the native rewrite's visible version in lockstep with Expo Mobile during parity
-    # work; release automation can bump both clients together.
+    # Why: release automation uses this as the default marketing version while allowing an exact
+    # workflow override or a deliberate patch bump.
     MARKETING_VERSION: '0.0.1'
     SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
     SWIFT_STRICT_CONCURRENCY: complete
@@ -132,6 +132,8 @@ targets:
         CODE_SIGN_STYLE: Automatic
         DEVELOPMENT_TEAM: 8H6Q2YA365
         GENERATE_INFOPLIST_FILE: NO
+        # Why: preserve the widget identifier registered on Apple ID 6792278376 so the native
+        # binary upgrades the existing app and its extension instead of introducing a new target.
         PRODUCT_BUNDLE_IDENTIFIER: com.xinyao27.yiru.mobile.ExpoWidgetsTarget
         PRODUCT_NAME: YiruWidgets
         SKIP_INSTALL: YES

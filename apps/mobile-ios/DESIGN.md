@@ -41,11 +41,10 @@ Yiru iOS 的设计语言由系统 Liquid Glass、中性纯色背景和清晰的�
 5. **可读性优先于效果。** Reduce Transparency、Reduce Motion、Increase Contrast、动态
    字体、深浅色和浅色壁纸都必须可用。
 
-## 迁移保真合同
+## 功能保真合同
 
-原生重写不是重新设计，但保真只约束**行为、能力与状态语义**，不再约束页面排布。Expo 版已
-下线删除，功能基准现在是 [FUNCTIONAL-PARITY.md](./FUNCTIONAL-PARITY.md)、机器可读的
-[`migration-parity.json`](./migration-parity.json) 和 Desktop 客户端本身：实现或改动任一页面
+原生实现的保真只约束**行为、能力与状态语义**，不约束已退役客户端的页面排布。功能基准是
+Desktop 客户端、runtime protocol 和各 feature 的 `INVARIANTS.md`：实现或改动任一页面
 前，先在这三者中确认它覆盖的每个能力、状态分支、图标语义与文案含义——这些必须在原生页面上
 全部保留，不能凭印象删减、合并或改变含义。旧版的信息密度、控件尺寸、分组方式和布局顺序**不再是必须复制的视觉
 基准**：当旧版布局本身存在问题（矛盾的重复入口、无分组的堆叠、对齐不一致、被截断的关键信
@@ -54,7 +53,7 @@ Yiru iOS 的设计语言由系统 Liquid Glass、中性纯色背景和清晰的�
 不能凭印象替换内容样式。下文的 Diff Code Surface 契约与图标语义映射不受本次调整影响，其具
 体数值已在本文件中写明，不再依赖已删除的旧树。
 
-- 迁移页面允许使用 feature-owned 固定视觉 metric，以便准确映射旧版 token；同一 metric
+- 业务页面允许使用 feature-owned 固定视觉 metric，以便准确映射既有 token；同一 metric
   必须只有一个 owner，不能散落成互不一致的 magic number。
 - 旧版内容图标使用 Phosphor 时，原生端使用 Hugeicons Free 的语义等价图标；不在页面中
   创建逐个图片资产，也不保留 Phosphor 或 SF Symbols 作为 UI 图标 provider。
@@ -86,7 +85,7 @@ Terminal accessory 和 sheet 密度；只有有足够空间的 iPad 窗口才显
 分栏、右侧 dock 或 Review 的并排面板。这个判断必须由 Design System 统一提供，feature 不得
 重新写一套设备型号或 size class 条件。
 
-Workspace List 的第一组基准由 `Features/Workspace/list/metrics.swift` 持有：文字
+Workspace List 的第一组基准由 `Features/Workspace/list/Metrics.swift` 持有：文字
 17 / 15 / 13pt（对应旧版 `text-base` / `text-sm` / `text-xs`），项目图标 20pt，普通图标和工作区 Loader 16pt，紧凑图标 12pt，agent 状态
 10pt、内部方块 6pt，section / row 最小高度 44pt，open-tab 行高 24pt。工作区内容图标来自
 Hugeicons Free。普通 Repo fallback、分支、非 Agent tab、备注、折叠箭头和 Loader 使用
@@ -95,7 +94,7 @@ open / closed / merged 的语义状态色，不能退回默认黑色。所有 se
 20pt 固定列并在 44pt 行内垂直居中，Project Name 共用一个 leading anchor；项目 rail 从行顶
 32pt 独立绘制，不能通过把图标容器改为顶部对齐来迁就 rail。
 
-Terminal 的基准由 `Features/Terminal/chrome-metrics.swift` 持有：Tab Strip 位于标题下方且高
+Terminal 的基准由 `Features/Terminal/ChromeMetrics.swift` 持有：Tab Strip 位于标题下方且高
 44pt，左右边距 12pt、间距 8pt；Tab 可视高度 36pt、宽 96–160pt、图标 16pt、文字
 15pt。未选中 Tab 透明，选中 Tab 使用灰色 `selection` 胶囊，不能把每个 Tab 做成 Glass，新增
 按钮是 36pt 中性实色圆形和 44pt 点击区，不使用会在 Terminal 边缘形成分隔阴影的 Glass。
@@ -195,7 +194,7 @@ Appearance picker 必须直接渲染全部 26 个候选动画；Design System Ca
 
 - spacing 使用 4 / 8 / 12 / 16 / 20 / 24 / 32 的阶梯；
 - radius 只定义 content、control、floating surface 三种语义；
-- 新页面 typography 使用动态系统 text style；迁移页面按上面的保真合同使用 feature-owned
+- 新页面 typography 使用动态系统 text style；既有页面按上面的保真合同使用 feature-owned
   metric，并在默认 Dynamic Type 下与旧版数值一致；
 - animation 使用系统 `.snappy` / `.smooth` token，并尊重 Reduce Motion；
 - opacity、glass spacing、minimum hit target 和页面边距不在 feature 内重复硬编码。
@@ -203,12 +202,32 @@ Appearance picker 必须直接渲染全部 26 个候选动画；Design System Ca
 内容本身需要的语义色——ANSI terminal、diff、syntax highlighting、agent identity、图片和
 状态——属于 feature/domain，不强行压成品牌色。
 
+### Feature 样式约束
+
+- Feature 只能通过 `Theme`、Design System 组件及语义 modifier 选择颜色、字号、间距、圆角、
+  描边和控件尺寸；不得在 view body 里复制跨页面数值。只有确实属于业务内容几何的尺寸可以由
+  feature-owned metric 持有，并且同一 metric 只有一个 owner。
+- UI 正文默认使用 regular。`bold` / `semibold` 只用于 navigation title、内容标题和 section
+  title；按钮、Tab、状态、Badge、数量、作者、时间、辅助信息和 row accessory 均保持 regular，
+  通过字号、颜色和位置表达层级，不能靠任意加粗制造强调。
+- 新页面的文字角色只使用 `Theme.Typography`：13pt metadata、15pt supporting、17pt primary、
+  19pt emphasis、21pt page title。Feature 不得用相邻的 12 / 14 / 18pt 近似值重新造一套层级。
+- 内容 Surface 使用 `ContentSurface`，由它统一拥有 16pt 内边距、content radius 和 hairline；
+  feature 不复制背景、圆角和描边配方。普通交互行至少 44pt，控件可见尺寸继续遵循按钮尺寸合同。
+
+Source Control 的 hosted review 由 `HostedReviewPage`、`HostedReviewSection` 和
+`SourceSelectionStrip` 共同持有页面节奏：页面横向 16pt，section 之间 12pt，section header
+高度 44pt、header 到 Surface 4pt、Surface 内元素分组 12pt。身份、检查、Reviewer、描述和评论
+不得各自重写这组数值。PR 身份信息到首要操作使用 20pt；首要操作到后续 44pt 控件行补 4pt，
+使首要操作上下的可见留白保持同一 20pt 节奏。紧邻的图标操作使用 `.regular` 的 36pt 可见尺寸、
+44pt hit target，并共享零 layout gap 的连续操作组，不能因 hit target 的隐形空间再次叠加间距。
+
 ## 页面语法
 
 - 页面统一使用纯色 `AppBackground`；禁止渐变、彩色光晕或其他装饰性背景。
 - 主内容使用 `ScrollView` + lazy container 或 `List`；大型集合不得用 eager stack。
 - 页面标题和首要操作进入 navigation/toolbar，由系统生成玻璃。
-- 旧 Expo route 的 navigation header 是紧凑 inline 标题；对应 SwiftUI 页面必须显式使用
+- 内容页面的 navigation header 使用紧凑 inline 标题；对应 SwiftUI 页面必须显式使用
   `.navigationBarTitleDisplayMode(.inline)`，不能因为 SwiftUI 默认采用大标题而改变首屏密度。
   Home 等旧版本来就在内容内显示标题的页面继续由内容持有标题。
 - 浮动底部操作组使用 `GlassActionGroup`；同一操作不能同时出现在 toolbar 与浮层。

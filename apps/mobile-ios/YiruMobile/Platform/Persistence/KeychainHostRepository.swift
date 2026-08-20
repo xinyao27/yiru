@@ -132,9 +132,9 @@ actor KeychainHostRepository: HostRepository {
         }
 
         // Why: a user may have installed an earlier native build before upgrading
-        // from Expo. Merge the legacy metadata once, but never read it on every
+        // from the previous client. Merge the legacy metadata once, but never read it on every
         // subsequent launch — otherwise removing a native host could resurrect
-        // the stale Expo row.
+        // the stale legacy row.
         guard !defaults.bool(forKey: legacyHostMigrationKey) else { return current }
         guard let storage = LegacyExpoAsyncStorage.load() else { return current }
         guard storage.isComplete else {

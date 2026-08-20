@@ -149,7 +149,7 @@ struct AppView: View {
                     )
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Theme.Colors.background.ignoresSafeArea())
+                .background { AppBackground() }
                 .navigationDestination(for: AppRoute.self) { route in
                     AppRouteDestinationView(route: route, model: model)
                 }

@@ -1,6 +1,5 @@
-# Yiru native iOS release lane. The workflow remains pointed at the Expo lane
-# until every cutover gate is verified; this lane is the signed-archive target
-# that replaces it at cutover.
+# Yiru native iOS release lane. It signs and uploads the only mobile client while
+# refusing to target any App Store Connect record other than the existing Yiru app.
 
 require "base64"
 require "yaml"
@@ -16,6 +15,8 @@ APP_TARGET = "YiruMobile"
 BUNDLE_ID = "com.xinyao27.yiru.mobile"
 APP_STORE_APP_ID = "6792278376"
 WIDGET_TARGET = "YiruWidgets"
+# Why: this is the extension identifier already registered on the existing App Store app.
+# Renaming it would break the upgrade path and require a separate identifier migration.
 WIDGET_BUNDLE_ID = "com.xinyao27.yiru.mobile.ExpoWidgetsTarget"
 TESTFLIGHT_GROUPS = ["peeps"].freeze
 DEFAULT_TESTFLIGHT_CHANGELOG = "Latest Yiru Mobile updates and fixes.".freeze
@@ -54,12 +55,48 @@ def bump_patch_version(version)
   "#{match[1]}.#{match[2]}.#{match[3].to_i + 1}"
 end
 
-def resolve_requested_version(options)
+def release_history(app)
+  app_store_versions = app
+    .get_app_store_versions(filter: { platform: Spaceship::ConnectAPI::Platform::IOS })
+    .map(&:version_string)
+  builds = Spaceship::ConnectAPI::Build.all(
+    app_id: app.id,
+    platform: Spaceship::ConnectAPI::Platform::IOS,
+  )
+
+  {
+    versions: (app_store_versions + builds.map(&:app_version)).compact.uniq,
+    build_numbers: builds.map { |build| build.version.to_s },
+  }
+rescue StandardError => error
+  UI.user_error!(
+    "Could not read version and build history from the existing App Store app; " \
+    "release blocked (#{error.message})",
+  )
+end
+
+def resolve_requested_version(options, history)
   requested = options[:version].to_s.strip
   requested = ENV.fetch("MOBILE_IOS_RELEASE_VERSION", "").strip if requested.empty?
-  version = requested.empty? ? project_marketing_version : requested
-  version = bump_patch_version(version) if truthy_option?(options[:bump_patch])
-  version = bump_patch_version(version) if truthy_option?(ENV["MOBILE_IOS_BUMP_PATCH_VERSION"])
+
+  unless requested.empty?
+    UI.user_error!("iOS release version must be x.y.z") unless requested.match?(/\A\d+\.\d+\.\d+\z/)
+    return requested
+  end
+
+  versions = [project_marketing_version, *history.fetch(:versions)]
+  unsupported_versions = versions.reject { |version| version.match?(/\A\d+\.\d+\.\d+\z/) }
+  unless unsupported_versions.empty?
+    UI.user_error!(
+      "Existing iOS version history contains unsupported versions: " \
+      "#{unsupported_versions.join(', ')}; provide an exact release_version",
+    )
+  end
+
+  version = versions.max_by { |candidate| Gem::Version.new(candidate) }
+  should_bump = truthy_option?(options[:bump_patch]) ||
+                truthy_option?(ENV["MOBILE_IOS_BUMP_PATCH_VERSION"])
+  version = bump_patch_version(version) if should_bump
 
   UI.user_error!("iOS release version must be x.y.z") unless version.match?(/\A\d+\.\d+\.\d+\z/)
   version
@@ -74,8 +111,9 @@ def version_train_closed?(app, version)
       CLOSED_APP_STORE_STATES.include?(app_store_version.app_store_state)
     end
 rescue StandardError => error
-  UI.error("Could not determine App Store state for #{version} (#{error.message}); assuming open")
-  false
+  UI.user_error!(
+    "Could not determine App Store state for #{version}; release blocked (#{error.message})",
+  )
 end
 
 def existing_app_store_app!
@@ -112,13 +150,13 @@ def ensure_open_version_train!(app, version)
   )
 end
 
-def next_testflight_build_number(api_key, version)
-  latest_testflight_build_number(
-    api_key: api_key,
-    app_identifier: BUNDLE_ID,
-    version: version,
-    initial_build_number: 0,
-  ).to_i + 1
+def next_testflight_build_number(history)
+  build_numbers = history
+    .fetch(:build_numbers)
+    .select { |build_number| build_number.match?(/\A[1-9]\d*\z/) }
+    .map(&:to_i)
+
+  build_numbers.max.to_i + 1
 end
 
 def testflight_changelog
@@ -133,10 +171,10 @@ def testflight_distribution
   UI.user_error!("TESTFLIGHT_DISTRIBUTION must be 'internal' or 'external'")
 end
 
-def resolve_archive_build_number(options)
+def resolve_archive_build_number(options, history)
   requested = options[:build_number].to_s.strip
   requested = ENV.fetch("NATIVE_ARCHIVE_BUILD_NUMBER", "").strip if requested.empty?
-  requested = "1" if requested.empty?
+  requested = next_testflight_build_number(history).to_s if requested.empty?
 
   unless requested.match?(/\A[1-9]\d*\z/)
     UI.user_error!("Archive build number must be a positive integer")
@@ -223,21 +261,23 @@ end
 platform :ios do
   desc "Validate the requested native iOS version and report its next TestFlight build number"
   lane :prepare_release_version do |options|
-    api_key = app_store_connect_api_key_from_env
-    version = resolve_requested_version(options)
+    app_store_connect_api_key_from_env
     app = existing_app_store_app!
+    history = release_history(app)
+    version = resolve_requested_version(options, history)
     ensure_open_version_train!(app, version)
-    build_number = next_testflight_build_number(api_key, version)
+    build_number = next_testflight_build_number(history)
     UI.message("Prepared native Yiru Mobile iOS #{version} (#{build_number})")
   end
 
   desc "Build and export a signed native archive without uploading it"
   lane :archive do |options|
     api_key = app_store_connect_api_key_from_env
-    version = resolve_requested_version(options)
-    build_number = resolve_archive_build_number(options)
     team_id = ENV.fetch("APPLE_TEAM_ID")
-    existing_app_store_app!
+    app = existing_app_store_app!
+    history = release_history(app)
+    version = resolve_requested_version(options, history)
+    build_number = resolve_archive_build_number(options, history)
 
     build_signed_archive(
       api_key: api_key,
@@ -254,10 +294,11 @@ platform :ios do
   desc "Build, sign, upload, and distribute the native iOS app through TestFlight"
   lane :release do |options|
     api_key = app_store_connect_api_key_from_env
-    version = resolve_requested_version(options)
     app = existing_app_store_app!
+    history = release_history(app)
+    version = resolve_requested_version(options, history)
     ensure_open_version_train!(app, version)
-    build_number = next_testflight_build_number(api_key, version)
+    build_number = next_testflight_build_number(history)
     distribution = testflight_distribution
     team_id = ENV.fetch("APPLE_TEAM_ID")
 

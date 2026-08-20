@@ -98,7 +98,7 @@ struct HomeView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Theme.Colors.background)
+        .background { AppBackground() }
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {

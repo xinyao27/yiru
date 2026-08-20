@@ -241,7 +241,7 @@ enum LegacyMobilePreferenceMigration {
         let currentIDs = Set(defaults.stringArray(forKey: nativeKey) ?? [])
         let mergedIDs = currentIDs.union(legacyIDs).sorted()
         guard mergedIDs != currentIDs.sorted() else { return }
-        // Why: a failed Expo keychain delete must remain recoverable after the
+        // Why: a failed legacy keychain delete must remain recoverable after the
         // bundle replacement, otherwise the native Settings screen cannot retry it.
         defaults.set(mergedIDs, forKey: nativeKey)
     }

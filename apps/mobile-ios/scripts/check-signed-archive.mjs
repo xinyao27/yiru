@@ -5,7 +5,7 @@
 // surfaces as "push notifications don't work" or "widget is blank" after real testers
 // install it. This gate reads the exact archive fastlane is about to upload.
 
-import { execFileSync } from 'node:child_process'
+import { execFileSync, spawnSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import process from 'node:process'
@@ -59,14 +59,22 @@ function verifySignatureValid(label, bundlePath) {
 }
 
 function verifyAuthorityAndTeam(label, bundlePath) {
-  let report
-  try {
-    report = execFileSync('codesign', ['-dvvv', bundlePath], {
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'pipe']
-    })
-  } catch (error) {
-    report = [error.stdout, error.stderr].filter(Boolean).map(String).join('\n')
+  // Why: codesign writes display metadata to stderr even when it exits successfully.
+  // Capture both streams so a valid distribution signature is not reported as empty.
+  const result = spawnSync('codesign', ['-dvvv', bundlePath], {
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe']
+  })
+  const report = [result.stdout, result.stderr].filter(Boolean).map(String).join('\n')
+  if (result.error) {
+    fail(`${label}: could not inspect signing authority — ${result.error.message}`)
+    return
+  }
+  if (result.status !== 0) {
+    fail(
+      `${label}: could not inspect signing authority — ${report.trim() || `codesign exited ${result.status}`}`
+    )
+    return
   }
   if (!report.includes(EXPECTED_SIGNING_AUTHORITY)) {
     const authority = report.split('\n').find((line) => line.startsWith('Authority='))

@@ -14,4 +14,4 @@
 - A cancelled refresh never replaces a usable cache with an empty aggregate or a false failure;
   one unavailable host does not hide successful summaries from other connected hosts.
 - Loaders use the global setting-selected neutral style. Charts, metrics, labels, and controls keep
-  the Expo mobile typography, spacing, and Hugeicons semantic IDs in light and dark appearance.
+  the mobile typography, spacing, and Hugeicons semantic IDs in light and dark appearance.

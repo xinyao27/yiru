@@ -33,7 +33,7 @@ The `yiru` scheme is registered in
 | Deep-link / QR payload decoding | `YiruMobile/Features/Pairing/PairingCodeDecoder.swift` |
 | Pairing offer model | `YiruMobile/Features/Pairing/PairingOffer.swift` |
 | Scan and confirm screens | `YiruMobile/Features/Pairing/PairingScanView.swift`, `PairingConfirmView.swift` |
-| Endpoint construction | `YiruMobile/Features/Hosts/endpoint.swift` |
+| Endpoint construction | `YiruMobile/Features/Hosts/Endpoint.swift` |
 | Host profile persistence (Keychain) | `YiruMobile/Platform/Persistence/KeychainHostRepository.swift` |
 | Authenticated socket | `YiruMobile/Platform/Runtime/AuthenticatedRuntimeConnection.swift` |
 | Desktop WebSocket listener and port selection | `apps/desktop/src/main/runtime/rpc/ws-transport.ts` |

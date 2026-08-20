@@ -1,7 +1,7 @@
 # Architecture
 
-目标不是把 React 组件逐个翻译成 SwiftUI，而是在保持协议和业务行为一致的前提下，
-建立一个能长期维护的原生客户端。组织原则与 Atat 相同：从功能名可以一次猜中代码位置，
+目标是在保持协议和业务行为一致的前提下，维护一个长期演进的原生客户端。
+组织原则与 Atat 相同：从功能名可以一次猜中代码位置，
 一个小功能变更通常只触碰同一 feature 的一到三个文件。
 
 ## 目录
@@ -42,9 +42,8 @@ App ───────→ Features ───────→ DesignSystem
 - `DesignSystem` 不依赖 feature、transport 或 persistence。
 - 跨进程 wire contract 的 source of truth 仍是 `packages/runtime-protocol` 与
   `packages/mobile-relay-protocol`。Swift wire model 应当从这些 source of truth 生成而非
-  在多个 feature 手抄一套相似 JSON 结构；此前生成加漂移校验由
-  `generate-mobile-ios-wire-contracts.mjs` 自动执行，该脚本已被删除，目前这条规则只能靠人工
-  在改动协议时同步维护 `MobileWire.generated.swift`。
+  在多个 feature 手抄一套相似 JSON 结构；改动协议时必须同步维护
+  `MobileWire.generated.swift`。
 
 Pairing 是第一个完整纵向切片：`PairingCodeDecoder` 只负责边界校验，`PairingModel` 只负责
 页面状态，`DirectPairingClient` 负责配对用例，`KeychainHostRepository` 负责持久身份。
@@ -93,11 +92,8 @@ RuntimeTerminalMultiplexer actor (one per host)
 ```
 
 当前实现 pin SwiftTerm 1.18.0，并由 Yiru 自己维护正式的 `UIViewRepresentable` adapter 与
-renderer-neutral `TerminalSurface`；首版使用默认 Core Text/Core Graphics renderer，性能数据
-证明有收益后再评估 Metal。
-`WKWebView + xterm.js` 只作为 prototype 未通过时的功能保真回退，Ghostty 与自研 renderer
-暂不采用。完整证据和验收闸门见
-[`docs/terminal-technology-research.md`](./docs/terminal-technology-research.md)。
+renderer-neutral `TerminalSurface`。默认使用 Core Text/Core Graphics renderer；只有性能数据
+证明有收益且视觉与能耗验收通过后才启用 Metal。
 
 Renderer 只接收有序 bytes、snapshot、resize 与输入回调。它不知道 WebSocket、relay、epoch
 或 ACK；只有 output 完成 parser feed 后 transport 才能推进 ACK。
@@ -133,7 +129,7 @@ feature-owned status overlays 渲染在 composition surface 上，而不是绑�
 
 ## 验证
 
-仓库合同禁止测试文件，因此本包不建立 XCTest 或 Swift Testing target。每个迁移切片使用：
+仓库合同禁止测试文件，因此本包不建立 XCTest 或 Swift Testing target。相关变更使用：
 
 1. `swift-format` 严格 lint。
 2. XcodeGen 可重复生成工程。

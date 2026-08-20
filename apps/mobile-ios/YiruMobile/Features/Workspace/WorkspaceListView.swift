@@ -103,7 +103,7 @@ struct WorkspaceListView: View {
                 }
             }
         }
-        .background(Theme.Colors.background.ignoresSafeArea())
+        .background { AppBackground() }
         .navigationTitle(Text(verbatim: host.name))
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(Theme.Colors.background, for: .navigationBar)

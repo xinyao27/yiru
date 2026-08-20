@@ -69,7 +69,7 @@ struct PairingConfirmView: View {
     private var readyContent: some View {
         VStack(spacing: 0) {
             Text("Pair with this desktop?")
-                .font(.system(size: Theme.Typography.supporting, weight: .semibold))
+                .font(.system(size: Theme.Typography.emphasis, weight: .semibold))
                 .foregroundStyle(Theme.Colors.foreground)
                 .multilineTextAlignment(.center)
             Text("You opened a pairing link from your desktop. Confirm to add it to your hosts.")
@@ -80,9 +80,9 @@ struct PairingConfirmView: View {
                 // Why: cap the explanatory copy at a readable measure inside the padded
                 // content column. Letting it use the whole phone width packs extra words onto
                 // the first line and reads as a wall of text.
-                .frame(maxWidth: 330)
-                .padding(.top, 8)
-                .padding(.bottom, 24)
+                .frame(maxWidth: PairingConfirmMetrics.copyWidth)
+                .padding(.top, Theme.Spacing.small)
+                .padding(.bottom, Theme.Spacing.extraLarge)
             readyActions
         }
     }
@@ -112,11 +112,11 @@ struct PairingConfirmView: View {
     }
 
     private var connectingContent: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: Theme.Spacing.standard) {
             ProgressView()
                 .controlSize(.large)
             Text("Connecting…")
-                .font(.system(size: 14))
+                .font(.system(size: Theme.Typography.supporting))
                 .foregroundStyle(Theme.Colors.mutedForeground)
             PairingLog(entries: model.logEntries)
                 .frame(maxWidth: .infinity)
@@ -124,23 +124,20 @@ struct PairingConfirmView: View {
     }
 
     private func failedContent(_ message: LocalizedStringResource) -> some View {
-        VStack(spacing: 20) {
-            Text(message)
-                .font(.system(size: 14))
-                .foregroundStyle(Theme.Colors.attention)
-                .multilineTextAlignment(.center)
-                .lineSpacing(4)
-            PairingLog(entries: model.logEntries)
-                .frame(maxWidth: .infinity)
-            StackedGlassActionGroup {
-                Button {
-                    cancelPairing()
-                } label: {
-                    Text("Back to home")
-                        .frame(maxWidth: .infinity)
+        AppUnavailableState(title: Text(message), iconID: .warning) {
+            VStack(spacing: Theme.Spacing.standard) {
+                PairingLog(entries: model.logEntries)
+                    .frame(maxWidth: .infinity)
+                StackedGlassActionGroup {
+                    Button {
+                        cancelPairing()
+                    } label: {
+                        Text("Back to home")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .appProminentGlassButton()
+                    .appButtonContext(.large)
                 }
-                .appProminentGlassButton()
-                .appButtonContext(.large)
             }
         }
     }
@@ -170,4 +167,9 @@ struct PairingConfirmView: View {
             beginPairing()
         #endif
     }
+}
+
+private enum PairingConfirmMetrics {
+    // Why: explanatory copy stays readable while actions can use the wider page column.
+    static let copyWidth: CGFloat = 330
 }

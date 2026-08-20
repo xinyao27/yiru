@@ -140,18 +140,28 @@ struct PairingScanView: View {
                     ZStack(alignment: .topLeading) {
                         if pastedCode.isEmpty {
                             Text("yiru://pair?code=... or paste the code")
-                                .font(.system(.body, design: .monospaced))
+                                .font(
+                                    .system(
+                                        size: Theme.Typography.code,
+                                        design: .monospaced
+                                    )
+                                )
                                 .foregroundStyle(Theme.Colors.mutedForeground)
-                                .padding(.horizontal, 5)
-                                .padding(.vertical, 8)
+                                .padding(.horizontal, Theme.Spacing.extraSmall)
+                                .padding(.vertical, Theme.Spacing.small)
                                 .allowsHitTesting(false)
                         }
                         TextEditor(text: $pastedCode)
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
-                            .font(.system(.body, design: .monospaced))
+                            .font(
+                                .system(
+                                    size: Theme.Typography.code,
+                                    design: .monospaced
+                                )
+                            )
                             .scrollContentBackground(.hidden)
-                            .frame(minHeight: 140)
+                            .frame(minHeight: PairingScanMetrics.editorHeight)
                     }
                 } header: {
                     Text("Pairing code")
@@ -185,7 +195,7 @@ struct PairingScanView: View {
                 ProgressView()
                     .controlSize(.large)
                 Text("Connecting…")
-                    .font(.system(size: 14))
+                    .font(.system(size: Theme.Typography.supporting))
                     .foregroundStyle(Theme.Colors.mutedForeground)
                 PairingLog(entries: model.logEntries)
                     .frame(maxWidth: .infinity)
@@ -202,15 +212,12 @@ struct PairingScanView: View {
         _ message: LocalizedStringResource,
         entries: [PairingLogEntry]
     ) -> some View {
-        VStack(spacing: Theme.Spacing.medium) {
-            Text(message)
-                .font(.system(size: 14))
-                .foregroundStyle(Theme.Colors.attention)
-                .multilineTextAlignment(.center)
-                .lineSpacing(4)
-            PairingLog(entries: entries)
-                .frame(maxWidth: .infinity)
-            retryActions
+        AppUnavailableState(title: Text(message), iconID: .warning) {
+            VStack(spacing: Theme.Spacing.standard) {
+                PairingLog(entries: entries)
+                    .frame(maxWidth: .infinity)
+                retryActions
+            }
         }
         .frame(maxWidth: Theme.Size.readingWidth)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -218,12 +225,7 @@ struct PairingScanView: View {
     }
 
     private func errorContent(_ message: LocalizedStringResource) -> some View {
-        VStack(spacing: Theme.Spacing.large) {
-            Text(message)
-                .font(.system(size: 14))
-                .foregroundStyle(Theme.Colors.attention)
-                .multilineTextAlignment(.center)
-                .lineSpacing(4)
+        AppUnavailableState(title: Text(message), iconID: .warning) {
             retryActions
         }
         .frame(maxWidth: Theme.Size.readingWidth)
@@ -320,11 +322,11 @@ struct PairingScanView: View {
     private func pairingStep(number: Int, text: LocalizedStringKey) -> some View {
         HStack(spacing: Theme.Spacing.small) {
             Text(verbatim: String(number))
-                .font(.system(size: 14))
+                .font(.system(size: Theme.Typography.supporting))
                 .foregroundStyle(Theme.Colors.mutedForeground)
-                .frame(width: 24)
+                .frame(width: Theme.Spacing.extraLarge)
             Text(text)
-                .font(.system(size: 14))
+                .font(.system(size: Theme.Typography.supporting))
                 .foregroundStyle(Theme.Colors.mutedForeground)
         }
     }
@@ -363,6 +365,11 @@ private enum CameraAccess: Equatable {
     case available
     case denied
     case unsupported
+}
+
+private enum PairingScanMetrics {
+    // Why: the fixed sheet exposes several wrapped code lines without making the form resizable.
+    static let editorHeight: CGFloat = 140
 }
 
 private struct PairingScanReticle: View {
