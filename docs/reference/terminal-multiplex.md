@@ -718,6 +718,10 @@ snapshot 请求优先级从高到低：
 - 随后分配新 snapshotId；
 - 客户端不得把不同 snapshotId 的 chunk 淞在一起。
 
+若 complete SnapshotEnd 已到达客户端、但其 parse ACK 返回前 snapshot 被更高优先级请求
+supersede，服务端必须把该旧 snapshotId 和 coverageEndSeq 的迟到 ACK 当作 no-op 接受，不能将
+stream 作为 invalid_payload 关闭。
+
 manual 请求在 recovery 期间收到 Ack(kind=control, busy)。客户端可在 stream 回到 live 后重试。Why：旧实现等 manual snapshot 完成后才发 recovery，可能延长已确认损坏的画面。本协议让恢复抢占，并用 snapshotId 消除 frame group 猜测。
 
 ### 15.2 状态机

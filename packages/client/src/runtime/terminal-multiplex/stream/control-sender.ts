@@ -239,7 +239,7 @@ export class RemoteTerminalControlSender {
   }
 
   close(): void {
-    this.clearPendingInputs()
+    this.dispose()
     this.options.send(
       TerminalMultiplexOpcode.Unsubscribe,
       this.options.routeId,
@@ -247,6 +247,10 @@ export class RemoteTerminalControlSender {
       this.options.allocateCorrelationId(),
       new Uint8Array()
     )
+  }
+
+  dispose(): void {
+    this.clearPendingInputs()
   }
 
   private clearPendingInputs(): void {

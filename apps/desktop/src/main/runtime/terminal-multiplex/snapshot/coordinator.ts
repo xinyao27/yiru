@@ -13,6 +13,8 @@ import type { TerminalMultiplexStreamOutput } from '../stream/output/output'
 import type { TerminalMultiplexStreamTelemetry } from '../telemetry'
 import { sendTerminalMultiplexSnapshot } from './sender'
 
+const SUPERSEDED_SNAPSHOT_ACK_LIMIT = 1_024
+
 export type TerminalMultiplexSnapshotReason = 0 | 1 | 2 | 3 | 4 | 5 | 6
 export type TerminalMultiplexSnapshotState = 'snapshotting' | 'live' | 'gated' | 'recovering'
 
@@ -46,6 +48,7 @@ type PendingSnapshot = {
 export class TerminalMultiplexSnapshotCoordinator {
   private readonly options: TerminalMultiplexSnapshotCoordinatorOptions
   private pending: PendingSnapshot | null = null
+  private readonly supersededAcks = new Map<number, bigint>()
   private activeReason: TerminalMultiplexSnapshotReason | null = null
   private generation = 0
 
@@ -58,14 +61,19 @@ export class TerminalMultiplexSnapshotCoordinator {
   }
 
   acknowledge(frame: TerminalMultiplexFrame, record: TerminalMultiplexAckRecord): boolean {
-    if (
-      record.kind !== 2 ||
-      this.pending?.id !== frame.correlationId ||
-      this.pending.coverageEndSeq !== frame.seq
-    ) {
+    if (record.kind !== 2) {
       return false
     }
-    if (this.pending.reason === 1) {
+    const pending = this.pending
+    if (!pending || pending.id !== frame.correlationId || pending.coverageEndSeq !== frame.seq) {
+      const supersededSeq = this.supersededAcks.get(frame.correlationId)
+      if (supersededSeq !== frame.seq) {
+        return false
+      }
+      this.supersededAcks.delete(frame.correlationId)
+      return true
+    }
+    if (pending.reason === 1) {
       this.options.output.completeManualSnapshot()
     } else {
       this.options.output.completeSnapshot(frame.seq)
@@ -117,6 +125,7 @@ export class TerminalMultiplexSnapshotCoordinator {
   dispose(): void {
     this.generation += 1
     this.pending = null
+    this.supersededAcks.clear()
     this.activeReason = null
   }
 
@@ -183,6 +192,15 @@ export class TerminalMultiplexSnapshotCoordinator {
   private supersedePending(): void {
     if (!this.pending) {
       return
+    }
+    // Why: the completed SnapshotEnd can reach the renderer before the superseding
+    // status, so its parse ACK remains valid even after a higher-priority snapshot wins.
+    this.supersededAcks.set(this.pending.id, this.pending.coverageEndSeq)
+    if (this.supersededAcks.size > SUPERSEDED_SNAPSHOT_ACK_LIMIT) {
+      const oldestId = this.supersededAcks.keys().next().value
+      if (oldestId !== undefined) {
+        this.supersededAcks.delete(oldestId)
+      }
     }
     this.sendSuperseded(this.pending.id, this.pending.coverageEndSeq)
     this.pending = null

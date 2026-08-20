@@ -63,16 +63,19 @@ export class RemoteTerminalMultiplexedStream {
     })
     this.publicStream = {
       streamId: options.streamId,
-      sendInput: (text) => this.controls.sendInput(text),
-      sendInputAccepted: (text) => this.controls.sendInputAccepted(text),
-      sendQueryReply: (text) => this.controls.sendQueryReply(text),
-      resize: (cols, rows) => this.controls.resize(cols, rows),
-      claimViewport: (cols, rows) => this.controls.claimViewport(cols, rows),
-      setDeliveryState: (state) => this.controls.setDeliveryState(state),
-      signal: (signal) => this.controls.signal(signal),
-      kill: (keepHistory) => this.controls.kill(keepHistory),
+      sendInput: (text) => !this.closed && this.controls.sendInput(text),
+      sendInputAccepted: (text) =>
+        this.closed ? Promise.resolve(false) : this.controls.sendInputAccepted(text),
+      sendQueryReply: (text) => !this.closed && this.controls.sendQueryReply(text),
+      resize: (cols, rows) => !this.closed && this.controls.resize(cols, rows),
+      claimViewport: (cols, rows) => !this.closed && this.controls.claimViewport(cols, rows),
+      setDeliveryState: (state) => !this.closed && this.controls.setDeliveryState(state),
+      signal: (signal) => !this.closed && this.controls.signal(signal),
+      kill: (keepHistory) => !this.closed && this.controls.kill(keepHistory),
       serializeBuffer: (snapshotOptions) =>
-        this.delivery.requestSnapshot(snapshotOptions?.scrollbackRows),
+        this.closed
+          ? Promise.resolve(null)
+          : this.delivery.requestSnapshot(snapshotOptions?.scrollbackRows),
       close: () => this.close(true)
     }
   }
@@ -147,10 +150,12 @@ export class RemoteTerminalMultiplexedStream {
     }
     if (permanent) {
       this.closed = true
+      this.controls.dispose()
       this.delivery.dispose()
       this.options.callbacks.onTransportClose?.()
     } else {
       this.delivery.prepareForNewEpoch()
+      this.controls.prepareForNewEpoch()
     }
   }
 
@@ -203,6 +208,7 @@ export class RemoteTerminalMultiplexedStream {
   private fail(message: string): void {
     this.options.callbacks.onError?.(message)
     this.close(false)
+    this.options.callbacks.onTransportClose?.()
   }
 
   private close(sendUnsubscribe: boolean): void {
@@ -211,6 +217,8 @@ export class RemoteTerminalMultiplexedStream {
     }
     if (sendUnsubscribe) {
       this.controls.close()
+    } else {
+      this.controls.dispose()
     }
     this.closed = true
     this.delivery.dispose()
