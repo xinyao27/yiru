@@ -70,10 +70,10 @@ Version bumps, tags, and releases are maintainer-managed. Do not include release
 
 ### Cutting a release (maintainers)
 
-Releases used to be cut from a **Cut Release** GitHub Actions workflow
-(`.github/workflows/release-cut.yml`), which resolved the next version from GitHub Releases, bumped
-`package.json`, tagged, pushed, and ran the enabled desktop builds and publish inline. That workflow
-file — along with `release-mac-build.yml` and their `apps/desktop/scripts/` release helpers — has
-since been deleted from the repository. There is currently no automated release workflow and no
-local `pnpm release:*` script; ask a maintainer how a release should be cut before assuming any of
-the mechanics previously documented here still apply.
+Run the **Cut Release** GitHub Actions workflow (`.github/workflows/release-cut.yml`) and choose the
+release kind and source ref. It resolves the next version from GitHub Releases, bumps the workspace
+and desktop package versions, tags the release, builds the enabled desktop platforms, verifies the
+published artifacts, and only then makes the draft release visible. macOS signing runs in the
+isolated `release-mac-build.yml` workflow. Windows artifacts are included only when the repository's
+SignPath secret and variable are both configured; otherwise the release is intentionally macOS and
+Linux only.

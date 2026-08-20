@@ -30,9 +30,17 @@ export function Home(): React.JSX.Element {
       </p>
 
       <div className="flex flex-col gap-3">
-        <p className="max-w-[620px]">Download:</p>
+        <p className="max-w-[620px]">Use Yiru:</p>
         <div className="border-hairline rounded-card flex w-full items-center justify-between gap-3 border px-4 py-3">
           <div className="flex min-w-0 items-center gap-5 font-mono text-[14px]">
+            <a
+              href={siteLinks.webApp}
+              target="_blank"
+              rel="noreferrer"
+              className="text-ink hover:text-accent transition-colors"
+            >
+              Web App
+            </a>
             <DownloadMenu label="macOS" options={macBuilds} />
             <a
               href={siteLinks.testflight}

@@ -3,7 +3,8 @@ import {
   YIRU_GITHUB_LATEST_RELEASE_DOWNLOAD_URL,
   YIRU_GITHUB_RELEASES_URL,
   YIRU_GITHUB_REPOSITORY_URL,
-  YIRU_IOS_TESTFLIGHT_URL
+  YIRU_IOS_TESTFLIGHT_URL,
+  YIRU_WEB_APP_URL
 } from '@yiru/workbench-model/product'
 
 // Why: these URLs are canonical in @yiru/workbench-model — the desktop and
@@ -22,5 +23,6 @@ export const siteLinks = {
   releases: YIRU_GITHUB_RELEASES_URL,
   issues: YIRU_GITHUB_ISSUES_URL,
   license: `${YIRU_GITHUB_REPOSITORY_URL}/blob/main/LICENSE`,
-  testflight: YIRU_IOS_TESTFLIGHT_URL
+  testflight: YIRU_IOS_TESTFLIGHT_URL,
+  webApp: YIRU_WEB_APP_URL
 } as const
