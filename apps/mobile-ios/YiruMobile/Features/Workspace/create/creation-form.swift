@@ -29,16 +29,21 @@ extension WorkspaceCreationSheet {
                             .padding(.top, 8)
                     }
 
-                    HStack {
-                        Spacer()
+                    // Why: the flow's primary action spans the sheet; an intrinsic trailing pill
+                    // made the disabled action both inconsistent and difficult to find.
+                    Group {
                         if model.isCreating {
                             ProgressView()
-                                .frame(width: 44, height: 44)
+                                .frame(maxWidth: .infinity, minHeight: 44)
                         } else {
-                            Button("Create Workspace") { create() }
-                                .appProminentGlassButton()
-                                .appButtonContext(.large)
-                                .disabled(!model.canCreate)
+                            Button {
+                                create()
+                            } label: {
+                                Text("Create Workspace").frame(maxWidth: .infinity)
+                            }
+                            .appProminentGlassButton()
+                            .appButtonContext(.large)
+                            .disabled(!model.canCreate)
                         }
                     }
                     .padding(.top, 16)

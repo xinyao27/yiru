@@ -4,7 +4,6 @@ nonisolated enum WorkspaceListMetrics {
     static let horizontalGap: CGFloat = 6
     static let leadingColumn: CGFloat = 20
     static let openTabHeight: CGFloat = 24
-    static let lineageControlHeight: CGFloat = 24
     static let rowMinimumHeight: CGFloat = 44
     static let sectionHeight: CGFloat = 44
     static let sectionRailStart: CGFloat = 32

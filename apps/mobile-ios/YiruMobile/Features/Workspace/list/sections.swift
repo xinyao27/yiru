@@ -8,10 +8,7 @@ nonisolated enum WorkspaceListSectionKind: Hashable, Sendable {
 nonisolated struct WorkspaceListRowState: Identifiable, Hashable, Sendable {
     let id: String
     let workspace: WorkspaceSummary
-    let lineageCollapseKey: String
     let lineageDepth: Int
-    let lineageChildCount: Int
-    let isLineageCollapsed: Bool
     let endsProjectRail: Bool
 }
 
@@ -60,10 +57,7 @@ nonisolated func buildWorkspaceListSections(
                     WorkspaceListRowState(
                         id: "pinned:\(workspaceListIdentity(workspace, counts: workspaceIDCounts))",
                         workspace: workspace,
-                        lineageCollapseKey: "",
                         lineageDepth: 0,
-                        lineageChildCount: 0,
-                        isLineageCollapsed: false,
                         endsProjectRail: index == pinned.count - 1
                     )
                 }
@@ -100,11 +94,7 @@ nonisolated func buildWorkspaceListSections(
         let rows =
             viewSettings.collapsedGroups.contains(sectionID)
             ? []
-            : lineageRows(
-                workspaces: mainFirst,
-                sectionID: sectionID,
-                collapsedLineages: viewSettings.collapsedGroups
-            )
+            : lineageRows(workspaces: mainFirst, sectionID: sectionID)
         sections.append(
             WorkspaceListSection(
                 id: sectionID,
@@ -192,8 +182,7 @@ nonisolated private func effectiveRecentActivity(_ workspace: WorkspaceSummary, 
 
 nonisolated private func lineageRows(
     workspaces: [WorkspaceSummary],
-    sectionID: String,
-    collapsedLineages: Set<String>
+    sectionID: String
 ) -> [WorkspaceListRowState] {
     let workspacesByID = Dictionary(grouping: workspaces, by: \.id)
     let workspaceIDCounts = workspacesByID.mapValues(\.count)
@@ -220,28 +209,14 @@ nonisolated private func lineageRows(
         let workspaceIdentity = identity(workspace)
         guard emitted.insert(workspaceIdentity).inserted else { return }
         let children = childrenByParent[workspaceIdentity] ?? []
-        let collapseKey = "workspace-lineage:\(workspaceIdentity)"
-        let isCollapsed = !children.isEmpty && collapsedLineages.contains(collapseKey)
         rows.append(
             WorkspaceListRowState(
                 id: "\(sectionID):\(workspaceIdentity)",
                 workspace: workspace,
-                lineageCollapseKey: collapseKey,
                 lineageDepth: depth,
-                lineageChildCount: children.count,
-                isLineageCollapsed: isCollapsed,
                 endsProjectRail: isLastChild
             )
         )
-        guard !isCollapsed else {
-            markDescendants(
-                workspaceIdentity,
-                childrenByParent: childrenByParent,
-                identity: identity,
-                emitted: &emitted
-            )
-            return
-        }
         children.enumerated().forEach { index, child in
             emit(child, depth: depth + 1, isLastChild: index == children.count - 1)
         }
@@ -265,24 +240,6 @@ nonisolated private func hasValidLineageParent(
     }
     return workspace.worktreeInstanceID == workspace.lineageWorktreeInstanceID
         && parent.worktreeInstanceID == workspace.parentWorktreeInstanceID
-}
-
-nonisolated private func markDescendants(
-    _ workspaceID: String,
-    childrenByParent: [String: [WorkspaceSummary]],
-    identity: (WorkspaceSummary) -> String,
-    emitted: inout Set<String>
-) {
-    for child in childrenByParent[workspaceID] ?? [] {
-        let childIdentity = identity(child)
-        guard emitted.insert(childIdentity).inserted else { continue }
-        markDescendants(
-            childIdentity,
-            childrenByParent: childrenByParent,
-            identity: identity,
-            emitted: &emitted
-        )
-    }
 }
 
 nonisolated private func workspaceListIdentity(

@@ -64,11 +64,16 @@ extension View {
     }
 
     func appProminentGlassButton() -> some View {
-        buttonStyle(.glassProminent)
-            .foregroundStyle(Theme.Colors.background)
-        // Why: iOS 26 can resolve a prominent glass surface to a light pill in dark mode while
-        // leaving the inherited app tint as a light label. The adaptive canvas color is the
-        // contrasting semantic pair for both appearances: near-white on the dark light-mode
-        // pill and near-black on the light dark-mode pill.
+        buttonStyle(.glassProminent).modifier(AppProminentGlassLabelColor())
+    }
+}
+
+private struct AppProminentGlassLabelColor: ViewModifier {
+    @Environment(\.isEnabled) private var isEnabled
+
+    // Why: prominent glass needs the adaptive canvas color while enabled, but its disabled
+    // surface becomes pale enough that the same label color disappears.
+    func body(content: Content) -> some View {
+        content.foregroundStyle(isEnabled ? Theme.Colors.background : Theme.Colors.mutedForeground)
     }
 }

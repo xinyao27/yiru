@@ -12,7 +12,6 @@ struct WorkspaceListRow: View {
     let selectWorkspace: () -> Void
     let selectTab: (WorkspaceOpenTab) -> Void
     let showActions: () -> Void
-    let toggleLineage: () -> Void
 
     @Environment(\.displayScale) private var displayScale
     @Environment(\.yiruLayoutMetrics) private var layoutMetrics
@@ -37,9 +36,6 @@ struct WorkspaceListRow: View {
                         selectTab: selectTab
                     )
                 }
-            }
-            if state.lineageChildCount > 0 {
-                childRow { lineageButton }
             }
         }
         .padding(.leading, leadingPadding)
@@ -164,36 +160,6 @@ struct WorkspaceListRow: View {
             }
             .foregroundStyle(Theme.Colors.mutedForeground)
         }
-    }
-
-    private var lineageButton: some View {
-        Button(action: toggleLineage) {
-            HStack(spacing: 4) {
-                YiruIcon(
-                    state.isLineageCollapsed ? .chevronRight : .chevronDown,
-                    size: WorkspaceListMetrics.compactIcon
-                )
-                YiruIcon(
-                    .gitMerge,
-                    size: WorkspaceListMetrics.compactIcon
-                )
-                if state.lineageChildCount == 1 {
-                    Text("\(state.lineageChildCount) child")
-                } else {
-                    Text("\(state.lineageChildCount) children")
-                }
-            }
-            .font(.system(size: WorkspaceListMetrics.metadataText))
-            .foregroundStyle(Theme.Colors.mutedForeground)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .frame(minHeight: WorkspaceListMetrics.lineageControlHeight)
-        }
-        .buttonStyle(.plain)
-        .glassEffect(.regular.interactive(), in: .capsule)
-        .frame(minHeight: Theme.Size.minimumHitTarget)
-        .contentShape(.rect)
-        .padding(.top, 4)
     }
 
     private var unreadIndicator: some View {

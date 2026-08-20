@@ -132,17 +132,6 @@ final class WorkspaceListModel {
         viewSettings.collapsedGroups.contains(id)
     }
 
-    func toggleLineage(collapseKey: String) {
-        guard !collapseKey.isEmpty else { return }
-        if viewSettings.collapsedGroups.contains(collapseKey) {
-            viewSettings.collapsedGroups.remove(collapseKey)
-        } else {
-            viewSettings.collapsedGroups.insert(collapseKey)
-        }
-        rebuildSections()
-        persistCollapsedGroups()
-    }
-
     func openTabs(for workspaceID: String) -> [WorkspaceOpenTab] {
         openTabsByWorkspace[workspaceID] ?? []
     }

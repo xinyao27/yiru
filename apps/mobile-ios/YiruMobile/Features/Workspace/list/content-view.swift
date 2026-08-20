@@ -95,9 +95,6 @@ struct WorkspaceListContentView: View {
                                 showActions: {
                                     guard !model.isReadOnly else { return }
                                     showActions(row.workspace)
-                                },
-                                toggleLineage: {
-                                    model.toggleLineage(collapseKey: row.lineageCollapseKey)
                                 }
                             )
                             .id(row.id)
