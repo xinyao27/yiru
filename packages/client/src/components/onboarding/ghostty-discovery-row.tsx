@@ -39,7 +39,7 @@ export function GhosttyDiscoveryRow({
   if (discovery.status === 'imported') {
     return (
       <div className="text-foreground flex items-center gap-2.5 border border-emerald-500/30 bg-emerald-500/[0.07] px-3.5 py-2.5 text-[12px]">
-        <Check className="size-3.5 text-emerald-600 dark:text-emerald-400" strokeWidth={3} />
+        <Check className="size-3.5 text-emerald-600 dark:text-emerald-400" />
         <span className="flex-1">
           <span className="font-medium">
             {translate('auto.components.onboarding.ThemeStep.78b6386140', 'Imported from Ghostty.')}

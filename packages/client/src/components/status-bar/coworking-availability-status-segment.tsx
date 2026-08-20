@@ -92,7 +92,6 @@ function CoworkingPresenceStatusSegment({
                       className={
                         connectionCount > 0 ? 'size-3 text-sky-500' : 'text-muted-foreground size-3'
                       }
-                      weight={connectionCount > 0 ? 'fill' : 'regular'}
                     />
                     {/* Why: DESIGN.md requires status to read without colour, so
                         an active session always carries its count as text. */}

@@ -236,7 +236,7 @@ export function ThemeStep({ theme, onThemeChange, settings, updateSettings }: Th
                 <ChromePreview variant={id} />
                 {selected && (
                   <div className="bg-primary text-primary-foreground absolute top-1.5 right-1.5 grid size-5 place-items-center">
-                    <Check className="size-3" strokeWidth={3} />
+                    <Check className="size-3" />
                   </div>
                 )}
               </div>

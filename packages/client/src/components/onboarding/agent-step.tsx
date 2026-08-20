@@ -321,7 +321,7 @@ function AgentButton({
     >
       {selected ? (
         <div className="bg-primary text-primary-foreground absolute top-2 right-2 grid size-5 place-items-center">
-          <Check className="size-3" strokeWidth={3} />
+          <Check className="size-3" />
         </div>
       ) : null}
       <div className="flex min-w-0 items-start gap-2.5 pr-6">

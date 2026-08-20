@@ -1,10 +1,9 @@
 import React from 'react'
-import type { IconProps } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 
 type ActionButtonProps = {
-  icon: React.ComponentType<{ className?: string; weight?: IconProps['weight'] }>
+  icon: React.ComponentType<{ className?: string }>
   title: string
   onClick: (event: React.MouseEvent) => void
   disabled?: boolean

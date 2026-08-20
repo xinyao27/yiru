@@ -134,11 +134,7 @@ export default function TerminalContextMenu({
           <AgentIcon agent={command.agent} size={14} />
         </span>
       ) : (
-        <Play
-          className="text-muted-foreground size-3.5 shrink-0"
-          fill="currentColor"
-          strokeWidth={0}
-        />
+        <Play className="text-muted-foreground size-3.5 shrink-0" />
       )}
       <span className="min-w-0 flex-1 truncate">{command.label}</span>
       {!isTerminalAgentQuickCommand(command) && !command.appendEnter ? (
@@ -167,7 +163,7 @@ export default function TerminalContextMenu({
       </ContextMenuItem>
       <ContextMenuSub>
         <ContextMenuSubTrigger>
-          <Play fill="currentColor" strokeWidth={0} />
+          <Play />
           {translate(
             'auto.components.terminal.pane.TerminalContextMenu.ec85df5914',
             'Quick Commands'

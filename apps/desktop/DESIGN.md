@@ -130,8 +130,9 @@ section labels. Truncate metadata before shrinking primary text.
 - Destructive styling is only for irreversible actions. Cancel, Close, Dismiss, and Back stay quiet.
 - Use Hugeicons free Stroke Rounded icons through the shared renderer adapter
   (`~renderer/components/icons/hugeicons`). Set `size` through the existing Tailwind size class
-  or an explicit numeric value, and use `strokeWidth={1.5}` for the shared default. Do not import
-  an icon package directly or add another icon language.
+  or an explicit numeric value. The adapter uses the package's default stroke sizing; feature code
+  must not pass stroke-sizing props or the legacy `weight` prop. Do not import an icon package
+  directly or add another icon language.
 
 ## 6. Platform, accessibility, and motion
 

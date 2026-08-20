@@ -98,11 +98,7 @@ export function DiscoveredWorktreesAlert(
                   onKeyDown={stopProjectHeaderEvent}
                   onPointerDown={stopProjectHeaderEvent}
                 >
-                  <WarningCircle
-                    className="text-destructive size-4"
-                    weight="fill"
-                    aria-hidden="true"
-                  />
+                  <WarningCircle className="text-destructive size-4" aria-hidden="true" />
                 </Button>
               }
             />
@@ -124,11 +120,7 @@ export function DiscoveredWorktreesAlert(
         onPointerDown={stopProjectHeaderEvent}
       >
         <div className="border-border flex items-start gap-2 border-b px-3 py-2">
-          <WarningCircle
-            className="text-destructive size-4 shrink-0"
-            weight="fill"
-            aria-hidden="true"
-          />
+          <WarningCircle className="text-destructive size-4 shrink-0" aria-hidden="true" />
           <div className="min-w-0">
             <div className="text-foreground text-xs font-medium">
               {translate(

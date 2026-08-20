@@ -46,7 +46,7 @@ function FilePicker({
           <Button type="button" variant="ghost" size="xs" className="max-w-64 min-w-0">
             <FileIcon className="text-muted-foreground shrink-0" />
             <span className="truncate font-mono">{fileName}</span>
-            <CaretDown weight="regular" className="text-muted-foreground shrink-0" />
+            <CaretDown className="text-muted-foreground shrink-0" />
           </Button>
         }
       />
@@ -89,9 +89,9 @@ function PlacementPicker({ placements }: { placements: readonly SkillPlacement[]
         render={
           <Button type="button" variant="ghost" size="xs" className="min-w-0">
             {unreachable ? (
-              <Warning weight="regular" className="text-destructive shrink-0" />
+              <Warning className="text-destructive shrink-0" />
             ) : (
-              <FolderSimple weight="regular" className="text-muted-foreground shrink-0" />
+              <FolderSimple className="text-muted-foreground shrink-0" />
             )}
             <span className="truncate">
               {translate(
@@ -100,7 +100,7 @@ function PlacementPicker({ placements }: { placements: readonly SkillPlacement[]
                 { value0: placements.length }
               )}
             </span>
-            <CaretDown weight="regular" className="text-muted-foreground shrink-0" />
+            <CaretDown className="text-muted-foreground shrink-0" />
           </Button>
         }
       />

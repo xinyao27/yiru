@@ -152,7 +152,7 @@ export const CandidateRow = React.memo(function CandidateRow({
             onClick={() => onToggleSelected(candidate.worktreeId)}
             className="text-primary mt-0.5 flex size-4"
           >
-            {selected ? <Check className="size-3" strokeWidth={3} /> : null}
+            {selected ? <Check className="size-3" /> : null}
           </Button>
         ) : (
           <div className="mt-0.5 size-4 shrink-0" aria-hidden="true" />

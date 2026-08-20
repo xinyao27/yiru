@@ -50,7 +50,7 @@ function SkillPlacementRow({ placement }: { placement: SkillPlacement }): React.
             className="text-muted-foreground flex min-w-0 items-center gap-1 font-mono text-[11px]"
             title={placement.linkTargetPath}
           >
-            <ArrowRight weight="regular" className="size-3 shrink-0" />
+            <ArrowRight className="size-3 shrink-0" />
             <span className="truncate">{placement.linkTargetPath}</span>
           </p>
         ) : null}
@@ -59,7 +59,7 @@ function SkillPlacementRow({ placement }: { placement: SkillPlacement }): React.
         <TooltipTrigger
           render={
             <Badge variant="outline" className="h-5 shrink-0 gap-1 text-[10px]">
-              <TopologyIcon weight="regular" className="size-3" />
+              <TopologyIcon className="size-3" />
               {placementTopologyLabel(placement.topology)}
             </Badge>
           }
@@ -79,7 +79,7 @@ function SkillPlacementRow({ placement }: { placement: SkillPlacement }): React.
               onClick={() => void revealPlacement(placement)}
               aria-label={translate('auto.components.skills.SkillsPage.dc4c3328ee', 'Reveal file')}
             >
-              <FolderOpen weight="regular" className="size-4" />
+              <FolderOpen className="size-4" />
             </Button>
           }
         />

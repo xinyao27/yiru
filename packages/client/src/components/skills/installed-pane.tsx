@@ -55,7 +55,7 @@ function SkillRow({
       className="w-full items-start"
       onClick={() => onSelect(skill)}
     >
-      <BookOpen weight="regular" className="text-muted-foreground mt-0.5 size-4 shrink-0" />
+      <BookOpen className="text-muted-foreground mt-0.5 size-4 shrink-0" />
       <span className="min-w-0 flex-1 space-y-0.5">
         <span className="flex min-w-0 items-center gap-2">
           <span className="min-w-0 flex-1 truncate text-sm font-medium">{skill.name}</span>

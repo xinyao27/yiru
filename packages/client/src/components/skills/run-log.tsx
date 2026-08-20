@@ -18,10 +18,7 @@ export function SkillRunLog({ output }: { output: string }): React.JSX.Element |
       <CollapsibleTrigger
         render={
           <Button type="button" variant="ghost" size="xs" className="group -ml-2 gap-1.5">
-            <ChevronDown
-              weight="regular"
-              className="size-3.5 transition-transform group-data-[state=open]:rotate-180"
-            />
+            <ChevronDown className="size-3.5 transition-transform group-data-[state=open]:rotate-180" />
             {translate('auto.components.skills.SkillRunLog.showLog', 'Show log')}
           </Button>
         }

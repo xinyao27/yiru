@@ -299,7 +299,7 @@ function AgentCapabilitySetupChecklist(props: {
                       : 'border-border bg-background'
                   )}
                 >
-                  {selected ? <Check className="size-3" strokeWidth={3} /> : null}
+                  {selected ? <Check className="size-3" /> : null}
                 </span>
               </span>
               <span className="text-foreground mt-3 text-sm font-medium">{row.title}</span>

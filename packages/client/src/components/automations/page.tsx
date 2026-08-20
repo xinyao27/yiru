@@ -2205,7 +2205,7 @@ export default function AutomationsPage(): React.JSX.Element {
                   : 'border-muted-foreground bg-transparent'
               )}
             >
-              {dontAskDeleteAgain ? <Check className="size-3" strokeWidth={3} /> : null}
+              {dontAskDeleteAgain ? <Check className="size-3" /> : null}
             </span>
             {translate('auto.components.automations.AutomationsPage.1e2e41392f', "Don't ask again")}
           </Button>

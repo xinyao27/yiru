@@ -256,19 +256,19 @@ export function ThemeGradientPad({
       >
         <ColorFieldButton
           label={translate('themeGradient.scheme.system', 'Follow system appearance')}
-          icon={<Sparkle weight="fill" />}
+          icon={<Sparkle />}
           isSelected={themeMode === 'system'}
           onClick={() => onThemeModeChange('system')}
         />
         <ColorFieldButton
           label={translate('themeGradient.scheme.light', 'Use light appearance')}
-          icon={<Sun weight="fill" />}
+          icon={<Sun />}
           isSelected={themeMode === 'light'}
           onClick={() => onThemeModeChange('light')}
         />
         <ColorFieldButton
           label={translate('themeGradient.scheme.dark', 'Use dark appearance')}
-          icon={<Moon weight="fill" />}
+          icon={<Moon />}
           isSelected={themeMode === 'dark'}
           onClick={() => onThemeModeChange('dark')}
         />

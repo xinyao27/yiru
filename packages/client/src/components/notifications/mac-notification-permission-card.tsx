@@ -137,7 +137,7 @@ export function MacNotificationPermissionCard({
   if (state === 'enabled') {
     return (
       <section className="flex items-center gap-2.5 border border-emerald-500/30 bg-emerald-500/[0.07] px-5 py-4">
-        <Check className="size-4 shrink-0 text-emerald-600 dark:text-emerald-400" strokeWidth={3} />
+        <Check className="size-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
         <div className="min-w-0">
           <div className="text-foreground text-sm font-semibold">
             {translate(

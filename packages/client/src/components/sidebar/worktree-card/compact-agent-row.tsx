@@ -301,7 +301,6 @@ export const CompactAgentRow = React.memo(function CompactAgentRow({
                   aria-expanded={childAgentsExpanded}
                 >
                   <ChevronRight
-                    weight="regular"
                     className={cn(
                       'size-3 transition-transform duration-150 motion-reduce:transition-none',
                       childAgentsExpanded && 'rotate-90'

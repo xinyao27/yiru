@@ -100,7 +100,7 @@ export function SkillsMarketplaceActions({
           }
         }}
       >
-        <DownloadSimple weight="regular" className="size-3.5" />
+        <DownloadSimple className="size-3.5" />
         {translate('auto.components.skills.SkillsMarketplace.installCurrent', 'Install this skill')}
       </Button>
     </div>

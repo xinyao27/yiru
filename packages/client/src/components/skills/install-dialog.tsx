@@ -206,10 +206,7 @@ export function SkillInstallDialog({
 
             {run.state === 'success' ? (
               <div className="flex items-center gap-2 text-sm font-medium">
-                <CheckCircle2
-                  weight="regular"
-                  className="size-4 text-emerald-600 dark:text-emerald-400"
-                />
+                <CheckCircle2 className="size-4 text-emerald-600 dark:text-emerald-400" />
                 {translate('auto.components.skills.SkillInstallDialog.success', 'Skill installed')}
               </div>
             ) : null}
@@ -217,7 +214,7 @@ export function SkillInstallDialog({
             {run.state === 'error' ? (
               <div className="border-destructive text-muted-foreground space-y-2 border p-3 text-xs">
                 <p className="text-foreground flex items-center gap-2 font-medium">
-                  <AlertTriangle weight="regular" className="text-destructive size-4" />
+                  <AlertTriangle className="text-destructive size-4" />
                   {translate(
                     'auto.components.skills.SkillInstallDialog.errorTitle',
                     "The install didn't finish"

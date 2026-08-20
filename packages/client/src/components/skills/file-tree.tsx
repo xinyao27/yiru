@@ -100,7 +100,6 @@ function SkillFileTreeDirectoryRow({
       onClick={() => onToggle(node.relativePath)}
     >
       <ChevronRight
-        weight="regular"
         className={`text-muted-foreground size-3 shrink-0 transition-transform${
           expanded ? ' rotate-90' : ''
         }`}

@@ -151,9 +151,7 @@ export function NativeChatQuestionCard({
                         value0: i + 1
                       })}
                   </span>
-                  {answerFor(i).length > 0 ? (
-                    <Check className="text-primary size-3" strokeWidth={3} />
-                  ) : null}
+                  {answerFor(i).length > 0 ? <Check className="text-primary size-3" /> : null}
                 </Button>
               ))}
             </div>
@@ -288,7 +286,7 @@ function OptionRow({
           selected ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
         )}
       >
-        {selected ? <Check className="size-3.5" strokeWidth={3} /> : badge}
+        {selected ? <Check className="size-3.5" /> : badge}
       </span>
       <span className="min-w-0">
         <span className="text-foreground block truncate text-sm" title={label}>

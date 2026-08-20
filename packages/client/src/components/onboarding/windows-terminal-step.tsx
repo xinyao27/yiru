@@ -347,7 +347,7 @@ function PreferenceCard({
     >
       {selected ? (
         <span className="bg-primary text-primary-foreground absolute top-3 right-3 grid size-5 place-items-center">
-          <Check className="size-3" strokeWidth={3} />
+          <Check className="size-3" />
         </span>
       ) : null}
       <span className="flex min-w-0 items-start gap-3 pr-7">

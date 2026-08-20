@@ -76,10 +76,7 @@ const SidebarNav = React.memo(function SidebarNav() {
         aria-current={homeActive ? 'page' : undefined}
         className={getSelectableControlStateClasses(homeActive)}
       >
-        <House
-          className={cn('size-4 shrink-0', !homeActive && 'text-sidebar-foreground/30')}
-          strokeWidth={1.75}
-        />
+        <House className={cn('size-4 shrink-0', !homeActive && 'text-sidebar-foreground/30')} />
         <span className="flex-1">
           {translate('auto.components.sidebar.SidebarNav.home', 'Home')}
         </span>
@@ -95,7 +92,7 @@ const SidebarNav = React.memo(function SidebarNav() {
         )}
         className={cn('group', getSelectableControlStateClasses(false))}
       >
-        <Search className="text-sidebar-foreground/30 size-4 shrink-0" strokeWidth={1.75} />
+        <Search className="text-sidebar-foreground/30 size-4 shrink-0" />
         <span className="min-w-0 flex-1 truncate">
           {translate('auto.components.sidebar.SidebarNav.80611a8b10', 'Search')}
         </span>
@@ -126,7 +123,6 @@ const SidebarNav = React.memo(function SidebarNav() {
       >
         <BookOpen
           className={cn('size-4 shrink-0', !skillsActive && 'text-sidebar-foreground/30')}
-          strokeWidth={1.75}
         />
         <span className="flex-1">
           {translate('auto.components.sidebar.SidebarNav.skills', 'Skills')}
@@ -155,7 +151,6 @@ const SidebarNav = React.memo(function SidebarNav() {
                     'size-4 shrink-0',
                     !automationsActive && 'text-sidebar-foreground/30'
                   )}
-                  strokeWidth={automationsActive ? 2.25 : 1.75}
                 />
                 <span className="flex-1">
                   {translate('auto.components.sidebar.SidebarNav.f323383e9a', 'Automations')}
@@ -187,7 +182,6 @@ const SidebarNav = React.memo(function SidebarNav() {
               >
                 <Smartphone
                   className={cn('size-4 shrink-0', !mobileActive && 'text-sidebar-foreground/30')}
-                  strokeWidth={mobileActive ? 2.25 : 1.75}
                 />
                 <span className="flex-1">
                   {translate('auto.components.sidebar.SidebarNav.1b5c41caee', 'Yiru Mobile')}

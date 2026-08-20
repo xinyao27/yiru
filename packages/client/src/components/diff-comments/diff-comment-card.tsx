@@ -211,7 +211,7 @@ export function DiffCommentCard({
                       handleStartEdit()
                     }}
                   >
-                    <Pencil className="size-3" weight="duotone" />
+                    <Pencil className="size-3" />
                   </Button>
                   {onDelete && <span className="yiru-diff-comment-pill-divider" />}
                 </>
@@ -236,7 +236,7 @@ export function DiffCommentCard({
                     onDelete()
                   }}
                 >
-                  <Trash className="size-3" weight="duotone" />
+                  <Trash className="size-3" />
                 </Button>
               )}
             </div>

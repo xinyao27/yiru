@@ -337,7 +337,7 @@ function CheckButton({
             : 'border-muted-foreground/50 bg-background/40 text-transparent'
         )}
       >
-        {isChecked ? <Check className="size-3" strokeWidth={3} /> : null}
+        {isChecked ? <Check className="size-3" /> : null}
         {isMixed ? <Minus className="size-3" /> : null}
       </span>
     </Button>
