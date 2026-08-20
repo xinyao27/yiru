@@ -1,6 +1,6 @@
-import { Globe, MagnifyingGlass as Search } from '@phosphor-icons/react'
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: dropdown visibility depends on DOM focus plus browser-history suggestions, so the close path is an imperative popover sync. */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Globe, MagnifyingGlass as Search } from '~renderer/components/icons/hugeicons'
 import { Command, CommandGroup, CommandItem, CommandList } from '~renderer/components/ui/command'
 import { Input } from '~renderer/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '~renderer/components/ui/popover'

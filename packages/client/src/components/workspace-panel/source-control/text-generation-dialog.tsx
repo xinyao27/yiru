@@ -1,5 +1,5 @@
-import { Warning as TriangleAlert } from '@phosphor-icons/react'
 import React, { useMemo } from 'react'
+import { Warning as TriangleAlert } from '~renderer/components/icons/hugeicons'
 import {
   Dialog,
   DialogContent,

@@ -12,12 +12,16 @@ nonisolated struct ManagedRuntimeTerminalMultiplexer: Sendable {
 }
 
 extension RuntimeClient {
-    func openTerminalSession(hostID: String, terminalID: String) async throws
+    func openTerminalSession(
+        hostID: String,
+        terminalID: String,
+        viewport: TerminalGridSize?
+    ) async throws
         -> any TerminalSession
     {
         let context = try await terminalConnectionContext(for: hostID)
         let multiplexer = await terminalMultiplexer(for: context)
-        return try await multiplexer.openSession(terminalID: terminalID)
+        return try await multiplexer.openSession(terminalID: terminalID, viewport: viewport)
     }
 
     private func terminalMultiplexer(
@@ -43,7 +47,7 @@ extension RuntimeClient {
     }
 }
 
-nonisolated struct RuntimeNullWire: Encodable {
+nonisolated struct RuntimeNullWire: Encodable, RuntimeOmittedOrpcInput {
     func encode(to encoder: any Encoder) throws {
         var container = encoder.singleValueContainer()
         try container.encodeNil()

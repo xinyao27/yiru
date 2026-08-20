@@ -24,6 +24,12 @@ import path from 'node:path'
 // require('electron') returns the npm stub instead of the built-in API.
 delete process.env.ELECTRON_RUN_AS_NODE
 
+// Why: the native iOS development client exercises the terminal multiplex
+// transport against the same Desktop process. Packaged and release hosts keep
+// the capability behind the explicit canary gate, while every direct Desktop
+// development entry point must expose it for the paired development stack.
+process.env.YIRU_TERMINAL_MULTIPLEX_CANARY ||= '1'
+
 const require = createRequire(import.meta.url)
 const appRoot = path.resolve(import.meta.dirname, '..')
 // Why: app assets live under apps/desktop, while dev-instance identity must

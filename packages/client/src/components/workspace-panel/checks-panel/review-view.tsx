@@ -1,6 +1,6 @@
-import { Check, Pencil, X } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { DetachedHeadBadge } from '~renderer/components/detached-head-badge'
+import { Check, Pencil, X } from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { getBrokenChecks } from '~renderer/components/pr-checks-fix-prompt'
 import { Button } from '~renderer/components/ui/button'

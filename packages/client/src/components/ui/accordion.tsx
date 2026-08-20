@@ -1,7 +1,8 @@
 'use client'
 
 import { Accordion as AccordionPrimitive } from '@base-ui/react/accordion'
-import { CaretDown as ChevronDown } from '@phosphor-icons/react'
+import { ArrowDown01Icon } from '@hugeicons/core-free-icons'
+import { HugeiconsIcon } from '@hugeicons/react'
 import * as React from 'react'
 import { cn } from '~renderer/lib/class-names'
 
@@ -42,7 +43,8 @@ function AccordionTrigger({
   ...props
 }: AccordionTriggerProps): React.JSX.Element {
   const indicator = (
-    <ChevronDown
+    <HugeiconsIcon
+      icon={ArrowDown01Icon}
       className={cn(
         'text-muted-foreground size-4 shrink-0 transition-transform duration-200',
         variant === 'section' &&

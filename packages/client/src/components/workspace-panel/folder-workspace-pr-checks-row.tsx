@@ -1,9 +1,9 @@
+import { openHttpLink } from '~renderer/components/editor/http-link-routing'
 import {
   GitMerge,
   CaretRight as ChevronRight,
   ArrowSquareOut as ExternalLink
-} from '@phosphor-icons/react'
-import { openHttpLink } from '~renderer/components/editor/http-link-routing'
+} from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { translate } from '~renderer/i18n/i18n'

@@ -1,7 +1,7 @@
-import { Pencil, Play, Trash as Trash2, Plus } from '@phosphor-icons/react'
 import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 import { useMemo, useState } from 'react'
 import { useConfirmationDialog } from '~renderer/components/confirmation-dialog'
+import { Pencil, Play, Trash as Trash2, Plus } from '~renderer/components/icons/hugeicons'
 import {
   createTerminalQuickCommandDraft,
   TerminalQuickCommandDialog

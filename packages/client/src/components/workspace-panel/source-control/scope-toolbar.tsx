@@ -1,4 +1,4 @@
-import { GitDiff } from '@phosphor-icons/react'
+import { GitDiff } from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
 
 import type { SourceControlController } from './controller'

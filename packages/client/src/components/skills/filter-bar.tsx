@@ -1,4 +1,4 @@
-import { MagnifyingGlass as Search } from '@phosphor-icons/react'
+import { MagnifyingGlass as Search } from '~renderer/components/icons/hugeicons'
 import { Input } from '~renderer/components/ui/input'
 import {
   Select,

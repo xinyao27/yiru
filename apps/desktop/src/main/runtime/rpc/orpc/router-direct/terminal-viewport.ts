@@ -27,13 +27,13 @@ import { wireRuntimeMethod } from '../registered-method'
 // re-audited this ordering against slice 84's `options.envelope` precedent and declined to
 // reorder it: the desktop renderer's `terminal-pane/remote-runtime-pty-transport.ts`
 // now dispatches through the negotiated oRPC client and only lands on this bare-string path
-// when that negotiation falls back to legacy — but mobile's `MobileRuntimeOrpcTransport`
-// (apps/mobile/src/transport/runtime-orpc-transport.ts) independently latches its *whole*
-// connection into the same bare-string legacy mode (permanently for a pre-oRPC host, or
-// transiently on any capability-probe error) and dispatches `terminal.send`/`updateViewport`
-// through it exactly like `terminal.subscribe`. Slice 94 flagged this as blocking outright
-// retirement (a client stuck in that mode would see a terminal it could not type into or
-// resize) — slice 110's dispatcher fallback resolves that at the layer slice 94 didn't
+// when that negotiation falls back to legacy — but the mobile client's runtime oRPC transport
+// independently latches its *whole* connection into the same bare-string legacy mode
+// (permanently for a pre-oRPC host, or transiently on any capability-probe error) and
+// dispatches `terminal.send`/`updateViewport` through it exactly like `terminal.subscribe`.
+// Slice 94 flagged this as blocking outright retirement (a client stuck in that mode would
+// see a terminal it could not type into or resize) — slice 110's dispatcher fallback
+// resolves that at the layer slice 94 didn't
 // consider: the server now serves the bare envelope directly instead of requiring the
 // client to negotiate, so the legacy registration itself became removable without touching
 // this routing. `unsubscribe` is the bare-method-name cleanup companion

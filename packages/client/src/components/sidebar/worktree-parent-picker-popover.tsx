@@ -1,7 +1,7 @@
 import type { Popover as BasePopover } from '@base-ui/react/popover'
-import { GitMerge } from '@phosphor-icons/react'
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { GitMerge } from '~renderer/components/icons/hugeicons'
 import { RepoBadgeMark } from '~renderer/components/repo/badge-label'
 import {
   Command,

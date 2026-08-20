@@ -1,4 +1,4 @@
-import { Sparkle as Sparkles, Square } from '@phosphor-icons/react'
+import { Sparkle as Sparkles, Square } from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import { Textarea } from '~renderer/components/ui/textarea'

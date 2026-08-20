@@ -1,9 +1,9 @@
+import { useCallback, useEffect, useState } from 'react'
 import {
   ShieldCheck,
   ArrowSquareOut as ExternalLink,
   ArrowClockwise as RefreshCw
-} from '@phosphor-icons/react'
-import { useCallback, useEffect, useState } from 'react'
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { translate } from '~renderer/i18n/i18n'
 import { AgentIcon } from '~renderer/lib/agent-catalog'

@@ -1,11 +1,11 @@
+import React from 'react'
 import {
   GitMerge,
   DotsThree as Ellipsis,
   Link,
   LinkBreak as Unlink,
   ArrowClockwise as RefreshCw
-} from '@phosphor-icons/react'
-import React from 'react'
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import {

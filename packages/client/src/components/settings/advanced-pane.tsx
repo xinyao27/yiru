@@ -1,5 +1,5 @@
-import { Info, ArrowClockwise as RotateCw } from '@phosphor-icons/react'
 import { useRef, useState } from 'react'
+import { Info, ArrowClockwise as RotateCw } from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'

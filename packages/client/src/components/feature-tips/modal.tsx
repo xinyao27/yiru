@@ -1,6 +1,6 @@
-import { Microphone as Mic } from '@phosphor-icons/react'
 import { useEffect, useRef, useState, type JSX } from 'react'
 import { toast } from 'sonner'
+import { Microphone as Mic } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,

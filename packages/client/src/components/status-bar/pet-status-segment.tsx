@@ -1,6 +1,11 @@
-import { Check, Package as PackageOpen, Trash as Trash2, Upload } from '@phosphor-icons/react'
 import React from 'react'
 import { toast } from 'sonner'
+import {
+  Check,
+  Package as PackageOpen,
+  Trash as Trash2,
+  Upload
+} from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,

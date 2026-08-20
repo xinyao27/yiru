@@ -2,40 +2,97 @@ import SwiftUI
 
 struct TerminalPrototypeView: View {
     @State private var model: TerminalPrototypeModel
+    @State private var activeTabID = "terminal"
+    @State private var displayMode = TerminalDisplayMode.auto
 
     init(factory: any TerminalSurfaceFactory) {
         _model = State(initialValue: TerminalPrototypeModel(factory: factory))
     }
 
     var body: some View {
-        ZStack(alignment: .bottomTrailing) {
+        VStack(spacing: 0) {
+            TerminalTabStrip(
+                tabs: Self.fixtureTabs,
+                activeTabID: activeTabID,
+                isDisabled: false,
+                selectTab: { activeTabID = $0.id },
+                closeTab: { _ in },
+                navigateBrowser: { _, _ in },
+                createTerminal: {}
+            )
+
             TerminalSurfaceHost(surface: model.surface)
-                .background(Color(red: 0.035, green: 0.047, blue: 0.075))
-
-            FloatingGlassSurface {
-                HStack(spacing: Theme.Spacing.medium) {
-                    VStack(alignment: .trailing, spacing: Theme.Spacing.extraSmall) {
-                        Text(model.lastEvent)
-                            .font(.caption)
-                            .lineLimit(1)
-                        Text(statusDetail)
-                            .font(.caption2.monospacedDigit())
-                            .foregroundStyle(.secondary)
-                    }
-
-                    Button("Keyboard", systemImage: "keyboard", action: model.focus)
-                        .buttonStyle(.glassProminent)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding(.horizontal, TerminalChromeMetrics.horizontalInset)
+                .background(Theme.Colors.background)
+                .clipped()
+                .safeAreaInset(edge: .bottom, spacing: 0) {
+                    TerminalAccessoryDock(
+                        state: model.surface.accessoryState,
+                        displayMode: displayMode,
+                        isDisplayModeUpdating: false,
+                        toggleDisplayMode: {
+                            displayMode = displayMode.toggleTarget
+                        }
+                    )
                 }
-            }
-            .padding(Theme.Spacing.standard)
         }
-        .navigationTitle(Text("Terminal Prototype"))
+        .navigationTitle(Text("megamouth"))
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Menu {
+                    Button("Show Keyboard", iconID: .terminal, action: model.focus)
+                } label: {
+                    YiruToolbarIcon(.more)
+                }
+                .accessibilityLabel("More session actions")
+            }
+        }
         .onAppear(perform: model.loadFixture)
     }
 
-    private var statusDetail: String {
-        let grid = model.gridSize.map { "\($0.columns) × \($0.rows)" } ?? "— × —"
-        return String(localized: "\(grid) · \(model.inputByteCount) input bytes")
-    }
+    private static let fixtureTabs = [
+        TerminalWorkspaceTab(
+            id: "terminal",
+            title: "Claude Code",
+            isActive: true,
+            isPinned: false,
+            leafID: "root",
+            content: .terminal(
+                .ready(TerminalTarget(id: "fixture", title: "Claude Code", isWritable: true))
+            )
+        ),
+        TerminalWorkspaceTab(
+            id: "markdown",
+            title: "README.md",
+            isActive: false,
+            isPinned: false,
+            leafID: nil,
+            content: .markdown(
+                WorkspaceMarkdownTab(
+                    relativePath: "README.md",
+                    documentVersion: "fixture",
+                    isHostDirty: false
+                )
+            )
+        ),
+        TerminalWorkspaceTab(
+            id: "browser",
+            title: "Apple Design Resources",
+            isActive: false,
+            isPinned: false,
+            leafID: nil,
+            content: .browser(
+                WorkspaceBrowserTab(
+                    workspaceID: "fixture",
+                    pageID: "page",
+                    url: "https://developer.apple.com/design/resources/",
+                    isLoading: false,
+                    canGoBack: false,
+                    canGoForward: false
+                )
+            )
+        ),
+    ]
 }

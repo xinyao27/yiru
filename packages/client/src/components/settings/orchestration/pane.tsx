@@ -1,10 +1,10 @@
+import { useState } from 'react'
 import {
   GitMerge,
   ListChecks,
   ArrowsLeftRight as ArrowRightLeft,
   FlowArrow as Workflow
-} from '@phosphor-icons/react'
-import { useState } from 'react'
+} from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { useActiveProjectSkillRuntime } from '~renderer/hooks/use-active-project-skill-runtime'
 import {

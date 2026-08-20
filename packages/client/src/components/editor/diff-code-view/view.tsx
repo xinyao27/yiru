@@ -1,4 +1,3 @@
-import { Copy, SelectionAll } from '@phosphor-icons/react'
 import type { OnDiffLineEnterLeaveProps, OnLineEnterLeaveProps } from '@pierre/diffs'
 import {
   CodeView,
@@ -8,6 +7,7 @@ import {
 } from '@pierre/diffs/react'
 import { useCallback, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { DecoratedDiffComment } from '~renderer/components/diff-comments/decorated-diff-comment'
+import { Copy, SelectionAll } from '~renderer/components/icons/hugeicons'
 import { CLOSE_ALL_CONTEXT_MENUS_EVENT } from '~renderer/components/tab-bar/sortable-tab'
 import {
   ContextMenu,

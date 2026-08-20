@@ -1,10 +1,10 @@
-import { Archive } from '@phosphor-icons/react'
 import {
   aiVaultSessionRecoverableSignalCount,
   isAiVaultSessionRecoverableEmpty,
   type AiVaultSession
 } from '@yiru/workbench-model/agent'
 import type React from 'react'
+import { Archive } from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
 
 // Distinct state for a zero-turn transcript: the conversation was not persisted,

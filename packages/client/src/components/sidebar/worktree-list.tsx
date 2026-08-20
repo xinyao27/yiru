@@ -5,6 +5,18 @@ import {
   type OnViewableItemsChangedInfo
 } from '@legendapp/list/react'
 import {
+  ALL_EXECUTION_HOSTS_SCOPE,
+  getRepoExecutionHostId,
+  getSettingsFocusedExecutionHostId,
+  type ExecutionHostId
+} from '@yiru/workbench-model/workspace'
+/* eslint-disable max-lines */
+import React, { useMemo, useCallback, useRef, useState, useEffect, useLayoutEffect } from 'react'
+import { toast } from 'sonner'
+import { useShallow } from 'zustand/react/shallow'
+import { shallow } from 'zustand/shallow'
+import { CoworkingProjectVisibilityDialog } from '~renderer/components/coworking/worktree-visibility-dialog'
+import {
   Warning as AlertTriangle,
   XCircle as CircleX,
   DotsThree as Ellipsis,
@@ -21,19 +33,7 @@ import {
   CaretDown as ChevronDown,
   FolderPlus,
   Plus
-} from '@phosphor-icons/react'
-import {
-  ALL_EXECUTION_HOSTS_SCOPE,
-  getRepoExecutionHostId,
-  getSettingsFocusedExecutionHostId,
-  type ExecutionHostId
-} from '@yiru/workbench-model/workspace'
-/* eslint-disable max-lines */
-import React, { useMemo, useCallback, useRef, useState, useEffect, useLayoutEffect } from 'react'
-import { toast } from 'sonner'
-import { useShallow } from 'zustand/react/shallow'
-import { shallow } from 'zustand/shallow'
-import { CoworkingProjectVisibilityDialog } from '~renderer/components/coworking/worktree-visibility-dialog'
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { RepoForkIndicator } from '~renderer/components/repo/fork-indicator'
 import { RepoIconGlyph } from '~renderer/components/repo/icon'

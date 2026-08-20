@@ -1,6 +1,10 @@
-import { Minus, ArrowsOut as Maximize2, ArrowsIn as Minimize2 } from '@phosphor-icons/react'
 import { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
+import {
+  Minus,
+  ArrowsOut as Maximize2,
+  ArrowsIn as Minimize2
+} from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { ButtonGroup } from '~renderer/components/ui/button-group'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'

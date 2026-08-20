@@ -4,13 +4,13 @@ import gitForWindowsLogoUrl from '~renderer/assets/brand/git-for-windows-logo.sv
 import { translate } from '~renderer/i18n/i18n'
 
 // Why: the "+" dropdown and per-tab tab strip both need a visual distinction
-// between PowerShell, CMD, Git Bash, and WSL sessions. Stock lucide glyphs don't
+// between PowerShell, CMD, Git Bash, and WSL sessions. Stock shared glyphs don't
 // differentiate — every session rendered as the same generic chevron. These
 // hand-crafted icons and the official Git for Windows mark make each shell
 // identifiable at a glance without shipping a heavier brand-asset package
 // like simple-icons. The generic (macOS/Linux) terminal fallback uses the same
 // colored-tile treatment so the tab strip reads as a consistent set of badges
-// rather than a monochrome lucide glyph next to colorful brand marks.
+// rather than a monochrome generic glyph next to colorful brand marks.
 
 function PowerShellIcon({ size = 14 }: { size?: number }): React.JSX.Element {
   return (

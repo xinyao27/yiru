@@ -5,10 +5,10 @@ import UIKit
 @MainActor
 final class SwiftTermSurface: NSObject, TerminalSurface, TerminalViewDelegate {
     var events: TerminalSurfaceEvents = .inactive
+    let accessoryState: TerminalAccessoryState
 
     private let terminalView: YiruTerminalView
-    private let accessoryState: TerminalAccessoryState
-    private let accessoryView: TerminalAccessoryInputView
+    private let controlModifierObserver: TerminalControlModifierObserver
     private var isRestoringSnapshot = false
 
     init(configuration: TerminalSurfaceConfiguration) {
@@ -17,24 +17,27 @@ final class SwiftTermSurface: NSObject, TerminalSurface, TerminalViewDelegate {
             font: .monospacedSystemFont(ofSize: configuration.fontSize, weight: .regular)
         )
         configuredTerminalView.captureModeAwareAccessory()
+        configuredTerminalView.inputAccessoryView = nil
         terminalView = configuredTerminalView
-        accessoryState = TerminalAccessoryState(
+        let configuredAccessoryState = TerminalAccessoryState(
             keys: configuration.accessoryKeys,
+            customKeys: configuration.customAccessoryKeys,
             onSend: { [weak terminalView = configuredTerminalView] key in
                 terminalView?.sendAccessoryKey(key)
+            },
+            onSendCustom: { [weak terminalView = configuredTerminalView] key in
+                terminalView?.sendCustomAccessoryKey(key)
             },
             onControlChange: { [weak terminalView = configuredTerminalView] isActive in
                 terminalView?.controlModifier = isActive
             },
             onPaste: { [weak terminalView = configuredTerminalView] in
                 terminalView?.paste(nil)
-            },
-            onDismiss: { [weak terminalView = configuredTerminalView] in
-                terminalView?.resignFirstResponder()
             }
         )
-        accessoryView = TerminalAccessoryInputView(
-            state: accessoryState,
+        accessoryState = configuredAccessoryState
+        controlModifierObserver = TerminalControlModifierObserver(
+            state: configuredAccessoryState,
             terminalView: configuredTerminalView
         )
         super.init()
@@ -45,21 +48,26 @@ final class SwiftTermSurface: NSObject, TerminalSurface, TerminalViewDelegate {
         terminalView.terminalDelegate = self
         terminalView.optionAsMetaKey = false
         terminalView.allowMouseReporting = true
-        terminalView.nativeForegroundColor = UIColor(
-            red: 0.86,
-            green: 0.89,
-            blue: 0.94,
-            alpha: 1
-        )
-        terminalView.nativeBackgroundColor = UIColor(
-            red: 0.035,
-            green: 0.047,
-            blue: 0.075,
-            alpha: 1
-        )
-        terminalView.backgroundOpacity = 1
+        configuredTerminalView.observeAppearanceChanges { terminalView in
+            Self.applyPalette(to: terminalView)
+        }
         terminalView.changeScrollback(configuration.scrollbackLines)
-        terminalView.inputAccessoryView = accessoryView
+    }
+
+    private static func applyPalette(to terminalView: YiruTerminalView) {
+        let palette = Theme.Terminal.palette(for: terminalView.traitCollection.userInterfaceStyle)
+        terminalView.nativeForegroundColor = palette.foreground
+        terminalView.nativeBackgroundColor = palette.background
+        // Why: SwiftTerm paints default cells itself but keeps the inter-cell canvas on the
+        // backing layer, so both surfaces must change together when appearance changes.
+        terminalView.layer.backgroundColor = palette.background.cgColor
+        terminalView.backgroundOpacity = 1
+        terminalView.caretColor = palette.foreground
+        terminalView.caretTextColor = palette.background
+        terminalView.selectedTextForegroundColor = palette.selectionForeground
+        terminalView.selectedTextBackgroundColor = palette.selectionBackground
+        terminalView.selectionHandleColor = palette.foreground
+        terminalView.installColors(palette.ansiColors.map(SwiftTerm.Color.init(uiColor:)))
     }
 
     var view: UIView {
@@ -73,10 +81,20 @@ final class SwiftTermSurface: NSObject, TerminalSurface, TerminalViewDelegate {
 
     func restore(_ snapshot: TerminalReplaySnapshot) {
         isRestoringSnapshot = true
-        terminalView.resize(cols: snapshot.columns, rows: snapshot.rows)
+        synchronizeGrid(
+            to: TerminalGridSize(columns: snapshot.columns, rows: snapshot.rows)
+        )
         feed(Data([0x1B, 0x63]))
         feed(snapshot.replayBytes)
         isRestoringSnapshot = false
+    }
+
+    func synchronizeGrid(to size: TerminalGridSize) {
+        // Why: TerminalView.resize reports the remote size back through sizeChanged on the next
+        // run-loop turn. Resizing the emulator core directly keeps server-authoritative geometry
+        // from echoing as a new phone viewport and preserves the viewport measured from UIKit.
+        terminalView.getTerminal().resize(cols: size.columns, rows: size.rows)
+        terminalView.setNeedsDisplay(terminalView.bounds)
     }
 
     func clear() {
@@ -99,7 +117,10 @@ final class SwiftTermSurface: NSObject, TerminalSurface, TerminalViewDelegate {
             )
         }
         terminalView.changeScrollback(configuration.scrollbackLines)
-        accessoryState.setKeys(configuration.accessoryKeys)
+        accessoryState.setKeys(
+            configuration.accessoryKeys,
+            customKeys: configuration.customAccessoryKeys
+        )
     }
 
     func sizeChanged(source: TerminalView, newCols: Int, newRows: Int) {
@@ -122,7 +143,7 @@ final class SwiftTermSurface: NSObject, TerminalSurface, TerminalViewDelegate {
     func scrolled(source: TerminalView, position: Double) {}
 
     func requestOpenLink(source: TerminalView, link: String, params: [String: String]) {
-        events.onOpenLink(link)
+        events.onOpenLink(link, params)
     }
 
     func bell(source: TerminalView) {
@@ -134,7 +155,7 @@ final class SwiftTermSurface: NSObject, TerminalSurface, TerminalViewDelegate {
     }
 
     func clipboardRead(source: TerminalView) -> Data? {
-        nil
+        UIPasteboard.general.string.map { Data($0.utf8) }
     }
 
     func iTermContent(source: TerminalView, content: ArraySlice<UInt8>) {}
@@ -145,6 +166,16 @@ final class SwiftTermSurface: NSObject, TerminalSurface, TerminalViewDelegate {
 private final class YiruTerminalView: TerminalView {
     var onQueryReply: (Data) -> Void = { _ in }
     private var modeAwareAccessory: TerminalAccessory?
+    private var appearanceChangeHandler: ((YiruTerminalView) -> Void)?
+
+    func observeAppearanceChanges(_ handler: @escaping (YiruTerminalView) -> Void) {
+        appearanceChangeHandler = handler
+        handler(self)
+        registerForTraitChanges([UITraitUserInterfaceStyle.self]) {
+            (view: YiruTerminalView, _: UITraitCollection) in
+            view.appearanceChangeHandler?(view)
+        }
+    }
 
     func captureModeAwareAccessory() {
         modeAwareAccessory = inputAccessoryView as? TerminalAccessory
@@ -156,16 +187,27 @@ private final class YiruTerminalView: TerminalView {
             send([0x1B])
         case .tab:
             send([0x09])
-        case .arrowLeft:
-            sendModeAwareArrow(selectorName: "left:")
-        case .arrowDown:
-            sendModeAwareArrow(selectorName: "down:")
-        case .arrowUp:
-            sendModeAwareArrow(selectorName: "up:")
-        case .arrowRight:
-            sendModeAwareArrow(selectorName: "right:")
+        case .enter:
+            // Why: SwiftTerm switches Enter to the negotiated keyboard protocol when a
+            // terminal enables keyboard enhancement flags. A raw carriage return bypasses
+            // that encoder, so agent TUIs can redraw the prompt without submitting the line.
+            insertText("\n")
+        case .shiftTab:
+            send([0x1B, 0x5B, 0x5A])
+        case .space:
+            send([0x20])
         case .backspace:
             send([0x7F])
+        case .delete:
+            send([0x1B, 0x5B, 0x33, 0x7E])
+        case .arrowUp:
+            sendModeAwareArrow(selectorName: "up:")
+        case .arrowDown:
+            sendModeAwareArrow(selectorName: "down:")
+        case .arrowLeft:
+            sendModeAwareArrow(selectorName: "left:")
+        case .arrowRight:
+            sendModeAwareArrow(selectorName: "right:")
         case .interrupt:
             send([0x03])
         case .endOfFile:
@@ -174,7 +216,23 @@ private final class YiruTerminalView: TerminalView {
             send([0x0C])
         case .suspend:
             send([0x1A])
+        case .reverseSearch:
+            send([0x12])
+        case .startOfLine:
+            send([0x01])
+        case .endOfLine:
+            send([0x05])
+        case .deleteWordBackward:
+            send([0x17])
+        case .clearLineBeforeCursor:
+            send([0x15])
         }
+    }
+
+    func sendCustomAccessoryKey(_ key: TerminalCustomKey) {
+        var bytes = Array(key.bytes.utf8)
+        if key.enter { bytes.append(0x0D) }
+        send(bytes)
     }
 
     override func send(source: Terminal, data: ArraySlice<UInt8>) {

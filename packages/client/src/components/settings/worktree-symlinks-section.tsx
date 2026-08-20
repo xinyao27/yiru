@@ -1,6 +1,6 @@
-import { Folder, LinkSimple as Link2, Plus, X } from '@phosphor-icons/react'
 import { getRepoExecutionHostId, LOCAL_EXECUTION_HOST_ID } from '@yiru/workbench-model/workspace'
 import { useEffect, useMemo, useState } from 'react'
+import { Folder, LinkSimple as Link2, Plus, X } from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
 import { getFileTypeIcon } from '~renderer/lib/file-type-icons'

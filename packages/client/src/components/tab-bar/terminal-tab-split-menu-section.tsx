@@ -2,7 +2,7 @@ import {
   Layout as PanelBottomClose,
   Sidebar as PanelRightClose,
   TerminalWindow as SquareTerminal
-} from '@phosphor-icons/react'
+} from '~renderer/components/icons/hugeicons'
 import {
   DropdownMenuItem,
   DropdownMenuSeparator,

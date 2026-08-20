@@ -1,7 +1,7 @@
 import {
   CaretLeft as ChevronLeft,
   ArrowElbowDownLeft as CornerDownLeft
-} from '@phosphor-icons/react'
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'

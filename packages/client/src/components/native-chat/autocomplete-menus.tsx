@@ -1,5 +1,5 @@
-import { ArrowClockwise, Package } from '@phosphor-icons/react'
 import { memo, useEffect, useRef } from 'react'
+import { ArrowClockwise, Package } from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'

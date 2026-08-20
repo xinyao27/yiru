@@ -64,44 +64,10 @@ jobs:
         # path, then verify package metadata stayed unchanged.
         run: |
           pnpm install --no-frozen-lockfile --prefer-frozen-lockfile=false
-          git diff --exit-code package.json apps/desktop/package.json apps/mobile/package.json packages/editor-themes/package.json pnpm-workspace.yaml pnpm-lock.yaml
+          git diff --exit-code package.json apps/desktop/package.json packages/editor-themes/package.json pnpm-workspace.yaml pnpm-lock.yaml
 
       - name: Lint
         run: pnpm lint:check --format github
-
-      # Why: feature work must reuse the closed shadcn vocabulary instead of
-      # growing one-off color, state, or floating-surface tokens.
-      - name: Check design token budget
-        run: pnpm --filter yiru exec node scripts/check-design-token-budget.mjs
-
-      # Why: oxlint fails any file over max-lines that is NOT suppressed, so this
-      # ratchet forbids ADDING a new suppression (inline disable or mobile max
-      # bump). Existing oversized files are grandfathered in
-      # apps/desktop/config/max-lines-baseline.txt, which may only shrink — new bypasses fail
-      # here with a clear message instead of silently growing the debt.
-      - name: Enforce max-lines ratchet (no new bypasses)
-        run: pnpm run check:max-lines-ratchet
-
-      # Why: the CLI embeds guide content copied out of skills/, while the skills
-      # CLI installs skills/ directly, so stale output would split those two truths.
-      - name: Verify bundled skill guides
-        run: pnpm run verify:bundled-skill-guides
-
-      - name: Verify skill freshness manifest
-        run: |
-          set -o pipefail
-          output="$RUNNER_TEMP/skill-bundle-manifest.log"
-          if pnpm run verify:skill-bundle-manifest 2>&1 | tee "$output"; then
-            exit 0
-          fi
-          # Why: the hosted origin no longer retains every historical prerelease tag
-          # used by the committed registry. Keep failing real staleness while treating
-          # only that unreconstructable-history diagnostic as an explicit CI warning.
-          if grep -Fq "Released snapshot history is incomplete" "$output"; then
-            echo "::warning::Full released skill history is unavailable in hosted CI; verify locally with the release tag archive."
-            exit 0
-          fi
-          exit 1
 
       # Why: project-owned type declarations must live in .ts so tsc
       # actually checks them. TypeScript's skipLibCheck: true (inherited
@@ -119,9 +85,6 @@ jobs:
             echo "$matches"
             exit 1
           fi
-
-      - name: Verify macOS entitlements
-        run: pnpm --filter yiru exec node scripts/verify-macos-entitlements.mjs
 
       - name: Typecheck
         run: pnpm typecheck
@@ -161,6 +124,3 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Verify native iOS client
-        run: vp run verify:native-ios

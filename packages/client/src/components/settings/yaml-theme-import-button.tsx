@@ -1,4 +1,4 @@
-import { FileArrowUp as FileUp } from '@phosphor-icons/react'
+import { FileArrowUp as FileUp } from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
 
 import { Button } from '../ui/button'

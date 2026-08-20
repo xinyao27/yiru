@@ -70,41 +70,10 @@ Version bumps, tags, and releases are maintainer-managed. Do not include release
 
 ### Cutting a release (maintainers)
 
-All releases are cut from the **Cut Release** GitHub Actions workflow. There is no local `pnpm release:*` script — running releases locally is too easy to get wrong (dirty tree, wrong branch, stale main).
-
-**To cut a release:**
-
-1. Open [Actions → Cut Release](https://github.com/xinyao27/yiru/actions/workflows/release-cut.yml).
-2. Click **Run workflow** and pick:
-   - **kind**: one of `rc`, `patch`, `minor`, `major`.
-   - **ref**: the branch, tag, or SHA to build from. Defaults to `main`.
-3. Run it.
-
-The workflow resolves the next version from GitHub Releases, bumps `package.json`, tags, pushes, and runs the enabled desktop builds + publish inline. macOS and Linux are always included. Windows is included only when both the `SIGNPATH_API_TOKEN` repository secret and `SIGNPATH_ORGANIZATION_ID` repository variable are set; when both are absent, Windows is intentionally omitted. Setting only one fails before a tag is created.
-
-**How the next version is chosen:**
-
-All stable kinds (`patch`, `minor`, `major`) are computed off the latest _stable_ release, ignoring any RCs in between.
-
-- `kind=rc` + latest stable `v0.0.0` → `v0.0.1-rc.0`.
-- `kind=rc` + active RC series `v0.0.1-rc.2` → `v0.0.1-rc.3`.
-- `kind=patch` + latest stable `v0.0.0` → `v0.0.1` (regardless of any intermediate RCs).
-- The next `kind=patch` after stable `v0.0.1` → `v0.0.2`.
-- `kind=minor` + latest stable `v0.0.1` → `v0.1.0`.
-- `kind=major` + latest stable `v0.0.1` → `v1.0.0`.
-
-**Safety guarantees:**
-
-- Stable releases are refused if the new version isn't strictly greater than the latest published stable. This is the only rule `electron-updater` actually needs — it compares semver within the `latest` channel, so a regressing stable is the one thing that breaks auto-update for fresh installs.
-- Complete RC draft releases created by the release workflow are published before cutting a new tag only when the draft tag was built from the current release ref. Stale drafts are skipped so fixes cut a fresh RC instead of exposing old artifacts.
-- If the latest RC tag exists but is still draft-only or missing its GitHub Release, the workflow resumes that tag only when it was built from the current release ref. Otherwise the next RC number is cut.
-- RC numbering also considers release commits on `main`, so deleting a stale tag does not let a later cut reuse the same RC number.
-- Off-main releases (when `ref` is not the tip of `main`) only push the tag. `main` is never mutated from a non-main ref, so you can safely release an older commit without polluting history.
-- When `ref` is the tip of `main`, the version-bump commit is fast-forwarded onto `main` so local `package.json` stays in sync with what's shipped.
-
-**Common scenarios:**
-
-- **Normal release:** `kind=patch`, `ref=main`.
-- **"A bad commit just landed on main, release the commit before it":** `kind=patch`, `ref=<good-sha>`. `main` is left alone; the tag points at the good SHA. Fix forward on `main` afterward.
-- **One-off RC for a feature branch:** `kind=rc`, `ref=<branch-or-sha>`. Produces an RC tag that does not touch `main`.
-- **Minor or major bump:** `kind=minor` or `kind=major`.
+Releases used to be cut from a **Cut Release** GitHub Actions workflow
+(`.github/workflows/release-cut.yml`), which resolved the next version from GitHub Releases, bumped
+`package.json`, tagged, pushed, and ran the enabled desktop builds and publish inline. That workflow
+file — along with `release-mac-build.yml` and their `apps/desktop/scripts/` release helpers — has
+since been deleted from the repository. There is currently no automated release workflow and no
+local `pnpm release:*` script; ask a maintainer how a release should be cut before assuming any of
+the mechanics previously documented here still apply.

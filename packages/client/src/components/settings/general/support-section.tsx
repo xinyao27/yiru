@@ -1,7 +1,7 @@
-import { Star, ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
 import { YIRU_GITHUB_STARGAZERS_URL } from '@yiru/workbench-model/product'
 import type React from 'react'
 import { useEffect, useState } from 'react'
+import { Star, ArrowSquareOut as ExternalLink } from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import { Label } from '~renderer/components/ui/label'

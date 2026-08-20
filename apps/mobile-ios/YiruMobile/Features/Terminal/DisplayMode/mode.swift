@@ -13,12 +13,12 @@ nonisolated enum TerminalDisplayMode: String, Equatable, Sendable {
         }
     }
 
-    var systemImage: String {
+    var iconID: YiruIconID {
         switch self {
         case .auto:
-            "iphone"
+            .deviceMobile
         case .desktop:
-            "desktopcomputer"
+            .laptop
         }
     }
 
@@ -34,9 +34,9 @@ nonisolated enum TerminalDisplayMode: String, Equatable, Sendable {
     var toggleTitle: LocalizedStringResource {
         switch toggleTarget {
         case .auto:
-            "Switch to Phone Fit"
+            "Switch to phone mode"
         case .desktop:
-            "Switch to Desktop Size"
+            "Switch to desktop mode"
         }
     }
 }

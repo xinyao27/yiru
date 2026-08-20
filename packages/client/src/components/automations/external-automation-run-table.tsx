@@ -1,11 +1,11 @@
+/* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: run rows are fetched from the external automation store; the loading state tracks that async request lifecycle. */
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import {
   WarningCircle as AlertCircle,
   FileText,
   CaretLeft as ChevronLeft,
   CaretRight as ChevronRight
-} from '@phosphor-icons/react'
-/* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: run rows are fetched from the external automation store; the loading state tracks that async request lifecycle. */
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Badge } from '~renderer/components/ui/badge'
 import { Button } from '~renderer/components/ui/button'

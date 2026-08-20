@@ -55,8 +55,8 @@ function isDesktopHttpLinkFallbackActivation(event: MouseEvent): boolean {
     return false
   }
   // Why: desktop terminal links require an intentional Cmd/Ctrl gesture so
-  // plain clicks remain available for cursor placement and selection. Mobile
-  // tap routing is handled separately under apps/mobile/src/terminal.
+  // plain clicks remain available for cursor placement and selection. The
+  // mobile client handles its own tap-to-open-link routing separately.
   return isTerminalHttpLinkActivation(event)
 }
 

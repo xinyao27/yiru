@@ -10,8 +10,8 @@ import {
   Crosshair as Radar,
   SpeakerLow as Volume1,
   Lightning as Zap,
-  type Icon as PhosphorIcon
-} from '@phosphor-icons/react'
+  type Icon
+} from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
 import { createLocalizedCatalog } from '~renderer/i18n/localized-catalog'
 import { basename } from '~renderer/lib/path'
@@ -20,7 +20,7 @@ import type { GlobalSettings } from '~shared/types'
 export type NotificationSoundOption = {
   id: GlobalSettings['notifications']['customSoundId']
   title: string
-  icon: PhosphorIcon
+  icon: Icon
 }
 
 export const getBuiltInNotificationSoundOptions = createLocalizedCatalog(

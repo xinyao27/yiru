@@ -1,6 +1,6 @@
-import { Check, CaretUpDown as ChevronsUpDown } from '@phosphor-icons/react'
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: picker base-ref defaults and search results come from debounced runtime IPC, so loading/result state is intentionally synchronized from effects. */
 import React from 'react'
+import { Check, CaretUpDown as ChevronsUpDown } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import {
   Command,

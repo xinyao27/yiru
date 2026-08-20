@@ -1,10 +1,10 @@
+import React from 'react'
 import {
   Warning as AlertTriangle,
   GitMerge,
   ArrowCounterClockwise as RotateCcw,
   X
-} from '@phosphor-icons/react'
-import React from 'react'
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import { retryBackgroundWorktreeCreation } from '~renderer/components/worktree-creation/flow'

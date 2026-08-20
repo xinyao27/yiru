@@ -1,5 +1,10 @@
-import { FolderOpen, Globe, Lightbulb, HardDrives as Server } from '@phosphor-icons/react'
 import { useState, type ComponentType, type ReactNode } from 'react'
+import {
+  FolderOpen,
+  Globe,
+  Lightbulb,
+  HardDrives as Server
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import { DialogDescription, DialogHeader, DialogTitle } from '~renderer/components/ui/dialog'

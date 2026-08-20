@@ -1,8 +1,8 @@
 import type { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
-import { Warning as AlertTriangle, Eye, TerminalWindow } from '@phosphor-icons/react'
 import type React from 'react'
 import { useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { Warning as AlertTriangle, Eye, TerminalWindow } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,

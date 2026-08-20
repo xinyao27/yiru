@@ -5,9 +5,9 @@ import {
   ShareNetwork,
   TerminalWindow as SquareTerminal,
   Trash as Trash2,
-  type Icon as PhosphorIcon,
+  type Icon,
   FolderPlus
-} from '@phosphor-icons/react'
+} from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
 import { createLocalizedCatalog } from '~renderer/i18n/localized-catalog'
 
@@ -31,7 +31,7 @@ export type CmdJQuickAction = {
   kind: 'action'
   title: string
   description: string
-  icon: PhosphorIcon
+  icon: Icon
   verbKeywords: string[]
   isAvailable: (ctx: CmdJQuickActionContext) => CmdJQuickActionAvailability
   run: (ctx: CmdJQuickActionContext) => Promise<CmdJQuickActionRunResult>

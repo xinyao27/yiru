@@ -1,9 +1,9 @@
+import React from 'react'
 import {
   WarningCircle as AlertCircle,
   CheckCircle as CheckCircle2,
   Download
-} from '@phosphor-icons/react'
-import React from 'react'
+} from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { translate } from '~renderer/i18n/i18n'

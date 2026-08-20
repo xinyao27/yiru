@@ -1,3 +1,10 @@
+/* eslint-disable max-lines -- Why: AccountsPane owns all per-provider account UI
+   (Claude, Codex, Gemini, OpenCode Go, and future providers). Each provider's
+   add/select/reauth/remove flow is tightly coupled to the provider-specific
+   error handling and restart prompts below; splitting them into separate files
+   would scatter those flows without a meaningful abstraction boundary. */
+import { useEffect, useRef, useState } from 'react'
+import { toast } from 'sonner'
 import {
   Warning as AlertTriangle,
   Question as HelpCircle,
@@ -9,14 +16,7 @@ import {
   Plus,
   ArrowClockwise as RefreshCw,
   X
-} from '@phosphor-icons/react'
-/* eslint-disable max-lines -- Why: AccountsPane owns all per-provider account UI
-   (Claude, Codex, Gemini, OpenCode Go, and future providers). Each provider's
-   add/select/reauth/remove flow is tightly coupled to the provider-specific
-   error handling and restart prompts below; splitting them into separate files
-   would scatter those flows without a meaningful abstraction boundary. */
-import { useEffect, useRef, useState } from 'react'
-import { toast } from 'sonner'
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Switch } from '~renderer/components/ui/switch'
 import { translate } from '~renderer/i18n/i18n'

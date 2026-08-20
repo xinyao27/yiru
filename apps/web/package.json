@@ -29,7 +29,8 @@
     "deploy:dry-run": "wrangler deploy --dry-run"
   },
   "dependencies": {
-    "@phosphor-icons/react": "catalog:",
+    "@hugeicons/core-free-icons": "catalog:",
+    "@hugeicons/react": "catalog:",
     "@tanstack/react-router": "catalog:",
     "@yiru/client": "workspace:*",
     "@yiru/runtime-protocol": "workspace:*",

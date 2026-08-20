@@ -19,8 +19,8 @@ import { useAppStore } from '~renderer/store'
  * Centralizing the sequence here keeps that safety invariant in one place so
  * a new caller can't accidentally skip it.
  */
-export async function runSleepWorktree(worktreeId: string): Promise<void> {
-  await runSleepWorktrees([worktreeId])
+export async function runSleepWorktree(worktreeId: string): Promise<boolean> {
+  return runSleepWorktrees([worktreeId])
 }
 
 function getSidebarWorktreeOptions(worktreeId: string): HTMLElement[] {
@@ -107,9 +107,9 @@ function preserveSidebarWorktreePosition(worktreeId: string): () => void {
   }
 }
 
-export async function runSleepWorktrees(worktreeIds: readonly string[]): Promise<void> {
+export async function runSleepWorktrees(worktreeIds: readonly string[]): Promise<boolean> {
   if (worktreeIds.length === 0) {
-    return
+    return true
   }
   const {
     activeWorktreeId,
@@ -180,4 +180,5 @@ export async function runSleepWorktrees(worktreeIds: readonly string[]): Promise
       }
     )
   }
+  return errors.length === 0
 }

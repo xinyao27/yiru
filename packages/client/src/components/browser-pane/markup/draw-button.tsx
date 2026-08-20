@@ -1,5 +1,5 @@
-import { PenNib as PenTool } from '@phosphor-icons/react'
 import React, { useEffect } from 'react'
+import { PenNib as PenTool } from '~renderer/components/icons/hugeicons'
 import { Badge } from '~renderer/components/ui/badge'
 import { Button } from '~renderer/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '~renderer/components/ui/popover'

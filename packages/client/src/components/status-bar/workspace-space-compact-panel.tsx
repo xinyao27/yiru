@@ -1,10 +1,10 @@
+import { useCallback } from 'react'
 import {
   Warning as AlertTriangle,
   HardDrive,
   ArrowClockwise as RefreshCw,
   X
-} from '@phosphor-icons/react'
-import { useCallback } from 'react'
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { translate } from '~renderer/i18n/i18n'
 import { useAppStore } from '~renderer/store'

@@ -1,6 +1,10 @@
-import { CalendarDots as CalendarClock, Pencil, Note as StickyNote } from '@phosphor-icons/react'
 import React from 'react'
 import { toast } from 'sonner'
+import {
+  CalendarDots as CalendarClock,
+  Pencil,
+  Note as StickyNote
+} from '~renderer/components/icons/hugeicons'
 import { SelectedTextCopyMenu } from '~renderer/components/selected-text-copy-menu'
 import { HoverCard, HoverCardTrigger, HoverCardContent } from '~renderer/components/ui/hover-card'
 import { translate } from '~renderer/i18n/i18n'

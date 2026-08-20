@@ -2,18 +2,20 @@ import SwiftUI
 
 struct SemanticBadge: View {
     private let title: LocalizedStringKey
-    private let systemImage: String
+    private let iconID: YiruIconID
     private let tint: Color
 
-    init(_ title: LocalizedStringKey, systemImage: String, tint: Color) {
+    init(_ title: LocalizedStringKey, iconID: YiruIconID, tint: Color) {
         self.title = title
-        self.systemImage = systemImage
+        self.iconID = iconID
         self.tint = tint
     }
 
     var body: some View {
-        Label(title, systemImage: systemImage)
+        Label(title, iconID: iconID)
             .font(.caption.weight(.semibold))
+            .lineLimit(1)
+            .fixedSize(horizontal: true, vertical: false)
             .foregroundStyle(tint)
             .padding(.horizontal, Theme.Spacing.medium)
             .padding(.vertical, Theme.Spacing.small)

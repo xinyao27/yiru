@@ -1,7 +1,7 @@
 import { useSortable } from '@dnd-kit/sortable'
-import { PushPin as Pin, ArrowsIn as Minimize2 } from '@phosphor-icons/react'
 import { stripLeadingAgentTitleDecoration } from '@yiru/workbench-model/agent'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { PushPin as Pin, ArrowsIn as Minimize2 } from '~renderer/components/icons/hugeicons'
 import { useTabAgent } from '~renderer/components/tab-bar/use-tab-agent'
 import { Button } from '~renderer/components/ui/button'
 import { ContextMenu, ContextMenuTrigger } from '~renderer/components/ui/context-menu'

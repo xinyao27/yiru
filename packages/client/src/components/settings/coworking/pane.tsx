@@ -1,7 +1,7 @@
-import { ArrowClockwise as RefreshCw, Trash as Trash2 } from '@phosphor-icons/react'
 import type React from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import { ArrowClockwise as RefreshCw, Trash as Trash2 } from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'

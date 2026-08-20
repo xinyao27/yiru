@@ -1,4 +1,4 @@
-import { ArrowCounterClockwise as RotateCcw } from '@phosphor-icons/react'
+import { ArrowCounterClockwise as RotateCcw } from '~renderer/components/icons/hugeicons'
 import { OSC52_CLIPBOARD_SETTING_ID } from '~renderer/components/terminal-pane/osc52-clipboard-setting-anchor'
 import { isMacPlatform } from '~renderer/components/terminal-pane/terminal-link-open-hints'
 import { Button } from '~renderer/components/ui/button'

@@ -1,3 +1,4 @@
+import React from 'react'
 import {
   List,
   TreeStructure as ListTree,
@@ -5,8 +6,7 @@ import {
   DotsThree as MoreHorizontal,
   GearSix as Settings2,
   ArrowClockwise as RefreshCw
-} from '@phosphor-icons/react'
-import React from 'react'
+} from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,

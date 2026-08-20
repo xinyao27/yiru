@@ -1,7 +1,7 @@
-import { Check } from '@phosphor-icons/react'
 import type { BuiltInWindowsTerminalShell } from '@yiru/workbench-model/platform'
 import { WINDOWS_GIT_BASH_SHELL } from '@yiru/workbench-model/platform'
 import { useCallback, useState } from 'react'
+import { Check } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import {
   Select,

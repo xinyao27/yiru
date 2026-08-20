@@ -1,6 +1,11 @@
 import { execFile } from 'node:child_process'
 import { posix as pathPosix } from 'node:path'
 
+import {
+  applySkillLockIndex,
+  emptySkillLockIndex,
+  type SkillLockIndex
+} from '~shared/skill-lockfile'
 import { summarizeSkillMarkdown } from '~shared/skill-metadata'
 import type { SkillDiscoveryResult, SkillDiscoverySource } from '~shared/skills'
 
@@ -14,6 +19,7 @@ import {
   type SkillScanRoot
 } from './skill-discovery-sources'
 import { classifySkillPlacementTopology } from './skill-installation-topology'
+import { readSkillLockIndexInWsl } from './skill-lockfile-wsl'
 import {
   groupSkillPlacements,
   skillContentDigest,
@@ -158,7 +164,8 @@ function buildWslPlacementCandidate(
 export function parseWslSkillDiscoveryOutput(
   output: string,
   roots: readonly SkillScanRoot[],
-  scannedAt = Date.now()
+  scannedAt = Date.now(),
+  lockIndex: SkillLockIndex = emptySkillLockIndex()
 ): SkillDiscoveryResult {
   const fields = output.split('\0')
   const scannedRoots = new Map<number, ScannedRoot>()
@@ -203,15 +210,18 @@ export function parseWslSkillDiscoveryOutput(
       scannedRoots.get(rootIndex)?.resolvedPath ?? root.path
     ])
   )
-  const skills = groupSkillPlacements(
-    pending.map(({ root, record }) =>
-      buildWslPlacementCandidate(root, record, {
-        canonicalRootPath,
-        // Why: the distro owns path identity, so "this root is a link" is a
-        // realpath comparison there rather than an ancestor walk here.
-        rootIsLinked: rootResolvedPaths.get(root.id) !== root.path
-      })
-    )
+  const skills = applySkillLockIndex(
+    groupSkillPlacements(
+      pending.map(({ root, record }) =>
+        buildWslPlacementCandidate(root, record, {
+          canonicalRootPath,
+          // Why: the distro owns path identity, so "this root is a link" is a
+          // realpath comparison there rather than an ancestor walk here.
+          rootIsLinked: rootResolvedPaths.get(root.id) !== root.path
+        })
+      )
+    ),
+    lockIndex
   )
 
   const sources: SkillDiscoverySource[] = roots.map((root, rootIndex) => {
@@ -267,6 +277,9 @@ export async function discoverSkillsInWsl(args: {
   ]
   // Why: UNC traversal applies Windows casing and symlink rules. The distro
   // must own enumeration, metadata reads, and canonical path identity.
-  const output = await executeWslSkillDiscovery(args.distro, buildWslSkillDiscoveryCommand(roots))
-  return parseWslSkillDiscoveryOutput(output, roots)
+  const [output, lockIndex] = await Promise.all([
+    executeWslSkillDiscovery(args.distro, buildWslSkillDiscoveryCommand(roots)),
+    readSkillLockIndexInWsl(args).catch(() => emptySkillLockIndex())
+  ])
+  return parseWslSkillDiscoveryOutput(output, roots, Date.now(), lockIndex)
 }

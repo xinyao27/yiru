@@ -1,5 +1,5 @@
-import { Plus } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
+import { Plus } from '~renderer/components/icons/hugeicons'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'
 import { parseSparsePresetDirectories } from '~renderer/lib/sparse-preset-draft'

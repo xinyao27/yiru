@@ -1,7 +1,7 @@
-import { Copy, Check } from '@phosphor-icons/react'
 import { NodeViewContent, NodeViewWrapper } from '@tiptap/react'
 import type { NodeViewProps } from '@tiptap/react'
 import React, { useCallback, useRef, useState } from 'react'
+import { Copy, Check } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
 import { useUiLocale } from '~renderer/i18n/use-ui-locale'

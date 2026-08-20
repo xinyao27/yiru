@@ -1,4 +1,4 @@
-import { ArrowSquareOut, TerminalWindow, WarningCircle } from '@phosphor-icons/react'
+import { ArrowSquareOut, TerminalWindow, WarningCircle } from '~renderer/components/icons/hugeicons'
 import {
   focusRendererTerminalHandle,
   findTerminalHandleTarget

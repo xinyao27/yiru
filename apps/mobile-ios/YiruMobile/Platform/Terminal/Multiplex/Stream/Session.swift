@@ -11,6 +11,29 @@ nonisolated enum TerminalMultiplexSessionError: Error, Sendable {
     case server(message: String?)
 }
 
+nonisolated enum TerminalInputConfirmationError: Error, Equatable, Sendable {
+    case rejected
+    case deliveryUnknown
+}
+
+nonisolated private enum TerminalMultiplexEffectiveDisplayMode: String, Decodable, Sendable {
+    case auto
+    case desktop
+    case phone
+}
+
+nonisolated private struct TerminalMultiplexResizedRecord: Decodable, Sendable {
+    let cols: Int
+    let rows: Int
+    let displayMode: TerminalMultiplexEffectiveDisplayMode
+    let applied: Bool?
+}
+
+nonisolated private struct TerminalMultiplexFitOverrideRecord: Decodable, Sendable {
+    let cols: Int
+    let rows: Int
+}
+
 actor TerminalMultiplexSession: TerminalSession {
     private let route: TerminalBulkRoute
     private let terminalID: String
@@ -31,7 +54,8 @@ actor TerminalMultiplexSession: TerminalSession {
         route: TerminalBulkRoute,
         terminalID: String,
         transportGeneration: String,
-        clientID: String
+        clientID: String,
+        viewport: TerminalGridSize?
     ) {
         let pair = AsyncThrowingStream.makeStream(of: TerminalSessionEvent.self)
         stream = pair.stream
@@ -40,6 +64,7 @@ actor TerminalMultiplexSession: TerminalSession {
         self.terminalID = terminalID
         self.transportGeneration = transportGeneration
         self.clientID = clientID
+        self.viewport = viewport
         input = TerminalMultiplexInputFlow(route: route)
         let delivery = TerminalMultiplexDelivery(
             route: route,
@@ -65,6 +90,10 @@ actor TerminalMultiplexSession: TerminalSession {
 
     func sendInput(_ data: Data) async throws {
         try await input.enqueue(data, kind: 0)
+    }
+
+    func sendInputConfirmed(_ data: Data) async throws {
+        try await input.enqueueConfirmed(data, kind: 0)
     }
 
     func sendQueryReply(_ data: Data) async throws {
@@ -156,7 +185,8 @@ actor TerminalMultiplexSession: TerminalSession {
 
     private func subscribe() async throws {
         let appState = await deliveryState.prepareSubscription()
-        let size = viewport.map {
+        let subscriptionViewport = viewport
+        let size = subscriptionViewport.map {
             TerminalMultiplexViewportRecord(cols: $0.columns, rows: $0.rows)
         }
         let payload = try JSONEncoder().encode(
@@ -181,7 +211,11 @@ actor TerminalMultiplexSession: TerminalSession {
             correlationID: try await route.allocateCorrelationID(),
             payload: payload
         )
-        sentViewport = viewport
+        // Why: actor reentrancy can update `viewport` while the subscribe frame
+        // is being assembled and sent. Track the dimensions actually encoded in
+        // that frame so `handleSubscribed` can send a late measurement instead
+        // of incorrectly treating it as already delivered.
+        sentViewport = subscriptionViewport
     }
 
     private func handle(_ frame: TerminalMultiplexFrame) async throws {
@@ -204,7 +238,11 @@ actor TerminalMultiplexSession: TerminalSession {
             throw TerminalMultiplexSessionError.server(message: record?.message)
         case .clearBuffer:
             continuation.yield(.clearBuffer)
-        case .resized, .metadata, .fitOverride, .driver, .sideEffectBatch:
+        case .resized:
+            try handleResized(frame)
+        case .fitOverride:
+            try handleFitOverride(frame)
+        case .metadata, .driver, .sideEffectBatch:
             break
         case .epoch, .heartbeat, .subscribe, .unsubscribe, .end, .output, .input,
             .resize, .claimViewport, .snapshotRequest, .snapshotStart, .snapshotChunk,
@@ -237,12 +275,56 @@ actor TerminalMultiplexSession: TerminalSession {
         case .desktop:
             continuation.yield(.displayMode(.desktop))
         }
+        continuation.yield(
+            .gridSizeChanged(TerminalGridSize(columns: record.cols, rows: record.rows))
+        )
         isSubscribed = true
         if let viewport, viewport != sentViewport {
             try await sendResize(viewport)
         }
         try await delivery.beginInitialSnapshot(id: snapshotID)
         try await deliveryState.reconcileAfterSubscription()
+    }
+
+    private func handleResized(_ frame: TerminalMultiplexFrame) throws {
+        let record = try JSONDecoder().decode(
+            TerminalMultiplexResizedRecord.self, from: frame.payload)
+        let size = try validatedGridSize(columns: record.cols, rows: record.rows)
+        switch record.displayMode {
+        case .auto, .phone:
+            continuation.yield(.displayMode(.auto))
+        case .desktop:
+            continuation.yield(.displayMode(.desktop))
+        }
+        if record.applied != false {
+            continuation.yield(.gridSizeChanged(size))
+        }
+    }
+
+    private func handleFitOverride(_ frame: TerminalMultiplexFrame) throws {
+        let record = try JSONDecoder().decode(
+            TerminalMultiplexFitOverrideRecord.self,
+            from: frame.payload
+        )
+        guard record.cols > 0, record.rows > 0 else { return }
+        continuation.yield(
+            .gridSizeChanged(
+                try validatedGridSize(columns: record.cols, rows: record.rows)
+            )
+        )
+    }
+
+    private func validatedGridSize(columns: Int, rows: Int) throws -> TerminalGridSize {
+        guard
+            (TerminalMultiplexStreamRecordWire
+                .columnsMin...TerminalMultiplexStreamRecordWire.columnsMax)
+                .contains(columns),
+            (TerminalMultiplexStreamRecordWire.rowsMin...TerminalMultiplexStreamRecordWire.rowsMax)
+                .contains(rows)
+        else {
+            throw TerminalMultiplexSessionError.invalidFrame
+        }
+        return TerminalGridSize(columns: columns, rows: rows)
     }
 
     private func handleCredit(_ frame: TerminalMultiplexFrame) async throws {
@@ -287,6 +369,7 @@ actor TerminalMultiplexSession: TerminalSession {
         guard !isClosed else { return }
         isClosed = true
         receiveTask = nil
+        await input.fail()
         await route.close()
         continuation.finish(throwing: error)
     }
@@ -296,6 +379,7 @@ actor TerminalMultiplexSession: TerminalSession {
         isClosed = true
         receiveTask?.cancel()
         receiveTask = nil
+        await input.fail()
         await route.close()
         continuation.finish()
     }

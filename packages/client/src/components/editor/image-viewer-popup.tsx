@@ -1,5 +1,5 @@
-import { X } from '@phosphor-icons/react'
 import type { CSSProperties, JSX } from 'react'
+import { X } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,

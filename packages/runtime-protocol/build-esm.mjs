@@ -21,10 +21,54 @@ await build({
           import.meta.dirname,
           'src/mobile-development-pairing.ts'
         ),
+        'mobile-accounts-wire': resolve(import.meta.dirname, 'src/mobile-accounts-wire.ts'),
+        'mobile-agent-history-wire': resolve(
+          import.meta.dirname,
+          'src/mobile-agent-history-wire.ts'
+        ),
+        'mobile-agent-status-wire': resolve(import.meta.dirname, 'src/mobile-agent-status-wire.ts'),
+        'mobile-client-events-wire': resolve(
+          import.meta.dirname,
+          'src/mobile-client-events-wire.ts'
+        ),
+        'mobile-hosted-review-wire': resolve(
+          import.meta.dirname,
+          'src/mobile-hosted-review-wire.ts'
+        ),
+        'mobile-github-review-wire': resolve(
+          import.meta.dirname,
+          'src/mobile-github-review-wire.ts'
+        ),
+        'mobile-files-wire': resolve(import.meta.dirname, 'src/mobile-files-wire.ts'),
+        'mobile-clipboard-wire': resolve(import.meta.dirname, 'src/mobile-clipboard-wire.ts'),
+        'mobile-native-chat-wire': resolve(import.meta.dirname, 'src/mobile-native-chat-wire.ts'),
+        'mobile-notifications-wire': resolve(
+          import.meta.dirname,
+          'src/mobile-notifications-wire.ts'
+        ),
+        'mobile-review-wire': resolve(import.meta.dirname, 'src/mobile-review-wire.ts'),
         'mobile-runtime-types': resolve(import.meta.dirname, 'src/mobile-runtime-types.ts'),
+        'mobile-browser-wire': resolve(import.meta.dirname, 'src/mobile-browser-wire.ts'),
+        'mobile-session-content-wire': resolve(
+          import.meta.dirname,
+          'src/mobile-session-content-wire.ts'
+        ),
         'mobile-session-tabs-wire': resolve(import.meta.dirname, 'src/mobile-session-tabs-wire.ts'),
+        'mobile-source-control-wire': resolve(
+          import.meta.dirname,
+          'src/mobile-source-control-wire.ts'
+        ),
+        'mobile-stats-wire': resolve(import.meta.dirname, 'src/mobile-stats-wire.ts'),
         'mobile-terminal-wire': resolve(import.meta.dirname, 'src/mobile-terminal-wire.ts'),
+        'mobile-terminal-quick-commands-wire': resolve(
+          import.meta.dirname,
+          'src/mobile-terminal-quick-commands-wire.ts'
+        ),
         'mobile-worktree-wire': resolve(import.meta.dirname, 'src/mobile-worktree-wire.ts'),
+        'mobile-workspace-creation-wire': resolve(
+          import.meta.dirname,
+          'src/mobile-workspace-creation-wire.ts'
+        ),
         'orpc-peer-frame': resolve(import.meta.dirname, 'src/runtime-orpc-peer-frame.ts'),
         'provider-usage': resolve(import.meta.dirname, 'src/provider-usage.ts'),
         'rpc-envelope': resolve(import.meta.dirname, 'src/runtime-rpc-envelope.ts'),

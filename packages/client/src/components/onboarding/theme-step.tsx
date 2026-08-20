@@ -1,6 +1,12 @@
-import { Check, Monitor, Moon, GearSix as Settings2, Sun } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import {
+  Check,
+  Monitor,
+  Moon,
+  GearSix as Settings2,
+  Sun
+} from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'

@@ -5,7 +5,7 @@ import {
   Monitor,
   Gear as Settings,
   Plus
-} from '@phosphor-icons/react'
+} from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,

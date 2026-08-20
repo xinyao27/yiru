@@ -1,5 +1,5 @@
-import { DownloadSimple } from '@phosphor-icons/react'
 import { useEffect, useRef } from 'react'
+import { DownloadSimple } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
 import { createBrowserWebviewElement } from '~renderer/runtime/browser-webview-element'

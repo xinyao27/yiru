@@ -1,3 +1,10 @@
+// Why: this codec is shared with the desktop main runtime (shell reveal/mount
+// RPCs must mint the same `runtime:`-prefixed shape this module parses) — see
+// ~shared/runtime-terminal-pty-id.ts's file-level Why comment.
+import {
+  getRuntimeTerminalEnvironmentId,
+  getRuntimeTerminalHandle
+} from '~shared/runtime-terminal-pty-id'
 import type { GlobalSettings } from '~shared/types'
 
 import { callRuntimeOrpc } from './orpc-client'
@@ -5,55 +12,16 @@ import { RuntimeRpcCallError, getActiveRuntimeTarget } from './rpc-client'
 import { getRuntimeTerminalMultiplexer } from './terminal-multiplex/registry'
 import { publishRendererTerminalSideEffects } from './terminal-side-effect-client'
 
-const RUNTIME_TERMINAL_PTY_ID_PREFIX = 'runtime:'
-const RUNTIME_TERMINAL_OWNER_SEPARATOR = '@@'
+export type { RuntimeTerminalPtyIdParts } from '~shared/runtime-terminal-pty-id'
+export {
+  getRuntimeTerminalEnvironmentId,
+  getRuntimeTerminalHandle,
+  isRuntimeTerminalPtyId,
+  parseRuntimeTerminalPtyId,
+  toRuntimeTerminalPtyId
+} from '~shared/runtime-terminal-pty-id'
+
 const LIVE_TAIL_SUBSCRIPTION_TIMEOUT_MS = 10_000
-
-export type RuntimeTerminalPtyIdParts = {
-  environmentId: string | null
-  handle: string
-}
-
-export function toRuntimeTerminalPtyId(handle: string, environmentId?: string | null): string {
-  const owner = environmentId?.trim()
-  if (!owner) {
-    return `${RUNTIME_TERMINAL_PTY_ID_PREFIX}${handle}`
-  }
-  return `${RUNTIME_TERMINAL_PTY_ID_PREFIX}${encodeURIComponent(owner)}${RUNTIME_TERMINAL_OWNER_SEPARATOR}${encodeURIComponent(handle)}`
-}
-
-export function parseRuntimeTerminalPtyId(ptyId: string): RuntimeTerminalPtyIdParts | null {
-  if (!ptyId.startsWith(RUNTIME_TERMINAL_PTY_ID_PREFIX)) {
-    return null
-  }
-  const rest = ptyId.slice(RUNTIME_TERMINAL_PTY_ID_PREFIX.length)
-  const separatorIndex = rest.indexOf(RUNTIME_TERMINAL_OWNER_SEPARATOR)
-  if (separatorIndex === -1) {
-    return { environmentId: null, handle: rest }
-  }
-  try {
-    return {
-      environmentId: decodeURIComponent(rest.slice(0, separatorIndex)),
-      handle: decodeURIComponent(
-        rest.slice(separatorIndex + RUNTIME_TERMINAL_OWNER_SEPARATOR.length)
-      )
-    }
-  } catch {
-    return null
-  }
-}
-
-export function isRuntimeTerminalPtyId(ptyId: string | null | undefined): ptyId is string {
-  return typeof ptyId === 'string' && parseRuntimeTerminalPtyId(ptyId) !== null
-}
-
-export function getRuntimeTerminalHandle(ptyId: string): string | null {
-  return parseRuntimeTerminalPtyId(ptyId)?.handle ?? null
-}
-
-export function getRuntimeTerminalEnvironmentId(ptyId: string): string | null {
-  return parseRuntimeTerminalPtyId(ptyId)?.environmentId ?? null
-}
 
 export function runtimeTerminalErrorMessage(error: unknown): string {
   if (error instanceof RuntimeRpcCallError) {

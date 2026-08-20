@@ -1,4 +1,4 @@
-import { GitMerge } from '@phosphor-icons/react'
+import { GitMerge } from '~renderer/components/icons/hugeicons'
 import { cn } from '~renderer/lib/class-names'
 
 import { PullRequestIcon } from './worktree-card/helpers'

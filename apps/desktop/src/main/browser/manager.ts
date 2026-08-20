@@ -1019,6 +1019,10 @@ export class BrowserManager {
       // cannot restore a failure over the already-committed page.
       this.clearedLoadErrorsByGuestId.delete(guest.id)
       this.certificateTrustController?.onMainFrameNavigationCommitted(guest.id, url)
+      // Why: headless mobile session tabs expose the live history affordances
+      // from this WebContents. Publish after commit so Back/Forward state is
+      // refreshed without making renderer-hosted guests depend on it.
+      this.notifyBrowserGuestStateChanged(guest.id)
     }
 
     guest.on('will-navigate', navigationGuard)

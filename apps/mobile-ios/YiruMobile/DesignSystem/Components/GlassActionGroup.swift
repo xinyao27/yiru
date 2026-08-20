@@ -15,3 +15,19 @@ struct GlassActionGroup<Content: View>: View {
         }
     }
 }
+
+struct StackedGlassActionGroup<Content: View>: View {
+    private let content: Content
+
+    init(@ViewBuilder content: () -> Content) {
+        self.content = content()
+    }
+
+    var body: some View {
+        // Why: a GlassEffectContainer blends nearby full-width capsules and creates a dark seam
+        // between vertically stacked primary and secondary actions.
+        VStack(spacing: Theme.Glass.stackedActionSpacing) {
+            content
+        }
+    }
+}

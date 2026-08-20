@@ -1,3 +1,4 @@
+import type React from 'react'
 import {
   ArrowsMerge,
   ArrowUUpLeft,
@@ -13,8 +14,7 @@ import {
   Tag,
   TextAa,
   Trash
-} from '@phosphor-icons/react'
-import type React from 'react'
+} from '~renderer/components/icons/hugeicons'
 import {
   ContextMenuContent,
   ContextMenuItem,

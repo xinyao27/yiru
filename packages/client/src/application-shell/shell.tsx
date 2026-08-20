@@ -1,10 +1,3 @@
-import {
-  DotsThree as MoreHorizontal,
-  SidebarSimple as PanelLeft,
-  ArrowLeft,
-  ArrowRight,
-  ArrowsIn as Minimize2
-} from '@phosphor-icons/react'
 import { toRuntimeExecutionHostId, type ExecutionHostId } from '@yiru/workbench-model/workspace'
 /* eslint-disable max-lines */
 import {
@@ -21,6 +14,16 @@ import {
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 import logo from '~renderer/assets/brand/yiru-wordmark.png?url'
+import {
+  DotsThree as MoreHorizontal,
+  SidebarSimple as PanelLeft,
+  ArrowLeft,
+  ArrowRight,
+  ArrowsIn as Minimize2,
+  WindowClose,
+  WindowMaximize,
+  WindowMinimize
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicatorStyleProvider } from '~renderer/components/loading-indicator'
 import { useRateLimitResumeDetector } from '~renderer/components/rate-limit-resume/detector'
 import { useRateLimitResumeDispatch } from '~renderer/components/rate-limit-resume/use-rate-limit-resume-dispatch'
@@ -120,7 +123,6 @@ import { shouldRenderPetOverlay } from '../components/pet/overlay-visibility'
 import { WorkspacePortScanner } from '../components/ports/workspace-port-scanner'
 import { installRendererCommandToasts } from '../components/renderer-command-toasts'
 import Sidebar from '../components/sidebar/panel'
-import { SidebarWorkspaceSearchButton } from '../components/sidebar/workspace-search-button'
 import { SkillFreshnessNudge } from '../components/skills/skill-freshness-nudge'
 import { StarNagCard } from '../components/star-nag-card'
 import { StarNagAgentValueMomentObserver } from '../components/star-nag/agent-value-moment-observer'
@@ -265,8 +267,8 @@ type ShortcutDispatchInput = {
 
 // Why: Windows ('hidden' titleBarStyle) and Linux (frame: false) both remove
 // the native OS title bar, so we render our own minimize/maximize/close
-// buttons. These SVG icons match the Fluent/Win11 style: thin 10×10 paths in a
-// 46×36 hit area.
+// buttons. These use the shared Hugeicons adapter and stay inside the same
+// 46×36 hit area as the native title-bar affordances.
 function WindowControls(): React.JSX.Element {
   const [maximized, setMaximized] = useState(false)
   useEffect(() => {
@@ -298,9 +300,7 @@ function WindowControls(): React.JSX.Element {
         aria-label={translate('auto.App.bbb7f90669', 'Minimize')}
         onClick={() => shellClient.ui.minimize()}
       >
-        <svg className="size-2.5" width="10" height="10" viewBox="0 0 10 10" aria-hidden>
-          <path d="M0 5h10v1H0z" fill="currentColor" />
-        </svg>
+        <WindowMinimize className="size-2.5" aria-hidden />
       </Button>
       <Button
         type="button"
@@ -314,17 +314,7 @@ function WindowControls(): React.JSX.Element {
         }
         onClick={() => shellClient.ui.maximize()}
       >
-        {maximized ? (
-          // Restore icon (two overlapping squares)
-          <svg className="size-2.5" width="10" height="10" viewBox="0 0 10 10" aria-hidden>
-            <path d="M2 0v2H0v8h8V8h2V0H2zm6 9H1V3h7v6zM9 7H8V2H3V1h6v6z" fill="currentColor" />
-          </svg>
-        ) : (
-          // Maximize icon (single square frame)
-          <svg className="size-2.5" width="10" height="10" viewBox="0 0 10 10" aria-hidden>
-            <path d="M0 0v10h10V0H0zm9 9H1V1h8v8z" fill="currentColor" />
-          </svg>
-        )}
+        <WindowMaximize className="size-2.5" aria-hidden />
       </Button>
       <Button
         type="button"
@@ -341,9 +331,7 @@ function WindowControls(): React.JSX.Element {
         // unreliable in sandboxed renderers.
         onClick={() => shellClient.ui.requestClose()}
       >
-        <svg className="size-2.5" width="10" height="10" viewBox="0 0 10 10" aria-hidden>
-          <path d="M1 0L0 1l4 4-4 4 1 1 4-4 4 4 1-1-4-4 4-4-1-1-4 4-4-4z" fill="currentColor" />
-        </svg>
+        <WindowClose className="size-2.5" aria-hidden />
       </Button>
     </div>
   )
@@ -1995,7 +1983,10 @@ function App(): React.JSX.Element {
             type="button"
             variant={titlebarControlVariant}
             size="icon-titlebar-wide"
-            className={TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME}
+            className={cn(
+              TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME,
+              showWorktreeHistoryControls && !sidebarOpen && 'border-r-0'
+            )}
             onClick={actions.toggleSidebar}
             aria-label={translate('auto.App.e4b9e7dff7', 'Toggle sidebar')}
           >
@@ -2077,14 +2068,11 @@ function App(): React.JSX.Element {
           cluster is shown wherever the history shortcut is live. Hidden in
           Settings and non-stack page views. */}
       {showWorktreeHistoryControls && (
-        // Why: workspace navigation begins immediately after the traffic-light gutter.
-        // Search stays between sidebar and history, and flex-grows to fill the header.
+        // Why: the sidebar toggle stays at the leading edge while history stays
+        // beside the tab strip; collapsed chrome naturally joins both groups.
         <div className={cn('flex h-full items-stretch', sidebarOpen && 'min-w-0 flex-1')}>
-          <ButtonGroup className={cn('h-full', sidebarOpen && 'w-full min-w-0')}>
-            {sidebarToggleControl}
-            {sidebarOpen ? (
-              <SidebarWorkspaceSearchButton variant={titlebarControlVariant} stretch />
-            ) : null}
+          <ButtonGroup className="h-full">{sidebarToggleControl}</ButtonGroup>
+          <ButtonGroup className={cn('h-full', sidebarOpen && 'ml-auto')}>
             <Tooltip>
               <TooltipTrigger
                 render={

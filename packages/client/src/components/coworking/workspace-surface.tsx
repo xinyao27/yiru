@@ -1,9 +1,3 @@
-import {
-  LockKey as LockKeyhole,
-  ShieldCheck,
-  TerminalWindow as SquareTerminal,
-  Warning as TriangleAlert
-} from '@phosphor-icons/react'
 import type React from 'react'
 import { useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'
@@ -14,6 +8,12 @@ import {
   selectCoworkingRequesterControlState
 } from '~renderer/components/coworking/selectors'
 import type { CoworkingWorkspaceRoute } from '~renderer/components/coworking/types'
+import {
+  LockKey as LockKeyhole,
+  ShieldCheck,
+  TerminalWindow as SquareTerminal,
+  Warning as TriangleAlert
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import {
   WORKSPACE_COLUMN_BODY_CLASS_NAME,

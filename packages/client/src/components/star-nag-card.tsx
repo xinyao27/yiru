@@ -1,6 +1,6 @@
-import { Star, ArrowSquareOut as ExternalLink, X } from '@phosphor-icons/react'
 import { YIRU_GITHUB_REPOSITORY_URL } from '@yiru/workbench-model/product'
 import { useCallback, useEffect, useState } from 'react'
+import { Star, ArrowSquareOut as ExternalLink, X } from '~renderer/components/icons/hugeicons'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'

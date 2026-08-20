@@ -1,9 +1,13 @@
-import { GithubLogo as Github, Image, LinkSimple as Link2 } from '@phosphor-icons/react'
 import type { RepoIcon } from '@yiru/workbench-model/workspace'
 import { faviconUrlFromWebsite } from '@yiru/workbench-model/workspace'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { getRepoLucideIconOptions } from '~renderer/components/repo/icon'
+import {
+  GithubLogo as Github,
+  Image,
+  LinkSimple as Link2
+} from '~renderer/components/icons/hugeicons'
+import { getRepoIconOptions } from '~renderer/components/repo/icon'
 import { Button } from '~renderer/components/ui/button'
 import { Input } from '~renderer/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~renderer/components/ui/tabs'
@@ -16,7 +20,7 @@ const EMOJI_OPTIONS = ['🚀', '✨', '💻', '🧠', '📦', '🔧', '🎨', '�
 
 type RepositoryIconTabsProps = {
   initialTab: 'avatar' | 'icon' | 'emoji'
-  selectedLucideName: string | null
+  selectedIconName: string | null
   selectedEmoji: string
   loadingGitHub: boolean
   onSetIcon: (repoIcon: RepoIcon | null) => void
@@ -25,7 +29,7 @@ type RepositoryIconTabsProps = {
 
 export function RepositoryIconTabs({
   initialTab,
-  selectedLucideName,
+  selectedIconName,
   selectedEmoji,
   loadingGitHub,
   onSetIcon,
@@ -155,13 +159,13 @@ export function RepositoryIconTabs({
 
       <TabsContent value="icon" className="space-y-3">
         <div className="grid grid-cols-10 gap-1.5">
-          {getRepoLucideIconOptions().map((option) => (
+          {getRepoIconOptions().map((option) => (
             <Tooltip key={option.name}>
               <TooltipTrigger
                 render={
                   <Button
                     type="button"
-                    variant={selectedLucideName === option.name ? 'secondary' : 'ghost'}
+                    variant={selectedIconName === option.name ? 'secondary' : 'ghost'}
                     size="icon-xs"
                     className="size-8"
                     onClick={() => onSetIcon({ type: 'lucide', name: option.name })}

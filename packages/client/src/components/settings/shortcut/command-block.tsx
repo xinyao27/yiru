@@ -1,10 +1,10 @@
+import React from 'react'
 import {
   Prohibit as Ban,
   Terminal,
   Plus,
   ArrowCounterClockwise as RotateCcw
-} from '@phosphor-icons/react'
-import React from 'react'
+} from '~renderer/components/icons/hugeicons'
 import { Badge } from '~renderer/components/ui/badge'
 import { Button } from '~renderer/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'

@@ -5,7 +5,7 @@ import ReactDOM from 'react-dom/client'
 import { lazyWithRetry as lazy } from '~renderer/lib/lazy-with-retry'
 
 import { RecoverableRenderErrorBoundary } from '../components/error-boundaries/recoverable-render-error-boundary'
-import { PhosphorIconContextProvider } from '../components/phosphor-icon-context-provider'
+import { HugeiconsIconContextProvider } from '../components/icons/context-provider'
 import { translate } from '../i18n/i18n'
 import { I18nProvider } from '../i18n/provider'
 import { useUiLocale } from '../i18n/use-ui-locale'
@@ -53,10 +53,10 @@ function WebRootBoundary(): React.JSX.Element {
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <CSPProvider disableStyleElements>
-    <PhosphorIconContextProvider>
+    <HugeiconsIconContextProvider>
       <I18nProvider>
         <WebRootBoundary />
       </I18nProvider>
-    </PhosphorIconContextProvider>
+    </HugeiconsIconContextProvider>
   </CSPProvider>
 )

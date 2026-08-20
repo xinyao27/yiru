@@ -1,5 +1,5 @@
-import { PaperPlaneRight as Send, Sparkle as Sparkles } from '@phosphor-icons/react'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { PaperPlaneRight as Send, Sparkle as Sparkles } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,

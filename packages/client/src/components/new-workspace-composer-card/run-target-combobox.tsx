@@ -1,5 +1,9 @@
-import { CaretUpDown as ChevronsUpDown, Check, HardDrives as Server } from '@phosphor-icons/react'
 import React from 'react'
+import {
+  CaretUpDown as ChevronsUpDown,
+  Check,
+  HardDrives as Server
+} from '~renderer/components/icons/hugeicons'
 import type { ReadyProjectHostSetupOption } from '~renderer/components/new-workspace-composer-card/project-host-setup-options'
 import { Button } from '~renderer/components/ui/button'
 import { Command, CommandEmpty, CommandItem, CommandList } from '~renderer/components/ui/command'

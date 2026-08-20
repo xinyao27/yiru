@@ -1,5 +1,5 @@
-import { ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { ArrowClockwise as RefreshCw } from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { AndroidLogo, IosBrandIcon } from '~renderer/components/mobile/brand-icons'
 import { Badge } from '~renderer/components/ui/badge'

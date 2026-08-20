@@ -1,3 +1,5 @@
+import { YIRU_GITHUB_STARGAZERS_URL } from '@yiru/workbench-model/product'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   Warning as AlertTriangle,
   Star,
@@ -5,9 +7,7 @@ import {
   FolderPlus,
   GitMerge,
   X
-} from '@phosphor-icons/react'
-import { YIRU_GITHUB_STARGAZERS_URL } from '@yiru/workbench-model/product'
-import { useEffect, useMemo, useRef, useState } from 'react'
+} from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'

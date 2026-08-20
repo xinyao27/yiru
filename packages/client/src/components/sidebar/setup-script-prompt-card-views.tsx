@@ -1,3 +1,4 @@
+import React from 'react'
 import {
   Check,
   Download,
@@ -5,8 +6,7 @@ import {
   Gear as Settings,
   ArrowClockwise as RefreshCw,
   X
-} from '@phosphor-icons/react'
-import React from 'react'
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import { Textarea } from '~renderer/components/ui/textarea'

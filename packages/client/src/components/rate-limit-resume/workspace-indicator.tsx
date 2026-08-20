@@ -1,5 +1,5 @@
-import { ClockCountdown } from '@phosphor-icons/react'
 import { formatAgentTypeLabel } from '@yiru/workbench-model/agent'
+import { ClockCountdown } from '~renderer/components/icons/hugeicons'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { translate } from '~renderer/i18n/i18n'
 import { useAppStore } from '~renderer/store'

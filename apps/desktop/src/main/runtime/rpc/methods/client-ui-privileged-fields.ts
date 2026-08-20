@@ -21,10 +21,10 @@ type AgentLaunchControlKey = (typeof AGENT_LAUNCH_CONTROL_KEYS)[number]
  * Whether this caller may see or set the agent launch controls.
  *
  * Why `mobile` is still allowed: the phone reads all three to rebuild a launch
- * spec when resuming a session (apps/mobile/src/session/ai-vault-resume-launch.ts),
- * so redacting them here would break session resume. The correct fix is to stop
- * round-tripping the values through the phone and resolve them on the host at
- * launch time — tracked in docs/coworking-unified-remote-access.md §6.8 A.
+ * spec when resuming a session, so redacting them here would break session
+ * resume. The correct fix is to stop round-tripping the values through the
+ * phone and resolve them on the host at launch time — tracked in
+ * docs/coworking-unified-remote-access.md §6.8 A.
  */
 function mayGrantCodeExecution(caller: RpcCallerClass): boolean {
   switch (caller) {
@@ -76,8 +76,8 @@ export function assertAgentLaunchControlsWritable(
  * hook scripts as approved to run. A write here is delayed code execution.
  *
  * Why `mobile` is allowed: the phone round-trips the whole UI record back
- * through ui.set (apps/mobile/src/workspace-create/rpc-payloads.ts), so
- * rejecting the key outright would break every mobile UI-state write.
+ * through ui.set, so rejecting the key outright would break every mobile
+ * UI-state write.
  */
 export function assertHookTrustWritable(
   update: Partial<Record<'trustedYiruHooks', unknown>>,

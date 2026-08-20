@@ -1,12 +1,12 @@
 import type { BaseUIEvent } from '@base-ui/react/types'
+import type { CSSProperties, RefObject } from 'react'
 import {
   ChatCentered as MessageSquarePlus,
   Chat as MessageSquare,
   SquareSplitVertical,
   TerminalWindow as SquareTerminal,
   X
-} from '@phosphor-icons/react'
-import type { CSSProperties, RefObject } from 'react'
+} from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 
 // Why: this file is the only place that renders `.pane-title-bar` /

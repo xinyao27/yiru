@@ -128,10 +128,23 @@ export function WorkspaceSidebarFrame({
           ref={collapsedChromeRef}
           className="fixed top-0 right-[var(--window-controls-width,0px)] z-20 h-[var(--titlebar-height)] [-webkit-app-region:no-drag]"
         >
-          <WorkspaceSidebarToggleButton
-            shortcut={toggleShortcut}
-            onToggle={() => onOpenChange(true)}
-          />
+          {/* Why: collapsed chrome keeps the panel destinations reachable; selecting
+              one uses the same route as the expanded activity bar and opens the sidebar. */}
+          <ButtonGroup presentation="titlebar" className="h-full">
+            {items.map((item) => (
+              <ActivityBarButton
+                key={item.id}
+                item={item}
+                active={false}
+                onClick={() => onSelectView(item.id)}
+                layout="top"
+              />
+            ))}
+            <WorkspaceSidebarToggleButton
+              shortcut={toggleShortcut}
+              onToggle={() => onOpenChange(true)}
+            />
+          </ButtonGroup>
         </div>
       ) : null}
       <div

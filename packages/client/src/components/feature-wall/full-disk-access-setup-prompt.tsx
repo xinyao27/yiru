@@ -1,6 +1,10 @@
-import { Check, HardDrive, ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import {
+  Check,
+  HardDrive,
+  ArrowSquareOut as ExternalLink
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Badge } from '~renderer/components/ui/badge'
 import { Button } from '~renderer/components/ui/button'

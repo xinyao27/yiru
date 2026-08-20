@@ -1,6 +1,9 @@
-import { HardDrives as Server, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import { useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'
+import {
+  HardDrives as Server,
+  ArrowClockwise as RefreshCw
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'

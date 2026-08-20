@@ -12,6 +12,11 @@ export type BrowserBackendCreateTab = {
   shellConnectionId?: string
 }
 
+export type BrowserNavigationState = {
+  canGoBack: boolean
+  canGoForward: boolean
+}
+
 export type BrowserBackend = {
   /** Create a browser page and register its handle. Returns the page id. */
   createTab(params: BrowserBackendCreateTab): Promise<{ browserPageId: string }>
@@ -27,6 +32,8 @@ export type BrowserBackend = {
   setProfileCookie?(profileId: string, cookie: BrowserCookie): Promise<void>
   /** Recreate a stable page id inside a different isolated profile. */
   setTabProfile?(browserPageId: string, profileId: string | null): Promise<void>
+  /** Read the live browser history affordances for a page, when the backend exposes them. */
+  getNavigationState?(browserPageId: string): BrowserNavigationState | null
   /** Tear down every page this backend owns (process shutdown). Optional —
    *  renderer-hosted backends are torn down with their window. */
   destroyAll?(): Promise<void> | void

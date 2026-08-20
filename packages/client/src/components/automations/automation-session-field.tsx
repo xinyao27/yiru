@@ -1,5 +1,5 @@
-import { Info } from '@phosphor-icons/react'
 import React from 'react'
+import { Info } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { ToggleGroup, ToggleGroupItem } from '~renderer/components/ui/toggle-group'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'

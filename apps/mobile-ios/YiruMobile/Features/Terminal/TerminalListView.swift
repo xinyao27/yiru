@@ -30,15 +30,16 @@ struct TerminalListView: View {
             case .loaded(let snapshot):
                 terminalContent(snapshot)
             case .failed(let message):
-                ContentUnavailableView {
-                    Label("Terminals unavailable", systemImage: "rectangle.connected.to.line.below")
-                } description: {
-                    Text(message)
-                } actions: {
+                AppUnavailableState(
+                    "Terminals unavailable",
+                    iconID: .terminal,
+                    description: Text(message)
+                ) {
                     Button("Try again") {
                         Task { await model.reconnectAndLoad() }
                     }
-                    .buttonStyle(.glassProminent)
+                    .buttonStyle(.glass)
+                    .appButtonContext(.regular)
                 }
             }
         }
@@ -52,22 +53,25 @@ struct TerminalListView: View {
     @ViewBuilder
     private func terminalContent(_ snapshot: TerminalSnapshot) -> some View {
         if snapshot.terminals.isEmpty {
-            ContentUnavailableView {
-                Label("No terminals", systemImage: "apple.terminal")
-            } description: {
-                Text("Start a terminal on this workspace, then refresh this screen.")
-            } actions: {
+            AppUnavailableState(
+                "No terminals",
+                iconID: .terminal,
+                description: Text(
+                    "Start a terminal on this workspace, then refresh this screen."
+                )
+            ) {
                 Button("Refresh") {
                     Task { await model.load() }
                 }
-                .buttonStyle(.glassProminent)
+                .buttonStyle(.glass)
+                .appButtonContext(.regular)
             }
         } else {
             List {
                 if snapshot.isTruncated {
                     Label(
                         "Showing \(snapshot.terminals.count) of \(snapshot.totalCount) terminals",
-                        systemImage: "exclamationmark.triangle"
+                        iconID: .warning
                     )
                     .font(.footnote)
                     .foregroundStyle(.secondary)
@@ -82,6 +86,8 @@ struct TerminalListView: View {
                     .buttonStyle(.plain)
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(Theme.Colors.background)
             .refreshable {
                 await model.load()
             }
@@ -94,9 +100,8 @@ private struct TerminalRow: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: Theme.Spacing.medium) {
-            Image(systemName: "apple.terminal")
-                .font(.title3)
-                .foregroundStyle(terminal.isConnected ? Theme.Colors.accent : .secondary)
+            YiruIcon(.terminal, size: 20)
+                .foregroundStyle(Theme.Colors.mutedForeground)
                 .frame(width: Theme.Size.minimumHitTarget, height: Theme.Size.minimumHitTarget)
 
             VStack(alignment: .leading, spacing: Theme.Spacing.extraSmall) {
@@ -115,12 +120,11 @@ private struct TerminalRow: View {
 
             SemanticBadge(
                 terminal.isConnected ? "Live" : "Ended",
-                systemImage: terminal.isConnected ? "waveform.path" : "stop.circle",
+                iconID: terminal.isConnected ? .pulse : .stop,
                 tint: terminal.isConnected ? .green : .secondary
             )
 
-            Image(systemName: "chevron.forward")
-                .font(.caption.weight(.semibold))
+            YiruIcon(.arrowRight, size: 16)
                 .foregroundStyle(.tertiary)
         }
         .accessibilityElement(children: .combine)

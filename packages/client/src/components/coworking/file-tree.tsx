@@ -1,6 +1,10 @@
 import { LegendList, type LegendListRenderItemProps } from '@legendapp/list/react'
-import { Trash as Trash2, FilePlus as FilePlus2, FolderPlus } from '@phosphor-icons/react'
 import type React from 'react'
+import {
+  Trash as Trash2,
+  FilePlus as FilePlus2,
+  FolderPlus
+} from '~renderer/components/icons/hugeicons'
 import { LEGEND_LIST_SCROLL_AREA_PROPS } from '~renderer/components/sidebar/list-scroll-area'
 import { Button } from '~renderer/components/ui/button'
 import {

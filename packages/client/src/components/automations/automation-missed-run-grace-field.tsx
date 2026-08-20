@@ -1,4 +1,4 @@
-import { Info } from '@phosphor-icons/react'
+import { Info } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import {
   Select,

@@ -1,11 +1,11 @@
+import React from 'react'
 import {
   CheckCircle as CircleCheck,
   Circle as CircleDot,
   XCircle as CircleX,
   Clock,
   GitMerge
-} from '@phosphor-icons/react'
-import React from 'react'
+} from '~renderer/components/icons/hugeicons'
 import { Badge } from '~renderer/components/ui/badge'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'

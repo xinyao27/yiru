@@ -1,5 +1,8 @@
-import { WarningCircle as AlertCircle, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import { Suspense } from 'react'
+import {
+  WarningCircle as AlertCircle,
+  ArrowClockwise as RefreshCw
+} from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
 import { lazyWithRetry as lazy } from '~renderer/lib/lazy-with-retry'

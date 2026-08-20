@@ -1,6 +1,6 @@
-import { ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import { ArrowClockwise as RefreshCw } from '~renderer/components/icons/hugeicons'
 import { Switch } from '~renderer/components/ui/switch'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'

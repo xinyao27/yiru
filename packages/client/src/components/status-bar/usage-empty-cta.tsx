@@ -1,5 +1,5 @@
-import { ChartBar as BarChart3, EyeSlash as EyeOff } from '@phosphor-icons/react'
 import React, { useCallback } from 'react'
+import { ChartBar as BarChart3, EyeSlash as EyeOff } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '~renderer/components/ui/hover-card'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'

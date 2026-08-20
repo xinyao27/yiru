@@ -1,3 +1,5 @@
+import React from 'react'
+import AgentCombobox from '~renderer/components/agent/combobox'
 import {
   CheckCircle as CheckCircle2,
   Info,
@@ -5,9 +7,7 @@ import {
   Sparkle as Sparkles,
   Warning as TriangleAlert,
   ArrowCounterClockwise as RotateCcw
-} from '@phosphor-icons/react'
-import React from 'react'
-import AgentCombobox from '~renderer/components/agent/combobox'
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { SourceControlActionVariableChips } from '~renderer/components/source-control/action-variable-chips'
 import { Button } from '~renderer/components/ui/button'

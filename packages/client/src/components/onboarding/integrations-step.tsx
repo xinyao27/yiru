@@ -1,9 +1,9 @@
+import { useEffect, useState } from 'react'
 import {
   GithubLogo as Github,
   Terminal,
   ArrowSquareOut as ExternalLink
-} from '@phosphor-icons/react'
-import { useEffect, useState } from 'react'
+} from '~renderer/components/icons/hugeicons'
 import { IntegrationStatusPill } from '~renderer/components/integration-status-pill'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'

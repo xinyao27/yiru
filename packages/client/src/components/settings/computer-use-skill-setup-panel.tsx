@@ -1,4 +1,4 @@
-import { Monitor as MonitorCog } from '@phosphor-icons/react'
+import { Monitor as MonitorCog } from '~renderer/components/icons/hugeicons'
 import { useActiveProjectSkillRuntime } from '~renderer/hooks/use-active-project-skill-runtime'
 import {
   GLOBAL_AGENT_SKILL_SOURCE_KINDS,

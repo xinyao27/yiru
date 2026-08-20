@@ -1,13 +1,3 @@
-import {
-  Check,
-  Copy,
-  Chat as MessageSquare,
-  CaretDown as ChevronDown,
-  CaretUp as ChevronUp,
-  ArrowElbowDownLeft as CornerDownLeft,
-  Plus,
-  X
-} from '@phosphor-icons/react'
 import { relativePathInsideRoot } from '@yiru/workbench-model/platform'
 /* eslint-disable max-lines -- Why: MarkdownPreview owns rendering, link interception,
 search, and viewport state for the preview surface in one place so markdown
@@ -35,6 +25,7 @@ import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import { toast } from 'sonner'
 import { createConnectionIdForFileSelector } from '~renderer/components/editor/connection-owner-resolution'
+import { isMarkdownComment } from '~renderer/components/editor/diff-comment-compat'
 
 // Why: this component is the only lazy() boundary (content.tsx's
 // `MarkdownPreview`) that mounts rehype-highlight's `.hljs-*` tree, the
@@ -43,7 +34,6 @@ import { createConnectionIdForFileSelector } from '~renderer/components/editor/c
 import './markdown.css'
 import './markdown-review.css'
 import 'katex/dist/katex.min.css'
-import { isMarkdownComment } from '~renderer/components/editor/diff-comment-compat'
 import { computeEditorFontSize } from '~renderer/components/editor/font-zoom'
 import {
   openHttpLink,
@@ -66,6 +56,16 @@ import {
   type MarkdownReviewNote
 } from '~renderer/components/editor/markdown-review-notes'
 import { scrollTopCache, setWithLRU } from '~renderer/components/editor/scroll-cache'
+import {
+  Check,
+  Copy,
+  Chat as MessageSquare,
+  CaretDown as ChevronDown,
+  CaretUp as ChevronUp,
+  ArrowElbowDownLeft as CornerDownLeft,
+  Plus,
+  X
+} from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { Input } from '~renderer/components/ui/input'
 import { Textarea } from '~renderer/components/ui/textarea'

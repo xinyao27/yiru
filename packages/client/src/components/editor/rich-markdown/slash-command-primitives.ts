@@ -1,7 +1,7 @@
-import type { IconProps } from '@phosphor-icons/react'
 import { TextSelection } from '@tiptap/pm/state'
 import type { Editor } from '@tiptap/react'
 import type React from 'react'
+import type { IconProps } from '~renderer/components/icons/hugeicons'
 
 import type { ToggleHeadingVariant } from '../details-markdown-html'
 

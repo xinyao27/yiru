@@ -1,4 +1,3 @@
-import { ArrowLeft, ArrowRight, X } from '@phosphor-icons/react'
 import {
   useLayoutEffect,
   useRef,
@@ -9,6 +8,7 @@ import {
   type RefObject
 } from 'react'
 import { createPortal } from 'react-dom'
+import { ArrowLeft, ArrowRight, X } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'

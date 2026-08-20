@@ -1,5 +1,5 @@
-import { FolderPlus } from '@phosphor-icons/react'
 import React, { useCallback, useRef, useState } from 'react'
+import { FolderPlus } from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import {

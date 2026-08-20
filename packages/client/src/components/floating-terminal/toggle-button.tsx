@@ -1,5 +1,5 @@
-import { Layout as PanelsTopLeft } from '@phosphor-icons/react'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { Layout as PanelsTopLeft } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { useShortcutLabel } from '~renderer/hooks/use-shortcut-label'

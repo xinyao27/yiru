@@ -1,5 +1,5 @@
-import { Terminal } from '@phosphor-icons/react'
 import type React from 'react'
+import { Terminal } from '~renderer/components/icons/hugeicons'
 import { SourceControlActionVariableChips } from '~renderer/components/source-control/action-variable-chips'
 import { Button } from '~renderer/components/ui/button'
 import { Input } from '~renderer/components/ui/input'

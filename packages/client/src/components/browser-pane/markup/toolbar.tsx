@@ -1,3 +1,4 @@
+import React from 'react'
 import {
   Circle,
   Highlighter,
@@ -9,8 +10,7 @@ import {
   ArrowClockwise as Redo2,
   ArrowCounterClockwise as Undo2,
   type IconProps
-} from '@phosphor-icons/react'
-import React from 'react'
+} from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '~renderer/components/ui/popover'
 import {

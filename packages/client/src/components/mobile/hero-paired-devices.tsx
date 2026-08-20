@@ -1,4 +1,4 @@
-import { DeviceMobile as Smartphone, Trash as Trash2 } from '@phosphor-icons/react'
+import { DeviceMobile as Smartphone, Trash as Trash2 } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'

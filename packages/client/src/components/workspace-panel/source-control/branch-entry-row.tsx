@@ -1,5 +1,5 @@
-import { Chat as MessageSquare } from '@phosphor-icons/react'
 import React from 'react'
+import { Chat as MessageSquare } from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
 import { getFileTypeIcon } from '~renderer/lib/file-type-icons'
 import { basename, dirname, joinPath } from '~renderer/lib/path'

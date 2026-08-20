@@ -1,5 +1,5 @@
-import { MagnifyingGlass as Search } from '@phosphor-icons/react'
 import { useEffect, useRef, useState } from 'react'
+import { MagnifyingGlass as Search } from '~renderer/components/icons/hugeicons'
 import { cn } from '~renderer/lib/class-names'
 import { ZOOM_LEVEL_CHANGED_EVENT } from '~renderer/lib/zoom-events'
 import type { ZoomLevelChangedEventDetail } from '~renderer/lib/zoom-events'

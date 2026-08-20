@@ -1,3 +1,4 @@
+import React from 'react'
 import {
   Prohibit as Ban,
   Circle,
@@ -9,8 +10,7 @@ import {
   PlayCircle as CirclePlay,
   Flag,
   Timer
-} from '@phosphor-icons/react'
-import React from 'react'
+} from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
 import { createLocalizedCatalog } from '~renderer/i18n/localized-catalog'
 

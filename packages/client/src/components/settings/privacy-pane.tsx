@@ -1,5 +1,5 @@
-import { ShieldCheck } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
+import { ShieldCheck } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { Switch } from '~renderer/components/ui/switch'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'

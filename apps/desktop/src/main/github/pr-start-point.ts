@@ -160,6 +160,11 @@ export async function resolveGitHubPrStartPoint(
       const result = await fetchPullRequestHeadSha()
       if (!('error' in result)) {
         await resolvePushTarget()
+        // Why: a merged PR can keep its GitHub pull ref after the same-repo head
+        // branch is deleted. Keeping that now-missing origin target makes the
+        // subsequent worktree create fetch the deleted branch and fail again.
+        const fallbackPushTarget =
+          pushTarget?.remoteName === remote && !pushTarget.remoteUrl ? undefined : pushTarget
         const compareBaseFetchError = await fetchCompareBaseRef()
         if (compareBaseFetchError) {
           return compareBaseFetchError
@@ -169,7 +174,7 @@ export async function resolveGitHubPrStartPoint(
           ...(compareBaseRef ? { compareBaseRef } : {}),
           headSha: result.baseBranch,
           branchNameOverride: headRefName,
-          ...(pushTarget ? { pushTarget } : {}),
+          ...(fallbackPushTarget ? { pushTarget: fallbackPushTarget } : {}),
           ...(maintainerCanModify !== undefined ? { maintainerCanModify } : {})
         }
       }

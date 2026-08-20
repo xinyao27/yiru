@@ -1,4 +1,9 @@
-import { Files, FlowArrow as Workflow, GitMerge, ListChecks } from '@phosphor-icons/react'
+import {
+  Files,
+  FlowArrow as Workflow,
+  GitMerge,
+  ListChecks
+} from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
 
 import type { ActivityBarItem } from './activity-bar-buttons'

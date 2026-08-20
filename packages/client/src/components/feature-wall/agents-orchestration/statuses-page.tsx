@@ -1,8 +1,8 @@
-import { Wrench } from '@phosphor-icons/react'
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: this page is a timed storyboard; reveal state intentionally resets when the active/reduced-motion gates change. */
 import { useEffect, useRef, useState } from 'react'
 import type { JSX, ReactNode } from 'react'
 import { AgentStateDot } from '~renderer/components/agent-state-dot'
+import { Wrench } from '~renderer/components/icons/hugeicons'
 import { ClaudeIcon, OpenAIIcon } from '~renderer/components/status-bar/icons'
 import { translate } from '~renderer/i18n/i18n'
 import { getAgentCatalog, AgentIcon, type AgentCatalogEntry } from '~renderer/lib/agent-catalog'

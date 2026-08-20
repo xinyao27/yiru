@@ -1,6 +1,6 @@
-import { ArrowElbowDownLeft as CornerDownLeft } from '@phosphor-icons/react'
 import { useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { ArrowElbowDownLeft as CornerDownLeft } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { Textarea } from '~renderer/components/ui/textarea'
 import { translate } from '~renderer/i18n/i18n'

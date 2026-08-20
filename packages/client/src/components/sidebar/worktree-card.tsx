@@ -1,3 +1,8 @@
+import type { HostedReviewInfo } from '@yiru/workbench-model/review'
+import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
+/* eslint-disable max-lines -- Why: the worktree card centralizes sidebar card state (selection, drag, agent status, git info, context menu) in one cohesive component so sidebar rendering doesn't fan out across files. */
+import React, { useEffect, useCallback, useState } from 'react'
+import { DetachedHeadBadge } from '~renderer/components/detached-head-badge'
 import {
   WarningCircle as AlertCircle,
   Warning as AlertTriangle,
@@ -7,12 +12,7 @@ import {
   Trash as Trash2,
   CaretDown as ChevronDown,
   FlowArrow as Workflow
-} from '@phosphor-icons/react'
-import type { HostedReviewInfo } from '@yiru/workbench-model/review'
-import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
-/* eslint-disable max-lines -- Why: the worktree card centralizes sidebar card state (selection, drag, agent status, git info, context menu) in one cohesive component so sidebar rendering doesn't fan out across files. */
-import React, { useEffect, useCallback, useState } from 'react'
-import { DetachedHeadBadge } from '~renderer/components/detached-head-badge'
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { RateLimitResumeWorkspaceIndicator } from '~renderer/components/rate-limit-resume/workspace-indicator'
 import { RepoIconGlyph } from '~renderer/components/repo/icon'

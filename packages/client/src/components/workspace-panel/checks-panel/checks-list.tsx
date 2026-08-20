@@ -1,10 +1,10 @@
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { openHttpLink } from '~renderer/components/editor/http-link-routing'
 import {
   CircleDashed,
   CaretRight as ChevronRight,
   ArrowSquareOut as ExternalLink
-} from '@phosphor-icons/react'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { openHttpLink } from '~renderer/components/editor/http-link-routing'
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'

@@ -1,3 +1,7 @@
+import { describeRuntimeCompatBlock } from '@yiru/runtime-protocol/capabilities'
+import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
+import React, { useCallback, useState } from 'react'
+import { toast } from 'sonner'
 import {
   Warning as AlertTriangle,
   DotsThree as Ellipsis,
@@ -5,11 +9,7 @@ import {
   GearSix as Settings2,
   Trash as Trash2,
   ArrowClockwise as RefreshCw
-} from '@phosphor-icons/react'
-import { describeRuntimeCompatBlock } from '@yiru/runtime-protocol/capabilities'
-import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
-import React, { useCallback, useState } from 'react'
-import { toast } from 'sonner'
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import {

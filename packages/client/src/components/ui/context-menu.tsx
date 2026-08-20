@@ -1,5 +1,6 @@
 import { ContextMenu as ContextMenuPrimitive } from '@base-ui/react/context-menu'
-import { CheckIcon, CircleIcon, CaretRight as ChevronRightIcon } from '@phosphor-icons/react'
+import { ArrowRight01Icon, CheckIcon, CircleIcon } from '@hugeicons/core-free-icons'
+import { HugeiconsIcon } from '@hugeicons/react'
 import * as React from 'react'
 import {
   floatingSurfaceClass,
@@ -78,7 +79,7 @@ function ContextMenuSubTrigger({
       {...props}
     >
       {children}
-      <ChevronRightIcon className="ml-auto size-4" />
+      <HugeiconsIcon icon={ArrowRight01Icon} className="ml-auto size-4" />
     </ContextMenuPrimitive.SubmenuTrigger>
   )
 }
@@ -194,7 +195,7 @@ function ContextMenuCheckboxItem({
     >
       <span className="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
         <ContextMenuPrimitive.CheckboxItemIndicator>
-          <CheckIcon className="size-4" />
+          <HugeiconsIcon icon={CheckIcon} className="size-4" />
         </ContextMenuPrimitive.CheckboxItemIndicator>
       </span>
       {children}
@@ -215,7 +216,7 @@ function ContextMenuRadioItem({
     >
       <span className="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
         <ContextMenuPrimitive.RadioItemIndicator>
-          <CircleIcon className="size-2 fill-current" />
+          <HugeiconsIcon icon={CircleIcon} className="size-2 fill-current" />
         </ContextMenuPrimitive.RadioItemIndicator>
       </span>
       {children}

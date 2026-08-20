@@ -1,4 +1,11 @@
-import { ArrowClockwise, ArrowLeft, ArrowRight, Globe } from '@phosphor-icons/react'
+import {
+  ArrowLeft01Icon,
+  ArrowReloadHorizontalIcon,
+  ArrowRight01Icon,
+  GlobeIcon,
+  Search01Icon
+} from '@hugeicons/core-free-icons'
+import { HugeiconsIcon } from '@hugeicons/react'
 import { cn } from 'cnfast'
 
 import { OrbLoader } from './orb-loader'
@@ -23,20 +30,28 @@ export function BrowserPane({ state }: BrowserPaneProps): React.JSX.Element {
     <div className="flex min-w-0 flex-1 flex-col">
       <div className="border-hairline flex h-8 shrink-0 items-center gap-1 border-b px-2">
         <span className="text-faint inline-flex size-5 shrink-0 items-center justify-center">
-          <ArrowLeft className="size-3.5" aria-hidden="true" />
+          <HugeiconsIcon icon={ArrowLeft01Icon} className="size-3.5" aria-hidden="true" />
         </span>
         <span className="text-rule-strong inline-flex size-5 shrink-0 items-center justify-center">
-          <ArrowRight className="size-3.5" aria-hidden="true" />
+          <HugeiconsIcon icon={ArrowRight01Icon} className="size-3.5" aria-hidden="true" />
         </span>
         <span className="text-faint inline-flex size-5 shrink-0 items-center justify-center">
           {state.browserReloading ? (
             <OrbLoader className="size-3.5" />
           ) : (
-            <ArrowClockwise className="size-3.5" aria-hidden="true" />
+            <HugeiconsIcon
+              icon={ArrowReloadHorizontalIcon}
+              className="size-3.5"
+              aria-hidden="true"
+            />
           )}
         </span>
         <span className="border-hairline ml-1 flex min-w-0 flex-1 items-center gap-1.5 border px-2 py-[3px]">
-          <Globe className="text-faint size-3 shrink-0" aria-hidden="true" />
+          <HugeiconsIcon
+            icon={GlobeIcon}
+            className="text-faint size-3 shrink-0"
+            aria-hidden="true"
+          />
           <span className="text-copy truncate font-mono text-[10.5px]/[1.3]">
             localhost:3000/search
           </span>
@@ -45,7 +60,11 @@ export function BrowserPane({ state }: BrowserPaneProps): React.JSX.Element {
 
       <div className="min-w-0 flex-1 p-3">
         <div className="border-rule text-ink flex items-center gap-2 border px-2 py-1.5 text-[11.5px]/[1.4]">
-          <span className="text-faint">⌕</span>
+          <HugeiconsIcon
+            icon={Search01Icon}
+            className="text-faint size-3 shrink-0"
+            aria-hidden="true"
+          />
           <span className="truncate">{SEARCH_QUERY}</span>
         </div>
 

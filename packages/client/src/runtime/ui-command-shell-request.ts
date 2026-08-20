@@ -52,9 +52,9 @@ async function activateNotifiedWorktree(
   })
 }
 
-export function handleShellServicesUICommand(
+export async function handleShellServicesUICommand(
   command: ShellServicesUICommandInput
-): ShellServicesUICommandOutput {
+): Promise<ShellServicesUICommandOutput> {
   switch (command.type) {
     case 'activateWorktree':
       void activateNotifiedWorktree(command).catch((error) => {
@@ -162,7 +162,9 @@ export function handleShellServicesUICommand(
       }
       return { accepted: true }
     case 'sleepWorktree':
-      void runSleepWorktree(command.worktreeId)
+      if (!(await runSleepWorktree(command.worktreeId))) {
+        throw new Error('sleep_failed')
+      }
       return { accepted: true }
     case 'resumeSleepingAgents':
       backgroundSleepingAgentWakeDispatcher.request(command.worktreeId)

@@ -1,5 +1,5 @@
-import { Question as CircleHelp } from '@phosphor-icons/react'
 import { useState } from 'react'
+import { Question as CircleHelp } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
 import type { NestedRepoScanResult } from '~shared/types'

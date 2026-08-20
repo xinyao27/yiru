@@ -22,31 +22,12 @@ nonisolated enum TerminalAccessoryKey: String, CaseIterable, Identifiable, Senda
     case deleteWordBackward = "ctrlW"
     case clearLineBeforeCursor = "ctrlU"
 
-    static let standardOrder: [Self] = [
-        .tab,
-        .enter,
-        .escape,
-        .shiftTab,
-        .arrowUp,
-        .arrowDown,
-        .arrowLeft,
-        .arrowRight,
-        .delete,
-        .interrupt,
-        .endOfFile,
-        .clearScreen,
-        .reverseSearch,
-        .startOfLine,
-        .endOfLine,
-        .deleteWordBackward,
-        .clearLineBeforeCursor,
-        .suspend,
-        .backspace,
-        .space,
-    ]
-
+    // Why: the old Mobile accessory bar preserves this order in its default
+    // AsyncStorage value. Keep the same order so a native upgrade does not
+    // move controls or silently hide keys users already rely on.
+    static let standardOrder = allCases
     static let legacyStandardOrder = allCases
-    static let standardVisibleKeys = Set(allCases).subtracting([.backspace, .space])
+    static let standardVisibleKeys = Set(allCases)
     static let standardVisibleOrder = standardOrder.filter(standardVisibleKeys.contains)
 
     var id: Self { self }
@@ -56,17 +37,17 @@ nonisolated enum TerminalAccessoryKey: String, CaseIterable, Identifiable, Senda
         case .escape:
             "Esc"
         case .tab:
-            "⇥"
+            "Tab"
         case .enter:
-            "↵"
+            "Enter"
         case .shiftTab:
-            "⇧⇥"
+            "Shift+Tab"
         case .space:
-            "␣"
+            "Space"
         case .backspace:
             "⌫"
         case .delete:
-            "⌦"
+            "Del"
         case .arrowUp:
             "↑"
         case .arrowDown:
@@ -76,23 +57,23 @@ nonisolated enum TerminalAccessoryKey: String, CaseIterable, Identifiable, Senda
         case .arrowRight:
             "→"
         case .interrupt:
-            "⌃C"
+            "Ctrl+C"
         case .endOfFile:
-            "⌃D"
+            "Ctrl+D"
         case .clearScreen:
-            "⌃L"
+            "Ctrl+L"
         case .suspend:
-            "⌃Z"
+            "Ctrl+Z"
         case .reverseSearch:
-            "⌃R"
+            "Ctrl+R"
         case .startOfLine:
-            "⌃A"
+            "Ctrl+A"
         case .endOfLine:
-            "⌃E"
+            "Ctrl+E"
         case .deleteWordBackward:
-            "⌃W"
+            "Ctrl+W"
         case .clearLineBeforeCursor:
-            "⌃U"
+            "Ctrl+U"
         }
     }
 
@@ -168,13 +149,14 @@ nonisolated enum TerminalAccessoryKey: String, CaseIterable, Identifiable, Senda
     }
 
     var isCircular: Bool {
+        // Why: only repeatable directional keys and backspace get 40pt circular cells; glyph
+        // keys such as Tab, Enter, Space, and Delete need the wider capsule to hold a word.
         switch self {
-        case .tab, .enter, .space, .backspace, .delete, .arrowLeft, .arrowDown, .arrowUp,
-            .arrowRight:
+        case .backspace, .arrowLeft, .arrowDown, .arrowUp, .arrowRight:
             true
-        case .escape, .shiftTab, .interrupt, .endOfFile, .clearScreen, .suspend,
-            .reverseSearch, .startOfLine, .endOfLine, .deleteWordBackward,
-            .clearLineBeforeCursor:
+        case .escape, .tab, .enter, .shiftTab, .space, .delete, .interrupt, .endOfFile,
+            .clearScreen, .suspend, .reverseSearch, .startOfLine, .endOfLine,
+            .deleteWordBackward, .clearLineBeforeCursor:
             false
         }
     }

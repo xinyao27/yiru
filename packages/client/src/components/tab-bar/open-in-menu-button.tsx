@@ -1,4 +1,4 @@
-import { FolderOpen, CaretDown } from '@phosphor-icons/react'
+import { FolderOpen, CaretDown } from '~renderer/components/icons/hugeicons'
 import {
   getLocalFileManagerLabel,
   getPreferredWorktreeOpenInEntry,

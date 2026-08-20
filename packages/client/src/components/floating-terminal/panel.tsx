@@ -1,10 +1,3 @@
-import {
-  ChatCircleDots,
-  FileText,
-  Globe,
-  Minus,
-  TerminalWindow as TerminalSquare
-} from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: the floating panel owns window chrome,
  * resizing, orchestration setup, and mixed terminal/browser/editor tab
  * handling in one surface so the floating worktree does not drift from the
@@ -15,6 +8,13 @@ import { useContextualTour } from '~renderer/components/contextual-tours/use-con
 import type { OpenFile } from '~renderer/components/editor/state'
 import EmulatorPane from '~renderer/components/emulator-pane/emulator-pane'
 import { createUntitledMarkdownFileWithTemplateSelection } from '~renderer/components/floating-terminal/create-untitled-markdown'
+import {
+  ChatCircleDots,
+  FileText,
+  Globe,
+  Minus,
+  TerminalWindow as TerminalSquare
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { ShortcutKeyCombo } from '~renderer/components/shortcut-key-combo'
 import TabBar from '~renderer/components/tab-bar/tab-bar'

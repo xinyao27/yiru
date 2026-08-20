@@ -58,7 +58,17 @@ export async function activateTerminalMultiplexStream(
     options.registerUnsubscriber(unsubscribe)
   }
   options.output.gate(!options.record.delivery.visible && !options.record.delivery.interested)
-  if (options.record.viewport) {
+  if (options.client.type === 'mobile') {
+    // Why: SwiftUI can establish the stream before SwiftTerm reports its first
+    // grid measurement. Register the mobile presence even without a viewport
+    // so the first in-place resize can late-bind dimensions instead of being
+    // rejected as an update from an unknown subscriber.
+    await runtime.handleMobileSubscribe(
+      ptyId,
+      options.client.id,
+      options.record.viewport ?? undefined
+    )
+  } else if (options.record.viewport) {
     await updateViewportForClient(
       runtime,
       ptyId,

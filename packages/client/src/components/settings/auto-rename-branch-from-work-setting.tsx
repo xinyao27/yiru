@@ -1,5 +1,5 @@
-import { CaretDown as ChevronDown } from '@phosphor-icons/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { CaretDown as ChevronDown } from '~renderer/components/icons/hugeicons'
 import { Switch } from '~renderer/components/ui/switch'
 import { Textarea } from '~renderer/components/ui/textarea'
 import { translate } from '~renderer/i18n/i18n'

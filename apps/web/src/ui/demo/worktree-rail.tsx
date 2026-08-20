@@ -1,4 +1,5 @@
-import { Folder, GitMerge } from '@phosphor-icons/react'
+import { Folder01Icon, GitMergeIcon } from '@hugeicons/core-free-icons'
+import { HugeiconsIcon } from '@hugeicons/react'
 import { cn } from 'cnfast'
 
 import { ClaudeGlyph } from './claude-glyph'
@@ -35,9 +36,10 @@ function StatusMarker({ status }: { status: WorktreeStatus }): React.JSX.Element
     return <OrbLoader className="text-status-working size-4" />
   }
   // Why: branch identity is the desktop's resting glyph for a worktree — see
-  // sidebar/worktree-card/status-slot.tsx, which renders Phosphor GitMerge.
+  // sidebar/worktree-card/status-slot.tsx, which renders the Hugeicons GitMerge glyph.
   return (
-    <GitMerge
+    <HugeiconsIcon
+      icon={GitMergeIcon}
       className={cn('size-3.5', status === 'review' ? 'text-status-attention' : 'text-faint')}
       aria-hidden="true"
     />
@@ -45,7 +47,9 @@ function StatusMarker({ status }: { status: WorktreeStatus }): React.JSX.Element
 }
 
 function RepoGlyph(): React.JSX.Element {
-  return <Folder className="text-muted size-4 shrink-0" aria-hidden="true" />
+  return (
+    <HugeiconsIcon icon={Folder01Icon} className="text-muted size-4 shrink-0" aria-hidden="true" />
+  )
 }
 
 function AgentEntry({ agent }: { agent: AgentRow }): React.JSX.Element {

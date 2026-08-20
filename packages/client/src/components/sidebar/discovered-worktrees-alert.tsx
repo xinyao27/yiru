@@ -1,5 +1,5 @@
-import { WarningCircle } from '@phosphor-icons/react'
 import React, { useState } from 'react'
+import { WarningCircle } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '~renderer/components/ui/popover'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'

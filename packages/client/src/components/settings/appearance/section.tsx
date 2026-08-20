@@ -1,5 +1,5 @@
-import { CaretRight as ChevronRight } from '@phosphor-icons/react'
 import type React from 'react'
+import { CaretRight as ChevronRight } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { cn } from '~renderer/lib/class-names'
 

@@ -1,6 +1,9 @@
-import { Chat as MessageSquare, Warning as TriangleAlert } from '@phosphor-icons/react'
 import { NATIVE_CHAT_EMPTY_STATE_COPY } from '@yiru/workbench-model/agent'
 import type { NativeChatSession } from '@yiru/workbench-model/agent'
+import {
+  Chat as MessageSquare,
+  Warning as TriangleAlert
+} from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
 import { formatAgentTypeLabel } from '~renderer/lib/agent-status'
 

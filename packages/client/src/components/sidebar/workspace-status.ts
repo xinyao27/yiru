@@ -1,5 +1,5 @@
-import { Circle as CircleDot } from '@phosphor-icons/react'
 import React from 'react'
+import { Circle as CircleDot } from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
 import { createLocalizedCatalog } from '~renderer/i18n/localized-catalog'
 import type { WorkspaceStatus, WorkspaceStatusDefinition } from '~shared/types'

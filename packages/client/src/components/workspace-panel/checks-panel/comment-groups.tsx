@@ -1,5 +1,5 @@
-import { Sparkle as Sparkles } from '@phosphor-icons/react'
 import React from 'react'
+import { Sparkle as Sparkles } from '~renderer/components/icons/hugeicons'
 import {
   Accordion,
   AccordionContent,

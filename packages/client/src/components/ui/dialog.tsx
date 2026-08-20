@@ -1,7 +1,8 @@
 'use client'
 
 import { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
-import { XIcon } from '@phosphor-icons/react'
+import { Cancel01Icon } from '@hugeicons/core-free-icons'
+import { HugeiconsIcon } from '@hugeicons/react'
 import * as React from 'react'
 import { Button, buttonVariants } from '~renderer/components/ui/button'
 import {
@@ -71,7 +72,7 @@ function DialogContent({
               'absolute top-3 right-3 text-muted-foreground hover:text-foreground'
             )}
           >
-            <XIcon />
+            <HugeiconsIcon icon={Cancel01Icon} />
             <span className="sr-only">
               {translate('auto.components.ui.dialog.f26c4baeda', 'Close')}
             </span>

@@ -90,7 +90,6 @@ inline apps/desktop/src/main/workspace-space-analysis.ts
 inline apps/desktop/src/main/worktree/remote.ts
 inline apps/desktop/src/relay/agent-hook-server.ts
 inline apps/desktop/src/relay/dispatcher.ts
-inline apps/mobile/src/constants/marine-creatures.ts
 inline packages/client/src/application-shell/shell.tsx
 inline packages/client/src/application-shell/update-card.tsx
 inline packages/client/src/application-shell/use-ipc-events.ts
@@ -170,12 +169,3 @@ inline packages/shared/src/source-control/ai.ts
 inline packages/shared/src/telemetry-events.ts
 inline packages/shared/src/text-search.ts
 inline packages/shared/src/types.ts
-mobile-config app/h/*/index.tsx
-mobile-config app/h/*/session/*.tsx
-mobile-config app/index.tsx
-mobile-config src/browser/pane.tsx
-mobile-config src/components/rich-markdown-editor-html.ts
-mobile-config src/terminal/accessory-keys.ts
-mobile-config src/terminal/webview/html.ts
-mobile-config src/transport/rpc-client.ts
-mobile-config src/workspace-create/modal.tsx

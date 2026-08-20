@@ -1,12 +1,12 @@
+import { buildImageDataUri } from '@yiru/workbench-model/ui'
+import { type JSX, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: image surface size is measured with ResizeObserver and DOM refs, which are external layout systems outside render derivation. */
 import {
   Image as ImageIcon,
   MagnifyingGlassPlus as ZoomIn,
   MagnifyingGlassMinus as ZoomOut,
   ArrowCounterClockwise as RotateCcw
-} from '@phosphor-icons/react'
-import { buildImageDataUri } from '@yiru/workbench-model/ui'
-import { type JSX, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+} from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'

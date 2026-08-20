@@ -1,5 +1,5 @@
-import { BellSimple } from '@phosphor-icons/react'
 import React from 'react'
+import { BellSimple } from '~renderer/components/icons/hugeicons'
 
 export function UnreadStatusIndicator(): React.JSX.Element {
   return (

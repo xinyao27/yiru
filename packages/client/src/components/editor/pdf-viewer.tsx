@@ -1,10 +1,3 @@
-import {
-  Image as ImageIcon,
-  MagnifyingGlass as Search,
-  MagnifyingGlassPlus as ZoomIn,
-  MagnifyingGlassMinus as ZoomOut,
-  ArrowCounterClockwise as RotateCcw
-} from '@phosphor-icons/react'
 import * as pdfjsLib from 'pdfjs-dist'
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
 import {
@@ -15,6 +8,13 @@ import {
 } from 'pdfjs-dist/web/pdf_viewer.mjs'
 /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: PDF loading drives pdf.js document/viewer instances and decode errors through an external worker lifecycle. */
 import { type JSX, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  Image as ImageIcon,
+  MagnifyingGlass as Search,
+  MagnifyingGlassPlus as ZoomIn,
+  MagnifyingGlassMinus as ZoomOut,
+  ArrowCounterClockwise as RotateCcw
+} from '~renderer/components/icons/hugeicons'
 
 import 'pdfjs-dist/web/pdf_viewer.css'
 import { Button } from '~renderer/components/ui/button'

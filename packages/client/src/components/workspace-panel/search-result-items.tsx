@@ -1,5 +1,5 @@
-import { Copy, CaretRight as ChevronRight } from '@phosphor-icons/react'
 import React, { useMemo } from 'react'
+import { Copy, CaretRight as ChevronRight } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import {
   ContextMenu,

@@ -1,5 +1,5 @@
-import type { IconProps } from '@phosphor-icons/react'
 import React from 'react'
+import type { IconProps } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 

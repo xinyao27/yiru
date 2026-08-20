@@ -1,11 +1,11 @@
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import {
   TextB as Bold,
   Code as Code2,
   TextItalic as Italic,
   List,
   Quotes as Quote
-} from '@phosphor-icons/react'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+} from '~renderer/components/icons/hugeicons'
 import { ShortcutKeyCombo } from '~renderer/components/shortcut-key-combo'
 import { Button } from '~renderer/components/ui/button'
 import { Textarea } from '~renderer/components/ui/textarea'

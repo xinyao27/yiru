@@ -1,4 +1,3 @@
-import { MagnifyingGlass as Search, ArrowClockwise as RefreshCw, X } from '@phosphor-icons/react'
 import type {
   AiVaultAgent,
   AiVaultGroup,
@@ -6,6 +5,11 @@ import type {
   AiVaultSort
 } from '@yiru/workbench-model/agent'
 import type { ExecutionHostScope } from '@yiru/workbench-model/workspace'
+import {
+  MagnifyingGlass as Search,
+  ArrowClockwise as RefreshCw,
+  X
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import { Input } from '~renderer/components/ui/input'

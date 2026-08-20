@@ -1,4 +1,5 @@
-import { Moon, Sun } from '@phosphor-icons/react'
+import { Moon02Icon, Sun03Icon } from '@hugeicons/core-free-icons'
+import { HugeiconsIcon } from '@hugeicons/react'
 
 import { useTheme } from '../theme'
 
@@ -16,9 +17,9 @@ export function ThemeToggle(): React.JSX.Element {
       className="text-muted hover:text-ink inline-flex items-center justify-center transition-colors"
     >
       {theme === 'dark' ? (
-        <Sun className="size-[18px]" aria-hidden="true" />
+        <HugeiconsIcon icon={Sun03Icon} className="size-[18px]" aria-hidden="true" />
       ) : (
-        <Moon className="size-[18px]" aria-hidden="true" />
+        <HugeiconsIcon icon={Moon02Icon} className="size-[18px]" aria-hidden="true" />
       )}
     </button>
   )

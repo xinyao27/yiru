@@ -1,6 +1,6 @@
-import { ShieldCheck, WarningCircle as CircleAlert } from '@phosphor-icons/react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import { ShieldCheck, WarningCircle as CircleAlert } from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'

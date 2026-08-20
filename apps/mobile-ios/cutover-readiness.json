@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "legacyRemovalAllowed": true,
+  "gates": [
+    {
+      "id": "source-coverage-ledger",
+      "status": "verified",
+      "evidence": ["apps/mobile-ios/migration-parity.json", "apps/mobile-ios/FUNCTIONAL-PARITY.md"]
+    },
+    {
+      "id": "development-auto-pair",
+      "status": "verified",
+      "evidence": ["apps/mobile-ios/scripts/start-development.mjs", "apps/mobile-ios/CUTOVER.md"]
+    },
+    {
+      "id": "core-live-smoke",
+      "status": "verified",
+      "evidence": ["apps/mobile-ios/CUTOVER.md"]
+    },
+    {
+      "id": "route-behavior-parity",
+      "status": "pending",
+      "evidence": ["apps/mobile-ios/CUTOVER.md"]
+    },
+    {
+      "id": "upgrade-data-migration",
+      "status": "verified",
+      "evidence": [
+        "apps/mobile-ios/CUTOVER.md",
+        "apps/mobile-ios/YiruMobile/Platform/Persistence/LegacyExpoAsyncStorage.swift",
+        "apps/mobile-ios/YiruMobile/Platform/Persistence/LegacyMobilePreferenceMigration.swift",
+        "apps/mobile-ios/YiruMobile/Platform/Persistence/KeychainHostRepository.swift"
+      ]
+    },
+    {
+      "id": "self-contained-assets",
+      "status": "verified",
+      "evidence": [
+        "apps/mobile-ios/CUTOVER.md",
+        "apps/mobile-ios/project.yml",
+        "apps/mobile-ios/YiruMobile/Resources/AppIcon.icon/icon.json",
+        "apps/mobile-ios/YiruMobile/DesignSystem/Components/agent-mark.swift"
+      ]
+    },
+    {
+      "id": "privacy-and-entitlements",
+      "status": "verified",
+      "evidence": [
+        "apps/mobile-ios/CUTOVER.md",
+        "apps/mobile-ios/YiruMobile/Resources/YiruMobile.entitlements",
+        "apps/mobile-ios/YiruMobile/Resources/YiruMobileRelease.entitlements",
+        ".github/workflows/mobile-ios-native-archive.yml"
+      ]
+    },
+    {
+      "id": "physical-device-performance",
+      "status": "pending",
+      "evidence": ["apps/mobile-ios/CUTOVER.md"]
+    },
+    {
+      "id": "app-store-archive",
+      "status": "pending",
+      "evidence": [
+        "apps/mobile-ios/CUTOVER.md",
+        "apps/mobile-ios/fastlane/Fastfile",
+        "apps/mobile-ios/scripts/check-signed-archive.mjs",
+        ".github/workflows/mobile-ios-native-archive.yml",
+        ".github/workflows/mobile-ios-native-release.yml"
+      ]
+    },
+    {
+      "id": "testflight-release",
+      "status": "pending",
+      "evidence": ["apps/mobile-ios/CUTOVER.md"]
+    },
+    {
+      "id": "store-metadata",
+      "status": "verified",
+      "evidence": [
+        "apps/mobile-ios/CUTOVER.md",
+        "apps/mobile-ios/fastlane/metadata/en-US/name.txt",
+        "apps/mobile-ios/fastlane/metadata/en-US/description.txt",
+        "apps/mobile-ios/fastlane/metadata/en-US/keywords.txt"
+      ]
+    },
+    {
+      "id": "ci-cutover",
+      "status": "verified",
+      "evidence": [
+        "apps/mobile-ios/CUTOVER.md",
+        ".github/workflows/mobile-ios-native-archive.yml",
+        ".github/workflows/mobile-ios-native-release.yml",
+        ".github/workflows/mobile-ios-native-check.yml",
+        ".github/workflows/pr.yml"
+      ]
+    },
+    {
+      "id": "legacy-reference-cleanup",
+      "status": "verified",
+      "evidence": [
+        "apps/mobile-ios/CUTOVER.md",
+        "vite.config.ts",
+        "pnpm-workspace.yaml",
+        "pnpm-lock.yaml",
+        "package.json",
+        "AGENTS.md",
+        "docs/style-guide.md",
+        "docs/reference/ios-simulator-desktop-connection.md",
+        "apps/desktop/config/max-lines-baseline.txt",
+        "apps/desktop/resources/brand/generate-yiru-raster-assets.sh",
+        "apps/desktop/resources/brand/derive-yiru-assets.mjs"
+      ]
+    }
+  ]
+}

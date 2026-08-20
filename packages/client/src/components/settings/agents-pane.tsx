@@ -1,14 +1,14 @@
+/* eslint-disable max-lines -- Why: the Agents pane keeps catalog rows, default
+   selection, per-agent controls, and runtime location together so settings
+   reconciliation stays visible in one file. */
+import { useId, useMemo, useState } from 'react'
 import {
   Check,
   Terminal,
   CaretDown as ChevronDown,
   ArrowSquareOut as ExternalLink,
   ArrowClockwise as RefreshCw
-} from '@phosphor-icons/react'
-/* eslint-disable max-lines -- Why: the Agents pane keeps catalog rows, default
-   selection, per-agent controls, and runtime location together so settings
-   reconciliation stays visible in one file. */
-import { useId, useMemo, useState } from 'react'
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { useDetectedAgents } from '~renderer/hooks/use-detected-agents'
 import { translate } from '~renderer/i18n/i18n'

@@ -1,3 +1,11 @@
+import { getRepoExecutionHostId, parseExecutionHostId } from '@yiru/workbench-model/workspace'
+/* eslint-disable max-lines -- Why: consolidating memory + sessions into one
+   surface deliberately co-locates the sparkline, worktree tree, session list,
+   daemon actions, and kill-confirm dialog so the popover body and badge stay
+   consistent. Splitting across files would scatter render-state that only
+   exists to serve this one status-bar segment. See
+   docs/resource-usage-merge-spec.md for the full design. */
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Warning as AlertTriangle,
   Globe,
@@ -8,15 +16,7 @@ import {
   CaretRight as ChevronRight,
   ArrowClockwise as RotateCw,
   X
-} from '@phosphor-icons/react'
-import { getRepoExecutionHostId, parseExecutionHostId } from '@yiru/workbench-model/workspace'
-/* eslint-disable max-lines -- Why: consolidating memory + sessions into one
-   surface deliberately co-locates the sparkline, worktree tree, session list,
-   daemon actions, and kill-confirm dialog so the popover body and badge stay
-   consistent. Splitting across files would scatter render-state that only
-   exists to serve this one status-bar segment. See
-   docs/resource-usage-merge-spec.md for the full design. */
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import {

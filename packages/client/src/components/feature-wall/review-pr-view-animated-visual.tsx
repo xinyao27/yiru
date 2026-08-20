@@ -1,11 +1,11 @@
+import { useRef } from 'react'
+import type { ComponentType, JSX, ReactNode } from 'react'
 import {
   Files,
   GitMerge,
   Chat as MessageSquare,
   MagnifyingGlass as Search
-} from '@phosphor-icons/react'
-import { useRef } from 'react'
-import type { ComponentType, JSX, ReactNode } from 'react'
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import { useShortcutLabel } from '~renderer/hooks/use-shortcut-label'

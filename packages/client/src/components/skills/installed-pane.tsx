@@ -1,5 +1,5 @@
-import { BookOpen } from '@phosphor-icons/react'
 import { useMemo, useState } from 'react'
+import { BookOpen } from '~renderer/components/icons/hugeicons'
 import { Badge } from '~renderer/components/ui/badge'
 import { Button } from '~renderer/components/ui/button'
 import { ScrollArea } from '~renderer/components/ui/scroll-area'

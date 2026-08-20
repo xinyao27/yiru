@@ -1,3 +1,4 @@
+import React from 'react'
 import {
   Chat as MessageSquare,
   PaperPlaneTilt as SendHorizontal,
@@ -5,8 +6,7 @@ import {
   SlidersHorizontal,
   Plus,
   X
-} from '@phosphor-icons/react'
-import React from 'react'
+} from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,

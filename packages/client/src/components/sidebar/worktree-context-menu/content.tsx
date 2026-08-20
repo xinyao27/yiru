@@ -1,3 +1,4 @@
+import type React from 'react'
 import {
   Bell,
   BellSlash as BellOff,
@@ -17,8 +18,7 @@ import {
   Trash as Trash2,
   LinkBreak as Unlink,
   FlowArrow as Workflow
-} from '@phosphor-icons/react'
-import type React from 'react'
+} from '~renderer/components/icons/hugeicons'
 import {
   ContextMenuContent,
   ContextMenuItem,

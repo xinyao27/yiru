@@ -1,9 +1,13 @@
 import SwiftUI
 
 struct TerminalLiveView: View {
+    @Environment(\.dismiss) private var dismiss
     @State private var model: TerminalLiveModel
     private let preferences: TerminalPreferences
-    private let showSettings: () -> Void
+    private let openTerminalFile: ((TerminalFileOpenRequest) -> Void)?
+    private let hostID: String
+    private let worktreeID: String?
+    private let terminalID: String
 
     init(
         host: HostProfile,
@@ -12,7 +16,8 @@ struct TerminalLiveView: View {
         displayModeRuntime: any TerminalDisplayModeRuntime,
         surfaceFactory: any TerminalSurfaceFactory,
         preferences: TerminalPreferences,
-        showSettings: @escaping () -> Void
+        worktreeID: String? = nil,
+        openTerminalFile: ((TerminalFileOpenRequest) -> Void)? = nil
     ) {
         _model = State(
             initialValue: TerminalLiveModel(
@@ -25,7 +30,10 @@ struct TerminalLiveView: View {
             )
         )
         self.preferences = preferences
-        self.showSettings = showSettings
+        self.openTerminalFile = openTerminalFile
+        hostID = host.id
+        self.worktreeID = worktreeID
+        terminalID = terminal.id
     }
 
     var body: some View {
@@ -33,7 +41,28 @@ struct TerminalLiveView: View {
             model: model,
             preferences: preferences,
             isVisible: true,
-            showSettings: showSettings
+            topChrome: nil,
+            closeTerminal: {
+                Task {
+                    guard await model.closeRemote() else { return }
+                    dismiss()
+                }
+            },
+            showFiles: nil,
+            showSourceControl: nil,
+            showAgentHistory: nil,
+            openTerminalFile: { tappedFile in
+                guard let worktreeID else { return }
+                openTerminalFile?(
+                    TerminalFileOpenRequest(
+                        hostID: hostID,
+                        worktreeID: worktreeID,
+                        terminalID: terminalID,
+                        cwd: model.currentDirectory,
+                        tappedFile: tappedFile
+                    )
+                )
+            }
         )
         .navigationTitle(Text(model.title))
         .navigationBarTitleDisplayMode(.inline)

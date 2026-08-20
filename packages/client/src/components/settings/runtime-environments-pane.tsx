@@ -1,14 +1,3 @@
-/* eslint-disable max-lines -- Why: the Coworking host settings pane keeps active
-   host selection, saved host mutation, and confirmation dialogs together so
-   the state transitions stay auditable. */
-import {
-  Warning as AlertTriangle,
-  HardDrives as Host,
-  HardDrive as HostOff,
-  Trash as Trash2,
-  CaretDown as ChevronDown,
-  ArrowClockwise as RefreshCw
-} from '@phosphor-icons/react'
 import {
   describeRuntimeCompatBlock,
   evaluateRuntimeCompat,
@@ -21,6 +10,17 @@ import {
 } from '@yiru/runtime-protocol/capabilities'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
+/* eslint-disable max-lines -- Why: the Coworking host settings pane keeps active
+   host selection, saved host mutation, and confirmation dialogs together so
+   the state transitions stay auditable. */
+import {
+  Warning as AlertTriangle,
+  HardDrives as Host,
+  HardDrive as HostOff,
+  Trash as Trash2,
+  CaretDown as ChevronDown,
+  ArrowClockwise as RefreshCw
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'

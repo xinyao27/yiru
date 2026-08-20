@@ -129,7 +129,7 @@ import { previewGhosttyImport } from './ghostty/import-preview'
 import { setDefaultWslDistroOverride } from './git/runner'
 import { moveWorktree } from './git/worktree'
 import { getElectronSystemLocale } from './i18n/electron-system-locale'
-import { setMainSystemLocaleProvider, setMainUiLanguage } from './i18n/main-i18n'
+import { setMainSystemLocaleProvider, setMainUiLanguage, translateMain } from './i18n/main-i18n'
 import { registerCoreHandlers } from './ipc/register-core-handlers'
 import { KeybindingService } from './keybindings/keybinding-service'
 import {
@@ -1426,12 +1426,22 @@ async function presentRendererRecoveryPrompt(recentRecoveryCount: number): Promi
   const window = mainWindow && !mainWindow.isDestroyed() ? mainWindow : undefined
   const options = {
     type: 'error' as const,
-    buttons: ['Reload', 'Quit'],
+    buttons: [
+      translateMain('app.recoverableError.reload', 'Reload'),
+      translateMain('app.recoverableError.quit', 'Quit')
+    ],
     defaultId: 0,
     cancelId: 1,
-    title: 'Yiru keeps failing to load',
-    message: 'The app window crashed repeatedly and stopped reloading automatically.',
-    detail: `Yiru tried to recover ${recentRecoveryCount} times in a row without success. This is often a graphics-driver or installation problem. Reload to try again, or quit and relaunch Yiru.`
+    title: translateMain('app.recoverableError.loadLoopTitle', 'Yiru keeps failing to load'),
+    message: translateMain(
+      'app.recoverableError.loadLoopMessage',
+      'The app window crashed repeatedly and stopped reloading automatically.'
+    ),
+    detail: translateMain(
+      'app.recoverableError.loadLoopDetail',
+      'Yiru tried to recover {{value0}} times in a row without success. This is often a graphics-driver or installation problem. Reload to try again, or quit and relaunch Yiru.',
+      { value0: recentRecoveryCount }
+    )
   }
   const { response } = window
     ? await dialog.showMessageBox(window, options)

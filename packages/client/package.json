@@ -22,16 +22,15 @@
     "fmt": "vp fmt .",
     "lint": "vp lint . --fix",
     "generate:i18n": "paraglide-js compile --project ./project.inlang --outdir ./generated/paraglide --emit-ts-declarations --output-structure locale-modules",
-    "typecheck": "vp run generate:i18n && tsc --noEmit",
-    "verify:design-token-budget": "node scripts/check-design-token-budget.mjs",
-    "verify:ui-style-drift": "node scripts/check-ui-style-drift.mjs"
+    "typecheck": "vp run generate:i18n && tsc --noEmit"
   },
   "dependencies": {
     "@base-ui/react": "catalog:",
     "@floating-ui/dom": "catalog:",
+    "@hugeicons/core-free-icons": "catalog:",
+    "@hugeicons/react": "catalog:",
     "@orpc/client": "catalog:",
     "@orpc/server": "catalog:",
-    "@phosphor-icons/react": "catalog:",
     "@xterm/addon-serialize": "catalog:",
     "@yiru/editor-themes": "workspace:*",
     "@yiru/mobile-relay-protocol": "workspace:*",

@@ -1,5 +1,5 @@
-import type { Icon as PhosphorIcon } from '@phosphor-icons/react'
 import React from 'react'
+import type { Icon } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 
@@ -12,7 +12,7 @@ export function SourceControlHeaderIconButton({
   disabled,
   variant = 'outline'
 }: {
-  icon: PhosphorIcon
+  icon: Icon
   label: string
   onClick: () => void
   disabled?: boolean

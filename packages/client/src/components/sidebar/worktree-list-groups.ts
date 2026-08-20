@@ -1,10 +1,3 @@
-/* eslint-disable max-lines -- Why: sidebar row construction keeps every grouping mode in one pure module so reveal, virtualized rendering, and tests share the same flat row contract. */
-import {
-  XCircle as CircleX,
-  Folders as FolderTree,
-  List,
-  PushPin as Pin
-} from '@phosphor-icons/react'
 import { isWindowsAbsolutePathLike } from '@yiru/workbench-model/platform'
 import { parseWslUncPath } from '@yiru/workbench-model/platform'
 import {
@@ -15,6 +8,13 @@ import {
   type ExecutionHostId
 } from '@yiru/workbench-model/workspace'
 import type React from 'react'
+/* eslint-disable max-lines -- Why: sidebar row construction keeps every grouping mode in one pure module so reveal, virtualized rendering, and tests share the same flat row contract. */
+import {
+  XCircle as CircleX,
+  Folders as FolderTree,
+  List,
+  PushPin as Pin
+} from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
 import { branchName } from '~renderer/lib/git-utils'
 import {

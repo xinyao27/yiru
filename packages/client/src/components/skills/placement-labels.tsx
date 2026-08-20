@@ -8,7 +8,7 @@ import {
   PuzzlePiece,
   Question,
   Star
-} from '@phosphor-icons/react'
+} from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
 import type { SkillInstallationTopology, SkillPlacement } from '~shared/skills'
 

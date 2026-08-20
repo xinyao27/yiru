@@ -1,6 +1,6 @@
-import { Copy, type Icon as PhosphorIcon } from '@phosphor-icons/react'
 import { Fragment } from 'react'
 import { toast } from 'sonner'
+import { Copy, type Icon } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,
@@ -44,7 +44,7 @@ function OrchestrationExamplePromptText(props: { prompt: string }): React.JSX.El
 
 export function OrchestrationExampleDialog(props: {
   example: OrchestrationUsageExample
-  icon?: PhosphorIcon
+  icon?: Icon
   open: boolean
   onOpenChange: (open: boolean) => void
 }): React.JSX.Element {

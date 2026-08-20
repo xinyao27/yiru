@@ -1,10 +1,10 @@
+import React, { useCallback, useMemo } from 'react'
+import { presentGitHubPRMergeState } from '~renderer/components/github-pr-merge-state'
 import {
   GitMerge,
   GitPullRequest as GitPullRequestClosed,
   CaretDown as ChevronDown
-} from '@phosphor-icons/react'
-import React, { useCallback, useMemo } from 'react'
-import { presentGitHubPRMergeState } from '~renderer/components/github-pr-merge-state'
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import {

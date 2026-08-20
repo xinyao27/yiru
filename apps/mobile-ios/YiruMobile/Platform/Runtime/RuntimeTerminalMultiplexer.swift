@@ -25,14 +25,16 @@ actor RuntimeTerminalMultiplexer {
         self.clientInstanceID = clientInstanceID
     }
 
-    func openSession(terminalID: String) async throws -> any TerminalSession {
+    func openSession(terminalID: String, viewport: TerminalGridSize?) async throws
+        -> any TerminalSession
+    {
         guard !isShutdown else { throw RuntimeTerminalMultiplexerError.closed }
-        async let shownTerminal: MobileTerminalShowWire = controlSession.call(
+        let result: MobileTerminalShowResultWire = try await controlSession.call(
             path: MobileTerminalWireContract.showPath,
             input: MobileTerminalHandleRequestWire(terminal: terminalID),
-            output: MobileTerminalShowWire.self
+            output: MobileTerminalShowResultWire.self
         )
-        let shown = try await shownTerminal
+        let shown = result.terminal
         guard !isShutdown else { throw RuntimeTerminalMultiplexerError.closed }
         var activeBulk = try await activeBulk()
         let route: TerminalBulkRoute
@@ -49,7 +51,8 @@ actor RuntimeTerminalMultiplexer {
             route: route,
             terminalID: terminalID,
             transportGeneration: shown.transportGeneration,
-            clientID: clientInstanceID
+            clientID: clientInstanceID,
+            viewport: viewport
         )
         await session.start()
         return session
@@ -76,14 +79,25 @@ actor RuntimeTerminalMultiplexer {
         bulk = nil
         bulkControlGeneration = nil
         if let connectionTask {
-            let connected = try await connectionTask.value
-            guard !isShutdown, connectionAttempt != nil else {
-                await connected.connection.close()
-                throw CancellationError()
+            do {
+                let connected = try await connectionTask.value
+                guard !isShutdown, connectionAttempt != nil else {
+                    await connected.connection.close()
+                    throw CancellationError()
+                }
+                guard await controlSession.generation() == connected.controlGeneration else {
+                    await connected.connection.close()
+                    self.connectionTask = nil
+                    throw RuntimeTerminalMultiplexerError.controlGenerationChanged
+                }
+                self.connectionTask = nil
+                bulk = connected.connection
+                bulkControlGeneration = connected.controlGeneration
+                return connected.connection
+            } catch {
+                self.connectionTask = nil
+                throw error
             }
-            bulk = connected.connection
-            bulkControlGeneration = connected.controlGeneration
-            return connected.connection
         }
         let attempt = UUID()
         connectionAttempt = attempt

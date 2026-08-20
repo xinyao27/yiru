@@ -1,5 +1,16 @@
 import Foundation
 
+nonisolated protocol RuntimeOmittedOrpcInput {}
+
+nonisolated struct RuntimeVoidInput: Encodable, RuntimeOmittedOrpcInput, Sendable {
+    func encode(to encoder: any Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encodeNil()
+    }
+}
+
+nonisolated struct RuntimeEmptyObjectInput: Encodable, Sendable {}
+
 nonisolated func decodeResponse<Output: Decodable>(
     _ data: Data,
     requestID: String,
@@ -12,7 +23,11 @@ nonisolated func decodeResponse<Output: Decodable>(
     let status = head.p?.s ?? 200
     guard status >= 200 && status < 400 else {
         let error = try? JSONDecoder().decode(OrpcErrorEnvelope.self, from: data)
-        throw RuntimeOrpcError.server(status: status, code: error?.p.b.json.code)
+        throw RuntimeOrpcError.server(
+            status: status,
+            code: error?.p.b.json.code,
+            message: error?.p.b.json.message
+        )
     }
     return try JSONDecoder().decode(OrpcResponseEnvelope<Output>.self, from: data).p.b.json
 }
@@ -37,6 +52,18 @@ nonisolated struct OrpcRequestPayload<Input: Encodable>: Encodable {
 
 nonisolated struct OrpcEncodableBody<Value: Encodable>: Encodable {
     let json: Value
+
+    private enum CodingKeys: String, CodingKey {
+        case json
+    }
+
+    func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        // Why: oRPC represents JavaScript `undefined` as an empty serialized body;
+        // encoding Swift's void marker as JSON null fails every z.void() contract.
+        guard !(json is any RuntimeOmittedOrpcInput) else { return }
+        try container.encode(json, forKey: .json)
+    }
 }
 
 nonisolated struct OrpcResponseHead: Decodable {
@@ -107,4 +134,5 @@ nonisolated struct OrpcErrorPayload: Decodable {
 
 nonisolated struct OrpcErrorWire: Decodable {
     let code: String
+    let message: String?
 }

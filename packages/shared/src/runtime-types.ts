@@ -552,7 +552,9 @@ export type RuntimeWorktreePsSummary = {
   worktreeId: string
   repoId: string
   hostId?: Worktree['hostId']
+  resumeTargetStatus?: 'local' | 'runtime' | 'unknown'
   terminalPlatform?: NodeJS.Platform
+  priorWorktreeIds?: string[]
   repo: string
   path: string
   branch: string

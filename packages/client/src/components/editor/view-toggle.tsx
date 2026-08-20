@@ -1,3 +1,5 @@
+import React from 'react'
+import type { MarkdownViewMode } from '~renderer/components/editor/state'
 import {
   Code,
   Eye,
@@ -6,10 +8,8 @@ import {
   Notebook as NotebookText,
   Pencil,
   Table as TableIcon,
-  type Icon as PhosphorIcon
-} from '@phosphor-icons/react'
-import React from 'react'
-import type { MarkdownViewMode } from '~renderer/components/editor/state'
+  type Icon
+} from '~renderer/components/icons/hugeicons'
 import { ToggleGroup, ToggleGroupItem } from '~renderer/components/ui/toggle-group'
 import {
   Tooltip,
@@ -29,7 +29,7 @@ import { useUiLocale } from '~renderer/i18n/use-ui-locale'
 // distinction. See reviews/changes-view-mode-plan.md.
 export type EditorToggleValue = MarkdownViewMode | 'edit' | 'changes'
 
-type ViewModeMetadata = { label: string; icon: PhosphorIcon; title?: string }
+type ViewModeMetadata = { label: string; icon: Icon; title?: string }
 
 const DEFAULT_VIEW_MODE_METADATA: Record<EditorToggleValue, ViewModeMetadata> = {
   source: {

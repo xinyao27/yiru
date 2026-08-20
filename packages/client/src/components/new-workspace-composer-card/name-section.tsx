@@ -1,5 +1,5 @@
-import { Warning as AlertTriangle } from '@phosphor-icons/react'
 import React from 'react'
+import { Warning as AlertTriangle } from '~renderer/components/icons/hugeicons'
 import SmartWorkspaceNameField, {
   type SmartWorkspaceNameSelection
 } from '~renderer/components/new-workspace/smart-workspace-name-field'

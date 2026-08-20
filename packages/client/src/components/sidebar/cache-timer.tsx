@@ -1,5 +1,5 @@
-import { Timer } from '@phosphor-icons/react'
 import { useShallow } from 'zustand/react/shallow'
+import { Timer } from '~renderer/components/icons/hugeicons'
 import { Tooltip, TooltipTrigger, TooltipContent } from '~renderer/components/ui/tooltip'
 import { cn } from '~renderer/lib/class-names'
 import { useAppStore } from '~renderer/store'

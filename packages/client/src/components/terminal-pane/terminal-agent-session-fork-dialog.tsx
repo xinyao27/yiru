@@ -1,5 +1,5 @@
-import { Copy, GitFork } from '@phosphor-icons/react'
 import { useRef, useState } from 'react'
+import { Copy, GitFork } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,

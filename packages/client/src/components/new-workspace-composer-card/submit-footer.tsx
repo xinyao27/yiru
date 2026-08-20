@@ -1,5 +1,5 @@
-import { ArrowElbowDownLeft as CornerDownLeft } from '@phosphor-icons/react'
 import React from 'react'
+import { ArrowElbowDownLeft as CornerDownLeft } from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import type { WorkspaceCreateErrorDisplay } from '~renderer/components/new-workspace-composer-card/workspace-create-error-format'
 import { Button } from '~renderer/components/ui/button'

@@ -1,4 +1,4 @@
-import { UserCircle as CircleUserRound } from '@phosphor-icons/react'
+import { UserCircle as CircleUserRound } from '~renderer/components/icons/hugeicons'
 import { DropdownMenuLabel } from '~renderer/components/ui/dropdown-menu'
 import type { YiruProfileSummary } from '~shared/yiru-profiles'
 

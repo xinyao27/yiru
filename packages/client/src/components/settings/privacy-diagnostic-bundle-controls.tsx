@@ -5,7 +5,7 @@ import {
   FileText,
   CloudArrowUp as UploadCloud,
   X
-} from '@phosphor-icons/react'
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { translate } from '~renderer/i18n/i18n'
 import type {

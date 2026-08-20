@@ -1,7 +1,7 @@
 # Yiru for iOS
 
-Yiru 的原生 iOS 26 客户端。它与 `apps/mobile` 并行开发，迁移完成前不替换 Expo
-客户端，也不承担 Android 或 Web 兼容。
+Yiru 唯一的移动端客户端，原生 iOS 26。它已取代并删除了原先的 Expo 客户端
+（`apps/mobile`），不承担 Android 或 Web 兼容。
 
 技术基线：
 
@@ -27,8 +27,10 @@ xcodebuild -downloadComponent MetalToolchain
 vp run yiru-mobile-ios#project:generate
 vp run yiru-mobile-ios#dev
 vp run yiru-mobile-ios#verify
-vp run verify:mobile-ios-wire
 ```
+
+`vp run verify:mobile-ios-wire`（生成并核对 wire contract 漂移）曾是常用命令之一，其生成脚本
+（`scripts/generate-mobile-ios-wire-contracts.mjs`）已被删除，此命令目前不存在。
 
 代码结构和依赖规则见 [ARCHITECTURE.md](./ARCHITECTURE.md)，视觉规则见
 [DESIGN.md](./DESIGN.md)，功能迁移顺序见 [MIGRATION.md](./MIGRATION.md)。Terminal renderer

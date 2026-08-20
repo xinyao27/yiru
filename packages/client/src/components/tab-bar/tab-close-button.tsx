@@ -1,4 +1,4 @@
-import { X } from '@phosphor-icons/react'
+import { X } from '~renderer/components/icons/hugeicons'
 import { ShortcutKeyCombo } from '~renderer/components/shortcut-key-combo'
 import { Button } from '~renderer/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'

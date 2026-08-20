@@ -1,6 +1,6 @@
-import { GitBranch, MagnifyingGlass } from '@phosphor-icons/react'
 import type React from 'react'
 import { useMemo, useState } from 'react'
+import { GitBranch, MagnifyingGlass } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { Checkbox } from '~renderer/components/ui/checkbox'
 import { Input } from '~renderer/components/ui/input'

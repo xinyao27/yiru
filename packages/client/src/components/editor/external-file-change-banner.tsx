@@ -1,7 +1,7 @@
-import { Warning as TriangleAlert } from '@phosphor-icons/react'
 import React, { useState } from 'react'
 import { toast } from 'sonner'
 import type { OpenFile } from '~renderer/components/editor/state'
+import { Warning as TriangleAlert } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
 import { getConnectionIdForFile } from '~renderer/lib/connection-context'

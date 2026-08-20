@@ -1,4 +1,3 @@
-import { CaretRight as ChevronRight } from '@phosphor-icons/react'
 import {
   isToolCallBlock,
   isToolResultBlock,
@@ -7,6 +6,7 @@ import {
   type NativeChatToolResultBlock
 } from '@yiru/workbench-model/agent'
 import { useEffect, useState } from 'react'
+import { CaretRight as ChevronRight } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'

@@ -1,5 +1,5 @@
-import { Pencil, Play, Trash as Trash2 } from '@phosphor-icons/react'
 import React from 'react'
+import { Pencil, Play, Trash as Trash2 } from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { SettingsSwitch } from '~renderer/components/settings/form-controls'
 import { Badge } from '~renderer/components/ui/badge'

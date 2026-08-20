@@ -1,11 +1,11 @@
+import { useMemo, useState } from 'react'
+import { toast } from 'sonner'
 import {
   Copy,
   FolderSimple as FolderGit2,
   ArrowsLeftRight as ArrowRightLeft,
   ArrowRight as MoveRight
-} from '@phosphor-icons/react'
-import { useMemo, useState } from 'react'
-import { toast } from 'sonner'
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import {

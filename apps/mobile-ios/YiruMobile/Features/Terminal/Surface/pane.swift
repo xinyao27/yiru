@@ -5,16 +5,57 @@ struct TerminalLivePane: View {
     @Environment(\.scenePhase) private var scenePhase
     @Bindable var model: TerminalLiveModel
     let preferences: TerminalPreferences
+    var hostConnectionIsReady = true
     let isVisible: Bool
-    let showSettings: () -> Void
+    let topChrome: TerminalTabStrip?
+    let closeTerminal: (() -> Void)?
+    var showQuickCommands: (() -> Void)? = nil
+    let showFiles: (() -> Void)?
+    let showSourceControl: (() -> Void)?
+    let showAgentHistory: (() -> Void)?
+    var switchToChat: (() -> Void)? = nil
+    var imageAttachment: TerminalImageAttachment? = nil
+    var openTerminalFile: ((TerminalTappedFile) -> Void)? = nil
+    var openTerminalURL: ((URL) -> Void)? = nil
 
     var body: some View {
-        ZStack(alignment: .bottomTrailing) {
-            TerminalSurfaceHost(surface: model.surface)
-                .background(Color(red: 0.035, green: 0.047, blue: 0.075))
+        VStack(spacing: 0) {
+            if let topChrome {
+                topChrome
+            }
 
-            statusOverlay
-                .padding(Theme.Spacing.standard)
+            TerminalSurfaceHost(surface: model.surface)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding(.horizontal, TerminalChromeMetrics.horizontalInset)
+                .background(Theme.Colors.background)
+                .clipped()
+                .safeAreaInset(edge: .bottom, spacing: 0) {
+                    TerminalAccessoryDock(
+                        state: model.surface.accessoryState,
+                        displayMode: model.displayMode,
+                        isDisplayModeUpdating: model.isDisplayModeUpdating,
+                        attachment: imageAttachment,
+                        toggleDisplayMode: { Task { await model.toggleDisplayMode() } },
+                        removeCustomKey: { preferences.removeCustomKey($0) }
+                    )
+                }
+        }
+        .background(Theme.Colors.background)
+        .overlay(alignment: .top) {
+            TerminalConnectionStatusBanner(
+                model: model,
+                hostConnectionIsReady: hostConnectionIsReady
+            )
+            .padding(.horizontal, TerminalChromeMetrics.horizontalInset)
+            .padding(.top, Theme.Spacing.small)
+            .transition(.move(edge: .top).combined(with: .opacity))
+        }
+        .overlay(alignment: .bottom) {
+            if let notice = model.actionNotice {
+                TerminalActionNoticeLabel(message: notice.message)
+                    .padding(.bottom, 60)
+                    .transition(.opacity.combined(with: .move(edge: .bottom)))
+            }
         }
         .toolbar {
             if isVisible {
@@ -26,9 +67,29 @@ struct TerminalLivePane: View {
         .task(id: model.connectionAttempt) {
             await model.connect(attempt: model.connectionAttempt)
         }
-        .onChange(of: model.linkRequest) { _, link in
-            guard isVisible, let link else { return }
-            openURL(link)
+        .onChange(of: model.linkRequest) { _, request in
+            guard isVisible, let request else { return }
+            if let url = URL(string: request.rawValue),
+                let scheme = url.scheme?.lowercased(),
+                ["http", "https"].contains(scheme)
+            {
+                if let openTerminalURL {
+                    openTerminalURL(url)
+                } else {
+                    openURL(url)
+                }
+            } else if var tappedFile = TerminalTappedFile.parse(request.rawValue) {
+                let parameterLine = request.parameters["line"].flatMap(Int.init)
+                let parameterColumn = request.parameters["column"].flatMap(Int.init)
+                if parameterLine != nil || parameterColumn != nil {
+                    tappedFile = TerminalTappedFile(
+                        pathText: tappedFile.pathText,
+                        line: parameterLine ?? tappedFile.line,
+                        column: parameterColumn ?? tappedFile.column
+                    )
+                }
+                openTerminalFile?(tappedFile)
+            }
             model.clearLinkRequest()
         }
         .task(id: scenePhase) {
@@ -37,6 +98,24 @@ struct TerminalLivePane: View {
         .task(id: isVisible) {
             await synchronizeDeliveryState()
         }
+        .task(id: model.hasSubscribed && isVisible && model.canAcceptUserInput) {
+            guard isVisible, model.canAcceptUserInput else { return }
+            // Why: a native SwiftTerm surface owns the UITextInput responder. Focus it after the
+            // view has subscribed so hardware-keyboard and accessory input follow the selected
+            // tab rather than the one that happened to be focused first.
+            await Task.yield()
+            guard !Task.isCancelled else { return }
+            model.focus()
+            // Why: SwiftUI may finish attaching the UIViewRepresentable one run-loop after the
+            // subscription state flips. Retry after the host view exists so a cold tab entry does
+            // not leave the terminal rendered but unable to accept hardware or accessory input.
+            try? await Task.sleep(for: .milliseconds(80))
+            guard !Task.isCancelled, isVisible, model.canAcceptUserInput else { return }
+            model.focus()
+            try? await Task.sleep(for: .milliseconds(160))
+            guard !Task.isCancelled, isVisible, model.canAcceptUserInput else { return }
+            model.focus()
+        }
         .sensoryFeedback(.warning, trigger: model.bellRevision)
         .onChange(of: preferences.surfaceConfiguration) { _, configuration in
             model.apply(configuration)
@@ -44,99 +123,41 @@ struct TerminalLivePane: View {
     }
 
     private var controlsMenu: some View {
-        Menu("Terminal Controls", systemImage: "ellipsis") {
-            Button(
-                model.displayMode.toggleTitle,
-                systemImage: model.displayMode.toggleTarget.systemImage
-            ) {
-                Task { await model.toggleDisplayMode() }
-            }
-            .disabled(model.isDisplayModeUpdating)
-
-            Divider()
-
-            Button("Terminal Settings", systemImage: "gearshape", action: showSettings)
-        }
-    }
-
-    private var statusOverlay: some View {
-        FloatingGlassSurface {
-            HStack(spacing: Theme.Spacing.medium) {
-                VStack(alignment: .trailing, spacing: Theme.Spacing.extraSmall) {
-                    Label(statusTitle, systemImage: statusIcon)
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(statusTint)
-                    Label(model.displayMode.title, systemImage: model.displayMode.systemImage)
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                    if let statusDetail {
-                        Text(statusDetail)
-                            .font(.caption2.monospaced())
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
-                    }
-                }
-
-                if showsRetry {
-                    Button("Reconnect", systemImage: "arrow.clockwise", action: model.retry)
-                        .buttonStyle(.glassProminent)
-                } else {
-                    Button("Keyboard", systemImage: "keyboard", action: model.focus)
-                        .buttonStyle(.glassProminent)
-                        .disabled(!model.canAcceptUserInput)
+        Menu {
+            if let switchToChat {
+                Button(action: switchToChat) {
+                    Label("Switch to chat view", iconID: .chat)
                 }
             }
-        }
-    }
 
-    private var statusTitle: LocalizedStringResource {
-        switch model.phase {
-        case .connecting: "Connecting"
-        case .reconnecting: "Reconnecting"
-        case .restoring: "Restoring terminal"
-        case .active: "Live"
-        case .ended: "Terminal ended"
-        case .failed: "Connection interrupted"
-        }
-    }
+            if let showQuickCommands {
+                Button(action: showQuickCommands) {
+                    Label("Quick commands", iconID: .arrowRight)
+                }
+            }
 
-    private var statusIcon: String {
-        switch model.phase {
-        case .connecting, .reconnecting, .restoring:
-            "arrow.trianglehead.2.clockwise.rotate.90"
-        case .active: "waveform.path"
-        case .ended: "stop.circle"
-        case .failed: "wifi.exclamationmark"
-        }
-    }
+            if let showFiles {
+                Button(action: showFiles) {
+                    Label("Open file explorer", iconID: .folder)
+                }
+            }
 
-    private var statusTint: Color {
-        switch model.phase {
-        case .active: .green
-        case .failed: .orange
-        case .connecting, .reconnecting, .restoring, .ended: .secondary
-        }
-    }
+            if let showSourceControl {
+                Button(action: showSourceControl) {
+                    Label("Open source control", iconID: .gitBranch)
+                }
+            }
 
-    private var statusDetail: String? {
-        if case .failed(let message) = model.phase {
-            return String(localized: message)
-        }
-        if case .reconnecting(let attempt) = model.phase {
-            return String(localized: "Retry attempt \(attempt).")
-        }
-        if let directory = model.currentDirectory, !directory.isEmpty {
-            return directory
-        }
-        guard let gridSize = model.gridSize else { return nil }
-        return "\(gridSize.columns) × \(gridSize.rows)"
-    }
+            if let showAgentHistory {
+                Button(action: showAgentHistory) {
+                    Label("Agent History", iconID: .history)
+                }
+            }
 
-    private var showsRetry: Bool {
-        switch model.phase {
-        case .reconnecting, .failed, .ended: true
-        case .connecting, .restoring, .active: false
+        } label: {
+            YiruToolbarIcon(.more)
         }
+        .accessibilityLabel("More session actions")
     }
 
     private func synchronizeDeliveryState() async {

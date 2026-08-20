@@ -1,5 +1,5 @@
-import { CaretDown as ChevronDown } from '@phosphor-icons/react'
 import React from 'react'
+import { CaretDown as ChevronDown } from '~renderer/components/icons/hugeicons'
 import type { SmartWorkspaceNameSelection } from '~renderer/components/new-workspace/smart-workspace-name-field'
 import { Button } from '~renderer/components/ui/button'
 import { Input } from '~renderer/components/ui/input'

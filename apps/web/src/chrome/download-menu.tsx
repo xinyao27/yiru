@@ -1,4 +1,5 @@
-import { CaretDown } from '@phosphor-icons/react'
+import { ArrowDown01Icon } from '@hugeicons/core-free-icons'
+import { HugeiconsIcon } from '@hugeicons/react'
 import { cn } from 'cnfast'
 import { useEffect, useId, useRef, useState } from 'react'
 
@@ -59,7 +60,8 @@ export function DownloadMenu({ label, options }: DownloadMenuProps): React.JSX.E
         )}
       >
         {label}
-        <CaretDown
+        <HugeiconsIcon
+          icon={ArrowDown01Icon}
           className={cn('size-2.5 shrink-0 transition-transform', open && 'rotate-180')}
           aria-hidden="true"
         />

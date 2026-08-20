@@ -44,6 +44,7 @@ export type RuntimeMobileSessionTerminalTab = {
   terminalTheme?: RuntimeMobileTerminalTheme
   agentStatus?: AgentStatusEntry | null
   launchAgent?: TuiAgent
+  resolvedAgentType?: TuiAgent
   startupCwd?: string
   parentLayout?: RuntimeTerminalLayoutSnapshot
   color?: string | null

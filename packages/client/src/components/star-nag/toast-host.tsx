@@ -1,7 +1,12 @@
-import { Check, Star, ArrowSquareOut as ExternalLink, X } from '@phosphor-icons/react'
 import { YIRU_GITHUB_REPOSITORY_URL } from '@yiru/workbench-model/product'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import {
+  Check,
+  Star,
+  ArrowSquareOut as ExternalLink,
+  X
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'

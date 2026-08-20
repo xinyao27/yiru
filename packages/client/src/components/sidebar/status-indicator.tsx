@@ -1,5 +1,5 @@
-import { Question } from '@phosphor-icons/react'
 import React from 'react'
+import { Question } from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { cn } from '~renderer/lib/class-names'
 import { getWorktreeStatusLabel, type WorktreeStatus } from '~renderer/lib/worktree-status'

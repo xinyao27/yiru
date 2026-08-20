@@ -1,7 +1,7 @@
-import { Moon, Sun } from '@phosphor-icons/react'
 import { LigaturesAddon } from '@xterm/addon-ligatures'
 import { Terminal } from '@xterm/xterm'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { Moon, Sun } from '~renderer/components/icons/hugeicons'
 import { buildFontFamily } from '~renderer/components/terminal-pane/layout-serialization'
 
 import '@xterm/xterm/css/xterm.css'

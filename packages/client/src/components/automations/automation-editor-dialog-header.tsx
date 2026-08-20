@@ -1,4 +1,4 @@
-import { Sparkle as Sparkles } from '@phosphor-icons/react'
+import { Sparkle as Sparkles } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { DialogHeader, DialogTitle } from '~renderer/components/ui/dialog'
 import { Input } from '~renderer/components/ui/input'

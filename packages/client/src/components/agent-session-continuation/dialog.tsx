@@ -1,10 +1,10 @@
-import { ChatCentered as MessageSquarePlus } from '@phosphor-icons/react'
 import { useEffect, useMemo, useState } from 'react'
 import {
   detectAgentSessionContinuationAgents,
   launchAgentSessionContinuation
 } from '~renderer/components/agent-session-continuation/launch-agent-session-continuation'
 import AgentCombobox from '~renderer/components/agent/combobox'
+import { ChatCentered as MessageSquarePlus } from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import {

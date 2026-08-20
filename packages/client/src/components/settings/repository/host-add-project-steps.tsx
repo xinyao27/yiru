@@ -1,5 +1,5 @@
-import { Download, FolderOpen, ArrowLeft, Plus } from '@phosphor-icons/react'
 import type { ComponentType } from 'react'
+import { Download, FolderOpen, ArrowLeft, Plus } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { Input } from '~renderer/components/ui/input'
 import {

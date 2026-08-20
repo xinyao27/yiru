@@ -6,55 +6,14 @@ import Observation
 final class AppModel {
     let dependencies: AppDependencies
     var routes: [AppRoute] = []
-    private(set) var homeRevision = 0
+    var homeRevision = 0
+    var hostRevision = 0
+    var isActivityInsightsPresented = false
+    var isNotificationOptInPresented = false
+    @ObservationIgnored var deepLinkTask: Task<Void, Never>?
+    @ObservationIgnored var didHandleDevelopmentPairingLaunch = false
 
     init(dependencies: AppDependencies) {
         self.dependencies = dependencies
-    }
-
-    func showDesignSystemCatalog() {
-        routes.append(.designSystemCatalog)
-    }
-
-    func showPairing() {
-        routes.append(.pair)
-    }
-
-    func showHosts() {
-        routes.append(.hosts)
-    }
-
-    func showWorkspaces(_ host: HostProfile) {
-        routes.append(.workspaces(host))
-    }
-
-    func showWorkspaceSession(host: HostProfile, workspace: WorkspaceSummary) {
-        routes.append(.workspaceSession(host, workspace))
-    }
-
-    func showTerminal(host: HostProfile, terminal: TerminalSummary) {
-        routes.append(.terminal(host, terminal))
-    }
-
-    func showTerminalSettings() {
-        routes.append(.terminalSettings)
-    }
-
-    func showTerminalPrototype() {
-        routes.append(.terminalPrototype)
-    }
-
-    func confirmPairing(_ offer: PairingOffer) {
-        routes.append(.pairConfirm(offer))
-    }
-
-    func finishPairing(_: HostProfile) {
-        routes.removeAll()
-        homeRevision += 1
-    }
-
-    func handleOpenURL(_ url: URL) {
-        guard let offer = try? PairingCodeDecoder().decode(url.absoluteString) else { return }
-        routes = [.pairConfirm(offer)]
     }
 }

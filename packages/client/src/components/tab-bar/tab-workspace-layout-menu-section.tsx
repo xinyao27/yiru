@@ -4,7 +4,7 @@ import {
   ArrowLeft,
   ArrowRight,
   ArrowUp
-} from '@phosphor-icons/react'
+} from '~renderer/components/icons/hugeicons'
 import {
   DropdownMenuSeparator,
   DropdownMenuSub,

@@ -1,7 +1,7 @@
-import { Trash as Trash2 } from '@phosphor-icons/react'
 import { getRepoExecutionHostId, type ExecutionHostId } from '@yiru/workbench-model/workspace'
 import { useCallback, useRef, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
+import { Trash as Trash2 } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { Label } from '~renderer/components/ui/label'
 import { Separator } from '~renderer/components/ui/separator'

@@ -1,3 +1,4 @@
+import React from 'react'
 import {
   TextAa as CaseSensitive,
   Swap as Replace,
@@ -7,8 +8,7 @@ import {
   CaretUp as ChevronUp,
   ArrowsClockwise as ReplaceAll,
   X
-} from '@phosphor-icons/react'
-import React from 'react'
+} from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { Input } from '~renderer/components/ui/input'
 import { useOptionalShortcutLabel } from '~renderer/hooks/use-shortcut-label'

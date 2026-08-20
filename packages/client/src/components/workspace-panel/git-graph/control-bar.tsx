@@ -1,5 +1,5 @@
-import { ArrowClockwise, MagnifyingGlass, X } from '@phosphor-icons/react'
 import type React from 'react'
+import { ArrowClockwise, MagnifyingGlass, X } from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import { Switch } from '~renderer/components/ui/switch'

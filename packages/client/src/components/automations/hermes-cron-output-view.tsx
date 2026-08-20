@@ -1,3 +1,4 @@
+import React, { useMemo, useState } from 'react'
 import {
   Warning as AlertTriangle,
   CalendarDots as CalendarClock,
@@ -7,11 +8,10 @@ import {
   Chat as MessageSquare,
   Sparkle as Sparkles,
   Terminal,
-  type Icon as PhosphorIcon,
+  type Icon,
   CaretDown as ChevronDown,
   CaretRight as ChevronRight
-} from '@phosphor-icons/react'
-import React, { useMemo, useState } from 'react'
+} from '~renderer/components/icons/hugeicons'
 import CommentMarkdown from '~renderer/components/sidebar/comment-markdown'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
@@ -48,7 +48,7 @@ function getMetadataDisplayLabel(label: string): string {
   return isScheduleMetadataLabel(label) ? 'Schedule' : label
 }
 
-type MetadataIconStyle = { icon: PhosphorIcon; iconClass: string; ringClass: string }
+type MetadataIconStyle = { icon: Icon; iconClass: string; ringClass: string }
 
 function getMetadataIconStyle(label: string): MetadataIconStyle {
   const normalized = label.toLowerCase()
@@ -85,7 +85,7 @@ type CollapsibleSectionProps = {
   defaultOpen?: boolean
   children: React.ReactNode
   tone?: 'default' | 'muted'
-  icon?: PhosphorIcon
+  icon?: Icon
   iconClass?: string
 }
 

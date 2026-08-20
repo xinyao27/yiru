@@ -26,6 +26,7 @@ import dingSoundPath from '../../../resources/notification-sounds/ding.mp3?asset
 import sonarSoundPath from '../../../resources/notification-sounds/sonar.mp3?asset'
 import thumpSoundPath from '../../../resources/notification-sounds/thump.mp3?asset'
 import twoToneSoundPath from '../../../resources/notification-sounds/two-tone.mp3?asset'
+import { translateMain } from '../i18n/main-i18n'
 import type { Store } from '../persistence'
 import { electronShellServicesConnectionId } from '../runtime/rpc/orpc/shell-services-identity'
 import { dispatchShellUICommand } from '../runtime/rpc/orpc/shell-services-reverse-link'
@@ -134,8 +135,11 @@ function probeNotificationDelivery(): Promise<NotificationDeliveryProbeResult> {
   permissionDialogTriggeredThisSession = true
 
   const probe = new Notification({
-    title: 'Yiru notifications are on',
-    body: 'Yiru will alert you when agents finish or terminals need attention.',
+    title: translateMain('notifications.deliveryProbe.title', 'Yiru notifications are on'),
+    body: translateMain(
+      'notifications.deliveryProbe.body',
+      'Yiru will alert you when agents finish or terminals need attention.'
+    ),
     silent: true
   })
   activeNotifications.add(probe)
@@ -617,8 +621,11 @@ export function triggerStartupNotificationRegistration(store: Store): void {
   store.updateUI({ notificationPermissionRequested: true })
 
   const notification = new Notification({
-    title: 'Yiru is ready to notify you',
-    body: 'Allow notifications so Yiru can alert you when agents finish or terminals need attention.'
+    title: translateMain('notifications.permissionRequest.title', 'Yiru is ready to notify you'),
+    body: translateMain(
+      'notifications.permissionRequest.body',
+      'Allow notifications so Yiru can alert you when agents finish or terminals need attention.'
+    )
   })
 
   // Why: prevent GC from collecting the notification (and its click handler)

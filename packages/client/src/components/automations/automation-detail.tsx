@@ -1,5 +1,5 @@
-import { Pencil, Pause, Play, Trash as Trash2 } from '@phosphor-icons/react'
 import React from 'react'
+import { Pencil, Pause, Play, Trash as Trash2 } from '~renderer/components/icons/hugeicons'
 import { Badge } from '~renderer/components/ui/badge'
 import { Button } from '~renderer/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'

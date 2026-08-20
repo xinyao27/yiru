@@ -1,5 +1,9 @@
-import { Check, CaretUpDown as ChevronsUpDown, FolderPlus } from '@phosphor-icons/react'
 import React, { useCallback, useMemo, useState } from 'react'
+import {
+  Check,
+  CaretUpDown as ChevronsUpDown,
+  FolderPlus
+} from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import {
   Command,

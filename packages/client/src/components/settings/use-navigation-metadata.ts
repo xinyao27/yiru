@@ -1,3 +1,5 @@
+/* oxlint-disable max-lines */
+import { useMemo } from 'react'
 // Why: this registry mirrors the Settings sidebar in one neutral module so
 // Cmd+J and Settings visibility cannot drift. Keep it free of Settings pane UI
 // imports; the boundary is enforced by a focused architecture test.
@@ -25,9 +27,7 @@ import {
   TerminalWindow as SquareTerminal,
   UserGear as UserCog,
   Wrench
-} from '@phosphor-icons/react'
-/* oxlint-disable max-lines */
-import { useMemo } from 'react'
+} from '~renderer/components/icons/hugeicons'
 import { getAccountsPaneSearchEntries } from '~renderer/components/settings/accounts-search'
 import { getAdvancedPaneSearchEntries } from '~renderer/components/settings/advanced-search'
 import { getAgentsPaneSearchEntries } from '~renderer/components/settings/agents-search'

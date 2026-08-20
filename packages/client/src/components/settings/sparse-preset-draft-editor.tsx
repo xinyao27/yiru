@@ -1,4 +1,4 @@
-import { FloppyDisk as Save, X } from '@phosphor-icons/react'
+import { FloppyDisk as Save, X } from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Textarea } from '~renderer/components/ui/textarea'
 import { translate } from '~renderer/i18n/i18n'

@@ -1,6 +1,6 @@
-import { Copy, Terminal, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
+import { Copy, Terminal, ArrowClockwise as RefreshCw } from '~renderer/components/icons/hugeicons'
 import { IntegrationStatusPill } from '~renderer/components/integration-status-pill'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { OnboardingInlineCommandTerminal } from '~renderer/components/onboarding/inline-command-terminal'

@@ -4,7 +4,7 @@ import {
   Warning as TriangleAlert,
   ArrowsDownUp as ArrowDownUp,
   CaretDown as ChevronDown
-} from '@phosphor-icons/react'
+} from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { Checkbox } from '~renderer/components/ui/checkbox'
 import { Input } from '~renderer/components/ui/input'

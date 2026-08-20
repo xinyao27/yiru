@@ -1,5 +1,5 @@
-import { FolderOpen, ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
 import React, { useCallback } from 'react'
+import { FolderOpen, ArrowSquareOut as ExternalLink } from '~renderer/components/icons/hugeicons'
 import {
   ContextMenuItem,
   ContextMenuSeparator,

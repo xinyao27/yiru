@@ -1,5 +1,10 @@
-import { Copy, Eye, FolderOpen, ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
 import React, { useCallback } from 'react'
+import {
+  Copy,
+  Eye,
+  FolderOpen,
+  ArrowSquareOut as ExternalLink
+} from '~renderer/components/icons/hugeicons'
 import { useRuntimeRemoteSshSupport } from '~renderer/components/sidebar/use-runtime-remote-ssh-support'
 import {
   getWorktreeOpenInEntries,

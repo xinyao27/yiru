@@ -1,5 +1,5 @@
-import { CaretDown as ChevronDown } from '@phosphor-icons/react'
 import React from 'react'
+import { CaretDown as ChevronDown } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { Checkbox } from '~renderer/components/ui/checkbox'
 import { translate } from '~renderer/i18n/i18n'

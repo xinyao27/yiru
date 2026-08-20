@@ -1,4 +1,4 @@
-import { Pencil, Trash as Trash2 } from '@phosphor-icons/react'
+import { Pencil, Trash as Trash2 } from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
 import { AgentIcon, getAgentLabel } from '~renderer/lib/agent-catalog'
 import { cn } from '~renderer/lib/class-names'

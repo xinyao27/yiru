@@ -1,6 +1,6 @@
-import { CaretLeft as ChevronLeft } from '@phosphor-icons/react'
 import type React from 'react'
 import { useState } from 'react'
+import { CaretLeft as ChevronLeft } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { Textarea } from '~renderer/components/ui/textarea'
 import { translate } from '~renderer/i18n/i18n'

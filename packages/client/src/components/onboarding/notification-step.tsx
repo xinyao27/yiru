@@ -1,6 +1,6 @@
-import { BellRinging as BellRing, FileAudio, Upload } from '@phosphor-icons/react'
 import { useCallback, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { BellRinging as BellRing, FileAudio, Upload } from '~renderer/components/icons/hugeicons'
 import { getNotificationSoundOptions } from '~renderer/components/notification-sound-options'
 import {
   MacNotificationPermissionCard,

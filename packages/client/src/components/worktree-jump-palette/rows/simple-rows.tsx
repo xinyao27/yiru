@@ -1,5 +1,5 @@
-import { Plus } from '@phosphor-icons/react'
 import type React from 'react'
+import { Plus } from '~renderer/components/icons/hugeicons'
 import { CommandItem } from '~renderer/components/ui/command'
 import { CREATE_WORKTREE_ITEM_ID } from '~renderer/components/worktree-jump-palette/worktree-palette-create-action'
 import { translate } from '~renderer/i18n/i18n'

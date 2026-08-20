@@ -1,5 +1,5 @@
-import { Trash, ArrowCounterClockwise as Undo2 } from '@phosphor-icons/react'
 import { useMemo, useRef } from 'react'
+import { Trash, ArrowCounterClockwise as Undo2 } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,

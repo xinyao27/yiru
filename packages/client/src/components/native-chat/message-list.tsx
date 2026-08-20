@@ -1,10 +1,10 @@
-import { Image as ImageIcon, ArrowDown, ArrowUp } from '@phosphor-icons/react'
 import {
   isTextBlock,
   type NativeChatBlock,
   type NativeChatMessage
 } from '@yiru/workbench-model/agent'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { Image as ImageIcon, ArrowDown, ArrowUp } from '~renderer/components/icons/hugeicons'
 import CommentMarkdown, {
   type CommentMarkdownLinkClickHandler
 } from '~renderer/components/sidebar/comment-markdown'

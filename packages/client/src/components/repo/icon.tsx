@@ -1,3 +1,5 @@
+import type { RepoIcon } from '@yiru/workbench-model/workspace'
+import React from 'react'
 import {
   Robot as Bot,
   Cube as Box,
@@ -19,15 +21,13 @@ import {
   Sparkle as Sparkles,
   TerminalWindow as SquareTerminal,
   Wrench,
-  type Icon as PhosphorIcon
-} from '@phosphor-icons/react'
-import type { RepoIcon } from '@yiru/workbench-model/workspace'
-import React from 'react'
+  type Icon
+} from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
 import { createLocalizedCatalog } from '~renderer/i18n/localized-catalog'
 import { cn } from '~renderer/lib/class-names'
 
-export const getRepoLucideIconOptions = createLocalizedCatalog(() => [
+export const getRepoIconOptions = createLocalizedCatalog(() => [
   {
     name: 'Folder',
     label: translate('auto.components.repo.repo.icon.bed2674f9d', 'Folder'),
@@ -126,8 +126,8 @@ export const getRepoLucideIconOptions = createLocalizedCatalog(() => [
   { name: 'Box', label: translate('auto.components.repo.repo.icon.0ad395d475', 'Box'), icon: Box }
 ])
 
-export function getRepoLucideIcon(name: string | null | undefined): PhosphorIcon {
-  return getRepoLucideIconOptions().find((option) => option.name === name)?.icon ?? Folder
+export function getRepoIcon(name: string | null | undefined): Icon {
+  return getRepoIconOptions().find((option) => option.name === name)?.icon ?? Folder
 }
 
 export function RepoIconGlyph({
@@ -165,7 +165,7 @@ export function RepoIconGlyph({
     )
   }
 
-  const Icon = getRepoLucideIcon(repoIcon?.type === 'lucide' ? repoIcon.name : 'Folder')
+  const Icon = getRepoIcon(repoIcon?.type === 'lucide' ? repoIcon.name : 'Folder')
   return (
     <span className={cn('inline-flex items-center justify-center', className)}>
       <Icon className={iconClassName} style={color ? { color } : undefined} />

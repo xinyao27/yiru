@@ -1,5 +1,8 @@
-import { CheckCircle as CheckCircle2, WarningCircle as CircleAlert } from '@phosphor-icons/react'
 import React from 'react'
+import {
+  CheckCircle as CheckCircle2,
+  WarningCircle as CircleAlert
+} from '~renderer/components/icons/hugeicons'
 import { Input } from '~renderer/components/ui/input'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'

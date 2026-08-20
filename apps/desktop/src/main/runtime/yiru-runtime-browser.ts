@@ -131,6 +131,8 @@ type ActiveBrowserScreencastPage = {
   done: Promise<void>
 }
 
+const BROWSER_NAVIGATION_STATE_REPUBLISH_DELAY_MS = 100
+
 function clampInteger(
   value: number | undefined,
   min: number,
@@ -259,6 +261,7 @@ export class RuntimeBrowserCommands {
   private readonly activeScreencastPageIds = new Set<string>()
   private readonly activeScreencastsByPageId = new Map<string, ActiveBrowserScreencastPage>()
   private readonly stoppingScreencastPageIds = new Map<string, Promise<void>>()
+  private readonly navigationUpdateGenerations = new Map<string, number>()
   private readonly remoteScreencasts: BrowserRemoteScreencastAuthority<BrowserScreencastParams>
 
   constructor(
@@ -294,7 +297,13 @@ export class RuntimeBrowserCommands {
     input: BrowserPageUnregisterInput,
     shellConnectionId: string | undefined
   ): BrowserControlBooleanResult {
-    return this.shellAdapter?.browserPageUnregister(input, shellConnectionId) ?? { accepted: false }
+    const result = this.shellAdapter?.browserPageUnregister(input, shellConnectionId) ?? {
+      accepted: false
+    }
+    if (result.accepted) {
+      this.navigationUpdateGenerations.delete(input.browserPageId)
+    }
+    return result
   }
 
   browserPageSetActive(
@@ -572,7 +581,33 @@ export class RuntimeBrowserCommands {
   // address bar and tab title) stale. Push updates from main → renderer after
   // any navigation-causing command so the UI stays in sync.
   private notifyRendererNavigation(browserPageId: string, url: string, title: string): void {
-    this.host.emitBrowserGuestEvent({ type: 'navigationUpdate', browserPageId, url, title })
+    const generation = (this.navigationUpdateGenerations.get(browserPageId) ?? 0) + 1
+    this.navigationUpdateGenerations.set(browserPageId, generation)
+    const publish = (readLiveInfo: boolean): void => {
+      const page = this.host.getAgentBrowserBridge()?.getPage(browserPageId)
+      const info = readLiveInfo ? page?.getInfo() : undefined
+      const navigationState = page?.getNavigationState?.()
+      this.host.emitBrowserGuestEvent({
+        type: 'navigationUpdate',
+        browserPageId,
+        url: info?.url || url,
+        title: info?.title || title,
+        ...navigationState
+      })
+    }
+
+    publish(false)
+    // Why: Chromium can settle navigationHistory just after the CDP command
+    // response. A trailing read prevents a stale Forward/Back affordance from
+    // winning the renderer-to-mobile session snapshot race.
+    setTimeout(() => {
+      // Why: a rapid Back → Forward (or repeated reload) can queue multiple delayed
+      // reads. Only the newest navigation may publish the settled history state.
+      if (this.navigationUpdateGenerations.get(browserPageId) !== generation) {
+        return
+      }
+      publish(true)
+    }, BROWSER_NAVIGATION_STATE_REPUBLISH_DELAY_MS)
   }
 
   // Why: `tabSwitch` only flips the bridge's `activeWebContentsId` — it
@@ -1236,7 +1271,13 @@ export class RuntimeBrowserCommands {
 
   async browserForward(params: BrowserCommandTargetParams): Promise<BrowserForwardResult> {
     const target = await this.resolveBrowserCommandTarget(params)
-    return this.requireAgentBrowserBridge().forward(target.worktreeId, target.browserPageId)
+    const bridge = this.requireAgentBrowserBridge()
+    const result = await bridge.forward(target.worktreeId, target.browserPageId)
+    const pageId = bridge.getActivePageId(target.worktreeId, target.browserPageId)
+    if (pageId) {
+      this.notifyRendererNavigation(pageId, result.url, result.title)
+    }
+    return result
   }
 
   async browserScrollIntoView(

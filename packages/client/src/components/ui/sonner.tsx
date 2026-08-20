@@ -1,9 +1,10 @@
 import {
-  CheckCircle as CircleCheckIcon,
-  InfoIcon,
-  XCircle as OctagonXIcon,
-  Warning as TriangleAlertIcon
-} from '@phosphor-icons/react'
+  Alert02Icon,
+  CircleCheckIcon,
+  CircleXIcon,
+  InformationCircleIcon
+} from '@hugeicons/core-free-icons'
+import { HugeiconsIcon } from '@hugeicons/react'
 import { Toaster as Sonner, type ToasterProps } from 'sonner'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 
@@ -21,10 +22,10 @@ const Toaster = ({ theme = 'system', ...props }: ToasterProps) => {
       mobileOffset={{ bottom: 'calc(2.5rem + env(safe-area-inset-bottom, 0px))' }}
       className="toaster group"
       icons={{
-        success: <CircleCheckIcon className="size-4" />,
-        info: <InfoIcon className="size-4" />,
-        warning: <TriangleAlertIcon className="size-4" />,
-        error: <OctagonXIcon className="size-4" />,
+        success: <HugeiconsIcon icon={CircleCheckIcon} className="size-4" />,
+        info: <HugeiconsIcon icon={InformationCircleIcon} className="size-4" />,
+        warning: <HugeiconsIcon icon={Alert02Icon} className="size-4" />,
+        error: <HugeiconsIcon icon={CircleXIcon} className="size-4" />,
         loading: <LoadingIndicator className="size-4" />
       }}
       style={

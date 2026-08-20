@@ -1,4 +1,13 @@
 import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type MouseEventHandler,
+  type RefObject
+} from 'react'
+import {
   ArrowClockwise,
   Clipboard,
   Copy,
@@ -12,16 +21,7 @@ import {
   ArrowsOut as Maximize2,
   ArrowsIn as Minimize2,
   X
-} from '@phosphor-icons/react'
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type MouseEventHandler,
-  type RefObject
-} from 'react'
+} from '~renderer/components/icons/hugeicons'
 import {
   ContextMenuContent,
   ContextMenuItem,

@@ -1,4 +1,3 @@
-import { CalendarDots as CalendarClock, PlayCircle } from '@phosphor-icons/react'
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
 import React from 'react'
 import {
@@ -6,6 +5,7 @@ import {
   listAutomationRunsForTarget,
   listAutomationsForTarget
 } from '~renderer/components/automations/automation-host-client'
+import { CalendarDots as CalendarClock, PlayCircle } from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
 import type { AutomationWorkspaceProvenance } from '~shared/types'
 

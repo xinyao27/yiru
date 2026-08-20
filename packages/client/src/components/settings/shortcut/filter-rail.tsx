@@ -1,6 +1,6 @@
-import { MagnifyingGlass as Search, X } from '@phosphor-icons/react'
 import { isClipboardTextByteLengthOverLimit } from '@yiru/workbench-model/ui'
 import React from 'react'
+import { MagnifyingGlass as Search, X } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { Input } from '~renderer/components/ui/input'
 import { translate } from '~renderer/i18n/i18n'

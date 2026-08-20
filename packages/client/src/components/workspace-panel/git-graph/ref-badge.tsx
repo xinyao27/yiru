@@ -1,5 +1,11 @@
-import { CloudCheck, GitBranch, GitCommit, Tag as TagIcon, Target } from '@phosphor-icons/react'
 import type React from 'react'
+import {
+  CloudCheck,
+  GitBranch,
+  GitCommit,
+  Tag as TagIcon,
+  Target
+} from '~renderer/components/icons/hugeicons'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { cn } from '~renderer/lib/class-names'
 import type { GitHistoryItemRef } from '~shared/git/history'

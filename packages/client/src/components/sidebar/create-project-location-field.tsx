@@ -1,4 +1,4 @@
-import { Folder, FolderOpen, Pencil } from '@phosphor-icons/react'
+import { Folder, FolderOpen, Pencil } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { DialogDescription, DialogHeader, DialogTitle } from '~renderer/components/ui/dialog'
 import { Input } from '~renderer/components/ui/input'

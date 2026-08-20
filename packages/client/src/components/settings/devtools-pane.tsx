@@ -1,11 +1,11 @@
+import { toast } from 'sonner'
 import {
   Bell,
   Info,
   XCircle as OctagonX,
   Sparkle as Sparkles,
   Trash as Trash2
-} from '@phosphor-icons/react'
-import { toast } from 'sonner'
+} from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
 import type { AppState } from '~renderer/store/types'
 

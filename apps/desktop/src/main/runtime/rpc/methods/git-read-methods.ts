@@ -12,6 +12,7 @@ import type {
   GitSubmoduleStatusInputSchema,
   GitWorktreeSelectorInputSchema
 } from '@yiru/runtime-protocol/contract'
+import { MOBILE_GIT_BRANCH_COMPARE_MAX_ENTRIES } from '@yiru/runtime-protocol/mobile-source-control-wire'
 import type { z } from 'zod'
 
 import type { RpcContext } from '../core'
@@ -87,10 +88,28 @@ export const handleGitDiff = (
     params.compareAgainstHead
   )
 
-export const handleGitBranchCompare = (
+export const handleGitBranchCompare = async (
   params: z.infer<typeof GitBranchCompareInputSchema>,
-  { gitCommands }: RpcContext
-) => gitCommands.getRuntimeGitBranchCompare(params.worktree, params.baseRef)
+  { gitCommands, clientKind }: RpcContext
+) => {
+  const result = await gitCommands.getRuntimeGitBranchCompare(params.worktree, params.baseRef)
+  // Why: desktop's own branch-compare panel has no entry cap (diffing thousands
+  // of files against base is normal there), but a mobile client transports this
+  // as a single WebSocket message. Cap it defensively for huge monorepo
+  // comparisons even though the mobile client now configures a generous
+  // maximumMessageSize (see AuthenticatedRuntimeConnection.swift) — an
+  // unbounded array is still an unbounded memory/bandwidth cost on the wire.
+  // `summary.changedFiles` keeps the true total; only the array sent to
+  // mobile is bounded.
+  if (clientKind !== 'mobile' || result.entries.length <= MOBILE_GIT_BRANCH_COMPARE_MAX_ENTRIES) {
+    return result
+  }
+  return {
+    ...result,
+    entries: result.entries.slice(0, MOBILE_GIT_BRANCH_COMPARE_MAX_ENTRIES),
+    didHitLimit: true
+  }
+}
 
 export const handleGitCommitCompare = (
   params: z.infer<typeof GitCommitCompareInputSchema>,

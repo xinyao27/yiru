@@ -1,3 +1,5 @@
+import type { AiVaultSession } from '@yiru/workbench-model/agent'
+import type React from 'react'
 import {
   ChatCentered as MessageSquarePlus,
   Crosshair as LocateFixed,
@@ -5,9 +7,7 @@ import {
   Layout as PanelTopOpen,
   Play,
   CaretDown as ChevronDown
-} from '@phosphor-icons/react'
-import type { AiVaultSession } from '@yiru/workbench-model/agent'
-import type React from 'react'
+} from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,

@@ -51,10 +51,11 @@ import { commonPropsSchema, validate } from './validator'
 // the build-identity gate below: both must be satisfied to transmit, so
 // flipping the flag alone still leaves contributor builds silent.
 //
-// NOTE: scripts/verify-telemetry-constants.mjs greps this declaration
-// shape (`const TELEMETRY_ENABLED = true|false`) to gate release verification.
-// If you refactor this (e.g. let, export, computed-from-env, moved into a
-// config object), update the regex in that script too.
+// NOTE: this declaration shape (`const TELEMETRY_ENABLED = true|false`) used to be grepped by
+// scripts/verify-telemetry-constants.mjs to gate release verification; that script has been
+// deleted, so refactoring this (e.g. let, export, computed-from-env, moved into a config
+// object) is no longer caught automatically — double-check any release process that still
+// expects this literal shape.
 const TELEMETRY_ENABLED = true
 const POSTHOG_HOST = 'https://us.i.posthog.com'
 

@@ -1,6 +1,6 @@
-import { GitMerge, CaretDown as ChevronDown } from '@phosphor-icons/react'
 // Step for AddRepoDialog (yiru#763), split out so create-project state stays scoped.
 import React, { useMemo, useState } from 'react'
+import { GitMerge, CaretDown as ChevronDown } from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import { DialogHeader, DialogTitle, DialogDescription } from '~renderer/components/ui/dialog'

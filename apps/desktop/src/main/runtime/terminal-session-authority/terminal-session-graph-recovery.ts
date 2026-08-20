@@ -21,6 +21,7 @@ type LeafBuildContext<TLeaf> = {
 
 export type TerminalGraphSyncPort<TIncomingLeaf, TLeaf> = {
   buildLeaf(input: TIncomingLeaf, context: LeafBuildContext<TLeaf>): TLeaf
+  preserveRemotePty(ptyId: string): boolean
   recordLivePty(input: TIncomingLeaf, existing: TLeaf | null): void
 }
 
@@ -51,7 +52,10 @@ export class TerminalSessionGraphRecovery<
       const key = leafKey(input)
       const existing = this.graph.getLeaf(key)
       const ptyId =
-        preserveLivePtys && input.ptyId === null ? (existing?.ptyId ?? null) : input.ptyId
+        input.ptyId === null &&
+        (preserveLivePtys || Boolean(existing?.ptyId && port.preserveRemotePty(existing.ptyId)))
+          ? (existing?.ptyId ?? null)
+          : input.ptyId
       const ptyGeneration =
         existing && existing.ptyId !== ptyId
           ? existing.ptyGeneration + 1
@@ -75,7 +79,7 @@ export class TerminalSessionGraphRecovery<
       }
     }
 
-    this.preserveRecoverableLeaves(nextLeaves, preserveLivePtys)
+    this.preserveRecoverableLeaves(nextLeaves, preserveLivePtys, port.preserveRemotePty)
     this.graph.replaceLeaves(nextLeaves)
     this.graph.markReady(windowId)
     for (const leaf of this.graph.listLeaves()) {
@@ -165,7 +169,11 @@ export class TerminalSessionGraphRecovery<
     })
   }
 
-  private preserveRecoverableLeaves(nextLeaves: Map<string, TLeaf>, enabled: boolean): void {
+  private preserveRecoverableLeaves(
+    nextLeaves: Map<string, TLeaf>,
+    enabled: boolean,
+    preserveRemotePty: (ptyId: string) => boolean
+  ): void {
     const livePtyIds = new Set(
       [...nextLeaves.values()].map((leaf) => leaf.ptyId).filter((ptyId): ptyId is string => !!ptyId)
     )
@@ -175,12 +183,13 @@ export class TerminalSessionGraphRecovery<
         continue
       }
       if (
-        enabled &&
         oldLeaf.ptyId &&
-        this.graph.getHandleForPty(oldLeaf.ptyId) &&
+        ((enabled && this.graph.getHandleForPty(oldLeaf.ptyId)) ||
+          preserveRemotePty(oldLeaf.ptyId)) &&
         !livePtyIds.has(oldLeaf.ptyId)
       ) {
-        // Why: renderer reload must not revoke a CLI-created terminal before it rebinds.
+        // Why: renderer reloads and hidden desktop panes must not revoke a terminal while a
+        // CLI-created handle or remote view still owns its live transport.
         nextLeaves.set(oldKey, oldLeaf)
         livePtyIds.add(oldLeaf.ptyId)
       } else {

@@ -1,5 +1,5 @@
-import { DownloadSimple as Import } from '@phosphor-icons/react'
 import { toast } from 'sonner'
+import { DownloadSimple as Import } from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import {

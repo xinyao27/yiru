@@ -1,6 +1,6 @@
 import { useDroppable } from '@dnd-kit/core'
-import { X } from '@phosphor-icons/react'
 import { Suspense, useMemo } from 'react'
+import { X } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { ButtonGroup } from '~renderer/components/ui/button-group'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'

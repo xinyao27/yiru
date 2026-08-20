@@ -1,6 +1,6 @@
-import { ArrowElbowDownLeft as CornerDownLeft } from '@phosphor-icons/react'
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { ArrowElbowDownLeft as CornerDownLeft } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { Textarea } from '~renderer/components/ui/textarea'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'

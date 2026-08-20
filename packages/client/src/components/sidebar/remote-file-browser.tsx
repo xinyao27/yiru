@@ -1,12 +1,12 @@
+/* eslint-disable max-lines -- Why: the remote file browser centralizes filter state, path-mode preview state, cache, debounce, request gen, and click/keyboard handling in one component so picker navigation stays coherent. */
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Folder,
   House as Home,
   MagnifyingGlass as Search,
   CaretRight as ChevronRight,
   ArrowUp
-} from '@phosphor-icons/react'
-/* eslint-disable max-lines -- Why: the remote file browser centralizes filter state, path-mode preview state, cache, debounce, request gen, and click/keyboard handling in one component so picker navigation stays coherent. */
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import { Input } from '~renderer/components/ui/input'

@@ -1,6 +1,6 @@
-import { Gear as SettingsIcon } from '@phosphor-icons/react'
 import React, { useCallback } from 'react'
 import { toast } from 'sonner'
+import { Gear as SettingsIcon } from '~renderer/components/icons/hugeicons'
 import { DropdownMenuItem } from '~renderer/components/ui/dropdown-menu'
 import { useDetectedAgents } from '~renderer/hooks/use-detected-agents'
 import { useOptionalShortcutLabel } from '~renderer/hooks/use-shortcut-label'

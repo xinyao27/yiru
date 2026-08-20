@@ -33,7 +33,7 @@ final class TerminalPrototypeModel {
             onDirectoryChange: { [weak self] _ in
                 self?.lastEvent = String(localized: "Working directory changed")
             },
-            onOpenLink: { [weak self] _ in
+            onOpenLink: { [weak self] _, _ in
                 self?.lastEvent = String(localized: "Link activation received")
             },
             onClipboardWriteRequest: { [weak self] _ in

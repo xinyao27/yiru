@@ -12,6 +12,7 @@ enum PairingPhase {
 final class PairingModel {
     let offer: PairingOffer
     private(set) var phase: PairingPhase = .ready
+    private(set) var logEntries: [PairingLogEntry] = []
 
     @ObservationIgnored
     private let runtime: any PairingRuntime
@@ -23,8 +24,11 @@ final class PairingModel {
 
     func pair() async -> HostProfile? {
         phase = .connecting
+        logEntries = []
         do {
-            let host = try await runtime.pair(offer)
+            let host = try await runtime.pair(offer) { [weak self] level, message, detail in
+                await self?.appendLog(level: level, message: message, detail: detail)
+            }
             guard !Task.isCancelled else { return nil }
             return host
         } catch is CancellationError {
@@ -37,23 +41,40 @@ final class PairingModel {
         } catch PairingRuntimeError.authenticationFailed {
             phase = .failed(
                 "The desktop rejected this pairing code. Generate a new code and try again.")
+        } catch PairingRuntimeError.connectionFailed(let detail) {
+            phase = .failed(
+                LocalizedStringResource(
+                    stringLiteral: pairingFailureMessage(detail)
+                )
+            )
         } catch {
-            phase = .failed("Yiru could not establish a secure connection to this desktop.")
+            phase = .failed(
+                LocalizedStringResource(
+                    stringLiteral: pairingFailureMessage(error.localizedDescription)
+                )
+            )
         }
         return nil
     }
 
-    func retry() {
-        phase = .ready
+    private func pairingFailureMessage(_ detail: String) -> String {
+        let trimmed = detail.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            return "Yiru could not establish a secure connection to this desktop."
+        }
+        return "Pairing failed: \(trimmed)"
     }
 
-    var isConnecting: Bool {
-        if case .connecting = phase { return true }
-        return false
+    private func appendLog(level: PairingLogLevel, message: String, detail: String?) {
+        logEntries.append(
+            PairingLogEntry(
+                id: UUID(),
+                date: Date(),
+                level: level,
+                message: message,
+                detail: detail
+            )
+        )
     }
 
-    var hasFailed: Bool {
-        if case .failed = phase { return true }
-        return false
-    }
 }

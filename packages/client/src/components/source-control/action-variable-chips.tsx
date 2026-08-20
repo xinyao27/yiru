@@ -1,5 +1,5 @@
-import { BracketsCurly as Braces } from '@phosphor-icons/react'
 import type React from 'react'
+import { BracketsCurly as Braces } from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
 import {
   SOURCE_CONTROL_ACTION_VARIABLE_INFO,

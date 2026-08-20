@@ -1,4 +1,4 @@
-import { DeviceMobile as Smartphone } from '@phosphor-icons/react'
+import { DeviceMobile as Smartphone } from '~renderer/components/icons/hugeicons'
 import {
   Select,
   SelectContent,

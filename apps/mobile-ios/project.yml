@@ -1,6 +1,6 @@
 name: YiruMobile
 options:
-  bundleIdPrefix: me.xinyao.yiru
+  bundleIdPrefix: com.xinyao27.yiru
   createIntermediateGroups: true
   deploymentTarget:
     iOS: '26.0'
@@ -10,7 +10,9 @@ settings:
   base:
     CURRENT_PROJECT_VERSION: '1'
     ENABLE_USER_SCRIPT_SANDBOXING: YES
-    MARKETING_VERSION: '0.1.0'
+    # Why: keep the native rewrite's visible version in lockstep with Expo Mobile during parity
+    # work; release automation can bump both clients together.
+    MARKETING_VERSION: '0.0.1'
     SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
     SWIFT_STRICT_CONCURRENCY: complete
     SWIFT_VERSION: '6.0'
@@ -22,12 +24,19 @@ packages:
   SwiftTerm:
     url: https://github.com/migueldeicaza/SwiftTerm.git
     exactVersion: 1.18.0
+  Textual:
+    url: https://github.com/gonzalezreal/textual.git
+    exactVersion: 0.5.0
+  Hugeicons:
+    url: https://github.com/iSapozhnik/hugeicons-swift.git
+    exactVersion: 4.1.7
 
 schemes:
   YiruMobile:
     build:
       targets:
         YiruMobile: all
+        YiruWidgets: all
 
 targets:
   YiruMobile:
@@ -38,9 +47,17 @@ targets:
         type: syncedFolder
         excludes:
           - '**/*.md'
+          - 'Resources/agent-icons/**'
+      - path: Shared/Widgets
+      - path: YiruMobile/Resources/agent-icons
+        type: folder
+        buildPhase: resources
     dependencies:
       - package: Sodium
       - package: SwiftTerm
+      - package: Textual
+      - package: Hugeicons
+      - target: YiruWidgets
     info:
       path: YiruMobile/Resources/Info.plist
       properties:
@@ -48,15 +65,26 @@ targets:
         CFBundleDisplayName: Yiru
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        CADisableMinimumFrameDurationOnPhone: true
         CFBundleURLTypes:
-          - CFBundleURLName: me.xinyao.yiru.mobile.pairing
+          - CFBundleURLName: com.xinyao27.yiru.mobile.pairing
             CFBundleURLSchemes:
               - yiru
         ITSAppUsesNonExemptEncryption: false
-        NSCameraUsageDescription: Scan a Yiru desktop pairing code.
+        NSCameraUsageDescription: Allow Yiru to take photos and scan pairing codes.
+        NSLocalNetworkUsageDescription: Yiru connects to the desktop app on your local network.
+        NSPhotoLibraryUsageDescription: Allow Yiru to attach photos from your library to an agent or terminal session on your paired desktop.
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
+          NSExceptionDomains:
+            100.64.0.0/10:
+              NSExceptionAllowsInsecureHTTPLoads: true
+            fd7a:115c:a1e0::/48:
+              NSExceptionAllowsInsecureHTTPLoads: true
         UILaunchScreen: {}
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
         UISupportedInterfaceOrientations~ipad:
@@ -66,12 +94,49 @@ targets:
           - UIInterfaceOrientationLandscapeRight
     settings:
       base:
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: 8H6Q2YA365
         GENERATE_INFOPLIST_FILE: NO
-        PRODUCT_BUNDLE_IDENTIFIER: me.xinyao.yiru.mobile.ios
+        PRODUCT_BUNDLE_IDENTIFIER: com.xinyao27.yiru.mobile
         PRODUCT_NAME: Yiru
         SUPPORTS_MACCATALYST: NO
         SWIFT_EMIT_LOC_STRINGS: YES
         TARGETED_DEVICE_FAMILY: '1,2'
+      configs:
+        Debug:
+          CODE_SIGN_ENTITLEMENTS: YiruMobile/Resources/YiruMobile.entitlements
+        Release:
+          CODE_SIGN_ENTITLEMENTS: YiruMobile/Resources/YiruMobileRelease.entitlements
+  YiruWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: YiruWidgets
+        type: syncedFolder
+      - path: Shared/Widgets
+      - path: YiruMobile/DesignSystem/Icons
+    info:
+      path: YiruWidgets/Resources/Info.plist
+      properties:
+        CFBundleDisplayName: Yiru Widgets
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        CODE_SIGN_ENTITLEMENTS: YiruWidgets/Resources/YiruWidgets.entitlements
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: 8H6Q2YA365
+        GENERATE_INFOPLIST_FILE: NO
+        PRODUCT_BUNDLE_IDENTIFIER: com.xinyao27.yiru.mobile.ExpoWidgetsTarget
+        PRODUCT_NAME: YiruWidgets
+        SKIP_INSTALL: YES
+        SUPPORTS_MACCATALYST: NO
+        SWIFT_EMIT_LOC_STRINGS: YES
+        TARGETED_DEVICE_FAMILY: '1,2'
+    dependencies:
+      - package: Hugeicons

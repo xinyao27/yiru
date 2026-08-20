@@ -1,12 +1,12 @@
+import type { Editor } from '@tiptap/react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import {
   Copy,
   Pencil,
   LinkBreak as Unlink,
   ArrowSquareOut as ExternalLink
-} from '@phosphor-icons/react'
-import type { Editor } from '@tiptap/react'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
+} from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { Input } from '~renderer/components/ui/input'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'

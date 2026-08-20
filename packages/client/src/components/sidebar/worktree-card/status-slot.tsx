@@ -1,5 +1,5 @@
-import { GitMerge } from '@phosphor-icons/react'
 import React from 'react'
+import { GitMerge } from '~renderer/components/icons/hugeicons'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'

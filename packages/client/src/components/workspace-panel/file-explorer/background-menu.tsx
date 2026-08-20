@@ -1,5 +1,5 @@
-import { FilePlus, FolderPlus } from '@phosphor-icons/react'
 import React, { useEffect } from 'react'
+import { FilePlus, FolderPlus } from '~renderer/components/icons/hugeicons'
 import { CLOSE_ALL_CONTEXT_MENUS_EVENT } from '~renderer/components/tab-bar/sortable-tab'
 import {
   ContextMenu,

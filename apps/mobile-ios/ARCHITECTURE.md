@@ -41,8 +41,10 @@ App ───────→ Features ───────→ DesignSystem
 - `Platform` 不拥有产品状态；它只把系统能力适配成 feature 定义的窄接口。
 - `DesignSystem` 不依赖 feature、transport 或 persistence。
 - 跨进程 wire contract 的 source of truth 仍是 `packages/runtime-protocol` 与
-  `packages/mobile-relay-protocol`。Swift wire model 必须由可校验的生成步骤产生，不能在
-  多个 feature 手抄一套相似 JSON 结构。
+  `packages/mobile-relay-protocol`。Swift wire model 应当从这些 source of truth 生成而非
+  在多个 feature 手抄一套相似 JSON 结构；此前生成加漂移校验由
+  `generate-mobile-ios-wire-contracts.mjs` 自动执行，该脚本已被删除，目前这条规则只能靠人工
+  在改动协议时同步维护 `MobileWire.generated.swift`。
 
 Pairing 是第一个完整纵向切片：`PairingCodeDecoder` 只负责边界校验，`PairingModel` 只负责
 页面状态，`DirectPairingClient` 负责配对用例，`KeychainHostRepository` 负责持久身份。
@@ -72,8 +74,10 @@ provisioning、credential rotation 或 relay endpoint lifecycle。
 
 - 根导航由 `AppModel` 持有，route 是可穷举的值类型。
 - 由选择驱动的 sheet 使用 `.sheet(item:)`，不用成组布尔值表达互斥页面。
-- iPhone 使用 `NavigationStack`；需要主从布局的 feature 在 iPad 上使用
-  `NavigationSplitView`，不维护两套业务状态。
+- Home 和非 Workspace 路由使用 `NavigationStack`；Workspace 路由始终由同一个
+  `NavigationSplitView` composition root 承载。iPhone 使用系统的紧凑单列适配，iPad
+  展示主从栏；窗口尺寸变化只改变列可见性，不替换导航根，也不重建 Session/Terminal
+  状态。
 - Deep link 先解析成 typed intent，再由当前 feature 决定是否能够执行。
 
 ## Terminal renderer
@@ -112,6 +116,11 @@ Terminal 控制面的 `status/list/show/openMultiplex` 使用 runtime-protocol �
 Workspace session 以 `session.tabs` publication 为唯一 tab 权威源；本地只拥有 pending selection、
 短期 close tombstone 和已访问 terminal surface 集合。`publicationEpoch + snapshotVersion` 拒绝同一
 publisher 的倒序 snapshot，隐藏 tab 保留 renderer，但将 terminal delivery interest 降为 background。
+
+Terminal 与 Native Chat 共用同一个 `TerminalLiveModel`。连接状态和 terminal action notice 由
+feature-owned status overlays 渲染在 composition surface 上，而不是绑定到 terminal renderer
+的可见性；因此切换 Chat/Terminal、窄宽布局或 iPad master-detail 时，重连、retry、Stop 失败和
+其他 transient feedback 都仍然可见，并且不会推开 transcript 或 composer 的布局。
 
 ## 文件和 API 边界
 

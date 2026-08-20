@@ -986,14 +986,21 @@ export function useIpcEvents(): void {
     // navigations, so the Zustand store (address bar, tab title) stays stale.
     // This IPC pushes the live URL/title from main after goto/click/back/reload.
     unsubs.push(
-      browserShellEventsClient.onNavigationUpdate(({ browserPageId, url, title }) => {
-        if (isRuntimeEnvironmentActive()) {
-          return
+      browserShellEventsClient.onNavigationUpdate(
+        ({ browserPageId, url, title, canGoBack, canGoForward }) => {
+          if (isRuntimeEnvironmentActive()) {
+            return
+          }
+          const store = useAppStore.getState()
+          store.setBrowserPageUrl(browserPageId, url)
+          store.updateBrowserPageState(browserPageId, {
+            title,
+            loading: false,
+            ...(canGoBack === undefined ? {} : { canGoBack }),
+            ...(canGoForward === undefined ? {} : { canGoForward })
+          })
         }
-        const store = useAppStore.getState()
-        store.setBrowserPageUrl(browserPageId, url)
-        store.updateBrowserPageState(browserPageId, { title, loading: false })
-      })
+      )
     )
 
     // Why: browser webviews only start their guest process when the container

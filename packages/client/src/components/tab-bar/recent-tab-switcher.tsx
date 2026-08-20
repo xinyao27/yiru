@@ -1,12 +1,12 @@
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import {
   FileText,
   GitBranch,
   GitDiff as GitCompare,
   Globe as Globe2,
   TerminalWindow as TerminalSquare
-} from '@phosphor-icons/react'
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
+} from '~renderer/components/icons/hugeicons'
 import { getShortcutPlatform } from '~renderer/hooks/use-shortcut-label'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'

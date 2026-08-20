@@ -1,11 +1,11 @@
+import React, { useCallback, useMemo, useState } from 'react'
+import { toast } from 'sonner'
 import {
   FloppyDisk as Save,
   Sparkle as Sparkles,
   Terminal,
   Warning as TriangleAlert
-} from '@phosphor-icons/react'
-import React, { useCallback, useMemo, useState } from 'react'
-import { toast } from 'sonner'
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { SourceControlActionVariableChips } from '~renderer/components/source-control/action-variable-chips'
 import { Button } from '~renderer/components/ui/button'

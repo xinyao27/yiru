@@ -1,30 +1,28 @@
 import Foundation
 
-extension RuntimeClient: WorkspaceRepository {
-    func workspaces(for hostID: String) async throws -> WorkspaceSnapshot {
-        try await withThrowingTaskGroup(of: WorkspaceSnapshot.self) { group in
-            group.addTask { try await self.fetchWorkspaces(for: hostID) }
-            group.addTask {
-                try await Task.sleep(for: self.timeout)
-                throw WorkspaceRepositoryError.timeout
-            }
-            guard let snapshot = try await group.next() else { throw CancellationError() }
-            group.cancelAll()
-            return snapshot
+extension RuntimeClient: TerminalHostCapabilityRepository {
+    func terminalCapabilities(for hostID: String) async -> TerminalHostCapabilities {
+        guard
+            let status: MobileRuntimeStatusWire = try? await callRuntime(
+                hostID: hostID,
+                path: MobileTerminalWireContract.statusPath,
+                input: RuntimeNullWire(),
+                output: MobileRuntimeStatusWire.self
+            )
+        else {
+            return TerminalHostCapabilities(
+                browserScreencastSupported: false,
+                agentHistorySupported: false,
+                quickCommandsSupported: false
+            )
         }
-    }
-
-    private func fetchWorkspaces(for hostID: String) async throws -> WorkspaceSnapshot {
-        let wire: MobileWorkspaceListWire = try await callRuntime(
-            hostID: hostID,
-            path: MobileRuntimeWireContract.worktreeListPath,
-            input: MobileWorkspaceListRequestWire(limit: 10_000),
-            output: MobileWorkspaceListWire.self
-        )
-        return WorkspaceSnapshot(
-            workspaces: wire.worktrees.map(WorkspaceSummary.init(wire:)),
-            totalCount: wire.totalCount,
-            isTruncated: wire.truncated
+        let capabilities = Set(status.capabilities ?? [])
+        return TerminalHostCapabilities(
+            browserScreencastSupported: capabilities.contains("browser.screencast.v1"),
+            agentHistorySupported: capabilities.contains(MobileAgentHistoryWireContract.capability),
+            quickCommandsSupported: capabilities.contains(
+                MobileQuickCommandsWireContract.capability
+            )
         )
     }
 }
@@ -94,6 +92,81 @@ extension RuntimeClient: TerminalDisplayModeRuntime {
         switch wire.mode {
         case .auto: return .auto
         case .desktop: return .desktop
+        }
+    }
+}
+
+extension RuntimeClient {
+    func focusTerminal(hostID: String, terminalID: String) async throws {
+        let result: MobileTerminalFocusResultWire = try await callRuntime(
+            hostID: hostID,
+            path: MobileTerminalWireContract.focusPath,
+            input: MobileTerminalHandleRequestWire(terminal: terminalID),
+            output: MobileTerminalFocusResultWire.self
+        )
+        guard result.focus.handle == terminalID else {
+            throw TerminalWorkspaceRepositoryError.rejectedMutation
+        }
+    }
+
+    func inferAgentInterrupt(
+        hostID: String,
+        baseline: TerminalAgentInterruptBaseline
+    ) async -> Bool {
+        do {
+            return try await callRuntime(
+                hostID: hostID,
+                path: MobileAgentStatusWireContract.inferInterruptPath,
+                input: MobileAgentStatusInferInterruptRequestWire(
+                    paneKey: baseline.paneKey,
+                    baselineUpdatedAt: baseline.updatedAt,
+                    baselineStateStartedAt: baseline.stateStartedAt,
+                    baselinePrompt: baseline.prompt,
+                    baselineAgentType: baseline.agentType,
+                    intent: "plain-escape",
+                    inputCount: nil
+                ),
+                output: Bool.self
+            )
+        } catch {
+            return false
+        }
+    }
+
+    func renameTerminal(hostID: String, terminalID: String, title: String) async throws -> String {
+        let result: MobileTerminalRenameResultWire = try await callRuntime(
+            hostID: hostID,
+            path: MobileTerminalWireContract.renamePath,
+            input: MobileTerminalRenameRequestWire(terminal: terminalID, title: title),
+            output: MobileTerminalRenameResultWire.self
+        )
+        guard result.rename.handle == terminalID else {
+            throw TerminalWorkspaceRepositoryError.rejectedMutation
+        }
+        return result.rename.title ?? String(localized: "Terminal")
+    }
+
+    func clearTerminal(hostID: String, terminalID: String) async throws {
+        let result: MobileTerminalClearBufferResultWire = try await callRuntime(
+            hostID: hostID,
+            path: MobileTerminalWireContract.clearBufferPath,
+            input: MobileTerminalHandleRequestWire(terminal: terminalID),
+            output: MobileTerminalClearBufferResultWire.self
+        )
+        guard result.clear.handle == terminalID, result.clear.cleared else {
+            throw TerminalWorkspaceRepositoryError.rejectedMutation
+        }
+    }
+
+    func closeTerminal(hostID: String, terminalID: String) async throws {
+        let result: MobileTerminalCloseResultWire = try await callRuntime(
+            hostID: hostID,
+            path: MobileTerminalWireContract.closePath,
+            input: MobileTerminalHandleRequestWire(terminal: terminalID),
+            output: MobileTerminalCloseResultWire.self
+        )
+        guard result.close.handle == terminalID else {
+            throw TerminalWorkspaceRepositoryError.rejectedMutation
         }
     }
 }

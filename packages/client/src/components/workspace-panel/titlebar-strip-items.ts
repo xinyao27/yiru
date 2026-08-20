@@ -1,5 +1,10 @@
-import { ClockCounterClockwise, Folder, FolderOpen, Play } from '@phosphor-icons/react'
 import type { ActiveRightSidebarTab } from '~renderer/components/editor/state'
+import {
+  ClockCounterClockwise,
+  Folder,
+  FolderOpen,
+  Play
+} from '~renderer/components/icons/hugeicons'
 
 import type { ActivityBarItem } from './activity-bar-buttons'
 

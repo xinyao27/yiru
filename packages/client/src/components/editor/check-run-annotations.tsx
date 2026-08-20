@@ -1,5 +1,5 @@
-import { ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
 import React from 'react'
+import { ArrowSquareOut as ExternalLink } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
 import type { PRCheckAnnotation } from '~shared/types'

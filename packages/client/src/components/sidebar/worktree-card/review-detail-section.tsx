@@ -1,11 +1,11 @@
+import React from 'react'
 import {
   Copy,
   DotsThree as Ellipsis,
   LinkBreak as Unlink,
   ArrowSquareOut as ExternalLink,
   MonitorArrowUp as MonitorUp
-} from '@phosphor-icons/react'
-import React from 'react'
+} from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,

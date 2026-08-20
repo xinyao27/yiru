@@ -1,5 +1,5 @@
-import { Check, Info, ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
 import { useLayoutEffect, useRef, useState } from 'react'
+import { Check, Info, ArrowSquareOut as ExternalLink } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { Checkbox } from '~renderer/components/ui/checkbox'
 import {

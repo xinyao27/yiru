@@ -1,5 +1,5 @@
-import { Warning as TriangleAlert } from '@phosphor-icons/react'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { Warning as TriangleAlert } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,

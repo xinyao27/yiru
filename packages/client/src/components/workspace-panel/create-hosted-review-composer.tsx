@@ -1,11 +1,11 @@
+import type { HostedReviewProvider } from '@yiru/workbench-model/review'
 import {
   GitMerge,
   GitPullRequest as GitPullRequestArrow,
   Sparkle as Sparkles,
   Square,
   CaretDown as ChevronDown
-} from '@phosphor-icons/react'
-import type { HostedReviewProvider } from '@yiru/workbench-model/review'
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import {

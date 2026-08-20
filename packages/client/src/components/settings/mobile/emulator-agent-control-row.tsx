@@ -1,5 +1,5 @@
-import { DownloadSimple as Import } from '@phosphor-icons/react'
 import { useMobileEmulatorAgentSetupState } from '~renderer/components/emulator-pane/use-mobile-emulator-agent-setup-state'
+import { DownloadSimple as Import } from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import {

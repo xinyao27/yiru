@@ -11,6 +11,10 @@ nonisolated enum TerminalChromeMetrics {
     static let tabIcon: CGFloat = 16
     static let tabText: CGFloat = 15
     static let tabHorizontalPadding: CGFloat = 12
+    // Why: the strip owns the 12pt outer inset and the tab control owns its 12pt content
+    // padding. A third inset moves the first tab off the leading anchor and changes how many
+    // tabs fit before the add action.
+    static let tabLeadingInset: CGFloat = 0
 
     static let actionVisualSize: CGFloat = 36
     static let actionHitSize: CGFloat = 44
@@ -21,7 +25,9 @@ nonisolated enum TerminalChromeMetrics {
     static let accessoryGap: CGFloat = 6
     static let accessoryVisualSize: CGFloat = 40
     static let accessoryHitSize: CGFloat = 44
-    static let accessoryText: CGFloat = 16
+    // Why: a 14pt monospaced label. At 16pt the capsule keys grow wide enough to drop a
+    // shortcut off the end of the bar.
+    static let accessoryText: CGFloat = 14
     static let accessoryIcon: CGFloat = 18
     static let accessoryKeyIcon: CGFloat = 20
     static let accessoryControlIcon: CGFloat = 28

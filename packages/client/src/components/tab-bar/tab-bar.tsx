@@ -1,5 +1,4 @@
 import { SortableContext } from '@dnd-kit/sortable'
-import { DeviceMobile as Smartphone, FileText, Globe, FilePlus } from '@phosphor-icons/react'
 import {
   type BuiltInWindowsTerminalShell,
   WINDOWS_GIT_BASH_SHELL
@@ -13,6 +12,12 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { useShallow } from 'zustand/react/shallow'
 import { getEditorDisplayLabel } from '~renderer/components/editor/labels'
+import {
+  DeviceMobile as Smartphone,
+  FileText,
+  Globe,
+  FilePlus
+} from '~renderer/components/icons/hugeicons'
 import {
   DropdownMenuItem,
   DropdownMenuSeparator,

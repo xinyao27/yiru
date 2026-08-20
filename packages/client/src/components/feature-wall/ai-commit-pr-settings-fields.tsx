@@ -1,5 +1,5 @@
-import { Terminal } from '@phosphor-icons/react'
 import type { JSX } from 'react'
+import { Terminal } from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
 import { AgentIcon } from '~renderer/lib/agent-catalog'
 import { cn } from '~renderer/lib/class-names'

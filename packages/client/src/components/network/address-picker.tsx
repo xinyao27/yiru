@@ -1,5 +1,5 @@
-import { Plus } from '@phosphor-icons/react'
 import React, { useState } from 'react'
+import { Plus } from '~renderer/components/icons/hugeicons'
 
 import {
   Select,

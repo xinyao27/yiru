@@ -1,4 +1,3 @@
-import { WarningCircle as AlertCircle, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: EditorContent is the dispatch surface for
 every editor mode (edit, diff, conflict, markdown-preview, combined-diff, and
 now Changes view mode). Keeping the mode-selection branches colocated is easier
@@ -11,6 +10,10 @@ import type {
   OpenFile,
   PendingEditorReveal
 } from '~renderer/components/editor/state'
+import {
+  WarningCircle as AlertCircle,
+  ArrowClockwise as RefreshCw
+} from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { showWorkspaceSidebar } from '~renderer/components/workspace-panel/show-sidebar'
 import { translate } from '~renderer/i18n/i18n'

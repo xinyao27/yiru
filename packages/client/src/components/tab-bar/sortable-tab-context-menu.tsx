@@ -7,7 +7,7 @@ import {
   TerminalWindow as SquareTerminal,
   List as ListX,
   X
-} from '@phosphor-icons/react'
+} from '~renderer/components/icons/hugeicons'
 import {
   ContextMenuContent,
   ContextMenuItem,

@@ -5,7 +5,7 @@ import {
   TextHFour as Heading4,
   TextHFive as Heading5,
   CaretRight as ChevronRight
-} from '@phosphor-icons/react'
+} from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
 
 import { icon, insertToggle, type SlashCommand } from './slash-command-primitives'

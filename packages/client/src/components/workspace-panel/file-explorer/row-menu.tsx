@@ -1,3 +1,8 @@
+import { toast } from 'sonner'
+import {
+  isLocalPathOpenBlocked,
+  showLocalPathOpenBlockedToast
+} from '~renderer/components/editor/local-path-open-guard'
 import {
   ArrowSquareOut as ExternalLink,
   Copy,
@@ -13,12 +18,7 @@ import {
   Pencil,
   TerminalWindow as SquareTerminal,
   Trash as Trash2
-} from '@phosphor-icons/react'
-import { toast } from 'sonner'
-import {
-  isLocalPathOpenBlocked,
-  showLocalPathOpenBlockedToast
-} from '~renderer/components/editor/local-path-open-guard'
+} from '~renderer/components/icons/hugeicons'
 import {
   ContextMenuContent,
   ContextMenuItem,

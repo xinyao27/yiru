@@ -1,4 +1,4 @@
-import { CursorClick as MousePointerClick } from '@phosphor-icons/react'
+import { CursorClick as MousePointerClick } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
 

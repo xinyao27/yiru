@@ -2,14 +2,8 @@ import { resolve } from 'node:path'
 
 import { defineConfig } from 'vite-plus'
 
-import { mobileMaxLinesRatchets } from './apps/mobile/config/mobile-max-lines-ratchets.ts'
-
 const lintProfile = process.env.YIRU_LINT_PROFILE
 const desktopRoot = resolve(import.meta.dirname, 'apps/desktop')
-const mobileMaxLinesOverrides = mobileMaxLinesRatchets.map((override) => ({
-  ...override,
-  files: override.files.map((file) => `apps/mobile/${file}`)
-}))
 
 const yiruRootToolingConfig = defineConfig({
   staged: {
@@ -51,7 +45,7 @@ const yiruRootToolingConfig = defineConfig({
               { allowDefaultCaseForExhaustiveSwitch: false }
             ]
           },
-          ignorePatterns: ['**/node_modules', '**/build', '**/dist', '**/out', 'apps/mobile/**'],
+          ignorePatterns: ['**/node_modules', '**/build', '**/dist', '**/out'],
           options: { typeAware: true, typeCheck: false }
         }
       : lintProfile === 'react-doctor'
@@ -71,7 +65,7 @@ const yiruRootToolingConfig = defineConfig({
               'react-doctor/no-derived-state-effect': 'warn',
               'react-doctor/no-initialize-state': 'warn'
             },
-            ignorePatterns: ['**/node_modules', '**/build', '**/dist', '**/out', 'apps/mobile/**'],
+            ignorePatterns: ['**/node_modules', '**/build', '**/dist', '**/out'],
             options: { typeAware: false, typeCheck: false },
             jsPlugins: [{ name: 'react-doctor', specifier: 'oxlint-plugin-react-doctor' }]
           }
@@ -211,39 +205,9 @@ const yiruRootToolingConfig = defineConfig({
                     }
                   ]
                 }
-              },
-              {
-                // Why: React Native and Expo retain framework-specific source
-                // conventions that are intentionally outside the desktop policy.
-                files: ['apps/mobile/**/*.{ts,tsx}'],
-                rules: {
-                  'react/exhaustive-deps': 'off',
-                  'react/no-unescaped-entities': 'off',
-                  'typescript/array-type': 'off',
-                  'typescript/consistent-type-definitions': 'off',
-                  'typescript/consistent-type-imports': 'off',
-                  'prefer-template': 'off',
-                  'no-useless-return': 'off',
-                  'unicorn/prefer-at': 'off',
-                  'unicorn/prefer-ternary': 'off',
-                  'unicorn/prefer-node-protocol': 'off'
-                }
-              },
-              {
-                // Why: Expo derives route parameter names from bracketed files,
-                // so camelCase parameters must remain stable across deep links.
-                files: ['apps/mobile/app/**/[[]*[]].tsx'],
-                rules: { 'unicorn/filename-case': 'off' }
-              },
-              ...mobileMaxLinesOverrides
+              }
             ],
-            ignorePatterns: [
-              '**/node_modules',
-              '**/build',
-              '**/dist',
-              '**/out',
-              'apps/mobile/src/terminal/webview-engine.generated.ts'
-            ],
+            ignorePatterns: ['**/node_modules', '**/build', '**/dist', '**/out'],
             options: {
               // Why: Yiru type-checks three explicit tsc projects and enables only the
               // switch exhaustiveness type-aware rule in a separate narrow lint pass.

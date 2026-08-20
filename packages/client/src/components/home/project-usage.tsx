@@ -1,6 +1,6 @@
-import { MagnifyingGlass as Search } from '@phosphor-icons/react'
 import { useMemo, useState } from 'react'
 import type { TokenValueMetric } from '~renderer/components/contribution-heatmap/metric'
+import { MagnifyingGlass as Search } from '~renderer/components/icons/hugeicons'
 import { Card, CardContent, CardHeader } from '~renderer/components/ui/card'
 import { Input } from '~renderer/components/ui/input'
 import { ScrollArea } from '~renderer/components/ui/scroll-area'

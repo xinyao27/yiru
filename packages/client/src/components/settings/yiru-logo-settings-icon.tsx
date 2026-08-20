@@ -1,6 +1,6 @@
-import type { IconProps } from '@phosphor-icons/react'
 import { createElement } from 'react'
 import logo from '~renderer/assets/brand/yiru-wordmark.png?url'
+import type { IconProps } from '~renderer/components/icons/hugeicons'
 import { cn } from '~renderer/lib/class-names'
 
 export function YiruLogoSettingsIcon({ className }: IconProps): React.JSX.Element {

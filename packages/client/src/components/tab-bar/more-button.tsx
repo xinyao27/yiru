@@ -1,6 +1,6 @@
-import { DotsThree as MoreHorizontal, X } from '@phosphor-icons/react'
 import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 import { useState } from 'react'
+import { DotsThree as MoreHorizontal, X } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,

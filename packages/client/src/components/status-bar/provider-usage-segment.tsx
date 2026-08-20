@@ -1,5 +1,5 @@
-import { Warning as AlertTriangle } from '@phosphor-icons/react'
 import type React from 'react'
+import { Warning as AlertTriangle } from '~renderer/components/icons/hugeicons'
 import { Progress } from '~renderer/components/ui/progress'
 import { translate } from '~renderer/i18n/i18n'
 import type { ProviderRateLimits } from '~shared/rate-limit-types'

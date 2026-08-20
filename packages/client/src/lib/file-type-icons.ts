@@ -22,10 +22,10 @@ import {
   FileText as FileType,
   FileVideo,
   DeviceMobile as Smartphone,
-  type Icon as PhosphorIcon
-} from '@phosphor-icons/react'
+  type Icon
+} from '~renderer/components/icons/hugeicons'
 
-const FILE_ICON_BY_NAME: Record<string, PhosphorIcon> = {
+const FILE_ICON_BY_NAME: Record<string, Icon> = {
   '.babelrc': FileSliders,
   '.dockerignore': FileSliders,
   '.editorconfig': FileSliders,
@@ -101,7 +101,7 @@ const FILE_ICON_BY_NAME: Record<string, PhosphorIcon> = {
   'yarn.lock': FileBox
 }
 
-const FILE_ICON_BY_EXTENSION: Record<string, PhosphorIcon> = {
+const FILE_ICON_BY_EXTENSION: Record<string, Icon> = {
   '7z': FileArchive,
   aac: FileMusic,
   adoc: FileText,
@@ -302,7 +302,7 @@ function getExtension(filename: string): string {
   return filename.slice(lastDot + 1).toLowerCase()
 }
 
-export function getFileTypeIcon(filePath: string | undefined | null): PhosphorIcon {
+export function getFileTypeIcon(filePath: string | undefined | null): Icon {
   const filename = getFilename(filePath)
   if (!filename) {
     return File

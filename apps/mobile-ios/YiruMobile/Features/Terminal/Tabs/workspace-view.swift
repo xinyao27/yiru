@@ -1,37 +1,112 @@
 import SwiftUI
+import UIKit
 
 struct TerminalWorkspaceView: View {
+    @Environment(\.openURL) private var openURL
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.yiruLayoutMetrics) private var layoutMetrics
     let workspace: WorkspaceSummary
     @State private var model: TerminalWorkspaceModel
+    @State private var diffCommentsModel: WorkspaceDiffCommentsModel
+    @State private var isNewTabPresented = false
+    @State private var isQuickCommandsPresented = false
+    @State private var hostCapabilities: TerminalHostCapabilities?
+    @State private var markdownDrafts: [String: WorkspaceMarkdownDraft] = [:]
+    @State private var contentRefreshRevisions: [String: Int] = [:]
+    @State private var leaveDrafts: [WorkspaceMarkdownDraft]?
     private let host: HostProfile
+    private let contentRepository: any WorkspaceContentRepository
+    private let browserRepository: any WorkspaceBrowserRepository
+    private let workspaceCreationRepository: any WorkspaceCreationRepository
+    private let connectionRuntime: any HostConnectionRuntime
+    private let quickCommandRepository: any TerminalQuickCommandRepository
+    private let capabilityRepository: any TerminalHostCapabilityRepository
+    private let nativeChatRepository: any NativeChatRepository
+    private let filesRepository: any WorkspaceFilesRepository
+    private let sourceRepository: any SourceControlRepository
+    private let sourceReviewRepository: any SourceReviewRepository
+    private let hostedReviewRepository: any HostedReviewRepository
     private let runtime: any TerminalSessionRuntime
     private let displayModeRuntime: any TerminalDisplayModeRuntime
     private let surfaceFactory: any TerminalSurfaceFactory
     private let preferences: TerminalPreferences
-    private let showSettings: () -> Void
+    private let settingsPreferences: SettingsPreferences
+    private let showFiles: () -> Void
+    private let showSourceControl: () -> Void
+    private let showAgentHistory: () -> Void
+    private let openTerminalFile: (TerminalFileOpenRequest) -> Void
+    private let openWorkspaceFile: (String, String) -> Void
+    private let openSourceReview: (SourceFileEntry) -> Void
 
     init(
         host: HostProfile,
         workspace: WorkspaceSummary,
+        initialTab: WorkspaceOpenTab? = nil,
         repository: any TerminalWorkspaceRepository,
+        connectionRuntime: any HostConnectionRuntime,
+        contentRepository: any WorkspaceContentRepository,
+        browserRepository: any WorkspaceBrowserRepository,
+        workspaceCreationRepository: any WorkspaceCreationRepository,
+        quickCommandRepository: any TerminalQuickCommandRepository,
+        capabilityRepository: any TerminalHostCapabilityRepository,
+        nativeChatRepository: any NativeChatRepository,
+        filesRepository: any WorkspaceFilesRepository,
+        sourceRepository: any SourceControlRepository,
+        sourceReviewRepository: any SourceReviewRepository,
+        hostedReviewRepository: any HostedReviewRepository,
         runtime: any TerminalSessionRuntime,
         displayModeRuntime: any TerminalDisplayModeRuntime,
         surfaceFactory: any TerminalSurfaceFactory,
         preferences: TerminalPreferences,
-        showSettings: @escaping () -> Void
+        settingsPreferences: SettingsPreferences,
+        showFiles: @escaping () -> Void,
+        showSourceControl: @escaping () -> Void,
+        showAgentHistory: @escaping () -> Void,
+        openTerminalFile: @escaping (TerminalFileOpenRequest) -> Void,
+        openWorkspaceFile: @escaping (String, String) -> Void,
+        openSourceReview: @escaping (SourceFileEntry) -> Void
     ) {
         self.host = host
+        self.contentRepository = contentRepository
+        self.browserRepository = browserRepository
+        self.workspaceCreationRepository = workspaceCreationRepository
+        self.connectionRuntime = connectionRuntime
+        self.quickCommandRepository = quickCommandRepository
+        self.capabilityRepository = capabilityRepository
+        self.nativeChatRepository = nativeChatRepository
+        self.filesRepository = filesRepository
+        self.sourceRepository = sourceRepository
+        self.sourceReviewRepository = sourceReviewRepository
+        self.hostedReviewRepository = hostedReviewRepository
         self.workspace = workspace
         self.runtime = runtime
         self.displayModeRuntime = displayModeRuntime
         self.surfaceFactory = surfaceFactory
         self.preferences = preferences
-        self.showSettings = showSettings
+        self.settingsPreferences = settingsPreferences
+        self.showFiles = showFiles
+        self.showSourceControl = showSourceControl
+        self.showAgentHistory = showAgentHistory
+        self.openTerminalFile = openTerminalFile
+        self.openWorkspaceFile = openWorkspaceFile
+        self.openSourceReview = openSourceReview
         _model = State(
             initialValue: TerminalWorkspaceModel(
                 hostID: host.id,
                 worktreeID: workspace.id,
-                repository: repository
+                repoID: workspace.repoID,
+                displayName: workspace.name,
+                initialTabID: initialTab?.id,
+                repository: repository,
+                connectionRuntime: connectionRuntime,
+                quickCommandRepository: quickCommandRepository
+            )
+        )
+        _diffCommentsModel = State(
+            initialValue: WorkspaceDiffCommentsModel(
+                hostID: host.id,
+                worktreeID: workspace.id,
+                repository: sourceReviewRepository
             )
         )
     }
@@ -42,24 +117,65 @@ struct TerminalWorkspaceView: View {
             case .loading:
                 ProgressView("Loading workspace session…")
             case .loaded:
-                workspaceContent
+                TerminalWorkspaceContentView(
+                    host: host,
+                    workspace: workspace,
+                    model: model,
+                    diffCommentsModel: diffCommentsModel,
+                    hostCapabilities: hostCapabilities,
+                    contentRepository: contentRepository,
+                    browserRepository: browserRepository,
+                    filesRepository: filesRepository,
+                    sourceRepository: sourceRepository,
+                    sourceReviewRepository: sourceReviewRepository,
+                    hostedReviewRepository: hostedReviewRepository,
+                    runtime: runtime,
+                    displayModeRuntime: displayModeRuntime,
+                    surfaceFactory: surfaceFactory,
+                    nativeChatRepository: nativeChatRepository,
+                    preferences: preferences,
+                    settingsPreferences: settingsPreferences,
+                    showFiles: showFiles,
+                    showSourceControl: showSourceControl,
+                    showAgentHistory: showAgentHistory,
+                    showQuickCommands: { isQuickCommandsPresented = true },
+                    createTerminalTab: { isNewTabPresented = true },
+                    openTerminalFile: openTerminalFile,
+                    openWorkspaceFile: openWorkspaceFile,
+                    openSourceReview: openSourceReview,
+                    openTerminalURL: openTerminalURL,
+                    updateDraft: updateDraft,
+                    refreshContent: requestContentRefresh,
+                    copyContentPath: copyContentPath,
+                    contentRefreshID: { contentRefreshRevisions[$0] ?? 0 }
+                )
             case .failed(let message):
-                ContentUnavailableView {
-                    Label("Workspace session unavailable", systemImage: "rectangle.3.group")
-                } description: {
-                    Text(message)
-                } actions: {
+                AppUnavailableState(
+                    "Workspace session unavailable",
+                    iconID: .stack,
+                    description: Text(message)
+                ) {
                     Button("Try again") {
                         Task { await model.reconnectAndLoad() }
                     }
-                    .buttonStyle(.glassProminent)
+                    .buttonStyle(.glass)
+                    .appButtonContext(.regular)
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
-        .navigationTitle(Text(workspace.name))
+        // Why: a single-line native title only. The explicit principal toolbar item below is
+        // what preserves middle truncation without SwiftUI's default large-title layout.
+        .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
+        .disablesInteractivePopGesture(!markdownDrafts.isEmpty)
         .task {
             await model.observe()
+        }
+        .task(id: model.isConnected) {
+            guard model.isConnected else { return }
+            await diffCommentsModel.load()
         }
         .alert(
             "Tab action failed",
@@ -74,144 +190,139 @@ struct TerminalWorkspaceView: View {
                 Text(message)
             }
         }
-    }
-
-    @ViewBuilder
-    private var workspaceContent: some View {
-        if model.tabs.isEmpty {
-            ContentUnavailableView {
-                Label("No open tabs", systemImage: "rectangle.on.rectangle.slash")
-            } description: {
-                Text("Create a terminal to start working in this workspace.")
-            } actions: {
-                Button("New Terminal", systemImage: "plus") {
-                    Task { await model.createTerminal() }
-                }
-                .buttonStyle(.glassProminent)
-                .disabled(model.operation != nil)
+        .sheet(isPresented: $isNewTabPresented) {
+            WorkspaceNewTabChooser(
+                hostID: host.id,
+                repoID: workspace.id == WorkspaceSummary.floatingID ? nil : workspace.repoID,
+                repository: workspaceCreationRepository,
+                isFloatingWorkspace: workspace.id == WorkspaceSummary.floatingID,
+                createAgent: { agentID in
+                    Task { await model.createTerminal(agentID: agentID) }
+                },
+                createTerminal: { Task { await model.createTerminal() } },
+                createMarkdown: { Task { await model.createMarkdown() } },
+                createBrowser: { url in Task { await model.createBrowser(url: url) } },
+                browserSupported: hostCapabilities?.browserScreencastSupported == true,
+                browserUnavailable: model.reportBrowserUnavailable
+            )
+        }
+        .sheet(isPresented: $isQuickCommandsPresented) {
+            TerminalQuickCommandSheet(
+                hostID: host.id,
+                repoID: workspace.kind == .git ? workspace.repoID : nil,
+                repoName: workspace.kind == .git ? workspace.repoName : nil,
+                repository: quickCommandRepository,
+                launch: model.launchQuickCommand
+            )
+        }
+        .task(id: model.isConnected) {
+            guard model.isConnected else {
+                hostCapabilities = nil
+                return
             }
-        } else {
-            ZStack {
-                retainedTerminals
-                activeNonterminalContent
-            }
-            .safeAreaInset(edge: .bottom, spacing: 0) {
-                tabStrip
+            hostCapabilities = await capabilityRepository.terminalCapabilities(for: host.id)
+            if hostCapabilities?.quickCommandsSupported == false {
+                isQuickCommandsPresented = false
             }
         }
-    }
-
-    private var retainedTerminals: some View {
-        ZStack {
-            ForEach(model.retainedTerminalTabs) { tab in
-                if let target = tab.terminalTarget {
-                    RetainedTerminalPane(
-                        host: host,
-                        target: target,
-                        runtime: runtime,
-                        displayModeRuntime: displayModeRuntime,
-                        surfaceFactory: surfaceFactory,
-                        preferences: preferences,
-                        isVisible: tab.id == model.activeTabID,
-                        showSettings: showSettings
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                TerminalSessionHeader(title: model.displayName)
+            }
+            ToolbarItem(placement: .topBarLeading) {
+                Button(action: requestLeaveSession) {
+                    YiruToolbarIcon(.arrowLeft)
+                }
+                .accessibilityLabel("Back to workspaces")
+            }
+            if model.activeTab?.terminalTarget == nil, case .loaded = model.phase {
+                ToolbarItem(placement: .topBarTrailing) {
+                    TerminalWorkspaceMenu(
+                        workspace: workspace,
+                        quickCommandsAvailable: quickCommandsAvailable,
+                        agentHistoryAvailable: agentHistoryAvailable,
+                        showQuickCommands: { isQuickCommandsPresented = true },
+                        showFiles: showFiles,
+                        showSourceControl: showSourceControl,
+                        showAgentHistory: showAgentHistory
                     )
-                    .id(tab.id)
-                    .opacity(tab.id == model.activeTabID ? 1 : 0)
-                    .allowsHitTesting(tab.id == model.activeTabID)
-                    .accessibilityHidden(tab.id != model.activeTabID)
                 }
             }
         }
-    }
-
-    @ViewBuilder
-    private var activeNonterminalContent: some View {
-        if let activeTab = model.activeTab {
-            switch activeTab.content {
-            case .terminal(.ready):
-                EmptyView()
-            case .terminal(.pending):
-                ProgressView("Starting terminal…")
-            case .markdown(let path):
-                unavailableTab(
-                    title: "Markdown preview is coming next",
-                    systemImage: "doc.richtext",
-                    detail: path
-                )
-            case .file(let path):
-                unavailableTab(
-                    title: "File preview is coming next",
-                    systemImage: "doc.text",
-                    detail: path
-                )
-            case .browser(let url):
-                unavailableTab(
-                    title: "Browser tabs are coming next",
-                    systemImage: "globe",
-                    detail: url
-                )
-            }
+        .confirmationDialog(
+            "Unsaved markdown changes",
+            isPresented: Binding(
+                get: { leaveDrafts != nil },
+                set: { if !$0 { leaveDrafts = nil } }
+            ),
+            titleVisibility: .visible
+        ) {
+            Button("Copy All & Leave") { copyDraftsAndLeave() }
+            Button("Discard & Leave", role: .destructive) { leaveSession() }
+            Button("Cancel", role: .cancel) { leaveDrafts = nil }
+        } message: {
+            Text("Copy or discard phone drafts before leaving.")
         }
     }
 
-    private var tabStrip: some View {
-        GlassEffectContainer(spacing: Theme.Spacing.small) {
-            HStack(spacing: Theme.Spacing.small) {
-                ScrollView(.horizontal) {
-                    HStack(spacing: Theme.Spacing.small) {
-                        ForEach(model.tabs) { tab in
-                            tabButton(tab)
-                        }
-                    }
-                }
-                .scrollIndicators(.hidden)
-
-                Button("New Terminal", systemImage: "plus") {
-                    Task { await model.createTerminal() }
-                }
-                .labelStyle(.iconOnly)
-                .buttonStyle(.glassProminent)
-                .disabled(model.operation != nil)
-            }
-        }
-        .padding(.horizontal, Theme.Spacing.standard)
-        .padding(.vertical, Theme.Spacing.small)
-    }
-
-    @ViewBuilder
-    private func tabButton(_ tab: TerminalWorkspaceTab) -> some View {
-        let button = Button {
-            Task { await model.select(tab) }
-        } label: {
-            Label(tab.title, systemImage: tab.systemImage)
-                .lineLimit(1)
-        }
-        .contextMenu {
-            Button("Close Tab", systemImage: "xmark", role: .destructive) {
-                Task { await model.close(tab) }
-            }
-            .disabled(model.operation != nil)
-        }
-        .disabled(model.operation != nil && tab.id != model.activeTabID)
-
-        if tab.id == model.activeTabID {
-            button.buttonStyle(.glassProminent)
+    private func openTerminalURL(_ url: URL) {
+        if workspace.id == WorkspaceSummary.floatingID
+            || settingsPreferences.terminalLinkOpenMode == .phoneBrowser
+        {
+            openURL(url)
+        } else if hostCapabilities?.browserScreencastSupported == true {
+            Task { await model.createBrowser(url: url.absoluteString) }
         } else {
-            button.buttonStyle(.glass)
+            model.reportBrowserUnavailable()
         }
     }
 
-    private func unavailableTab(
-        title: LocalizedStringResource,
-        systemImage: String,
-        detail: String?
-    ) -> some View {
-        ContentUnavailableView {
-            Label(title, systemImage: systemImage)
-        } description: {
-            if let detail, !detail.isEmpty {
-                Text(detail)
-            }
+    private var quickCommandsAvailable: Bool {
+        hostCapabilities?.quickCommandsSupported != false
+    }
+
+    private var agentHistoryAvailable: Bool {
+        hostCapabilities?.agentHistorySupported == true
+    }
+
+    private func updateDraft(_ draft: WorkspaceMarkdownDraft?, for tabID: String) {
+        if let draft {
+            markdownDrafts[tabID] = draft
+        } else {
+            markdownDrafts.removeValue(forKey: tabID)
         }
+    }
+
+    private func requestContentRefresh(for tab: TerminalWorkspaceTab) {
+        contentRefreshRevisions[tab.id, default: 0] += 1
+    }
+
+    private func copyContentPath(for tab: TerminalWorkspaceTab) {
+        guard case .markdown(let descriptor) = tab.content else { return }
+        UIPasteboard.general.string = descriptor.relativePath
+    }
+
+    private func requestLeaveSession() {
+        let drafts = markdownDrafts.values.sorted { $0.title < $1.title }
+        guard !drafts.isEmpty else {
+            dismiss()
+            return
+        }
+        leaveDrafts = drafts
+    }
+
+    private func copyDraftsAndLeave() {
+        guard let leaveDrafts else { return }
+        UIPasteboard.general.string = leaveDrafts.map { draft in
+            "# \(draft.title)\n\n\(draft.content)"
+        }.joined(separator: "\n\n---\n\n")
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+        leaveSession()
+    }
+
+    private func leaveSession() {
+        leaveDrafts = nil
+        markdownDrafts.removeAll()
+        dismiss()
     }
 }

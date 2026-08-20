@@ -6,6 +6,7 @@ final class UserDefaultsTerminalPreferenceStore: TerminalPreferenceStore {
         static let textSize = "terminal.text-size"
         static let accessoryOrder = "terminal.accessory-order"
         static let accessoryVisible = "terminal.accessory-visible"
+        static let customKeys = "yiru:custom-accessory-keys"
     }
 
     private let defaults: UserDefaults
@@ -31,7 +32,10 @@ final class UserDefaultsTerminalPreferenceStore: TerminalPreferenceStore {
             accessoryLayout: TerminalAccessoryLayout(
                 orderedKeys: orderedKeys,
                 visibleKeys: visibleKeys
-            )
+            ),
+            customKeys: defaults.data(forKey: Key.customKeys).flatMap {
+                try? JSONDecoder().decode([TerminalCustomKey].self, from: $0)
+            } ?? []
         )
     }
 
@@ -45,5 +49,6 @@ final class UserDefaultsTerminalPreferenceStore: TerminalPreferenceStore {
             snapshot.accessoryLayout.visibleKeys.map(\.rawValue).sorted(),
             forKey: Key.accessoryVisible
         )
+        defaults.set(try? JSONEncoder().encode(snapshot.customKeys), forKey: Key.customKeys)
     }
 }

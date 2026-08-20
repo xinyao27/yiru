@@ -5,7 +5,7 @@ import { createRoot } from 'react-dom/client'
 import App from './application-shell/shell'
 import { applyDocumentTheme } from './components/editor/document-theme'
 import { RecoverableRenderErrorBoundary } from './components/error-boundaries/recoverable-render-error-boundary'
-import { PhosphorIconContextProvider } from './components/phosphor-icon-context-provider'
+import { HugeiconsIconContextProvider } from './components/icons/context-provider'
 import { translate } from './i18n/i18n'
 import { I18nProvider } from './i18n/provider'
 import { useUiLocale } from './i18n/use-ui-locale'
@@ -66,11 +66,11 @@ void hydrateShellSettings()
   .then(() => {
     createRoot(rootElement).render(
       <StrictMode>
-        <PhosphorIconContextProvider>
+        <HugeiconsIconContextProvider>
           <I18nProvider>
             <RendererRoot />
           </I18nProvider>
-        </PhosphorIconContextProvider>
+        </HugeiconsIconContextProvider>
       </StrictMode>
     )
     recordRendererCrashBreadcrumb('renderer_bootstrap_rendered')

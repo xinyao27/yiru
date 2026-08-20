@@ -1,5 +1,5 @@
-import { Trash as Trash2 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
+import { Trash as Trash2 } from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
 import type { RemoveWorktreeResult, Worktree } from '~shared/types'
 

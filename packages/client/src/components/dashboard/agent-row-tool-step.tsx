@@ -1,4 +1,4 @@
-import { Wrench } from '@phosphor-icons/react'
+import { Wrench } from '~renderer/components/icons/hugeicons'
 import { cn } from '~renderer/lib/class-names'
 
 type DashboardAgentRowToolStepProps = {

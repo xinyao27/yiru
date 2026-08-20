@@ -1,5 +1,5 @@
-import { FolderOpen, Globe, Plus } from '@phosphor-icons/react'
 import type { ComponentType } from 'react'
+import { FolderOpen, Globe, Plus } from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
 
 export type AddRepoLocalStartActionHandlers = {

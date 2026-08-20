@@ -2,6 +2,7 @@ import { lstat, open, realpath, stat } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { basename, dirname, relative, resolve, sep } from 'node:path'
 
+import { applySkillLockIndex } from '~shared/skill-lockfile'
 import { summarizeSkillMarkdown } from '~shared/skill-metadata'
 import type { SkillDiscoveryResult, SkillDiscoverySource, SkillPlacement } from '~shared/skills'
 import type { Repo } from '~shared/types'
@@ -19,6 +20,7 @@ import {
   hasSymlinkedAncestor,
   writableDestination
 } from './skill-installation-topology'
+import { readSkillLockIndex } from './skill-lockfile-read'
 import {
   groupSkillPlacements,
   skillContentDigest,
@@ -157,8 +159,14 @@ export async function discoverSkills(args: {
   const agentsRootPath = roots.find((root) => root.id === 'home-agents')?.path ?? ''
   const canonicalRootPath = await realpath(agentsRootPath).catch(() => resolve(agentsRootPath))
   const sources: SkillDiscoverySource[] = []
-  const candidateGroups = await Promise.all(
-    roots.map(async (root) => {
+  const [lockIndex, ...candidateGroups] = await Promise.all([
+    readSkillLockIndex({
+      homeDir,
+      cwd: args.cwd,
+      repos: args.repos,
+      includeCwd: args.includeCwd
+    }),
+    ...roots.map(async (root) => {
       const exists = await pathExists(root.path)
       // Why: `scopeKey` is a scanner-side grouping input, so the source contract
       // the renderer receives is built field by field rather than spread.
@@ -174,9 +182,9 @@ export async function discoverSkills(args: {
       })
       return exists ? scanRoot(root, { canonicalRootPath, homeDir }) : []
     })
-  )
+  ])
   return {
-    skills: groupSkillPlacements(candidateGroups.flat()),
+    skills: applySkillLockIndex(groupSkillPlacements(candidateGroups.flat()), lockIndex),
     sources: sources.sort((a, b) =>
       a.label.localeCompare(b.label, undefined, { sensitivity: 'base' })
     ),

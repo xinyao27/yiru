@@ -1,3 +1,8 @@
+import React, { useCallback, useMemo } from 'react'
+import DashboardAgentRow from '~renderer/components/dashboard/agent-row'
+import { isDismissibleAgentRow } from '~renderer/components/dashboard/agent-row-dismissible'
+import type { DashboardAgentRow as DashboardAgentRowData } from '~renderer/components/dashboard/use-dashboard-data'
+import { useNow } from '~renderer/components/dashboard/use-now'
 import {
   DeviceMobile,
   FileText,
@@ -5,12 +10,7 @@ import {
   GitDiff,
   Globe,
   TerminalWindow
-} from '@phosphor-icons/react'
-import React, { useCallback, useMemo } from 'react'
-import DashboardAgentRow from '~renderer/components/dashboard/agent-row'
-import { isDismissibleAgentRow } from '~renderer/components/dashboard/agent-row-dismissible'
-import type { DashboardAgentRow as DashboardAgentRowData } from '~renderer/components/dashboard/use-dashboard-data'
-import { useNow } from '~renderer/components/dashboard/use-now'
+} from '~renderer/components/icons/hugeicons'
 import { activateTabAndFocusPane } from '~renderer/lib/activate-tab-and-focus-pane'
 import { AgentIcon } from '~renderer/lib/agent-catalog'
 import { cn } from '~renderer/lib/class-names'

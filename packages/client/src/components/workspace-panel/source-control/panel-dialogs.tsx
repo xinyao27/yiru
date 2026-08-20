@@ -1,5 +1,5 @@
-import { Trash as Trash2 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
+import { Trash as Trash2 } from '~renderer/components/icons/hugeicons'
 import { BaseRefPicker } from '~renderer/components/settings/base-ref-picker'
 import { Button } from '~renderer/components/ui/button'
 import {

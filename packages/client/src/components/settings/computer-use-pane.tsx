@@ -1,12 +1,12 @@
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { toast } from 'sonner'
 import {
   PersonArmsSpread as Accessibility,
   Camera,
   ShieldCheck,
   ArrowSquareOut as ExternalLink,
   ArrowClockwise as RefreshCw
-} from '@phosphor-icons/react'
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { toast } from 'sonner'
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'

@@ -1,3 +1,9 @@
+/* eslint-disable max-lines -- Why: the cleanup dialog keeps scan status,
+   filters, row actions, localized review copy, and force-aware confirmation
+   in one modal flow. */
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { toast } from 'sonner'
+import { useShallow } from 'zustand/react/shallow'
 import {
   Warning as AlertTriangle,
   MagnifyingGlass as Search,
@@ -5,13 +11,7 @@ import {
   Trash as Trash2,
   ArrowCounterClockwise as RefreshCcw,
   X
-} from '@phosphor-icons/react'
-/* eslint-disable max-lines -- Why: the cleanup dialog keeps scan status,
-   filters, row actions, localized review copy, and force-aware confirmation
-   in one modal flow. */
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { toast } from 'sonner'
-import { useShallow } from 'zustand/react/shallow'
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import RepoMultiCombobox from '~renderer/components/repo/multi-combobox'
 import { Button } from '~renderer/components/ui/button'

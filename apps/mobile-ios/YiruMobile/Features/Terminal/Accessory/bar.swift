@@ -6,6 +6,7 @@ struct TerminalAccessoryDock: View {
     let isDisplayModeUpdating: Bool
     var attachment: TerminalImageAttachment? = nil
     let toggleDisplayMode: () -> Void
+    var removeCustomKey: (TerminalCustomKey) -> Void = { _ in }
 
     var body: some View {
         TerminalAccessoryBar(
@@ -13,7 +14,8 @@ struct TerminalAccessoryDock: View {
             displayMode: displayMode,
             isDisplayModeUpdating: isDisplayModeUpdating,
             attachment: attachment,
-            toggleDisplayMode: toggleDisplayMode
+            toggleDisplayMode: toggleDisplayMode,
+            removeCustomKey: removeCustomKey
         )
         .padding(.horizontal, TerminalChromeMetrics.horizontalInset)
         .padding(.top, TerminalChromeMetrics.dockTopPadding)
@@ -21,13 +23,14 @@ struct TerminalAccessoryDock: View {
 }
 
 struct TerminalAccessoryBar: View {
-    private static let controlInsertionIndex = 2
-
     let state: TerminalAccessoryState
     let displayMode: TerminalDisplayMode
     let isDisplayModeUpdating: Bool
     let attachment: TerminalImageAttachment?
     let toggleDisplayMode: () -> Void
+    var removeCustomKey: (TerminalCustomKey) -> Void = { _ in }
+
+    @State private var pendingRemoval: TerminalCustomKey?
 
     var body: some View {
         GlassEffectContainer(spacing: TerminalChromeMetrics.accessoryGap) {
@@ -40,12 +43,12 @@ struct TerminalAccessoryBar: View {
 
                 ScrollView(.horizontal) {
                     HStack(spacing: TerminalChromeMetrics.accessoryGap) {
-                        displayModeButton
-                        ForEach(keysBeforeControl) { key in
+                        controlButton
+                        ForEach(escapeAndTabKeys) { key in
                             keyButton(key)
                         }
-                        controlButton
-                        ForEach(keysAfterControl) { key in
+                        displayModeButton
+                        ForEach(otherKeys) { key in
                             keyButton(key)
                         }
                         ForEach(state.customKeys) { key in
@@ -59,6 +62,24 @@ struct TerminalAccessoryBar: View {
             }
         }
         .frame(height: TerminalChromeMetrics.accessoryRowHeight)
+        .sensoryFeedback(.warning, trigger: pendingRemoval)
+        .confirmationDialog(
+            "Remove Shortcut",
+            isPresented: Binding(
+                get: { pendingRemoval != nil },
+                set: { if !$0 { pendingRemoval = nil } }
+            ),
+            titleVisibility: .visible
+        ) {
+            Button("Remove", role: .destructive) {
+                guard let key = pendingRemoval else { return }
+                pendingRemoval = nil
+                removeCustomKey(key)
+            }
+            Button("Cancel", role: .cancel) { pendingRemoval = nil }
+        } message: {
+            Text("Remove \"\(pendingRemoval?.label ?? "")\" from your custom shortcuts?")
+        }
     }
 
     private func customKeyButton(_ key: TerminalCustomKey) -> some View {
@@ -67,7 +88,7 @@ struct TerminalAccessoryBar: View {
         } label: {
             Text(verbatim: key.label)
                 .font(.system(size: TerminalChromeMetrics.accessoryText, design: .monospaced))
-                .foregroundStyle(Theme.Colors.mutedForeground)
+                .foregroundStyle(Theme.Colors.foreground)
                 .lineLimit(1)
                 .frame(minHeight: TerminalChromeMetrics.accessoryVisualSize)
                 .padding(.horizontal, 10)
@@ -77,38 +98,50 @@ struct TerminalAccessoryBar: View {
         .frame(minHeight: TerminalChromeMetrics.accessoryHitSize)
         .disabled(!state.isEnabled)
         .accessibilityLabel(Text(verbatim: key.label))
+        .contextMenu {
+            Button("Remove Shortcut", role: .destructive) {
+                pendingRemoval = key
+            }
+        }
+        // Why: the context menu's long-press gesture is unreachable for VoiceOver users, so the
+        // same removal is exposed as a named accessibility action (reachable via the rotor).
+        .accessibilityAction(named: Text("Remove shortcut")) {
+            pendingRemoval = key
+        }
     }
 
-    private var keysBeforeControl: [TerminalAccessoryKey] {
-        Array(state.keys.prefix(Self.controlInsertionIndex))
+    private var escapeAndTabKeys: [TerminalAccessoryKey] {
+        state.keys.filter { key in
+            key == .escape || key == .tab
+        }
     }
 
-    private var keysAfterControl: [TerminalAccessoryKey] {
-        Array(state.keys.dropFirst(Self.controlInsertionIndex))
+    private var otherKeys: [TerminalAccessoryKey] {
+        state.keys.filter { key in
+            key != .escape && key != .tab
+        }
     }
 
     private var controlButton: some View {
         Button {
             state.toggleControl()
         } label: {
-            YiruIcon(.keyboardControl, size: TerminalChromeMetrics.accessoryControlIcon)
-                .foregroundStyle(Theme.Colors.mutedForeground)
+            Text("Ctrl")
+                .font(.system(size: TerminalChromeMetrics.accessoryText, design: .monospaced))
+                .foregroundStyle(Theme.Colors.foreground)
                 .frame(
-                    width: TerminalChromeMetrics.accessoryVisualSize,
-                    height: TerminalChromeMetrics.accessoryVisualSize
+                    minHeight: TerminalChromeMetrics.accessoryVisualSize
                 )
+                .padding(.horizontal, 10)
                 .glassEffect(
                     state.isControlActive
                         ? .regular.tint(Theme.Colors.selection).interactive()
                         : .regular.interactive(),
-                    in: .circle
+                    in: .capsule
                 )
         }
         .buttonStyle(.plain)
-        .frame(
-            width: TerminalChromeMetrics.accessoryHitSize,
-            height: TerminalChromeMetrics.accessoryHitSize
-        )
+        .frame(minHeight: TerminalChromeMetrics.accessoryHitSize)
         .disabled(!state.isEnabled)
         .accessibilityLabel(
             state.isControlActive ? "Control modifier active" : "Control modifier"
@@ -119,15 +152,14 @@ struct TerminalAccessoryBar: View {
     private var displayModeButton: some View {
         Button(action: toggleDisplayMode) {
             YiruIcon(
-                displayMode == .auto ? .monitor : .deviceMobile,
+                displayMode == .auto ? .laptop : .deviceMobile,
                 size: TerminalChromeMetrics.accessoryIcon
             )
-            .font(.system(size: TerminalChromeMetrics.accessoryIcon))
             .frame(
                 width: TerminalChromeMetrics.accessoryVisualSize,
                 height: TerminalChromeMetrics.accessoryVisualSize
             )
-            .foregroundStyle(Theme.Colors.mutedForeground)
+            .foregroundStyle(Theme.Colors.foreground)
             .glassEffect(.regular.interactive(), in: .circle)
         }
         .buttonStyle(.plain)
@@ -145,7 +177,7 @@ struct TerminalAccessoryBar: View {
             state.send(key)
         } label: {
             keyLabel(key)
-                .foregroundStyle(Theme.Colors.mutedForeground)
+                .foregroundStyle(Theme.Colors.foreground)
                 .fixedSize(horizontal: true, vertical: false)
                 .frame(
                     minWidth: key.isCircular
@@ -173,32 +205,7 @@ struct TerminalAccessoryBar: View {
 
     @ViewBuilder
     private func keyLabel(_ key: TerminalAccessoryKey) -> some View {
-        switch key {
-        case .tab:
-            YiruIcon(.keyboardTab, size: TerminalChromeMetrics.accessoryKeyIcon)
-        case .enter:
-            YiruIcon(.keyboardEnter, size: TerminalChromeMetrics.accessoryKeyIcon)
-        case .shiftTab:
-            HStack(spacing: TerminalChromeMetrics.accessoryChordGap) {
-                Text("⇧")
-                    .font(.system(size: TerminalChromeMetrics.accessoryModifierGlyph))
-                YiruIcon(.keyboardTab, size: TerminalChromeMetrics.accessoryIcon)
-            }
-        case .interrupt, .endOfFile, .clearScreen, .suspend, .reverseSearch, .startOfLine,
-            .endOfLine, .deleteWordBackward, .clearLineBeforeCursor:
-            if let suffix = key.controlChordSuffix {
-                HStack(spacing: TerminalChromeMetrics.accessoryChordGap) {
-                    Text("⌃")
-                    Text(verbatim: suffix)
-                }
-                .font(.system(size: TerminalChromeMetrics.accessoryText, design: .monospaced))
-            }
-        case .escape:
-            Text(key.title)
-                .font(.system(size: TerminalChromeMetrics.accessoryText, design: .monospaced))
-        case .space, .backspace, .delete, .arrowUp, .arrowDown, .arrowLeft, .arrowRight:
-            Text(key.title)
-                .font(.system(size: TerminalChromeMetrics.accessoryGlyph))
-        }
+        Text(key.title)
+            .font(.system(size: TerminalChromeMetrics.accessoryText, design: .monospaced))
     }
 }

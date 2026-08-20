@@ -1,3 +1,8 @@
+import { YIRU_GITHUB_RELEASES_URL } from '@yiru/workbench-model/product'
+/* eslint-disable max-lines -- Why: the update card owns the full updater lifecycle in one
+   renderer surface. Keeping the state machine and its presentation variants together avoids
+   scattering tightly coupled update behavior across multiple files. */
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   WarningCircle as AlertCircle,
   Check,
@@ -5,12 +10,7 @@ import {
   Network,
   ArrowClockwise as RotateCw,
   X
-} from '@phosphor-icons/react'
-import { YIRU_GITHUB_RELEASES_URL } from '@yiru/workbench-model/product'
-/* eslint-disable max-lines -- Why: the update card owns the full updater lifecycle in one
-   renderer surface. Keeping the state machine and its presentation variants together avoids
-   scattering tightly coupled update behavior across multiple files. */
-import { useCallback, useEffect, useRef, useState } from 'react'
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button as UiButton } from '~renderer/components/ui/button'
 import { usePrefersReducedMotion } from '~renderer/hooks/use-prefers-reduced-motion'

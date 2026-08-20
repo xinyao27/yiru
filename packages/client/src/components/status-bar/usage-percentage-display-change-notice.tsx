@@ -1,6 +1,6 @@
-import { ChartBar as BarChart3, X } from '@phosphor-icons/react'
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
+import { ChartBar as BarChart3, X } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
 import { useAppStore } from '~renderer/store'

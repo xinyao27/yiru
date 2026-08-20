@@ -1,11 +1,11 @@
+import type React from 'react'
 import {
   TextAa as CaseSensitive,
   GitMerge,
   GithubLogo as Github,
   GitlabLogo as Gitlab,
   Sparkle as Sparkles
-} from '@phosphor-icons/react'
-import type React from 'react'
+} from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
 
 import type { SmartNameMode } from './smart-workspace-source-results'

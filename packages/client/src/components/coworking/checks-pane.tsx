@@ -1,7 +1,7 @@
-import { ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import type React from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { CoworkingWorkspaceRoute } from '~renderer/components/coworking/types'
+import { ArrowClockwise as RefreshCw } from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'

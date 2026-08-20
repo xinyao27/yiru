@@ -1,11 +1,11 @@
+import type React from 'react'
 import {
   CheckCircle as CircleCheck,
   CircleDashed,
   MinusCircle as CircleMinus,
   Warning as AlertTriangle,
   XCircle as CircleX
-} from '@phosphor-icons/react'
-import type React from 'react'
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 
 export const CHECK_ICON: Record<string, React.ComponentType<{ className?: string }>> = {

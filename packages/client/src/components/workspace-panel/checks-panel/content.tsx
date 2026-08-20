@@ -1,4 +1,4 @@
-import { GitPullRequest } from '@phosphor-icons/react'
+import { GitPullRequest } from '~renderer/components/icons/hugeicons'
 import type { PRInfo } from '~shared/types'
 
 export { CHECK_COLOR, CHECK_ICON } from '../check-status-presentation'

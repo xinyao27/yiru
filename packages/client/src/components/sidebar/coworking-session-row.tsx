@@ -1,5 +1,5 @@
-import { TerminalWindow as SquareTerminal } from '@phosphor-icons/react'
 import type React from 'react'
+import { TerminalWindow as SquareTerminal } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { AgentIcon } from '~renderer/lib/agent-catalog'
 import { cn } from '~renderer/lib/class-names'

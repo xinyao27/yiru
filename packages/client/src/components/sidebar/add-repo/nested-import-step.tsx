@@ -1,6 +1,6 @@
-import { StopCircle as CircleStop } from '@phosphor-icons/react'
 import { getRuntimePathBasename } from '@yiru/workbench-model/platform'
 import { useId, useState, type Dispatch, type SetStateAction } from 'react'
+import { StopCircle as CircleStop } from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { NestedRepoChecklist } from '~renderer/components/repo/nested-repo-checklist'
 import { NestedRepoScanLimitNotice } from '~renderer/components/repo/nested-repo-scan-limit-notice'

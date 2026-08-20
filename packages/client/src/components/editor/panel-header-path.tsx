@@ -1,6 +1,11 @@
-import { Copy, Eye, Pencil, ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
 import { useEffect, useRef, useState } from 'react'
 import type { OpenFile } from '~renderer/components/editor/state'
+import {
+  Copy,
+  Eye,
+  Pencil,
+  ArrowSquareOut as ExternalLink
+} from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import {
   ContextMenu,

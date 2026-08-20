@@ -1,7 +1,8 @@
 'use client'
 
 import { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
-import { MagnifyingGlass as SearchIcon } from '@phosphor-icons/react'
+import { Search01Icon } from '@hugeicons/core-free-icons'
+import { HugeiconsIcon } from '@hugeicons/react'
 import { Command as CommandPrimitive } from 'cmdk'
 import * as React from 'react'
 import {
@@ -142,7 +143,8 @@ function CommandInput({
       )}
       data-cmdk-input-wrapper=""
     >
-      <SearchIcon
+      <HugeiconsIcon
+        icon={Search01Icon}
         className={cn(
           'mr-2 shrink-0 text-muted-foreground opacity-50',
           size === 'default' ? 'size-4' : 'size-3.5',

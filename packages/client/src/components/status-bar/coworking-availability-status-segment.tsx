@@ -1,15 +1,15 @@
+import { useRef, useState } from 'react'
+import {
+  projectCoworkingAvailabilityDiagnostic,
+  type CoworkingAvailabilityDiagnostic
+} from '~renderer/components/coworking/availability-diagnostic'
 import {
   Monitor,
   UsersThree,
   WarningCircle,
   ArrowClockwise as RefreshCw,
   ShieldCheck
-} from '@phosphor-icons/react'
-import { useRef, useState } from 'react'
-import {
-  projectCoworkingAvailabilityDiagnostic,
-  type CoworkingAvailabilityDiagnostic
-} from '~renderer/components/coworking/availability-diagnostic'
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '~renderer/components/ui/popover'

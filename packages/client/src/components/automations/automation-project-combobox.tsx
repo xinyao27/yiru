@@ -1,11 +1,11 @@
+import { getRepoExecutionHostId } from '@yiru/workbench-model/workspace'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Check,
   CaretRight as ChevronRight,
   CaretUpDown as ChevronsUpDown,
   FolderPlus
-} from '@phosphor-icons/react'
-import { getRepoExecutionHostId } from '@yiru/workbench-model/workspace'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+} from '~renderer/components/icons/hugeicons'
 import RepoBadgeLabel from '~renderer/components/repo/badge-label'
 import { Button } from '~renderer/components/ui/button'
 import { Command, CommandInput, CommandList } from '~renderer/components/ui/command'

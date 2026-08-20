@@ -35,7 +35,7 @@ Each task can live in its own worktree while Yiru keeps the surrounding workflow
 - **Source control:** Stage, commit, sync, review history, and manage branches from the desktop or mobile interface.
 - **Code review:** Inspect GitHub pull requests and GitLab merge requests, including discussions, checks, and review state.
 - **Remote development:** Work with local, WSL, and SSH hosts while keeping host-specific execution and reconnection behavior explicit.
-- **Mobile companion:** Pair an iOS or Android device to monitor sessions, receive notifications, and send follow-up instructions away from the desktop.
+- **Mobile companion:** Pair an iOS 26 device to monitor sessions, receive notifications, and send follow-up instructions away from the desktop.
 
 ## Coding agents
 
@@ -59,7 +59,6 @@ Windows builds are published when release signing is available. macOS and Linux 
 Install the mobile app, then pair it with Yiru Desktop from the Mobile settings screen.
 
 - **iOS:** [Join the TestFlight beta](https://testflight.apple.com/join/67PVx1Se)
-- **Android:** [Download the latest APK](https://github.com/xinyao27/yiru/releases/download/mobile-android-latest/app-release.apk)
 - **Documentation:** [Mobile companion guide](https://yiru.ai/docs/mobile)
 
 ## Develop locally
@@ -74,7 +73,8 @@ pnpm dev:desktop
 Useful commands:
 
 ```bash
-pnpm dev:mobile   # Start the Expo mobile app
+pnpm dev:mobile          # Start the native iOS 26 mobile app and pair with Desktop
+pnpm dev:mobile:legacy   # Start the Expo rollback mobile app
 pnpm typecheck    # Type-check all workspace projects
 pnpm check        # Lint, format, typecheck, and repository contracts
 pnpm lint         # Run and fix lint checks

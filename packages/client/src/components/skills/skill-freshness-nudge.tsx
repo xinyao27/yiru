@@ -1,6 +1,6 @@
-import { Terminal } from '@phosphor-icons/react'
 import { useEffect, useRef } from 'react'
 import { toast } from 'sonner'
+import { Terminal } from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
 import { useAppStore } from '~renderer/store'
 

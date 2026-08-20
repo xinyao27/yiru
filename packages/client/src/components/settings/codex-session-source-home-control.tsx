@@ -1,5 +1,5 @@
-import { Info } from '@phosphor-icons/react'
 import { useState } from 'react'
+import { Info } from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
 import { normalizeGlobalWindowsRuntimeDefault } from '~shared/project-execution-runtime'
 import type { GlobalSettings } from '~shared/types'

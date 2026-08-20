@@ -33,6 +33,7 @@ export type RuntimeAgentStatusSubscriptionEvent =
   | { type: 'end' }
 
 const HOST_READ_ACCESS = { scope: 'host', tier: 'read' } as const
+const MOBILE_CLIENT = { mobile: true } as const
 // Why: drop/retirePaneAuthority/transferPaneAuthority/inferInterrupt mutate
 // the hook server's shared pane-authority bookkeeping (which pane currently
 // owns a pty's hook events, and inferred-interrupt turn state) — the part of
@@ -77,7 +78,7 @@ export const agentStatusContract = {
   // Why: the hook server reports for every pane on the machine, so the stream
   // is host-wide. Read tier: it reports agent state, it never drives it.
   events: {
-    subscribe: withAccess({ scope: 'host', tier: 'read' }, { mobile: true })
+    subscribe: withAccess({ scope: 'host', tier: 'read' }, MOBILE_CLIENT)
       .input(type<void>())
       .output(eventIterator(type<RuntimeAgentStatusSubscriptionEvent>()))
   },
@@ -89,7 +90,7 @@ export const agentStatusContract = {
   getMigrationUnsupportedSnapshot: withAccess(HOST_READ_ACCESS)
     .input(z.void())
     .output(type<MigrationUnsupportedPtyEntry[]>()),
-  inferInterrupt: withAccess(HOST_CONTROL_ACCESS)
+  inferInterrupt: withAccess(HOST_CONTROL_ACCESS, MOBILE_CLIENT)
     .input(AgentStatusInferInterruptInputSchema)
     .output(type<boolean>()),
   drop: withAccess(HOST_CONTROL_ACCESS).input(AgentStatusPaneKeyInputSchema).output(type<void>()),

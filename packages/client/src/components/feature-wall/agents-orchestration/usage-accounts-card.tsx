@@ -1,7 +1,7 @@
-import { Plus } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
 import type { JSX, ReactNode } from 'react'
 import { toast } from 'sonner'
+import { Plus } from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { ClaudeIcon, OpenAIIcon } from '~renderer/components/status-bar/icons'
 import { Button } from '~renderer/components/ui/button'

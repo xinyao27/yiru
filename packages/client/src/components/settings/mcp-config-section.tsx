@@ -1,16 +1,16 @@
 import {
-  WarningCircle as AlertCircle,
-  FileCode as FileCode2,
-  Plus,
-  ArrowClockwise as RefreshCw
-} from '@phosphor-icons/react'
-import {
   getRepoExecutionHostId,
   getRepoIdFromWorktreeId,
   LOCAL_EXECUTION_HOST_ID
 } from '@yiru/workbench-model/workspace'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import {
+  WarningCircle as AlertCircle,
+  FileCode as FileCode2,
+  Plus,
+  ArrowClockwise as RefreshCw
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'

@@ -70,6 +70,10 @@ export type DiscoveredSkill = {
   installed: boolean
   fileCount: number
   updatedAt: number | null
+  /** The `owner/repo` (or well-known domain) the skills CLI recorded for this
+   *  install. Optional so a relay whose build predates lockfile reads still
+   *  parses; null means the scan ran and found no source. */
+  installSource?: string | null
 }
 
 /**

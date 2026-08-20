@@ -1,0 +1,1 @@
+coding,agents,terminal,git,worktree,developer,workspace,remote,review

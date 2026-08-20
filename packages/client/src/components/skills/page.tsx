@@ -1,6 +1,6 @@
-import { BookOpen, ArrowClockwise as RefreshCw, X } from '@phosphor-icons/react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
+import { BookOpen, ArrowClockwise as RefreshCw, X } from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~renderer/components/ui/tabs'

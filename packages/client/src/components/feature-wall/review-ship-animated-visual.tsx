@@ -1,6 +1,6 @@
-import { GitMerge, Sparkle as Sparkles } from '@phosphor-icons/react'
 import { useEffect, useRef } from 'react'
 import type { JSX } from 'react'
+import { GitMerge, Sparkle as Sparkles } from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
 
 import {

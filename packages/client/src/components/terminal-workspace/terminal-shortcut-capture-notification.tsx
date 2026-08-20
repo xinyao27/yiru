@@ -1,5 +1,5 @@
-import { Keyboard } from '@phosphor-icons/react'
 import { toast } from 'sonner'
+import { Keyboard } from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
 import { useAppStore } from '~renderer/store'
 import {

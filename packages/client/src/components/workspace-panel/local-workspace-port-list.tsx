@@ -1,3 +1,4 @@
+import { useCallback } from 'react'
 import {
   Copy,
   Trash as Trash2,
@@ -6,8 +7,7 @@ import {
   Info,
   ArrowSquareOut as ExternalLink,
   CaretRight as ChevronRight
-} from '@phosphor-icons/react'
-import { useCallback } from 'react'
+} from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import {
   ContextMenu,

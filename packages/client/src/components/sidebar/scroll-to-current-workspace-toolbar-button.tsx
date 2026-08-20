@@ -1,5 +1,5 @@
-import { Crosshair } from '@phosphor-icons/react'
 import React from 'react'
+import { Crosshair } from '~renderer/components/icons/hugeicons'
 import { requestScrollToCurrentWorkspaceReveal } from '~renderer/components/sidebar/scroll-to-current-workspace-status'
 import { Button } from '~renderer/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'

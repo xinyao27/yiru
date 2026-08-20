@@ -1,5 +1,5 @@
-import { FlowArrow as Workflow } from '@phosphor-icons/react'
 import type { JSX } from 'react'
+import { FlowArrow as Workflow } from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
 import type { Worktree } from '~shared/types'
 

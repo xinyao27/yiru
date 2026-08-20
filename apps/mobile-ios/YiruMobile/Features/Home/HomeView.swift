@@ -2,230 +2,203 @@ import SwiftUI
 
 struct HomeView: View {
     @State private var model: HomeModel
+    @State private var creationTarget: HomeWorkspaceCreationTarget?
+    @State private var removalTarget: HostProfile?
+    @State private var now = Date()
+    @State private var hasAppeared = false
     private let refreshRevision: Int
-    private let showHosts: () -> Void
+    private let workspaceCreationRepository: any WorkspaceCreationRepository
+    private let showHost: (HostProfile) -> Void
+    private let showWorkspace: (HostProfile, WorkspaceSummary) -> Void
     private let showPairing: () -> Void
-    private let showTerminalSettings: () -> Void
-    private let showTerminalPrototype: () -> Void
-    private let showDesignSystemCatalog: () -> Void
+    private let showActivityInsights: () -> Void
+    private let showSettings: () -> Void
+    private let showAccounts: (HostProfile) -> Void
+    private let editHost: (HostProfile) -> Void
+    private let hostsChanged: () -> Void
 
     init(
-        runtime: any HomeRuntime,
+        hostRepository: any HostRepository,
+        connectionRuntime: any HostConnectionRuntime,
+        workspaceRepository: any WorkspaceRepository,
+        accountsRepository: any AccountsRepository,
+        activityRepository: any ActivityStatsRepository,
+        widgetSnapshotWriter: WidgetSnapshotWriter,
+        recentWorkspaceStore: RecentWorkspaceStore,
+        snapshotCache: HomeSnapshotCache,
+        workspaceCreationRepository: any WorkspaceCreationRepository,
         refreshRevision: Int,
-        showHosts: @escaping () -> Void,
+        showHost: @escaping (HostProfile) -> Void,
+        showWorkspace: @escaping (HostProfile, WorkspaceSummary) -> Void,
         showPairing: @escaping () -> Void,
-        showTerminalSettings: @escaping () -> Void,
-        showTerminalPrototype: @escaping () -> Void,
-        showDesignSystemCatalog: @escaping () -> Void
+        showActivityInsights: @escaping () -> Void,
+        showSettings: @escaping () -> Void,
+        showAccounts: @escaping (HostProfile) -> Void,
+        editHost: @escaping (HostProfile) -> Void,
+        hostsChanged: @escaping () -> Void
     ) {
-        _model = State(initialValue: HomeModel(runtime: runtime))
+        _model = State(
+            initialValue: HomeModel(
+                hostRepository: hostRepository,
+                connectionRuntime: connectionRuntime,
+                workspaceRepository: workspaceRepository,
+                accountsRepository: accountsRepository,
+                activityRepository: activityRepository,
+                widgetSnapshotWriter: widgetSnapshotWriter,
+                recentWorkspaceStore: recentWorkspaceStore,
+                snapshotCache: snapshotCache
+            )
+        )
         self.refreshRevision = refreshRevision
-        self.showHosts = showHosts
+        self.workspaceCreationRepository = workspaceCreationRepository
+        self.showHost = showHost
+        self.showWorkspace = showWorkspace
         self.showPairing = showPairing
-        self.showTerminalSettings = showTerminalSettings
-        self.showTerminalPrototype = showTerminalPrototype
-        self.showDesignSystemCatalog = showDesignSystemCatalog
+        self.showActivityInsights = showActivityInsights
+        self.showSettings = showSettings
+        self.showAccounts = showAccounts
+        self.editHost = editHost
+        self.hostsChanged = hostsChanged
     }
 
     var body: some View {
-        ZStack {
-            AtmosphereBackground()
-
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: Theme.Spacing.large) {
-                    introduction
-                    connectionContent
+        Group {
+            switch model.phase {
+            case .loading:
+                ProgressView()
+            case .loaded(let snapshot):
+                if snapshot.hosts.isEmpty {
+                    HomeOnboardingView(showPairing: showPairing)
+                } else {
+                    HomeDashboardView(
+                        snapshot: snapshot,
+                        now: now,
+                        creationTarget: $creationTarget,
+                        showHost: showHost,
+                        showWorkspace: showWorkspace,
+                        showPairing: showPairing,
+                        showAccounts: showAccounts,
+                        editHost: editHost,
+                        reconnect: { host in Task { await model.reconnect(hostID: host.id) } },
+                        disconnect: { host in Task { await model.disconnect(hostID: host.id) } },
+                        requestRemove: { removalTarget = $0 },
+                        refresh: { await model.refresh() }
+                    )
                 }
-                .frame(maxWidth: Theme.Size.readingWidth, alignment: .leading)
-                .padding(.horizontal, Theme.Spacing.page)
-                .padding(.vertical, Theme.Spacing.extraLarge)
-                .frame(maxWidth: .infinity)
+            case .failed(let message):
+                AppUnavailableState(
+                    "Home unavailable",
+                    iconID: .warning,
+                    description: Text(message)
+                ) {
+                    Button("Try again") { Task { await model.refresh() } }
+                        .buttonStyle(.glass)
+                        .appButtonContext(.regular)
+                }
             }
         }
-        .navigationTitle(Text("Yiru"))
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Theme.Colors.background)
+        .navigationTitle("")
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            // Why: activity insights sits at the leading edge and settings at the trailing
+            // edge — two placements, not two buttons grouped on one.
+            // Why: GlassHeaderButton wraps its own `.glassEffect` circle for sheet/docked-panel
+            // headers that sit outside a NavigationStack toolbar. Home's actions live in the
+            // real navigation bar, so — like every other root toolbar in this app (Workspace
+            // List, Terminal session, Activity insights) — they use a plain Button around
+            // YiruToolbarIcon and let SwiftUI supply the Liquid Glass surface itself. Wrapping
+            // a second glass circle inside the system's own toolbar glass made both items
+            // collapse to the trailing edge instead of splitting leading/trailing.
             ToolbarItem(placement: .topBarLeading) {
-                Button("Pair", systemImage: "qrcode.viewfinder", action: showPairing)
+                Button(action: showActivityInsights) {
+                    YiruToolbarIcon(.insights)
+                }
+                .accessibilityLabel("Open activity insights")
             }
             ToolbarItem(placement: .topBarTrailing) {
-                Menu("More", systemImage: "ellipsis.circle") {
-                    Button(
-                        "Terminal Settings",
-                        systemImage: "gearshape",
-                        action: showTerminalSettings
-                    )
-                    #if DEBUG
-                        Button(
-                            "Design System",
-                            systemImage: "paintpalette",
-                            action: showDesignSystemCatalog
-                        )
-                    #endif
+                Button(action: showSettings) {
+                    YiruToolbarIcon(.settings)
                 }
+                .accessibilityLabel("Settings")
             }
         }
         .task(id: refreshRevision) {
             await model.observe()
         }
-        .refreshable {
-            await model.refresh()
-        }
-    }
-
-    private var introduction: some View {
-        ContentSurface {
-            VStack(alignment: .leading, spacing: Theme.Spacing.medium) {
-                Label("Native iOS foundation", systemImage: "swift")
-                    .font(.title2.weight(.semibold))
-
-                Text(
-                    "The iOS 26 app shell, architecture, and Liquid Glass design system are ready for feature-by-feature migration."
-                )
-                .foregroundStyle(.secondary)
-
-                #if DEBUG
-                    Button(
-                        "Terminal prototype",
-                        systemImage: "terminal",
-                        action: showTerminalPrototype
-                    )
-                    .buttonStyle(.glass)
-                #endif
+        // Why: re-fetch worktree, account, and stats data on every screen focus, not just on
+        // cold start or a connection-state change, so counts stay current after creating a
+        // workspace or returning from a session. `observe()`'s stream only reacts to
+        // connection transitions, so the focus refetch has to happen here.
+        .onAppear {
+            guard hasAppeared else {
+                hasAppeared = true
+                return
             }
+            Task { await model.refresh() }
         }
-    }
-
-    @ViewBuilder
-    private var connectionContent: some View {
-        switch model.phase {
-        case .loading:
-            ContentSurface {
-                HStack(spacing: Theme.Spacing.medium) {
-                    ProgressView()
-                    Text("Reading connection state…")
-                        .foregroundStyle(.secondary)
+        .sheet(item: $creationTarget) { target in
+            WorkspaceCreationSheet(
+                host: target.host,
+                existingPaths: target.existingPaths,
+                repository: workspaceCreationRepository,
+                onCreated: { workspace in
+                    showWorkspace(target.host, workspace)
                 }
-            }
-        case .loaded(let state):
-            ConnectionSummary(
-                state: state,
-                showHosts: showHosts,
-                showPairing: showPairing,
-                reconnect: { Task { await model.reconnect() } }
             )
         }
-    }
-}
-
-private struct ConnectionSummary: View {
-    let state: RuntimeConnectionState
-    let showHosts: () -> Void
-    let showPairing: () -> Void
-    let reconnect: () -> Void
-
-    var body: some View {
-        ContentSurface {
-            VStack(alignment: .leading, spacing: Theme.Spacing.medium) {
-                badge
-                Text(title)
-                    .font(.headline)
-                Text(detail)
-                    .foregroundStyle(.secondary)
-                if case .unpaired = state {
-                    Button(
-                        "Pair with desktop", systemImage: "qrcode.viewfinder", action: showPairing
-                    )
-                    .buttonStyle(.glassProminent)
-                } else if shouldShowHosts {
-                    GlassActionGroup {
-                        Button("View hosts", systemImage: "desktopcomputer", action: showHosts)
-                            .buttonStyle(.glass)
-                        if shouldReconnect {
-                            Button("Reconnect", systemImage: "arrow.clockwise", action: reconnect)
-                                .buttonStyle(.glassProminent)
-                        }
+        .confirmationDialog(
+            "Remove \(removalTarget?.name ?? "host")?",
+            isPresented: Binding(
+                get: { removalTarget != nil },
+                set: { if !$0 { removalTarget = nil } }
+            ),
+            titleVisibility: .visible
+        ) {
+            Button("Remove", role: .destructive) {
+                guard let host = removalTarget else { return }
+                removalTarget = nil
+                Task {
+                    let removed = await model.remove(host)
+                    if removed {
+                        hostsChanged()
+                    } else {
+                        removalTarget = host
                     }
                 }
             }
+            Button("Cancel", role: .cancel) { removalTarget = nil }
+        } message: {
+            Text(
+                "This removes the paired host and its credentials from this iPhone. You can re-pair later."
+            )
+        }
+        .alert(
+            "Could not remove host",
+            isPresented: Binding(
+                get: { model.actionFailure != nil },
+                set: { isPresented in
+                    if !isPresented { model.clearActionFailure() }
+                }
+            )
+        ) {
+            Button("OK") { model.clearActionFailure() }
+        } message: {
+            if let message = model.actionFailure { Text(message) }
+        }
+        .task {
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(60))
+                now = Date()
+            }
         }
     }
 
-    @ViewBuilder
-    private var badge: some View {
-        switch state {
-        case .unpaired:
-            SemanticBadge("Not paired", systemImage: "link.badge.plus", tint: .orange)
-        case .paired:
-            SemanticBadge("Paired", systemImage: "checkmark.shield.fill", tint: .green)
-        case .connecting:
-            SemanticBadge("Connecting", systemImage: "arrow.trianglehead.2.clockwise", tint: .blue)
-        case .connected:
-            SemanticBadge("Connected", systemImage: "checkmark.circle.fill", tint: .green)
-        case .reconnecting:
-            SemanticBadge(
-                "Reconnecting", systemImage: "arrow.trianglehead.2.clockwise", tint: .orange)
-        case .unavailable:
-            SemanticBadge("Unavailable", systemImage: "exclamationmark.triangle.fill", tint: .red)
-        case .authenticationFailed:
-            SemanticBadge(
-                "Authentication failed", systemImage: "key.slash.fill", tint: .red)
-        }
-    }
+}
 
-    private var title: LocalizedStringKey {
-        switch state {
-        case .unpaired:
-            "No paired hosts"
-        case .paired(let hostName):
-            "Paired with \(hostName)"
-        case .connecting(let hostName):
-            "Connecting to \(hostName)"
-        case .connected(let hostName):
-            "Connected to \(hostName)"
-        case .reconnecting(let hostName, _):
-            "Reconnecting to \(hostName)"
-        case .unavailable(let hostName, _):
-            "Cannot reach \(hostName)"
-        case .authenticationFailed(let hostName):
-            "Pairing expired for \(hostName)"
-        }
-    }
-
-    private var detail: LocalizedStringKey {
-        switch state {
-        case .unpaired:
-            "Scan the QR code from Yiru on your desktop to add your first host."
-        case .paired:
-            "The desktop identity and device credential are stored securely on this device."
-        case .connecting:
-            "Yiru is establishing an encrypted runtime connection."
-        case .connected:
-            "Choose a workspace to continue."
-        case .reconnecting(_, let reconnectAttempt):
-            "Encrypted connection interrupted. Retry attempt \(reconnectAttempt)."
-        case .unavailable(_, let reconnectAttempt):
-            "The host is still unavailable after \(reconnectAttempt) attempts."
-        case .authenticationFailed:
-            "The saved credential was rejected. Pair this desktop again."
-        }
-    }
-
-    private var shouldShowHosts: Bool {
-        switch state {
-        case .unpaired:
-            false
-        case .paired, .connecting, .connected, .reconnecting, .unavailable,
-            .authenticationFailed:
-            true
-        }
-    }
-
-    private var shouldReconnect: Bool {
-        switch state {
-        case .reconnecting, .unavailable:
-            true
-        case .unpaired, .paired, .connecting, .connected, .authenticationFailed:
-            false
-        }
-    }
+nonisolated struct HomeWorkspaceCreationTarget: Identifiable, Sendable {
+    let host: HostProfile
+    let existingPaths: [String]
+    var id: String { host.id }
 }

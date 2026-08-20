@@ -1,3 +1,4 @@
+import { showLocalPathOpenBlockedToast } from '~renderer/components/editor/local-path-open-guard'
 import {
   Copy,
   Eye,
@@ -8,8 +9,7 @@ import {
   PushPinSlash as PinOff,
   ArrowSquareOut as ExternalLink,
   X
-} from '@phosphor-icons/react'
-import { showLocalPathOpenBlockedToast } from '~renderer/components/editor/local-path-open-guard'
+} from '~renderer/components/icons/hugeicons'
 import {
   ContextMenuContent,
   ContextMenuItem,

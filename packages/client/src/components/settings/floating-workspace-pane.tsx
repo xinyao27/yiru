@@ -1,5 +1,5 @@
-import { FolderOpen } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
+import { FolderOpen } from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
 import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'

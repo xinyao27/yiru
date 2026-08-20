@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import {
   Clipboard,
   Copy as ClipboardCopy,
@@ -15,8 +16,7 @@ import {
   ArrowsIn as Minimize2,
   Plus,
   X
-} from '@phosphor-icons/react'
-import { useMemo } from 'react'
+} from '~renderer/components/icons/hugeicons'
 import {
   ContextMenuContent,
   ContextMenuItem,

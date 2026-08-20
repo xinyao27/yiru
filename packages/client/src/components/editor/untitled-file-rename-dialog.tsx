@@ -1,5 +1,5 @@
-import { FolderOpen } from '@phosphor-icons/react'
 import React, { useCallback, useRef, useState } from 'react'
+import { FolderOpen } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,

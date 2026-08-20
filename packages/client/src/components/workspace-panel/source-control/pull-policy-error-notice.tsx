@@ -1,6 +1,6 @@
-import { Check, Copy, Warning as TriangleAlert } from '@phosphor-icons/react'
 import type React from 'react'
 import { useCallback, useEffect, useState } from 'react'
+import { Check, Copy, Warning as TriangleAlert } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { translate } from '~renderer/i18n/i18n'

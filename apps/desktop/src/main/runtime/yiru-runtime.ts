@@ -43,6 +43,7 @@ import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
 import {
   AGENT_STATUS_STALE_AFTER_MS,
   isFreshNonDoneAgentStatus,
+  resolveExplicitTerminalTitleAgentType,
   type AgentStatusIpcPayload,
   type ParsedAgentStatusPayload,
   type AgentStatusOrchestrationContext,
@@ -164,6 +165,7 @@ import type { ExactWorkerProviderSession } from '~shared/orchestration-worker-ou
 import { extractOscTitleScanTail } from '~shared/osc-title-scan-tail'
 import { FIRST_PANE_ID } from '~shared/pane-key'
 import type { ProjectExecutionRuntimeResolution } from '~shared/project-execution-runtime'
+import { getProjectGroupSubtreeIds } from '~shared/project-groups'
 import {
   getProjectHostSetupForRepo,
   getProjectHostSetupWorktreeMeta
@@ -181,6 +183,7 @@ import type {
   RuntimeMethodParams,
   RuntimeMethodResult
 } from '~shared/runtime-method-contract'
+import { toRuntimeTerminalPtyId } from '~shared/runtime-terminal-pty-id'
 import { HEADLESS_RUNTIME_WINDOW_ID, type RuntimeDesktopWindowStatus } from '~shared/runtime-types'
 import type {
   RuntimeRepoSearchRefs,
@@ -679,6 +682,7 @@ import {
   requestShellTerminalCreate,
   requestShellTerminalMount,
   requestShellTerminalReveal,
+  requestShellSleepWorktree,
   saveMobileMarkdownViaShell
 } from './rpc/orpc/shell-services-reverse-link'
 import {
@@ -707,6 +711,61 @@ import { RuntimeGitCommands } from './yiru-runtime-git'
 function sanitizeNestedRepoRuntimeImportError(context: string, error: unknown): string {
   console.warn(`[project-groups] ${context}`, error)
   return 'Repository could not be imported'
+}
+
+type MobileResumeTargetStatus = 'local' | 'runtime' | 'unknown'
+
+function mobileExecutionHostTargetStatus(
+  hostId: ExecutionHostId | null | undefined
+): MobileResumeTargetStatus {
+  return parseExecutionHostId(hostId)?.kind ?? 'unknown'
+}
+
+function mobileFolderResumeTargetStatus(args: {
+  folderWorkspace: FolderWorkspace
+  projectGroup: ProjectGroup
+  projectGroups: readonly ProjectGroup[]
+  repos: readonly Repo[]
+}): MobileResumeTargetStatus {
+  const explicitHostId = normalizeExecutionHostId(args.projectGroup.executionHostId)
+  if (explicitHostId) {
+    return mobileExecutionHostTargetStatus(explicitHostId)
+  }
+
+  const groupIds = getProjectGroupSubtreeIds(args.projectGroups, args.projectGroup.id)
+  const groupRepos = args.repos.filter(
+    (repo) => typeof repo.projectGroupId === 'string' && groupIds.has(repo.projectGroupId)
+  )
+  const pathRepos = args.repos.filter(
+    (repo) =>
+      !(typeof repo.projectGroupId === 'string' && groupIds.has(repo.projectGroupId)) &&
+      isPathInsideOrEqual(args.folderWorkspace.folderPath, repo.path)
+  )
+  const candidateRepos = args.folderWorkspace.connectionId
+    ? [
+        ...groupRepos,
+        ...pathRepos.filter(
+          (repo) => (repo.connectionId ?? null) === args.folderWorkspace.connectionId
+        )
+      ]
+    : groupRepos.length === 0
+      ? pathRepos
+      : (() => {
+          const groupConnectionIds = new Set(groupRepos.map((entry) => entry.connectionId ?? null))
+          return [
+            ...groupRepos,
+            ...pathRepos.filter((repo) => groupConnectionIds.has(repo.connectionId ?? null))
+          ]
+        })()
+  if (candidateRepos.length === 0) {
+    return 'local'
+  }
+  const hostIds = candidateRepos.map(getRepoExecutionHostId)
+  const statuses = hostIds.map(mobileExecutionHostTargetStatus)
+  if (statuses.includes('runtime')) {
+    return 'runtime'
+  }
+  return new Set(hostIds).size === 1 ? (statuses[0] ?? 'unknown') : 'unknown'
 }
 
 export type RemoteFetchResult = { ok: true } | { ok: false; errorKind: 'git_error' }
@@ -2896,6 +2955,7 @@ export class YiruRuntimeService {
     for (const listener of this.agentStatusEventListeners) {
       listener(event)
     }
+    this.touchMobileSessionSnapshotsForAgentStatus(event)
   }
 
   onSpeechEvent(listener: (event: RuntimeSpeechEvent) => void): () => void {
@@ -3235,13 +3295,15 @@ export class YiruRuntimeService {
   }
 
   syncWindowGraph(windowId: number, graph: RuntimeSyncWindowGraph): RuntimeSyncWindowGraphResult {
+    const leaves = this.preserveRemoteViewedLeafBindings(graph)
     this.syncMobileSessionTabs(graph.mobileSessionTabs)
     const graphSyncedAt = this.nextTitleObservationSequence()
     this.terminalSessions.synchronizeGraph(
       windowId,
       graph.tabs,
-      graph.leaves,
+      leaves,
       {
+        preserveRemotePty: (ptyId) => this.hasRemoteTerminalViewSubscriber(ptyId),
         buildLeaf: (leaf, { existing, ptyId, ptyGeneration, writable }) => {
           const existingPty = ptyId ? this.terminalSessions.getPtyRecord(ptyId) : null
           const tailSource = existing?.ptyId === ptyId ? existing : existingPty
@@ -3293,6 +3355,37 @@ export class YiruRuntimeService {
       ...this.getStatus(),
       ...(agentOrchestrationByPaneKey ? { agentOrchestrationByPaneKey } : {})
     }
+  }
+
+  private preserveRemoteViewedLeafBindings(
+    graph: RuntimeSyncWindowGraph
+  ): RuntimeSyncWindowGraph['leaves'] {
+    const remotePtyByLeaf = new Map<string, string>()
+    for (const snapshot of graph.mobileSessionTabs ?? []) {
+      for (const tab of snapshot.tabs) {
+        if (tab.type !== 'terminal') {
+          continue
+        }
+        const ptyId = tab.ptyId ?? tab.parentLayout?.ptyIdsByLeafId?.[tab.leafId] ?? null
+        if (!ptyId || !this.hasRemoteTerminalViewSubscriber(ptyId)) {
+          continue
+        }
+        remotePtyByLeaf.set(`${snapshot.worktree}\0${tab.parentTabId}\0${tab.leafId}`, ptyId)
+      }
+    }
+    if (remotePtyByLeaf.size === 0) {
+      return graph.leaves
+    }
+    // Why: a hidden desktop pane can report a null renderer leaf even while a paired phone is
+    // streaming its PTY. The session snapshot still carries that stable binding; keep it in the
+    // authoritative graph until the remote view releases ownership.
+    return graph.leaves.map((leaf) => {
+      if (leaf.ptyId !== null) {
+        return leaf
+      }
+      const ptyId = remotePtyByLeaf.get(`${leaf.worktreeId}\0${leaf.tabId}\0${leaf.leafId}`)
+      return ptyId ? { ...leaf, ptyId } : leaf
+    })
   }
 
   async listMobileSessionTabs(worktreeSelector: string): Promise<RuntimeMobileSessionTabsResult> {
@@ -3361,12 +3454,28 @@ export class YiruRuntimeService {
         reconciledWorktreeIds.add(entryWorktreeId)
         continue
       }
+      // Why: with a window attached, the live renderer graph is authoritative.
+      // The persisted (disk) session can lag a closed tab — it is written on a
+      // debounce, not synchronously on every close — so seeding straight from
+      // it here would publish stale/closed tabs to mobile. Once seeded they
+      // used to be preserved forever by shouldPreserveHeadlessMobileSessionTab
+      // regardless of liveness; that hole is now closed there too, but not
+      // publishing them in the first place avoids even the one-sync flash.
+      const hasAttachedWindow = Boolean(this.getAvailableAuthoritativeWindow())
       const terminalTabs = this.buildHeadlessMobileSessionTerminalTabs(
         entryWorktreeId,
         persistedTabs
-      ).filter(
-        (tab) => options.onlyServeOwnedTerminals !== true || this.hasServeOwnedPtyBinding(tab)
-      )
+      ).filter((tab) => {
+        if (options.onlyServeOwnedTerminals === true && !this.hasServeOwnedPtyBinding(tab)) {
+          return false
+        }
+        if (!hasAttachedWindow) {
+          return true
+        }
+        return (
+          this.hasServeOwnedPtyBinding(tab) || this.terminalSessions.hasGraphTab(tab.parentTabId)
+        )
+      })
       // Why: offscreen browser panes are live-only (no persisted session entry),
       // so include them on every hydrate regardless of the onlyServeOwnedTerminals
       // filter, which is about terminal PTY ownership and never applies to browsers.
@@ -3885,6 +3994,40 @@ export class YiruRuntimeService {
     }
   }
 
+  private touchMobileSessionSnapshotsForAgentStatus(event: RuntimeAgentStatusEvent): void {
+    let paneKey: string
+    let reportedWorktreeId: string | undefined
+    switch (event.type) {
+      case 'set':
+        paneKey = event.status.paneKey
+        reportedWorktreeId = event.status.worktreeId
+        break
+      case 'clear':
+        paneKey = event.paneKey
+        reportedWorktreeId = undefined
+        break
+      case 'migrationUnsupported':
+      case 'migrationUnsupportedClear':
+        return
+    }
+    for (const [worktreeId, snapshot] of this.mobileSessionTabsByWorktree) {
+      const matchesReportedWorktree = reportedWorktreeId === worktreeId
+      const matchesPane = snapshot.tabs.some(
+        (tab) => tab.type === 'terminal' && this.getMobileTerminalPaneKey(tab) === paneKey
+      )
+      if (!matchesReportedWorktree && !matchesPane) {
+        continue
+      }
+      this.mobileSessionTabsByWorktree.set(worktreeId, {
+        ...snapshot,
+        snapshotVersion: snapshot.snapshotVersion + 1
+      })
+      // Why: native chat session identity arrives from agent hooks after a terminal tab is
+      // published; advance the session-tabs stream so paired clients can start transcript sync.
+      this.mobileSessionTabsNotifyCoalescer.schedule(worktreeId)
+    }
+  }
+
   private buildHeadlessMobileSessionTerminalTabs(
     worktreeId: string,
     persistedTabs: readonly TerminalTab[]
@@ -3942,6 +4085,7 @@ export class YiruRuntimeService {
     }
     return this.agentBrowserBridge.tabList(worktreeId).tabs.map((tab) => {
       const persistedProps = this.getPersistedUnifiedSessionTabProps(worktreeId, tab.browserPageId)
+      const navigationState = this.browserBackend?.getNavigationState?.(tab.browserPageId)
       return {
         type: 'browser' as const,
         // Why: an offscreen page has no separate workspace identity, so the page id
@@ -3952,8 +4096,8 @@ export class YiruRuntimeService {
         browserPageId: tab.browserPageId,
         url: tab.url || 'about:blank',
         loading: false,
-        canGoBack: false,
-        canGoForward: false,
+        canGoBack: navigationState?.canGoBack ?? false,
+        canGoForward: navigationState?.canGoForward ?? false,
         loadError: tab.loadError ?? undefined,
         certificateFailure: tab.certificateFailure ?? undefined,
         ...(persistedProps ? { color: persistedProps.color } : {}),
@@ -3982,6 +4126,8 @@ export class YiruRuntimeService {
         tab.url === prev.url &&
         tab.isActive === prev.isActive &&
         (tab.isPinned ?? false) === (prev.isPinned ?? false) &&
+        tab.canGoBack === prev.canGoBack &&
+        tab.canGoForward === prev.canGoForward &&
         (tab.color ?? null) === (prev.color ?? null) &&
         this.browserLoadErrorsEqual(tab.loadError, prev.loadError) &&
         this.browserCertificateFailuresEqual(tab.certificateFailure, prev.certificateFailure)
@@ -10951,7 +11097,10 @@ export class YiruRuntimeService {
     })
   }
 
-  async getWorktreePs(limit = DEFAULT_WORKTREE_PS_LIMIT): Promise<{
+  async getWorktreePs(
+    limit = DEFAULT_WORKTREE_PS_LIMIT,
+    clientKind?: 'mobile' | 'runtime'
+  ): Promise<{
     worktrees: RuntimeWorktreePsSummary[]
     totalCount: number
     truncated: boolean
@@ -10966,8 +11115,9 @@ export class YiruRuntimeService {
     // Why: worktree.ps backs the mobile sidebar, so it must use the same
     // host-owned imported-worktree visibility gate as worktree.list/desktop.
     await this.refreshPtyWorktreeRecordsFromController(resolvedWorktrees)
+    const allRepos = this.store?.getRepos() ?? []
     const repoById = new Map(
-      (this.store?.getRepos() ?? [])
+      allRepos
         .filter((repo) => getRepoExecutionHostId(repo) === LOCAL_EXECUTION_HOST_ID)
         .map((repo) => [repo.id, repo])
     )
@@ -11001,6 +11151,9 @@ export class YiruRuntimeService {
         linkedPR = { number: meta.linkedPR, state: 'unknown' }
       }
       const terminalPlatform = platformByRepoId.get(worktree.repoId) ?? process.platform
+      const resumeRepo = allRepos.find((candidate) => candidate.id === worktree.repoId)
+      const resumeHostId =
+        worktree.hostId ?? meta?.hostId ?? (resumeRepo ? getRepoExecutionHostId(resumeRepo) : null)
       // Why: use the instance-validated lineage from attachLineageToResolvedWorktrees,
       // not the raw store entry — shipped mobile clients trust parentWorktreeId as-is,
       // so a stale same-path entry would nest replacement checkouts under old parents.
@@ -11012,7 +11165,13 @@ export class YiruRuntimeService {
         worktreeId: worktree.id,
         repoId: worktree.repoId,
         ...((worktree.hostId ?? meta?.hostId) ? { hostId: worktree.hostId ?? meta?.hostId } : {}),
+        resumeTargetStatus: resumeHostId
+          ? mobileExecutionHostTargetStatus(normalizeExecutionHostId(resumeHostId))
+          : 'unknown',
         terminalPlatform,
+        ...(meta?.priorWorktreeIds !== undefined
+          ? { priorWorktreeIds: meta.priorWorktreeIds }
+          : {}),
         repo: repo?.displayName ?? worktree.repoId,
         path: worktree.path,
         branch: worktree.branch,
@@ -11049,9 +11208,8 @@ export class YiruRuntimeService {
       })
     }
 
-    const projectGroupById = new Map(
-      (this.store?.getProjectGroups?.() ?? []).map((group) => [group.id, group])
-    )
+    const projectGroups = this.store?.getProjectGroups?.() ?? []
+    const projectGroupById = new Map(projectGroups.map((group) => [group.id, group]))
     for (const folderWorkspace of this.store?.getFolderWorkspaces?.() ?? []) {
       const projectGroup = projectGroupById.get(folderWorkspace.projectGroupId)
       if (!projectGroup?.parentPath) {
@@ -11064,6 +11222,12 @@ export class YiruRuntimeService {
         workspaceKind: 'folder-workspace',
         worktreeId: worktree.id,
         repoId: worktree.repoId,
+        resumeTargetStatus: mobileFolderResumeTargetStatus({
+          folderWorkspace,
+          projectGroup,
+          projectGroups,
+          repos: allRepos
+        }),
         repo: projectGroup.name,
         path: worktree.path,
         branch: worktree.branch,
@@ -11261,10 +11425,14 @@ export class YiruRuntimeService {
     )
 
     const sorted = [...summaries.values()].sort(compareWorktreePs)
+    const visibleWorktrees =
+      clientKind === 'mobile'
+        ? sorted.map((summary) => compactWorktreePsForMobile(summary))
+        : sorted
     return {
-      worktrees: sorted.slice(0, limit),
-      totalCount: sorted.length,
-      truncated: sorted.length > limit
+      worktrees: visibleWorktrees.slice(0, limit),
+      totalCount: visibleWorktrees.length,
+      truncated: visibleWorktrees.length > limit
     }
   }
 
@@ -13834,8 +14002,15 @@ export class YiruRuntimeService {
   async sleepManagedWorktree(worktreeSelector: string): Promise<{ worktreeId: string }> {
     const worktree = await this.resolveWorktreeSelector(worktreeSelector)
     // Why: sleep is renderer-owned (it tears down tab state before killing
-    // PTYs), so the runtime asks its attached shell to run the ordered flow.
-    this.dispatchShellCommand({ type: 'sleepWorktree', worktreeId: worktree.id })
+    // PTYs), so the runtime asks its attached shell to run the ordered flow and
+    // waits for the renderer's teardown promise before acknowledging mobile.
+    const accepted = await requestShellSleepWorktree(
+      this.shellConnectionId ?? undefined,
+      worktree.id
+    )
+    if (!accepted) {
+      throw new Error('shell_unavailable')
+    }
     return { worktreeId: worktree.id }
   }
 
@@ -17132,7 +17307,12 @@ export class YiruRuntimeService {
           // already baked into the PTY env — keeps paneKey hook attribution intact.
           const revealResult = await requestShellTerminalReveal(this.shellConnectionId, {
             worktreeId: workspace.id,
-            ptyId: result.id,
+            // Why: the shell's attach()/store parse this id with
+            // parseRuntimeTerminalPtyId, which requires the `runtime:` wire
+            // shape — sending the bare controller handle here is exactly the
+            // "Remote runtime terminal id is invalid" defect (see the mint-side
+            // fix note on toRuntimeTerminalPtyId's import above).
+            ptyId: toRuntimeTerminalPtyId(result.id),
             title: launchOpts.title ?? null,
             ...(cwd !== workspace.path ? { cwd } : {}),
             ...(effectiveLaunchConfig ? { launchConfig: effectiveLaunchConfig } : {}),
@@ -18001,7 +18181,11 @@ export class YiruRuntimeService {
       return false
     }
     const tabId = record.tabId.startsWith('pty:') ? undefined : record.tabId
-    const ptyId = record.ptyId ?? undefined
+    // Why: the renderer resolves this against tab.ptyId (a `runtime:`-wrapped
+    // wire id) via resolveTerminalTabIdForPtyId's raw string equality —
+    // sending the bare controller handle here silently fails that match and
+    // the renderer never mounts the tab mobile is waiting on.
+    const ptyId = record.ptyId ? toRuntimeTerminalPtyId(record.ptyId) : undefined
     if (!tabId && !ptyId) {
       return false
     }
@@ -18046,7 +18230,9 @@ export class YiruRuntimeService {
       const revealed = this.shellConnectionId
         ? await requestShellTerminalReveal(this.shellConnectionId, {
             worktreeId: pty.pty.worktreeId,
-            ptyId: pty.pty.ptyId,
+            // Why: wire shape must match parseRuntimeTerminalPtyId — see the
+            // mint-side fix note where toRuntimeTerminalPtyId is imported above.
+            ptyId: toRuntimeTerminalPtyId(pty.pty.ptyId),
             title: getLatestPtyTitle(pty.pty),
             ...(pty.pty.launchConfig
               ? { launchConfig: copySleepingAgentLaunchConfig(pty.pty.launchConfig) }
@@ -18093,7 +18279,9 @@ export class YiruRuntimeService {
     // is an ordinary terminal/chat tab in the local floating workspace.
     const revealed = await requestShellTerminalReveal(this.shellConnectionId, {
       worktreeId: FLOATING_TERMINAL_WORKTREE_ID,
-      ptyId: pty.pty.ptyId,
+      // Why: wire shape must match parseRuntimeTerminalPtyId — see the
+      // mint-side fix note where toRuntimeTerminalPtyId is imported above.
+      ptyId: toRuntimeTerminalPtyId(pty.pty.ptyId),
       // Why: agent OSC titles change during startup; the app-owned tab should
       // keep its stable product identity rather than becoming "Claude Code".
       title: 'Friday',
@@ -18267,7 +18455,9 @@ export class YiruRuntimeService {
       }
       const revealResult = await requestShellTerminalReveal(this.shellConnectionId, {
         worktreeId: workspace.id,
-        ptyId: result.id,
+        // Why: wire shape must match parseRuntimeTerminalPtyId — see the
+        // mint-side fix note where toRuntimeTerminalPtyId is imported above.
+        ptyId: toRuntimeTerminalPtyId(result.id),
         title: null,
         activate: opts.activate !== false,
         tabId: parentTabId,
@@ -20135,10 +20325,23 @@ export class YiruRuntimeService {
     if (tab.type !== 'terminal') {
       return false
     }
-    return (
-      this.isHeadlessMobileSessionPublication(snapshot.publicationEpoch) ||
-      this.hasServeOwnedPtyBinding(tab)
-    )
+    // Why: a genuinely-headless host (no attached window at all) has no live
+    // graph to check against, so the whole-snapshot "headless" origin is the
+    // only signal available and every one of its terminals is preserved.
+    // Once a window IS attached, that origin stops being trustworthy: a
+    // worktree's mobile snapshot can be seeded once, on first activation, from
+    // the *persisted* (possibly stale/closed) workspace session — see
+    // hydrateHeadlessMobileSessionTabsFromWorkspaceSession — and every tab it
+    // produced is stamped with the same 'headless-hydrated:' epoch forever
+    // after. Falling back to that stamp here would keep resurrecting closed
+    // tabs on every later live-renderer merge (#duplicate-mobile-tabs). With a
+    // window attached, require either genuine serve/ssh ownership or current
+    // membership in the live renderer graph, matching
+    // isRuntimeOwnedHeadlessMobileTab's same discriminator.
+    if (!this.getAvailableAuthoritativeWindow()) {
+      return this.isHeadlessMobileSessionPublication(snapshot.publicationEpoch)
+    }
+    return this.hasServeOwnedPtyBinding(tab) || this.terminalSessions.hasGraphTab(tab.parentTabId)
   }
 
   private isHeadlessMobileSessionPublication(publicationEpoch: string): boolean {
@@ -20438,9 +20641,36 @@ export class YiruRuntimeService {
       )
       const liveTitleEvidence = leafTitle ?? ptyTitle
       const liveTitleEvidenceClassification = classifyAgentTitle(liveTitleEvidence)
-      const normalizedTabAgentStatus = tab.agentStatus
-        ? normalizeCompatibleAgentStatusEntryForOwner(tab.agentStatus, ownerAgent)
+      const hookAgentStatus = this.getFreshHookAgentStatusForMobileTab(
+        snapshot.worktree,
+        paneKey,
+        tab
+      )
+      // Why: runtime-backed terminal snapshots may omit the provider session even though the
+      // hook stream already knows it; native chat needs that canonical identity to load history.
+      const freshestAgentStatus =
+        hookAgentStatus &&
+        (!tab.agentStatus || hookAgentStatus.updatedAt > tab.agentStatus.updatedAt)
+          ? hookAgentStatus
+          : tab.agentStatus
+      const mergedAgentStatus = freshestAgentStatus
+        ? {
+            ...freshestAgentStatus,
+            ...(!freshestAgentStatus.agentType && hookAgentStatus?.agentType
+              ? { agentType: hookAgentStatus.agentType }
+              : {}),
+            ...(!freshestAgentStatus.providerSession && hookAgentStatus?.providerSession
+              ? { providerSession: hookAgentStatus.providerSession }
+              : {})
+          }
         : null
+      const normalizedTabAgentStatus = mergedAgentStatus
+        ? normalizeCompatibleAgentStatusEntryForOwner(mergedAgentStatus, ownerAgent)
+        : null
+      const resolvedAgentType =
+        normalizedTabAgentStatus?.agentType ??
+        launchAgent ??
+        resolveExplicitTerminalTitleAgentType(title)
       // Why: keep the rich hook-driven status when the agent has a live
       // interactive prompt or an active tool — those are authoritative agent
       // activity even if the terminal's title isn't agent-classified (e.g. it
@@ -20497,6 +20727,7 @@ export class YiruRuntimeService {
         ...(tab.ptyId ? { ptyId: tab.ptyId } : {}),
         ...(tab.terminalTheme ? { terminalTheme: tab.terminalTheme } : {}),
         ...(launchAgent ? { launchAgent } : {}),
+        ...(resolvedAgentType ? { resolvedAgentType } : {}),
         ...(agentStatus ?? this.buildPtyMobileAgentStatus(livePty ?? pty, tab, terminalHandle)),
         ...(tab.parentLayout ? { parentLayout: tab.parentLayout } : {}),
         ...(tab.startupCwd ? { startupCwd: tab.startupCwd } : {}),
@@ -20549,6 +20780,55 @@ export class YiruRuntimeService {
       ...(tabGroups ? { tabGroups } : {}),
       ...(snapshot.tabGroupLayout !== undefined ? { tabGroupLayout } : {}),
       tabs: normalizedTabs
+    }
+  }
+
+  private getFreshHookAgentStatusForMobileTab(
+    worktreeId: string,
+    paneKey: string,
+    tab: RuntimeMobileSessionTerminalTab
+  ): AgentStatusEntry | null {
+    const now = Date.now()
+    let latest: AgentStatusIpcPayload | null = null
+    for (const entry of this.getAgentStatusSnapshotFn?.() ?? []) {
+      if (now - entry.receivedAt > AGENT_STATUS_STALE_AFTER_MS) {
+        continue
+      }
+      const matchesPane = entry.paneKey === paneKey
+      const matchesTab =
+        entry.tabId === tab.parentTabId &&
+        (entry.worktreeId === undefined || entry.worktreeId === worktreeId)
+      if (!matchesPane && !matchesTab) {
+        continue
+      }
+      if (!latest || entry.receivedAt > latest.receivedAt) {
+        latest = entry
+      }
+    }
+    if (!latest) {
+      return null
+    }
+    return {
+      state: latest.state,
+      prompt: latest.prompt,
+      updatedAt: latest.receivedAt,
+      stateStartedAt: latest.stateStartedAt,
+      paneKey: latest.paneKey,
+      stateHistory: [],
+      ...(latest.terminalHandle ? { terminalHandle: latest.terminalHandle } : {}),
+      ...(latest.tabId ? { tabId: latest.tabId } : {}),
+      ...(latest.worktreeId ? { worktreeId: latest.worktreeId } : {}),
+      connectionId: latest.connectionId,
+      ...(latest.agentType ? { agentType: latest.agentType } : {}),
+      ...(latest.model ? { model: latest.model } : {}),
+      ...(latest.toolName ? { toolName: latest.toolName } : {}),
+      ...(latest.toolInput ? { toolInput: latest.toolInput } : {}),
+      ...(latest.interactivePrompt ? { interactivePrompt: latest.interactivePrompt } : {}),
+      ...(latest.lastAssistantMessage ? { lastAssistantMessage: latest.lastAssistantMessage } : {}),
+      ...(latest.interrupted ? { interrupted: true } : {}),
+      ...(latest.orchestration ? { orchestration: latest.orchestration } : {}),
+      ...(latest.providerSession ? { providerSession: latest.providerSession } : {}),
+      ...(latest.subagents ? { subagents: latest.subagents } : {})
     }
   }
 
@@ -23968,6 +24248,57 @@ function compareWorktreePs(
   }
   return left.path.localeCompare(right.path)
 }
+
+const MOBILE_WORKTREE_PREVIEW_MAX_CHARS = 2_048
+const MOBILE_WORKTREE_AGENT_TEXT_MAX_CHARS = 512
+const MOBILE_WORKTREE_AGENT_INPUT_MAX_CHARS = 1_024
+
+function compactWorktreePsForMobile(summary: RuntimeWorktreePsSummary): RuntimeWorktreePsSummary {
+  // Why: URLSessionWebSocketTask rejects a single message over 1 MB. Agent hook payloads can
+  // contain full tool inputs and terminal previews, while the mobile list only renders a short
+  // activity label. Keep the state-bearing fields intact and bound display text before encryption.
+  return {
+    ...summary,
+    preview: clipMobileWorktreeText(summary.preview, MOBILE_WORKTREE_PREVIEW_MAX_CHARS),
+    agents: summary.agents.map((agent) => ({
+      ...agent,
+      prompt: clipMobileWorktreeText(agent.prompt, MOBILE_WORKTREE_AGENT_TEXT_MAX_CHARS),
+      taskTitle: clipNullableMobileWorktreeText(
+        agent.taskTitle,
+        MOBILE_WORKTREE_AGENT_TEXT_MAX_CHARS
+      ),
+      displayName: clipNullableMobileWorktreeText(
+        agent.displayName,
+        MOBILE_WORKTREE_AGENT_TEXT_MAX_CHARS
+      ),
+      lastAssistantMessage: clipNullableMobileWorktreeText(
+        agent.lastAssistantMessage,
+        MOBILE_WORKTREE_AGENT_TEXT_MAX_CHARS
+      ),
+      toolName: clipNullableMobileWorktreeText(
+        agent.toolName,
+        MOBILE_WORKTREE_AGENT_TEXT_MAX_CHARS
+      ),
+      toolInput: clipNullableMobileWorktreeText(
+        agent.toolInput,
+        MOBILE_WORKTREE_AGENT_INPUT_MAX_CHARS
+      )
+    }))
+  }
+}
+
+function clipNullableMobileWorktreeText(value: string | null, limit: number): string | null {
+  return value === null ? null : clipMobileWorktreeText(value, limit)
+}
+
+function clipMobileWorktreeText(value: string, limit: number): string {
+  if (value.length <= limit) {
+    return value
+  }
+  const suffix = '…'
+  return value.slice(0, Math.max(0, limit - suffix.length)) + suffix
+}
+
 type ProviderTerminalBufferSnapshot = Omit<PtyProviderBufferSnapshot, 'source'> & {
   source: 'provider'
 }

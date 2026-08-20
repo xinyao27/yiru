@@ -1,4 +1,4 @@
-import { GitFork } from '@phosphor-icons/react'
+import { GitFork } from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
 
 import { CreateHostedReviewComposer } from '../create-hosted-review-composer'

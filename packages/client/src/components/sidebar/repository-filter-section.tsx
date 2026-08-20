@@ -1,5 +1,5 @@
-import { X } from '@phosphor-icons/react'
 import React, { useCallback, useMemo, useState } from 'react'
+import { X } from '~renderer/components/icons/hugeicons'
 import RepoBadgeLabel from '~renderer/components/repo/badge-label'
 import { Badge } from '~renderer/components/ui/badge'
 import { Button } from '~renderer/components/ui/button'

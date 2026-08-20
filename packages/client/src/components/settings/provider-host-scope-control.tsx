@@ -1,4 +1,4 @@
-import { HardDrives as ServerCog } from '@phosphor-icons/react'
+import { HardDrives as ServerCog } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
 import { useAppStore } from '~renderer/store'

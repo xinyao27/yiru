@@ -1,4 +1,4 @@
-import { Bookmark, Pencil, Trash as Trash2 } from '@phosphor-icons/react'
+import { Bookmark, Pencil, Trash as Trash2 } from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'

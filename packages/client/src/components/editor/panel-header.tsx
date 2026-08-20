@@ -1,12 +1,12 @@
+import { useMemo } from 'react'
+import type { OpenFile } from '~renderer/components/editor/state'
 import {
   Columns as Columns2,
   Eye,
   FileText,
   TreeStructure as ListTree,
   Rows as Rows2
-} from '@phosphor-icons/react'
-import { useMemo } from 'react'
-import type { OpenFile } from '~renderer/components/editor/state'
+} from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { ButtonGroup } from '~renderer/components/ui/button-group'
 import { Toggle } from '~renderer/components/ui/toggle'

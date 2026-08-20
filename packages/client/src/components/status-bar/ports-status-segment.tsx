@@ -1,5 +1,9 @@
-import { Plug, CaretDown as ChevronDown, CaretRight as ChevronRight } from '@phosphor-icons/react'
 import React, { useCallback, useMemo, useState } from 'react'
+import {
+  Plug,
+  CaretDown as ChevronDown,
+  CaretRight as ChevronRight
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { SelectedTextCopyMenu } from '~renderer/components/selected-text-copy-menu'
 import { Button } from '~renderer/components/ui/button'

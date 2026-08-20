@@ -1,4 +1,3 @@
-import { X } from '@phosphor-icons/react'
 // Existing-user first-launch notice. Shown to users whose cohort marker is
 // `existedBeforeTelemetryRelease === true` and whose `optedIn` is still
 // `null`, i.e. users who installed Yiru before the telemetry release and
@@ -34,6 +33,7 @@ import { X } from '@phosphor-icons/react'
 // off), the notice never returns, because the cohort condition
 // (`optedIn === null`) clears in all three resolving paths.
 import { useState } from 'react'
+import { X } from '~renderer/components/icons/hugeicons'
 import { Button as UiButton } from '~renderer/components/ui/button'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'

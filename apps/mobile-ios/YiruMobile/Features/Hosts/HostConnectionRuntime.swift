@@ -3,4 +3,5 @@ nonisolated protocol HostConnectionRuntime: Sendable {
         [String: RuntimeConnectionSnapshot]
     >
     func reconnect(hostID: String) async
+    func disconnect(hostID: String) async
 }

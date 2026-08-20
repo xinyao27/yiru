@@ -1,3 +1,7 @@
+import { YIRU_GITHUB_RELEASES_URL, YIRU_GITHUB_REPOSITORY_URL } from '@yiru/workbench-model/product'
+import React, { useState } from 'react'
+import { toast } from 'sonner'
+import logo from '~renderer/assets/brand/yiru-wordmark.png?url'
 import {
   BookOpen,
   Question as CircleHelp,
@@ -10,11 +14,7 @@ import {
   ArrowSquareOut as ExternalLink,
   ArrowClockwise as RefreshCw,
   ArrowClockwise as RotateCw
-} from '@phosphor-icons/react'
-import { YIRU_GITHUB_RELEASES_URL, YIRU_GITHUB_REPOSITORY_URL } from '@yiru/workbench-model/product'
-import React, { useState } from 'react'
-import { toast } from 'sonner'
-import logo from '~renderer/assets/brand/yiru-wordmark.png?url'
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { ShortcutKeyCombo } from '~renderer/components/shortcut-key-combo'
 import { Button } from '~renderer/components/ui/button'

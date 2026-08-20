@@ -1,15 +1,3 @@
-import {
-  WarningCircle as AlertCircle,
-  BracketsCurly as Braces,
-  FileCode as FileCode2,
-  Play,
-  FloppyDisk as Save,
-  Trash as Trash2,
-  ArrowLineDown as ArrowDownToLine,
-  ArrowLineUp as ArrowUpToLine,
-  ArrowDown as MoveDown,
-  ArrowUp as MoveUp
-} from '@phosphor-icons/react'
 import { DIFFS_TAG_NAME } from '@pierre/diffs'
 import DOMPurify from 'dompurify'
 /* eslint-disable max-lines -- Why: notebook editing, output rendering, and cell
@@ -33,6 +21,18 @@ import remarkGfm from 'remark-gfm'
 import { resolveEditorFontFamilyOrInherit } from '~renderer/components/editor/font-family'
 import { computeEditorFontSize } from '~renderer/components/editor/font-zoom'
 import { scrollTopCache, setWithLRU } from '~renderer/components/editor/scroll-cache'
+import {
+  WarningCircle as AlertCircle,
+  BracketsCurly as Braces,
+  FileCode as FileCode2,
+  Play,
+  FloppyDisk as Save,
+  Trash as Trash2,
+  ArrowLineDown as ArrowDownToLine,
+  ArrowLineUp as ArrowUpToLine,
+  ArrowDown as MoveDown,
+  ArrowUp as MoveUp
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { ShortcutKeyCombo } from '~renderer/components/shortcut-key-combo'
 import { Button } from '~renderer/components/ui/button'

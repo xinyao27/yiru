@@ -1,5 +1,5 @@
-import { CaretDown, FolderSimple, Warning } from '@phosphor-icons/react'
 import { useState } from 'react'
+import { CaretDown, FolderSimple, Warning } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '~renderer/components/ui/popover'
 import { translate } from '~renderer/i18n/i18n'

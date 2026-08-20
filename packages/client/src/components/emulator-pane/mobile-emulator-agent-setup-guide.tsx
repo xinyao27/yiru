@@ -1,5 +1,8 @@
-import { CaretDown as ChevronDown, CaretUp as ChevronUp } from '@phosphor-icons/react'
 import { useState } from 'react'
+import {
+  CaretDown as ChevronDown,
+  CaretUp as ChevronUp
+} from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
 import { useAppStore } from '~renderer/store'

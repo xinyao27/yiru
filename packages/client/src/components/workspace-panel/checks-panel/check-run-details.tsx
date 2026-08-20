@@ -1,5 +1,5 @@
-import { Sidebar as PanelRight } from '@phosphor-icons/react'
 import React from 'react'
+import { Sidebar as PanelRight } from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import CommentMarkdown from '~renderer/components/sidebar/comment-markdown'
 import { Button } from '~renderer/components/ui/button'

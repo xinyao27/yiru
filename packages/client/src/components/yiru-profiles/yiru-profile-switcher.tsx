@@ -1,12 +1,12 @@
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useShallow } from 'zustand/react/shallow'
 import {
   Check,
   Laptop,
   GearSix as Settings2,
   CaretDown as ChevronDown,
   Plus
-} from '@phosphor-icons/react'
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { useShallow } from 'zustand/react/shallow'
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import {

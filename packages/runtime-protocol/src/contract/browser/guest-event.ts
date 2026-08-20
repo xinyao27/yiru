@@ -53,6 +53,9 @@ export type BrowserNavigationUpdateEvent = {
   browserPageId: string
   url: string
   title: string
+  /** Live Chromium history affordances after a CDP-driven navigation. */
+  canGoBack?: boolean
+  canGoForward?: boolean
 }
 
 export type BrowserGuestLoadFailedEvent = {

@@ -1,4 +1,8 @@
-import { CheckCircle as CheckCircle2, Cloud, LinkBreak as Unlink } from '@phosphor-icons/react'
+import {
+  CheckCircle as CheckCircle2,
+  Cloud,
+  LinkBreak as Unlink
+} from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
 
 import { Button } from '../ui/button'

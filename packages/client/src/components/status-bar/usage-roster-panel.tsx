@@ -1,5 +1,5 @@
-import { CaretRight, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import { Fragment, type ReactNode } from 'react'
+import { CaretRight, ArrowClockwise as RefreshCw } from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { SettingsSegmentedControl } from '~renderer/components/settings/form-controls'
 import { Badge } from '~renderer/components/ui/badge'

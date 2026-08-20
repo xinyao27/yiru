@@ -1,11 +1,11 @@
+import type React from 'react'
+import { toast } from 'sonner'
 import {
   CheckCircle as CheckCircle2,
   WarningCircle as CircleAlert,
   FolderOpen,
   X
-} from '@phosphor-icons/react'
-import type React from 'react'
-import { toast } from 'sonner'
+} from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
 import { shellClient } from '~renderer/runtime/shell-client'

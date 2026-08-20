@@ -1,13 +1,5 @@
 import type { Popover as PopoverPrimitive } from '@base-ui/react/popover'
 import {
-  TextAa as CaseSensitive,
-  GitMerge,
-  GitPullRequest,
-  MagnifyingGlass as Search,
-  ArrowSquareOut as ExternalLink,
-  X
-} from '@phosphor-icons/react'
-import {
   getRepoExecutionHostId,
   parseExecutionHostId,
   type ExecutionHostId
@@ -17,6 +9,14 @@ search orchestration, and result rendering so the unified create flow stays
 in one predictable form control instead of splitting state across fragments. */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
+import {
+  TextAa as CaseSensitive,
+  GitMerge,
+  GitPullRequest,
+  MagnifyingGlass as Search,
+  ArrowSquareOut as ExternalLink,
+  X
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { parseGitLabMergeRequestLink } from '~renderer/components/new-workspace/gitlab-links'
 import {

@@ -1,5 +1,5 @@
-import { Gauge, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { Gauge, ArrowClockwise as RefreshCw } from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { getProviderRateLimitScope } from '~renderer/components/settings/provider-account-scope'
 import { ProviderHostScopeControl } from '~renderer/components/settings/provider-host-scope-control'

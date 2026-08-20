@@ -1,5 +1,5 @@
-import { Copy } from '@phosphor-icons/react'
 import { toast } from 'sonner'
+import { Copy } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,

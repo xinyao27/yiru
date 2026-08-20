@@ -1,14 +1,4 @@
 import {
-  Archive as ArchiveRestore,
-  Calendar,
-  Clock as Clock3,
-  FolderOpen,
-  Funnel as ListFilter,
-  Layout as PanelsTopLeft,
-  HardDrives as Server,
-  CaretRight as ChevronRight
-} from '@phosphor-icons/react'
-import {
   AI_VAULT_AGENTS,
   type AiVaultAgent,
   type AiVaultGroup,
@@ -17,6 +7,16 @@ import {
 } from '@yiru/workbench-model/agent'
 import { getExecutionHostLabel, type ExecutionHostScope } from '@yiru/workbench-model/workspace'
 import type React from 'react'
+import {
+  Archive as ArchiveRestore,
+  Calendar,
+  Clock as Clock3,
+  FolderOpen,
+  Funnel as ListFilter,
+  Layout as PanelsTopLeft,
+  HardDrives as Server,
+  CaretRight as ChevronRight
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import {

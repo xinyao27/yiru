@@ -1,6 +1,6 @@
-import { TerminalWindow as SquareTerminal } from '@phosphor-icons/react'
 import type React from 'react'
 import { useEffect, useId, useMemo, useState, type KeyboardEvent } from 'react'
+import { TerminalWindow as SquareTerminal } from '~renderer/components/icons/hugeicons'
 import { WorkspaceSelectableTab } from '~renderer/components/tab-bar/workspace-selectable-tab'
 import { WorkspaceTabStripViewport } from '~renderer/components/tab-bar/workspace-tab-strip-viewport'
 import { translate } from '~renderer/i18n/i18n'

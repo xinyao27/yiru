@@ -1,6 +1,6 @@
-import { MagnifyingGlass as Search } from '@phosphor-icons/react'
 import type { Editor } from '@tiptap/react'
 import React from 'react'
+import { MagnifyingGlass as Search } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { Input } from '~renderer/components/ui/input'
 import { translate } from '~renderer/i18n/i18n'

@@ -1,6 +1,6 @@
-import { FileAudio, Upload, SpeakerHigh as Volume2 } from '@phosphor-icons/react'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { FileAudio, Upload, SpeakerHigh as Volume2 } from '~renderer/components/icons/hugeicons'
 import { getNotificationSoundOptions } from '~renderer/components/notification-sound-options'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { translate } from '~renderer/i18n/i18n'

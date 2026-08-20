@@ -1,6 +1,6 @@
-import { Check, CaretUpDown as ChevronsUpDown } from '@phosphor-icons/react'
 import { describeRuntimeCompatBlock } from '@yiru/runtime-protocol/capabilities'
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
+import { Check, CaretUpDown as ChevronsUpDown } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { Command, CommandItem, CommandList } from '~renderer/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '~renderer/components/ui/popover'

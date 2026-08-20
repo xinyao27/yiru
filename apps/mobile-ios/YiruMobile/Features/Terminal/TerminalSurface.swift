@@ -11,15 +11,18 @@ nonisolated struct TerminalSurfaceConfiguration: Equatable, Sendable {
     let fontSize: CGFloat
     let scrollbackLines: Int
     let accessoryKeys: [TerminalAccessoryKey]
+    let customAccessoryKeys: [TerminalCustomKey]
 
     static func standard(
         textScale: Double = 1,
-        accessoryKeys: [TerminalAccessoryKey] = TerminalAccessoryKey.standardVisibleOrder
+        accessoryKeys: [TerminalAccessoryKey] = TerminalAccessoryKey.standardVisibleOrder,
+        customAccessoryKeys: [TerminalCustomKey] = []
     ) -> TerminalSurfaceConfiguration {
         TerminalSurfaceConfiguration(
             fontSize: 13 * textScale,
             scrollbackLines: 10_000,
-            accessoryKeys: accessoryKeys
+            accessoryKeys: accessoryKeys,
+            customAccessoryKeys: customAccessoryKeys
         )
     }
 }
@@ -31,7 +34,7 @@ struct TerminalSurfaceEvents {
     var onResize: (TerminalGridSize) -> Void
     var onTitleChange: (String) -> Void
     var onDirectoryChange: (String?) -> Void
-    var onOpenLink: (String) -> Void
+    var onOpenLink: (String, [String: String]) -> Void
     var onClipboardWriteRequest: (Data) -> Void
     var onBell: () -> Void
 
@@ -41,7 +44,7 @@ struct TerminalSurfaceEvents {
         onResize: { _ in },
         onTitleChange: { _ in },
         onDirectoryChange: { _ in },
-        onOpenLink: { _ in },
+        onOpenLink: { _, _ in },
         onClipboardWriteRequest: { _ in },
         onBell: {}
     )
@@ -51,9 +54,11 @@ struct TerminalSurfaceEvents {
 protocol TerminalSurface: AnyObject {
     var events: TerminalSurfaceEvents { get set }
     var view: UIView { get }
+    var accessoryState: TerminalAccessoryState { get }
 
     func feed(_ bytes: Data)
     func restore(_ snapshot: TerminalReplaySnapshot)
+    func synchronizeGrid(to size: TerminalGridSize)
     func clear()
     func focus()
     func apply(_ configuration: TerminalSurfaceConfiguration)
@@ -73,4 +78,18 @@ struct TerminalSurfaceHost: UIViewRepresentable {
     }
 
     func updateUIView(_ uiView: UIView, context: Context) {}
+
+    func sizeThatFits(
+        _ proposal: ProposedViewSize,
+        uiView: UIView,
+        context: Context
+    ) -> CGSize? {
+        guard let width = proposal.width, let height = proposal.height,
+            width.isFinite, height.isFinite,
+            width > 0, height > 0
+        else {
+            return nil
+        }
+        return CGSize(width: width, height: height)
+    }
 }

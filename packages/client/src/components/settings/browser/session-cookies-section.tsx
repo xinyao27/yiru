@@ -1,5 +1,5 @@
-import { Plus } from '@phosphor-icons/react'
 import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
+import { Plus } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { Label } from '~renderer/components/ui/label'
 import {

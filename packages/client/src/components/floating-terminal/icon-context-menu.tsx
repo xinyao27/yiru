@@ -1,9 +1,9 @@
+import { useMemo, useState } from 'react'
 import {
   EyeSlash as EyeOff,
   Layout as PanelBottom,
   Layout as PanelTop
-} from '@phosphor-icons/react'
-import { useMemo, useState } from 'react'
+} from '~renderer/components/icons/hugeicons'
 import {
   ContextMenu,
   ContextMenuContent,

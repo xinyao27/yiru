@@ -3,7 +3,9 @@ import Foundation
 actor RuntimeOrpcPeer {
     private let connection: AuthenticatedRuntimeConnection
     private var pending: [String: PendingRequest] = [:]
+    private var pendingLegacyStatus: [String: PendingRequest] = [:]
     private var subscriptions: [String: PendingSubscription] = [:]
+    private var binarySubscriber: PendingBinarySubscriber?
     private var receiveTask: Task<Void, Never>?
     private var isClosed = false
 
@@ -54,6 +56,58 @@ actor RuntimeOrpcPeer {
     func ping() async throws {
         guard !isClosed else { throw RuntimeOrpcError.closed }
         try await connection.ping()
+    }
+
+    func probeStatusForProtocolCompatibility<Output: Decodable>(
+        deviceToken: String,
+        output: Output.Type
+    ) async throws -> Output {
+        guard !isClosed else { throw RuntimeOrpcError.closed }
+        startReceivingIfNeeded()
+        let requestID = UUID().uuidString.lowercased()
+        let request = LegacyStatusProbeEnvelope(
+            id: requestID,
+            deviceToken: deviceToken,
+            method: "status.get"
+        )
+        let data = try JSONEncoder().encode(request)
+        guard let payload = String(data: data, encoding: .utf8) else {
+            throw RuntimeOrpcError.invalidMessage
+        }
+
+        return try await withTaskCancellationHandler {
+            let response = try await withCheckedThrowingContinuation {
+                (continuation: CheckedContinuation<Data, Error>) in
+                pendingLegacyStatus[requestID] = PendingRequest(continuation: continuation)
+                Task {
+                    do {
+                        try await connection.sendText(payload)
+                    } catch {
+                        self.failLegacyStatus(requestID: requestID, error: error)
+                    }
+                }
+            }
+            let envelope = try JSONDecoder().decode(
+                LegacyStatusResponseEnvelope<Output>.self,
+                from: response
+            )
+            guard envelope.id == requestID else { throw RuntimeOrpcError.invalidMessage }
+            guard envelope.ok, let result = envelope.result else {
+                throw RuntimeOrpcError.server(
+                    status: 500,
+                    code: envelope.error?.code,
+                    message: envelope.error?.message
+                )
+            }
+            return result
+        } onCancel: {
+            Task {
+                await self.failLegacyStatus(
+                    requestID: requestID,
+                    error: CancellationError()
+                )
+            }
+        }
     }
 
     func subscribe<Input: Encodable, Output: Decodable & Sendable>(
@@ -109,6 +163,27 @@ actor RuntimeOrpcPeer {
         return stream
     }
 
+    func subscribeWithBinary<Input: Encodable, Output: Decodable & Sendable>(
+        path: String,
+        input: Input,
+        output: Output.Type
+    ) async throws -> RuntimeOrpcBinarySubscription<Output> {
+        let subscriberID = UUID()
+        let (binary, continuation) = AsyncThrowingStream.makeStream(of: Data.self)
+        binarySubscriber?.continuation.finish()
+        binarySubscriber = PendingBinarySubscriber(id: subscriberID, continuation: continuation)
+        continuation.onTermination = { [weak self] _ in
+            Task { await self?.removeBinarySubscriber(subscriberID) }
+        }
+        do {
+            let events = try await subscribe(path: path, input: input, output: output)
+            return RuntimeOrpcBinarySubscription(events: events, binary: binary)
+        } catch {
+            removeBinarySubscriber(subscriberID)
+            throw error
+        }
+    }
+
     func close() async {
         guard !isClosed else { return }
         isClosed = true
@@ -132,15 +207,16 @@ actor RuntimeOrpcPeer {
                 switch try await connection.receive() {
                 case .text(let message):
                     try receiveText(message)
-                case .binary:
-                    // Terminal multiplex owns binary dispatch once its transport is attached.
-                    continue
+                case .binary(let data):
+                    binarySubscriber?.continuation.yield(data)
                 }
             }
         } catch is CancellationError {
             failAll(with: CancellationError())
         } catch {
-            failAll(with: error)
+            // Why: frame decoding failures mean the peer stream is unusable. Response-body
+            // decoding happens after dispatch and remains a request-local protocol error.
+            failAll(with: RuntimeOrpcError.invalidMessage)
         }
         if !isClosed {
             isClosed = true
@@ -149,7 +225,15 @@ actor RuntimeOrpcPeer {
     }
 
     private func receiveText(_ message: String) throws {
-        guard message.hasPrefix(MobileRuntimeWireContract.textPrefix) else { return }
+        guard message.hasPrefix(MobileRuntimeWireContract.textPrefix) else {
+            let data = Data(message.utf8)
+            guard let head = try? JSONDecoder().decode(LegacyStatusResponseHead.self, from: data)
+            else { return }
+            pendingLegacyStatus.removeValue(forKey: head.id)?.continuation.resume(
+                returning: data
+            )
+            return
+        }
         let data = Data(message.dropFirst(MobileRuntimeWireContract.textPrefix.count).utf8)
         let head = try JSONDecoder().decode(OrpcResponseHead.self, from: data)
         if head.t == OrpcPeerMessageType.eventIterator.rawValue {
@@ -167,13 +251,22 @@ actor RuntimeOrpcPeer {
         pending.removeValue(forKey: requestID)?.continuation.resume(throwing: error)
     }
 
+    private func failLegacyStatus(requestID: String, error: Error) {
+        pendingLegacyStatus.removeValue(forKey: requestID)?.continuation.resume(throwing: error)
+    }
+
     private func failAll(with error: Error) {
         let requests = pending.values
         pending.removeAll()
         requests.forEach { $0.continuation.resume(throwing: error) }
+        let legacyStatusRequests = pendingLegacyStatus.values
+        pendingLegacyStatus.removeAll()
+        legacyStatusRequests.forEach { $0.continuation.resume(throwing: error) }
         let activeSubscriptions = subscriptions.values
         subscriptions.removeAll()
         activeSubscriptions.forEach { $0.finish(error) }
+        binarySubscriber?.continuation.finish(throwing: error)
+        binarySubscriber = nil
     }
 
     private func confirmSubscription(requestID: String, data: Data, head: OrpcResponseHead) {
@@ -183,7 +276,11 @@ actor RuntimeOrpcPeer {
             let error = try? JSONDecoder().decode(OrpcErrorEnvelope.self, from: data)
             finishSubscription(
                 requestID: requestID,
-                error: RuntimeOrpcError.server(status: status, code: error?.p.b.json.code)
+                error: RuntimeOrpcError.server(
+                    status: status,
+                    code: error?.p.b.json.code,
+                    message: error?.p.b.json.message
+                )
             )
             return
         }
@@ -211,7 +308,11 @@ actor RuntimeOrpcPeer {
             let error = try? JSONDecoder().decode(OrpcEventErrorEnvelope.self, from: data)
             finishSubscription(
                 requestID: requestID,
-                error: RuntimeOrpcError.server(status: 500, code: error?.p.d?.json.code)
+                error: RuntimeOrpcError.server(
+                    status: 500,
+                    code: error?.p.d?.json.code,
+                    message: error?.p.d?.json.message
+                )
             )
         case .done:
             finishSubscription(requestID: requestID, error: nil)
@@ -233,6 +334,11 @@ actor RuntimeOrpcPeer {
         await sendAbort(requestID: requestID)
     }
 
+    private func removeBinarySubscriber(_ id: UUID) {
+        guard binarySubscriber?.id == id else { return }
+        binarySubscriber = nil
+    }
+
     private func sendAbort(requestID: String) async {
         guard !isClosed else { return }
         let abort = OrpcAbortEnvelope(
@@ -247,21 +353,86 @@ actor RuntimeOrpcPeer {
     }
 }
 
-nonisolated enum RuntimeOrpcError: Error {
+nonisolated enum RuntimeOrpcError: LocalizedError {
     case invalidMessage
     case unexpectedResponse
-    case server(status: Int, code: String?)
+    case server(status: Int, code: String?, message: String?)
     case closed
+
+    var serverMessage: String? {
+        guard case .server(_, _, let message) = self else { return nil }
+        return message
+    }
+
+    var serverCode: String? {
+        guard case .server(_, let code, _) = self else { return nil }
+        return code
+    }
+
+    var errorDescription: String? {
+        switch self {
+        case .invalidMessage:
+            String(localized: "Desktop returned an invalid response")
+        case .unexpectedResponse:
+            String(localized: "Desktop returned an unexpected response")
+        case .server(let status, let code, let message):
+            if let message = message?.trimmingCharacters(in: .whitespacesAndNewlines),
+                !message.isEmpty
+            {
+                message
+            } else if let code = code?.trimmingCharacters(in: .whitespacesAndNewlines),
+                !code.isEmpty
+            {
+                String(localized: "Desktop request failed: \(code)")
+            } else {
+                String(localized: "Desktop request failed with status \(status)")
+            }
+        case .closed:
+            String(localized: "The desktop connection closed")
+        }
+    }
 }
 
 nonisolated private struct PendingRequest {
     let continuation: CheckedContinuation<Data, Error>
 }
 
+nonisolated private struct LegacyStatusProbeEnvelope: Encodable {
+    let id: String
+    let deviceToken: String
+    let method: String
+}
+
+nonisolated private struct LegacyStatusResponseHead: Decodable {
+    let id: String
+}
+
+nonisolated private struct LegacyStatusResponseEnvelope<Result: Decodable>: Decodable {
+    let id: String
+    let ok: Bool
+    let result: Result?
+    let error: LegacyStatusErrorEnvelope?
+}
+
+nonisolated private struct LegacyStatusErrorEnvelope: Decodable {
+    let code: String
+    let message: String
+}
+
 nonisolated private struct PendingSubscription: Sendable {
     var isConfirmed: Bool
     let yieldEvent: @Sendable (Data) -> Error?
     let finish: @Sendable (Error?) -> Void
+}
+
+nonisolated private struct PendingBinarySubscriber: Sendable {
+    let id: UUID
+    let continuation: AsyncThrowingStream<Data, Error>.Continuation
+}
+
+nonisolated struct RuntimeOrpcBinarySubscription<Event: Sendable>: Sendable {
+    let events: AsyncThrowingStream<Event, Error>
+    let binary: AsyncThrowingStream<Data, Error>
 }
 
 nonisolated private enum OrpcPeerMessageType: Int {

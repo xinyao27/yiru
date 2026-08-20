@@ -1,5 +1,5 @@
-import { StopCircle as CircleStop } from '@phosphor-icons/react'
 import { useEffect, useRef, useState, type ComponentType, type ReactNode, type Ref } from 'react'
+import { StopCircle as CircleStop } from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { ShortcutKeyCombo } from '~renderer/components/shortcut-key-combo'
 import { Button } from '~renderer/components/ui/button'

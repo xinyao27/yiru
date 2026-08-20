@@ -1,6 +1,6 @@
-import { FolderOpen, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
+import { FolderOpen, ArrowClockwise as RefreshCw } from '~renderer/components/icons/hugeicons'
 import {
   GLOBAL_AGENT_SKILL_SOURCE_KINDS,
   useInstalledAgentSkill

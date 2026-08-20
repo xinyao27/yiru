@@ -1,13 +1,13 @@
+import type { RuntimeSpeechModelSummary } from '@yiru/runtime-protocol/contract'
+import { useState } from 'react'
+import { toast } from 'sonner'
 import {
   Cloud,
   Download,
   Trash as Trash2,
   Check,
   CaretDown as ChevronDown
-} from '@phosphor-icons/react'
-import type { RuntimeSpeechModelSummary } from '@yiru/runtime-protocol/contract'
-import { useState } from 'react'
-import { toast } from 'sonner'
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'

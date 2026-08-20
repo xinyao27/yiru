@@ -26,7 +26,7 @@ The supported general-purpose vocabulary is the default shadcn set. Use those ro
 - `text-green-700 dark:text-green-300`, not a success token.
 - `border-border` plus an opaque surface, not an elevation variable.
 
-Custom variables are reserved for stable product-domain semantics such as git decorations and embedded editor surfaces. CSS-only variables stay outside `@theme inline`. `scripts/check-design-token-budget.mjs` keeps the Tailwind theme on the default shadcn vocabulary in CI; promoting an exception requires a deliberate contract change, not an incidental task edit. `scripts/check-ui-style-drift.mjs` fails on feature-TSX drift that reintroduces native form/action tags, dead `rounded-*`, black/white alpha washes, or private style-module imports, and warns on Button classNames that look like the old quiet/`sidebar-accent` stacks — see `docs/style-guide.md`.
+Custom variables are reserved for stable product-domain semantics such as git decorations and embedded editor surfaces. CSS-only variables stay outside `@theme inline`. This budget used to be kept on the default shadcn vocabulary in CI by `scripts/check-design-token-budget.mjs`, and feature-TSX drift that reintroduces native form/action tags, dead `rounded-*`, black/white alpha washes, or private style-module imports used to fail `scripts/check-ui-style-drift.mjs`; both scripts have been deleted, so promoting an exception or reintroducing drift is no longer caught by CI — treat both rules as review-enforced conventions instead — see `docs/style-guide.md`.
 
 ## Primitive catalog
 
@@ -101,7 +101,7 @@ These are examples to copy when the same domain needs another composed picker; t
 3. Compose default shadcn roles; do not add a theme token for the task.
 4. Put domain imports and copy outside `components/ui/`.
 5. Preserve `data-slot` on primitive parts and merge caller `className` last with `cn()` (layout only at call sites).
-6. Use Base UI for headless behavior, Phosphor for icons, and existing scrollbar classes.
+6. Use Base UI for headless behavior, Hugeicons free icons for icons, and existing scrollbar classes.
 7. Screens import rendered modules only — never `floating-surface-styles.ts` or `menu-item-styles.ts`.
 8. Check light/dark, keyboard focus, reduced motion, Windows/Linux labels, and remote latency.
 9. Update this catalog only when the reusable interface or ownership changes.

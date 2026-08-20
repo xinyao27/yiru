@@ -1,3 +1,4 @@
+import React from 'react'
 import {
   Warning as AlertTriangle,
   Check,
@@ -9,10 +10,9 @@ import {
   MagnifyingGlass as Search,
   TerminalWindow as SquareTerminal,
   Trash as Trash2,
-  type Icon as PhosphorIcon,
+  type Icon,
   CaretDown as ChevronDown
-} from '@phosphor-icons/react'
-import React from 'react'
+} from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { translate } from '~renderer/i18n/i18n'
@@ -60,7 +60,7 @@ function MetadataIconChip({
   value,
   tone = 'neutral'
 }: {
-  icon: PhosphorIcon
+  icon: Icon
   label: string
   value?: string
   tone?: StatusPillTone

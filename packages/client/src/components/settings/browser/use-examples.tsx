@@ -1,5 +1,5 @@
-import { Copy, Sparkle as Sparkles } from '@phosphor-icons/react'
 import { toast } from 'sonner'
+import { Copy, Sparkle as Sparkles } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import {
   Tooltip,

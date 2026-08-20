@@ -1,6 +1,6 @@
-import { MagnifyingGlass as Search, ArrowLeft } from '@phosphor-icons/react'
 import type { RepoIcon } from '@yiru/workbench-model/workspace'
 import type { CSSProperties, RefObject } from 'react'
+import { MagnifyingGlass as Search, ArrowLeft } from '~renderer/components/icons/hugeicons'
 import { useShortcutKeyComboDetails } from '~renderer/hooks/use-shortcut-label'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'

@@ -1,5 +1,8 @@
-import { Warning as AlertTriangle, CheckCircle as CheckCircle2 } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
+import {
+  Warning as AlertTriangle,
+  CheckCircle as CheckCircle2
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import {

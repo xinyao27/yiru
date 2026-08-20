@@ -1,5 +1,8 @@
-import { FolderSimple as FolderGit2, Cursor as MousePointer2 } from '@phosphor-icons/react'
 import type { JSX } from 'react'
+import {
+  FolderSimple as FolderGit2,
+  Cursor as MousePointer2
+} from '~renderer/components/icons/hugeicons'
 import { cn } from '~renderer/lib/class-names'
 
 // Why: these static marks replace storyboarded animations for setup steps whose

@@ -1,5 +1,5 @@
-import { GitMerge } from '@phosphor-icons/react'
 import { useMemo, type Dispatch, type SetStateAction } from 'react'
+import { GitMerge } from '~renderer/components/icons/hugeicons'
 import { Checkbox } from '~renderer/components/ui/checkbox'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'

@@ -1,11 +1,11 @@
+import React from 'react'
 import {
   MagnifyingGlass as SearchIcon,
   TextAa as CaseSensitive,
   BracketsSquare as WholeWord,
   Asterisk as Regex,
   X
-} from '@phosphor-icons/react'
-import React from 'react'
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import { Input } from '~renderer/components/ui/input'

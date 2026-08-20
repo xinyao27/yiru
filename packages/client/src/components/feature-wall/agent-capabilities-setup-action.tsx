@@ -1,12 +1,12 @@
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
+import { toast } from 'sonner'
 import {
   Check,
   Globe as Globe2,
   Monitor as MonitorCog,
   Terminal,
   FlowArrow as Workflow
-} from '@phosphor-icons/react'
-import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
-import { toast } from 'sonner'
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'

@@ -1,16 +1,16 @@
-import {
-  Check,
-  Star,
-  Terminal,
-  ArrowRight,
-  CaretUpDown as ChevronsUpDown
-} from '@phosphor-icons/react'
 import React, { useCallback, useMemo, useState } from 'react'
 import {
   agentPickerBlankTerminalMatches,
   getAgentPickerCommandValue,
   searchAgentPickerEntries
 } from '~renderer/components/agent/picker-search'
+import {
+  Check,
+  Star,
+  Terminal,
+  ArrowRight,
+  CaretUpDown as ChevronsUpDown
+} from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import {
   Command,

@@ -1,12 +1,12 @@
+import type { SearchAddon } from '@xterm/addon-search'
+import { useEffect, useState, useCallback } from 'react'
 import {
   TextAa as CaseSensitive,
   Asterisk as Regex,
   CaretUp as ChevronUp,
   CaretDown as ChevronDown,
   X
-} from '@phosphor-icons/react'
-import type { SearchAddon } from '@xterm/addon-search'
-import { useEffect, useState, useCallback } from 'react'
+} from '~renderer/components/icons/hugeicons'
 import type { SearchState } from '~renderer/components/terminal-pane/keyboard-handlers'
 import { Button } from '~renderer/components/ui/button'
 import { Input } from '~renderer/components/ui/input'

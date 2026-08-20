@@ -22,6 +22,7 @@ import { join } from 'node:path'
 
 import { app, dialog, shell } from 'electron'
 
+import { translateMain } from '../i18n/main-i18n'
 import type { CollectedBundle } from '../observability/bundle'
 import { resolveDiagnosticYiruChannel } from '../observability/diagnostic-build-channel'
 import {
@@ -184,16 +185,28 @@ function deletePreviewFile(filePath: string): void {
 async function confirmBundleUpload(bundle: CollectedBundle): Promise<boolean> {
   const result = await dialog.showMessageBox({
     type: 'question',
-    buttons: ['Send', 'Cancel'],
+    buttons: [
+      translateMain('diagnostics.uploadConsent.send', 'Send'),
+      translateMain('diagnostics.uploadConsent.cancel', 'Cancel')
+    ],
     defaultId: 1,
     cancelId: 1,
-    title: 'Send diagnostics to support?',
-    message: 'This sends a bounded redacted excerpt and metadata to PostHog.',
+    title: translateMain('diagnostics.uploadConsent.title', 'Send diagnostics to support?'),
+    message: translateMain(
+      'diagnostics.uploadConsent.message',
+      'This sends a bounded redacted excerpt and metadata to PostHog.'
+    ),
     // Why: the full multi-megabyte preview is never attached to a PostHog
     // event; make that privacy boundary explicit at the final consent step.
-    detail: `The full review file does not leave this device.\n\nDiagnostic ID: ${bundle.bundleSubmissionId}\nDiagnostic records: ${bundle.spanCount}\nSize: ${Math.round(
-      bundle.bytes / 1024
-    )} KB`
+    detail: translateMain(
+      'diagnostics.uploadConsent.detail',
+      'The full review file does not leave this device.\n\nDiagnostic ID: {{value0}}\nDiagnostic records: {{value1}}\nSize: {{value2}} KB',
+      {
+        value0: bundle.bundleSubmissionId,
+        value1: bundle.spanCount,
+        value2: Math.round(bundle.bytes / 1024)
+      }
+    )
   })
   return result.response === 0
 }

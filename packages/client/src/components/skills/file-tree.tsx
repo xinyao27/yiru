@@ -1,5 +1,9 @@
-import { CaretRight as ChevronRight, Folder, FolderOpen } from '@phosphor-icons/react'
 import { useMemo, useState } from 'react'
+import {
+  CaretRight as ChevronRight,
+  Folder,
+  FolderOpen
+} from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { ScrollArea } from '~renderer/components/ui/scroll-area'
 import { getFileTypeIcon } from '~renderer/lib/file-type-icons'

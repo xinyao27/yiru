@@ -1,5 +1,5 @@
-import { Plus } from '@phosphor-icons/react'
 import { useEffect, useRef, useState } from 'react'
+import { Plus } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { Textarea } from '~renderer/components/ui/textarea'
 import {

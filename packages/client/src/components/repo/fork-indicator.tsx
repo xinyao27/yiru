@@ -1,5 +1,5 @@
-import { GitFork } from '@phosphor-icons/react'
 import React from 'react'
+import { GitFork } from '~renderer/components/icons/hugeicons'
 import { cn } from '~renderer/lib/class-names'
 import type { GitHubRepositoryIdentity } from '~shared/types'
 

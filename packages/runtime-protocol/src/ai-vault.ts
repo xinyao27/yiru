@@ -37,6 +37,11 @@ export const AiVaultListSessionsInputSchema = z.object({
     .pipe(z.union([z.number().int().max(AI_VAULT_LIMIT_MAX), z.undefined()]))
     .optional(),
   force: OptionalBoolean,
+  // Why: the native iOS client can request the legacy 500-session recency
+  // window while asking the host to trim optional usage payloads and preview
+  // text before encryption. This keeps the response useful without crossing
+  // URLSession's single-WebSocket-message limit.
+  compact: OptionalBoolean,
   scopePaths: z
     .array(z.string().min(1).max(AI_VAULT_SCOPE_PATH_MAX_LENGTH))
     .transform((paths) => paths.slice(0, AI_VAULT_SCOPE_PATHS_MAX_COUNT))

@@ -4,7 +4,12 @@
       "rootTitle": "Yiru 遇到渲染器错误。",
       "rootDescription": "应用 shell 无法完成渲染。重试以重新挂载，如果错误仍然存在，请重新启动 Yiru。",
       "webTitle": "Yiru Web 遇到渲染器错误。",
-      "webDescription": "重试 Web 客户端或重新连接到配对的运行时。"
+      "webDescription": "重试 Web 客户端或重新连接到配对的运行时。",
+      "loadLoopTitle": "Yiru 反复加载失败",
+      "loadLoopMessage": "应用窗口多次崩溃，已停止自动重新加载。",
+      "loadLoopDetail": "Yiru 连续尝试恢复 {{value0}} 次均未成功。这通常是显卡驱动或安装问题。可以重新加载再试一次，或退出后重新启动 Yiru。",
+      "reload": "重新加载",
+      "quit": "退出"
     }
   },
   "settings": {
@@ -12197,5 +12202,24 @@
     "targetWorkspaceMissing": "The target workspace is no longer available.",
     "agentBlocked": "Automation agent is blocked: {{reason}}.",
     "agentIncomplete": "Automation agent did not report completion."
+  },
+  "notifications": {
+    "deliveryProbe": {
+      "title": "Yiru 通知已开启",
+      "body": "代理完成任务或终端需要处理时，Yiru 会提醒你。"
+    },
+    "permissionRequest": {
+      "title": "Yiru 已准备好通知你",
+      "body": "允许通知，Yiru 就能在代理完成任务或终端需要处理时提醒你。"
+    }
+  },
+  "diagnostics": {
+    "uploadConsent": {
+      "title": "将诊断信息发送给支持团队？",
+      "message": "这会向 PostHog 发送一段有限且已脱敏的摘要和元数据。",
+      "detail": "完整的审查文件不会离开此设备。\n\n诊断 ID：{{value0}}\n诊断记录数：{{value1}}\n大小：{{value2}} KB",
+      "send": "发送",
+      "cancel": "取消"
+    }
   }
 }

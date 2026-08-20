@@ -2,7 +2,7 @@ import {
   QrCode,
   ArrowSquareOut as ExternalLink,
   ArrowClockwise as RefreshCw
-} from '@phosphor-icons/react'
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { NetworkInterfacePicker } from '~renderer/components/mobile/network-interface-picker'
 import {

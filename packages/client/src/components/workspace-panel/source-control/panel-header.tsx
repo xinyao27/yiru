@@ -1,3 +1,5 @@
+import { DetachedHeadBadge } from '~renderer/components/detached-head-badge'
+import { DiffNotesSendMenu } from '~renderer/components/editor/diff-notes-send-menu'
 import {
   Check,
   Copy,
@@ -5,9 +7,7 @@ import {
   CaretDown as ChevronDown,
   Chat as MessageSquare,
   Trash as Trash2
-} from '@phosphor-icons/react'
-import { DetachedHeadBadge } from '~renderer/components/detached-head-badge'
-import { DiffNotesSendMenu } from '~renderer/components/editor/diff-notes-send-menu'
+} from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,

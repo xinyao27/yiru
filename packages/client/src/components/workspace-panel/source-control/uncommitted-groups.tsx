@@ -1,5 +1,11 @@
-import { Minus, Plus, Trash, ArrowCounterClockwise as Undo2, GitDiff } from '@phosphor-icons/react'
 import React from 'react'
+import {
+  Minus,
+  Plus,
+  Trash,
+  ArrowCounterClockwise as Undo2,
+  GitDiff
+} from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
 
 import {

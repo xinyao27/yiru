@@ -1,10 +1,10 @@
-import { FileText } from '@phosphor-icons/react'
 import { useCallback, useEffect, useRef, useState, type JSX } from 'react'
 import type {
   MarkdownTemplatePickerRequest,
   MarkdownTemplateSelection
 } from '~renderer/components/editor/markdown-template-picker-request'
 import { subscribeMarkdownTemplatePicker } from '~renderer/components/editor/markdown-template-picker-request'
+import { FileText } from '~renderer/components/icons/hugeicons'
 import {
   CommandDialog,
   CommandEmpty,

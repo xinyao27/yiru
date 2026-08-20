@@ -1,5 +1,5 @@
-import { CloudFog as Cloudy } from '@phosphor-icons/react'
 import type React from 'react'
+import { CloudFog as Cloudy } from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
 
 import { SidebarDisclosure } from './disclosure'

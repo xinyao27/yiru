@@ -1,7 +1,8 @@
 'use client'
 
 import { Checkbox as CheckboxPrimitive } from '@base-ui/react/checkbox'
-import { CheckIcon } from '@phosphor-icons/react'
+import { CheckIcon } from '@hugeicons/core-free-icons'
+import { HugeiconsIcon } from '@hugeicons/react'
 import { cn } from '~renderer/lib/class-names'
 
 function Checkbox({ className, ...props }: CheckboxPrimitive.Root.Props) {
@@ -18,7 +19,7 @@ function Checkbox({ className, ...props }: CheckboxPrimitive.Root.Props) {
         data-slot="checkbox-indicator"
         className="flex items-center justify-center text-current"
       >
-        <CheckIcon className="size-3.5" />
+        <HugeiconsIcon icon={CheckIcon} className="size-3.5" />
       </CheckboxPrimitive.Indicator>
     </CheckboxPrimitive.Root>
   )

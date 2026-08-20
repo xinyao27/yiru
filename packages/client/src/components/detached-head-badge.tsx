@@ -1,5 +1,5 @@
-import { GitCommit as GitCommitHorizontal } from '@phosphor-icons/react'
 import React from 'react'
+import { GitCommit as GitCommitHorizontal } from '~renderer/components/icons/hugeicons'
 import { Badge } from '~renderer/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { cn } from '~renderer/lib/class-names'

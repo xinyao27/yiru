@@ -1,15 +1,39 @@
 import { z } from 'zod'
 
+import type {
+  TerminalAutoRestoreFitResult,
+  TerminalClearBufferResult,
+  TerminalCloseResult,
+  TerminalFocusResult,
+  TerminalRenameResult,
+  TerminalSendResult,
+  TerminalShowResult
+} from './contract/terminal-results.js' with { 'resolution-mode': 'import' }
+
 export const MOBILE_STATUS_GET_ORPC_PATH = '/status/get'
 export const MOBILE_TERMINAL_LIST_ORPC_PATH = '/terminal/list'
 export const MOBILE_TERMINAL_SHOW_ORPC_PATH = '/terminal/show'
+export const MOBILE_TERMINAL_SEND_ORPC_PATH = '/terminal/send'
+export const MOBILE_TERMINAL_RENAME_ORPC_PATH = '/terminal/rename'
+export const MOBILE_TERMINAL_CLEAR_BUFFER_ORPC_PATH = '/terminal/clearBuffer'
+export const MOBILE_TERMINAL_FOCUS_ORPC_PATH = '/terminal/focus'
+export const MOBILE_TERMINAL_CLOSE_ORPC_PATH = '/terminal/close'
 export const MOBILE_TERMINAL_SET_DISPLAY_MODE_ORPC_PATH = '/terminal/setDisplayMode'
+export const MOBILE_TERMINAL_GET_AUTO_RESTORE_FIT_ORPC_PATH = '/terminal/getAutoRestoreFit'
+export const MOBILE_TERMINAL_SET_AUTO_RESTORE_FIT_ORPC_PATH = '/terminal/setAutoRestoreFit'
 export const MOBILE_TERMINAL_OPEN_MULTIPLEX_ORPC_PATH = '/terminal/openMultiplex'
 export const MOBILE_TERMINAL_MULTIPLEX_ORPC_PATH = '/terminal/multiplex'
 
 export const MobileRuntimeStatusSchema = z.object({
   runtimeId: z.string(),
-  capabilities: z.array(z.string()).optional()
+  runtimeProtocolVersion: z.number().int().nonnegative().optional(),
+  minCompatibleRuntimeClientVersion: z.number().int().nonnegative().optional(),
+  capabilities: z.array(z.string()).optional(),
+  floatingWorkspaceEnabled: z.boolean().optional(),
+  hostPlatform: z.string().optional(),
+  terminalWindowsShell: z.string().nullable().optional(),
+  protocolVersion: z.number().int().nonnegative().optional(),
+  minCompatibleMobileVersion: z.number().int().nonnegative().optional()
 })
 
 export const MobileTerminalListRequestSchema = z.object({
@@ -44,10 +68,73 @@ export const MobileTerminalListSchema = z.object({
 
 export const MobileTerminalHandleRequestSchema = z.object({ terminal: z.string().min(1) })
 
+export const MobileTerminalSendRequestSchema = MobileTerminalHandleRequestSchema.extend({
+  text: z.string(),
+  enter: z.boolean(),
+  client: z
+    .object({
+      id: z.string().min(1),
+      type: z.literal('mobile')
+    })
+    .optional()
+})
+
+export const MobileTerminalSendResultSchema = z.object({
+  send: z.object({
+    handle: z.string(),
+    accepted: z.boolean(),
+    bytesWritten: z.number(),
+    refusedReason: z.enum(['no-agent', 'permission']).optional()
+  })
+})
+
+export const MobileTerminalEmptyRequestSchema = z.object({})
+
+export const MobileTerminalSetAutoRestoreFitRequestSchema = z.object({
+  ms: z.number().nullable()
+})
+
+export const MobileTerminalAutoRestoreFitResultSchema = z.object({
+  ms: z.number().nullable()
+})
+
+export const MobileTerminalRenameRequestSchema = MobileTerminalHandleRequestSchema.extend({
+  title: z.string().nullable()
+})
+
+export const MobileTerminalRenameResultSchema = z.object({
+  rename: z.object({
+    handle: z.string(),
+    tabId: z.string(),
+    title: z.string().nullable()
+  })
+})
+
+export const MobileTerminalClearBufferResultSchema = z.object({
+  clear: z.object({ handle: z.string(), cleared: z.boolean() })
+})
+
+export const MobileTerminalFocusResultSchema = z.object({
+  focus: z.object({ handle: z.string(), tabId: z.string(), worktreeId: z.string() })
+})
+
+export const MobileTerminalCloseResultSchema = z.object({
+  close: z.object({
+    handle: z.string(),
+    tabId: z.string(),
+    closeMode: z.literal('tab').optional(),
+    ptyKilled: z.boolean()
+  })
+})
+
 export const MobileTerminalShowSchema = MobileTerminalSummarySchema.extend({
   paneRuntimeId: z.number().int(),
   rendererGraphEpoch: z.number().int().nonnegative(),
   transportGeneration: z.string().min(1)
+})
+
+export const MobileTerminalShowResultSchema = z.object({
+  terminal: MobileTerminalShowSchema
 })
 
 export const MobileTerminalOpenMultiplexRequestSchema = z.object({
@@ -85,7 +172,50 @@ export type MobileRuntimeStatus = z.infer<typeof MobileRuntimeStatusSchema>
 export type MobileTerminalList = z.infer<typeof MobileTerminalListSchema>
 export type MobileTerminalListRequest = z.infer<typeof MobileTerminalListRequestSchema>
 export type MobileTerminalShow = z.infer<typeof MobileTerminalShowSchema>
+export type MobileTerminalShowResult = z.infer<typeof MobileTerminalShowResultSchema>
 export type MobileTerminalOpenMultiplex = z.infer<typeof MobileTerminalOpenMultiplexSchema>
 export type MobileTerminalOpenMultiplexRequest = z.infer<
   typeof MobileTerminalOpenMultiplexRequestSchema
 >
+
+export const MOBILE_TERMINAL_RENAME_WIRE_IS_COMPATIBLE: TerminalRenameResult extends z.infer<
+  typeof MobileTerminalRenameResultSchema
+>
+  ? true
+  : false = true
+
+export const MOBILE_TERMINAL_SEND_WIRE_IS_COMPATIBLE: TerminalSendResult extends z.infer<
+  typeof MobileTerminalSendResultSchema
+>
+  ? true
+  : false = true
+
+export const MOBILE_TERMINAL_CLEAR_WIRE_IS_COMPATIBLE: TerminalClearBufferResult extends z.infer<
+  typeof MobileTerminalClearBufferResultSchema
+>
+  ? true
+  : false = true
+
+export const MOBILE_TERMINAL_FOCUS_WIRE_IS_COMPATIBLE: TerminalFocusResult extends z.infer<
+  typeof MobileTerminalFocusResultSchema
+>
+  ? true
+  : false = true
+
+export const MOBILE_TERMINAL_CLOSE_WIRE_IS_COMPATIBLE: TerminalCloseResult extends z.infer<
+  typeof MobileTerminalCloseResultSchema
+>
+  ? true
+  : false = true
+
+export const MOBILE_TERMINAL_SHOW_WIRE_IS_COMPATIBLE: TerminalShowResult extends z.infer<
+  typeof MobileTerminalShowResultSchema
+>
+  ? true
+  : false = true
+
+export const MOBILE_TERMINAL_AUTO_RESTORE_WIRE_IS_COMPATIBLE: TerminalAutoRestoreFitResult extends z.infer<
+  typeof MobileTerminalAutoRestoreFitResultSchema
+>
+  ? true
+  : false = true

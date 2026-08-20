@@ -1,5 +1,5 @@
-import { AppWindow } from '@phosphor-icons/react'
 import type React from 'react'
+import { AppWindow } from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
 import { createLocalizedCatalog } from '~renderer/i18n/localized-catalog'
 import type { OpenInApplication } from '~shared/types'

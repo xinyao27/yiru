@@ -1,10 +1,10 @@
+import React from 'react'
 import {
   GearSix as Settings2,
-  type Icon as PhosphorIcon,
+  type Icon,
   ArrowUp,
   ArrowClockwise as RefreshCw
-} from '@phosphor-icons/react'
-import React from 'react'
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import { Tooltip, TooltipTrigger, TooltipContent } from '~renderer/components/ui/tooltip'
@@ -162,7 +162,7 @@ export function CompareSummaryToolbarButton({
   label,
   onClick
 }: {
-  icon: PhosphorIcon
+  icon: Icon
   label: string
   onClick: () => void
 }): React.JSX.Element {

@@ -1,6 +1,10 @@
-import { Warning as AlertTriangle, Clipboard, PaperPlaneRight as Send } from '@phosphor-icons/react'
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import {
+  Warning as AlertTriangle,
+  Clipboard,
+  PaperPlaneRight as Send
+} from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { Checkbox } from '~renderer/components/ui/checkbox'
 import {

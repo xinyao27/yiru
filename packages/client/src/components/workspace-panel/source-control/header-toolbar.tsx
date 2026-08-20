@@ -1,5 +1,5 @@
-import { GitBranch, MagnifyingGlass as Search, X } from '@phosphor-icons/react'
 import React, { useCallback, useEffect, useRef } from 'react'
+import { GitBranch, MagnifyingGlass as Search, X } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { Input } from '~renderer/components/ui/input'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'

@@ -1,5 +1,6 @@
 import { Menu as DropdownMenuPrimitive } from '@base-ui/react/menu'
-import { CheckIcon, CircleIcon, CaretRight as ChevronRightIcon } from '@phosphor-icons/react'
+import { ArrowRight01Icon, CheckIcon, CircleIcon } from '@hugeicons/core-free-icons'
+import { HugeiconsIcon } from '@hugeicons/react'
 import * as React from 'react'
 import {
   floatingSurfaceClass,
@@ -111,7 +112,7 @@ function DropdownMenuCheckboxItem({
     >
       <span className="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
         <DropdownMenuPrimitive.CheckboxItemIndicator>
-          <CheckIcon className="size-4" />
+          <HugeiconsIcon icon={CheckIcon} className="size-4" />
         </DropdownMenuPrimitive.CheckboxItemIndicator>
       </span>
       {children}
@@ -136,7 +137,7 @@ function DropdownMenuRadioItem({
     >
       <span className="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
         <DropdownMenuPrimitive.RadioItemIndicator>
-          <CircleIcon className="size-2 fill-current" />
+          <HugeiconsIcon icon={CircleIcon} className="size-2 fill-current" />
         </DropdownMenuPrimitive.RadioItemIndicator>
       </span>
       {children}
@@ -204,7 +205,7 @@ function DropdownMenuSubTrigger({
       {...props}
     >
       {children}
-      <ChevronRightIcon className="ml-auto size-4" />
+      <HugeiconsIcon icon={ArrowRight01Icon} className="ml-auto size-4" />
     </DropdownMenuPrimitive.SubmenuTrigger>
   )
 }

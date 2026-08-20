@@ -1,5 +1,5 @@
-import { Folder } from '@phosphor-icons/react'
 import React, { useState } from 'react'
+import { Folder } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { DialogDescription, DialogHeader, DialogTitle } from '~renderer/components/ui/dialog'
 import { Input } from '~renderer/components/ui/input'

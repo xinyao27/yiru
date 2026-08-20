@@ -1,11 +1,11 @@
+import React from 'react'
+import type { ConflictReviewEntry } from '~renderer/components/editor/state'
 import {
   Folder,
   FolderOpen,
   SidebarSimple as PanelLeftClose,
   CaretDown as ChevronDown
-} from '@phosphor-icons/react'
-import React from 'react'
-import type { ConflictReviewEntry } from '~renderer/components/editor/state'
+} from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'

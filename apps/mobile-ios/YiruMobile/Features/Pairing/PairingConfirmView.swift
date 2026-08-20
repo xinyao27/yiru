@@ -1,54 +1,56 @@
 import SwiftUI
 
 struct PairingConfirmView: View {
-    @Environment(\.dismiss) private var dismiss
     @State private var model: PairingModel
     @State private var pairingTask: Task<Void, Never>?
+    @State private var didStartDevelopmentAutoPair = false
 
     private let onPaired: (HostProfile) -> Void
+    private let onCancel: () -> Void
 
     init(
-        offer: PairingOffer, runtime: any PairingRuntime, onPaired: @escaping (HostProfile) -> Void
+        offer: PairingOffer,
+        runtime: any PairingRuntime,
+        onPaired: @escaping (HostProfile) -> Void,
+        onCancel: @escaping () -> Void
     ) {
         _model = State(initialValue: PairingModel(offer: offer, runtime: runtime))
         self.onPaired = onPaired
+        self.onCancel = onCancel
     }
 
     var body: some View {
         ZStack {
-            AtmosphereBackground()
+            AppBackground()
 
-            ScrollView {
-                VStack(spacing: Theme.Spacing.large) {
-                    identity
+            GeometryReader { geometry in
+                ScrollView {
                     status
-                    actions
+                        .frame(maxWidth: Theme.Size.readingWidth)
+                        .frame(minHeight: geometry.size.height)
+                        .padding(.horizontal, Theme.Spacing.page)
+                        .frame(maxWidth: .infinity)
                 }
-                .frame(maxWidth: Theme.Size.readingWidth)
-                .padding(Theme.Spacing.page)
-                .frame(maxWidth: .infinity)
             }
         }
-        .navigationTitle(Text("Confirm pairing"))
-        .navigationBarBackButtonHidden(model.isConnecting)
+        // Why: this route hides the native stack header — its only navigation affordance is
+        // the 36pt circular back control inside the page content. Keeping a toolbar title adds
+        // a second header row and pushes the centered confirmation group off-centre.
+        .overlay(alignment: .topLeading) {
+            GlassHeaderButton(
+                iconName: .arrowLeft,
+                accessibilityLabel: "Cancel pairing",
+                action: cancelPairing
+            )
+            .padding(.top, Theme.Spacing.small)
+            .padding(.leading, Theme.Spacing.standard)
+        }
+        .task {
+            startDevelopmentAutoPairIfNeeded()
+        }
         .onDisappear {
             pairingTask?.cancel()
             pairingTask = nil
-        }
-    }
-
-    private var identity: some View {
-        ContentSurface {
-            VStack(alignment: .leading, spacing: Theme.Spacing.medium) {
-                Label("Pair with this desktop?", systemImage: "desktopcomputer")
-                    .font(.title2.weight(.semibold))
-                Text(
-                    "Confirm to add this desktop to your hosts over an end-to-end encrypted connection."
-                )
-                .foregroundStyle(.secondary)
-                LabeledContent("Endpoint", value: redactedEndpoint)
-                LabeledContent("Transport", value: "Direct")
-            }
         }
     }
 
@@ -56,54 +58,91 @@ struct PairingConfirmView: View {
     private var status: some View {
         switch model.phase {
         case .ready:
-            EmptyView()
+            readyContent
         case .connecting:
-            ContentSurface {
-                HStack(spacing: Theme.Spacing.medium) {
-                    ProgressView()
-                    VStack(alignment: .leading, spacing: Theme.Spacing.extraSmall) {
-                        Text("Establishing secure connection…")
-                            .font(.headline)
-                        Text("Verifying the desktop key and authenticating this device.")
-                            .foregroundStyle(.secondary)
-                    }
-                }
-            }
+            connectingContent
         case .failed(let message):
-            ContentSurface {
-                Label {
-                    Text(message)
-                } icon: {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundStyle(.red)
-                }
-            }
+            failedContent(message)
         }
     }
 
-    private var actions: some View {
-        GlassActionGroup {
-            Button("Cancel", role: .cancel) { dismiss() }
-                .buttonStyle(.glass)
-                .disabled(model.isConnecting)
+    private var readyContent: some View {
+        VStack(spacing: 0) {
+            Text("Pair with this desktop?")
+                .font(.system(size: Theme.Typography.supporting, weight: .semibold))
+                .foregroundStyle(Theme.Colors.foreground)
+                .multilineTextAlignment(.center)
+            Text("You opened a pairing link from your desktop. Confirm to add it to your hosts.")
+                .font(.system(size: Theme.Typography.supporting))
+                .foregroundStyle(Theme.Colors.mutedForeground)
+                .multilineTextAlignment(.center)
+                .lineSpacing(4)
+                // Why: cap the explanatory copy at a readable measure inside the padded
+                // content column. Letting it use the whole phone width packs extra words onto
+                // the first line and reads as a wall of text.
+                .frame(maxWidth: 330)
+                .padding(.top, 8)
+                .padding(.bottom, 24)
+            readyActions
+        }
+    }
 
+    private var readyActions: some View {
+        StackedGlassActionGroup {
             Button {
                 beginPairing()
             } label: {
-                Text(model.hasFailed ? "Try again" : "Pair")
+                Text("Pair")
+                    .font(.system(size: Theme.Typography.supporting))
+                    .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.glassProminent)
-            .disabled(model.isConnecting)
+            .appProminentGlassButton()
+            .appButtonContext(.large)
+
+            Button(role: .cancel) {
+                cancelPairing()
+            } label: {
+                Text("Cancel")
+                    .font(.system(size: Theme.Typography.supporting))
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.glass)
+            .appButtonContext(.large)
         }
     }
 
-    private var redactedEndpoint: String {
-        guard let components = URLComponents(string: model.offer.endpoint),
-            let host = components.host
-        else {
-            return String(localized: "Unknown endpoint")
+    private var connectingContent: some View {
+        VStack(spacing: 16) {
+            ProgressView()
+                .controlSize(.large)
+            Text("Connecting…")
+                .font(.system(size: 14))
+                .foregroundStyle(Theme.Colors.mutedForeground)
+            PairingLog(entries: model.logEntries)
+                .frame(maxWidth: .infinity)
         }
-        return components.port.map { "\(host):\($0)" } ?? host
+    }
+
+    private func failedContent(_ message: LocalizedStringResource) -> some View {
+        VStack(spacing: 20) {
+            Text(message)
+                .font(.system(size: 14))
+                .foregroundStyle(Theme.Colors.attention)
+                .multilineTextAlignment(.center)
+                .lineSpacing(4)
+            PairingLog(entries: model.logEntries)
+                .frame(maxWidth: .infinity)
+            StackedGlassActionGroup {
+                Button {
+                    cancelPairing()
+                } label: {
+                    Text("Back to home")
+                        .frame(maxWidth: .infinity)
+                }
+                .appProminentGlassButton()
+                .appButtonContext(.large)
+            }
+        }
     }
 
     private func beginPairing() {
@@ -113,5 +152,22 @@ struct PairingConfirmView: View {
                 onPaired(host)
             }
         }
+    }
+
+    private func cancelPairing() {
+        pairingTask?.cancel()
+        pairingTask = nil
+        onCancel()
+    }
+
+    private func startDevelopmentAutoPairIfNeeded() {
+        #if DEBUG && targetEnvironment(simulator)
+            guard !didStartDevelopmentAutoPair,
+                ProcessInfo.processInfo.arguments.contains("--development-auto-pair"),
+                URL(string: model.offer.endpoint)?.host == "127.0.0.1"
+            else { return }
+            didStartDevelopmentAutoPair = true
+            beginPairing()
+        #endif
     }
 }

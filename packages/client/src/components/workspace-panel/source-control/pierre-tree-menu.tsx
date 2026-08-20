@@ -1,6 +1,11 @@
-import { Minus, Trash, Plus, ArrowCounterClockwise as Undo2 } from '@phosphor-icons/react'
 import type { ContextMenuOpenContext } from '@pierre/trees'
 import { useEffect, useRef } from 'react'
+import {
+  Minus,
+  Trash,
+  Plus,
+  ArrowCounterClockwise as Undo2
+} from '~renderer/components/icons/hugeicons'
 import { ContextMenu, ContextMenuItem } from '~renderer/components/ui/context-menu'
 import { translate } from '~renderer/i18n/i18n'
 import { joinPath } from '~renderer/lib/path'

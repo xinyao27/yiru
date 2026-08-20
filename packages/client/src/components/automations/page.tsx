@@ -1,16 +1,3 @@
-import {
-  CalendarDots as CalendarClock,
-  Check,
-  Clock,
-  Eye,
-  Pause,
-  Pencil,
-  Play,
-  Trash as Trash2,
-  Plus,
-  ArrowClockwise as RefreshCw,
-  X
-} from '@phosphor-icons/react'
 import { PROJECT_SOURCE_CONTEXT_RUNTIME_CAPABILITY } from '@yiru/runtime-protocol/capabilities'
 import {
   getLocalExecutionHostLabel,
@@ -24,6 +11,19 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { ensureHooksConfirmed } from '~renderer/components/automations/ensure-hooks-confirmed'
 import { useContextualTour } from '~renderer/components/contextual-tours/use-contextual-tour'
+import {
+  CalendarDots as CalendarClock,
+  Check,
+  Clock,
+  Eye,
+  Pause,
+  Pencil,
+  Play,
+  Trash as Trash2,
+  Plus,
+  ArrowClockwise as RefreshCw,
+  X
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import RepoBadgeLabel from '~renderer/components/repo/badge-label'
 import CommentMarkdown from '~renderer/components/sidebar/comment-markdown'

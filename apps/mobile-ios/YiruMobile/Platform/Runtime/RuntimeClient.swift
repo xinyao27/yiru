@@ -1,9 +1,12 @@
 import Foundation
 
-actor RuntimeClient: HomeRuntime, HostConnectionRuntime, TerminalSessionRuntime {
+actor RuntimeClient: ConnectionDiagnosticsRepository, HomeRuntime, HostConnectionRuntime,
+    TerminalSessionRuntime
+{
     private let hosts: any HostRepository
     let timeout: Duration
     private let revivalMonitor: ConnectionRevivalMonitor
+    private let connectionLogStore = RuntimeConnectionLogStore()
     let terminalClientInstanceID = UUID().uuidString.lowercased()
     private var sessions: [String: ManagedSession] = [:]
     var terminalMultiplexers: [String: ManagedRuntimeTerminalMultiplexer] = [:]
@@ -87,6 +90,41 @@ actor RuntimeClient: HomeRuntime, HostConnectionRuntime, TerminalSessionRuntime 
         await session.forceReconnect()
     }
 
+    func disconnect(hostID: String) async {
+        await connectionLogStore.append(
+            hostID: hostID,
+            level: .info,
+            message: "Disconnected by user"
+        )
+        if let managed = sessions.removeValue(forKey: hostID) {
+            await managed.session.shutdown()
+        }
+        if let terminal = terminalMultiplexers.removeValue(forKey: hostID) {
+            await terminal.multiplexer.shutdown()
+        }
+        snapshots.removeValue(forKey: hostID)
+        for subscription in snapshotSubscriptions.values
+        where subscription.hostIDs.contains(hostID) {
+            subscription.continuation.yield(
+                filteredSnapshots(hostIDs: subscription.hostIDs)
+            )
+        }
+        if primaryHostID == hostID {
+            primaryHostID = nil
+            primaryHostName = nil
+            homeContinuations.values.forEach { $0.yield(.unpaired) }
+        }
+    }
+
+    func connectionDiagnostics(for hostID: String) async throws
+        -> AsyncStream<ConnectionDiagnosticsSnapshot>
+    {
+        let credential = try await credential(for: hostID)
+        let session = await session(for: credential)
+        await session.start()
+        return await connectionLogStore.updates(hostID: hostID)
+    }
+
     func terminalConnectionContext(for hostID: String) async throws
         -> RuntimeTerminalConnectionContext
     {
@@ -131,6 +169,13 @@ actor RuntimeClient: HomeRuntime, HostConnectionRuntime, TerminalSessionRuntime 
         return try await session(for: credential).call(path: path, input: input, output: output)
     }
 
+    func probeRuntimeStatusForProtocolCompatibility(hostID: String) async throws
+        -> MobileRuntimeStatusWire
+    {
+        let credential = try await credential(for: hostID)
+        return try await session(for: credential).probeStatusForProtocolCompatibility()
+    }
+
     func subscribeRuntime<Input: Encodable & Sendable, Output: Decodable & Sendable>(
         hostID: String,
         path: String,
@@ -139,6 +184,20 @@ actor RuntimeClient: HomeRuntime, HostConnectionRuntime, TerminalSessionRuntime 
     ) async throws -> AsyncThrowingStream<Output, Error> {
         let credential = try await credential(for: hostID)
         return try await session(for: credential).subscribe(
+            path: path,
+            input: input,
+            output: output
+        )
+    }
+
+    func subscribeRuntimeWithBinary<Input: Encodable & Sendable, Output: Decodable & Sendable>(
+        hostID: String,
+        path: String,
+        input: Input,
+        output: Output.Type
+    ) async throws -> RuntimeOrpcBinarySubscription<Output> {
+        let credential = try await credential(for: hostID)
+        return try await session(for: credential).subscribeWithBinary(
             path: path,
             input: input,
             output: output
@@ -156,15 +215,29 @@ actor RuntimeClient: HomeRuntime, HostConnectionRuntime, TerminalSessionRuntime 
         if let terminal = terminalMultiplexers.removeValue(forKey: credential.profile.id) {
             await terminal.multiplexer.shutdown()
         }
-        let session = RuntimeHostSession(credential: credential) { [weak self] snapshot in
-            await self?.record(snapshot)
-        }
+        let logStore = connectionLogStore
+        let session = RuntimeHostSession(
+            credential: credential,
+            callTimeout: timeout,
+            publishSnapshot: { [weak self] snapshot in
+                await self?.record(snapshot)
+            },
+            publishLog: { level, message, detail in
+                await logStore.append(
+                    hostID: credential.profile.id,
+                    level: level,
+                    message: message,
+                    detail: detail
+                )
+            }
+        )
         sessions[credential.profile.id] = ManagedSession(credential: credential, session: session)
         snapshots[credential.profile.id] = await session.snapshot()
         return session
     }
 
     private func record(_ snapshot: RuntimeConnectionSnapshot) {
+        Task { await connectionLogStore.record(snapshot) }
         snapshots[snapshot.hostID] = snapshot
         for subscription in snapshotSubscriptions.values
         where subscription.hostIDs.contains(snapshot.hostID) {

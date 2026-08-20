@@ -1,4 +1,4 @@
-import { ChatCentered as MessageSquarePlus } from '@phosphor-icons/react'
+import { ChatCentered as MessageSquarePlus } from '~renderer/components/icons/hugeicons'
 import { DropdownMenuItem } from '~renderer/components/ui/dropdown-menu'
 import { translate } from '~renderer/i18n/i18n'
 

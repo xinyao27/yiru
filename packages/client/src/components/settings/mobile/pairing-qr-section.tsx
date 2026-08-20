@@ -1,6 +1,6 @@
-import { Check, Copy, ArrowsOut as Maximize2 } from '@phosphor-icons/react'
 import { useCallback, useRef } from 'react'
 import { toast } from 'sonner'
+import { Check, Copy, ArrowsOut as Maximize2 } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~renderer/components/ui/dialog'
 import { translate } from '~renderer/i18n/i18n'

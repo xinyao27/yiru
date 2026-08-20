@@ -1,3 +1,4 @@
+import React from 'react'
 import {
   Minus,
   Chat as MessageSquare,
@@ -7,8 +8,7 @@ import {
   CaretDown as ChevronDown,
   Plus,
   ArrowCounterClockwise as Undo2
-} from '@phosphor-icons/react'
-import React from 'react'
+} from '~renderer/components/icons/hugeicons'
 import {
   Tooltip,
   TooltipTrigger,

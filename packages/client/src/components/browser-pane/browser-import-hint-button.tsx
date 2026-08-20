@@ -1,6 +1,6 @@
-import { DownloadSimple as Import } from '@phosphor-icons/react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
+import { DownloadSimple as Import } from '~renderer/components/icons/hugeicons'
 import { isLinuxUserAgent, isMacUserAgent } from '~renderer/components/terminal-pane/pane-helpers'
 import { Button } from '~renderer/components/ui/button'
 import {

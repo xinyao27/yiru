@@ -1,5 +1,5 @@
-import { WarningCircle as AlertCircle, Check, Copy } from '@phosphor-icons/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { WarningCircle as AlertCircle, Check, Copy } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,

@@ -1,11 +1,11 @@
+import type React from 'react'
+import { useLayoutEffect, useState } from 'react'
 import {
   AppWindow,
   Palette,
   SidebarSimple as PanelLeft,
   TerminalWindow as TerminalSquare
-} from '@phosphor-icons/react'
-import type React from 'react'
-import { useLayoutEffect, useState } from 'react'
+} from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
 import { SHOW_UI_LANGUAGE_SETTING } from '~renderer/i18n/supported-languages'
 import { isWebClientLocation } from '~renderer/lib/web-client-location'

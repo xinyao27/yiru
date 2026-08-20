@@ -28,8 +28,8 @@ import type { TuiAgent } from '~shared/types'
 // regions (e.g. mainland China) and offline, leaving broken images across the
 // agent settings page, tab title bar, and status bar (#8451). Bundle the favicon
 // PNGs at build time so the icons render without any network dependency.
-// The PNGs live in packages/shared/src/agent-icons so mobile (Metro) can bundle the same
-// files; see apps/mobile/src/components/mobile-agent-icon-assets.ts.
+// The PNGs live in packages/shared/src/agent-icons, not packages/client, so any other
+// client that bundles the same favicon set can import them without duplicating the assets.
 export const AGENT_FAVICON_ASSETS: Partial<Record<TuiAgent, string>> = {
   grok: grokUrl,
   'mimo-code': mimoCodeUrl,

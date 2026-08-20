@@ -1,10 +1,10 @@
+import { useEffect, useState } from 'react'
 import {
   BellRinging as BellRing,
   Check,
   Gear as Settings,
   Warning as TriangleAlert
-} from '@phosphor-icons/react'
-import { useEffect, useState } from 'react'
+} from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
 import { shellClient } from '~renderer/runtime/shell-client'

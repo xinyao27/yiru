@@ -1,11 +1,8 @@
 'use client'
 
 import { Select as SelectPrimitive } from '@base-ui/react/select'
-import {
-  CheckIcon,
-  CaretDown as ChevronDownIcon,
-  CaretUp as ChevronUpIcon
-} from '@phosphor-icons/react'
+import { ArrowDown01Icon, ArrowUp01Icon, CheckIcon } from '@hugeicons/core-free-icons'
+import { HugeiconsIcon } from '@hugeicons/react'
 import {
   floatingSurfaceClass,
   floatingSurfaceMotionClass
@@ -45,7 +42,10 @@ function SelectTrigger({
       {children}
       <SelectPrimitive.Icon
         render={
-          <ChevronDownIcon className={cn('opacity-50', size === 'xs' ? 'size-3' : 'size-4')} />
+          <HugeiconsIcon
+            icon={ArrowDown01Icon}
+            className={cn('opacity-50', size === 'xs' ? 'size-3' : 'size-4')}
+          />
         }
       />
     </SelectPrimitive.Trigger>
@@ -119,7 +119,7 @@ function SelectItem({ className, children, ...props }: SelectPrimitive.Item.Prop
         data-slot="select-item-indicator"
         render={<span className="absolute right-2 flex size-3.5 items-center justify-center" />}
       >
-        <CheckIcon className="size-4" />
+        <HugeiconsIcon icon={CheckIcon} className="size-4" />
       </SelectPrimitive.ItemIndicator>
     </SelectPrimitive.Item>
   )
@@ -143,7 +143,7 @@ function SelectScrollUpButton({ className, ...props }: SelectPrimitive.ScrollUpA
       className={cn('flex cursor-default items-center justify-center py-1 top-0 w-full', className)}
       {...props}
     >
-      <ChevronUpIcon className="size-4" />
+      <HugeiconsIcon icon={ArrowUp01Icon} className="size-4" />
     </SelectPrimitive.ScrollUpArrow>
   )
 }
@@ -159,7 +159,7 @@ function SelectScrollDownButton({ className, ...props }: SelectPrimitive.ScrollD
       )}
       {...props}
     >
-      <ChevronDownIcon className="size-4" />
+      <HugeiconsIcon icon={ArrowDown01Icon} className="size-4" />
     </SelectPrimitive.ScrollDownArrow>
   )
 }

@@ -1,5 +1,5 @@
-import { Check } from '@phosphor-icons/react'
 import ghosttyIcon from '~renderer/assets/brand/ghostty.svg'
+import { Check } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
 import type { GhosttyImportPreview } from '~shared/types'

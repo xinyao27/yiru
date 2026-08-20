@@ -1,5 +1,5 @@
-import { ArrowLeft } from '@phosphor-icons/react'
 import React from 'react'
+import { ArrowLeft } from '~renderer/components/icons/hugeicons'
 import { Badge } from '~renderer/components/ui/badge'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'

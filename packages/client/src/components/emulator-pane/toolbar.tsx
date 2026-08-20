@@ -1,10 +1,10 @@
+import { useMemo } from 'react'
 import {
   House as Home,
   Power,
   DeviceMobile as Smartphone,
   ArrowClockwise as RotateCw
-} from '@phosphor-icons/react'
-import { useMemo } from 'react'
+} from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import {
   Select,

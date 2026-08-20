@@ -1,9 +1,9 @@
-import { ArrowCounterClockwise as RotateCcw } from '@phosphor-icons/react'
 import { getRepoExecutionHostId, parseExecutionHostId } from '@yiru/workbench-model/workspace'
 import type { RepoIcon } from '@yiru/workbench-model/workspace'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
-import { RepoIconGlyph, getRepoLucideIconOptions } from '~renderer/components/repo/icon'
+import { ArrowCounterClockwise as RotateCcw } from '~renderer/components/icons/hugeicons'
+import { RepoIconGlyph, getRepoIconOptions } from '~renderer/components/repo/icon'
 import { Button } from '~renderer/components/ui/button'
 import { Label } from '~renderer/components/ui/label'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
@@ -36,7 +36,7 @@ export function RepositoryIconPicker({
   const selectedHost = parseExecutionHostId(getRepoExecutionHostId(repo))
   const activeRuntimeEnvironmentId =
     selectedHost?.kind === 'runtime' ? selectedHost.environmentId : null
-  const selectedLucideName = repo.repoIcon?.type === 'lucide' ? repo.repoIcon.name : null
+  const selectedIconName = repo.repoIcon?.type === 'lucide' ? repo.repoIcon.name : null
   const selectedEmoji = repo.repoIcon?.type === 'emoji' ? repo.repoIcon.emoji : ''
   const selectedBadgeColor = normalizeRepoBadgeColor(repo.badgeColor) ?? DEFAULT_REPO_BADGE_COLOR
   const initialTab =
@@ -58,12 +58,11 @@ export function RepositoryIconPicker({
     }
     if (repo.repoIcon?.type === 'lucide') {
       const label =
-        getRepoLucideIconOptions().find((option) => option.name === selectedLucideName)?.label ??
-        'Folder'
+        getRepoIconOptions().find((option) => option.name === selectedIconName)?.label ?? 'Folder'
       return `${label} icon with repo color`
     }
     return 'Default'
-  }, [repo.repoIcon, selectedLucideName])
+  }, [repo.repoIcon, selectedIconName])
 
   const setIcon = (repoIcon: RepoIcon | null) => updateRepo(repo.id, { repoIcon })
   const setBadgeColor = (badgeColor: string) => updateRepo(repo.id, { badgeColor })
@@ -202,7 +201,7 @@ export function RepositoryIconPicker({
 
       <RepositoryIconTabs
         initialTab={initialTab}
-        selectedLucideName={selectedLucideName}
+        selectedIconName={selectedIconName}
         selectedEmoji={selectedEmoji}
         loadingGitHub={loadingGitHub}
         onSetIcon={setIcon}

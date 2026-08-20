@@ -1,5 +1,5 @@
-import { GitMerge, Moon, FlowArrow as Workflow } from '@phosphor-icons/react'
 import React from 'react'
+import { GitMerge, Moon, FlowArrow as Workflow } from '~renderer/components/icons/hugeicons'
 import { Switch } from '~renderer/components/ui/switch'
 import { translate } from '~renderer/i18n/i18n'
 import { useAppStore } from '~renderer/store'

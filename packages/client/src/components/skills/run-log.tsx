@@ -1,4 +1,4 @@
-import { CaretDown as ChevronDown } from '@phosphor-icons/react'
+import { CaretDown as ChevronDown } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import {
   Collapsible,

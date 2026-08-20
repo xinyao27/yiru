@@ -1,4 +1,11 @@
 import type { Menu as DropdownMenuPrimitive } from '@base-ui/react/menu'
+import {
+  getRepoExecutionHostId,
+  parseExecutionHostId,
+  toRuntimeExecutionHostId
+} from '@yiru/workbench-model/workspace'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { FloatingTerminalIconContextMenu } from '~renderer/components/floating-terminal/icon-context-menu'
 /* eslint-disable max-lines -- Why: the status bar keeps provider rendering,
 interaction menus, and compact-layout behavior together so the hover/click
 states stay consistent across Claude and Codex. */
@@ -10,14 +17,7 @@ import {
   CaretDown as ChevronDown,
   CaretRight as ChevronRight,
   ArrowClockwise as RefreshCw
-} from '@phosphor-icons/react'
-import {
-  getRepoExecutionHostId,
-  parseExecutionHostId,
-  toRuntimeExecutionHostId
-} from '@yiru/workbench-model/workspace'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { FloatingTerminalIconContextMenu } from '~renderer/components/floating-terminal/icon-context-menu'
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { USAGE_PERCENTAGE_DISPLAY_SETTING_ID } from '~renderer/components/settings/appearance/usage-percentage-search'
 import { Button } from '~renderer/components/ui/button'

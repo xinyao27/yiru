@@ -7,7 +7,7 @@ import {
   Table as Table2,
   CaretRight as ChevronRight,
   FlowArrow as Workflow
-} from '@phosphor-icons/react'
+} from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
 
 import { headingSlashCommands } from './heading-slash-commands'

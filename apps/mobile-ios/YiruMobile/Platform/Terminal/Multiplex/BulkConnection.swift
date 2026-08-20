@@ -35,7 +35,9 @@ actor TerminalBulkConnection {
         guard ticket.expiresAt > Int64(Date().timeIntervalSince1970 * 1_000) else {
             throw TerminalBulkConnectionError.expiredTicket
         }
-        let connection = try await AuthenticatedRuntimeConnection.connect(
+        // Why: Desktop recognizes terminal bulk sockets by their legacy handshake;
+        // a v2 control handshake here would replace the logical RPC connection.
+        let connection = try await AuthenticatedRuntimeConnection.connectTerminalBulk(
             endpoint: ticket.bulkEndpoint,
             desktopPublicKeyBase64: credential.profile.publicKeyBase64,
             deviceToken: credential.deviceToken

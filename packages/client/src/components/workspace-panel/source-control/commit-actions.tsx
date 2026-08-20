@@ -1,3 +1,4 @@
+import type React from 'react'
 import {
   ArrowsDownUp,
   ArrowUp,
@@ -6,8 +7,7 @@ import {
   CloudArrowUp as CloudUpload,
   GitPullRequest as GitPullRequestArrow,
   Plus
-} from '@phosphor-icons/react'
-import type React from 'react'
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import { ButtonGroup } from '~renderer/components/ui/button-group'

@@ -1,5 +1,5 @@
-import { Copy } from '@phosphor-icons/react'
 import { toast } from 'sonner'
+import { Copy } from '~renderer/components/icons/hugeicons'
 import { OnboardingInlineCommandTerminal } from '~renderer/components/onboarding/inline-command-terminal'
 import { Button } from '~renderer/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'

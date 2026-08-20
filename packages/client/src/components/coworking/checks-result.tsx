@@ -1,6 +1,10 @@
-import { GitMerge, GitPullRequest, ArrowSquareOut as ExternalLink } from '@phosphor-icons/react'
 import type React from 'react'
 import { openHttpLink } from '~renderer/components/editor/http-link-routing'
+import {
+  GitMerge,
+  GitPullRequest,
+  ArrowSquareOut as ExternalLink
+} from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import {
   CHECK_COLOR,

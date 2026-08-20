@@ -1,5 +1,5 @@
-import { FolderPlus } from '@phosphor-icons/react'
 import React from 'react'
+import { FolderPlus } from '~renderer/components/icons/hugeicons'
 import type { NewWorkspaceProjectOption } from '~renderer/components/new-workspace-composer-card/new-workspace-project-options'
 import type { ProjectHostSetupOption } from '~renderer/components/new-workspace-composer-card/project-host-setup-options'
 import ProjectCombobox from '~renderer/components/new-workspace/project-combobox'

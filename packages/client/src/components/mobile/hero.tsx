@@ -1,5 +1,10 @@
-import { Copy, ArrowLeft, ArrowRight, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import { type ComponentProps, useLayoutEffect, useRef, useState } from 'react'
+import {
+  Copy,
+  ArrowLeft,
+  ArrowRight,
+  ArrowClockwise as RefreshCw
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import { cn } from '~renderer/lib/class-names'

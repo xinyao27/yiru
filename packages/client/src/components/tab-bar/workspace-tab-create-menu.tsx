@@ -1,5 +1,5 @@
-import { TerminalWindow as TerminalSquare, Plus } from '@phosphor-icons/react'
 import type React from 'react'
+import { TerminalWindow as TerminalSquare, Plus } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,

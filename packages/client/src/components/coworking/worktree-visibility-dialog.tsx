@@ -1,7 +1,7 @@
-import { Warning as AlertTriangle } from '@phosphor-icons/react'
 import type React from 'react'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { Warning as AlertTriangle } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,

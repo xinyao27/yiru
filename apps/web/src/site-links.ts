@@ -10,11 +10,12 @@ import {
 // mobile apps open the very same constants. Retyping them here is how a site
 // ends up pointing somewhere the product no longer does.
 export const siteLinks = {
-  // Why: these artifact names are version-free and fixed by the release
-  // contract in apps/desktop/scripts/verify-release-required-assets.mjs, so
-  // /releases/latest/download/<name> is a permalink to the current build —
-  // no metadata fetch, and one click instead of picking from 17 assets.
-  // Linux and Windows names live in that same contract when they are offered.
+  // Why: these artifact names are version-free so /releases/latest/download/<name> is a
+  // permalink to the current build — no metadata fetch, and one click instead of picking from
+  // 17 assets. This used to be a release contract checked by
+  // apps/desktop/scripts/verify-release-required-assets.mjs; that script has been deleted, so
+  // keeping these names in sync with the actual release artifact names is manual now.
+  // Linux and Windows names live alongside these when they are offered.
   downloadMac: `${YIRU_GITHUB_LATEST_RELEASE_DOWNLOAD_URL}/yiru-macos-arm64.dmg`,
   downloadMacIntel: `${YIRU_GITHUB_LATEST_RELEASE_DOWNLOAD_URL}/yiru-macos-x64.dmg`,
   github: YIRU_GITHUB_REPOSITORY_URL,

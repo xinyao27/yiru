@@ -1,6 +1,10 @@
-import { FolderOpen, ArrowClockwise as RefreshCw, Trash } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import {
+  FolderOpen,
+  ArrowClockwise as RefreshCw,
+  Trash
+} from '~renderer/components/icons/hugeicons'
 import { Badge } from '~renderer/components/ui/badge'
 import { Button } from '~renderer/components/ui/button'
 import { ScrollArea } from '~renderer/components/ui/scroll-area'

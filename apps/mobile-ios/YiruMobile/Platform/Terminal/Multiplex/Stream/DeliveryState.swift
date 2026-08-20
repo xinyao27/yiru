@@ -61,10 +61,11 @@ actor TerminalMultiplexDeliveryState {
             throw TerminalMultiplexSessionError.invalidAcknowledgement
         }
         guard record.kind == 3 else { return false }
-        guard record.status == 0, frame.correlationID != 0 else {
-            throw TerminalMultiplexSessionError.invalidAcknowledgement
-        }
         guard frame.correlationID == pendingReveal?.stateVersion else { return true }
+        guard record.status == 0, frame.correlationID != 0 else {
+            pendingReveal = nil
+            return true
+        }
         let stateVersion = frame.correlationID
         guard let generation = pendingReveal?.generation else { return true }
         pendingReveal = nil

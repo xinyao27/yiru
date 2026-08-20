@@ -1,8 +1,8 @@
 # AGENTS.md
 
-Yiru is an Electron desktop app — plus an Expo mobile companion — for running coding agents across many git worktrees, on local, WSL, SSH, and relay-connected hosts.
+Yiru is an Electron desktop app — plus a native SwiftUI iOS companion — for running coding agents across many git worktrees, on local, WSL, SSH, and relay-connected hosts.
 
-This file is the contract for every agent writing code here: structure, naming, cohesion, code quality. For visual work, the platform contract is canonical: [`apps/desktop/DESIGN.md`](./apps/desktop/DESIGN.md) for desktop and [`apps/mobile/DESIGN.md`](./apps/mobile/DESIGN.md) for mobile. [`docs/style-guide.md`](./docs/style-guide.md) is the detailed shared reference.
+This file is the contract for every agent writing code here: structure, naming, cohesion, code quality. For visual work, the platform contract is canonical: [`apps/desktop/DESIGN.md`](./apps/desktop/DESIGN.md) for desktop and [`apps/mobile-ios/DESIGN.md`](./apps/mobile-ios/DESIGN.md) for mobile. [`docs/style-guide.md`](./docs/style-guide.md) is the detailed shared reference.
 
 **The organizing principle.** Tailwind won because the style lives next to the markup: one place to look, one place to change. Apply that to all code. A feature's directory, filenames, and module boundaries exist so an agent can find the code from the feature name alone and change it without touching the rest of the tree. Optimize for *"where does this live?"* being answerable in one guess.
 
@@ -10,21 +10,24 @@ This file is the contract for every agent writing code here: structure, naming, 
 
 ## Read first
 
-These fail CI or are outright forbidden. No exceptions inside a feature task.
+These are hard rules regardless of who enforces them. Some still fail CI; several lost their
+automated check when the repository-contract scripts that enforced them were deleted, and are
+convention plus review only until a replacement check exists. The table says which is which — do
+not treat "no automated check" as "not a rule." No exceptions inside a feature task.
 
 | Never | Enforced by |
 | --- | --- |
 | Write or retain any test. No test files or test suites are allowed. | Section 9 |
-| Add an `eslint-disable`/`oxlint-disable max-lines`, or a per-file `max-lines` bump in `apps/mobile/config/mobile-max-lines-ratchets.ts` | `check-max-lines-ratchet.mjs` |
-| Add a project-owned `.d.ts` under `apps/desktop/src/preload` or `packages/shared/src` | PR workflow guard |
-| Add a variable to the `@theme inline` block in `packages/client/src/assets/main.css` | `@yiru/client#verify:design-token-budget` |
-| Use a native `<button>`/`<input>`/`<textarea>`/`<select>` in client feature TSX; write `rounded-*`; use `bg-black/N`-style alpha washes; import `components/ui/*-styles.ts` from feature code | `@yiru/client#verify:ui-style-drift` |
+| Add an `eslint-disable`/`oxlint-disable max-lines`, or a new entry to `apps/desktop/config/max-lines-baseline.txt` | Convention only — no automated check (the script that enforced this was deleted) |
+| Add a project-owned `.d.ts` under `apps/desktop/src/preload` or `packages/shared/src` | PR workflow guard (`.github/workflows/pr.yml`) |
+| Add a variable to the `@theme inline` block in `packages/client/src/assets/main.css` | Convention only — no automated check (the script that enforced this was deleted) |
+| Use a native `<button>`/`<input>`/`<textarea>`/`<select>` in client feature TSX; write `rounded-*`; use `bg-black/N`-style alpha washes; import `components/ui/*-styles.ts` from feature code | Convention only — no automated check (the script that enforced this was deleted) |
 | Use `interface`, `enum`, `namespace`, or `any` | oxlint + `erasableSyntaxOnly` |
-| Ship a user-visible string that isn't wrapped in `t()` / `translate()` | `audit-localization-coverage.mjs` |
+| Ship a user-visible string that isn't wrapped in `t()` / `translate()` | Convention only — no automated check (the script that enforced this was deleted) |
 | Hardcode `e.metaKey`, a path separator, or a platform font | Section 7 |
 | Import desktop main/preload modules from `packages/client/src`, or use `~renderer` from desktop source | Section 1 |
 | Name a file or folder `helpers`, `utils`, `common`, `misc`, or `shared-stuff`; add an `index.ts` re-export barrel | Section 2 |
-| Rename or move a file without updating the paths written as *strings* — build scripts, CI jobs, baselines, allowlists, `Why:` comments | `check-source-path-references.mjs` |
+| Rename or move a file without updating the paths written as *strings* — build scripts, CI jobs, baselines, allowlists, `Why:` comments | Convention only — no automated check (the script that enforced this was deleted) |
 | Follow an absolute path from a subagent result into the main repo instead of this worktree | Section 12 |
 
 ---
@@ -38,7 +41,8 @@ apps/desktop/src/
   relay/      headless runtime server (local, SSH, and remote hosts dispatch through it)
   cli/        the `yiru` CLI
   types/      desktop build and runtime ambient declarations
-apps/mobile/  Expo app: app/ = routes, src/ = features
+apps/mobile-ios/
+              native SwiftUI iOS app: YiruMobile/ = app source, YiruWidgets/ = widgets
 apps/web/     landing site and product web entrypoints
 packages/
   client/     source-only workbench UI consumed by desktop and web hosts
@@ -58,11 +62,12 @@ folder; `config/` is for configuration, never executables.
 
 `skills/<name>/SKILL.md` is product content, not app source — it sits at the
 repository root because it is shipped to users' agent installs rather than built
-into any one client. It is the **source of truth**:
-`apps/desktop/src/cli/bundled-skill-guides.ts`
-is generated from it by `scripts/generate-bundled-skill-guides.mjs`, and
-`apps/desktop/resources/skills/*.json` records its release-freshness digests. Edit
-`SKILL.md`, then run that script with `--write`; never edit the generated module.
+into any one client. It is the **source of truth** for
+`apps/desktop/src/cli/bundled-skill-guides.ts` and `apps/desktop/resources/skills/*.json`.
+Both used to be regenerated from `SKILL.md` by `scripts/generate-bundled-skill-guides.mjs` and
+`scripts/generate-skill-bundle-manifest.mjs`; both generators were deleted, so the two files are
+now frozen snapshots that no script keeps in sync. Edit `SKILL.md` as the source of truth, and
+hand-update `bundled-skill-guides.ts` and the manifest JSON to match in the same change.
 
 **Import direction is one-way.** `packages/client` never imports desktop `main` or `preload`.
 `packages/shared` never imports desktop, client, or `electron` modules — Node built-ins are fine.
@@ -129,7 +134,7 @@ Filenames are lowercase kebab-case, always. Beyond that, files and symbols follo
 - **Short and concrete** — two or three words. If you need five, it's doing five things.
 - **Domain over mechanism:** `resolveWorktreeBaseRef`, not `processData`. Booleans read as assertions (`isGitBashAvailable`, `hasUncommittedChanges`). Don't encode the type in the name (`worktreeList`, not `worktreeArray`) or abbreviate past recognition (`repo` is established here; `wt` isn't).
 - `PascalCase` types and components, `camelCase` values, `SCREAMING_SNAKE` module constants with a unit suffix where there is one (`KEYBOARD_INPUT_SOURCE_TIMEOUT_MS`). Props types are `<Component>Props`.
-- Keep meaningful role suffixes (`.config.ts`). Exempt: tool-discovery names, framework route parameters (Expo's `[id].tsx`), generated artifacts, native-language conventions.
+- Keep meaningful role suffixes (`.config.ts`). Exempt: tool-discovery names, generated artifacts, native-language conventions.
 
 ---
 
@@ -158,13 +163,14 @@ Splitting is good; scattering is not. The difference is whether the pieces stay 
 - **Imports use an alias the moment they leave the folder they belong to.** `~renderer/*` means
   `packages/client/src/*`; it is package-internal and supplied to hosts by the
   `@yiru/client/vite` preset. `~shared/*` means `packages/shared/src/*`. `~main/*` and
-  `~preload/*` are desktop-only. Mobile has `~/*` for its `src/`. Inside one area, `./x` and `../x`
+  `~preload/*` are desktop-only. Inside one area, `./x` and `../x`
   stay relative — reach for the alias at two levels up or more. `relay/` and `cli/` are leaf
   executables nothing imports into, so they have no aliases, and desktop has no bare `~`.
 - `packages/shared/src` uses only relative imports internally; aliases there would make the package
   depend on a host resolver. Desktop source cannot use `~renderer`; it consumes public
-  `@yiru/client` exports. Client source cannot use `~main` or `~preload`. These are build errors
-  enforced by `check-import-path-policy.mjs`, not style preferences.
+  `@yiru/client` exports. Client source cannot use `~main` or `~preload`. These are architectural
+  rules, not style preferences — the script that used to fail the build on a violation
+  (`check-import-path-policy.mjs`) was deleted, so nothing currently checks this automatically.
 - `build:cli` is a plain `tsc` emit, so it cannot resolve aliases at runtime: `scripts/rewrite-emitted-aliases.mjs` turns them back into relative requires and fails the build on any it does not recognize. Adding a desktop alias means updating that script and `config/tsconfig.cli.json` together.
 
 ---
@@ -232,9 +238,14 @@ Delete existing unit, integration, snapshot, and end-to-end tests instead of rep
 
 ## 10. Verify before you finish
 
-`pnpm check` is the gate — `vp lint --fix`, then typecheck, then `verify:repository-contracts` (switch exhaustiveness, design-token budget, UI style drift, source path references, max-lines ratchet, skill guides and manifest, localization catalog and coverage). `pnpm typecheck`, `pnpm lint`, and `pnpm fmt` run the pieces individually.
+`pnpm check` is the gate — `vp lint --fix`, then typecheck, then `verify:repository-contracts`. That
+task now checks switch exhaustiveness only: the design-token budget, UI style drift, source path
+references, max-lines ratchet, skill guides/manifest, and localization catalog/coverage checks it
+used to run were all deleted along with their scripts, and nothing has replaced them — those rules
+still apply (see "Read first") but are enforced by review, not by this command. `pnpm typecheck`,
+`pnpm lint`, and `pnpm fmt` run the remaining pieces individually.
 
-**Reach into a package with `vp run <package>#<task>`**, from anywhere in the repo — `vp run yiru#build:mac`, `vp run yiru-mobile#dev`. The root `package.json` no longer keeps a forwarding script per package task; it holds only what the whole workspace shares. Inside a package, one script calls another with `vp run <task>`, never `pnpm run <task>`, so the task graph stays visible to the runner.
+**Reach into a package with `vp run <package>#<task>`**, from anywhere in the repo — `vp run yiru#build:mac`, `vp run yiru-mobile-ios#dev`. The root `package.json` no longer keeps a forwarding script per package task; it holds only what the whole workspace shares. Inside a package, one script calls another with `vp run <task>`, never `pnpm run <task>`, so the task graph stays visible to the runner.
 
 A script that needs its workspace dependencies built first says so itself, with `vp run --filter '{.}^...' build` — the filter resolves this package's own dependencies from the workspace graph, so no caller has to remember the order and no package list gets hardcoded. Keep such work in `package.json`: a task defined in `vite.config.ts` is unreachable from `pnpm run`, which strands every call site that isn't already inside Vite+.
 

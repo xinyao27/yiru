@@ -1,15 +1,15 @@
 import { useSortable } from '@dnd-kit/sortable'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { getEditorDisplayLabel } from '~renderer/components/editor/labels'
+import { canOpenMarkdownPreview } from '~renderer/components/editor/markdown-preview-controls'
+import { getUntitledFileRoot } from '~renderer/components/editor/untitled-file-rename-path'
 import {
   GitDiff as GitCompareArrows,
   Eye,
   ShieldWarning as ShieldAlert,
   PushPin as Pin,
   ListChecks
-} from '@phosphor-icons/react'
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { getEditorDisplayLabel } from '~renderer/components/editor/labels'
-import { canOpenMarkdownPreview } from '~renderer/components/editor/markdown-preview-controls'
-import { getUntitledFileRoot } from '~renderer/components/editor/untitled-file-rename-path'
+} from '~renderer/components/icons/hugeicons'
 import { ContextMenu, ContextMenuTrigger } from '~renderer/components/ui/context-menu'
 import { Input } from '~renderer/components/ui/input'
 import { translate } from '~renderer/i18n/i18n'

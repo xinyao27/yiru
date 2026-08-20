@@ -1,7 +1,11 @@
-import { Pencil, Trash, ArrowElbowDownLeft as CornerDownLeft } from '@phosphor-icons/react'
 import { useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { getDiffCommentLineLabel } from '~renderer/components/editor/diff-comment-compat'
 import { openHttpLink } from '~renderer/components/editor/http-link-routing'
+import {
+  Pencil,
+  Trash,
+  ArrowElbowDownLeft as CornerDownLeft
+} from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { Textarea } from '~renderer/components/ui/textarea'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
@@ -11,7 +15,7 @@ import './diff-comment-styles.css'
 
 // Why: the saved-note card lives inside a Monaco view zone's DOM node.
 // useDiffCommentDecorator creates a React root per zone and renders this
-// component into it so we can use normal lucide icons and JSX instead of
+// component into it so we can use the shared Hugeicons adapter and JSX instead of
 // hand-built DOM + inline SVG strings.
 //
 // User-facing copy uses "Note" rather than "Comment" so it is not confused

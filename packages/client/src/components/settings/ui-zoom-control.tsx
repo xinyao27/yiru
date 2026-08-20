@@ -1,5 +1,9 @@
-import { Minus, Plus, ArrowCounterClockwise as RotateCcw } from '@phosphor-icons/react'
 import { useEffect, useState, useCallback } from 'react'
+import {
+  Minus,
+  Plus,
+  ArrowCounterClockwise as RotateCcw
+} from '~renderer/components/icons/hugeicons'
 import { applyUIZoom } from '~renderer/components/settings/ui-zoom'
 import { translate } from '~renderer/i18n/i18n'
 import { shellClient } from '~renderer/runtime/shell-client'

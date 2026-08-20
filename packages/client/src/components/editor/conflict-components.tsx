@@ -1,3 +1,5 @@
+import React from 'react'
+import type { ConflictReviewEntry, OpenFile } from '~renderer/components/editor/state'
 import {
   CheckCircle as CircleCheck,
   GitMerge,
@@ -7,9 +9,7 @@ import {
   CaretUp as ChevronUp,
   ArrowClockwise as RefreshCw,
   X
-} from '@phosphor-icons/react'
-import React from 'react'
-import type { ConflictReviewEntry, OpenFile } from '~renderer/components/editor/state'
+} from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { translate } from '~renderer/i18n/i18n'

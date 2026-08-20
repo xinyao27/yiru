@@ -1,3 +1,5 @@
+import type { Editor } from '@tiptap/react'
+import React from 'react'
 import {
   TextHOne as Heading1,
   TextHTwo as Heading2,
@@ -13,9 +15,7 @@ import {
   Paragraph as Pilcrow,
   Quotes as Quote,
   CaretRight as ChevronRight
-} from '@phosphor-icons/react'
-import type { Editor } from '@tiptap/react'
-import React from 'react'
+} from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import {
   DropdownMenu,

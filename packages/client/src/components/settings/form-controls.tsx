@@ -1,10 +1,14 @@
 import type { Popover as PopoverPrimitive } from '@base-ui/react/popover'
-import { Check, XCircle as CircleX, CaretUpDown as ChevronsUpDown } from '@phosphor-icons/react'
 /* eslint-disable max-lines -- Why: these small settings form primitives and controls
 co-locate shared layout and keyboard interaction logic, which keeps the settings
 panel wiring simple even though the file exceeds the default line limit. */
 import type React from 'react'
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
+import {
+  Check,
+  XCircle as CircleX,
+  CaretUpDown as ChevronsUpDown
+} from '~renderer/components/icons/hugeicons'
 import { Badge } from '~renderer/components/ui/badge'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'

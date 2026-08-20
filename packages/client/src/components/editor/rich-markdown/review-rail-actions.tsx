@@ -1,4 +1,4 @@
-import { Check, Copy, Chat as MessageSquare } from '@phosphor-icons/react'
+import { Check, Copy, Chat as MessageSquare } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
 

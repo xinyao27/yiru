@@ -3,7 +3,9 @@ import Foundation
 actor RuntimeHostSession {
     private let credential: HostCredential
     private let policy: RuntimeReconnectPolicy
+    private let callTimeout: Duration
     private let publishSnapshot: @Sendable (RuntimeConnectionSnapshot) async -> Void
+    private let publishLog: RuntimeConnectionLogSink
 
     private var phase: RuntimeConnectionPhase = .idle
     private var reconnectAttempt = 0
@@ -21,11 +23,15 @@ actor RuntimeHostSession {
     init(
         credential: HostCredential,
         policy: RuntimeReconnectPolicy = .mobile,
-        publishSnapshot: @escaping @Sendable (RuntimeConnectionSnapshot) async -> Void
+        callTimeout: Duration = .seconds(25),
+        publishSnapshot: @escaping @Sendable (RuntimeConnectionSnapshot) async -> Void,
+        publishLog: @escaping RuntimeConnectionLogSink
     ) {
         self.credential = credential
         self.policy = policy
+        self.callTimeout = callTimeout
         self.publishSnapshot = publishSnapshot
+        self.publishLog = publishLog
     }
 
     func snapshot() -> RuntimeConnectionSnapshot {
@@ -64,7 +70,38 @@ actor RuntimeHostSession {
         let activePeer = try await connectIfNeeded()
         let generation = connectionGeneration
         do {
-            return try await activePeer.call(path: path, input: input, output: output)
+            return try await withThrowingTaskGroup(of: Output.self) { group in
+                group.addTask {
+                    try await activePeer.call(path: path, input: input, output: output)
+                }
+                group.addTask {
+                    try await Task.sleep(for: self.callTimeout)
+                    throw RuntimeSessionError.timeout
+                }
+                defer { group.cancelAll() }
+                guard let result = try await group.next() else {
+                    throw RuntimeSessionError.timeout
+                }
+                return result
+            }
+        } catch is CancellationError {
+            throw CancellationError()
+        } catch {
+            if isRuntimeConnectionFailure(error) {
+                await invalidate(generation: generation)
+            }
+            throw error
+        }
+    }
+
+    func probeStatusForProtocolCompatibility() async throws -> MobileRuntimeStatusWire {
+        let activePeer = try await connectIfNeeded()
+        let generation = connectionGeneration
+        do {
+            return try await activePeer.probeStatusForProtocolCompatibility(
+                deviceToken: credential.deviceToken,
+                output: MobileRuntimeStatusWire.self
+            )
         } catch is CancellationError {
             throw CancellationError()
         } catch {
@@ -103,6 +140,7 @@ actor RuntimeHostSession {
             self.peer = nil
         }
         phase = .connecting
+        await publishLog(.info, "Reconnect requested", credential.profile.endpoint)
         await publish()
         startReconnectLoop()
     }
@@ -151,7 +189,8 @@ actor RuntimeHostSession {
             let connection = try await AuthenticatedRuntimeConnection.connect(
                 endpoint: credential.profile.endpoint,
                 desktopPublicKeyBase64: credential.profile.publicKeyBase64,
-                deviceToken: credential.deviceToken
+                deviceToken: credential.deviceToken,
+                log: publishLog
             )
             return RuntimeOrpcPeer(connection: connection)
         }
@@ -181,6 +220,7 @@ actor RuntimeHostSession {
         lastConnectedAt = Date()
         connectionGeneration += 1
         phase = .connected
+        await publishLog(.success, "Connected", credential.profile.endpoint)
         await publish()
         startHeartbeat(peer: connectedPeer, generation: connectionGeneration)
         return connectedPeer
@@ -197,11 +237,17 @@ actor RuntimeHostSession {
             authenticationRejections += 1
             if authenticationRejections >= policy.authenticationRetryLimit {
                 phase = .authenticationFailed
+                await publishLog(.error, "Authentication failed", String(describing: error))
                 await publish()
                 throw RuntimeSessionError.authenticationFailed
             }
         }
         phase = reconnectAttempt >= policy.fastAttemptLimit ? .unreachable : .reconnecting
+        await publishLog(
+            .warning,
+            phase == .unreachable ? "Host unreachable" : "Connection failed",
+            "attempt \(reconnectAttempt) · \(String(describing: error))"
+        )
         await publish()
     }
 
@@ -257,6 +303,7 @@ actor RuntimeHostSession {
                 } catch is CancellationError {
                     return
                 } catch {
+                    await self?.publishLog(.warning, "Heartbeat failed", String(describing: error))
                     await self?.invalidate(generation: generation)
                     return
                 }
@@ -293,4 +340,25 @@ actor RuntimeHostSession {
     private func publish() async {
         await publishSnapshot(snapshot())
     }
+}
+
+nonisolated func isRuntimeConnectionFailure(_ error: Error) -> Bool {
+    if let sessionError = error as? RuntimeSessionError {
+        // Why: a slow RPC is a request failure, not proof that the encrypted transport died.
+        // Reconnecting here tears down healthy subscriptions and makes one busy screen block
+        // every other feature on the host.
+        if case .timeout = sessionError { return false }
+    }
+    if let orpcError = error as? RuntimeOrpcError {
+        switch orpcError {
+        case .server:
+            return false
+        case .invalidMessage, .unexpectedResponse, .closed:
+            return true
+        }
+    }
+    if error is DecodingError {
+        return false
+    }
+    return true
 }

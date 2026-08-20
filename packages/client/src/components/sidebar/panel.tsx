@@ -1,5 +1,5 @@
-import { FolderPlus } from '@phosphor-icons/react'
 import React, { useEffect } from 'react'
+import { FolderPlus } from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { TooltipProvider } from '~renderer/components/ui/tooltip'
 import { useSidebarResize } from '~renderer/hooks/use-sidebar-resize'

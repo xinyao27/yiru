@@ -1,5 +1,5 @@
-import { Check, Copy } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
+import { Check, Copy } from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import { ButtonGroup, ButtonGroupText } from '~renderer/components/ui/button-group'

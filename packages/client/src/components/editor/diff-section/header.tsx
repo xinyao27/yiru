@@ -1,9 +1,9 @@
+import type { MouseEvent, ReactElement, ReactNode } from 'react'
 import {
   CaretDown as ChevronDown,
   CaretRight as ChevronRight,
   ArrowSquareOut as ExternalLink
-} from '@phosphor-icons/react'
-import type { MouseEvent, ReactElement, ReactNode } from 'react'
+} from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
 import { shellClient } from '~renderer/runtime/shell-client'

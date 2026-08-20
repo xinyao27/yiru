@@ -1,6 +1,9 @@
-import { FolderOpen, ArrowCounterClockwise as RotateCcw } from '@phosphor-icons/react'
 import { LOCAL_EXECUTION_HOST_ID } from '@yiru/workbench-model/workspace'
 import React, { useEffect, useId, useRef, useState } from 'react'
+import {
+  FolderOpen,
+  ArrowCounterClockwise as RotateCcw
+} from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
 import { isImeCompositionKeyDown } from '~renderer/lib/ime-composition-keyboard-event'
 import { workspaceHostClient } from '~renderer/runtime/workspace-host-client'

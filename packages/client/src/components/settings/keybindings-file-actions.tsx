@@ -1,3 +1,5 @@
+import React from 'react'
+import { toast } from 'sonner'
 import {
   Code as Code2,
   FileText,
@@ -5,9 +7,7 @@ import {
   CaretDown as ChevronDown,
   ArrowSquareOut as ExternalLink,
   ArrowClockwise as RefreshCw
-} from '@phosphor-icons/react'
-import React from 'react'
-import { toast } from 'sonner'
+} from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
 import { TOGGLE_FLOATING_TERMINAL_EVENT } from '~renderer/lib/floating-terminal'
 import { isFloatingWorkspacePanelVisible } from '~renderer/lib/floating-workspace-terminal-actions'

@@ -1,0 +1,796 @@
+{
+  "schemaVersion": 1,
+  "routes": [
+    {
+      "source": "apps/mobile/app/_layout.tsx",
+      "status": "complete",
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/App/AppView.swift",
+        "apps/mobile-ios/YiruMobile/App/deep-link.swift",
+        "apps/mobile-ios/YiruMobile/Features/Notifications/coordinator.swift"
+      ]
+    },
+    {
+      "source": "apps/mobile/app/about.tsx",
+      "status": "complete",
+      "evidence": ["apps/mobile-ios/YiruMobile/Features/Settings/about-view.swift"]
+    },
+    {
+      "source": "apps/mobile/app/activity-insights.tsx",
+      "status": "complete",
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Features/Activity/insights-view.swift",
+        "apps/mobile-ios/YiruMobile/Features/Activity/insights-model.swift",
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+Activity.swift"
+      ]
+    },
+    {
+      "source": "apps/mobile/app/appearance-settings.tsx",
+      "status": "complete",
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Features/Settings/appearance-view.swift",
+        "apps/mobile-ios/YiruMobile/Features/Settings/preference-store.swift",
+        "apps/mobile-ios/YiruMobile/DesignSystem/Components/loader.swift"
+      ]
+    },
+    {
+      "source": "apps/mobile/app/browser-settings.tsx",
+      "status": "complete",
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Features/Settings/browser-view.swift",
+        "apps/mobile-ios/YiruMobile/Features/Settings/preference-store.swift",
+        "apps/mobile-ios/YiruMobile/Features/Terminal/Tabs/workspace-view.swift"
+      ]
+    },
+    {
+      "source": "apps/mobile/app/connection-log.tsx",
+      "status": "complete",
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Features/Diagnostics/connection-log-view.swift",
+        "apps/mobile-ios/YiruMobile/Features/Diagnostics/connection-log-model.swift",
+        "apps/mobile-ios/YiruMobile/Features/Diagnostics/connection-log.swift"
+      ]
+    },
+    {
+      "source": "apps/mobile/app/h/[hostId]/accounts.tsx",
+      "status": "complete",
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Features/Accounts/account-view.swift",
+        "apps/mobile-ios/YiruMobile/Features/Accounts/account-model.swift",
+        "apps/mobile-ios/YiruMobile/Features/Accounts/usage-section.swift",
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+Accounts.swift"
+      ]
+    },
+    {
+      "source": "apps/mobile/app/h/[hostId]/agent-history/[worktreeId].tsx",
+      "status": "complete",
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Features/AgentHistory/history-view.swift",
+        "apps/mobile-ios/YiruMobile/Features/AgentHistory/history-model.swift",
+        "apps/mobile-ios/YiruMobile/Features/AgentHistory/resume-target.swift",
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+AgentHistory.swift"
+      ]
+    },
+    {
+      "source": "apps/mobile/app/h/[hostId]/edit.tsx",
+      "status": "complete",
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Features/Hosts/HostEditView.swift",
+        "apps/mobile-ios/YiruMobile/Features/Hosts/HostEditModel.swift",
+        "apps/mobile-ios/YiruMobile/Features/Hosts/endpoint.swift"
+      ]
+    },
+    {
+      "source": "apps/mobile/app/h/[hostId]/files/[worktreeId].tsx",
+      "status": "complete",
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Features/Files/explorer-view.swift",
+        "apps/mobile-ios/YiruMobile/Features/Files/explorer-model.swift",
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+Files.swift"
+      ]
+    },
+    {
+      "source": "apps/mobile/app/h/[hostId]/files/preview/[worktreeId].tsx",
+      "status": "complete",
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Features/Files/preview-view.swift",
+        "apps/mobile-ios/YiruMobile/Features/Files/artifact-preview.swift",
+        "apps/mobile-ios/YiruMobile/Features/Files/terminal-file.swift",
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+TerminalFiles.swift"
+      ]
+    },
+    {
+      "source": "apps/mobile/app/h/[hostId]/history/[worktreeId].tsx",
+      "status": "complete",
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/App/deep-link.swift",
+        "apps/mobile-ios/YiruMobile/Features/SourceControl/commit-history-view.swift",
+        "apps/mobile-ios/YiruMobile/Features/SourceControl/commit-history-model.swift"
+      ]
+    },
+    {
+      "source": "apps/mobile/app/h/[hostId]/index.tsx",
+      "status": "complete",
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Features/Workspace/WorkspaceListView.swift",
+        "apps/mobile-ios/YiruMobile/Features/Workspace/WorkspaceListModel.swift",
+        "apps/mobile-ios/YiruMobile/Features/Workspace/list/content-view.swift",
+        "apps/mobile-ios/YiruMobile/Features/Workspace/list/toolbar.swift",
+        "apps/mobile-ios/YiruMobile/Features/Workspace/list/search-sheet.swift",
+        "apps/mobile-ios/YiruMobile/Features/Workspace/list/workspace-row.swift",
+        "apps/mobile-ios/YiruMobile/Features/Workspace/create/creation-sheet.swift"
+      ]
+    },
+    {
+      "source": "apps/mobile/app/h/[hostId]/pr/[worktreeId].tsx",
+      "status": "complete",
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/App/deep-link.swift",
+        "apps/mobile-ios/YiruMobile/Features/SourceControl/hosted-review-view.swift",
+        "apps/mobile-ios/YiruMobile/Features/SourceControl/hosted-review-content.swift",
+        "apps/mobile-ios/YiruMobile/Features/SourceControl/hosted-review-model.swift",
+        "apps/mobile-ios/YiruMobile/Features/SourceControl/hosted-review-model-load.swift",
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+HostedReview.swift"
+      ]
+    },
+    {
+      "source": "apps/mobile/app/h/[hostId]/review/[worktreeId].tsx",
+      "status": "complete",
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Features/SourceControl/Review/review-view.swift",
+        "apps/mobile-ios/YiruMobile/Features/SourceControl/Review/review-content.swift",
+        "apps/mobile-ios/YiruMobile/Features/SourceControl/Review/review-model.swift",
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+Review.swift"
+      ]
+    },
+    {
+      "source": "apps/mobile/app/h/[hostId]/session/[worktreeId].tsx",
+      "status": "complete",
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Features/Terminal/Tabs/workspace-view.swift",
+        "apps/mobile-ios/YiruMobile/Features/Terminal/Tabs/session-content.swift",
+        "apps/mobile-ios/YiruMobile/Features/Terminal/Tabs/session-menu.swift",
+        "apps/mobile-ios/YiruMobile/Features/Terminal/Tabs/retained-pane.swift",
+        "apps/mobile-ios/YiruMobile/Features/Terminal/Surface/pane.swift",
+        "apps/mobile-ios/YiruMobile/Features/NativeChat/conversation-view.swift"
+      ]
+    },
+    {
+      "source": "apps/mobile/app/h/[hostId]/source-control/[worktreeId].tsx",
+      "status": "complete",
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Features/SourceControl/source-view.swift",
+        "apps/mobile-ios/YiruMobile/Features/SourceControl/source-content.swift",
+        "apps/mobile-ios/YiruMobile/Features/SourceControl/source-actions.swift",
+        "apps/mobile-ios/YiruMobile/Features/SourceControl/screen-model.swift",
+        "apps/mobile-ios/YiruMobile/Features/SourceControl/screen-model-refresh.swift",
+        "apps/mobile-ios/YiruMobile/Features/SourceControl/hosted-review-chip.swift",
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+SourceControl.swift"
+      ]
+    },
+    {
+      "source": "apps/mobile/app/h/_layout.tsx",
+      "status": "complete",
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/App/AppView.swift",
+        "apps/mobile-ios/YiruMobile/App/AppRoute.swift",
+        "apps/mobile-ios/YiruMobile/App/deep-link.swift"
+      ]
+    },
+    {
+      "source": "apps/mobile/app/index.tsx",
+      "status": "complete",
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Features/Home/HomeView.swift",
+        "apps/mobile-ios/YiruMobile/Features/Home/onboarding-view.swift",
+        "apps/mobile-ios/YiruMobile/Features/Home/dashboard-view.swift",
+        "apps/mobile-ios/YiruMobile/Features/Home/HomeModel.swift",
+        "apps/mobile-ios/YiruMobile/Features/Home/snapshot-cache.swift"
+      ]
+    },
+    {
+      "source": "apps/mobile/app/native-chat-settings.tsx",
+      "status": "complete",
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Features/Settings/chat-view.swift",
+        "apps/mobile-ios/YiruMobile/Features/Settings/preference-store.swift",
+        "apps/mobile-ios/YiruMobile/Features/Terminal/Tabs/retained-pane.swift"
+      ]
+    },
+    {
+      "source": "apps/mobile/app/notification-opt-in.tsx",
+      "status": "complete",
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Features/Notifications/opt-in-view.swift",
+        "apps/mobile-ios/YiruMobile/App/AppModel.swift",
+        "apps/mobile-ios/YiruMobile/Features/Notifications/preference.swift"
+      ]
+    },
+    {
+      "source": "apps/mobile/app/notifications.tsx",
+      "status": "complete",
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Features/Notifications/notification-settings-view.swift",
+        "apps/mobile-ios/YiruMobile/Features/Notifications/settings-model.swift",
+        "apps/mobile-ios/YiruMobile/Features/Notifications/coordinator.swift"
+      ]
+    },
+    {
+      "source": "apps/mobile/app/pair-confirm.tsx",
+      "status": "complete",
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Features/Pairing/PairingConfirmView.swift",
+        "apps/mobile-ios/YiruMobile/Features/Pairing/PairingRuntime.swift"
+      ]
+    },
+    {
+      "source": "apps/mobile/app/pair-scan.tsx",
+      "status": "complete",
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Features/Pairing/PairingScanView.swift",
+        "apps/mobile-ios/YiruMobile/Features/Pairing/PairingScannerView.swift",
+        "apps/mobile-ios/YiruMobile/Features/Pairing/PairingModel.swift",
+        "apps/mobile-ios/YiruMobile/Features/Pairing/pairing-log.swift"
+      ]
+    },
+    {
+      "source": "apps/mobile/app/pair.tsx",
+      "status": "complete",
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Features/Pairing/PairingCodeDecoder.swift",
+        "apps/mobile-ios/YiruMobile/Features/Pairing/pairing-link-error-view.swift",
+        "apps/mobile-ios/YiruMobile/App/AppModel.swift"
+      ]
+    },
+    {
+      "source": "apps/mobile/app/settings.tsx",
+      "status": "complete",
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Features/Settings/settings-view.swift",
+        "apps/mobile-ios/YiruMobile/Features/Settings/credential-cleanup.swift",
+        "apps/mobile-ios/YiruMobile/Platform/Persistence/KeychainHostRepository.swift"
+      ]
+    },
+    {
+      "source": "apps/mobile/app/terminal-settings.tsx",
+      "status": "complete",
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Features/Terminal/Preferences/view.swift",
+        "apps/mobile-ios/YiruMobile/Features/Terminal/Preferences/custom-shortcut-editor.swift",
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+TerminalPreferences.swift"
+      ]
+    },
+    {
+      "source": "apps/mobile/app/troubleshoot.tsx",
+      "status": "complete",
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Features/Diagnostics/troubleshooting-view.swift",
+        "apps/mobile-ios/YiruMobile/Features/Diagnostics/diagnostic-run.swift",
+        "apps/mobile-ios/YiruMobile/Features/Diagnostics/common-issues.swift",
+        "apps/mobile-ios/YiruMobile/Features/Diagnostics/connection-log-view.swift"
+      ]
+    },
+    {
+      "source": "apps/mobile/app/ui-lab.tsx",
+      "status": "complete",
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/DesignSystem/Catalog/DesignSystemCatalogView.swift",
+        "apps/mobile-ios/YiruMobile/App/YiruMobileApp.swift"
+      ]
+    }
+  ],
+  "capabilityGroups": [
+    {
+      "feature": "accounts",
+      "status": "complete",
+      "capabilities": [
+        "runtime.accounts.list",
+        "runtime.accounts.selectClaude",
+        "runtime.accounts.selectCodex",
+        "runtime.accounts.subscribe"
+      ],
+      "evidence": [
+        "packages/runtime-protocol/src/mobile-accounts-wire.ts",
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+Accounts.swift",
+        "apps/mobile-ios/YiruMobile/Features/Accounts/account-model.swift"
+      ]
+    },
+    {
+      "feature": "agent-history",
+      "status": "complete",
+      "capabilities": [
+        "runtime.aiVault.listSessions",
+        "runtime.folderWorkspace.list",
+        "runtime.projectGroup.list"
+      ],
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+AgentHistory.swift",
+        "apps/mobile-ios/YiruMobile/Features/AgentHistory/resume-target.swift",
+        "apps/desktop/src/main/runtime/yiru-runtime.ts"
+      ]
+    },
+    {
+      "feature": "browser",
+      "status": "complete",
+      "capabilities": [
+        "runtime.browser.back",
+        "runtime.browser.forward",
+        "runtime.browser.goto",
+        "runtime.browser.keyboardInsertText",
+        "runtime.browser.keypress",
+        "runtime.browser.mouseClick",
+        "runtime.browser.mouseDown",
+        "runtime.browser.mouseMove",
+        "runtime.browser.mouseUp",
+        "runtime.browser.mouseWheel",
+        "runtime.browser.reload",
+        "runtime.browser.screencast",
+        "runtime.browser.tabCreate"
+      ],
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+Browser.swift",
+        "apps/mobile-ios/YiruMobile/Features/Terminal/Tabs/Browser/remote-pane.swift",
+        "apps/mobile-ios/YiruMobile/Features/Terminal/Tabs/Browser/stream-model.swift",
+        "apps/mobile-ios/YiruMobile/Features/Terminal/Tabs/workspace-view.swift"
+      ]
+    },
+    {
+      "feature": "client-events",
+      "status": "complete",
+      "capabilities": ["runtime.clientEvents.subscribe"],
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+TerminalWorkspace.swift",
+        "apps/mobile-ios/YiruMobile/Features/Terminal/Tabs/workspace-model.swift"
+      ]
+    },
+    {
+      "feature": "clipboard-upload",
+      "status": "complete",
+      "capabilities": [
+        "runtime.clipboard.abortImageUpload",
+        "runtime.clipboard.appendImageUploadChunk",
+        "runtime.clipboard.commitImageUpload",
+        "runtime.clipboard.saveImageAsTempFile",
+        "runtime.clipboard.startImageUpload"
+      ],
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+NativeChat.swift",
+        "apps/mobile-ios/YiruMobile/Features/NativeChat/attachment-picker.swift",
+        "apps/mobile-ios/YiruMobile/Features/NativeChat/interaction-state.swift"
+      ]
+    },
+    {
+      "feature": "files",
+      "status": "complete",
+      "capabilities": [
+        "runtime.files.createFile",
+        "runtime.files.list",
+        "runtime.files.open",
+        "runtime.files.openDiff",
+        "runtime.files.read",
+        "runtime.files.readDir",
+        "runtime.files.readPreview",
+        "runtime.files.readTerminalArtifact",
+        "runtime.files.readTerminalArtifactPreview",
+        "runtime.files.resolveTerminalPath",
+        "runtime.files.searchPaths",
+        "runtime.files.writeTerminalArtifact"
+      ],
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+Files.swift",
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+TerminalFiles.swift",
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+TerminalWorkspace.swift",
+        "apps/mobile-ios/YiruMobile/Features/Files/explorer-view.swift",
+        "apps/mobile-ios/YiruMobile/Features/Files/artifact-preview.swift"
+      ]
+    },
+    {
+      "feature": "git",
+      "status": "complete",
+      "capabilities": [
+        "runtime.git.abortMerge",
+        "runtime.git.abortRebase",
+        "runtime.git.branchCompare",
+        "runtime.git.branchDiff",
+        "runtime.git.bulkStage",
+        "runtime.git.bulkUnstage",
+        "runtime.git.cancelGenerateCommitMessage",
+        "runtime.git.checkout",
+        "runtime.git.commit",
+        "runtime.git.commitCompare",
+        "runtime.git.diff",
+        "runtime.git.discard",
+        "runtime.git.fastForward",
+        "runtime.git.fetch",
+        "runtime.git.generateCommitMessage",
+        "runtime.git.history",
+        "runtime.git.localBranches",
+        "runtime.git.pull",
+        "runtime.git.push",
+        "runtime.git.rebaseFromBase",
+        "runtime.git.stage",
+        "runtime.git.status",
+        "runtime.git.unstage",
+        "runtime.git.upstreamStatus"
+      ],
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+SourceControl.swift",
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+Review.swift",
+        "apps/mobile-ios/YiruMobile/Features/SourceControl/screen-model.swift",
+        "apps/mobile-ios/YiruMobile/Features/SourceControl/actions.swift"
+      ]
+    },
+    {
+      "feature": "github",
+      "status": "complete",
+      "capabilities": [
+        "runtime.github.addPRComment",
+        "runtime.github.addPRReviewCommentReply",
+        "runtime.github.listAssignableUsers",
+        "runtime.github.listWorkItems",
+        "runtime.github.mergePR",
+        "runtime.github.prCheckDetails",
+        "runtime.github.prChecks",
+        "runtime.github.prForBranch",
+        "runtime.github.removePRReviewers",
+        "runtime.github.repoSlug",
+        "runtime.github.requestPRReviewers",
+        "runtime.github.rerunPRChecks",
+        "runtime.github.resolveReviewThread",
+        "runtime.github.setPRAutoMerge",
+        "runtime.github.updatePRState",
+        "runtime.github.updatePRTitle",
+        "runtime.github.workItem",
+        "runtime.github.workItemByOwnerRepo",
+        "runtime.github.workItemDetails"
+      ],
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+HostedReview.swift",
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+Workspace.swift",
+        "apps/mobile-ios/YiruMobile/Features/SourceControl/hosted-review-view.swift",
+        "apps/mobile-ios/YiruMobile/Features/Workspace/create/source-model.swift"
+      ]
+    },
+    {
+      "feature": "gitlab",
+      "status": "complete",
+      "capabilities": ["runtime.gitlab.listMRs", "runtime.gitlab.workItemByPath"],
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+Workspace.swift",
+        "apps/mobile-ios/YiruMobile/Features/Workspace/create/source-model.swift"
+      ]
+    },
+    {
+      "feature": "hosted-review",
+      "status": "complete",
+      "capabilities": [
+        "runtime.hostedReview.create",
+        "runtime.hostedReview.forBranch",
+        "runtime.hostedReview.getCreationEligibility"
+      ],
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+HostedReview.swift",
+        "apps/mobile-ios/YiruMobile/Features/SourceControl/hosted-review-create-flow.swift",
+        "apps/mobile-ios/YiruMobile/Features/SourceControl/hosted-review-model.swift",
+        "apps/mobile-ios/YiruMobile/Features/SourceControl/hosted-review-model-load.swift",
+        "apps/mobile-ios/YiruMobile/Features/SourceControl/hosted-review-content.swift",
+        "apps/mobile-ios/YiruMobile/Features/SourceControl/hosted-review-chip.swift"
+      ]
+    },
+    {
+      "feature": "markdown",
+      "status": "complete",
+      "capabilities": ["runtime.markdown.readTab", "runtime.markdown.saveTab"],
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+TerminalWorkspace.swift",
+        "apps/mobile-ios/YiruMobile/Features/Terminal/Tabs/Content/markdown-pane.swift",
+        "apps/mobile-ios/YiruMobile/Features/Terminal/Tabs/Content/markdown-model.swift"
+      ]
+    },
+    {
+      "feature": "native-chat",
+      "status": "complete",
+      "capabilities": ["runtime.nativeChat.readSession", "runtime.nativeChat.subscribe"],
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+NativeChat.swift",
+        "apps/mobile-ios/YiruMobile/Features/NativeChat/conversation-state.swift",
+        "apps/mobile-ios/YiruMobile/Features/NativeChat/conversation-view.swift"
+      ]
+    },
+    {
+      "feature": "notifications",
+      "status": "complete",
+      "capabilities": [
+        "runtime.notifications.getMissedSince",
+        "runtime.notifications.subscribe",
+        "runtime.notifications.unsubscribe"
+      ],
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+Notifications.swift",
+        "apps/mobile-ios/YiruMobile/Features/Notifications/coordinator.swift"
+      ]
+    },
+    {
+      "feature": "preflight",
+      "status": "complete",
+      "capabilities": [
+        "runtime.preflight.check",
+        "runtime.preflight.detectAgents",
+        "runtime.preflight.detectRemoteAgents"
+      ],
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+Workspace.swift",
+        "apps/mobile-ios/YiruMobile/Features/Workspace/create/creation-model.swift"
+      ]
+    },
+    {
+      "feature": "repo-list",
+      "status": "complete",
+      "capabilities": ["runtime.repo.list"],
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+Workspace.swift",
+        "apps/mobile-ios/YiruMobile/Features/Workspace/create/creation-sheet.swift"
+      ]
+    },
+    {
+      "feature": "repo-configuration",
+      "status": "complete",
+      "capabilities": [
+        "runtime.repo.baseRefDefault",
+        "runtime.repo.hooks",
+        "runtime.repo.searchRefs"
+      ],
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+Workspace.swift",
+        "apps/mobile-ios/YiruMobile/Features/Workspace/create/setup-configuration.swift",
+        "apps/mobile-ios/YiruMobile/Features/Workspace/create/source-model.swift"
+      ]
+    },
+    {
+      "feature": "session-tabs",
+      "status": "complete",
+      "capabilities": ["runtime.session.tabs"],
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+TerminalWorkspace.swift",
+        "apps/mobile-ios/YiruMobile/Features/Terminal/Tabs/workspace-model.swift",
+        "apps/mobile-ios/YiruMobile/Features/Terminal/Tabs/snapshot-gate.swift"
+      ]
+    },
+    {
+      "feature": "settings",
+      "status": "complete",
+      "capabilities": [
+        "runtime.settings.get",
+        "runtime.settings.getTerminalQuickCommands",
+        "runtime.settings.updateTerminalQuickCommands"
+      ],
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+Workspace.swift",
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+QuickCommands.swift",
+        "apps/mobile-ios/YiruMobile/Features/Terminal/QuickCommands/command-sheet.swift"
+      ]
+    },
+    {
+      "feature": "stats",
+      "status": "complete",
+      "capabilities": ["runtime.stats.summary"],
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+Activity.swift",
+        "apps/mobile-ios/YiruMobile/Features/Activity/insights-model.swift",
+        "apps/mobile-ios/YiruMobile/Features/Home/HomeModel.swift"
+      ]
+    },
+    {
+      "feature": "runtime-status",
+      "status": "complete",
+      "capabilities": ["runtime.status.get"],
+      "evidence": ["apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeTerminalMultiplexer.swift"]
+    },
+    {
+      "feature": "terminal-core",
+      "status": "complete",
+      "capabilities": [
+        "runtime.terminal.clearBuffer",
+        "runtime.terminal.close",
+        "runtime.terminal.focus",
+        "runtime.terminal.list",
+        "runtime.terminal.rename",
+        "runtime.terminal.send"
+      ],
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Features/Terminal/Surface/live-model.swift",
+        "apps/mobile-ios/YiruMobile/Features/Terminal/Surface/pane.swift",
+        "apps/mobile-ios/YiruMobile/Features/Terminal/INVARIANTS.md",
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+Capabilities.swift",
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+QuickCommands.swift"
+      ]
+    },
+    {
+      "feature": "terminal-restore-fit",
+      "status": "complete",
+      "capabilities": ["runtime.terminal.getAutoRestoreFit", "runtime.terminal.setAutoRestoreFit"],
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+TerminalPreferences.swift",
+        "apps/mobile-ios/YiruMobile/Features/Terminal/Preferences/auto-restore.swift",
+        "apps/mobile-ios/YiruMobile/Features/Terminal/Preferences/view.swift"
+      ]
+    },
+    {
+      "feature": "terminal-display-mode",
+      "status": "complete",
+      "capabilities": ["runtime.terminal.setDisplayMode"],
+      "evidence": ["apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+Capabilities.swift"]
+    },
+    {
+      "feature": "runtime-ui",
+      "status": "complete",
+      "capabilities": ["runtime.ui.get", "runtime.ui.set"],
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+Workspace.swift",
+        "apps/mobile-ios/YiruMobile/Features/Workspace/create/setup-configuration.swift"
+      ]
+    },
+    {
+      "feature": "workspace-list",
+      "status": "complete",
+      "capabilities": ["runtime.worktree.ps"],
+      "evidence": ["apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+Workspace.swift"]
+    },
+    {
+      "feature": "workspace-lifecycle",
+      "status": "complete",
+      "capabilities": [
+        "runtime.worktree.activate",
+        "runtime.worktree.rm",
+        "runtime.worktree.set",
+        "runtime.worktree.sleep"
+      ],
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+Workspace.swift",
+        "apps/mobile-ios/YiruMobile/Features/Workspace/WorkspaceListModel.swift",
+        "apps/mobile-ios/YiruMobile/Features/Workspace/actions-sheet.swift"
+      ]
+    },
+    {
+      "feature": "workspace-creation",
+      "status": "complete",
+      "capabilities": [
+        "runtime.worktree.create",
+        "runtime.worktree.resolveMrBase",
+        "runtime.worktree.resolvePrBase",
+        "runtime.worktree.show"
+      ],
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Features/Workspace/create/creation-sheet.swift",
+        "apps/mobile-ios/YiruMobile/Features/Workspace/create/creation-model.swift",
+        "apps/mobile-ios/YiruMobile/Features/Workspace/create/source-model.swift",
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+Workspace.swift"
+      ]
+    }
+  ],
+  "systemIntegrations": [
+    {
+      "feature": "pairing-url",
+      "status": "complete",
+      "source": "Linking initial URL and URL events",
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/App/AppModel.swift",
+        "apps/mobile-ios/YiruMobile/App/AppView.swift"
+      ]
+    },
+    {
+      "feature": "notification-routing",
+      "status": "complete",
+      "source": "expo-notifications response routing",
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Features/Notifications/coordinator.swift",
+        "apps/mobile-ios/YiruMobile/App/AppModel.swift",
+        "apps/mobile-ios/YiruMobile/App/deep-link.swift"
+      ]
+    },
+    {
+      "feature": "pairing-camera",
+      "status": "complete",
+      "source": "expo-camera pairing scanner",
+      "evidence": ["apps/mobile-ios/YiruMobile/Features/Pairing/PairingScannerView.swift"]
+    },
+    {
+      "feature": "attachment-sources",
+      "status": "complete",
+      "source": "camera, photo library, files, clipboard image",
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Features/NativeChat/attachment-picker.swift",
+        "apps/mobile-ios/YiruMobile/Features/Terminal/Accessory/attachment.swift",
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+NativeChat.swift"
+      ]
+    },
+    {
+      "feature": "clipboard",
+      "status": "complete",
+      "source": "terminal, chat, markdown, diff and diagnostics copy",
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Platform/Terminal/SwiftTermSurface.swift",
+        "apps/mobile-ios/YiruMobile/Features/NativeChat/message-row.swift",
+        "apps/mobile-ios/YiruMobile/Features/Terminal/Tabs/Content/markdown-model.swift",
+        "apps/mobile-ios/YiruMobile/Features/SourceControl/Review/review-model.swift",
+        "apps/mobile-ios/YiruMobile/Features/Diagnostics/connection-log-model.swift"
+      ]
+    },
+    {
+      "feature": "haptics",
+      "status": "complete",
+      "source": "selection, confirmation, rejection and impact feedback",
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Features/Terminal/Surface/pane.swift",
+        "apps/mobile-ios/YiruMobile/Features/SourceControl/screen-model.swift",
+        "apps/mobile-ios/YiruMobile/Features/SourceControl/Review/review-model.swift",
+        "apps/mobile-ios/YiruMobile/Features/Terminal/Tabs/Browser/remote-pane.swift"
+      ]
+    },
+    {
+      "feature": "notifications",
+      "status": "complete",
+      "source": "permission, local delivery, catch-up and dismissal",
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Features/Notifications/coordinator.swift",
+        "apps/mobile-ios/YiruMobile/Features/Notifications/settings-model.swift",
+        "apps/mobile-ios/YiruMobile/Features/Notifications/opt-in-view.swift",
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/RuntimeClient+Notifications.swift"
+      ]
+    },
+    {
+      "feature": "widgets",
+      "status": "complete",
+      "source": "provider usage, token usage and workspace status widgets",
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Features/Widgets/snapshot-writer.swift",
+        "apps/mobile-ios/Shared/Widgets/widget-snapshot.swift",
+        "apps/mobile-ios/YiruWidgets/provider-usage-widget.swift",
+        "apps/mobile-ios/YiruWidgets/token-usage-widget.swift",
+        "apps/mobile-ios/YiruWidgets/workspace-status-widget.swift"
+      ]
+    },
+    {
+      "feature": "foreground-revival",
+      "status": "complete",
+      "source": "AppState foreground connection revival",
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/App/AppView.swift",
+        "apps/mobile-ios/YiruMobile/Platform/Runtime/ConnectionRevivalMonitor.swift"
+      ]
+    },
+    {
+      "feature": "external-links",
+      "status": "complete",
+      "source": "browser, PR, support, privacy and markdown links",
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Features/Terminal/Tabs/workspace-view.swift",
+        "apps/mobile-ios/YiruMobile/Features/SourceControl/hosted-review-comments.swift",
+        "apps/mobile-ios/YiruMobile/Features/Settings/about-view.swift",
+        "apps/mobile-ios/YiruMobile/Features/Settings/section.swift",
+        "apps/mobile-ios/YiruMobile/Features/NativeChat/markdown-file-links.swift"
+      ]
+    },
+    {
+      "feature": "legacy-persistence-migration",
+      "status": "complete",
+      "source": "AsyncStorage and Expo SecureStore preferences and credentials",
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Platform/Persistence/LegacyExpoAsyncStorage.swift",
+        "apps/mobile-ios/YiruMobile/Platform/Persistence/LegacyMobilePreferenceMigration.swift",
+        "apps/mobile-ios/YiruMobile/Platform/Persistence/KeychainHostRepository.swift"
+      ]
+    },
+    {
+      "feature": "accessibility",
+      "status": "complete",
+      "source": "VoiceOver, Dynamic Type, keyboard and reduced motion",
+      "evidence": [
+        "apps/mobile-ios/YiruMobile/Platform/Terminal/SwiftTermSurface.swift",
+        "apps/mobile-ios/YiruMobile/DesignSystem/Components/glass-icon-button.swift",
+        "apps/mobile-ios/YiruMobile/Features/Workspace/list/workspace-row.swift",
+        "apps/mobile-ios/YiruMobile/Features/Terminal/Accessory/bar.swift"
+      ]
+    }
+  ]
+}

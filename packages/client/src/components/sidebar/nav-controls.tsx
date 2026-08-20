@@ -1,5 +1,5 @@
-import { EyeSlash as EyeOff } from '@phosphor-icons/react'
 import React from 'react'
+import { EyeSlash as EyeOff } from '~renderer/components/icons/hugeicons'
 import { ContextMenuContent, ContextMenuItem } from '~renderer/components/ui/context-menu'
 import { translate } from '~renderer/i18n/i18n'
 

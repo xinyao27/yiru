@@ -1,7 +1,10 @@
-import { ArrowSquareOut as ExternalLink, ArrowClockwise as RefreshCw } from '@phosphor-icons/react'
 import React from 'react'
 import { toast } from 'sonner'
 import { openHttpLink } from '~renderer/components/editor/http-link-routing'
+import {
+  ArrowSquareOut as ExternalLink,
+  ArrowClockwise as RefreshCw
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import CommentMarkdown from '~renderer/components/sidebar/comment-markdown'
 import { Button } from '~renderer/components/ui/button'

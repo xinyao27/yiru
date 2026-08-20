@@ -6,15 +6,22 @@ import process from 'node:process'
 
 const workspaceRoot = path.resolve(import.meta.dirname, '..')
 const developmentDesktopCli = path.join(workspaceRoot, 'apps', 'desktop', 'scripts', 'yiru-dev.mjs')
-const result = spawnSync('vp', ['run', '--parallel', '--filter', './apps/*', 'dev'], {
-  cwd: workspaceRoot,
-  env: {
-    ...process.env,
-    YIRU_CLI: process.env.YIRU_CLI || developmentDesktopCli
-  },
-  shell: process.platform === 'win32',
-  stdio: 'inherit'
-})
+const result = spawnSync(
+  'vp',
+  ['run', '--parallel', '--filter', './apps/*', '--filter', '!yiru-mobile', 'dev'],
+  {
+    cwd: workspaceRoot,
+    env: {
+      ...process.env,
+      YIRU_CLI: process.env.YIRU_CLI || developmentDesktopCli,
+      // Why: the native mobile terminal is a canary consumer of the multiplex
+      // transport; production remains gated while the unified dev stack must exercise it.
+      YIRU_TERMINAL_MULTIPLEX_CANARY: process.env.YIRU_TERMINAL_MULTIPLEX_CANARY || '1'
+    },
+    shell: process.platform === 'win32',
+    stdio: 'inherit'
+  }
+)
 
 if (result.signal) {
   process.kill(process.pid, result.signal)

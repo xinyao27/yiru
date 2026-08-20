@@ -4,7 +4,12 @@
       "rootTitle": "Yiru hit a renderer error.",
       "rootDescription": "The app shell could not finish rendering. Retry to remount it, or relaunch Yiru if the error persists.",
       "webTitle": "Yiru web hit a renderer error.",
-      "webDescription": "Retry the web client or reconnect to the paired runtime."
+      "webDescription": "Retry the web client or reconnect to the paired runtime.",
+      "loadLoopTitle": "Yiru keeps failing to load",
+      "loadLoopMessage": "The app window crashed repeatedly and stopped reloading automatically.",
+      "loadLoopDetail": "Yiru tried to recover {{value0}} times in a row without success. This is often a graphics-driver or installation problem. Reload to try again, or quit and relaunch Yiru.",
+      "reload": "Reload",
+      "quit": "Quit"
     }
   },
   "browser": {
@@ -12197,5 +12202,24 @@
     "targetWorkspaceMissing": "The target workspace is no longer available.",
     "agentBlocked": "Automation agent is blocked: {{reason}}.",
     "agentIncomplete": "Automation agent did not report completion."
+  },
+  "notifications": {
+    "deliveryProbe": {
+      "title": "Yiru notifications are on",
+      "body": "Yiru will alert you when agents finish or terminals need attention."
+    },
+    "permissionRequest": {
+      "title": "Yiru is ready to notify you",
+      "body": "Allow notifications so Yiru can alert you when agents finish or terminals need attention."
+    }
+  },
+  "diagnostics": {
+    "uploadConsent": {
+      "title": "Send diagnostics to support?",
+      "message": "This sends a bounded redacted excerpt and metadata to PostHog.",
+      "detail": "The full review file does not leave this device.\n\nDiagnostic ID: {{value0}}\nDiagnostic records: {{value1}}\nSize: {{value2}} KB",
+      "send": "Send",
+      "cancel": "Cancel"
+    }
   }
 }

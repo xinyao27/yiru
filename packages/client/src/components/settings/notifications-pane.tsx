@@ -1,5 +1,5 @@
-import { BellRinging as BellRing, Robot as Bot, Siren } from '@phosphor-icons/react'
 import { useEffect, useRef, useState } from 'react'
+import { BellRinging as BellRing, Robot as Bot, Siren } from '~renderer/components/icons/hugeicons'
 import {
   MacNotificationPermissionCard,
   useMacNotificationPermissionState

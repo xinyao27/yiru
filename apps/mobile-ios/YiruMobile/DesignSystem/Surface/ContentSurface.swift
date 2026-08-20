@@ -8,15 +8,17 @@ struct ContentSurface<Content: View>: View {
     }
 
     var body: some View {
+        let shape = RoundedRectangle(
+            cornerRadius: Theme.Radius.content,
+            style: .continuous
+        )
         content
             .padding(Theme.Spacing.standard)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 Theme.Colors.content,
-                in: RoundedRectangle(
-                    cornerRadius: Theme.Radius.content,
-                    style: .continuous
-                )
+                in: shape
             )
+            .overlay(shape.stroke(Theme.Colors.divider, lineWidth: Theme.Size.hairline))
     }
 }

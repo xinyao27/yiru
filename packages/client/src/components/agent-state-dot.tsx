@@ -1,5 +1,5 @@
-import { CheckCircle as CircleCheck, Question } from '@phosphor-icons/react'
 import React from 'react'
+import { CheckCircle as CircleCheck, Question } from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { cn } from '~renderer/lib/class-names'
 

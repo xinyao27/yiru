@@ -1,4 +1,7 @@
-import { Warning as AlertTriangle, CaretRight as ChevronRight } from '@phosphor-icons/react'
+import {
+  Warning as AlertTriangle,
+  CaretRight as ChevronRight
+} from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
 import type { HookCommandSourcePolicy, YiruHooks } from '~shared/types'

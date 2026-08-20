@@ -1,10 +1,10 @@
+import { useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import {
   Warning as AlertTriangle,
   CheckCircle as CheckCircle2,
   Copy,
   ArrowClockwise as RefreshCw
-} from '@phosphor-icons/react'
-import { useMemo, useRef, useState, useSyncExternalStore } from 'react'
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import {

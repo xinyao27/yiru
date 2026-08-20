@@ -1,4 +1,4 @@
-import { Circle as CircleDot, Trash as Trash2 } from '@phosphor-icons/react'
+import { Circle as CircleDot, Trash as Trash2 } from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'

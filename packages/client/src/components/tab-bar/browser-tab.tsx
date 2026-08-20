@@ -1,4 +1,5 @@
 import { useSortable } from '@dnd-kit/sortable'
+import { useEffect, useState } from 'react'
 import {
   Globe,
   Copy,
@@ -7,8 +8,7 @@ import {
   Sidebar as PanelRightClose,
   ArrowSquareOut as ExternalLink,
   X
-} from '@phosphor-icons/react'
-import { useEffect, useState } from 'react'
+} from '~renderer/components/icons/hugeicons'
 import {
   ContextMenu,
   ContextMenuContent,

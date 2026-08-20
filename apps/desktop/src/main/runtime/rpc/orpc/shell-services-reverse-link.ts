@@ -113,6 +113,25 @@ export function dispatchShellUICommand(
   return true
 }
 
+// Why: worktree sleep owns renderer state and PTY teardown, so the runtime must
+// not acknowledge a mobile sleep request until the attached shell has finished
+// the ordered browser/terminal shutdown. Other UI commands intentionally keep
+// the fire-and-forget notifier semantics above.
+export async function requestShellSleepWorktree(
+  shellConnectionId: ShellServicesConnectionId | undefined,
+  worktreeId: string
+): Promise<boolean> {
+  const client = getConnectedShellServicesClient(shellConnectionId)
+  if (!client) {
+    return false
+  }
+  const output = await client.ui.command(
+    { type: 'sleepWorktree', worktreeId },
+    { signal: AbortSignal.timeout(30_000) }
+  )
+  return output.accepted
+}
+
 export async function requestShellOpenExternal(
   shellConnectionId: ShellServicesConnectionId | undefined,
   input: ShellServicesOpenExternalInput

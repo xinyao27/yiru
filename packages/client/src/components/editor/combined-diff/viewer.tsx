@@ -1,3 +1,12 @@
+/* eslint-disable max-lines -- Why: combined diff behavior depends on one
+component-level state machine that coordinates lazy loading, inline editing,
+restore-on-remount caching, and scroll preservation. Splitting those pieces
+across smaller files would make the lifecycle edges harder to reason about and
+more error-prone than keeping the whole viewer flow together. */
+/* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: diff entry changes must reset list measurement and generation state in lockstep with external scroll restoration. */
+import React, { useState, useEffect, useCallback, useMemo, useRef, useLayoutEffect } from 'react'
+import type { ReactNode } from 'react'
+import { toast } from 'sonner'
 import {
   Check,
   Copy,
@@ -8,16 +17,7 @@ import {
   Sparkle as Sparkles,
   Trash as Trash2,
   TextAlignLeft as WrapText
-} from '@phosphor-icons/react'
-/* eslint-disable max-lines -- Why: combined diff behavior depends on one
-component-level state machine that coordinates lazy loading, inline editing,
-restore-on-remount caching, and scroll preservation. Splitting those pieces
-across smaller files would make the lifecycle edges harder to reason about and
-more error-prone than keeping the whole viewer flow together. */
-/* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: diff entry changes must reset list measurement and generation state in lockstep with external scroll restoration. */
-import React, { useState, useEffect, useCallback, useMemo, useRef, useLayoutEffect } from 'react'
-import type { ReactNode } from 'react'
-import { toast } from 'sonner'
+} from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import {
   Dialog,

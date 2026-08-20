@@ -1,5 +1,8 @@
-import { Warning as AlertTriangle, ArrowClockwise as RotateCw } from '@phosphor-icons/react'
 import React from 'react'
+import {
+  Warning as AlertTriangle,
+  ArrowClockwise as RotateCw
+} from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'

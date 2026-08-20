@@ -1,6 +1,6 @@
-import { Folders as FolderTree } from '@phosphor-icons/react'
 import type React from 'react'
 import { getPaletteHostBadge } from '~renderer/components/cmd-j/palette-host-badge'
+import { Folders as FolderTree } from '~renderer/components/icons/hugeicons'
 import { RepoBadgeMark } from '~renderer/components/repo/badge-label'
 import { CommandItem } from '~renderer/components/ui/command'
 import { translate } from '~renderer/i18n/i18n'

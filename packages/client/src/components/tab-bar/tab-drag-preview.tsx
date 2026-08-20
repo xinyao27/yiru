@@ -1,4 +1,4 @@
-import { GitBranch, Globe, Terminal as TerminalIcon } from '@phosphor-icons/react'
+import { GitBranch, Globe, Terminal as TerminalIcon } from '~renderer/components/icons/hugeicons'
 import { AgentIcon } from '~renderer/lib/agent-catalog'
 import { getFileTypeIcon } from '~renderer/lib/file-type-icons'
 

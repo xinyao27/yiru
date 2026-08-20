@@ -1,4 +1,17 @@
 import type { Menu } from '@base-ui/react/menu'
+/* eslint-disable max-lines */
+/* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: BrowserPane synchronizes Electron webviews, remote browser drivers, streams, downloads, and annotation overlays; those external lifecycles cannot be derived during render. */
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type DragEvent
+} from 'react'
+import { createPortal } from 'react-dom'
+import { useContextualTour } from '~renderer/components/contextual-tours/use-contextual-tour'
 import {
   CheckCircle as CircleCheck,
   Copy,
@@ -20,20 +33,7 @@ import {
   ChatCentered as MessageSquarePlus,
   ArrowClockwise as RefreshCw,
   X
-} from '@phosphor-icons/react'
-/* eslint-disable max-lines */
-/* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: BrowserPane synchronizes Electron webviews, remote browser drivers, streams, downloads, and annotation overlays; those external lifecycles cannot be derived during render. */
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-  type DragEvent
-} from 'react'
-import { createPortal } from 'react-dom'
-import { useContextualTour } from '~renderer/components/contextual-tours/use-contextual-tour'
+} from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import {
