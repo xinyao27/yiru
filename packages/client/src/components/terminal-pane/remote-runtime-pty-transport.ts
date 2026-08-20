@@ -10,8 +10,7 @@ import {
 import { getRuntimeTerminalMultiplexer } from '~renderer/runtime/terminal-multiplex/registry'
 import { publishRendererTerminalSideEffects } from '~renderer/runtime/terminal-side-effect-client'
 import {
-  getRuntimeTerminalEnvironmentId,
-  getRuntimeTerminalHandle,
+  parseRuntimeTerminalPtyId,
   runtimeTerminalErrorMessage,
   toRuntimeTerminalPtyId
 } from '~renderer/runtime/terminal-stream'
@@ -750,27 +749,26 @@ export function createRuntimePtyTransport(
 
     attach(options) {
       storedCallbacks = options.callbacks
-      const restoredEnvironmentId = getRuntimeTerminalEnvironmentId(options.existingPtyId)
-      currentRuntimeTarget = restoredEnvironmentId
-        ? { kind: 'environment', environmentId: restoredEnvironmentId }
-        : runtimeTarget
+      const restoredTerminal = parseRuntimeTerminalPtyId(options.existingPtyId)
       const previousHandle = handle
-      const nextHandle = getRuntimeTerminalHandle(options.existingPtyId)
+      const nextHandle = restoredTerminal?.handle ?? null
       if (previousHandle && previousHandle !== nextHandle) {
         // Why: debounced input is scoped by the current terminal handle at flush time.
         inputBatcher.clear()
       }
-      handle = nextHandle
-      if (!handle) {
+      if (!restoredTerminal) {
+        handle = null
         connected = false
         remotePtyId = null
         closeMultiplexedStream()
         storedCallbacks.onError?.('Remote runtime terminal id is invalid.')
         return
       }
-      // Why: legacy restored ids omitted their runtime owner. Canonicalize at
-      // attach so renderer stores and lifecycle guards never share raw aliases.
-      remotePtyId = toRuntimeTerminalPtyId(handle, environmentIdForTarget(currentRuntimeTarget))
+      handle = restoredTerminal.handle
+      currentRuntimeTarget = restoredTerminal.environmentId
+        ? { kind: 'environment', environmentId: restoredTerminal.environmentId }
+        : runtimeTarget
+      remotePtyId = options.existingPtyId
       connected = true
       desiredViewport = {
         cols: options.cols ?? 80,

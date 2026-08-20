@@ -1,4 +1,4 @@
-import { getCanonicalRuntimeTerminalHandle } from '~shared/runtime-terminal-pty-id'
+import { getRuntimeTerminalHandle } from '~shared/runtime-terminal-pty-id'
 
 export type AgentPaneAuthorityOwnershipSources = {
   getPtyIdForPaneKey?: (paneKey: string) => string | undefined
@@ -13,6 +13,6 @@ export function createAgentPaneAuthorityOwnership(
       return true
     }
     const runtimeHandle = sources.getRuntimeTerminalHandleForPaneKey?.(paneKey)
-    return Boolean(runtimeHandle && getCanonicalRuntimeTerminalHandle(ptyId) === runtimeHandle)
+    return Boolean(runtimeHandle && getRuntimeTerminalHandle(ptyId) === runtimeHandle)
   }
 }
