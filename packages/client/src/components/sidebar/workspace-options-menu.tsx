@@ -99,7 +99,7 @@ const SidebarWorkspaceOptionsMenu = React.memo(function SidebarWorkspaceOptionsM
                         )
                   }
                 >
-                  <SlidersHorizontal className="size-3.5" strokeWidth={2.25} />
+                  <SlidersHorizontal className="size-3.5" />
                   {hasAnyFilter && (
                     // Why: this combined options button now owns filtering, so it
                     // needs the same at-a-glance signal that the old filter button had.

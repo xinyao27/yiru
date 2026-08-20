@@ -41,7 +41,7 @@ const SidebarHeader = React.memo(function SidebarHeader() {
                 )}
                 onClick={() => openModal('add-repo')}
               >
-                <FolderPlus className="size-3.5" strokeWidth={2.25} />
+                <FolderPlus className="size-3.5" />
               </Button>
             }
           />
