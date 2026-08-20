@@ -3,56 +3,19 @@ import {
   formatWorkspaceCreateError,
   getWorkspaceCreateErrorToastMessage
 } from '~renderer/components/new-workspace-composer-card/workspace-create-error-format'
-import { queueNewWorkspaceTerminalFocus } from '~renderer/components/worktree-creation/new-workspace-terminal-focus'
 import { createBrowserUuid } from '~renderer/lib/browser-uuid'
-import { ensureAgentStartupInTerminal } from '~renderer/lib/new-workspace'
 import type {
   WorktreeCreationPhase,
   WorktreeCreationRequest
 } from '~renderer/lib/pending-worktree-creation'
-import {
-  activateAndRevealWorktree,
-  ensureWorktreeHasInitialTerminal,
-  type ActivateAndRevealResult,
-  type WorktreeStartupPayload
-} from '~renderer/lib/worktree-activation'
-import { markAgentWorkspaceTrusted } from '~renderer/runtime/agent-trust-client'
 import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
 import { useAppStore } from '~renderer/store'
-import { TUI_AGENT_CONFIG } from '~shared/tui-agent/config'
 import type { CreateWorktreeResult } from '~shared/types'
 
-import { seedNativeChatAppliedSessionOptions } from '../native-chat/session/option-cache'
+import { completeWorktreeCreationHandoff } from './handoff'
 
 type ContinueBackgroundWorktreeCreationOptions = {
   revealCreationSurface?: boolean
-}
-
-// Why: mirrors the startup-opt the composer used to build inline. The renderer
-// only seeds the first terminal when the backend did not already spawn it.
-function buildStartupOpt(
-  request: WorktreeCreationRequest,
-  backendSpawned: boolean
-): WorktreeStartupPayload | undefined {
-  const plan = request.startupPlan
-  if (!plan || backendSpawned) {
-    return undefined
-  }
-  return {
-    command: plan.launchCommand,
-    ...(plan.env ? { env: plan.env } : {}),
-    launchConfig: plan.launchConfig,
-    ...(plan.launchToken ? { launchToken: plan.launchToken } : {}),
-    ...(request.agent ? { launchAgent: request.agent } : {}),
-    ...(plan.draftPrompt ? { draftPrompt: plan.draftPrompt } : {}),
-    ...(plan.startupCommandDelivery ? { startupCommandDelivery: plan.startupCommandDelivery } : {}),
-    // Why: command-code shows its prompt in the tab status before the first
-    // hook fires, so the prompt is threaded through here.
-    ...(request.agent === 'command-code' && request.quickPrompt.trim().length > 0
-      ? { initialAgentStatus: { agent: request.agent, prompt: request.quickPrompt.trim() } }
-      : {}),
-    ...(request.quickTelemetry ? { telemetry: request.quickTelemetry } : {})
-  }
 }
 
 function getWorktreeCreationIndeterminate(request: WorktreeCreationRequest): boolean {
@@ -91,28 +54,6 @@ function revealPendingCreation(
   // router), so force it active so the panel is what fills the content area.
   store.setActiveView('terminal')
   store.setSidebarOpen(true)
-}
-
-async function preflightAgentTrust(request: WorktreeCreationRequest, path: string): Promise<void> {
-  // Why: trust-gated agents (cursor-agent, copilot) consume the bracketed paste
-  // as menu input on first launch. Pre-write the trust artifact before any
-  // terminal spawns. Best-effort — the worktree already exists, so a failure
-  // here must not strand it.
-  if (!request.agent) {
-    return
-  }
-  const preflight = TUI_AGENT_CONFIG[request.agent].preflightTrust
-  if (!preflight) {
-    return
-  }
-  try {
-    await markAgentWorkspaceTrusted({
-      preset: preflight,
-      workspacePath: path
-    })
-  } catch {
-    // Best-effort: continue with launch.
-  }
 }
 
 async function executeWorktreeCreation(
@@ -166,98 +107,7 @@ async function executeWorktreeCreation(
     return
   }
 
-  const worktree = result.worktree
-
-  // Why: if the user dismissed/cancelled while the create was in flight, the entry
-  // is gone. Git already made the worktree on disk, but don't auto-provision (trust
-  // write, terminal, agent, note) work they abandoned — it surfaces as a plain row
-  // via worktrees:changed and provisions lazily on first open.
-  if (!useAppStore.getState().pendingWorktreeCreations[creationId]) {
-    return
-  }
-
-  const backendSpawned = result.startupTerminal?.spawned === true
-  if (request.startupPlan && !backendSpawned && !request.startupPlan.launchToken) {
-    // Why: delayed delivery must target the exact pane spawned from this queued
-    // startup, so both halves of the handoff share one renderer-session token.
-    request.startupPlan.launchToken = createBrowserUuid()
-  }
-  const startupOpt = buildStartupOpt(request, backendSpawned)
-
-  if (worktree.path) {
-    await preflightAgentTrust(request, worktree.path)
-  }
-
-  // `createWorktree` already inserted the real worktree row. Leaving for an app
-  // view keeps the create in the background, while selecting another workspace
-  // means the user still expects this task-launch handoff when it becomes ready;
-  // the entry guard prevents a late trust preflight from reviving a cancelled create.
-  const completionState = useAppStore.getState()
-  const shouldActivateOnCompletion =
-    completionState.pendingWorktreeCreations[creationId] !== undefined &&
-    (isPendingCreationSurfaceVisible(creationId) ||
-      (completionState.activeView === 'terminal' &&
-        completionState.activePendingCreationId === null))
-
-  let activation: ActivateAndRevealResult | false = false
-  let primaryTabId: string | null
-  if (shouldActivateOnCompletion) {
-    activation = activateAndRevealWorktree(worktree.id, {
-      sidebarRevealBehavior: 'auto',
-      ...(result.setup ? { setup: result.setup } : {}),
-      ...(result.defaultTabs ? { defaultTabs: result.defaultTabs } : {}),
-      ...(startupOpt ? { startup: startupOpt } : {})
-    })
-    primaryTabId = activation === false ? null : activation.primaryTabId
-  } else {
-    // The user moved on. Seed the worktree's terminal + setup in the background
-    // (setActiveTab only writes global focus for the active worktree, so this is
-    // safe) without yanking them back to it.
-    primaryTabId = ensureWorktreeHasInitialTerminal(
-      useAppStore.getState(),
-      worktree.id,
-      startupOpt,
-      result.setup,
-      result.defaultTabs,
-      { activateCreatedTabs: false }
-    )
-  }
-
-  // Why: clearing synchronously right after activation lets React commit the
-  // panel→terminal swap in one frame — no two-row flicker, no empty-terminal flash.
-  useAppStore.getState().removePendingWorktreeCreation(creationId)
-  if (request.startupPlan && request.agent) {
-    const optionScopeKey = primaryTabId ?? result.startupTerminal?.tabId
-    if (optionScopeKey) {
-      seedNativeChatAppliedSessionOptions(
-        optionScopeKey,
-        request.agent,
-        request.startupPlan.sessionOptions
-      )
-    }
-  }
-  if (request.startupPlan && !backendSpawned) {
-    void ensureAgentStartupInTerminal({
-      worktreeId: worktree.id,
-      primaryTabId,
-      startup: request.startupPlan
-    })
-  }
-  if (shouldActivateOnCompletion && !request.suppressTerminalFocusOnCompletion) {
-    queueNewWorkspaceTerminalFocus(worktree.id, activation)
-  }
-
-  // Why: awaiting the note IPC before the swap would add a visible round-trip to
-  // the panel→terminal transition; it's cosmetic, so it runs last.
-  if (request.note) {
-    try {
-      await useAppStore.getState().updateWorktreeMeta(worktree.id, {
-        comment: request.note
-      })
-    } catch {
-      console.error('Failed to update worktree meta after creation')
-    }
-  }
+  await completeWorktreeCreationHandoff(creationId, request, result)
 }
 
 /**
