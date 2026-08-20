@@ -31,6 +31,30 @@ function readPlist(path) {
   return JSON.parse(json)
 }
 
+// Why: archive metadata contains plist-only values such as CreationDate, so converting the
+// entire document to JSON fails even though the signing identity itself is a plain string.
+function readOptionalPlistString(path, keyPath) {
+  const result = spawnSync(
+    'plutil',
+    ['-extract', keyPath, 'raw', '-expect', 'string', '-o', '-', path],
+    { encoding: 'utf8' }
+  )
+  if (result.error) {
+    throw result.error
+  }
+  if (result.status === 0) {
+    return result.stdout.trim() || null
+  }
+
+  const detail = result.stderr.trim()
+  if (detail.includes('No value at that key path')) {
+    return null
+  }
+  throw new Error(
+    `could not read ${keyPath} from ${path}: ${detail || `plutil exited ${result.status}`}`
+  )
+}
+
 // Why: `codesign -d --entitlements -` emits an XML plist on stdout; converting through
 // a temp-free plutil pipe keeps the check read-only against the archive.
 function readEntitlements(bundlePath) {
@@ -166,15 +190,14 @@ if (!existsSync(widgetPath)) {
 // --- archive metadata ---
 const archiveInfoPath = join(archivePath, 'Info.plist')
 if (existsSync(archiveInfoPath)) {
-  const archiveInfo = readPlist(archiveInfoPath)
-  const properties = archiveInfo.ApplicationProperties ?? {}
-  if (
-    properties.SigningIdentity &&
-    !properties.SigningIdentity.includes(EXPECTED_SIGNING_AUTHORITY)
-  ) {
-    fail(`archive: SigningIdentity is "${properties.SigningIdentity}"`)
+  const signingIdentity = readOptionalPlistString(
+    archiveInfoPath,
+    'ApplicationProperties.SigningIdentity'
+  )
+  if (signingIdentity && !signingIdentity.includes(EXPECTED_SIGNING_AUTHORITY)) {
+    fail(`archive: SigningIdentity is "${signingIdentity}"`)
   }
-  notes.push(`archive signing identity: ${properties.SigningIdentity ?? 'unreported'}`)
+  notes.push(`archive signing identity: ${signingIdentity ?? 'unreported'}`)
 }
 
 console.log(`Yiru.app ${marketingVersion ?? '?'} (${buildNumber ?? '?'})`)
