@@ -31,10 +31,8 @@ struct ActivityInsightsView: View {
                     .font(.system(size: Theme.Typography.supporting))
                     .foregroundStyle(Theme.Colors.mutedForeground)
                 summaryGrid
-                if model.metric != .activity {
-                    rangeFilter
-                    usageRangeNotice
-                }
+                rangeFilter
+                usageRangeNotice
                 ActivityContributionCard(
                     points: model.summary?.daily ?? [],
                     metric: $model.metric
@@ -44,7 +42,7 @@ struct ActivityInsightsView: View {
                 }
                 trendCard
                 rhythmCard
-                if model.metric != .activity, let summary = model.summary {
+                if let summary = model.summary {
                     providerCard(summary.dailyProviders)
                     ActivityBreakdownList(
                         title: "By model",
@@ -168,10 +166,6 @@ struct ActivityInsightsView: View {
                 .frame(height: 132)
             }
         }
-        .contentShape(Rectangle())
-        .onTapGesture { toggleTokenValueMetric() }
-        .accessibilityAddTraits(.isButton)
-        .accessibilityAction { toggleTokenValueMetric() }
     }
 
     private var rhythmCard: some View {
@@ -195,14 +189,6 @@ struct ActivityInsightsView: View {
                 .frame(height: 132)
             }
         }
-        .contentShape(Rectangle())
-        .onTapGesture { toggleTokenValueMetric() }
-        .accessibilityAddTraits(.isButton)
-        .accessibilityAction { toggleTokenValueMetric() }
-    }
-
-    private func toggleTokenValueMetric() {
-        model.metric = nextTokenValueMetric(model.metric)
     }
 
     private func providerCard(_ values: [ActivityDailyProviderUsage]) -> some View {
@@ -245,10 +231,6 @@ struct ActivityInsightsView: View {
                 }
             }
         }
-        .contentShape(Rectangle())
-        .onTapGesture { toggleTokenValueMetric() }
-        .accessibilityAddTraits(.isButton)
-        .accessibilityAction { toggleTokenValueMetric() }
     }
 
     private func summaryMetric(_ label: LocalizedStringResource, _ value: String) -> some View {
@@ -268,9 +250,6 @@ struct ActivityInsightsView: View {
 
     private var metricSummaryValue: String {
         guard let summary = model.summary else { return "—" }
-        if model.metric == .activity {
-            return "\(activityContributionTotals(summary.daily).currentStreak) days"
-        }
         if model.metric == .value, !summary.hasUsageValue { return "Not available" }
         let value = summary.daily.reduce(0) { $0 + activityMetricValue(model.metric, daily: $1) }
         return formatActivityMetric(value, metric: model.metric)
@@ -278,7 +257,6 @@ struct ActivityInsightsView: View {
 
     private var metricSummaryTitle: LocalizedStringResource {
         switch model.metric {
-        case .activity: "Current streak"
         case .tokens: "Total tokens"
         case .value: "API value"
         }
@@ -286,7 +264,6 @@ struct ActivityInsightsView: View {
 
     private var trendDescription: LocalizedStringResource {
         switch model.metric {
-        case .activity: "Agent starts and pull requests over time."
         case .tokens: "Token volume across the selected range."
         case .value: "Known API-equivalent value; unpriced usage is excluded."
         }

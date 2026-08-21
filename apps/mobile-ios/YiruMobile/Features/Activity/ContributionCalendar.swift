@@ -62,7 +62,7 @@ nonisolated func activityContributionWeeks(
 
 nonisolated func activityContributionTotals(
     _ points: [ActivityDailyPoint],
-    metric: ActivityMetric = .activity,
+    metric: ActivityMetric = .tokens,
     now: Date = Date()
 ) -> ActivityContributionTotals {
     let calendar = Calendar.current
@@ -150,11 +150,8 @@ struct ActivityContributionCard: View {
                             .foregroundStyle(Theme.Colors.mutedForeground)
                     }
                     Spacer(minLength: 0)
-                    // Why: a narrow two-way Activity/Tokens control in the card header. The
-                    // third "API value" state is reachable only by tapping the trend/rhythm
-                    // charts below, never as a visible segment, so it stays out of this picker.
-                    Picker("Contribution metric", selection: cardMetric) {
-                        Text(ActivityMetric.activity.title).tag(ActivityMetric.activity)
+                    Picker("Contribution metric", selection: $metric) {
+                        Text(ActivityMetric.value.title).tag(ActivityMetric.value)
                         Text(ActivityMetric.tokens.title).tag(ActivityMetric.tokens)
                     }
                     .pickerStyle(.segmented)
@@ -212,16 +209,6 @@ struct ActivityContributionCard: View {
         activityContributionWeeks(points, metric: metric)
     }
 
-    // Why: the header toggle shows Tokens selected while the hidden `.value` state is
-    // active, and always writes back an explicit `.activity`/`.tokens` choice so the
-    // two-segment control never has to represent a third state.
-    private var cardMetric: Binding<ActivityMetric> {
-        Binding(
-            get: { metric == .activity ? .activity : .tokens },
-            set: { metric = $0 }
-        )
-    }
-
     private var weekdayLabels: some View {
         VStack(spacing: Theme.Spacing.extraSmall) {
             ForEach(0..<7, id: \.self) { weekday in
@@ -236,18 +223,10 @@ struct ActivityContributionCard: View {
         .padding(.trailing, 1)
     }
 
-    // Why: day-cell selection only means something while browsing Activity. Once
-    // Tokens/API value is active, tapping any cell cycles the shared metric instead — the
-    // same gesture the trend/rhythm/provider charts use — and `onChange(of: metric)` above
-    // clears the selection so a stale day cannot outlive the metric it was read under.
     private func contributionCell(_ day: ActivityContributionDay) -> some View {
         Button {
             guard !day.isFuture else { return }
-            if metric == .activity {
-                selected = day
-            } else {
-                metric = nextTokenValueMetric(metric)
-            }
+            selected = day
         } label: {
             Rectangle()
                 .fill(day.isFuture ? .clear : color(day.intensity))
@@ -282,13 +261,11 @@ struct ActivityContributionCard: View {
                 "\(selected.date.formatted(.dateTime.month(.abbreviated).day())): \(formatActivityMetric(selected.value, metric: metric))"
         }
         let totals = activityContributionTotals(points, metric: metric)
-        let value = formatActivityMetric(totals.visibleTotal, metric: metric)
-        return metric == .activity ? "\(value) · \(totals.currentStreak) day streak" : value
+        return formatActivityMetric(totals.visibleTotal, metric: metric)
     }
 
     private var description: LocalizedStringResource {
         switch metric {
-        case .activity: "Agent starts and pull requests completed through Yiru."
         case .tokens: "Provider-reported token usage attributed to Yiru worktrees."
         case .value: "Standard global API-equivalent value calculated per request."
         }

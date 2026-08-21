@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react'
 import type { TokenValueMetric } from '~renderer/components/contribution-heatmap/metric'
-import { nextTokenValueMetric } from '~renderer/components/contribution-heatmap/metric'
 import { DitherPieChart, type DitherPieChartPoint } from '~renderer/components/dither-kit/pie-chart'
 import { ArrowClockwise as RefreshCw } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
@@ -9,7 +8,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui
 import { translate } from '~renderer/i18n/i18n'
 import { useAppStore } from '~renderer/store'
 
-import { chartActivationLabel } from './chart-activation'
 import type { ModelUsageValue } from './usage-value'
 
 const VISIBLE_MODEL_COUNT = 5
@@ -17,14 +15,9 @@ const VISIBLE_MODEL_COUNT = 5
 type ModelUsageChartProps = {
   metric: TokenValueMetric
   models: ModelUsageValue[]
-  onMetricChange: (metric: TokenValueMetric) => void
 }
 
-export function ModelUsageChart({
-  metric,
-  models,
-  onMetricChange
-}: ModelUsageChartProps): React.JSX.Element {
+export function ModelUsageChart({ metric, models }: ModelUsageChartProps): React.JSX.Element {
   const data = useMemo(() => buildPieData(models, metric), [metric, models])
   const formatValue = (value: number): string =>
     metric === 'tokens' ? formatTokens(value) : formatCurrency(value)
@@ -54,7 +47,7 @@ export function ModelUsageChart({
       {data.length > 0 ? (
         <CardContent className="mt-3">
           <DitherPieChart
-            ariaLabel={chartActivationLabel(
+            ariaLabel={
               metric === 'tokens'
                 ? translate(
                     'auto.components.home.modelChart.tokenAriaLabel',
@@ -63,12 +56,10 @@ export function ModelUsageChart({
                 : translate(
                     'auto.components.home.modelChart.valueAriaLabel',
                     'Estimated API value by model'
-                  ),
-              metric
-            )}
+                  )
+            }
             data={data}
             formatValue={formatValue}
-            onActivate={() => onMetricChange(nextTokenValueMetric(metric))}
             totalLabel={
               metric === 'tokens'
                 ? translate('auto.components.home.modelChart.tokensTotal', 'total tokens')
@@ -78,16 +69,21 @@ export function ModelUsageChart({
         </CardContent>
       ) : (
         <CardContent className="mt-4">
-          <Button
-            variant="chart"
-            size="chart"
-            aria-label={chartActivationLabel(
-              translate('auto.components.home.modelChart.title', 'Model mix'),
-              metric
-            )}
-            onClick={() => onMetricChange(nextTokenValueMetric(metric))}
+          <div
+            role="img"
+            aria-label={
+              metric === 'tokens'
+                ? translate(
+                    'auto.components.home.modelChart.tokenAriaLabel',
+                    'Token usage by model'
+                  )
+                : translate(
+                    'auto.components.home.modelChart.valueAriaLabel',
+                    'Estimated API value by model'
+                  )
+            }
           >
-            <span className="border-border text-muted-foreground w-full border border-dashed px-4 py-8 text-center text-sm">
+            <span className="border-border text-muted-foreground block w-full border border-dashed px-4 py-8 text-center text-sm">
               {metric === 'tokens'
                 ? translate(
                     'auto.components.home.modelChart.tokenUnavailable',
@@ -98,7 +94,7 @@ export function ModelUsageChart({
                     'No known model pricing is available for comparison yet.'
                   )}
             </span>
-          </Button>
+          </div>
         </CardContent>
       )}
     </Card>

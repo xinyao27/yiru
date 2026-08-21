@@ -5,7 +5,6 @@ import {
 import { localCalendarDayKey } from '@yiru/workbench-model/ui'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { TokenValueMetric } from '~renderer/components/contribution-heatmap/metric'
-import { nextTokenValueMetric } from '~renderer/components/contribution-heatmap/metric'
 import {
   ditherBackingSize,
   ditherThreshold,
@@ -14,7 +13,6 @@ import {
 import { ditherColor, MONOCHROME_DITHER_SEED } from '~renderer/components/dither-kit/palette'
 import { useChartDimensions } from '~renderer/components/dither-kit/use-chart-dimensions'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
-import { Button } from '~renderer/components/ui/button'
 import { Card, CardContent, CardHeader } from '~renderer/components/ui/card'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
@@ -33,7 +31,6 @@ type ProviderUsageChartProps = {
   isScanning: boolean
   metric: TokenValueMetric
   range: StatsUsageBoundedRange
-  onMetricChange: (metric: TokenValueMetric) => void
 }
 
 type ProviderTrendPoint = {
@@ -46,8 +43,7 @@ export function ProviderUsageChart({
   daily,
   isScanning,
   metric,
-  range,
-  onMetricChange
+  range
 }: ProviderUsageChartProps): React.JSX.Element {
   const trend = useMemo(() => buildProviderTrend(daily, range), [daily, range])
 
@@ -76,12 +72,7 @@ export function ProviderUsageChart({
         <ProviderLegend daily={daily} metric={metric} />
       </CardHeader>
       <CardContent className="mt-4">
-        <StackedUsageCanvas
-          metric={metric}
-          points={trend}
-          range={range}
-          onActivate={() => onMetricChange(nextTokenValueMetric(metric))}
-        />
+        <StackedUsageCanvas metric={metric} points={trend} range={range} />
       </CardContent>
     </Card>
   )
@@ -116,15 +107,13 @@ function ProviderLegend({
 function StackedUsageCanvas({
   metric,
   points,
-  range,
-  onActivate
+  range
 }: {
   metric: TokenValueMetric
   points: ProviderTrendPoint[]
   range: StatsUsageBoundedRange
-  onActivate: () => void
 }): React.JSX.Element {
-  const { ref, size } = useChartDimensions<HTMLElement>()
+  const { ref, size } = useChartDimensions<HTMLDivElement>()
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [hoverIndex, setHoverIndex] = useState<number | null>(null)
 
@@ -142,11 +131,10 @@ function StackedUsageCanvas({
     hoverIndex === null || points.length <= 1 ? 50 : (hoverIndex / (points.length - 1)) * 100
 
   return (
-    <Button
+    <div
       ref={ref}
-      variant="chart"
-      size="chart-plot"
-      className="relative block"
+      className="relative block h-48 w-full"
+      role="img"
       aria-label={translate(
         'auto.components.home.providerChart.ariaLabel',
         '{{metric}} by provider over {{days}} days',
@@ -155,7 +143,6 @@ function StackedUsageCanvas({
           days: statsUsageRangeDays(range).toLocaleString()
         }
       )}
-      onClick={onActivate}
     >
       <canvas
         ref={canvasRef}
@@ -177,7 +164,7 @@ function StackedUsageCanvas({
         <ProviderTooltip metric={metric} point={hoveredPoint} left={hoverLeft} />
       ) : null}
       <TrendLabels points={points} />
-    </Button>
+    </div>
   )
 }
 

@@ -5,9 +5,9 @@ const CONTRIBUTION_METRIC_STORAGE_KEY = 'yiru:contribution-metric:v1'
 export function loadContributionMetric(): ContributionDisplayMetric {
   try {
     const metric = window.localStorage.getItem(CONTRIBUTION_METRIC_STORAGE_KEY)
-    return metric === 'tokens' || metric === 'value' ? metric : 'activity'
+    return metric === 'value' ? metric : 'tokens'
   } catch {
-    return 'activity'
+    return 'tokens'
   }
 }
 

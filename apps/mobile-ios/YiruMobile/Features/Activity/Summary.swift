@@ -23,15 +23,13 @@ nonisolated enum ActivityUsageRange: String, CaseIterable, Codable, Sendable {
 }
 
 nonisolated enum ActivityMetric: String, CaseIterable, Hashable, Sendable {
-    case activity
-    case tokens
     case value
+    case tokens
 
     var title: LocalizedStringResource {
         switch self {
-        case .activity: "Activity"
-        case .tokens: "Tokens"
         case .value: "API value"
+        case .tokens: "Tokens"
         }
     }
 }

@@ -1,12 +1,6 @@
-import type { ContributionPoint } from '@yiru/workbench-model/ui'
-import { getContributionTotals } from '@yiru/workbench-model/ui'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { ContributionHeatmap } from '~renderer/components/contribution-heatmap/heatmap'
-import type {
-  ContributionDisplayMetric,
-  TokenValueMetric
-} from '~renderer/components/contribution-heatmap/metric'
-import { nextTokenValueMetric } from '~renderer/components/contribution-heatmap/metric'
+import type { TokenValueMetric } from '~renderer/components/contribution-heatmap/metric'
 import {
   loadContributionMetric,
   saveContributionMetric
@@ -18,8 +12,6 @@ import { useUiLocale } from '~renderer/i18n/use-ui-locale'
 import { useAppStore } from '~renderer/store'
 
 import { loadHomeDataSnapshot, saveHomeDataSnapshot } from './cache'
-import { chartActivationLabel } from './chart-activation'
-import { ContributionCharts } from './charts'
 import { MetricControls } from './metric-controls'
 import { UsageBreakdowns } from './project-usage'
 import { ProviderUsageChart } from './provider-usage-chart'
@@ -31,7 +23,7 @@ type MetricDisclosureProps = {
   hasUnpricedUsage: boolean
   hasValue: boolean
   isValueScanning: boolean
-  metric: ContributionDisplayMetric
+  metric: TokenValueMetric
   meteredValueUsd?: number | null
 }
 
@@ -48,7 +40,7 @@ export default function HomePage(): React.JSX.Element {
   const [usageRange, setUsageRange] = useUsageRangePreference()
   const cachedSnapshotRef = useRef(initialCachedSnapshot)
   const cachedSnapshot = cachedSnapshotRef.current
-  const [metric, setMetric] = useState<ContributionDisplayMetric>(loadContributionMetric)
+  const [metric, setMetric] = useState<TokenValueMetric>(loadContributionMetric)
   const liveUsageValue = useUsageValue(usageRange)
   const stats = liveStats ?? cachedSnapshot?.stats ?? null
   const cachedUsage = cachedSnapshot?.usage.range === usageRange ? cachedSnapshot.usage : null
@@ -75,31 +67,16 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [liveStats, liveUsageValue])
 
-  const activityPoints = useMemo<ContributionPoint[]>(
-    () =>
-      (stats?.dailyActivity ?? []).map((entry) => ({
-        day: entry.day,
-        value: entry.agentStarts + entry.prsCreated
-      })),
-    [stats?.dailyActivity]
-  )
   const tokenPoints = usageValue.dailyTokens
   const valuePoints = usageValue.dailyValues
-  const points = selectPoints(metric, activityPoints, tokenPoints, valuePoints)
-  const streakTotals = useMemo(() => getContributionTotals(activityPoints), [activityPoints])
+  const points = metric === 'tokens' ? tokenPoints : valuePoints
   const lifetimeTotal = useMemo(() => points.reduce((sum, point) => sum + point.value, 0), [points])
   const hasTokens = tokenPoints.some((point) => point.value > 0)
   const hasValue = usageValue.hasValue
 
-  const selectMetric = (nextMetric: ContributionDisplayMetric): void => {
+  const selectMetric = (nextMetric: TokenValueMetric): void => {
     setMetric(nextMetric)
     saveContributionMetric(nextMetric)
-  }
-  const selectTokenValueMetric = (nextMetric: TokenValueMetric): void => {
-    selectMetric(nextMetric)
-  }
-  const switchChartMetric = (): void => {
-    selectMetric(nextTokenValueMetric(metric))
   }
 
   return (
@@ -141,11 +118,7 @@ export default function HomePage(): React.JSX.Element {
           />
           <SummaryMetric
             label={metricSummaryLabel(metric)}
-            value={
-              metric === 'activity'
-                ? formatStreak(streakTotals.currentStreak)
-                : formatMetricValue(lifetimeTotal, metric, hasValue)
-            }
+            value={formatMetricValue(lifetimeTotal, metric, hasValue)}
           />
         </div>
 
@@ -167,15 +140,7 @@ export default function HomePage(): React.JSX.Element {
 
           <CardContent>
             <div className="scrollbar-sleek scrollbar-sleek-lg overflow-x-auto pb-1">
-              <ContributionHeatmap
-                activationLabel={chartActivationLabel(
-                  translate('auto.components.home.page.contributions', 'Contribution history'),
-                  metric
-                )}
-                points={points}
-                metric={metric}
-                onActivate={switchChartMetric}
-              />
+              <ContributionHeatmap points={points} metric={metric} />
             </div>
 
             <MetricDisclosure
@@ -189,29 +154,14 @@ export default function HomePage(): React.JSX.Element {
           </CardContent>
         </Card>
 
-        {metric === 'activity' ? (
-          <ContributionCharts
-            points={points}
-            metric={metric}
-            onMetricChange={selectTokenValueMetric}
-          />
-        ) : (
-          <ProviderUsageChart
-            daily={usageValue.dailyByProvider}
-            isScanning={usageValue.isScanning}
-            metric={metric}
-            range={usageRange}
-            onMetricChange={selectTokenValueMetric}
-          />
-        )}
+        <ProviderUsageChart
+          daily={usageValue.dailyByProvider}
+          isScanning={usageValue.isScanning}
+          metric={metric}
+          range={usageRange}
+        />
 
-        {metric === 'activity' ? null : (
-          <UsageBreakdowns
-            metric={metric}
-            usage={usageValue}
-            onMetricChange={selectTokenValueMetric}
-          />
-        )}
+        <UsageBreakdowns metric={metric} usage={usageValue} />
       </main>
     </div>
   )
@@ -225,9 +175,6 @@ function MetricDisclosure({
   metric,
   meteredValueUsd
 }: MetricDisclosureProps): React.JSX.Element | null {
-  if (metric === 'activity') {
-    return null
-  }
   if (!hasTokens) {
     return (
       <>
@@ -318,12 +265,6 @@ function SummaryMetric({ label, value }: SummaryMetricProps): React.JSX.Element 
   )
 }
 
-function formatStreak(days: number): string {
-  return translate('auto.components.home.page.streakDays', '{{value0}} days', {
-    value0: days.toLocaleString()
-  })
-}
-
 function formatDuration(durationMs: number): string {
   if (durationMs <= 0) {
     return translate('auto.components.home.activitySummary.durationMinutes', '{{value0}}m', {
@@ -354,29 +295,8 @@ function formatDuration(durationMs: number): string {
   })
 }
 
-function selectPoints(
-  metric: ContributionDisplayMetric,
-  activityPoints: ContributionPoint[],
-  tokenPoints: ContributionPoint[],
-  valuePoints: ContributionPoint[]
-): ContributionPoint[] {
+function metricDescription(metric: TokenValueMetric): string {
   switch (metric) {
-    case 'activity':
-      return activityPoints
-    case 'tokens':
-      return tokenPoints
-    case 'value':
-      return valuePoints
-  }
-}
-
-function metricDescription(metric: ContributionDisplayMetric): string {
-  switch (metric) {
-    case 'activity':
-      return translate(
-        'auto.components.home.page.activityDescription',
-        'Agent starts and pull requests completed through Yiru.'
-      )
     case 'tokens':
       return translate(
         'auto.components.home.page.tokenDescription',
@@ -390,10 +310,8 @@ function metricDescription(metric: ContributionDisplayMetric): string {
   }
 }
 
-function metricSummaryLabel(metric: ContributionDisplayMetric): string {
+function metricSummaryLabel(metric: TokenValueMetric): string {
   switch (metric) {
-    case 'activity':
-      return translate('auto.components.home.page.currentStreak', 'Current streak')
     case 'tokens':
       return translate('auto.components.home.page.totalTokens', 'Total tokens')
     case 'value':
@@ -401,14 +319,7 @@ function metricSummaryLabel(metric: ContributionDisplayMetric): string {
   }
 }
 
-function formatMetricValue(
-  value: number,
-  metric: ContributionDisplayMetric,
-  hasValue: boolean
-): string {
-  if (metric === 'activity') {
-    return value.toLocaleString()
-  }
+function formatMetricValue(value: number, metric: TokenValueMetric, hasValue: boolean): string {
   if (metric === 'value') {
     return hasValue
       ? Intl.NumberFormat(undefined, {

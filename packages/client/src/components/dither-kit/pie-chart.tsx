@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Button } from '~renderer/components/ui/button'
 import { cn } from '~renderer/lib/class-names'
 
 import { ditherBackingSize, ditherThreshold } from './dither-paint'
@@ -19,7 +18,6 @@ type DitherPieChartProps = {
   ariaLabel: string
   data: readonly DitherPieChartPoint[]
   formatValue: (value: number) => string
-  onActivate: () => void
   totalLabel: string
 }
 
@@ -31,7 +29,6 @@ export function DitherPieChart({
   ariaLabel,
   data,
   formatValue,
-  onActivate,
   totalLabel
 }: DitherPieChartProps): React.JSX.Element {
   const chartData = useMemo(
@@ -55,12 +52,10 @@ export function DitherPieChart({
   const hoveredPoint = hoverIndex === null ? null : chartData[hoverIndex]
 
   return (
-    <Button
-      variant="chart"
-      size="chart"
+    <div
       className="grid items-center gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(180px,0.8fr)]"
+      role="img"
       aria-label={ariaLabel}
-      onClick={onActivate}
     >
       <span
         ref={ref}
@@ -116,7 +111,7 @@ export function DitherPieChart({
           </span>
         ))}
       </span>
-    </Button>
+    </div>
   )
 }
 

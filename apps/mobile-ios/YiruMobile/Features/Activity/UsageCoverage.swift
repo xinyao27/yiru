@@ -5,20 +5,16 @@ struct ActivityUsageCoverage: View {
     let metric: ActivityMetric
 
     var body: some View {
-        if metric == .activity {
-            EmptyView()
-        } else {
-            VStack(alignment: .leading, spacing: Theme.Spacing.small) {
-                Text(coverageMessage)
-                if let meteredValue = summary.supplementalUsage?.meteredValueUSD {
-                    Text(
-                        "Cursor-metered spend: \(formatMeteredValue(meteredValue)) (actual plan deduction; API value above is a list-price estimate)."
-                    )
-                }
+        VStack(alignment: .leading, spacing: Theme.Spacing.small) {
+            Text(coverageMessage)
+            if let meteredValue = summary.supplementalUsage?.meteredValueUSD {
+                Text(
+                    "Cursor-metered spend: \(formatMeteredValue(meteredValue)) (actual plan deduction; API value above is a list-price estimate)."
+                )
             }
-            .font(.system(size: Theme.Typography.metadata))
-            .foregroundStyle(Theme.Colors.mutedForeground)
         }
+        .font(.system(size: Theme.Typography.metadata))
+        .foregroundStyle(Theme.Colors.mutedForeground)
     }
 
     private var hasTokens: Bool {

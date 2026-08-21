@@ -51,7 +51,7 @@ final class ActivityInsightsModel {
         range =
             ActivityUsageRange(rawValue: defaults.string(forKey: rangeKey) ?? "")
             ?? .thirtyDays
-        metric = ActivityMetric(rawValue: defaults.string(forKey: metricKey) ?? "") ?? .activity
+        metric = ActivityMetric(rawValue: defaults.string(forKey: metricKey) ?? "") ?? .tokens
         if let cached = snapshotCache?.load(),
             let aggregate = ActivityStatsSummary.aggregate(Array(cached.activityStats.values))
         {

@@ -9,7 +9,7 @@
 - `activityStats` is requested only for hosts whose `RuntimeConnectionSnapshot.phase` is
   `connected`; a connected transition refreshes the selected range, while disconnects preserve the
   last successful aggregate for the next retry.
-- Activity, Tokens, API value, 7/30/90-day range, pull-to-refresh, foreground refresh, and the
+- Tokens, API value, 7/30/90-day range, pull-to-refresh, foreground refresh, and the
   60-second focused refresh retain their UserDefaults preferences and share the Home usage range.
 - A cancelled refresh never replaces a usable cache with an empty aggregate or a false failure;
   one unavailable host does not hide successful summaries from other connected hosts.

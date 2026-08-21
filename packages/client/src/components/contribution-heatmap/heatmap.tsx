@@ -6,7 +6,6 @@ import {
   useMemo,
   useState
 } from 'react'
-import { Button } from '~renderer/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { translate } from '~renderer/i18n/i18n'
 import { useUiLocale } from '~renderer/i18n/use-ui-locale'
@@ -27,20 +26,15 @@ const CELL_STEP_PX = 14
 type ContributionHeatmapProps = {
   points: readonly ContributionPoint[]
   metric: ContributionDisplayMetric
-  activationLabel?: string
   anchorDate?: Date
-  onActivate?: () => void
 }
 
 export function ContributionHeatmap({
   points,
   metric,
-  activationLabel,
-  anchorDate,
-  onActivate
+  anchorDate
 }: ContributionHeatmapProps): React.JSX.Element {
   useUiLocale()
-  const isInteractive = activationLabel !== undefined && onActivate !== undefined
   const calendar = useMemo(
     () => buildContributionCalendar(points, anchorDate),
     [anchorDate, points]
@@ -81,8 +75,8 @@ export function ContributionHeatmap({
         'size-2.5 border',
         day.isFuture ? 'border-transparent bg-transparent' : INTENSITY_CLASS[day.intensity]
       )}
-      role={isInteractive ? undefined : 'gridcell'}
-      aria-label={isInteractive || day.isFuture ? undefined : formatCellLabel(day, metric)}
+      role="gridcell"
+      aria-label={day.isFuture ? undefined : formatCellLabel(day, metric)}
     />
   ))
   const handlePointerMove = (event: ReactPointerEvent<HTMLElement>): void => {
@@ -118,29 +112,15 @@ export function ContributionHeatmap({
         </div>
         <Tooltip open={activeDay !== null}>
           <div className="relative">
-            {activationLabel !== undefined && onActivate !== undefined ? (
-              <Button
-                variant="chart"
-                size="chart"
-                className="grid auto-cols-[10px] grid-flow-col grid-rows-[repeat(7,10px)] gap-1"
-                aria-label={activationLabel}
-                onClick={onActivate}
-                onPointerMove={handlePointerMove}
-                onPointerLeave={clearActiveDay}
-              >
-                {cells}
-              </Button>
-            ) : (
-              <div
-                className="grid auto-cols-[10px] grid-flow-col grid-rows-[repeat(7,10px)] gap-1"
-                role="grid"
-                aria-label={formatGridLabel(metric)}
-                onPointerMove={handlePointerMove}
-                onPointerLeave={clearActiveDay}
-              >
-                {cells}
-              </div>
-            )}
+            <div
+              className="grid auto-cols-[10px] grid-flow-col grid-rows-[repeat(7,10px)] gap-1"
+              role="grid"
+              aria-label={formatGridLabel(metric)}
+              onPointerMove={handlePointerMove}
+              onPointerLeave={clearActiveDay}
+            >
+              {cells}
+            </div>
             <TooltipTrigger
               render={
                 <span
@@ -186,11 +166,6 @@ function contributionIndexFromTarget(target: EventTarget): number | null {
 
 function formatGridLabel(metric: ContributionDisplayMetric): string {
   switch (metric) {
-    case 'activity':
-      return translate(
-        'auto.components.contribution.heatmap.activityLabel',
-        'Daily agent activity over the past year'
-      )
     case 'tokens':
       return translate(
         'auto.components.contribution.heatmap.tokensLabel',
@@ -211,12 +186,6 @@ function formatCellLabel(day: ContributionCalendarDay, metric: ContributionDispl
     day: 'numeric'
   })
   switch (metric) {
-    case 'activity':
-      return translate(
-        'auto.components.contribution.heatmap.activityCell',
-        '{{value0}}: {{value1}} activities',
-        { value0: date, value1: day.value.toLocaleString() }
-      )
     case 'tokens':
       return translate(
         'auto.components.contribution.heatmap.tokenCell',

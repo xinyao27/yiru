@@ -15,7 +15,6 @@ import type { UsageValue } from './usage-value'
 type UsageBreakdownsProps = {
   metric: TokenValueMetric
   usage: Pick<UsageValue, 'models' | 'projects'>
-  onMetricChange: (metric: TokenValueMetric) => void
 }
 
 type ProjectUsageProps = {
@@ -29,14 +28,10 @@ type ProviderShareProps = {
   usage: ProviderUsageValue
 }
 
-export function UsageBreakdowns({
-  metric,
-  usage,
-  onMetricChange
-}: UsageBreakdownsProps): React.JSX.Element {
+export function UsageBreakdowns({ metric, usage }: UsageBreakdownsProps): React.JSX.Element {
   return (
     <>
-      <ModelUsageChart metric={metric} models={usage.models} onMetricChange={onMetricChange} />
+      <ModelUsageChart metric={metric} models={usage.models} />
       <ProjectUsage metric={metric} projects={usage.projects} />
     </>
   )
