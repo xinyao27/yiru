@@ -5,6 +5,7 @@ import { resolve } from 'node:path'
 import { DaemonPtyAdapter } from '~main/daemon/pty-adapter'
 import { setMainSystemLocaleProvider, setMainUiLanguage, translateMain } from '~main/i18n/main-i18n'
 import { getNodeSystemLocale } from '~main/i18n/node-system-locale'
+import { ensureActiveYiruProfile } from '~main/yiru-profiles/profile-index-store'
 import type { RuntimeMetadata } from '~shared/runtime-bootstrap'
 import type { ServeSupervisorMessage } from '~shared/serve-update-handoff'
 import { UI_LANGUAGE_SYSTEM } from '~shared/ui-language'
@@ -123,6 +124,7 @@ async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2))
   setRuntimeHostPathsProvider(createNodeRuntimeHostPathsProvider(args.userDataPath))
   mkdirSync(args.userDataPath, { recursive: true, mode: 0o700 })
+  const activeProfile = ensureActiveYiruProfile(args.userDataPath)
 
   let didRequestDaemonShutdown = false
   let requestHostExit: (() => void) | null = null
@@ -139,7 +141,14 @@ async function main(): Promise<void> {
   })
   let service: ReturnType<typeof createNodeRuntimeHostService>
   try {
-    service = createNodeRuntimeHostService(args.userDataPath, ptyAdapter, daemon.restart)
+    service = createNodeRuntimeHostService({
+      localPtyProvider: ptyAdapter,
+      profileDataFile: activeProfile.dataFile,
+      profileDirectory: activeProfile.profileDirectory,
+      profileId: activeProfile.profile.id,
+      restartDaemon: daemon.restart,
+      userDataPath: args.userDataPath
+    })
   } catch (error) {
     ptyAdapter.dispose()
     await daemon.shutdown().catch(() => {})

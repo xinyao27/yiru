@@ -1,6 +1,6 @@
 import { join } from 'node:path'
 
-import { app } from 'electron'
+import { getRuntimeHostPathsProvider } from '../runtime/host/paths-provider'
 
 const LEGACY_DATA_FILE_NAME = 'yiru-data.json'
 const LEGACY_BROWSER_SESSION_META_FILE_NAME = 'browser-session-meta.json'
@@ -14,12 +14,14 @@ export const LEGACY_BACKUP_COUNT = 5
 let profileUserDataPath: string | null = null
 
 export function initYiruProfilePaths(): void {
-  profileUserDataPath = app.getPath('userData')
+  // Why: both Electron and the Node runtime install their process-specific
+  // provider before profile startup, so profile resolution remains portable.
+  profileUserDataPath = getRuntimeHostPathsProvider().userDataPath()
 }
 
 export function getProfileUserDataPath(): string {
   if (!profileUserDataPath) {
-    profileUserDataPath = app.getPath('userData')
+    profileUserDataPath = getRuntimeHostPathsProvider().userDataPath()
   }
   return profileUserDataPath
 }

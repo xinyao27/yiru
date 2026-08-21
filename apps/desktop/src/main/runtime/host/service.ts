@@ -86,18 +86,32 @@ export type NodeRuntimeHostService = {
   shutdown: () => Promise<void>
 }
 
-export function createNodeRuntimeHostService(
-  userDataPath: string,
-  localPtyProvider: DaemonPtyAdapter,
+type NodeRuntimeHostServiceOptions = {
+  localPtyProvider: DaemonPtyAdapter
+  profileDataFile: string
+  profileDirectory: string
+  profileId: string
   restartDaemon: () => Promise<void>
-): NodeRuntimeHostService {
+  userDataPath: string
+}
+
+export function createNodeRuntimeHostService({
+  localPtyProvider,
+  profileDataFile,
+  profileDirectory,
+  profileId,
+  restartDaemon,
+  userDataPath
+}: NodeRuntimeHostServiceOptions): NodeRuntimeHostService {
   configureOpenAiSpeechStorage({
     allowPlaintext: false,
     directory: () => userDataPath
   })
   initDataPath(userDataPath)
   initStatsPath()
-  const store = new Store()
+  // Why: runtime credentials and daemon state stay at the installation root,
+  // while workbench state follows the same active profile file as Electron.
+  const store = new Store({ dataFile: profileDataFile })
   const stats = new StatsCollector()
   const chromeExecutablePath = process.env.YIRU_CHROME_EXECUTABLE_PATH?.trim()
   const runtime = new YiruRuntimeService(store, stats, {
@@ -165,6 +179,10 @@ export function createNodeRuntimeHostService(
         })
       : null
   if (browserBackend) {
+    browserSessionRegistry.configureForYiruProfile({
+      yiruProfileId: profileId,
+      profileDirectory
+    })
     browserSessionRegistry.enableHeadlessProfileStorage()
     browserSessionRegistry.initializeBrowserSessionsFromPersistedState()
   }
@@ -198,7 +216,7 @@ export function createNodeRuntimeHostService(
           runtimeRpc,
           rateLimits: accountServices.rateLimits,
           userDataPath,
-          profileId: process.env.YIRU_PROFILE_ID?.trim() || 'runtime-host',
+          profileId,
           ownerRuntimeId: runtime.getRuntimeId(),
           yiruVersion: paths.version(),
           osFamily:
