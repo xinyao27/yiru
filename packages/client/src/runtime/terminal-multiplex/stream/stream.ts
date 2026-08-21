@@ -176,7 +176,8 @@ export class RemoteTerminalMultiplexedStream {
   private handleError(frame: TerminalMultiplexFrame): void {
     const value = decodeTerminalMultiplexJson(frame.payload)
     this.fail(
-      typeof value?.message === 'string' ? value.message : 'Remote terminal protocol error.'
+      typeof value?.message === 'string' ? value.message : 'Remote terminal protocol error.',
+      value?.retryable === true
     )
   }
 
@@ -205,10 +206,12 @@ export class RemoteTerminalMultiplexedStream {
     }
   }
 
-  private fail(message: string): void {
-    this.options.callbacks.onError?.(message)
+  private fail(message: string, retryable = false): void {
+    this.options.callbacks.onError?.(message, { kind: 'protocol', retryable })
     this.close(false)
-    this.options.callbacks.onTransportClose?.()
+    if (retryable) {
+      this.options.callbacks.onTransportClose?.()
+    }
   }
 
   private close(sendUnsubscribe: boolean): void {

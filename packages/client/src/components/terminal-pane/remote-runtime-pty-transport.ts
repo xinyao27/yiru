@@ -598,10 +598,18 @@ export function createRuntimePtyTransport(
             onPtyExit?.(subscribedPtyId)
           }
         },
-        onError: (message) => {
+        onError: (message, error) => {
           if (isCurrentSubscription()) {
             recordTerminalFreezeBreadcrumb('multiplex-stream-error')
             handleRemoteTerminalError(message)
+            if (error?.kind === 'protocol' && !error.retryable) {
+              transportClosed = true
+              connected = false
+              clearPendingViewportClaim()
+              multiplexedStream = null
+              multiplexedStreamHandle = null
+              storedCallbacks.onDisconnect?.()
+            }
           }
         },
         onFitOverrideChanged: (event) => {

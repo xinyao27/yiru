@@ -23,6 +23,7 @@ import { getShellGitHubViewer } from '~renderer/runtime/github-shell-client'
 import { shellClient } from '~renderer/runtime/shell-client'
 import {
   formatCrashReportText,
+  isRecoverableRendererErrorReport,
   isReactErrorBoundaryReport,
   type CrashReportDiagnosticBundle,
   type CrashReportRecord
@@ -38,9 +39,23 @@ import {
 import { useCrashReportCopy } from './use-crash-report-copy'
 
 function formatSummary(report: CrashReportRecord): string {
-  if (isReactErrorBoundaryReport(report)) {
+  if (isRecoverableRendererErrorReport(report)) {
     const surface = typeof report.details.surface === 'string' ? report.details.surface : null
-    return surface ? `React render error in ${surface}` : 'React render error'
+    const errorType = isReactErrorBoundaryReport(report)
+      ? translate(
+          'auto.components.crash.report.CrashReportDialog.reactRenderError',
+          'React render error'
+        )
+      : report.reason === 'terminal-error'
+        ? translate(
+            'auto.components.crash.report.CrashReportDialog.terminalError',
+            'Terminal error'
+          )
+        : translate(
+            'auto.components.crash.report.CrashReportDialog.rendererError',
+            'Application error'
+          )
+    return surface ? `${errorType} · ${surface}` : errorType
   }
   return `${report.processType} ${report.reason}${
     report.exitCode === null ? '' : ` (exit ${report.exitCode})`
@@ -49,29 +64,53 @@ function formatSummary(report: CrashReportRecord): string {
 
 function getDialogTitle(report: CrashReportRecord | null): string {
   if (!report) {
-    return 'Report a crash'
+    return translate('auto.components.crash.report.CrashReportDialog.reportCrash', 'Report a crash')
   }
-  return report && isReactErrorBoundaryReport(report)
-    ? 'Yiru hit a recoverable UI error'
-    : 'Yiru closed unexpectedly'
+  return report && isRecoverableRendererErrorReport(report)
+    ? translate(
+        'auto.components.crash.report.CrashReportDialog.recoverableError',
+        'Yiru hit a recoverable error'
+      )
+    : translate(
+        'auto.components.crash.report.CrashReportDialog.closedUnexpectedly',
+        'Yiru closed unexpectedly'
+      )
 }
 
 function getDialogDescription(report: CrashReportRecord | null): string {
   if (!report) {
-    return 'Send a privacy-safe crash report. Recent redacted diagnostic logs are included when available.'
+    return translate(
+      'auto.components.crash.report.CrashReportDialog.reportCrashDescription',
+      'Send a privacy-safe crash report. Recent redacted diagnostic logs are included when available.'
+    )
   }
-  return report && isReactErrorBoundaryReport(report)
-    ? 'Send a privacy-safe diagnostic report to help us understand the failed UI surface.'
-    : 'Send a privacy-safe diagnostic report to help us understand what happened.'
+  return report && isRecoverableRendererErrorReport(report)
+    ? translate(
+        'auto.components.crash.report.CrashReportDialog.recoverableErrorDescription',
+        'Send a privacy-safe diagnostic report to help us understand this error.'
+      )
+    : translate(
+        'auto.components.crash.report.CrashReportDialog.crashDescription',
+        'Send a privacy-safe diagnostic report to help us understand what happened.'
+      )
 }
 
 function getNotesPlaceholder(report: CrashReportRecord | null): string {
   if (!report) {
-    return 'Optional: what happened?'
+    return translate(
+      'auto.components.crash.report.CrashReportDialog.reportCrashNotes',
+      'Optional: what happened?'
+    )
   }
-  return report && isReactErrorBoundaryReport(report)
-    ? 'Optional: what were you doing before this UI error?'
-    : 'Optional: what were you doing before Yiru closed?'
+  return report && isRecoverableRendererErrorReport(report)
+    ? translate(
+        'auto.components.crash.report.CrashReportDialog.recoverableErrorNotes',
+        'Optional: what were you doing before this error?'
+      )
+    : translate(
+        'auto.components.crash.report.CrashReportDialog.crashNotes',
+        'Optional: what were you doing before Yiru closed?'
+      )
 }
 
 type CrashReportDialogSurfaceProps = {

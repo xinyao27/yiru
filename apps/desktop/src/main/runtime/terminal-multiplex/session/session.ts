@@ -35,8 +35,6 @@ export class TerminalMultiplexSession {
   private readonly epoch = randomTerminalMultiplexEpoch()
   private readonly connectionGeneration = randomTerminalMultiplexConnectionGeneration()
   private readonly streams = new Map<number, TerminalMultiplexStream>()
-  private readonly usedStreamIds = new Set<number>()
-  private readonly subscribeAttempts = new Map<number, number>()
   private readonly pendingHeartbeats = new Map<number, bigint>()
   private phase: 'offer' | 'heartbeat' | 'ready' | 'closed' = 'offer'
   private readonly snapshotIds = new TerminalMultiplexIdSequence()
@@ -45,6 +43,7 @@ export class TerminalMultiplexSession {
   private readonly sender: TerminalMultiplexSessionSender
   private connectionInFlightBytes = 0
   private connectionId = ''
+  private lastStreamId = 0
   private lastAuthenticatedFrameAt = Date.now()
   private removeAbort = (): void => {}
   private unregisterBinary = (): void => {}
@@ -186,22 +185,20 @@ export class TerminalMultiplexSession {
 
   private handleSubscribe(frame: TerminalMultiplexFrame): void {
     const record = decodeTerminalMultiplexSubscribe(frame.payload)
+    // Why: maxStreams limits concurrent work, not lifetime churn. A long-lived
+    // connection keeps stream ids monotonic without exhausting after 1,024 closes.
     if (
       frame.routeId < 1 ||
       frame.routeId > 0x7fffffff ||
       frame.correlationId === 0 ||
       !record ||
-      this.usedStreamIds.size >= MAX_STREAMS ||
-      this.usedStreamIds.has(frame.routeId) ||
-      frame.routeId <= Math.max(0, ...this.usedStreamIds)
+      this.streams.size >= MAX_STREAMS ||
+      frame.routeId <= this.lastStreamId
     ) {
       this.sendError(frame.routeId, frame.correlationId, 'invalid_payload', true)
       return
     }
-    this.streams.get(frame.routeId)?.dispose()
-    const attempt = (this.subscribeAttempts.get(frame.routeId) ?? 0) + 1
-    this.subscribeAttempts.set(frame.routeId, attempt)
-    this.usedStreamIds.add(frame.routeId)
+    this.lastStreamId = frame.routeId
     const stream = TerminalMultiplexStream.open({
       runtime: this.context.runtime,
       routeId: frame.routeId,
@@ -228,7 +225,7 @@ export class TerminalMultiplexSession {
     if (!stream) {
       return
     }
-    if (this.phase === 'closed' || this.subscribeAttempts.get(frame.routeId) !== attempt) {
+    if (this.phase === 'closed') {
       stream.dispose()
       return
     }

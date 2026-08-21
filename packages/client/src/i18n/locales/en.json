@@ -10736,7 +10736,19 @@
             "b2e36f53a1": "Failed to send crash report. Diagnostic ticket {{value0}} was uploaded but not linked.",
             "ead6fc0510": "No automatic crash report was captured. You can still send details and include recent diagnostic logs when available.",
             "b082f27490": "Attach recent diagnostic logs",
-            "e59f0b9427": "Sends a capped redacted log bundle with the report."
+            "e59f0b9427": "Sends a capped redacted log bundle with the report.",
+            "reactRenderError": "React render error",
+            "terminalError": "Terminal error",
+            "rendererError": "Application error",
+            "reportCrash": "Report a crash",
+            "recoverableError": "Yiru hit a recoverable error",
+            "closedUnexpectedly": "Yiru closed unexpectedly",
+            "reportCrashDescription": "Send a privacy-safe crash report. Recent redacted diagnostic logs are included when available.",
+            "recoverableErrorDescription": "Send a privacy-safe diagnostic report to help us understand this error.",
+            "crashDescription": "Send a privacy-safe diagnostic report to help us understand what happened.",
+            "reportCrashNotes": "Optional: what happened?",
+            "recoverableErrorNotes": "Optional: what were you doing before this error?",
+            "crashNotes": "Optional: what were you doing before Yiru closed?"
           },
           "submit": {
             "notice": {

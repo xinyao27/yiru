@@ -3,6 +3,11 @@ export type RemoteRuntimeTerminalDriver =
   | { kind: 'desktop' }
   | { kind: 'mobile'; clientId: string }
 
+export type RemoteRuntimeTerminalError = {
+  kind: 'protocol'
+  retryable: boolean
+}
+
 export type RemoteRuntimeMultiplexedTerminalCallbacks = {
   onData: (
     data: string,
@@ -21,7 +26,7 @@ export type RemoteRuntimeMultiplexedTerminalCallbacks = {
   ) => void
   onSubscribed?: () => void
   onEnd?: () => void
-  onError?: (message: string) => void
+  onError?: (message: string, error?: RemoteRuntimeTerminalError) => void
   onFitOverrideChanged?: (event: {
     mode: 'mobile-fit' | 'remote-desktop-fit' | 'desktop-fit'
     cols: number

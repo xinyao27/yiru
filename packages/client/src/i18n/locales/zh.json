@@ -10700,7 +10700,19 @@
             "b2e36f53a1": "发送崩溃报告失败。诊断票据 {{value0}} 已上传，但未关联。",
             "ead6fc0510": "没有捕获到自动崩溃报告。你仍然可以发送详情，并在可用时包含最近的诊断日志。",
             "b082f27490": "附加最近的诊断日志",
-            "e59f0b9427": "随报告发送经过删减且有大小限制的日志包。"
+            "e59f0b9427": "随报告发送经过删减且有大小限制的日志包。",
+            "reactRenderError": "React 渲染错误",
+            "terminalError": "终端错误",
+            "rendererError": "应用错误",
+            "reportCrash": "报告崩溃",
+            "recoverableError": "Yiru 遇到了可恢复错误",
+            "closedUnexpectedly": "Yiru 意外关闭",
+            "reportCrashDescription": "发送隐私安全的崩溃报告；如可用，将包含近期经过脱敏的诊断日志。",
+            "recoverableErrorDescription": "发送隐私安全的诊断报告，帮助我们了解这个错误。",
+            "crashDescription": "发送隐私安全的诊断报告，帮助我们了解发生了什么。",
+            "reportCrashNotes": "可选：发生了什么？",
+            "recoverableErrorNotes": "可选：发生此错误前你正在做什么？",
+            "crashNotes": "可选：Yiru 关闭前你正在做什么？"
           },
           "submit": {
             "notice": {

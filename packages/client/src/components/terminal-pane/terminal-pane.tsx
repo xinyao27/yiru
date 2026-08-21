@@ -154,7 +154,7 @@ import {
 import { pasteTerminalClipboard } from './terminal-clipboard-paste'
 import TerminalContextMenu from './terminal-context-menu'
 import { createTerminalMenuOpenChangeHandler } from './terminal-context-menu-dismiss'
-import { TerminalErrorToast } from './terminal-error-toast'
+import { reportTerminalPaneError } from './terminal-error-reporting'
 import { restoreTerminalFitToDesktop, restoreTerminalFitsToDesktop } from './terminal-fit-restore'
 import { recordTerminalUserInputForLeaf } from './terminal-input-activity'
 import {
@@ -368,7 +368,6 @@ export default function TerminalPane({
   const [agentSessionFork, setAgentSessionFork] = useState<PreparedAgentSessionFork | null>(null)
   const [agentSessionContinuation, setAgentSessionContinuation] =
     useState<AgentSessionContinuationRequest | null>(null)
-  const [terminalError, setTerminalError] = useState<string | null>(null)
   const [sessionStateSaveFailureOpen, setSessionStateSaveFailureOpen] = useState(false)
   const daemonActions = useDaemonActions()
   // Why: override state lives in a plain Map for perf (safeFit reads it on
@@ -605,11 +604,13 @@ export default function TerminalPane({
   )
   const onPtyErrorRef = useRef((_paneId: number, message: string) => {
     if (isTerminalSessionStateSaveFailure(message)) {
-      setTerminalError(null)
       setSessionStateSaveFailureOpen(true)
       return
     }
-    setTerminalError((prev) => (prev ? `${prev}\n${message}` : message))
+    if (isTerminalZeroDimensionsDiagnostic(message)) {
+      return
+    }
+    reportTerminalPaneError(message, 'terminal-pty')
   })
 
   const setTabPaneExpanded = useAppStore((store) => store.setTabPaneExpanded)
@@ -832,12 +833,6 @@ export default function TerminalPane({
       // Why: hidden startup measurement is only for first launch. Keeping it
       // after first visibility lets inactive agent tabs refit and SIGWINCH.
       setShouldMeasureHiddenStartup(false)
-    }
-    if (isVisible) {
-      // Why: a hidden pane that connected at 0×0 self-heals via the pane resize
-      // observer once shown, so clear that stale diagnostic. Scoped to the
-      // zero-dimensions message so genuine paste/save-failure errors survive.
-      setTerminalError((prev) => (prev && isTerminalZeroDimensionsDiagnostic(prev) ? null : prev))
     }
   }, [isVisible, shouldMeasureHiddenStartup])
 
@@ -1592,8 +1587,6 @@ export default function TerminalPane({
       transport?.destroy?.()
       paneTransportsRef.current.delete(paneId)
       setCacheTimerStartedAt(makePaneKey(tabId, pane.leafId), null)
-      setTerminalError(null)
-
       const newPaneBinding = connectPanePty(pane, manager, {
         tabId,
         worktreeId,
@@ -1991,7 +1984,10 @@ export default function TerminalPane({
         canContinue: () => isPanePasteTargetMounted(pane, transport, ptyId)
       })
       if (execution.status !== 'pasted') {
-        setTerminalError(formatTerminalPasteExecutionError(execution.reason))
+        reportTerminalPaneError(
+          formatTerminalPasteExecutionError(execution.reason),
+          'terminal-paste'
+        )
         return
       }
       if (text) {
@@ -2023,10 +2019,14 @@ export default function TerminalPane({
         pasteText: (text, options) =>
           executePanePasteText(pane, source, activeElementAtDispatch, text, options),
         onTextPasteError: () =>
-          setTerminalError('Paste failed: clipboard text is too large for a safe terminal paste.'),
-        onImagePasteError: (error) => setTerminalError(formatClipboardImagePasteError(error))
+          reportTerminalPaneError(
+            'Paste failed: clipboard text is too large for a safe terminal paste.',
+            'terminal-paste'
+          ),
+        onImagePasteError: (error) =>
+          reportTerminalPaneError(formatClipboardImagePasteError(error), 'terminal-paste')
       }).catch(() => {
-        setTerminalError('Paste failed.')
+        reportTerminalPaneError('Paste failed.', 'terminal-paste')
       })
     }
 
@@ -2171,10 +2171,14 @@ export default function TerminalPane({
         pasteText: (text, options) =>
           executePanePasteText(pane, 'app-menu', activeElementAtDispatch, text, options),
         onTextPasteError: () =>
-          setTerminalError('Paste failed: clipboard text is too large for a safe terminal paste.'),
-        onImagePasteError: (error) => setTerminalError(formatClipboardImagePasteError(error))
+          reportTerminalPaneError(
+            'Paste failed: clipboard text is too large for a safe terminal paste.',
+            'terminal-paste'
+          ),
+        onImagePasteError: (error) =>
+          reportTerminalPaneError(formatClipboardImagePasteError(error), 'terminal-paste')
       }).catch(() => {
-        setTerminalError('Paste failed.')
+        reportTerminalPaneError('Paste failed.', 'terminal-paste')
       })
     }
 
@@ -2554,7 +2558,7 @@ export default function TerminalPane({
     onClearPaneScrollback: clearPaneScrollback,
     onSetTitle: handleStartRename,
     onClearPaneTitle: handleClearPaneTitleShortcut,
-    onPasteError: setTerminalError,
+    onPasteError: (message) => reportTerminalPaneError(message, 'terminal-paste'),
     onAgentSessionForkReady: setAgentSessionFork,
     onAgentSessionContinuationReady: setAgentSessionContinuation,
     forceBracketedMultilineTextPaste,
@@ -2754,7 +2758,10 @@ export default function TerminalPane({
           canContinue: targetStillMounted
         })
         if (execution.status !== 'pasted') {
-          setTerminalError(formatTerminalPasteExecutionError(execution.reason))
+          reportTerminalPaneError(
+            formatTerminalPasteExecutionError(execution.reason),
+            'terminal-paste'
+          )
           return
         }
         recordTerminalUserInputForLeaf(tabId, clickedPane.leafId)
@@ -2971,13 +2978,6 @@ export default function TerminalPane({
           })
         }}
       />
-      {terminalError && isActive && (
-        <TerminalErrorToast
-          error={terminalError}
-          onDismiss={() => setTerminalError(null)}
-          onRestartDaemon={() => daemonActions.setPending('restart')}
-        />
-      )}
       <DaemonActionDialog api={daemonActions} />
       {isActive && (
         <TerminalSessionStateSaveFailureDialog

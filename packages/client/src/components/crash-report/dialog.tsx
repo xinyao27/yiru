@@ -2,9 +2,9 @@ import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
 import { lazyWithRetry as lazy } from '~renderer/lib/lazy-with-retry'
 import {
-  REACT_ERROR_BOUNDARY_REPORT_AVAILABLE_EVENT,
-  takePendingReactErrorBoundaryReport
-} from '~renderer/lib/react-error-boundary-reporting'
+  RENDERER_ERROR_REPORT_AVAILABLE_EVENT,
+  takePendingRendererErrorReport
+} from '~renderer/lib/renderer-error-reporting'
 import { shellClient } from '~renderer/runtime/shell-client'
 import type { CrashReportRecord } from '~shared/crash-reporting'
 
@@ -80,24 +80,21 @@ export function CrashReportDialog(): React.JSX.Element | null {
   }, [loadCrashReport])
 
   useEffect(() => {
-    const pendingReport = takePendingReactErrorBoundaryReport()
+    const pendingReport = takePendingRendererErrorReport()
     if (pendingReport) {
       openCrashReport(pendingReport)
     }
 
-    const onReactErrorBoundaryReport = (): void => {
-      const nextReport = takePendingReactErrorBoundaryReport()
+    const onRendererErrorReport = (): void => {
+      const nextReport = takePendingRendererErrorReport()
       if (nextReport) {
         openCrashReport(nextReport)
       }
     }
 
-    window.addEventListener(REACT_ERROR_BOUNDARY_REPORT_AVAILABLE_EVENT, onReactErrorBoundaryReport)
+    window.addEventListener(RENDERER_ERROR_REPORT_AVAILABLE_EVENT, onRendererErrorReport)
     return () => {
-      window.removeEventListener(
-        REACT_ERROR_BOUNDARY_REPORT_AVAILABLE_EVENT,
-        onReactErrorBoundaryReport
-      )
+      window.removeEventListener(RENDERER_ERROR_REPORT_AVAILABLE_EVENT, onRendererErrorReport)
     }
   }, [openCrashReport])
 

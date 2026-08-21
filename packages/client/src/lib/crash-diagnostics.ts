@@ -5,6 +5,7 @@ import {
   type BrowserWebviewMemoryProfile
 } from '../runtime/browser-webview-registry'
 import { recordRendererCrashBreadcrumb } from './crash-breadcrumb-recorder'
+import { reportRendererErrorCrash } from './renderer-error-reporting'
 import { collectRendererMemoryProfileCounts } from './renderer-memory-profile'
 
 const RENDERER_MEMORY_SAMPLE_INTERVAL_MS = 60_000
@@ -85,6 +86,12 @@ function recordRendererError(event: ErrorEvent): void {
       ...describeUnknownValue('error', event.error)
     })
   )
+  void reportRendererErrorCrash({
+    kind: 'renderer-unhandled-error',
+    originId: 'window-error',
+    surface: 'app-root',
+    error: event.error ?? new Error(event.message)
+  })
 }
 
 function recordRendererMemoryHighwater(
@@ -139,6 +146,12 @@ function recordRendererUnhandledRejection(event: PromiseRejectionEvent): void {
     'renderer_unhandled_rejection',
     compactBreadcrumbData(describeUnknownValue('reason', event.reason))
   )
+  void reportRendererErrorCrash({
+    kind: 'renderer-unhandled-error',
+    originId: 'unhandled-rejection',
+    surface: 'app-root',
+    error: event.reason
+  })
 }
 
 function recordRendererMemory(reason: string): void {

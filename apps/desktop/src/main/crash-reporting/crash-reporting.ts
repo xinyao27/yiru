@@ -11,8 +11,8 @@ import {
   type CrashReportBreadcrumbData,
   type CrashReportCopyDiagnosticsArgs,
   type CrashReportDiagnosticBundle,
-  type ReactErrorBoundaryReportArgs,
-  type ReactErrorBoundaryReportResult,
+  type RendererErrorReportArgs,
+  type RendererErrorReportResult,
   type CrashReportSubmitArgs,
   type CrashReportSubmitResult,
   formatCrashReportText,
@@ -44,7 +44,7 @@ const MAX_RENDERER_ERROR_KEY_AGE_MS = RENDERER_ERROR_DEDUPE_MS * 2
 const MAX_RECENT_RENDERER_ERROR_REPORT_KEYS = 256
 const MAX_SUBMITTED_REPORT_IDS = 256
 
-const REACT_ERROR_BOUNDARY_SURFACES = new Set<ReactErrorBoundaryReportArgs['surface']>([
+const RENDERER_ERROR_SURFACES = new Set<RendererErrorReportArgs['surface']>([
   'app-root',
   'web-root',
   'workspace-shell',
@@ -75,26 +75,34 @@ function nullableStringField(value: unknown, maxLength: number): string | null |
   return stringField(value, maxLength)
 }
 
-function normalizeRendererErrorReportArgs(args: unknown): ReactErrorBoundaryReportArgs | null {
+function normalizeRendererErrorReportArgs(args: unknown): RendererErrorReportArgs | null {
   if (!args || typeof args !== 'object') {
     return null
   }
   const record = args as Record<string, unknown>
-  const boundaryId = stringField(record.boundaryId, 120)
+  const kind =
+    record.kind === 'terminal-error' || record.kind === 'renderer-unhandled-error'
+      ? record.kind
+      : 'react-error-boundary'
+  const originId =
+    stringField(record.originId, 120) ??
+    // Why: keep reports from an older renderer valid across a desktop update.
+    stringField(record.boundaryId, 120)
   const surface = stringField(record.surface, 80)
   const errorName = stringField(record.errorName, 120) ?? 'Error'
   const errorMessage = stringField(record.errorMessage, 1_000) ?? 'Unknown render error'
   if (
-    !boundaryId ||
+    !originId ||
     !surface ||
-    !REACT_ERROR_BOUNDARY_SURFACES.has(surface as ReactErrorBoundaryReportArgs['surface'])
+    !RENDERER_ERROR_SURFACES.has(surface as RendererErrorReportArgs['surface'])
   ) {
     return null
   }
 
   return {
-    boundaryId,
-    surface: surface as ReactErrorBoundaryReportArgs['surface'],
+    kind,
+    originId,
+    surface: surface as RendererErrorReportArgs['surface'],
     errorName,
     errorMessage,
     ...(stringField(record.errorStack, 8_000)
@@ -136,9 +144,10 @@ function pruneRendererErrorReportKeys(now: number): void {
   }
 }
 
-function getRendererErrorReportKey(args: ReactErrorBoundaryReportArgs): string {
+function getRendererErrorReportKey(args: RendererErrorReportArgs): string {
   return JSON.stringify({
-    boundaryId: args.boundaryId,
+    kind: args.kind,
+    originId: args.originId,
     surface: args.surface,
     errorName: args.errorName,
     errorMessage: args.errorMessage,
@@ -163,7 +172,7 @@ function rememberSubmittedReportId(reportId: string): void {
 async function recordRendererErrorReport(
   store: CrashReportStore,
   args: unknown
-): Promise<ReactErrorBoundaryReportResult> {
+): Promise<RendererErrorReportResult> {
   const normalized = normalizeRendererErrorReportArgs(args)
   if (!normalized) {
     return { ok: false, error: 'Invalid renderer error report.' }
@@ -183,8 +192,13 @@ async function recordRendererErrorReport(
 
   const report = await store.record({
     source: 'renderer',
-    processType: 'react-render',
-    reason: 'react-error-boundary',
+    processType:
+      normalized.kind === 'react-error-boundary'
+        ? 'react-render'
+        : normalized.kind === 'terminal-error'
+          ? 'terminal'
+          : 'renderer',
+    reason: normalized.kind,
     exitCode: null,
     appVersion: app.getVersion(),
     platform: process.platform,
@@ -193,7 +207,9 @@ async function recordRendererErrorReport(
     electronVersion: process.versions.electron ?? 'unknown',
     chromeVersion: process.versions.chrome ?? 'unknown',
     details: {
-      boundary_id: normalized.boundaryId,
+      ...(normalized.kind === 'react-error-boundary'
+        ? { boundary_id: normalized.originId }
+        : { error_origin: normalized.originId }),
       surface: normalized.surface,
       error_name: normalized.errorName,
       error_message: normalized.errorMessage,
@@ -209,8 +225,8 @@ async function recordRendererErrorReport(
         ? { has_active_worktree: normalized.hasActiveWorktree }
         : {})
     },
-    // Why: React render failures are recoverable only because a boundary
-    // caught them; persist the same recent app breadcrumbs as native crashes.
+    // Why: recoverable renderer failures still need the same recent app
+    // breadcrumbs as native crashes to explain the state that led to them.
     breadcrumbs: getCrashBreadcrumbSnapshot()
   })
 
@@ -437,9 +453,7 @@ export async function copyLatestShellCrashDiagnostics(args?: CrashReportCopyDiag
   return { ok: true as const }
 }
 
-export async function recordShellRendererError(
-  args: unknown
-): Promise<ReactErrorBoundaryReportResult> {
+export async function recordShellRendererError(args: unknown): Promise<RendererErrorReportResult> {
   const store = requireShellCrashReportStore()
   try {
     return await recordRendererErrorReport(store, args)

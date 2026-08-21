@@ -2,8 +2,14 @@ import {
   appendDiagnosticBundleLines,
   type CrashReportDiagnosticBundle
 } from './crash-reporting-diagnostic-bundle'
+import type { RendererErrorSurface } from './crash-reporting/renderer-error'
 
 export type { CrashReportDiagnosticBundle } from './crash-reporting-diagnostic-bundle'
+export type {
+  RendererErrorReportArgs,
+  RendererErrorReportKind,
+  RendererErrorSurface
+} from './crash-reporting/renderer-error'
 
 export type CrashReportStatus = 'pending' | 'sent' | 'dismissed'
 export type CrashReportSource = 'renderer' | 'child'
@@ -59,17 +65,11 @@ export type CrashReportCreateInput = Omit<
   breadcrumbs?: CrashReportBreadcrumbInput[]
 }
 
-export type ReactErrorBoundarySurface =
-  | 'app-root'
-  | 'web-root'
-  | 'workspace-shell'
-  | 'sidebar'
-  | 'terminal-workbench'
-  | 'right-sidebar'
-  | 'page'
-  | 'modal'
-  | 'overlay'
-  | 'rich-markdown-editor'
+export type RendererErrorReportResult =
+  | { ok: true; report: CrashReportRecord | null; deduped: boolean }
+  | { ok: false; error: string }
+
+export type ReactErrorBoundarySurface = RendererErrorSurface
 
 export type ReactErrorBoundaryReportArgs = {
   boundaryId: string
@@ -159,6 +159,15 @@ export function isReactErrorBoundaryReport(report: CrashReportRecord): boolean {
     report.source === 'renderer' &&
     report.processType === 'react-render' &&
     report.reason === 'react-error-boundary'
+  )
+}
+
+export function isRecoverableRendererErrorReport(report: CrashReportRecord): boolean {
+  return (
+    report.source === 'renderer' &&
+    (report.reason === 'react-error-boundary' ||
+      report.reason === 'renderer-unhandled-error' ||
+      report.reason === 'terminal-error')
   )
 }
 

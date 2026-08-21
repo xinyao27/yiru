@@ -5,8 +5,8 @@ import type {
   CrashReportRecord,
   CrashReportSubmitArgs,
   CrashReportSubmitResult,
-  ReactErrorBoundaryReportArgs,
-  ReactErrorBoundaryReportResult
+  RendererErrorReportArgs,
+  RendererErrorReportResult
 } from '~shared/crash-reporting'
 import type { TelemetryConsentState } from '~shared/telemetry-consent-types'
 
@@ -43,9 +43,7 @@ export type ShellCrashReportsApi = {
   getLatestPending: () => Promise<CrashReportRecord | null>
   getLatestReport: () => Promise<CrashReportRecord | null>
   dismiss: (args: { reportId: string }) => Promise<CrashReportRecord | null>
-  recordRendererError: (
-    args: ReactErrorBoundaryReportArgs
-  ) => Promise<ReactErrorBoundaryReportResult>
+  recordRendererError: (args: RendererErrorReportArgs) => Promise<RendererErrorReportResult>
   recordBreadcrumb: (args: { name: string; data?: CrashReportBreadcrumbData }) => void
   submit: (args: CrashReportSubmitArgs) => Promise<CrashReportSubmitResult>
   copyLatestDiagnostics: (
