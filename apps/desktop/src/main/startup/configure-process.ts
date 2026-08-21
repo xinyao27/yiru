@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 import { app } from 'electron'
+import { getYiruCliEnvironment, resolveYiruCliCommandName } from '~shared/yiru-cli-command-name'
 
 import { getVersionManagerBinPaths } from '../runtime/cli-command'
 
@@ -200,11 +201,20 @@ export function configureDevUserDataPath(isDev: boolean): void {
   app.setPath('userData', join(app.getPath('appData'), 'yiru-dev'))
 }
 
-export function configureYiruUserDataPathEnv(): void {
+export function configureYiruUserDataPathEnv(isDev: boolean): void {
   // Why: app relaunches can inherit an YIRU_USER_DATA_PATH from an older CLI or
   // updater process. Main must canonicalize it before CLI-shared modules build
   // runtime-home paths, or migrations can bridge two Yiru app-data directories.
   process.env.YIRU_USER_DATA_PATH = app.getPath('userData')
+  // Why: the app process is the authority for its environment. Every later
+  // CLI consumer inherits one resolved command instead of guessing from PATH,
+  // cwd, or the userData directory name and crossing dev/production runtimes.
+  const environment = getYiruCliEnvironment(!isDev)
+  process.env.YIRU_CLI_ENVIRONMENT = environment
+  process.env.YIRU_CLI_COMMAND = resolveYiruCliCommandName({
+    environment,
+    platform: process.platform
+  })
 }
 
 export function shouldInstallManagedHooks(isDev: boolean): boolean {

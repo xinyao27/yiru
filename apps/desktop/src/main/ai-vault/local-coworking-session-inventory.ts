@@ -107,16 +107,14 @@ async function openLocalInventorySnapshot(
   signal.throwIfAborted()
   const candidates = discoveries
     .flatMap((discovery) =>
-      discovery.files.map(
-        (file): SessionFileCandidate => ({
-          agent: discovery.agent,
-          file,
-          codexHome:
-            discovery.agent === 'codex'
-              ? codexHomeForSessionsDir(discovery.rootDir, DEFAULT_CODEX_HOME_DIR)
-              : null
-        })
-      )
+      discovery.files.map((file): SessionFileCandidate => ({
+        agent: discovery.agent,
+        file,
+        codexHome:
+          discovery.agent === 'codex'
+            ? codexHomeForSessionsDir(discovery.rootDir, DEFAULT_CODEX_HOME_DIR)
+            : null
+      }))
     )
     .sort(compareCandidates)
 

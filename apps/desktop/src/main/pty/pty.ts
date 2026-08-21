@@ -29,6 +29,11 @@ import { isValidTerminalTabId } from '~shared/terminal/tab-id'
 import { isTuiAgent } from '~shared/tui-agent/config'
 import type { GlobalSettings, TuiAgent } from '~shared/types'
 import { parseWorkspaceKey } from '~shared/workspace/scope'
+import {
+  getYiruCliEnvironment,
+  resolveYiruCliCommandName,
+  rewriteYiruCliCommandPrefix
+} from '~shared/yiru-cli-command-name'
 
 import { isAgentStatusHooksEnabled } from '../agent-hooks/managed-agent-hook-controls'
 import { clearMigrationUnsupportedPty } from '../agent-hooks/migration-unsupported-pty-state'
@@ -910,19 +915,19 @@ export function buildPtyHostEnv(
     }
   }
 
-  // Why: WSL shells need the managed userData root for shell-ready wrappers; dev-mode terminals need the same export so `yiru` targets the live dev instance.
-  if (opts.isWsl) {
-    baseEnv.YIRU_USER_DATA_PATH = opts.userDataPath
-    // Why: exposing the registered WSL command keeps agent guidance scoped to
-    // the execution host instead of whichever command exists on Windows PATH.
-    baseEnv.YIRU_CLI_COMMAND = opts.isPackaged ? 'yiru' : 'yiru-dev'
-  } else {
-    if (!opts.isPackaged) {
-      baseEnv.YIRU_USER_DATA_PATH ??= opts.userDataPath
-    }
-    delete baseEnv.YIRU_CLI_COMMAND
-  }
-  // Why: dev mode needs the launcher PATH override so `yiru` resolves to the dev build instead of the production binary at /usr/local/bin/yiru.
+  // Why: every Yiru-owned terminal carries an exact runtime identity. Replacing
+  // inherited values prevents a production PTY opened from a dev shell (or the
+  // inverse) from reusing the other app's metadata, daemon socket, or CLI.
+  baseEnv.YIRU_USER_DATA_PATH = opts.userDataPath
+  const cliEnvironment = getYiruCliEnvironment(opts.isPackaged)
+  baseEnv.YIRU_CLI_ENVIRONMENT = cliEnvironment
+  baseEnv.YIRU_CLI_COMMAND = resolveYiruCliCommandName({
+    environment: cliEnvironment,
+    executionHost: opts.isWsl ? 'wsl' : 'native',
+    platform: process.platform
+  })
+  // Why: dev mode needs its launcher on PATH for the resolved `yiru-dev`
+  // command; the directory intentionally contains no production-name alias.
   if (!opts.isPackaged) {
     const devCliBin = join(opts.userDataPath, 'cli', 'bin')
     const inheritedPath = readInheritedPath(baseEnv)
@@ -1471,6 +1476,14 @@ export function registerPtyHandlers(
         ? { ...sshScopedEnv, ...claudeAuth.envPatch }
         : sshScopedEnv
       const requestedAgentTeamsPath = env?.YIRU_AGENT_TEAMS_TEAM_ID ? env.PATH : undefined
+      const terminalCommand =
+        args.command && args.launchAgent === 'claude-agent-teams'
+          ? rewriteYiruCliCommandPrefix(args.command, {
+              environment: getYiruCliEnvironment(Boolean(args.connectionId) || app.isPackaged),
+              executionHost: codexSelectionTarget.runtime === 'wsl' ? 'wsl' : 'native',
+              platform: process.platform
+            })
+          : args.command
       if (args.preAllocatedHandle) {
         env = { ...env, YIRU_TERMINAL_HANDLE: args.preAllocatedHandle }
       }
@@ -1502,7 +1515,7 @@ export function registerPtyHandlers(
           skipCodexHomeEnv,
           stripInheritedYiruCodexHome,
           githubAttributionEnabled: getSettings?.()?.enableGitHubAttribution ?? false,
-          launchCommand: args.command,
+          launchCommand: terminalCommand,
           launchAgent: isTuiAgent(args.launchAgent) ? args.launchAgent : undefined,
           shellPath: daemonShellOverride ?? process.env.COMSPEC,
           isWsl: shouldSkipCodexHomeEnvForWindowsShell(daemonShellOverride, cwd),
@@ -1542,8 +1555,8 @@ export function registerPtyHandlers(
       }
       deleteRequestedEnvKeys(env, spawnOptions.envToDelete)
       promoteAgentTeamsShimPath(env, requestedAgentTeamsPath)
-      if (args.command !== undefined) {
-        spawnOptions.command = args.command
+      if (terminalCommand !== undefined) {
+        spawnOptions.command = terminalCommand
       }
       if (args.commandDelivery !== undefined) {
         spawnOptions.commandDelivery = args.commandDelivery

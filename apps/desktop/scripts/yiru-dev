@@ -25,6 +25,8 @@ case "$(uname -s)" in
 esac
 
 export YIRU_USER_DATA_PATH="${YIRU_DEV_USER_DATA_PATH:-$default_data}"
+export YIRU_CLI_COMMAND=yiru-dev
+export YIRU_CLI_ENVIRONMENT=development
 electron_executable="$REPO_ROOT/node_modules/.bin/electron"
 case "$(uname -s)" in
   MINGW*|MSYS*) electron_executable="$REPO_ROOT/node_modules/electron/dist/electron.exe" ;;

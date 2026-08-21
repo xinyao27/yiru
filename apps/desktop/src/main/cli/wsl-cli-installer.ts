@@ -3,6 +3,7 @@
 import { execFile } from 'node:child_process'
 
 import type { CliInstallStatus } from '~shared/cli-install-types'
+import { getYiruCliCommandNameForPlatform } from '~shared/yiru-cli-command-name'
 
 import { getDefaultWslDistro } from '../wsl'
 import { CliInstaller } from './installer'
@@ -22,7 +23,7 @@ import {
 
 const MANAGED_MARKER = getWslLauncherMarker()
 const BRIDGE_MANAGED_MARKER = getWslBridgeMarker()
-const WSL_COMMAND_NAME = 'yiru'
+const WSL_COMMAND_NAME = getYiruCliCommandNameForPlatform('linux')
 const WSL_COMMAND_TIMEOUT_MS = 10_000
 
 function normalizeManagedScriptContent(content: string): string {

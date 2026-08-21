@@ -25,9 +25,9 @@ streaming server.
 
 ## CLI executable
 
-Choose the Yiru executable once: use the `YIRU_CLI_COMMAND` environment value when set;
-otherwise use `yiru-dev` in a dev session exposing `YIRU_DEV_REPO_ROOT`, and `yiru`
-everywhere else.
+Resolve the executable through the `yiru-cli` skill's **Start Here** contract before the first
+command. Use the exact `YIRU_CLI_COMMAND` value in a managed terminal; if it is absent, do not
+infer an environment in this skill.
 
 In every command example — fenced blocks, tables, and prose — `YIRU` is a documentation
 placeholder. Replace it with the chosen executable before running the command; do not

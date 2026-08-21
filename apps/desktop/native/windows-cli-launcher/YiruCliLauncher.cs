@@ -41,6 +41,17 @@ internal static class YiruCliLauncher
                 UseShellExecute = false
             };
 
+            if (String.Equals(
+                Environment.GetEnvironmentVariable("YIRU_CLI_ENVIRONMENT"),
+                "development",
+                StringComparison.Ordinal
+            ))
+            {
+                startInfo.EnvironmentVariables.Remove("YIRU_USER_DATA_PATH");
+            }
+            startInfo.EnvironmentVariables["YIRU_CLI_COMMAND"] = "yiru.exe";
+            startInfo.EnvironmentVariables["YIRU_CLI_ENVIRONMENT"] = "production";
+
             // Why: launching without cmd.exe preserves embedded newlines while matching the
             // packaged batch launcher's Electron-as-Node environment contract.
             MoveEnvironmentVariable(startInfo.EnvironmentVariables, "NODE_OPTIONS", "YIRU_NODE_OPTIONS");

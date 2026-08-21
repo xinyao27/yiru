@@ -3,6 +3,10 @@ setlocal
 set "SCRIPT_DIR=%~dp0"
 set "LAUNCHER=%SCRIPT_DIR%yiru.exe"
 
+if /I "%YIRU_CLI_ENVIRONMENT%"=="development" set "YIRU_USER_DATA_PATH="
+set "YIRU_CLI_COMMAND=yiru.cmd"
+set "YIRU_CLI_ENVIRONMENT=production"
+
 if not exist "%LAUNCHER%" (
   echo Unable to locate the native Yiru CLI launcher at "%LAUNCHER%" 1>&2
   exit /b 1

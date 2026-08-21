@@ -23,6 +23,11 @@ if [ ! -f "$APPIMAGE" ]; then
   echo "If you moved the AppImage, re-run CLI registration from Yiru Settings." >&2
   exit 1
 fi
+if [ "\${YIRU_CLI_ENVIRONMENT:-}" = development ]; then
+  unset YIRU_USER_DATA_PATH
+fi
+export YIRU_CLI_COMMAND=yiru
+export YIRU_CLI_ENVIRONMENT=production
 export YIRU_NODE_OPTIONS="\${NODE_OPTIONS-}"
 export YIRU_NODE_REPL_EXTERNAL_MODULE="\${NODE_REPL_EXTERNAL_MODULE-}"
 unset NODE_OPTIONS

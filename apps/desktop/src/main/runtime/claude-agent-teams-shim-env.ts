@@ -9,7 +9,7 @@ import {
   isDirectClaudeCommand,
   type ClaudeAgentTeamsMode
 } from '~shared/claude-agent-teams-tmux-compat'
-import { getYiruCliCommandNameForPlatform } from '~shared/yiru-cli-command-name'
+import { resolveYiruCliCommandName } from '~shared/yiru-cli-command-name'
 
 export type ClaudeAgentTeamsLaunchPlan = {
   command: string
@@ -58,15 +58,21 @@ export function resolveClaudeAgentTeamsShimBin(
   if (env.YIRU_AGENT_TEAMS_SHIM_BIN) {
     return env.YIRU_AGENT_TEAMS_SHIM_BIN
   }
-  const bundled = bundledLauncherPath()
-  if (bundled && isExecutableFile(bundled)) {
-    return bundled
+  const commandName = resolveYiruCliCommandName({
+    configuredCommand: env.YIRU_CLI_COMMAND,
+    environment: 'production',
+    platform: process.platform
+  })
+  const executableOnPath = findExecutableOnPath(commandName, env.PATH)
+  if (executableOnPath) {
+    return executableOnPath
   }
-  return (
-    findExecutableOnPath(process.platform === 'win32' ? 'yiru-dev.cmd' : 'yiru-dev', env.PATH) ??
-    findExecutableOnPath(getYiruCliCommandNameForPlatform(process.platform), env.PATH) ??
-    getYiruCliCommandNameForPlatform(process.platform)
-  )
+  const productionCommandName = resolveYiruCliCommandName({
+    environment: 'production',
+    platform: process.platform
+  })
+  const bundled = commandName === productionCommandName ? bundledLauncherPath() : null
+  return bundled && isExecutableFile(bundled) ? bundled : commandName
 }
 
 function defaultShimRoot(): string {
@@ -115,20 +121,30 @@ function isExecutableFile(candidate: string): boolean {
 }
 
 function unixShimScript(): string {
+  const commandName = resolveYiruCliCommandName({
+    configuredCommand: process.env.YIRU_CLI_COMMAND,
+    environment: 'production',
+    platform: process.platform
+  })
   return [
     '#!/usr/bin/env sh',
     'set -eu',
-    `exec "\${YIRU_AGENT_TEAMS_SHIM_BIN:-${getYiruCliCommandNameForPlatform(process.platform)}}" agent-teams-tmux "$@"`,
+    `exec "\${YIRU_AGENT_TEAMS_SHIM_BIN:-${commandName}}" agent-teams-tmux "$@"`,
     ''
   ].join('\n')
 }
 
 function windowsShimScript(): string {
+  const commandName = resolveYiruCliCommandName({
+    configuredCommand: process.env.YIRU_CLI_COMMAND,
+    environment: 'production',
+    platform: process.platform
+  })
   return [
     '@echo off',
     'setlocal',
     'if "%YIRU_AGENT_TEAMS_SHIM_BIN%"=="" (',
-    `  set "YIRU_AGENT_TEAMS_SHIM_BIN=${getYiruCliCommandNameForPlatform(process.platform)}"`,
+    `  set "YIRU_AGENT_TEAMS_SHIM_BIN=${commandName}"`,
     ')',
     '"%YIRU_AGENT_TEAMS_SHIM_BIN%" agent-teams-tmux %*',
     ''

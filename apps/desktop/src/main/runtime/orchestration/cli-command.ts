@@ -1,25 +1,39 @@
 import { isWslUncPath } from '@yiru/workbench-model/platform'
 import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
 import type { ProjectExecutionRuntimeResolution } from '~shared/project-execution-runtime'
-
-export type OrchestrationCliCommand = 'yiru' | 'yiru-ide'
+import { getYiruCliEnvironment, resolveYiruCliCommandName } from '~shared/yiru-cli-command-name'
 
 export function resolveTerminalOrchestrationCliCommand(args: {
   connectionId: string | null
+  isPackaged: boolean
   isWsl: boolean | null | undefined
   worktreeId: string
   projectRuntime?: ProjectExecutionRuntimeResolution
-}): OrchestrationCliCommand {
+}): string {
+  const environment = getYiruCliEnvironment(args.isPackaged)
   if (args.connectionId) {
-    return 'yiru'
+    // Why: orchestration instructions run inside the connected host, which has
+    // its own packaged relay CLI rather than this checkout's local dev shim.
+    return resolveYiruCliCommandName({
+      environment: 'production',
+      platform: process.platform
+    })
   }
   if (args.isWsl !== null && args.isWsl !== undefined) {
-    return args.isWsl ? 'yiru-ide' : 'yiru'
-  }
-  if (args.projectRuntime?.status === 'resolved' && args.projectRuntime.runtime.kind === 'wsl') {
-    return 'yiru-ide'
+    return resolveYiruCliCommandName({
+      environment,
+      executionHost: args.isWsl ? 'wsl' : 'native',
+      platform: process.platform
+    })
   }
 
   const worktreePath = splitWorktreeIdForFilesystem(args.worktreeId)?.worktreePath
-  return worktreePath && isWslUncPath(worktreePath) ? 'yiru-ide' : 'yiru'
+  const isWsl =
+    (args.projectRuntime?.status === 'resolved' && args.projectRuntime.runtime.kind === 'wsl') ||
+    Boolean(worktreePath && isWslUncPath(worktreePath))
+  return resolveYiruCliCommandName({
+    environment,
+    executionHost: isWsl ? 'wsl' : 'native',
+    platform: process.platform
+  })
 }

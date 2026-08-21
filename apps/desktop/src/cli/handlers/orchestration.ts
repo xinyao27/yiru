@@ -12,6 +12,7 @@ import { abbreviateOrchestrationTasks } from '~shared/orchestration-task-summary
 import type { OrchestrationWorkerReadResult } from '~shared/orchestration-worker-output'
 import type { RuntimeTerminalRead } from '~shared/runtime-types'
 import { parsePositiveSafeIntegerText } from '~shared/timer-delay'
+import { resolveYiruCliCommandName } from '~shared/yiru-cli-command-name'
 
 /* eslint-disable max-lines -- Why: orchestration CLI handlers share flag-parsing helpers and dispatch/preamble logic; splitting by verb would fragment the RuntimeClient call shape without reducing complexity. */
 import type { CommandHandler } from '../dispatch'
@@ -138,6 +139,11 @@ function formatLegacyAwareCheckMessages(
   messages: MessageSummary[],
   checkedTerminal: string
 ): string {
+  const cliCommand = resolveYiruCliCommandName({
+    configuredCommand: process.env.YIRU_CLI_COMMAND,
+    environment: isDevCliInvocation() ? 'development' : 'production',
+    platform: process.platform
+  })
   return messages
     .map((message) => {
       const legacyReadOnly = isLegacyReadOnlyMessage(message)
@@ -157,7 +163,7 @@ function formatLegacyAwareCheckMessages(
       if (!legacyReadOnly) {
         const replyFrom = message.to_handle ?? checkedTerminal
         lines.push(
-          `[Reply: yiru orchestration reply --id ${message.id} --from ${replyFrom} --body "..."]`
+          `[Reply: ${cliCommand} orchestration reply --id ${message.id} --from ${replyFrom} --body "..."]`
         )
       }
       return lines.join('\n')
@@ -374,10 +380,7 @@ function throwNoActiveSenderTerminal(): never {
 }
 
 function isDevCliInvocation(): boolean {
-  return (
-    process.env.YIRU_DEV_CLI_INVOCATION === '1' ||
-    (process.env.YIRU_USER_DATA_PATH?.includes('yiru-dev') ?? false)
-  )
+  return process.env.YIRU_CLI_ENVIRONMENT === 'development'
 }
 
 function getOptionalPositiveIntegerValueFlag(

@@ -15,20 +15,26 @@ description: >-
 
 # Yiru CLI
 
-Use `yiru` when Yiru's running editor/runtime is the source of truth. The public CLI command is `yiru` on every platform.
-
-**Dev builds (`pnpm dev`):** after `pnpm build:cli`, the dev CLI is exposed as `yiru-dev` (the global shim points at this checkout's wrapper + out/cli). Inside a dev Yiru's terminals use `yiru-dev emulator ...` (or `./scripts/yiru-dev.mjs emulator ...` for worktree-local invocation that does not depend on the /usr/local/bin symlink). Plain `yiru` targets any installed production Yiru. The app's own agent preambles use `yiru-dev` automatically in dev mode.
+Use the Yiru CLI when Yiru's running editor/runtime is the source of truth.
 
 Use plain shell tools when Yiru state does not matter.
 
 ## Start Here
 
-Choose the executable once for the current session:
+`YIRU_CLI_COMMAND` is the only automatic environment selector. A Yiru-managed terminal always
+exports its exact value: the development app resolves to its development CLI, the packaged app
+resolves to its production CLI, and WSL resolves to its host bridge. Use the value unchanged for
+the entire session. Never choose by PATH order, cwd, `YIRU_DEV_REPO_ROOT`, app-data path text, or
+by probing whichever executable happens to respond.
 
-- If the `YIRU_CLI_COMMAND` environment variable is set, use its value. Yiru exports this
-  for managed WSL sessions.
-- Otherwise, in a dev checkout whose session exposes `YIRU_DEV_REPO_ROOT`, use `yiru-dev`.
-- Otherwise, use `yiru`.
+Outside a Yiru-managed terminal, choose only from explicit task context:
+
+- A source-checkout/development-app task uses that checkout's
+  `apps/desktop/scripts/yiru-dev.mjs`; do not use a global dev shim that may point at another
+  checkout.
+- An installed/production-app task uses the installed production CLI.
+- If the target environment is not explicit, stop and ask which app instance is in scope instead
+  of running either CLI.
 
 In every command block, `YIRU` is a documentation placeholder. Replace it with the chosen
 executable before running the command; do not create a shell variable or run `YIRU`
@@ -40,8 +46,8 @@ YIRU worktree ps --json
 YIRU terminal list --json
 ```
 
-Keep using that same executable for every later command so dev sessions do not reach a
-production CLI.
+Keep using that same executable for every later command so the two app environments never share
+runtime metadata, daemon sockets, or terminal state.
 
 If Yiru is not running, start it:
 
@@ -56,7 +62,7 @@ Prefer `--json` for agent-driven calls. If the CLI is missing, say so explicitly
 
 A full handoff transfers ownership to another agent or worktree, then the original agent stops. Treat requests phrased as "hand off", "handoff", "handover", "give this to another agent", "give this to another worktree", "another agent", or "another worktree" as full handoffs unless the user explicitly asks to supervise, monitor, wait for results, track completion, coordinate a DAG, use decision gates, or manage ask/reply.
 
-Do not use `yiru orchestration task-create`, `yiru orchestration dispatch --inject`, or `yiru orchestration check --wait` for full handoffs. `task-create` is also forbidden because it records coordinator-owned tracking state; if a task row is needed, the user asked for supervised orchestration. Deliver the prompt with worktree/terminal commands, report the created worktree/terminal if useful, and stop monitoring.
+Do not use `YIRU orchestration task-create`, `YIRU orchestration dispatch --inject`, or `YIRU orchestration check --wait` for full handoffs. `task-create` is also forbidden because it records coordinator-owned tracking state; if a task row is needed, the user asked for supervised orchestration. Deliver the prompt with worktree/terminal commands, report the created worktree/terminal if useful, and stop monitoring.
 
 Independent new-worktree handoff:
 
@@ -91,7 +97,7 @@ YIRU terminal send --terminal <handle> --text "<task brief>" --enter --json
 
 A Yiru worktree is Yiru's tracked view of a repo checkout, its metadata, terminals, browser tabs, and UI state.
 
-Think of its id as a two-part address: `<repoId>::<worktreePath>`. For example, `repo-123::/Users/me/yiru/fix-login` means “the `fix-login` checkout inside repo `repo-123`.” Always copy the complete `id` field from `yiru worktree create --json` or `yiru worktree list --json`; `repo-123` alone identifies only the repo.
+Think of its id as a two-part address: `<repoId>::<worktreePath>`. For example, `repo-123::/Users/me/yiru/fix-login` means “the `fix-login` checkout inside repo `repo-123`.” Always copy the complete `id` field from `YIRU worktree create --json` or `YIRU worktree list --json`; `repo-123` alone identifies only the repo.
 
 Common commands:
 
@@ -119,7 +125,7 @@ YIRU worktree rm --worktree id:<repoId>::<worktreePath> --force --json
 Selectors:
 
 - `id:<repoId>::<worktreePath>`, `name:<displayName>`, `path:<absolutePath>`, `branch:<branchName>`
-- The full id is the exact `<repo-id>::<path>` value returned by `yiru worktree create --json` or `yiru worktree list --json`; a bare repo id is not a worktree id.
+- The full id is the exact `<repo-id>::<path>` value returned by `YIRU worktree create --json` or `YIRU worktree list --json`; a bare repo id is not a worktree id.
 - `active` / `current` for the enclosing Yiru-managed worktree from the shell cwd
 - For `worktree create --parent-worktree` only, folder/worktree parent context keys are also valid: `folder:<folderId>`, `worktree:<repoId>::<worktreePath>`, `id:folder:<folderId>`, `id:worktree:<repoId>::<worktreePath>`
 
@@ -142,14 +148,14 @@ YIRU worktree create --name task --run-hooks --json
 ```
 
 - `--agent <id>` launches that agent **in the first terminal** (Yiru docs: *"`--agent` launches the selected agent in the first terminal"*); `--prompt <text>` sends initial work to it. Known ids include `claude`, `codex`, `omp`, `pi`, `grok`, and other installed TUI agents.
-- **Prefer agent-first create for agent workers.** `yiru worktree create --agent <id> --prompt "..."` puts the agent in the worktree's first terminal without adding a separate fallback shell for that worker. Repo setup or default-terminal settings may still add tabs or splits. Without configured default tabs, the bare-create fallback shell plus a later `terminal create --command <agent>` is an anti-pattern for ordinary agent worktrees — use `--agent` instead of “create worktree, then open agent.” Configured default tabs are intentional surfaces; never treat one as disposable without verifying that it is an unused shell.
-- After create, use exactly one agent handle: `startupTerminal.handle` from the create response when present, or the matching result from `yiru terminal list --worktree id:<repoId>::<newWorktreePath> --json` (or `name:<displayName>`) when the response omits it. If a handle later returns `terminal_handle_stale`, re-list it; never dual-send to old and replacement handles.
+- **Prefer agent-first create for agent workers.** `YIRU worktree create --agent <id> --prompt "..."` puts the agent in the worktree's first terminal without adding a separate fallback shell for that worker. Repo setup or default-terminal settings may still add tabs or splits. Without configured default tabs, the bare-create fallback shell plus a later `terminal create --command <agent>` is an anti-pattern for ordinary agent worktrees — use `--agent` instead of “create worktree, then open agent.” Configured default tabs are intentional surfaces; never treat one as disposable without verifying that it is an unused shell.
+- After create, use exactly one agent handle: `startupTerminal.handle` from the create response when present, or the matching result from `YIRU terminal list --worktree id:<repoId>::<newWorktreePath> --json` (or `name:<displayName>`) when the response omits it. If a handle later returns `terminal_handle_stale`, re-list it; never dual-send to old and replacement handles.
 - `--setup run|skip|inherit` controls repo setup hooks. Default is `inherit`, which follows the repo's setup policy.
 - `--run-hooks` is a legacy alias for `--setup run`; it also reveals/activates the new worktree.
 - `--agent`, `--activate`, and `--run-hooks` reveal the new worktree. Plain create stays in the background.
 - Let Yiru choose setup terminal placement from repo settings, including tab vs split behavior. Do not manually create extra setup terminals when `--agent` already owns the first tab.
-- If an older installed CLI rejects `--agent`, `--prompt`, or `--setup`, create the worktree normally, then run `yiru terminal create --worktree <selector> --command "<requested-agent>"` and `yiru terminal send` if a prompt is needed. This can leave a fallback shell when no default tabs are configured; close it only after confirming it is unused.
-- `worktree create` creates a new checkout. For a fresh agent in the **current** checkout (no new worktree), use `yiru terminal create --worktree active --command "codex" --json` — that path does not create a second worktree shell.
+- If an older installed CLI rejects `--agent`, `--prompt`, or `--setup`, create the worktree normally, then run `YIRU terminal create --worktree <selector> --command "<requested-agent>"` and `YIRU terminal send` if a prompt is needed. This can leave a fallback shell when no default tabs are configured; close it only after confirming it is unused.
+- `worktree create` creates a new checkout. For a fresh agent in the **current** checkout (no new worktree), use `YIRU terminal create --worktree active --command "codex" --json` — that path does not create a second worktree shell.
 
 ## Worktree Comments
 
@@ -195,7 +201,7 @@ Terminal rules:
 - `--terminal` is optional for most commands; omitted means the active terminal in the current worktree.
 - Use `terminal read` before `terminal send` unless the next input is obvious.
 - Use `terminal send` only for direct terminal input or one-off prompts where no task state, inbox, or reply tracking is needed.
-- For structured coordination, invoke the `orchestration` skill; it uses `yiru orchestration ...` commands for messages, handoffs, task DAGs, dispatches, inbox/reply flows, and coordinator loops. A receiving agent can run `yiru orchestration check --unread --inject` to render its unread mail in agent-readable form; this checks the caller's inbox and does not remotely deliver input to another terminal.
+- For structured coordination, invoke the `orchestration` skill; it uses `YIRU orchestration ...` commands for messages, handoffs, task DAGs, dispatches, inbox/reply flows, and coordinator loops. A receiving agent can run `YIRU orchestration check --unread --inject` to render its unread mail in agent-readable form; this checks the caller's inbox and does not remotely deliver input to another terminal.
 - Use `terminal create --worktree active --command "<agent>"` for a fresh agent in the current worktree. Use `worktree create --agent <agent>` only for a separate checkout (agent in the first terminal — do not also `terminal create` the same agent).
 - Use `terminal wait --for tui-idle` for agent CLIs such as Claude Code, Gemini, Codex, OMP, Pi, and Grok; always pass `--timeout-ms`.
 - Terminal handles are runtime-scoped. Use `startupTerminal.handle` as the sole agent handle when `worktree create --agent` returns it; if Yiru restarts, omits the handle, or returns `terminal_handle_stale`, reacquire with `terminal list` and continue with the replacement only.
@@ -226,7 +232,7 @@ Use `--repo <selector>` for a new worktree per run, or `--workspace <selector>` 
 
 The built-in browser is Yiru's embedded browser tab surface, scoped to Yiru worktrees; it is not Chrome/Safari or desktop app UI.
 
-These commands control only Yiru's embedded browser tabs. For external Chrome/Safari/webviews or Yiru app chrome/settings, use the Computer Use skill/tool. If the user explicitly asks for Yiru CLI desktop control, use `yiru computer ...`; do not use browser commands for desktop UI.
+These commands control only Yiru's embedded browser tabs. For external Chrome/Safari/webviews or Yiru app chrome/settings, use the Computer Use skill/tool. If the user explicitly asks for Yiru CLI desktop control, use `YIRU computer ...`; do not use browser commands for desktop UI.
 
 Use a snapshot-interact-re-snapshot loop:
 
@@ -293,11 +299,11 @@ Common recoveries:
 
 ## Next Action
 
-Confirm `yiru status --json` unless already checked this turn, then choose the narrowest command for the job: `worktree ps/current/create`, `terminal list/read/wait/send`, `automations list`, or built-in browser `snapshot`.
+Confirm `YIRU status --json` unless already checked this turn, then choose the narrowest command for the job: `worktree ps/current/create`, `terminal list/read/wait/send`, `automations list`, or built-in browser `snapshot`.
 
 ## Mobile Emulator (iOS Simulator via serve-sim)
 
-The mobile emulator surface is workspace-scoped like browser tabs (active per worktree for unqualified; explicit --worktree/--device/--emulator for targeting). Always prefer `yiru emulator ...` over raw `npx serve-sim` or simctl when inside Yiru (the bridge owns lifecycle, scoping, and registration with the live pane).
+The mobile emulator surface is workspace-scoped like browser tabs (active per worktree for unqualified; explicit --worktree/--device/--emulator for targeting). Always prefer `YIRU emulator ...` over raw `npx serve-sim` or simctl when inside Yiru (the bridge owns lifecycle, scoping, and registration with the live pane).
 
 See the dedicated `yiru-emulator` skill for the full table (tap/type/gesture/button/rotate/camera/permissions/ax/list/attach/exec/kill + --json + gotchas like tap preferred, normalized 0-1, name->UDID early resolve in bridge, US ASCII type, camera one-time builds, stale state cleanup, no auto-focus on attach except --focus flag mirroring browser exactly, AX via HTTP endpoint from state).
 
@@ -319,7 +325,7 @@ Rules (mirror browser):
 - Default: current worktree's active (pane open or attach sets it; unqualified "just works").
 - Explicit: --device <udid|name> or --emulator <YiruId from list> (bridge resolves names early to avoid serve-sim control bug).
 - --worktree all only for list.
-- Recoveries: 'emulator_no_active' → yiru emulator attach or open pane; stale → list/kill/attach.
+- Recoveries: 'emulator_no_active' → YIRU emulator attach or open pane; stale → list/kill/attach.
 - No raw serve-sim in agent prompts/skills (use yiru wrappers; see yiru-emulator skill).
 
 The live pane (when implemented) registers its stream with the bridge for default targeting (seamless, recommended option per design).

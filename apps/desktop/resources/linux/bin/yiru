@@ -32,6 +32,11 @@ fi
 # launcher model used on macOS instead of maintaining a separate Node binary.
 CLI="$RESOURCES_DIR/app.asar.unpacked/out/cli/index.js"
 
+if [ "${YIRU_CLI_ENVIRONMENT:-}" = development ]; then
+	unset YIRU_USER_DATA_PATH
+fi
+export YIRU_CLI_COMMAND=yiru
+export YIRU_CLI_ENVIRONMENT=production
 export YIRU_NODE_OPTIONS="${NODE_OPTIONS-}"
 export YIRU_NODE_REPL_EXTERNAL_MODULE="${NODE_REPL_EXTERNAL_MODULE-}"
 unset NODE_OPTIONS

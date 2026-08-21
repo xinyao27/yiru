@@ -84,15 +84,15 @@ export const TUI_AGENT_CONFIG: Record<TuiAgent, TuiAgentConfig> = {
   'claude-agent-teams': {
     // Why: this is a Yiru-provided launch mode, not a separate upstream
     // binary. Detection follows the Yiru CLI and requires Claude below.
-    detectCmd: 'yiru',
-    detectCmdAliases: ['yiru-dev'],
+    detectCmd: getYiruCliCommandNameForPlatform('linux'),
+    detectCmdAliases: [getYiruCliCommandNameForPlatform('linux', 'development')],
     // Why: the Yiru shim alone exists on fresh installs. Require Claude too so
     // onboarding does not report Agent Teams when no agent CLI is installed.
     detectRequiredCommands: ['claude'],
     // Why: native Windows and WSL use Claude's in-process Agent Teams fallback,
     // not the Yiru native-pane/tmux-shim wrapper exposed by this agent entry.
     detectUnsupportedRuntimes: ['win32', 'wsl'],
-    launchCmd: 'yiru claude-teams',
+    launchCmd: `${getYiruCliCommandNameForPlatform('darwin')} claude-teams`,
     launchCmdByPlatform: {
       linux: `${getYiruCliCommandNameForPlatform('linux')} claude-teams`,
       win32: `${getYiruCliCommandNameForPlatform('win32')} claude-teams`

@@ -475,28 +475,26 @@ export class OpenCodeUsageStore {
   ): OpenCodeUsageSessionRow[] {
     return this.getFilteredSessions(scope, range)
       .slice(0, limit)
-      .map(
-        (session): OpenCodeUsageSessionRow => ({
-          sessionId: session.sessionId,
-          lastActiveAt: session.lastTimestamp,
-          durationMinutes: Math.max(
-            0,
-            Math.round(
-              (new Date(session.lastTimestamp).getTime() -
-                new Date(session.firstTimestamp).getTime()) /
-                60_000
-            )
-          ),
-          projectLabel: session.primaryProjectLabel,
-          model: session.primaryModel,
-          events: session.eventCount,
-          inputTokens: session.totalInputTokens,
-          cachedInputTokens: session.totalCachedInputTokens,
-          outputTokens: session.totalOutputTokens,
-          reasoningOutputTokens: session.totalReasoningOutputTokens,
-          totalTokens: session.totalTokens
-        })
-      )
+      .map((session): OpenCodeUsageSessionRow => ({
+        sessionId: session.sessionId,
+        lastActiveAt: session.lastTimestamp,
+        durationMinutes: Math.max(
+          0,
+          Math.round(
+            (new Date(session.lastTimestamp).getTime() -
+              new Date(session.firstTimestamp).getTime()) /
+              60_000
+          )
+        ),
+        projectLabel: session.primaryProjectLabel,
+        model: session.primaryModel,
+        events: session.eventCount,
+        inputTokens: session.totalInputTokens,
+        cachedInputTokens: session.totalCachedInputTokens,
+        outputTokens: session.totalOutputTokens,
+        reasoningOutputTokens: session.totalReasoningOutputTokens,
+        totalTokens: session.totalTokens
+      }))
   }
 
   private getFilteredDaily(

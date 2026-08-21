@@ -48,17 +48,15 @@ export class CoworkingLegacySessionAttestor {
     registeredRoots: readonly CoworkingRegisteredWorktreeRoot[]
   ): Promise<CoworkingPreparedPublicationPersistence> {
     const pending = targets
-      .map(
-        (entry): PendingPublication => ({
-          ...entry,
-          attestation: toPublicationAttestation(
-            entry.root.scopeKey,
-            entry.target,
-            entry.coworkingIncarnationId
-          ),
-          entries: new Map()
-        })
-      )
+      .map((entry): PendingPublication => ({
+        ...entry,
+        attestation: toPublicationAttestation(
+          entry.root.scopeKey,
+          entry.target,
+          entry.coworkingIncarnationId
+        ),
+        entries: new Map()
+      }))
       .filter(
         (entry) =>
           entry.forceRefresh || !this.provenance.hasLegacyPublicationAttestation(entry.attestation)

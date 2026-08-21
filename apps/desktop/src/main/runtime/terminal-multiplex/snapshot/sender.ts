@@ -10,6 +10,8 @@ import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
 import { buildTerminalMultiplexSnapshot } from './snapshot'
 
 const SNAPSHOT_CHUNK_DATA_BYTES = 48 * 1024
+const SNAPSHOT_MODEL_READY_RETRY_INTERVAL_MS = 50
+const SNAPSHOT_MODEL_READY_TIMEOUT_MS = 1_000
 
 type SendFrame = (
   opcode: (typeof TerminalMultiplexOpcode)[keyof typeof TerminalMultiplexOpcode],
@@ -38,13 +40,44 @@ export async function sendTerminalMultiplexSnapshot(options: {
   send: SendFrame
   isCurrent?: () => boolean
 }): Promise<TerminalMultiplexSentSnapshot> {
-  const result = await buildTerminalMultiplexSnapshot(
+  let result = await buildTerminalMultiplexSnapshot(
     options.runtime,
     options.ptyId,
     options.maxBytes,
     options.scrollbackRows,
     options.pendingDeliveryStartSeq
   )
+  if (result.kind === 'unavailable' && (options.reason === 0 || options.reason === 4)) {
+    // Why: a restored PTY can advertise before its first replay/live chunk
+    // creates main's headless model. Reporting unavailable at that instant
+    // leaves the renderer snapshotting even after normal output arrives.
+    const deadline = performance.now() + SNAPSHOT_MODEL_READY_TIMEOUT_MS
+    while (result.kind === 'unavailable' && performance.now() < deadline) {
+      await new Promise<void>((resolve) =>
+        setTimeout(resolve, SNAPSHOT_MODEL_READY_RETRY_INTERVAL_MS)
+      )
+      if (options.isCurrent && !options.isCurrent()) {
+        break
+      }
+      result = await buildTerminalMultiplexSnapshot(
+        options.runtime,
+        options.ptyId,
+        options.maxBytes,
+        options.scrollbackRows,
+        options.pendingDeliveryStartSeq
+      )
+    }
+  }
+  if (options.isCurrent && !options.isCurrent()) {
+    return {
+      snapshotId: options.snapshotId,
+      coverageEndSeq: options.runtime.getTerminalWireByteSequence(options.ptyId),
+      status: 3,
+      assembledBytes: 0,
+      retainedScrollbackRows: 0,
+      truncated: false
+    }
+  }
   if (result.kind !== 'complete') {
     const coverageEndSeq =
       result.kind === 'too-large'
@@ -70,17 +103,6 @@ export async function sendTerminalMultiplexSnapshot(options: {
       assembledBytes: 0,
       retainedScrollbackRows: 0,
       truncated: result.kind === 'too-large'
-    }
-  }
-
-  if (options.isCurrent && !options.isCurrent()) {
-    return {
-      snapshotId: options.snapshotId,
-      coverageEndSeq: result.snapshot.coverageEndSeq,
-      status: 3,
-      assembledBytes: 0,
-      retainedScrollbackRows: result.snapshot.retainedScrollbackRows,
-      truncated: result.snapshot.truncated
     }
   }
 

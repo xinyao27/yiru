@@ -332,6 +332,9 @@ function getDevUserDataPath() {
 }
 
 function prepareDevCliWrapper() {
+  const devCommandName = process.platform === 'win32' ? 'yiru-dev.cmd' : 'yiru-dev'
+  process.env.YIRU_CLI_COMMAND = devCommandName
+  process.env.YIRU_CLI_ENVIRONMENT = 'development'
   const binDir = path.join(appRoot, 'out', 'bin')
   mkdirSync(binDir, { recursive: true })
   const userDataPath = getDevUserDataPath()
@@ -342,24 +345,22 @@ function prepareDevCliWrapper() {
   if (process.platform === 'win32') {
     writeFileSync(
       path.join(binDir, 'yiru-dev.cmd'),
-      `@echo off\r\nset "YIRU_USER_DATA_PATH=${userDataPath}"\r\nset "YIRU_APP_EXECUTABLE=${electronBin}"\r\nset "YIRU_APP_EXECUTABLE_NEEDS_APP_ROOT=1"\r\nnode "${cliPath}" %*\r\n`,
+      `@echo off\r\nset "YIRU_USER_DATA_PATH=${userDataPath}"\r\nset "YIRU_CLI_COMMAND=${devCommandName}"\r\nset "YIRU_CLI_ENVIRONMENT=development"\r\nset "YIRU_APP_EXECUTABLE=${electronBin}"\r\nset "YIRU_APP_EXECUTABLE_NEEDS_APP_ROOT=1"\r\nnode "${cliPath}" %*\r\n`,
       'utf8'
     )
   } else {
-    const wrapperContent = `#!/usr/bin/env bash\nexport YIRU_USER_DATA_PATH=${JSON.stringify(userDataPath)}\nexport YIRU_APP_EXECUTABLE=${JSON.stringify(electronBin)}\nexport YIRU_APP_EXECUTABLE_NEEDS_APP_ROOT=1\nexec node ${JSON.stringify(cliPath)} "$@"\n`
-    const wrapperPath = path.join(binDir, 'yiru-dev')
+    const wrapperContent = `#!/usr/bin/env bash\nexport YIRU_USER_DATA_PATH=${JSON.stringify(userDataPath)}\nexport YIRU_CLI_COMMAND=${JSON.stringify(devCommandName)}\nexport YIRU_CLI_ENVIRONMENT=development\nexport YIRU_APP_EXECUTABLE=${JSON.stringify(electronBin)}\nexport YIRU_APP_EXECUTABLE_NEEDS_APP_ROOT=1\nexec node ${JSON.stringify(cliPath)} "$@"\n`
+    const wrapperPath = path.join(binDir, devCommandName)
     writeFileSync(wrapperPath, wrapperContent, 'utf8')
     chmodSync(wrapperPath, 0o755)
 
     mkdirSync(userDataBinDir, { recursive: true })
-    for (const commandName of ['yiru-dev', 'yiru']) {
-      const userDataWrapperPath = path.join(userDataBinDir, commandName)
-      // Why: dev Yiru terminals prepend this directory to PATH; refreshing the
-      // `yiru` alias prevents stale global/userData wrappers from hijacking
-      // Yiru-owned commands such as `yiru claude-teams`.
-      writeFileSync(userDataWrapperPath, wrapperContent, 'utf8')
-      chmodSync(userDataWrapperPath, 0o755)
-    }
+    // Why: remove the alias written by older dev builds so the development
+    // PATH cannot keep shadowing the installed production CLI after upgrade.
+    rmSync(path.join(userDataBinDir, 'yiru'), { force: true })
+    const userDataWrapperPath = path.join(userDataBinDir, devCommandName)
+    writeFileSync(userDataWrapperPath, wrapperContent, 'utf8')
+    chmodSync(userDataWrapperPath, 0o755)
   }
 
   process.env.PATH = `${binDir}${path.delimiter}${process.env.PATH ?? ''}`

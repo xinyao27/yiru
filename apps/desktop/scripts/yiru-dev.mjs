@@ -16,6 +16,8 @@ if (!existsSync(cliEntry)) {
 }
 
 process.env.YIRU_USER_DATA_PATH = process.env.YIRU_DEV_USER_DATA_PATH ?? getDefaultDevUserDataPath()
+process.env.YIRU_CLI_COMMAND = process.platform === 'win32' ? 'yiru-dev.cmd' : 'yiru-dev'
+process.env.YIRU_CLI_ENVIRONMENT = 'development'
 
 const electronExecutable = getElectronExecutable()
 if (!process.env.YIRU_APP_EXECUTABLE && isRunnableFile(electronExecutable)) {

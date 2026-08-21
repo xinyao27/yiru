@@ -1,4 +1,5 @@
 import { ORCHESTRATION_LEGACY_RUN_ID } from '~shared/orchestration-rpc-contract'
+import { resolveYiruCliCommandName } from '~shared/yiru-cli-command-name'
 
 import type { MessageRow } from './types'
 
@@ -6,6 +7,17 @@ const BANNER_WIDTH = 60
 const SEPARATOR = '─'.repeat(BANNER_WIDTH)
 
 export function formatMessageBanner(msg: MessageRow): string {
+  return formatMessageBannerForCli(
+    msg,
+    resolveYiruCliCommandName({
+      configuredCommand: process.env.YIRU_CLI_COMMAND,
+      environment: 'production',
+      platform: process.platform
+    })
+  )
+}
+
+function formatMessageBannerForCli(msg: MessageRow, cliCommand: string): string {
   const priorityTag =
     msg.priority === 'urgent' ? ' [URGENT]' : msg.priority === 'high' ? ' [HIGH]' : ''
   const legacyReadOnly = msg.run_id === ORCHESTRATION_LEGACY_RUN_ID
@@ -31,7 +43,7 @@ export function formatMessageBanner(msg: MessageRow): string {
   if (!legacyReadOnly) {
     // Why: older shells can lack Yiru's terminal identity environment.
     lines.push(
-      `[Reply: yiru orchestration reply --id ${msg.id} --from ${msg.to_handle} --body "..."]`
+      `[Reply: ${cliCommand} orchestration reply --id ${msg.id} --from ${msg.to_handle} --body "..."]`
     )
   }
   lines.push(SEPARATOR)
@@ -41,11 +53,13 @@ export function formatMessageBanner(msg: MessageRow): string {
 
 // Why: grouping multiple banners under a single wrapper line lets agents detect
 // the message block boundary and parse each banner individually.
-export function formatMessagesForInjection(messages: MessageRow[]): string {
+export function formatMessagesForInjection(messages: MessageRow[], cliCommand: string): string {
   if (messages.length === 0) {
     return ''
   }
 
-  const banners = messages.map(formatMessageBanner).join('\n\n')
+  const banners = messages
+    .map((message) => formatMessageBannerForCli(message, cliCommand))
+    .join('\n\n')
   return `\n--- Orchestration Messages (${messages.length}) ---\n${banners}\n---\n`
 }

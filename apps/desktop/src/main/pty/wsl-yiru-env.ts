@@ -25,6 +25,7 @@ export function addYiruWslInteropEnv(env: Record<string, string>): void {
     'YIRU_TERMINAL_HANDLE/u',
     'YIRU_USER_DATA_PATH/p',
     'YIRU_CLI_COMMAND/u',
+    'YIRU_CLI_ENVIRONMENT/u',
     'YIRU_PANE_KEY/u',
     'YIRU_TAB_ID/u',
     'YIRU_WORKTREE_ID/u',

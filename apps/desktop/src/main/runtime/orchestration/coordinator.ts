@@ -28,8 +28,9 @@ export type CoordinatorRuntime = {
   } | null>
   // Why: optional so lightweight runtime fakes keep compiling; when present, dispatch records the assignee's remint-stable pane identity.
   getTerminalPaneKey?(handle: string): string | null
-  // Why: Windows can host native and WSL workers at once, so the worker pane (not the coordinator) picks the packaged CLI name.
-  getTerminalOrchestrationCliCommand?(handle: string): 'yiru' | 'yiru-ide'
+  // Why: the worker pane (not the coordinator) owns the already-resolved CLI
+  // command for its host and dev/production environment.
+  getTerminalOrchestrationCliCommand?(handle: string): string
 }
 
 // Why (§3.1): 20 lets normal monorepo day-velocity pass but trips the 168-commit harm from ORCHESTRATOR_FEEDBACK.md (chosen in msg_eff3a646110d).
@@ -425,7 +426,6 @@ export class Coordinator {
       this.runtime.getTerminalPaneKey?.(targetHandle) ?? undefined
     )
 
-    // Why: dispatched agents use yiru-dev in dev mode to reach the dev runtime's socket, not production (Section 6.4).
     const preamble = buildDispatchPreamble({
       taskId: task.id,
       dispatchId: dispatch.id,
@@ -433,7 +433,6 @@ export class Coordinator {
       taskSpec: strippedSpec,
       coordinatorHandle: this.opts.coordinatorHandle,
       workerHandle: targetHandle,
-      devMode: process.env.YIRU_USER_DATA_PATH?.includes('yiru-dev'),
       ...(this.runtime.getTerminalOrchestrationCliCommand
         ? { cliCommand: this.runtime.getTerminalOrchestrationCliCommand(targetHandle) }
         : {}),

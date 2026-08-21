@@ -13,13 +13,13 @@ description: >-
 
 # Computer Use
 
-Use this skill for desktop UI through `yiru computer`. When the requested target is a website or web app, operate the desktop browser app/window that contains the page.
+Use this skill for desktop UI through `YIRU computer`. When the requested target is a website or web app, operate the desktop browser app/window that contains the page.
 
 ## Preconditions
 
-- Choose the Yiru executable once: use the `YIRU_CLI_COMMAND` environment value when set;
-  otherwise use `yiru-dev` in a dev session exposing `YIRU_DEV_REPO_ROOT`, and `yiru`
-  everywhere else.
+- Resolve the executable through the `yiru-cli` skill's **Start Here** contract before the first
+  command. Use the exact `YIRU_CLI_COMMAND` value in a managed terminal; if it is absent, do not
+  infer an environment in this skill.
 - In every command example, `YIRU` is a documentation placeholder — including examples that
   name a specific shell. Replace it with that chosen executable before running the command;
   do not create a shell variable or run `YIRU` literally. Blocks that name no shell are
@@ -131,7 +131,7 @@ Slack: the accessibility tree may be shallow while the screenshot contains usefu
 
 ## Errors
 
-- `app_not_found`: run `list-apps` and retry with the bundle ID. If the target is a web app such as Gmail, choose the desktop browser app/window that contains it; do not retry `YIRU computer ... --app Gmail` unchanged because `yiru computer` app selectors refer to desktop apps, not website names.
+- `app_not_found`: run `list-apps` and retry with the bundle ID. If the target is a web app such as Gmail, choose the desktop browser app/window that contains it; do not retry `YIRU computer ... --app Gmail` unchanged because `YIRU computer` app selectors refer to desktop apps, not website names.
 - `app_blocked`: stop; the target is intentionally blocked from computer-use.
 - `window_not_found` / `window_stale`: run `list-windows`, choose a current selector, then rerun `get-app-state`.
 - `window_not_focused`: retry once with `--restore-window`; if the message says restore was already requested, stop retrying restore and bring the app forward manually or check permissions. For editable fields prefer `set-value`, then inspect before assuming keyboard input worked.

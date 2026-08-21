@@ -7829,19 +7829,31 @@ export class YiruRuntimeService {
       : undefined
   }
 
-  getTerminalOrchestrationCliCommand(handle: string): 'yiru' | 'yiru-ide' {
+  getTerminalOrchestrationCliCommand(handle: string): string {
+    const isPackaged = getRuntimeHostPathsProvider().isPackaged()
     let pty: RuntimePtyWorktreeRecord | null = null
     try {
       const ptyId = this.resolveLeafForHandle(handle)?.ptyId
       pty = ptyId ? (this.terminalSessions.getPtyRecord(ptyId) ?? null) : null
     } catch {
-      return 'yiru'
+      return resolveTerminalOrchestrationCliCommand({
+        connectionId: null,
+        isPackaged,
+        isWsl: false,
+        worktreeId: ''
+      })
     }
     if (!pty) {
-      return 'yiru'
+      return resolveTerminalOrchestrationCliCommand({
+        connectionId: null,
+        isPackaged,
+        isWsl: false,
+        worktreeId: ''
+      })
     }
     return resolveTerminalOrchestrationCliCommand({
       connectionId: pty.connectionId,
+      isPackaged,
       isWsl: pty.isWsl,
       worktreeId: pty.worktreeId,
       projectRuntime: this.store
@@ -21895,7 +21907,10 @@ export class YiruRuntimeService {
       return
     }
 
-    const payload = formatMessagesForInjection(unread)
+    const payload = formatMessagesForInjection(
+      unread,
+      this.getTerminalOrchestrationCliCommand(handle)
+    )
     const wrote = this.ptyController?.write(leaf.ptyId, payload) ?? false
     if (!wrote) {
       return

@@ -568,7 +568,7 @@ if (app.isPackaged && process.platform !== 'win32') {
   })
 }
 configureDevUserDataPath(is.dev)
-configureYiruUserDataPathEnv()
+configureYiruUserDataPathEnv(is.dev)
 setMainSystemLocaleProvider(getElectronSystemLocale)
 setRuntimeHostPathsProvider({
   appPath: () => app.getAppPath(),

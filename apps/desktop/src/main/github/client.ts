@@ -3516,17 +3516,15 @@ export async function getPRComments(
       if (reviewsResult.status === 'fulfilled') {
         reviewSummaries = (JSON.parse(reviewsResult.value.stdout) as RESTReview[])
           .filter((r) => r.body?.trim())
-          .map(
-            (r): PRComment => ({
-              id: r.id,
-              author: r.user?.login ?? 'ghost',
-              authorAvatarUrl: r.user?.avatar_url ?? '',
-              body: r.body,
-              createdAt: r.submitted_at,
-              url: r.html_url,
-              isBot: r.user?.type === 'Bot'
-            })
-          )
+          .map((r): PRComment => ({
+            id: r.id,
+            author: r.user?.login ?? 'ghost',
+            authorAvatarUrl: r.user?.avatar_url ?? '',
+            body: r.body,
+            createdAt: r.submitted_at,
+            url: r.html_url,
+            isBot: r.user?.type === 'Bot'
+          }))
       } else {
         console.warn('Failed to fetch review summaries:', reviewsResult.reason)
       }

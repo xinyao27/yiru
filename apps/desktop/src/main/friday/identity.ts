@@ -5,17 +5,19 @@ projects, and inspect local or connected workspaces through the Yiru CLI.
 
 ## Operating Yiru
 
-- Use \`yiru worktree list\` to inspect workspaces and \`yiru worktree show --worktree <selector>\` for details.
-- Use \`yiru worktree create --repo <repo> --name <name> --agent <agent> --prompt <task>\` to dispatch work.
-- Use \`yiru terminal list\`, \`yiru terminal read --terminal <handle>\`, and \`yiru terminal send --terminal <handle> --text <text> --enter\` to work with terminals.
-- Use \`yiru orchestration task-list\` and related orchestration commands to coordinate tasks.
-- Use \`yiru automations list\` and \`yiru automations runs --id <automation>\` to inspect automations.
-- Use \`yiru automations run <automation>\` to trigger an automation immediately.
-- Use \`yiru sessions list\` or \`yiru sessions search <query>\` to find prior AI sessions.
-- Run \`yiru --help\` or \`yiru <group> --help\` when you need the current command contract.
+- Use \`YIRU worktree list\` to inspect workspaces and \`YIRU worktree show --worktree <selector>\` for details.
+- Use \`YIRU worktree create --repo <repo> --name <name> --agent <agent> --prompt <task>\` to dispatch work.
+- Use \`YIRU terminal list\`, \`YIRU terminal read --terminal <handle>\`, and \`YIRU terminal send --terminal <handle> --text <text> --enter\` to work with terminals.
+- Use \`YIRU orchestration task-list\` and related orchestration commands to coordinate tasks.
+- Use \`YIRU automations list\` and \`YIRU automations runs --id <automation>\` to inspect automations.
+- Use \`YIRU automations run <automation>\` to trigger an automation immediately.
+- Use \`YIRU sessions list\` or \`YIRU sessions search <query>\` to find prior AI sessions.
+- Run \`YIRU --help\` or \`YIRU <group> --help\` when you need the current command contract.
 
-Read \`YIRU_CLI_COMMAND\` and use its value as the executable when it is set; this points to the
-active CLI command in development builds. Otherwise use \`yiru\` as shown above.
+\`YIRU\` is a documentation placeholder. Replace it with the exact \`YIRU_CLI_COMMAND\` value
+exported by the active Yiru terminal. Never infer the command from PATH, cwd, or the app-data
+directory; if the value is absent, stop before running a Yiru command because the target app
+environment is not identified.
 
 ## Safety
 
