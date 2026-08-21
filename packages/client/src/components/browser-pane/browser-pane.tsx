@@ -98,8 +98,7 @@ import type { BrowserWebviewElement } from '~renderer/runtime/browser-webview-el
 import {
   destroyPersistentWebview,
   moveFocusToRendererBeforeWebviewDetach,
-  registeredWebContentsIds,
-  waitForPendingWebviewDestruction
+  registeredWebContentsIds
 } from '~renderer/runtime/browser-webview-registry'
 import {
   isRemoteRuntimeFileOperation,
@@ -2897,7 +2896,7 @@ function BrowserPagePane({
   const lastKnownWebviewUrlRef = useRef<string | null>(null)
   // Why: URL synchronization runs in a separate effect and must not bypass the
   // pre-document script registration while a newly attached guest is pending.
-  const initialNavigationPendingWebviewRef = useRef<BrowserWebviewElement | null>(null)
+  const registrationPendingWebviewRef = useRef<BrowserWebviewElement | null>(null)
   const onUpdatePageStateRef = useRef(onUpdatePageState)
   const onSetUrlRef = useRef(onSetUrl)
   const addBrowserHistoryEntry = useAppStore((s) => s.addBrowserHistoryEntry)
@@ -3782,8 +3781,7 @@ function BrowserPagePane({
       }
     }
     const needsGuestRegistration = !needsInitialNavigation && !hasRegisteredWebContents()
-    initialNavigationPendingWebviewRef.current =
-      needsInitialNavigation || needsGuestRegistration ? webview : null
+    registrationPendingWebviewRef.current = needsGuestRegistration ? webview : null
     let needsInitialDefaultZoom = ensuredWebview.created
 
     if (!ensuredWebview.created) {
@@ -3863,34 +3861,6 @@ function BrowserPagePane({
       return promise
     }
 
-    let initialUrl =
-      normalizeBrowserNavigationUrl(initialBrowserUrlRef.current) ?? YIRU_BROWSER_BLANK_URL
-    // Why: a webview without src may never create its guest, so bootstrap with
-    // Yiru's inert blank document before navigating to the requested URL. Keep
-    // its events out of the page model until the requested navigation commits.
-    let initialTargetCommitted = initialUrl === YIRU_BROWSER_BLANK_URL
-    let hasStartedInitialNavigation = !needsInitialNavigation
-    const startInitialNavigation = (): void => {
-      if (
-        lifecycleDisposed ||
-        hasStartedInitialNavigation ||
-        initialNavigationPendingWebviewRef.current !== webview ||
-        !webview.isConnected
-      ) {
-        return
-      }
-      hasStartedInitialNavigation = true
-      initialNavigationPendingWebviewRef.current = null
-      initialUrl =
-        normalizeBrowserNavigationUrl(initialBrowserUrlRef.current) ?? YIRU_BROWSER_BLANK_URL
-      initialTargetCommitted = initialUrl === YIRU_BROWSER_BLANK_URL
-      // Why: listeners and the pre-document session restore must both be ready
-      // before the first real URL can execute any site JavaScript.
-      trackNextLoadingEventRef.current = initialUrl !== YIRU_BROWSER_BLANK_URL
-      lastKnownWebviewUrlRef.current = initialUrl
-      webview.src = initialUrl
-    }
-
     let finishGuestRegistration: (registered: boolean) => void = () => {}
     const scheduleGuestRegistrationRetry = (): void => {
       if (
@@ -3946,12 +3916,8 @@ function BrowserPagePane({
           clearTimeout(registrationRetryTimer)
           registrationRetryTimer = null
         }
-        if (needsInitialNavigation) {
-          void waitForPendingWebviewDestruction().then(startInitialNavigation)
-        } else {
-          initialNavigationPendingWebviewRef.current = null
-          syncRegisteredWebviewToStoreUrl()
-        }
+        registrationPendingWebviewRef.current = null
+        syncRegisteredWebviewToStoreUrl()
       } else {
         scheduleGuestRegistrationRetry()
       }
@@ -4019,17 +3985,6 @@ function BrowserPagePane({
 
     const handleDidStopLoading = (): void => {
       const currentUrl = webview.getURL() || webview.src || 'about:blank'
-      if (
-        needsInitialNavigation &&
-        initialUrl !== YIRU_BROWSER_BLANK_URL &&
-        !initialTargetCommitted &&
-        normalizeBrowserNavigationUrl(currentUrl) === YIRU_BROWSER_BLANK_URL
-      ) {
-        return
-      }
-      if (needsInitialNavigation && initialUrl !== YIRU_BROWSER_BLANK_URL) {
-        initialTargetCommitted = true
-      }
       const browserModelUrl = redactKagiSessionToken(currentUrl)
       const activeLoadFailure = activeLoadFailureRef.current
       if (isChromiumErrorPage(currentUrl)) {
@@ -4107,17 +4062,6 @@ function BrowserPagePane({
       const currentUrl = event.url ?? webview.getURL() ?? webview.src ?? 'about:blank'
       if (isChromiumErrorPage(currentUrl)) {
         return
-      }
-      if (
-        needsInitialNavigation &&
-        initialUrl !== YIRU_BROWSER_BLANK_URL &&
-        !initialTargetCommitted &&
-        normalizeBrowserNavigationUrl(currentUrl) === YIRU_BROWSER_BLANK_URL
-      ) {
-        return
-      }
-      if (needsInitialNavigation && initialUrl !== YIRU_BROWSER_BLANK_URL) {
-        initialTargetCommitted = true
       }
       const browserModelUrl = redactKagiSessionToken(currentUrl)
       lastKnownWebviewUrlRef.current =
@@ -4234,11 +4178,14 @@ function BrowserPagePane({
       void registerGuest().then(finishGuestRegistration)
     }
     if (needsInitialNavigation) {
-      // Why: assigning the requested URL before registerGuest completes lets
-      // site JavaScript run before session restoration and guest policies are
-      // installed. The inert bootstrap creates the guest without exposing the
-      // requested page, then startInitialNavigation replaces it safely.
-      webview.src = YIRU_BROWSER_BLANK_URL
+      // Why: listeners must be attached before navigation so fast localhost
+      // failures are observable, but the requested URL itself must remain the
+      // guest's first navigation instead of visibly routing through blank.
+      const initialUrl =
+        normalizeBrowserNavigationUrl(initialBrowserUrlRef.current) ?? YIRU_BROWSER_BLANK_URL
+      trackNextLoadingEventRef.current = initialUrl !== YIRU_BROWSER_BLANK_URL
+      lastKnownWebviewUrlRef.current = initialUrl
+      webview.src = initialUrl
     }
 
     return () => {
@@ -4330,7 +4277,7 @@ function BrowserPagePane({
     if (!webview) {
       return
     }
-    if (initialNavigationPendingWebviewRef.current === webview) {
+    if (registrationPendingWebviewRef.current === webview) {
       return
     }
     const normalizedUrl = normalizeBrowserNavigationUrl(browserTab.url)

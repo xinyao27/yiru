@@ -198,7 +198,7 @@ export function openHttpLinkAtTerminalMouseEvent(
   if (!position) {
     return false
   }
-  return openHttpLinkAtBufferPosition(terminal.buffer.active, position, terminal.cols, deps)
+  return openHttpLinkAtBufferPosition(terminal.buffer.active, position, terminal.cols, deps, event)
 }
 
 export function installHttpLinkClickFallback(
@@ -243,13 +243,14 @@ export function openHttpLinkAtBufferPosition(
   buffer: { getLine(y: number): IBufferLine | undefined },
   position: { x: number; y: number },
   terminalColumns: number,
-  deps: UrlLinkHitTestDeps
+  deps: UrlLinkHitTestDeps,
+  event: Partial<Pick<MouseEvent, 'shiftKey'>>
 ): boolean {
   const url = findHttpLinkAtBufferPosition(buffer, position, terminalColumns)
   if (!url) {
     return false
   }
-  openTerminalHttpLink(url, deps)
+  openTerminalHttpLink(url, deps, event)
   return true
 }
 
@@ -297,9 +298,15 @@ function rangeContainsBufferPosition(
   return lower <= current && current <= upper
 }
 
-export function openTerminalHttpLink(url: string, deps: UrlLinkHitTestDeps): void {
+export function openTerminalHttpLink(
+  url: string,
+  deps: UrlLinkHitTestDeps,
+  event?: Partial<Pick<MouseEvent, 'shiftKey'>>
+): void {
+  // Why: the primary modifier safely activates terminal links; Shift is the
+  // explicit opt-in to a Yiru Browser tab instead of the system browser.
   openHttpLink(url, {
-    openInYiruBrowser: true,
+    openInYiruBrowser: event?.shiftKey === true,
     worktreeId: deps.worktreeId,
     sourceOwner: deps.runtimeEnvironmentId
       ? { kind: 'runtime', runtimeEnvironmentId: deps.runtimeEnvironmentId }

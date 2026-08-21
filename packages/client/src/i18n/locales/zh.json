@@ -12037,6 +12037,12 @@
       },
       "launchPromptNotDelivered": "未送达 — 请检查终端"
     },
+    "terminalPane": {
+      "urlLinkHint": {
+        "mac": "⌘+点击：默认浏览器；⇧⌘+点击：Yiru 浏览器",
+        "other": "Ctrl+点击：默认浏览器；Shift+Ctrl+点击：Yiru 浏览器"
+      }
+    },
     "tab": {
       "bar": {
         "SortableTabContextMenu": {

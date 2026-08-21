@@ -524,8 +524,8 @@ export function createMainWindow(
     // Why: arbitrary sites must stay inside an unprivileged guest surface. We
     // fail closed here so a renderer bug cannot smuggle preload, Node, or a
     // non-browser partition into the guest and widen the app privilege boundary.
-    // The one allowed data URL is Yiru's inert blank-tab bootstrap page; deny
-    // every other data URL so the renderer cannot inject arbitrary inline HTML.
+    // The one allowed data URL is Yiru's inert blank-tab page; deny every other
+    // data URL so the renderer cannot inject arbitrary inline HTML.
     // Why: session profiles use per-profile partitions (e.g.
     // persist:yiru-browser-session-<uuid>). The registry is the sole authority
     // for which partitions are valid — renderer-provided strings that are not

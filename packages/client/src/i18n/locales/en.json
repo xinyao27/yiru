@@ -12073,6 +12073,12 @@
       },
       "launchPromptNotDelivered": "Not delivered — check the terminal"
     },
+    "terminalPane": {
+      "urlLinkHint": {
+        "mac": "⌘+click for default browser or ⇧⌘+click for Yiru Browser",
+        "other": "Ctrl+click for default browser or Shift+Ctrl+click for Yiru Browser"
+      }
+    },
     "tab": {
       "bar": {
         "SortableTabContextMenu": {

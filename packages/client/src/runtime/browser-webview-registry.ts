@@ -194,10 +194,6 @@ export function moveFocusToRendererBeforeWebviewDetach(webview: BrowserWebviewEl
   moveFocusToRendererIfWebviewOwnsFocus(webview)
 }
 
-export async function waitForPendingWebviewDestruction(): Promise<void> {
-  await Promise.allSettled(webviewDestruction.values())
-}
-
 async function persistSessionStorageBeforeDetach(
   browserTabId: string,
   webview: BrowserWebviewElement

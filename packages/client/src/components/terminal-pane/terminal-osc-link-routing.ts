@@ -3,11 +3,11 @@ import { resolveTerminalFileLinkText } from '~renderer/lib/terminal-links'
 
 import { openDetectedFilePath } from './terminal-file-open-routing'
 import { resolveTerminalFileUrlTarget } from './terminal-file-url-target'
-import { isTerminalLinkActivation } from './terminal-link-activation'
+import { isTerminalHttpLinkActivation } from './terminal-http-link-activation'
 import type { LinkHandlerDeps } from './terminal-link-handlers'
 import { openTerminalHttpLink } from './terminal-url-link-hit-testing'
 
-type TerminalLinkEvent = Pick<MouseEvent, 'metaKey' | 'ctrlKey'> &
+type TerminalLinkEvent = Pick<MouseEvent, 'altKey' | 'metaKey' | 'ctrlKey'> &
   Partial<Pick<MouseEvent, 'button' | 'shiftKey' | 'preventDefault' | 'stopPropagation'>>
 
 function isDesktopOscLinkActivation(event: TerminalLinkEvent | undefined): boolean {
@@ -19,7 +19,7 @@ function isDesktopOscLinkActivation(event: TerminalLinkEvent | undefined): boole
   }
   // Why: desktop xterm links must not open while the user is just placing the
   // cursor or selecting text. Mobile URL taps use a separate WebView path.
-  return isTerminalLinkActivation(event)
+  return isTerminalHttpLinkActivation(event)
 }
 
 export function handleOscLink(
@@ -75,10 +75,14 @@ export function handleOscLink(
   }
 
   if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
-    openTerminalHttpLink(parsed.toString(), {
-      worktreeId: deps.worktreeId,
-      runtimeEnvironmentId: deps.runtimeEnvironmentId
-    })
+    openTerminalHttpLink(
+      parsed.toString(),
+      {
+        worktreeId: deps.worktreeId,
+        runtimeEnvironmentId: deps.runtimeEnvironmentId
+      },
+      event
+    )
     return true
   }
 

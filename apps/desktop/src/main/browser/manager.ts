@@ -951,11 +951,10 @@ export class BrowserManager {
       if (url.startsWith('blob:https://') || url.startsWith('blob:http://')) {
         return
       }
-      // Why: a new guest bootstraps through Yiru's inert blank document before
-      // loading an explicitly opened local preview. Permit that one transition
-      // only while the guest is still blank; after any real navigation, a page
-      // must not be able to redirect the guest to file:// and probe the local
-      // filesystem.
+      // Why: an explicitly opened local preview can be the first navigation
+      // from a blank tab. Permit that one transition only while the guest is
+      // still blank; after any real navigation, a page must not be able to
+      // redirect the guest to file:// and probe the local filesystem.
       if (url.startsWith('file:')) {
         let currentUrl = ''
         try {
@@ -1266,8 +1265,8 @@ export class BrowserManager {
       return false
     }
     try {
-      // Why: the first real navigation is held in the renderer until this
-      // resolves, so restoration runs before any site script can read storage.
+      // Why: bind the document bridge to the stable page id before exposing the
+      // guest to browser automation or any later navigation.
       await installGuestDocumentScripts(browserTabId)
     } catch {
       clearRegistrationAttempt()

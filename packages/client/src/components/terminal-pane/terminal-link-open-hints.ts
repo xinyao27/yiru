@@ -1,3 +1,5 @@
+import { translate } from '~renderer/i18n/i18n'
+
 export function isMacPlatform(): boolean {
   return navigator.userAgent.includes('Mac')
 }
@@ -21,7 +23,15 @@ export function getTerminalHtmlFileOpenHint(): string {
 }
 
 export function getTerminalUrlOpenHint(): string {
-  return isMacPlatform() ? '⌘+click to open link' : 'Ctrl+click to open link'
+  return isMacPlatform()
+    ? translate(
+        'components.terminalPane.urlLinkHint.mac',
+        '⌘+click for default browser or ⇧⌘+click for Yiru Browser'
+      )
+    : translate(
+        'components.terminalPane.urlLinkHint.other',
+        'Ctrl+click for default browser or Shift+Ctrl+click for Yiru Browser'
+      )
 }
 
 export function getTerminalWorktreePathOpenHint(canOpenWithSystemDefault: boolean): string {

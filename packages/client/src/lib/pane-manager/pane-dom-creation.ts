@@ -5,6 +5,7 @@ import { Unicode11Addon } from '@xterm/addon-unicode11'
 import { WebLinksAddon } from '@xterm/addon-web-links'
 import { Terminal } from '@xterm/xterm'
 import type { ITerminalOptions } from '@xterm/xterm'
+import { getTerminalUrlOpenHint } from '~renderer/components/terminal-pane/terminal-link-open-hints'
 import type { TerminalLeafId } from '~shared/stable-pane-id'
 
 import { attachPaneDrag } from './pane-drag-pointer'
@@ -15,10 +16,6 @@ import { ENABLE_WEBGL_RENDERER } from './pane-webgl-renderer'
 import { installGuardedLinkProviderRegistration } from './terminal-link-provider-guard'
 import { installWindowsCtrlAltChordRepair } from './terminal-windows-ctrl-alt-chord-classification'
 import type { ManagedPaneInternal, PaneManagerOptions } from './types'
-
-function getTerminalUrlOpenHint(): string {
-  return navigator.userAgent.includes('Mac') ? '⌘+click to open link' : 'Ctrl+click to open link'
-}
 
 function defaultLinkTooltipText(uri: string, openLinkHint: string): string {
   return `${uri} (${openLinkHint})`
