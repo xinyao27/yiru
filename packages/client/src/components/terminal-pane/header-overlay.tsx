@@ -1,7 +1,7 @@
 import type { BaseUIEvent } from '@base-ui/react/types'
 import type { CSSProperties, RefObject } from 'react'
 import {
-  ChatCentered as MessageSquarePlus,
+  ArrowSquareOut,
   Chat as MessageSquare,
   SquareSplitVertical,
   TerminalWindow as SquareTerminal,
@@ -274,7 +274,7 @@ export default function TerminalPaneHeaderOverlay({
                               onContinueAgentSessionInNewSession?.(pane)
                             }}
                           >
-                            <MessageSquarePlus className="size-3" />
+                            <ArrowSquareOut className="size-3" />
                           </Button>
                         }
                       />

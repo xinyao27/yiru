@@ -81,7 +81,7 @@ import {
   VolumeHighIcon as HugeVolumeHighIcon,
   VolumeLowIcon as HugeVolumeLowIcon,
   SquareIcon as HugeSquareIcon,
-  TableRowsSplitIcon as HugeTableRowsSplitIcon,
+  LayoutTwoColumnIcon as HugeLayoutTwoColumnIcon,
   Layers01Icon as HugeLayers01Icon,
   StarIcon as HugeStarIcon,
   StopCircleIcon as HugeStopCircleIcon,
@@ -204,7 +204,7 @@ export const Sparkle = createHugeIcon(HugeSparklesIcon)
 export const SpeakerHigh = createHugeIcon(HugeVolumeHighIcon)
 export const SpeakerLow = createHugeIcon(HugeVolumeLowIcon)
 export const Square = createHugeIcon(HugeSquareIcon)
-export const SquareSplitVertical = createHugeIcon(HugeTableRowsSplitIcon)
+export const SquareSplitVertical = createHugeIcon(HugeLayoutTwoColumnIcon)
 export const Stack = createHugeIcon(HugeLayers01Icon)
 export const Star = createHugeIcon(HugeStarIcon)
 export const StopCircle = createHugeIcon(HugeStopCircleIcon)
