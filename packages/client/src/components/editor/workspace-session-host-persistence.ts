@@ -14,6 +14,7 @@ import {
   type HostSessionSlices,
   type HostIdByWorktreeId
 } from './workspace-session-host-split'
+import { canonicalizeWorkspaceSessionTerminalIds } from './workspace-session-terminal-ids'
 
 export type HostPersistenceState = {
   repos: readonly Pick<Repo, 'id' | 'connectionId' | 'executionHostId'>[]
@@ -260,7 +261,7 @@ export async function fetchWorkspaceSessionWithRuntimeHostOwners(
   additionalRuntimeHostIds: readonly ExecutionHostId[] = []
 ): Promise<WorkspaceSessionHostRead> {
   const slices: HostSessionSlices = {
-    [LOCAL_EXECUTION_HOST_ID]: await api.get()
+    [LOCAL_EXECUTION_HOST_ID]: await canonicalizeWorkspaceSessionTerminalIds(await api.get())
   }
   // Why: startup can know saved runtime session hosts before their repo
   // catalogs hydrate, so include those partitions in the first read.
@@ -271,7 +272,10 @@ export async function fetchWorkspaceSessionWithRuntimeHostOwners(
   await Promise.all(
     [...runtimeHostIds].map(async (hostId) => {
       try {
-        slices[hostId] = await api.get(hostId)
+        slices[hostId] = await canonicalizeWorkspaceSessionTerminalIds(
+          await api.get(hostId),
+          hostId
+        )
       } catch (err) {
         console.warn(`[session] skipping unreadable host partition ${hostId}:`, err)
       }

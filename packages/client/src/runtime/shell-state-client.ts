@@ -74,10 +74,14 @@ const electronSettingsApi: ShellSettingsApi = {
 }
 
 const electronSessionApi: ShellSessionApi = {
-  get: async (hostId) =>
-    restoreShellDocument<WorkspaceSessionState>(
+  get: async (hostId) => {
+    // Why: legacy PTY ids can only be exchanged for runtime handles after the
+    // persistent daemon has restored its terminal inventory.
+    await callShellOrpc((client) => client.shell.app.awaitFirstWindowStartupServices, undefined)
+    return restoreShellDocument<WorkspaceSessionState>(
       await callShellOrpc((client) => client.shell.session.get, { hostId })
-    ),
+    )
+  },
   set: (session, hostId) =>
     callShellOrpc((client) => client.shell.session.set, { session, hostId }),
   patch: (patch, hostId) =>
