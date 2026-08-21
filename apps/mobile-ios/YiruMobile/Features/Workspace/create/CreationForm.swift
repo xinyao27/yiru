@@ -87,7 +87,7 @@ extension WorkspaceCreationSheet {
                 }
                 .workspaceCreationControl()
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.appPlain)
             .accessibilityRepresentation {
                 Button {
                     presentedSheet = .picker(.repository)
@@ -145,7 +145,7 @@ extension WorkspaceCreationSheet {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .workspaceCreationControl()
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.appPlain)
             }
         }
     }
@@ -166,7 +166,7 @@ extension WorkspaceCreationSheet {
                 }
                 .workspaceCreationControl()
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.appPlain)
             .accessibilityRepresentation {
                 Button {
                     presentedSheet = .picker(.agent)
@@ -195,7 +195,7 @@ extension WorkspaceCreationSheet {
                 .foregroundStyle(Theme.Colors.mutedForeground)
                 .frame(minHeight: Theme.Size.minimumHitTarget)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.appPlain)
 
             if model.isAdvancedExpanded {
                 if visibleSourceSelection != nil {

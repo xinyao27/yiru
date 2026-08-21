@@ -37,7 +37,7 @@ struct BrowserSettingsView: View {
                         .frame(minHeight: Theme.Size.minimumHitTarget)
                         .contentShape(.rect)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.appPlain)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -123,7 +123,7 @@ private struct BrowserLinkModePicker: View {
             .frame(minHeight: Theme.Size.minimumHitTarget)
             .contentShape(.rect)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.appPlain)
         .accessibilityLabel(mode.title)
         .accessibilityValue(preferences.terminalLinkOpenMode == mode ? "Selected" : "")
         .accessibilityAddTraits(preferences.terminalLinkOpenMode == mode ? .isSelected : [])

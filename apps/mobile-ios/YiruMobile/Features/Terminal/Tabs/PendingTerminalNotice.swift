@@ -34,9 +34,10 @@ struct PendingTerminalNotice: View {
             if didTimeOut {
                 Button("Retry", action: retry)
                     .font(.system(size: Theme.Typography.metadata, weight: .regular))
-                    .buttonStyle(.plain)
+                    .buttonStyle(.appPlain)
                     .foregroundStyle(Theme.Colors.foreground)
                     .frame(minHeight: Theme.Size.minimumHitTarget)
+                    .contentShape(.interaction, .rect)
             }
 
             Button(action: dismiss) {
@@ -47,7 +48,7 @@ struct PendingTerminalNotice: View {
                         height: Theme.Size.minimumHitTarget
                     )
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.appPlain)
             .accessibilityLabel("Dismiss starting terminal notice")
         }
         .padding(.leading, Theme.Spacing.medium)

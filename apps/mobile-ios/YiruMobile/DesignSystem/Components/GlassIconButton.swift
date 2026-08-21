@@ -23,7 +23,7 @@ struct GlassCircleButton<Label: View>: View {
             .frame(width: Theme.Size.minimumHitTarget, height: Theme.Size.minimumHitTarget)
             .contentShape(.rect)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.appPlain)
         .disabled(isDisabled || isLoading)
         .opacity(isDisabled ? 0.45 : 1)
         .accessibilityLabel(accessibilityLabel)
@@ -96,7 +96,7 @@ struct ProminentCircleButton: View {
                 .frame(width: Theme.Size.minimumHitTarget, height: Theme.Size.minimumHitTarget)
                 .contentShape(.rect)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.appPlain)
         .disabled(isDisabled)
         .opacity(isDisabled ? 0.4 : 1)
         .accessibilityLabel(accessibilityLabel)

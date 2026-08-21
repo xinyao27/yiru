@@ -42,7 +42,7 @@ struct TerminalAutoRestorePicker: View {
                 isSelected: selectedOption == option
             )
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.appPlain)
         .accessibilityLabel(option.title)
         .accessibilityValue(selectedOption == option ? "Selected" : "")
         .accessibilityAddTraits(selectedOption == option ? .isSelected : [])
@@ -86,7 +86,7 @@ struct TerminalTextSizePicker: View {
                 isSelected: preferences.textSize == size
             )
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.appPlain)
         .accessibilityLabel(size.title)
         .accessibilityValue(preferences.textSize == size ? "Selected" : "")
         .accessibilityAddTraits(preferences.textSize == size ? .isSelected : [])

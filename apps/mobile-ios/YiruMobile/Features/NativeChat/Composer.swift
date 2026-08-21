@@ -128,7 +128,7 @@ struct NativeChatComposer: View {
                             .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                             .padding(.horizontal, Theme.Spacing.medium)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.appPlain)
                 }
             }
         }

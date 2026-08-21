@@ -162,8 +162,9 @@ struct TerminalQuickCommandSheet: View {
                         )
                         .background(Theme.Colors.mutedForeground, in: Circle())
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.appPlain)
                 .frame(width: Theme.Size.minimumHitTarget, height: Theme.Size.minimumHitTarget)
+                .contentShape(.interaction, .rect)
                 .accessibilityLabel("Clear search")
             }
         }
@@ -218,7 +219,7 @@ struct TerminalQuickCommandSheet: View {
             .frame(minHeight: Theme.Size.minimumHitTarget, alignment: .leading)
             .contentShape(.rect)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.appPlain)
         .glassEffect(.regular.interactive(), in: .rect(cornerRadius: Theme.Radius.control))
         .disabled(!model.canAdd)
         .opacity(model.canAdd ? 1 : 0.45)
@@ -267,7 +268,7 @@ struct TerminalQuickCommandSheet: View {
                 .frame(maxWidth: .infinity, minHeight: 52, alignment: .leading)
                 .contentShape(.rect)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.appPlain)
             .accessibilityLabel("Run \(command.label)")
 
             HStack(spacing: Theme.Glass.groupSpacing) {

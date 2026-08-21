@@ -76,7 +76,7 @@ struct LoaderPickerSheet: View {
             .frame(minHeight: Theme.Size.minimumHitTarget)
             .contentShape(.rect)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.appPlain)
         .accessibilityLabel(style.title)
         .accessibilityValue(preferences.loaderStyle == style ? "Selected" : "")
         .accessibilityAddTraits(preferences.loaderStyle == style ? .isSelected : [])

@@ -45,7 +45,7 @@ struct NativeChatMessageRow: View {
                             .lineLimit(1)
                             .frame(minHeight: 30, alignment: .leading)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.appPlain)
                     .accessibilityHint("Show details")
                 }
                 if message.role != .user, !message.plainText.isEmpty, !isQueued {
@@ -164,7 +164,7 @@ private struct NativeChatToolDetailSheet: View {
                                         }
                                     }
                                 }
-                                .buttonStyle(.plain)
+                                .buttonStyle(.appPlain)
                                 .disabled(input.filePath == nil)
                                 if let callID {
                                     Text(callID)

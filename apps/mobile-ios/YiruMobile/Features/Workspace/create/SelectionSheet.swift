@@ -128,7 +128,7 @@ struct WorkspaceCreationPickerSheet: View {
             .frame(minHeight: rowHeight)
             .contentShape(.rect)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.appPlain)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 

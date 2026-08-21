@@ -48,7 +48,7 @@ struct SourceFileRow: View {
                 }
                 .contentShape(.rect)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.appPlain)
             .disabled(isDisabled || !entry.canOpen)
 
             // Why: this must be a sibling of the "open" button, not nested inside its

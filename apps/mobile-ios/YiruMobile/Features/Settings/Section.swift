@@ -90,7 +90,7 @@ struct SettingsNavigationRow: View {
             .frame(minHeight: Theme.Size.minimumHitTarget)
             .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.appPlain)
     }
 }
 
@@ -114,7 +114,7 @@ struct SettingsLinkRow: View {
             .frame(minHeight: Theme.Size.minimumHitTarget)
             .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.appPlain)
     }
 }
 

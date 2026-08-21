@@ -93,11 +93,12 @@ struct AccountUsageSection: View {
                                     .foregroundStyle(Theme.Colors.foreground)
                             }
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(.appPlain)
                         .frame(
                             minWidth: Theme.Size.minimumHitTarget,
                             minHeight: Theme.Size.minimumHitTarget
                         )
+                        .contentShape(.interaction, .rect)
                         .disabled(busyAccountID != nil || !isConnected)
                     }
                 }
@@ -159,7 +160,7 @@ struct AccountUsageSection: View {
             .frame(minHeight: Theme.Size.minimumHitTarget)
             .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.appPlain)
         .disabled(isActive || busyAccountID != nil || !isConnected)
     }
 

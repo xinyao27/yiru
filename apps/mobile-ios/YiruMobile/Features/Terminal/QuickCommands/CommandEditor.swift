@@ -147,7 +147,7 @@ struct TerminalQuickCommandEditor: View {
                         .foregroundStyle(Theme.Colors.mutedForeground)
                         .contentShape(.rect)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.appPlain)
 
                     if isAdvancedOpen {
                         if action == .terminal {

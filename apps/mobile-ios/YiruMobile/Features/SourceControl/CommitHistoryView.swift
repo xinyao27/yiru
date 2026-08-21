@@ -108,7 +108,7 @@ struct SourceHistoryView: View {
                 .padding(.vertical, Theme.Spacing.medium)
                 .contentShape(Rectangle())
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.appPlain)
             if isExpanded { expandedFiles(commit) }
         }
         .overlay(alignment: .bottom) {

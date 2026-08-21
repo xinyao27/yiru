@@ -135,7 +135,7 @@ struct SourceReviewFileSummary: View {
                             in: .rect(cornerRadius: Theme.Radius.control)
                         )
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.appPlain)
             }
         }
         .padding(.top, Theme.Spacing.small)

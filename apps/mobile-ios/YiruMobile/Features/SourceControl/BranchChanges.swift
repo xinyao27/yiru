@@ -102,10 +102,11 @@ struct SourceBranchChanges: View {
             .padding(.horizontal, Theme.Spacing.page)
             .contentShape(.rect)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.appPlain)
         .disabled(!canOpen || model.busyAction != nil)
         .padding(.vertical, Theme.Spacing.small)
         .frame(minHeight: Theme.Size.minimumHitTarget)
+        .contentShape(.interaction, .rect)
         .listRowInsets(EdgeInsets())
         .listRowBackground(Theme.Colors.background)
     }

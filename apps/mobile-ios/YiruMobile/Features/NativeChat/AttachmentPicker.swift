@@ -48,7 +48,7 @@ struct NativeChatAttachmentPicker: View {
             .frame(width: Theme.Size.minimumHitTarget, height: Theme.Size.minimumHitTarget)
             .contentShape(.rect)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.appPlain)
         .disabled(isDisabled || isPending)
         .opacity(isDisabled ? 0.4 : 1)
         .accessibilityLabel(isPending ? "Adding attachment" : "Add attachment")

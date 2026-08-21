@@ -32,11 +32,12 @@ struct WorkspaceSearchSheet: View {
                             .frame(width: 24, height: 24)
                             .background(Theme.Colors.mutedForeground, in: Circle())
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.appPlain)
                     .frame(
                         width: Theme.Size.minimumHitTarget,
                         height: Theme.Size.minimumHitTarget
                     )
+                    .contentShape(.interaction, .rect)
                     .accessibilityLabel("Clear search")
                 }
             }

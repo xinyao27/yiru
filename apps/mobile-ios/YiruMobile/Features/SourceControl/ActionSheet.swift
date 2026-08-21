@@ -89,7 +89,7 @@ struct SourceControlActionSheet: View {
             .padding(.vertical, Theme.Spacing.medium)
             .contentShape(.rect)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.appPlain)
         .disabled(action.isDisabled)
     }
 

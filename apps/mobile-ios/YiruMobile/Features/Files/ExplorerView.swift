@@ -185,7 +185,7 @@ struct WorkspaceFileExplorerView: View {
             .frame(minHeight: Theme.Size.minimumHitTarget)
             .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.appPlain)
         .disabled(row.kind == .binary && !canPreview)
         .accessibilityLabel(accessibilityLabel(row, canPreview: canPreview))
     }

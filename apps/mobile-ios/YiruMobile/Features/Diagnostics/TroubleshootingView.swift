@@ -32,7 +32,7 @@ struct TroubleshootingView: View {
                         .frame(maxWidth: .infinity, alignment: .center)
                         .frame(minHeight: Theme.Size.minimumHitTarget)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.appPlain)
                     .disabled(model.isRunning)
 
                     Button(action: showConnectionLog) {
@@ -41,7 +41,7 @@ struct TroubleshootingView: View {
                             .frame(maxWidth: .infinity, alignment: .center)
                             .frame(minHeight: Theme.Size.minimumHitTarget)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.appPlain)
                 }
                 .padding(.bottom, Theme.Spacing.standard)
 
@@ -146,7 +146,7 @@ struct TroubleshootingView: View {
                 .frame(minHeight: Theme.Size.minimumHitTarget)
                 .contentShape(Rectangle())
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.appPlain)
 
             if expandedIssueID == issue.id {
                 VStack(alignment: .leading, spacing: Theme.Spacing.small) {

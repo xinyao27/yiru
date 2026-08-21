@@ -181,7 +181,7 @@ private struct NativeChatChoiceCard: View {
                         .frame(minHeight: Theme.Size.minimumHitTarget)
                         .contentShape(.rect(cornerRadius: Theme.Radius.control))
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.appPlain)
                     .disabled(isSubmitting)
                 }
                 if prompt.isMultiple {

@@ -47,7 +47,7 @@ struct HomeAccountUsageSection: View {
             .padding(.vertical, HomeDashboardMetrics.hostVerticalPadding)
             .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.appPlain)
         .contextMenu {
             Button {
                 reconnect(item.host)

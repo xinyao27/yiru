@@ -240,7 +240,7 @@ struct ActivityContributionCard: View {
                     )
                 }
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.appPlain)
         .disabled(day.isFuture)
         .accessibilityLabel("\(day.day): \(formatActivityMetric(day.value, metric: metric))")
     }

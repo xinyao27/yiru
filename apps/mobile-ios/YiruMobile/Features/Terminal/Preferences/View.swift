@@ -143,7 +143,7 @@ struct TerminalSettingsView: View {
             .frame(minHeight: TerminalPreferencesMetrics.preferenceRowHeight)
             .contentShape(.rect)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.appPlain)
         .disabled(autoRestore.values[host.id]?.isBusy == true)
     }
 
@@ -174,7 +174,7 @@ struct TerminalSettingsView: View {
                 .frame(minHeight: TerminalPreferencesMetrics.preferenceRowHeight)
                 .contentShape(.rect)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.appPlain)
         }
     }
 
@@ -200,7 +200,7 @@ struct TerminalSettingsView: View {
                 .padding(.horizontal, Theme.Spacing.medium)
                 .frame(minHeight: 56, alignment: .leading)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.appPlain)
         }
     }
 
@@ -241,7 +241,7 @@ struct TerminalSettingsView: View {
                 .padding(.horizontal, Theme.Spacing.medium)
                 .frame(minHeight: 56)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.appPlain)
         }
     }
 

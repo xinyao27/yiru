@@ -228,7 +228,7 @@
                             .frame(minHeight: Theme.Size.minimumHitTarget)
                             .contentShape(.rect)
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(.appPlain)
                     }
                 }
             }

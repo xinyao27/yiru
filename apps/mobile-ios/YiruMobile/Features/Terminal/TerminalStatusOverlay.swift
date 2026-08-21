@@ -12,7 +12,7 @@ struct TerminalConnectionStatusBanner: View {
                     Button(action: model.retry) {
                         connectionBannerLabel
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.appPlain)
                     .accessibilityLabel("Reconnect to desktop")
                 } else {
                     connectionBannerLabel
@@ -28,7 +28,7 @@ struct TerminalConnectionStatusBanner: View {
                             height: Theme.Size.minimumHitTarget
                         )
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.appPlain)
                 .accessibilityLabel("Dismiss connection status")
             }
             .glassEffect(

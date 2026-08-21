@@ -94,8 +94,9 @@ struct TerminalAccessoryBar: View {
                 .padding(.horizontal, 10)
                 .glassEffect(.regular.interactive(), in: .capsule)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.appPlain)
         .frame(minHeight: TerminalChromeMetrics.accessoryHitSize)
+        .contentShape(.interaction, .rect)
         .disabled(!state.isEnabled)
         .accessibilityLabel(Text(verbatim: key.label))
         .contextMenu {
@@ -140,8 +141,9 @@ struct TerminalAccessoryBar: View {
                     in: .capsule
                 )
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.appPlain)
         .frame(minHeight: TerminalChromeMetrics.accessoryHitSize)
+        .contentShape(.interaction, .rect)
         .disabled(!state.isEnabled)
         .accessibilityLabel(
             state.isControlActive ? "Control modifier active" : "Control modifier"
@@ -162,11 +164,12 @@ struct TerminalAccessoryBar: View {
             .foregroundStyle(Theme.Colors.foreground)
             .glassEffect(.regular.interactive(), in: .circle)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.appPlain)
         .frame(
             width: TerminalChromeMetrics.accessoryHitSize,
             height: TerminalChromeMetrics.accessoryHitSize
         )
+        .contentShape(.interaction, .rect)
         .disabled(!state.isEnabled || isDisplayModeUpdating)
         .accessibilityLabel(displayMode.toggleTitle)
     }
@@ -191,8 +194,9 @@ struct TerminalAccessoryBar: View {
                     in: key.isCircular ? AnyShape(Circle()) : AnyShape(Capsule())
                 )
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.appPlain)
         .frame(minHeight: TerminalChromeMetrics.accessoryHitSize)
+        .contentShape(.interaction, .rect)
         .disabled(!state.isEnabled)
         .accessibilityLabel(key.accessibilityLabel)
 

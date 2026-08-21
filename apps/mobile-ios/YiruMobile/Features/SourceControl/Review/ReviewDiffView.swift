@@ -219,7 +219,7 @@ private struct SourceReviewLine: View {
                                     height: Theme.Size.minimumHitTarget
                                 )
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(.appPlain)
                         .foregroundStyle(
                             comment.diffIdentity == nil
                                 ? Theme.Colors.mutedForeground
@@ -248,7 +248,7 @@ private struct SourceReviewLine: View {
                 codeLabel
                     .contentShape(.rect)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.appPlain)
         } else {
             codeLabel
         }

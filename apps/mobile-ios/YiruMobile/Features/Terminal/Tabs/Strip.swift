@@ -75,12 +75,13 @@ struct TerminalTabStrip: View {
             // standalone iOS 26 glass button resolves to an opaque white disk against this
             // strip, so the surface is set explicitly and cannot regress when SwiftUI changes
             // the standalone glass material's contrast.
-            .buttonStyle(.plain)
+            .buttonStyle(.appPlain)
             .background(Theme.Colors.selection, in: Circle())
             .frame(
                 width: TerminalChromeMetrics.actionHitSize,
                 height: TerminalChromeMetrics.actionHitSize
             )
+            .contentShape(.interaction, .rect)
             .fixedSize()
             .disabled(isDisabled)
             .accessibilityLabel("New tab")

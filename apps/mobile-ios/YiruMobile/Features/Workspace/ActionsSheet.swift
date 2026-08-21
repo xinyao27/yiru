@@ -159,7 +159,7 @@ struct WorkspaceActionsSheet: View {
             .frame(minHeight: WorkspaceListMetrics.rowMinimumHeight)
             .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.appPlain)
         .disabled(isBusy)
     }
 }

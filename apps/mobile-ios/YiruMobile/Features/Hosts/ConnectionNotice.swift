@@ -39,7 +39,7 @@ struct HostConnectionNotice: View {
                             .font(.system(size: Theme.Typography.metadata))
                     }
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.appPlain)
                 .foregroundStyle(Theme.Colors.foreground)
                 .appButtonContext(.inline)
                 .disabled(isRetrying)
@@ -54,7 +54,7 @@ struct HostConnectionNotice: View {
                         height: Theme.Size.minimumHitTarget
                     )
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.appPlain)
             .accessibilityLabel("Dismiss connection status")
         }
         .padding(.leading, Theme.Spacing.medium)

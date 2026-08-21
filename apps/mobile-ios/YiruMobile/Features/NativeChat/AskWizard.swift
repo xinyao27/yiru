@@ -99,7 +99,7 @@ struct NativeChatAskWizard: View {
                                 in: .capsule
                             )
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(.appPlain)
                         .frame(minHeight: Theme.Size.minimumHitTarget)
                         .contentShape(.rect)
                     }
@@ -143,7 +143,7 @@ struct NativeChatAskWizard: View {
             .frame(minHeight: Theme.Size.minimumHitTarget)
             .contentShape(.rect(cornerRadius: Theme.Radius.control))
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.appPlain)
         .disabled(isSubmitting)
     }
 
@@ -176,7 +176,7 @@ struct NativeChatAskWizard: View {
             .frame(minHeight: Theme.Size.minimumHitTarget)
             .contentShape(.rect(cornerRadius: Theme.Radius.control))
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.appPlain)
         .disabled(isSubmitting)
     }
 

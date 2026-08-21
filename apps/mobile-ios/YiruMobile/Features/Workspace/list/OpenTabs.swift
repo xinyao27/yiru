@@ -23,7 +23,7 @@ struct WorkspaceOpenTabs: View {
                     } label: {
                         tabRow(tab)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.appPlain)
                     .accessibilityAddTraits(tab.isActive ? .isSelected : [])
                 }
             }

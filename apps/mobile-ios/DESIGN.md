@@ -150,6 +150,11 @@ Session 右上角 More 只承载老版的页面级导航：Terminal / Chat 视�
 | 大型操作：submit、底部主 CTA、旧版 custom sheet header、44pt mode selector | 44pt | 20pt | 44pt | `.appButtonContext(.large)` |
 | list row、menu item、navigation row | 行高至少 44pt | 随内容 metric | 整行 | 使用 `Button` / `Menu` 的 plain content row，不做 Glass pill |
 
+不需要系统视觉样式的 `Button` 统一使用 `.buttonStyle(.appPlain)`，不直接使用 `.plain`。
+`appPlain` 把 label 的布局矩形声明为 `.interaction` 命中区域；绘制或扩展交互表面的 owner 必须
+把 frame、padding 和视觉 shape 放进 label，或在 Button 最终的外层 hit frame 后再声明
+`.contentShape(.interaction, .rect)`。可见表面与可点击表面不能由不同调用点分别维护。
+
 - 相邻且同层级的 action 必须使用相同尺寸。主次关系通过 `.glassProminent` / `.glass`、文字
   weight 和位置表达，不能把首要按钮做大、旁边按钮做小。
 - 一个页面同时最多 1–2 个 prominent action。默认 action 和 Loader 都不使用蓝色；普通 icon

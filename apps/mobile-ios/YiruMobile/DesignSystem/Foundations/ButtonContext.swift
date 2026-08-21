@@ -30,6 +30,17 @@ enum AppButtonContext: Hashable, Sendable {
     }
 }
 
+struct AppPlainButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .contentShape(.interaction, .rect)
+    }
+}
+
+extension ButtonStyle where Self == AppPlainButtonStyle {
+    static var appPlain: AppPlainButtonStyle { AppPlainButtonStyle() }
+}
+
 private struct AppButtonContextModifier: ViewModifier {
     let context: AppButtonContext
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize

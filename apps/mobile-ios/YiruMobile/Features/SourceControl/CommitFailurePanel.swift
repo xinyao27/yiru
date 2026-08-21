@@ -68,7 +68,7 @@ struct SourceCommitFailureCard: View {
                     .foregroundStyle(Theme.Colors.mutedForeground)
                     .frame(minHeight: Theme.Size.minimumHitTarget)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.appPlain)
                 if isExpanded {
                     Text(verbatim: failure.error.trimmingCharacters(in: .whitespacesAndNewlines))
                         .font(.system(size: Theme.Typography.metadata, design: .monospaced))

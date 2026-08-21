@@ -199,7 +199,7 @@ private struct HostedReviewCommentGroupView: View {
                     .frame(minHeight: Theme.Size.minimumHitTarget)
                     .contentShape(.rect)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.appPlain)
 
                 if expandedResolvedGroups.contains(group.id) {
                     commentCards

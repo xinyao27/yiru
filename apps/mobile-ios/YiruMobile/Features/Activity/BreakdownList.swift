@@ -52,7 +52,8 @@ struct ActivityBreakdownList: View {
                         minHeight: Theme.Size.minimumHitTarget,
                         alignment: .leading
                     )
-                    .buttonStyle(.plain)
+                    .buttonStyle(.appPlain)
+                    .contentShape(.interaction, .rect)
                 }
                 if metric == .value, values.contains(where: { $0.valueUSD == nil }) {
                     Text("Usage without authoritative pricing is shown without a combined value.")

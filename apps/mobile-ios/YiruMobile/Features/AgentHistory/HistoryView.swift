@@ -100,11 +100,12 @@ struct AgentHistoryView: View {
                         YiruIcon(.xCircle)
                             .foregroundStyle(Theme.Colors.mutedForeground)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.appPlain)
                     .frame(
                         width: Theme.Size.minimumHitTarget,
                         height: Theme.Size.minimumHitTarget
                     )
+                    .contentShape(.interaction, .rect)
                     .accessibilityLabel("Clear search")
                 }
             }
@@ -181,8 +182,9 @@ struct AgentHistoryView: View {
                     in: .rect(cornerRadius: Theme.Radius.control)
                 )
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.appPlain)
         .frame(minHeight: Theme.Size.minimumHitTarget)
+        .contentShape(.interaction, .rect)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 

@@ -41,7 +41,7 @@ struct SourceCreateReviewRow: View {
             .frame(minHeight: Theme.Size.minimumHitTarget)
             .contentShape(.rect)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.appPlain)
         .disabled(!entry.isEnabled)
         .accessibilityLabel(
             Text(verbatim: entry.hint.map { "\(entry.label). \($0)" } ?? entry.label))

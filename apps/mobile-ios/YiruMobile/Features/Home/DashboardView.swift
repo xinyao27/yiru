@@ -144,7 +144,7 @@ private struct HomeMetricTileView: View {
             }
             .contentShape(.rect(cornerRadius: Theme.Radius.content))
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.appPlain)
         // Why: disable the tile when there is nothing to open, so an idle tile never looks
         // tappable. A plain Button with a no-op action still shows press feedback for a tap
         // that does nothing — visually present but functionally empty.

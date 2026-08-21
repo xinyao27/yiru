@@ -112,7 +112,7 @@ struct WorkspaceSourceSheet: View {
             .padding(.horizontal, Theme.Spacing.medium)
             .frame(minHeight: Theme.Size.minimumHitTarget)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.appPlain)
         .glassEffect(
             mode == value ? .regular.tint(Theme.Colors.selection) : .regular,
             in: .capsule
@@ -302,7 +302,7 @@ struct WorkspaceSourceSheet: View {
             .frame(minHeight: 56)
             .contentShape(.rect)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.appPlain)
         .disabled(model.isResolvingSource)
     }
 

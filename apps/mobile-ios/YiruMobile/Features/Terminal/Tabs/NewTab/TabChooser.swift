@@ -242,7 +242,7 @@ struct WorkspaceNewTabChooser: View {
             .padding(.vertical, Theme.Spacing.medium)
             .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.appPlain)
     }
 
     private var newTabSeparator: some View {
@@ -267,6 +267,6 @@ struct WorkspaceNewTabChooser: View {
             .padding(.vertical, Theme.Spacing.medium)
             .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.appPlain)
     }
 }

@@ -250,7 +250,7 @@ private struct HostedReviewCheckRow: View {
                 .frame(minHeight: Theme.Size.minimumHitTarget)
                 .contentShape(.rect)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.appPlain)
             if let url = check.url {
                 GlassCircleButton(
                     accessibilityLabel: "Open \(check.name) on the web",

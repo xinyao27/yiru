@@ -59,11 +59,12 @@ struct TerminalToolsMenu: View {
             .foregroundStyle(Theme.Colors.foreground)
             .glassEffect(.regular.interactive(), in: .circle)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.appPlain)
         .frame(
             width: TerminalChromeMetrics.accessoryHitSize,
             height: TerminalChromeMetrics.accessoryHitSize
         )
+        .contentShape(.interaction, .rect)
         .disabled(!state.isEnabled)
         .accessibilityLabel(
             attachment?.isPending == true ? "Adding attachment" : "Open terminal tools"

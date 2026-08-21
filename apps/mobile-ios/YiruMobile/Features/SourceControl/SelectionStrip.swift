@@ -31,7 +31,7 @@ struct SourceSelectionStrip<Option: Hashable, Label: View>: View {
                             in: .capsule
                         )
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.appPlain)
                 .frame(maxWidth: .infinity, minHeight: Theme.Size.minimumHitTarget)
                 .contentShape(.rect)
                 .accessibilityAddTraits(selection == option ? .isSelected : [])

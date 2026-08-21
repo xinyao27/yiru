@@ -105,7 +105,7 @@ struct WorkspaceSetupTrustSheet: View {
             .frame(minHeight: Theme.Size.minimumHitTarget)
             .contentShape(.rect)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.appPlain)
         .disabled(isBusy)
     }
 }

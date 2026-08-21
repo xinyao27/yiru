@@ -78,7 +78,7 @@ struct WorkspaceSetupSection: View {
                 .foregroundStyle(Theme.Colors.foreground)
                 .frame(maxWidth: .infinity, minHeight: Theme.Control.inlineHeight)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.appPlain)
         .glassEffect(
             model.setupDecisionChoice == decision
                 ? .regular.tint(Theme.Colors.selection) : .regular,
