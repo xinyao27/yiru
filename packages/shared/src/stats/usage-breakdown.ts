@@ -52,36 +52,30 @@ type DailyProviderInput = {
 
 export function buildProjectUsage(input: UsageBreakdownInput): ProjectUsageValue[] {
   return mergeProjectUsage([
-    ...input.claude.projectBreakdown.map(
-      (project): ProjectUsageInput => ({
-        key: project.key,
-        label: project.label,
-        provider: 'claude',
-        sessions: project.sessions,
-        tokens: claudeTokens(project),
-        valueUsd: project.estimatedCostUsd
-      })
-    ),
-    ...input.codex.projectBreakdown.map(
-      (project): ProjectUsageInput => ({
-        key: project.key,
-        label: project.label,
-        provider: 'codex',
-        sessions: project.sessions,
-        tokens: project.totalTokens,
-        valueUsd: project.estimatedCostUsd
-      })
-    ),
-    ...input.openCode.projectBreakdown.map(
-      (project): ProjectUsageInput => ({
-        key: project.key,
-        label: project.label,
-        provider: 'open-code',
-        sessions: project.sessions,
-        tokens: project.totalTokens,
-        valueUsd: project.estimatedCostUsd
-      })
-    )
+    ...input.claude.projectBreakdown.map((project): ProjectUsageInput => ({
+      key: project.key,
+      label: project.label,
+      provider: 'claude',
+      sessions: project.sessions,
+      tokens: claudeTokens(project),
+      valueUsd: project.estimatedCostUsd
+    })),
+    ...input.codex.projectBreakdown.map((project): ProjectUsageInput => ({
+      key: project.key,
+      label: project.label,
+      provider: 'codex',
+      sessions: project.sessions,
+      tokens: project.totalTokens,
+      valueUsd: project.estimatedCostUsd
+    })),
+    ...input.openCode.projectBreakdown.map((project): ProjectUsageInput => ({
+      key: project.key,
+      label: project.label,
+      provider: 'open-code',
+      sessions: project.sessions,
+      tokens: project.totalTokens,
+      valueUsd: project.estimatedCostUsd
+    }))
   ])
 }
 

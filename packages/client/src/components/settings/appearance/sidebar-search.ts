@@ -4,37 +4,35 @@ import { createLocalizedCatalog } from '~renderer/i18n/localized-catalog'
 import type { SettingsSearchEntry } from '../search'
 import { translateSearchKeyword } from '../search-keywords'
 
-export const getLeftSidebarAppearanceEntry = createLocalizedCatalog(
-  (): SettingsSearchEntry => ({
-    title: translate(
-      'auto.components.settings.appearance.search.leftSidebarAppearance.title',
-      'Left Sidebar Appearance'
+export const getLeftSidebarAppearanceEntry = createLocalizedCatalog((): SettingsSearchEntry => ({
+  title: translate(
+    'auto.components.settings.appearance.search.leftSidebarAppearance.title',
+    'Left Sidebar Appearance'
+  ),
+  description: translate(
+    'auto.components.settings.appearance.search.leftSidebarAppearance.description',
+    'Make the left sidebar match your terminal, stay default, or use a tint.'
+  ),
+  keywords: [
+    ...translateSearchKeyword('auto.components.settings.appearance.search.5bff6a2ef0', 'sidebar'),
+    ...translateSearchKeyword(
+      'auto.components.settings.appearance.search.leftSidebarAppearance.project',
+      'project'
     ),
-    description: translate(
-      'auto.components.settings.appearance.search.leftSidebarAppearance.description',
-      'Make the left sidebar match your terminal, stay default, or use a tint.'
+    ...translateSearchKeyword(
+      'auto.components.settings.appearance.search.leftSidebarAppearance.terminal',
+      'terminal'
     ),
-    keywords: [
-      ...translateSearchKeyword('auto.components.settings.appearance.search.5bff6a2ef0', 'sidebar'),
-      ...translateSearchKeyword(
-        'auto.components.settings.appearance.search.leftSidebarAppearance.project',
-        'project'
-      ),
-      ...translateSearchKeyword(
-        'auto.components.settings.appearance.search.leftSidebarAppearance.terminal',
-        'terminal'
-      ),
-      ...translateSearchKeyword(
-        'auto.components.settings.appearance.search.leftSidebarAppearance.background',
-        'background'
-      ),
-      ...translateSearchKeyword(
-        'auto.components.settings.appearance.search.leftSidebarAppearance.tint',
-        'tint'
-      )
-    ]
-  })
-)
+    ...translateSearchKeyword(
+      'auto.components.settings.appearance.search.leftSidebarAppearance.background',
+      'background'
+    ),
+    ...translateSearchKeyword(
+      'auto.components.settings.appearance.search.leftSidebarAppearance.tint',
+      'tint'
+    )
+  ]
+}))
 
 export const getShowPinnedWorktreesInGroupsEntry = createLocalizedCatalog(
   (): SettingsSearchEntry => ({

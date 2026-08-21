@@ -1042,8 +1042,8 @@ export const createBrowserSlice: StateCreator<AppState, [], [], BrowserSlice> = 
         },
         browserTabsByWorktree: {
           ...s.browserTabsByWorktree,
-          [workspace.worktreeId]: (s.browserTabsByWorktree[workspace.worktreeId] ?? []).map((tab) =>
-            tab.id === workspaceId ? nextWorkspace : tab
+          [workspace.worktreeId]: (s.browserTabsByWorktree[workspace.worktreeId] ?? []).map(
+            (tab) => (tab.id === workspaceId ? nextWorkspace : tab)
           )
         },
         pendingAddressBarFocusByPageId: shouldFocusAddressBar
@@ -1123,8 +1123,8 @@ export const createBrowserSlice: StateCreator<AppState, [], [], BrowserSlice> = 
         },
         browserTabsByWorktree: {
           ...s.browserTabsByWorktree,
-          [workspace.worktreeId]: (s.browserTabsByWorktree[workspace.worktreeId] ?? []).map((tab) =>
-            tab.id === workspace.id ? nextWorkspace : tab
+          [workspace.worktreeId]: (s.browserTabsByWorktree[workspace.worktreeId] ?? []).map(
+            (tab) => (tab.id === workspace.id ? nextWorkspace : tab)
           )
         },
         recentlyClosedBrowserPagesByWorkspace: {
@@ -1220,8 +1220,8 @@ export const createBrowserSlice: StateCreator<AppState, [], [], BrowserSlice> = 
       return {
         browserTabsByWorktree: {
           ...s.browserTabsByWorktree,
-          [workspace.worktreeId]: (s.browserTabsByWorktree[workspace.worktreeId] ?? []).map((tab) =>
-            tab.id === workspaceId ? nextWorkspace : tab
+          [workspace.worktreeId]: (s.browserTabsByWorktree[workspace.worktreeId] ?? []).map(
+            (tab) => (tab.id === workspaceId ? nextWorkspace : tab)
           )
         }
       }
@@ -1417,8 +1417,8 @@ export const createBrowserSlice: StateCreator<AppState, [], [], BrowserSlice> = 
       if (!browserWorkspaceMirrorFieldsEqual(workspace, nextWorkspace)) {
         nextState.browserTabsByWorktree = {
           ...s.browserTabsByWorktree,
-          [workspace.worktreeId]: (s.browserTabsByWorktree[workspace.worktreeId] ?? []).map((tab) =>
-            tab.id === workspace.id ? nextWorkspace : tab
+          [workspace.worktreeId]: (s.browserTabsByWorktree[workspace.worktreeId] ?? []).map(
+            (tab) => (tab.id === workspace.id ? nextWorkspace : tab)
           )
         }
       }
@@ -1509,8 +1509,8 @@ export const createBrowserSlice: StateCreator<AppState, [], [], BrowserSlice> = 
         },
         browserTabsByWorktree: {
           ...s.browserTabsByWorktree,
-          [workspace.worktreeId]: (s.browserTabsByWorktree[workspace.worktreeId] ?? []).map((tab) =>
-            tab.id === workspace.id ? nextWorkspace : tab
+          [workspace.worktreeId]: (s.browserTabsByWorktree[workspace.worktreeId] ?? []).map(
+            (tab) => (tab.id === workspace.id ? nextWorkspace : tab)
           )
         },
         ...(shouldClearAnnotations

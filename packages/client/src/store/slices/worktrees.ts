@@ -930,7 +930,9 @@ async function listWorktreeLineageForRuntime(
     lineage?: Record<string, WorktreeLineage>
     workspaceLineage?: Record<string, WorkspaceLineage>
   }
-  const normalizeLineageResponse = (value: Record<string, WorktreeLineage> | LineageListResponse) =>
+  const normalizeLineageResponse = (
+    value: Record<string, WorktreeLineage> | LineageListResponse
+  ) =>
     Object.prototype.hasOwnProperty.call(value, 'lineage') ||
     Object.prototype.hasOwnProperty.call(value, 'workspaceLineage')
       ? {
