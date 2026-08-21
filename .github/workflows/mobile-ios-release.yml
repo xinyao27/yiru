@@ -18,6 +18,7 @@ on:
       release_version:
         description: 'Optional exact iOS marketing version override, e.g. 0.0.15'
         required: false
+        default: '0.0.1'
         type: string
       testflight_distribution:
         description: 'TestFlight audience. Internal is the safe default; external uses
