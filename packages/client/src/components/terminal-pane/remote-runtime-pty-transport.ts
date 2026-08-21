@@ -42,6 +42,7 @@ import {
   createRemoteRuntimePtyTextBatcher,
   createRemoteRuntimeViewportBatcher
 } from './remote-runtime-pty-batching'
+import { retryRuntimeUnavailable } from './runtime-unavailable-retry'
 import { recordTerminalFreezeBreadcrumb } from './terminal-freeze-breadcrumbs'
 import { deliverPtyDataWithDeferredCredit } from './terminal-pty-ack-gate'
 
@@ -691,28 +692,32 @@ export function createRuntimePtyTransport(
         const launchConfigToSend = options.launchConfig ?? launchConfig
         const launchTokenToSend = options.launchToken ?? launchToken
         const launchAgentToSend = options.launchAgent ?? launchAgent
-        const created = await callRuntime<{ terminal: RuntimeTerminalCreate }>('terminal.create', {
-          worktree: toRuntimeTerminalWorktreeSelector(worktreeId),
-          viewport: { cols: options.cols ?? 80, rows: options.rows ?? 24 },
-          ...(commandToSend !== undefined ? { command: commandToSend } : {}),
-          ...(cwd !== undefined ? { cwd } : {}),
-          ...(cwdFallback !== undefined ? { cwdFallback } : {}),
-          ...(startupCommandDeliveryToSend !== undefined
-            ? { startupCommandDelivery: startupCommandDeliveryToSend }
-            : {}),
-          ...(envToSend !== undefined ? { env: envToSend } : {}),
-          ...(envToDeleteToSend !== undefined ? { envToDelete: envToDeleteToSend } : {}),
-          ...(launchConfigToSend !== undefined ? { launchConfig: launchConfigToSend } : {}),
-          ...(launchTokenToSend !== undefined ? { launchToken: launchTokenToSend } : {}),
-          ...(launchAgentToSend !== undefined ? { launchAgent: launchAgentToSend } : {}),
-          tabId,
-          leafId,
-          focus: false,
-          // Why: this transport is backing an already-mounted renderer pane;
-          // activation here is local state, not permission for remote UI reveal.
-          presentation: 'background',
-          ...(activate === true ? { activate: true } : {})
-        })
+        const created = await retryRuntimeUnavailable(
+          () =>
+            callRuntime<{ terminal: RuntimeTerminalCreate }>('terminal.create', {
+              worktree: toRuntimeTerminalWorktreeSelector(worktreeId),
+              viewport: { cols: options.cols ?? 80, rows: options.rows ?? 24 },
+              ...(commandToSend !== undefined ? { command: commandToSend } : {}),
+              ...(cwd !== undefined ? { cwd } : {}),
+              ...(cwdFallback !== undefined ? { cwdFallback } : {}),
+              ...(startupCommandDeliveryToSend !== undefined
+                ? { startupCommandDelivery: startupCommandDeliveryToSend }
+                : {}),
+              ...(envToSend !== undefined ? { env: envToSend } : {}),
+              ...(envToDeleteToSend !== undefined ? { envToDelete: envToDeleteToSend } : {}),
+              ...(launchConfigToSend !== undefined ? { launchConfig: launchConfigToSend } : {}),
+              ...(launchTokenToSend !== undefined ? { launchToken: launchTokenToSend } : {}),
+              ...(launchAgentToSend !== undefined ? { launchAgent: launchAgentToSend } : {}),
+              tabId,
+              leafId,
+              focus: false,
+              // Why: this transport is backing an already-mounted renderer pane;
+              // activation here is local state, not permission for remote UI reveal.
+              presentation: 'background',
+              ...(activate === true ? { activate: true } : {})
+            }),
+          () => destroyed
+        )
         handle = created.terminal.handle
         if (destroyed) {
           // Why: this is a cancelled launch, not a connected shared session.

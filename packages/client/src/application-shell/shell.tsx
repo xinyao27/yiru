@@ -131,6 +131,7 @@ import { StarNagCard } from '../components/star-nag-card'
 import { StarNagAgentValueMomentObserver } from '../components/star-nag/agent-value-moment-observer'
 import { StarNagToastHost } from '../components/star-nag/toast-host'
 import { CoworkingPresenceFooter } from '../components/status-bar/coworking-presence-footer'
+import { YiruRuntimeStatusOnlyFooter } from '../components/status-bar/runtime-status/segment'
 import RecentTabSwitcher from '../components/tab-bar/recent-tab-switcher'
 import PinnedTabCloseDialog from '../components/terminal-pane/pinned-tab-close-dialog'
 import { publishTerminalViewAttributesAtAppStart } from '../components/terminal-pane/terminal-appearance'
@@ -2527,6 +2528,7 @@ function App(): React.JSX.Element {
                 </RecoverableRenderErrorBoundary>
               </Suspense>
             ) : null}
+            {!statusBarVisible ? <YiruRuntimeStatusOnlyFooter /> : null}
             {/* Why: workspace creation is a core action; keeping it in the
             entry bundle avoids stale/corrupt lazy chunks stranding users at Create. */}
             {activeModal === 'new-workspace-composer' ? (

@@ -97,6 +97,7 @@ import { ClaudeIcon, GeminiIcon, MiniMaxIcon, OpenAIIcon, OpenCodeGoIcon } from 
 import { ProviderLetterBadge, ProviderUsageSegment } from './provider-usage-segment'
 import { getVisibleUsageProvider, isUsageEmptyState } from './provider-visibility'
 import { RemoteServerUpdateStatusSegment } from './remote-server-update-status-segment'
+import { YiruRuntimeStatusSegment } from './runtime-status/segment'
 import { SkillUpdateStatusSegment } from './skill-update-status-segment'
 import { ProviderPanel, barColor, clampUsedPercent, formatResetCreditExpiry } from './tooltip'
 import { UpdateStatusSegment } from './update-status-segment'
@@ -2289,6 +2290,7 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
               </Tooltip>
             </FloatingTerminalIconContextMenu>
           )}
+          <YiruRuntimeStatusSegment />
         </div>
       </ContextMenuTrigger>
       <ContextMenuContent className="w-fit min-w-0">
