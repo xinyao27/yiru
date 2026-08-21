@@ -2762,7 +2762,7 @@
           "1b5c41caee": "Yiru 手机端",
           "f323383e9a": "自动化",
           "d599269755": "从侧边栏隐藏",
-          "home": "Home",
+          "activity": "活动",
           "skills": "Skills"
         },
         "SidebarRepositoryFilterSection": {
@@ -11555,7 +11555,7 @@
       },
       "home": {
         "page": {
-          "title": "Home",
+          "title": "活动",
           "description": "A year of agent work, with today in context.",
           "contributions": "Contribution history",
           "activityDescription": "Agent starts and pull requests completed through Yiru.",

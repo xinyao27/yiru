@@ -85,7 +85,7 @@ export default function HomePage(): React.JSX.Element {
         <header className="flex items-start justify-between gap-6">
           <div>
             <h1 className="text-foreground text-sm font-semibold">
-              {translate('auto.components.home.page.title', 'Home')}
+              {translate('auto.components.home.page.title', 'Activity')}
             </h1>
             <p className="text-muted-foreground mt-1 max-w-2xl text-sm">
               {translate(

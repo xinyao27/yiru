@@ -2825,7 +2825,7 @@
           "1b5c41caee": "Yiru Mobile",
           "f323383e9a": "Automations",
           "d599269755": "Hide from sidebar",
-          "home": "Home",
+          "activity": "Activity",
           "skills": "Skills"
         },
         "SidebarRepositoryFilterSection": {
@@ -11591,7 +11591,7 @@
       },
       "home": {
         "page": {
-          "title": "Home",
+          "title": "Activity",
           "description": "A year of agent work, with today in context.",
           "contributions": "Contribution history",
           "activityDescription": "Agent starts and pull requests completed through Yiru.",

@@ -1,9 +1,9 @@
 import React from 'react'
 import {
+  ActivityIcon as Activity,
   BookOpen,
   CalendarDots as CalendarClock,
   DeviceMobile as Smartphone,
-  House,
   MagnifyingGlass as Search
 } from '~renderer/components/icons/hugeicons'
 import { getSelectableControlStateClasses } from '~renderer/components/selectable-control-state-classes'
@@ -72,19 +72,6 @@ const SidebarNav = React.memo(function SidebarNav() {
         variant="ghost"
         size="sidebar-row"
         type="button"
-        onClick={openHomePage}
-        aria-current={homeActive ? 'page' : undefined}
-        className={getSelectableControlStateClasses(homeActive)}
-      >
-        <House className={cn('size-4 shrink-0', !homeActive && 'text-sidebar-foreground/30')} />
-        <span className="flex-1">
-          {translate('auto.components.sidebar.SidebarNav.home', 'Home')}
-        </span>
-      </Button>
-      <Button
-        variant="ghost"
-        size="sidebar-row"
-        type="button"
         onClick={() => openModal('worktree-palette')}
         aria-label={translate(
           'auto.components.sidebar.SidebarNav.0c3395fd32',
@@ -110,6 +97,19 @@ const SidebarNav = React.memo(function SidebarNav() {
               separatorClassName="text-sidebar-foreground/45 text-[9px]"
             />
           ))}
+        </span>
+      </Button>
+      <Button
+        variant="ghost"
+        size="sidebar-row"
+        type="button"
+        onClick={openHomePage}
+        aria-current={homeActive ? 'page' : undefined}
+        className={getSelectableControlStateClasses(homeActive)}
+      >
+        <Activity className={cn('size-4 shrink-0', !homeActive && 'text-sidebar-foreground/30')} />
+        <span className="flex-1">
+          {translate('auto.components.sidebar.SidebarNav.activity', 'Activity')}
         </span>
       </Button>
       <SetupGuideSidebarEntry />
