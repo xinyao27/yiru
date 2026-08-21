@@ -1,3 +1,4 @@
+import type { SessionOptionSelectChoice } from '../native-chat/session-options'
 import type {
   AgentSessionOptionCatalog,
   CatalogModel,
@@ -29,20 +30,43 @@ export const GEMINI_SESSION_OPTION_CATALOG: AgentSessionOptionCatalog = {
   }
 }
 
-const CURSOR_EFFORT: CatalogOption = {
-  id: 'effort',
-  label: 'Effort',
-  category: 'thought_level',
-  kind: {
-    type: 'select',
-    choices: [
-      { value: 'low', label: 'Low' },
-      { value: 'medium', label: 'Medium' },
-      { value: 'high', label: 'High' }
-    ],
-    defaultValue: 'high'
-  },
-  apply: { composedIntoModel: true }
+const CURSOR_STANDARD_EFFORT_CHOICES: SessionOptionSelectChoice[] = [
+  { value: 'low', label: 'Low' },
+  { value: 'medium', label: 'Medium' },
+  { value: 'high', label: 'High' }
+]
+
+const CURSOR_EXTENDED_EFFORT_CHOICES: SessionOptionSelectChoice[] = [
+  ...CURSOR_STANDARD_EFFORT_CHOICES,
+  { value: 'xhigh', label: 'Extra high' }
+]
+
+const CURSOR_MAX_EFFORT_CHOICES: SessionOptionSelectChoice[] = [
+  ...CURSOR_EXTENDED_EFFORT_CHOICES,
+  { value: 'max', label: 'Max' }
+]
+
+const CURSOR_OPENAI_EFFORT_CHOICES: SessionOptionSelectChoice[] = [
+  { value: 'none', label: 'None' },
+  ...CURSOR_MAX_EFFORT_CHOICES
+]
+
+const CURSOR_MINIMAL_EFFORT_CHOICES: SessionOptionSelectChoice[] = [
+  { value: 'minimal', label: 'Minimal' },
+  ...CURSOR_STANDARD_EFFORT_CHOICES
+]
+
+function cursorEffort(
+  choices: readonly SessionOptionSelectChoice[],
+  defaultValue: string
+): CatalogOption {
+  return {
+    id: 'effort',
+    label: 'Effort',
+    category: 'thought_level',
+    kind: { type: 'select', choices: [...choices], defaultValue },
+    apply: { composedIntoModel: true }
+  }
 }
 
 const CURSOR_FAST: CatalogOption = {
@@ -53,25 +77,22 @@ const CURSOR_FAST: CatalogOption = {
   apply: { composedIntoModel: true }
 }
 
-const CURSOR_THINKING: CatalogOption = {
-  id: 'thinking',
-  label: 'Thinking',
-  category: 'model_config',
-  kind: { type: 'boolean', defaultValue: true },
-  apply: { composedIntoModel: true }
-}
-
 function parseCursorModels(stdout: string): CatalogModel[] {
   const seen = new Set<string>()
   const models: CatalogModel[] = []
   for (const line of stdout.split(/\r?\n/)) {
-    const match = line.trim().match(/^(?:[-*]\s+)?([a-z0-9][a-z0-9._-]*)(?:\s+\(.*\))?$/i)
-    const id = match?.[1]
+    const currentMatch = line.trim().match(/^([a-z0-9][a-z0-9._-]*)\s+-\s+(.+)$/i)
+    const legacyMatch = line.trim().match(/^(?:[-*]\s+)?([a-z0-9][a-z0-9._-]*)(?:\s+\(.*\))?$/i)
+    const id = currentMatch?.[1] ?? legacyMatch?.[1]
     if (!id || id.toLowerCase() === 'models' || seen.has(id)) {
       continue
     }
     seen.add(id)
-    models.push({ id, label: id === 'auto' ? 'Auto' : id, options: [] })
+    models.push({
+      id,
+      label: currentMatch?.[2]?.replace(/\s+\((?:default|current)\)$/i, '') ?? id,
+      options: []
+    })
   }
   return models
 }
@@ -80,14 +101,59 @@ export const CURSOR_SESSION_OPTION_CATALOG: AgentSessionOptionCatalog = {
   models: [
     { id: 'auto', label: 'Auto', isDefault: true, options: [] },
     {
-      id: 'gpt-5.3-codex',
-      label: 'GPT-5.3 Codex',
-      options: [CURSOR_EFFORT, CURSOR_FAST]
+      id: 'gpt-5.6-sol',
+      label: 'GPT-5.6 Sol',
+      options: [cursorEffort(CURSOR_OPENAI_EFFORT_CHOICES, 'medium'), CURSOR_FAST]
     },
     {
-      id: 'claude-opus-4-8',
-      label: 'Claude Opus 4.8',
-      options: [CURSOR_THINKING, CURSOR_EFFORT]
+      id: 'gpt-5.6-terra',
+      label: 'GPT-5.6 Terra',
+      options: [cursorEffort(CURSOR_OPENAI_EFFORT_CHOICES, 'medium'), CURSOR_FAST]
+    },
+    {
+      id: 'gpt-5.6-luna',
+      label: 'GPT-5.6 Luna',
+      options: [cursorEffort(CURSOR_OPENAI_EFFORT_CHOICES, 'medium'), CURSOR_FAST]
+    },
+    {
+      id: 'gpt-5.3-codex',
+      label: 'GPT-5.3 Codex',
+      options: [cursorEffort(CURSOR_EXTENDED_EFFORT_CHOICES, 'medium'), CURSOR_FAST]
+    },
+    {
+      id: 'claude-fable-5-thinking',
+      label: 'Claude Fable 5 Thinking',
+      options: [cursorEffort(CURSOR_MAX_EFFORT_CHOICES, 'high')]
+    },
+    {
+      id: 'claude-opus-5-thinking',
+      label: 'Claude Opus 5 Thinking',
+      options: [cursorEffort(CURSOR_MAX_EFFORT_CHOICES, 'high'), CURSOR_FAST]
+    },
+    {
+      id: 'claude-sonnet-5-thinking',
+      label: 'Claude Sonnet 5 Thinking',
+      options: [cursorEffort(CURSOR_MAX_EFFORT_CHOICES, 'high')]
+    },
+    {
+      id: 'cursor-grok-4.6',
+      label: 'Cursor Grok 4.6',
+      options: [cursorEffort(CURSOR_EXTENDED_EFFORT_CHOICES, 'high'), CURSOR_FAST]
+    },
+    {
+      id: 'gemini-3.7-flash',
+      label: 'Gemini 3.7 Flash',
+      options: [cursorEffort(CURSOR_STANDARD_EFFORT_CHOICES, 'high')]
+    },
+    {
+      id: 'gemini-3.6-flash',
+      label: 'Gemini 3.6 Flash',
+      options: [cursorEffort(CURSOR_MINIMAL_EFFORT_CHOICES, 'high')]
+    },
+    {
+      id: 'composer-2.5',
+      label: 'Composer 2.5',
+      options: [CURSOR_FAST]
     }
   ],
   modelApply: {
@@ -99,12 +165,12 @@ export const CURSOR_SESSION_OPTION_CATALOG: AgentSessionOptionCatalog = {
     if (modelId === 'auto') {
       return modelId
     }
-    if (modelId.startsWith('claude-')) {
-      const thinking = values.thinking === true ? '-thinking' : ''
-      const effort = typeof values.effort === 'string' ? `-${values.effort}` : ''
-      return `${modelId}${thinking}${effort}`
-    }
-    const effort = typeof values.effort === 'string' ? `-${values.effort}` : ''
+    const effortValue = typeof values.effort === 'string' ? values.effort : null
+    // Why: Cursor's catalog names medium GPT-5.3 Codex without an effort suffix.
+    const effort =
+      effortValue && !(modelId === 'gpt-5.3-codex' && effortValue === 'medium')
+        ? `-${effortValue}`
+        : ''
     const fast = values.fastMode === true ? '-fast' : ''
     return `${modelId}${effort}${fast}`
   },

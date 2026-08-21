@@ -22,6 +22,8 @@ export function nativeChatSessionOptionLabel(descriptor: SessionOptionDescriptor
 
 export function nativeChatSessionChoiceLabel(choice: SessionOptionSelectChoice): string {
   switch (choice.value) {
+    case 'none':
+      return translate('components.native-chat.composer.optionValue.none', 'None')
     case 'minimal':
       return translate('components.native-chat.composer.optionValue.minimal', 'Minimal')
     case 'low':
@@ -34,6 +36,8 @@ export function nativeChatSessionChoiceLabel(choice: SessionOptionSelectChoice):
       return translate('components.native-chat.composer.optionValue.xhigh', 'Extra high')
     case 'max':
       return translate('components.native-chat.composer.optionValue.max', 'Max')
+    case 'ultra':
+      return translate('components.native-chat.composer.optionValue.ultra', 'Ultra')
     default:
       return choice.label
   }

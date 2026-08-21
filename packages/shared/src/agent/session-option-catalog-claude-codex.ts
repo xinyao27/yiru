@@ -1,3 +1,4 @@
+import type { SessionOptionSelectChoice } from '../native-chat/session-options'
 import type { AgentSessionOptionCatalog, CatalogOption } from './session-option-catalog-types'
 
 function hasFlag(tokens: readonly string[], flags: readonly string[]): boolean {
@@ -105,25 +106,35 @@ export const CLAUDE_SESSION_OPTION_CATALOG: AgentSessionOptionCatalog = {
   }
 }
 
-const CODEX_EFFORT_CHOICES = [
-  { value: 'minimal', label: 'Minimal' },
+const CODEX_STANDARD_EFFORT_CHOICES: SessionOptionSelectChoice[] = [
   { value: 'low', label: 'Low' },
   { value: 'medium', label: 'Medium' },
   { value: 'high', label: 'High' },
   { value: 'xhigh', label: 'Extra high' }
 ]
 
-function codexEffort(includeExtraHigh: boolean): CatalogOption {
+const CODEX_MAX_EFFORT_CHOICES: SessionOptionSelectChoice[] = [
+  ...CODEX_STANDARD_EFFORT_CHOICES,
+  { value: 'max', label: 'Max' }
+]
+
+const CODEX_ULTRA_EFFORT_CHOICES: SessionOptionSelectChoice[] = [
+  ...CODEX_MAX_EFFORT_CHOICES,
+  { value: 'ultra', label: 'Ultra' }
+]
+
+function codexEffort(
+  choices: readonly SessionOptionSelectChoice[],
+  defaultValue: string
+): CatalogOption {
   return {
     id: 'effort',
     label: 'Reasoning effort',
     category: 'thought_level',
     kind: {
       type: 'select',
-      choices: includeExtraHigh
-        ? CODEX_EFFORT_CHOICES
-        : CODEX_EFFORT_CHOICES.filter((choice) => choice.value !== 'xhigh'),
-      defaultValue: 'medium'
+      choices: [...choices],
+      defaultValue
     },
     apply: {
       launchArgs: (value) => ['-c', `model_reasoning_effort=${String(value)}`],
@@ -137,14 +148,40 @@ export const CODEX_SESSION_OPTION_CATALOG: AgentSessionOptionCatalog = {
   // Why: Codex model access depends on auth. Keep this seed short and allow
   // unknown persisted ids to pass through instead of claiming a complete list.
   models: [
-    { id: 'gpt-5.6-sol', label: 'GPT-5.6 Sol', options: [codexEffort(true)] },
-    { id: 'gpt-5.6-terra', label: 'GPT-5.6 Terra', options: [codexEffort(true)] },
-    { id: 'gpt-5.6-luna', label: 'GPT-5.6 Luna', options: [codexEffort(false)] },
-    { id: 'gpt-5.5', label: 'GPT-5.5', options: [codexEffort(true)] },
     {
-      id: 'gpt-5.2-codex',
-      label: 'GPT-5.2 Codex',
-      options: [codexEffort(true)]
+      id: 'gpt-5.6-sol',
+      label: 'GPT-5.6 Sol',
+      options: [codexEffort(CODEX_ULTRA_EFFORT_CHOICES, 'low')]
+    },
+    {
+      id: 'gpt-5.6-terra',
+      label: 'GPT-5.6 Terra',
+      options: [codexEffort(CODEX_ULTRA_EFFORT_CHOICES, 'medium')]
+    },
+    {
+      id: 'gpt-5.6-luna',
+      label: 'GPT-5.6 Luna',
+      options: [codexEffort(CODEX_MAX_EFFORT_CHOICES, 'medium')]
+    },
+    {
+      id: 'gpt-5.5',
+      label: 'GPT-5.5',
+      options: [codexEffort(CODEX_STANDARD_EFFORT_CHOICES, 'medium')]
+    },
+    {
+      id: 'gpt-5.4',
+      label: 'GPT-5.4',
+      options: [codexEffort(CODEX_STANDARD_EFFORT_CHOICES, 'medium')]
+    },
+    {
+      id: 'gpt-5.4-mini',
+      label: 'GPT-5.4 Mini',
+      options: [codexEffort(CODEX_STANDARD_EFFORT_CHOICES, 'medium')]
+    },
+    {
+      id: 'gpt-5.3-codex-spark',
+      label: 'GPT-5.3 Codex Spark',
+      options: [codexEffort(CODEX_STANDARD_EFFORT_CHOICES, 'high')]
     }
   ],
   modelApply: {

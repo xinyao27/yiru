@@ -122,6 +122,12 @@ function DescriptorField(props: {
       </div>
     )
   }
+  const selectedChoice = descriptor.kind.choices.find(
+    (choice) => choice.value === descriptor.kind.currentValue
+  )
+  const selectedLabel = selectedChoice
+    ? nativeChatSessionChoiceLabel(selectedChoice)
+    : descriptor.kind.currentValue
   return (
     <div className="flex items-center justify-between gap-3">
       <Label className="text-xs font-normal">{label}</Label>
@@ -135,7 +141,7 @@ function DescriptorField(props: {
         }}
       >
         <SelectTrigger size="sm" className="h-7 w-[184px] text-xs">
-          <SelectValue />
+          <SelectValue>{selectedLabel}</SelectValue>
         </SelectTrigger>
         <SelectContent portalContainer={portalRoot} align="start" alignItemWithTrigger={false}>
           {descriptor.kind.choices.map((choice) => (

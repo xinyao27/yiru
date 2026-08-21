@@ -213,6 +213,15 @@ export function AgentSessionContinuationDialog({
     ? getAgentLabel(request.source.sourceAgent)
     : null
   const startDisabled = detecting || starting || agents.length === 0 || !selectedAgent
+  const focusedContextLabel = translate(
+    'components.agentSessionContinuation.modeFocused',
+    'Focused handoff (Recommended)'
+  )
+  const fullContextLabel = translate(
+    'components.agentSessionContinuation.modeFull',
+    'Full session transcript'
+  )
+  const selectedContextLabel = contextMode === 'focused' ? focusedContextLabel : fullContextLabel
 
   return (
     <Dialog
@@ -324,20 +333,12 @@ export function AgentSessionContinuationDialog({
               }
             >
               <SelectTrigger className="w-full min-w-0" size="sm">
-                <SelectValue />
+                <SelectValue>{selectedContextLabel}</SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="focused">
-                  {translate(
-                    'components.agentSessionContinuation.modeFocused',
-                    'Focused handoff (Recommended)'
-                  )}
-                </SelectItem>
+                <SelectItem value="focused">{focusedContextLabel}</SelectItem>
                 <SelectItem value="full" disabled={!hasFullContext}>
-                  {translate(
-                    'components.agentSessionContinuation.modeFull',
-                    'Full session transcript'
-                  )}
+                  {fullContextLabel}
                 </SelectItem>
               </SelectContent>
             </Select>

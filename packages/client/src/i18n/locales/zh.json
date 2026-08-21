@@ -11907,12 +11907,14 @@
         "optionUpdateFailed": "无法更新选项",
         "optionValue": {
           "fast": "快速",
+          "none": "无",
           "minimal": "最小",
           "low": "低",
           "medium": "中",
           "high": "高",
           "xhigh": "极高",
-          "max": "最大"
+          "max": "最大",
+          "ultra": "超高"
         },
         "relaunchWithOtherAgent": "更换 Agent 或模型…"
       },

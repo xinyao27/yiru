@@ -11943,12 +11943,14 @@
         "optionUpdateFailed": "Could not update option",
         "optionValue": {
           "fast": "Fast",
+          "none": "None",
           "minimal": "Minimal",
           "low": "Low",
           "medium": "Medium",
           "high": "High",
           "xhigh": "Extra high",
-          "max": "Max"
+          "max": "Max",
+          "ultra": "Ultra"
         },
         "relaunchWithOtherAgent": "Switch Agent or model…"
       },
