@@ -60,16 +60,21 @@ function runHelper(args: string[], input?: string): SecurityResult {
 }
 
 function resolveHelperPath(): string {
+  // Why: packaged builds ship the helper beside the executable (Contents/MacOS
+  // via extraFiles), which is the same location for the app and the CLI shim.
   const packaged = join(dirname(process.execPath), 'yiru-machine-key')
   if (existsSync(packaged)) {
     return packaged
   }
-  const development = resolve(
-    __dirname,
-    '../../../native/machine-key-macos/.build/release/yiru-machine-key'
-  )
-  if (existsSync(development)) {
-    return development
+  // Why: development builds have no such layout, and this module is loaded from
+  // two different output depths — out/cli/connect/ for the CLI and the bundled
+  // out/main/ for the app — so both distances to apps/desktop/ are tried.
+  const developmentSuffix = 'native/machine-key-macos/.build/release/yiru-machine-key'
+  for (const relativeRoot of ['../../..', '../..']) {
+    const development = resolve(__dirname, relativeRoot, developmentSuffix)
+    if (existsSync(development)) {
+      return development
+    }
   }
   throw new Error('The Yiru macOS Keychain helper is missing. Reinstall Yiru and try again.')
 }

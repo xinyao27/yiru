@@ -13,11 +13,7 @@ import {
 import nacl from 'tweetnacl'
 import { WebSocket, type RawData } from 'ws'
 
-import {
-  consumeBrowserRelayNonce,
-  type MachineIdentity,
-  type PairedBrowserAccess
-} from './identity'
+import type { ConnectIdentityStore, MachineIdentity } from './identity'
 
 type BrowserChannelCallbacks = {
   onClose: () => void
@@ -25,26 +21,32 @@ type BrowserChannelCallbacks = {
   sendReady: (ready: MachineBrowserReady) => void
 }
 
-export function openBrowserChannel(
-  envelope: RelayBrowserAuthEnvelope,
-  access: PairedBrowserAccess[],
-  localEndpoint: string,
-  deviceToken: string,
-  runtimePublicKeyB64: string,
-  identity: MachineIdentity,
+export type BrowserChannelRequest = {
   callbacks: BrowserChannelCallbacks
-): WebSocket | null {
-  const authorized = access.find(
-    (candidate) =>
-      candidate.machineId === envelope.auth.machineId &&
-      candidate.browser.signingKey.x === envelope.browser.signingKey.x &&
-      candidate.browser.signingKey.y === envelope.browser.signingKey.y
-  )
+  deviceToken: string
+  envelope: RelayBrowserAuthEnvelope
+  identity: MachineIdentity
+  localEndpoint: string
+  runtimePublicKeyB64: string
+  store: ConnectIdentityStore
+}
+
+export function openBrowserChannel(request: BrowserChannelRequest): WebSocket | null {
+  const { callbacks, deviceToken, envelope, identity, localEndpoint, runtimePublicKeyB64, store } =
+    request
+  const authorized = store
+    .listPairedBrowserAccess()
+    .find(
+      (candidate) =>
+        candidate.machineId === envelope.auth.machineId &&
+        candidate.browser.signingKey.x === envelope.browser.signingKey.x &&
+        candidate.browser.signingKey.y === envelope.browser.signingKey.y
+    )
   if (
     !authorized ||
     Math.abs(Date.now() - envelope.auth.timestamp) > WEB_CONNECT_REQUEST_CLOCK_SKEW_MS ||
     !verifyBrowserAuth(envelope) ||
-    !consumeBrowserRelayNonce({
+    !store.consumeBrowserRelayNonce({
       machineId: envelope.auth.machineId,
       browser: envelope.browser,
       nonce: envelope.auth.nonce

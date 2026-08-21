@@ -63,6 +63,7 @@ import {
   type ShellSpeechApi
 } from './shell-tools-client'
 import { electronShellUiApi, type ShellUiApi } from './shell-ui-client'
+import { shellWebConnectApi, type ShellWebConnectApi } from './shell-web-connect-client'
 import { getWebShellApi } from './web-shell-client'
 import { getWebShellUIApi } from './web-ui-shell-client'
 
@@ -88,6 +89,7 @@ type RendererShellClient = {
   starNag: ShellStarNagApi
   updater: ShellUpdaterApi
   telemetry: ShellTelemetryApi
+  webConnect: ShellWebConnectApi
   shell: ShellPlatformApi
   ui: ShellUiApi
   settings: ShellSettingsApi
@@ -126,6 +128,7 @@ export const shellClient: RendererShellClient = {
   starNag: shellStarNagApi,
   updater: shellUpdaterApi,
   telemetry: shellTelemetryApi,
+  webConnect: shellWebConnectApi,
   get shell() {
     return isWebShellClient() ? getWebShellApi() : electronShellPlatformApi
   },

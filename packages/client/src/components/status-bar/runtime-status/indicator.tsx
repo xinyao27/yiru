@@ -18,6 +18,9 @@ export type RuntimeStatusIndicatorDetail = {
 export type RuntimeStatusIndicatorProps = {
   description: string
   details: readonly RuntimeStatusIndicatorDetail[]
+  // Why: the popover is where a user looks for connection actions, but which
+  // actions exist is the segment's business, not this shared shell's.
+  footer?: React.ReactNode
   kind: RuntimeStatusIndicatorKind
   label: string
   onOpenChange?: (open: boolean) => void
@@ -132,6 +135,7 @@ export function RuntimeStatusIndicator(props: RuntimeStatusIndicatorProps): Reac
               ))}
             </dl>
           )}
+          {props.footer}
         </div>
       </PopoverContent>
     </Popover>

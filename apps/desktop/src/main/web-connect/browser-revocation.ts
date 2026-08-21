@@ -6,14 +6,14 @@ import {
 } from '@yiru/runtime-protocol/web-connect/relay-frames'
 import { browserSelfRevokeSigningMessage } from '@yiru/runtime-protocol/web-connect/signing-messages'
 
-import { browserAccessId, listPairedBrowserAccess, removePairedBrowserAccess } from './identity'
+import type { ConnectIdentityStore } from './identity'
 
-export function applyBrowserRevocationFrame(value: string): boolean {
+export function applyBrowserRevocationFrame(store: ConnectIdentityStore, value: string): boolean {
   const revoked = parseBrowserRevoked(value)
   if (!revoked) {
     return false
   }
-  applyBrowserRevocation(revoked)
+  applyBrowserRevocation(store, revoked)
   return true
 }
 
@@ -26,11 +26,14 @@ function parseBrowserRevoked(value: string): RelayBrowserRevoked | null {
   }
 }
 
-function applyBrowserRevocation(revoked: RelayBrowserRevoked): void {
-  const access = listPairedBrowserAccess().find(
-    (entry) =>
-      entry.machineId === revoked.machineId && browserAccessId(entry.browser) === revoked.browserId
-  )
+function applyBrowserRevocation(store: ConnectIdentityStore, revoked: RelayBrowserRevoked): void {
+  const access = store
+    .listPairedBrowserAccess()
+    .find(
+      (entry) =>
+        entry.machineId === revoked.machineId &&
+        store.browserAccessId(entry.browser) === revoked.browserId
+    )
   if (!access) {
     return
   }
@@ -50,7 +53,7 @@ function applyBrowserRevocation(revoked: RelayBrowserRevoked): void {
       Buffer.from(revoked.request.signature, 'base64url')
     )
     if (valid) {
-      removePairedBrowserAccess(revoked.browserId)
+      store.removePairedBrowserAccess(revoked.browserId)
     }
   } catch {
     // Why: malformed stored key material must fail closed without taking the foreground relay down.

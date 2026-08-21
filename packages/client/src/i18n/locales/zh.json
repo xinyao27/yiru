@@ -181,11 +181,18 @@
         "title": "Connect your computer",
         "description": "No account is required. This browser and your computer create their own private identities, then pair directly.",
         "installTitle": "Install Yiru",
-        "installDescription": "Run this once on the macOS or Linux computer you want to use.",
+        "installDescription": "Download Yiru on the computer you want to use, then install it as usual.",
+        "downloadMacArm64": "macOS · Apple silicon (.dmg)",
+        "downloadMacX64": "macOS · Intel (.dmg)",
+        "downloadLinuxX64": "Linux · x64 (.AppImage)",
+        "downloadLinuxArm64": "Linux · arm64 (.AppImage)",
+        "allDownloads": "All downloads — .deb, .rpm, and Windows",
         "pairTitle": "Pair this browser",
-        "pairDescription": "Run this single-use command on that computer. It expires after 10 minutes.",
+        "pairAppDescription": "If Yiru is already running on that computer, let it pair itself.",
+        "pairOpenApp": "Open Yiru and pair",
+        "pairDescription": "Or run this single-use command on that computer. It expires after 10 minutes.",
         "verifyTitle": "Check the code before confirming",
-        "verifyDescription": "The terminal on {{machine}} must show this same code:",
+        "verifyDescription": "Yiru on {{machine}} must show this same code:",
         "pairedTitle": "{{machine}} is paired",
         "pairedDescription": "Keep the terminal command running to use this computer in the Web app. Ctrl+C takes it offline.",
         "securityNote": "The private browser key cannot be exported. Clearing this site’s browser data removes access and requires pairing again.",
@@ -11840,6 +11847,18 @@
           "91b5c8d7e6": "GitLab"
         }
       }
+    },
+    "statusBar": {
+      "webConnect": {
+        "verifyTitle": "Confirm this browser",
+        "verifyDescription": "The web page must show this same code before you approve it.",
+        "confirm": "Codes match",
+        "cancel": "Cancel",
+        "openConnected": "Open in browser",
+        "connectBrowser": "Connect a browser",
+        "onlineDescription": "This computer is reachable from the Web app while Yiru stays open.",
+        "offlineDescription": "Opens the Web app and pairs it with this computer — no command needed."
+      }
     }
   },
   "components": {
@@ -12241,5 +12260,11 @@
       "send": "发送",
       "cancel": "取消"
     }
+  },
+  "webConnect": {
+    "pairingTitle": "将此浏览器连接到 Yiru？",
+    "pairingDetail": "网页上必须显示相同的验证码：\n\n{{code}}\n\n如果不一致，请取消。",
+    "confirmPairing": "验证码一致，连接",
+    "cancelPairing": "取消"
   }
 }

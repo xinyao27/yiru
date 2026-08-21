@@ -57,6 +57,17 @@
     "../src/main/openclaude/hook-service.ts",
     "../src/main/rolling-file-backup.ts",
     "../src/main/runtime/metadata.ts",
+    // Why: the CLI shares the web-connect core with the app but not its Electron
+    // surface — service.ts/desktop-integration.ts type-import the ESM-only
+    // contract subpath, which this CommonJS emit cannot resolve.
+    "../src/main/web-connect/browser-channel.ts",
+    "../src/main/web-connect/browser-revocation.ts",
+    "../src/main/web-connect/connect-origin.ts",
+    "../src/main/web-connect/grant-client.ts",
+    "../src/main/web-connect/identity.ts",
+    "../src/main/web-connect/macos-machine-key.ts",
+    "../src/main/web-connect/relay-bridge.ts",
+    "../src/main/web-connect/relay-frame.ts",
     "../src/main/win32-utils.ts"
   ],
   "compilerOptions": {

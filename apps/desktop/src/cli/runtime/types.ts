@@ -1,4 +1,5 @@
 import type { RuntimeRpcFailure } from '@yiru/runtime-protocol/rpc-envelope'
+import { RuntimeClientError } from '~shared/runtime-client-error'
 
 export type {
   RuntimeRpcFailure,
@@ -6,18 +7,9 @@ export type {
   RuntimeRpcSuccess
 } from '@yiru/runtime-protocol/rpc-envelope'
 
-export class RuntimeClientError extends Error {
-  readonly code: string
-  // Why: optional structured recovery payload (e.g. did-you-mean suggestions,
-  // valid-flag enumeration) surfaced into both the human and --json error output.
-  readonly data?: unknown
-
-  constructor(code: string, message: string, data?: unknown) {
-    super(message)
-    this.code = code
-    this.data = data
-  }
-}
+// Why: re-exported so every existing `../runtime-client` import keeps working
+// while the desktop main process throws the same class from ~shared.
+export { RuntimeClientError } from '~shared/runtime-client-error'
 
 export class RuntimeRpcFailureError extends RuntimeClientError {
   readonly response: RuntimeRpcFailure

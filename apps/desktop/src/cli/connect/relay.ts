@@ -1,185 +1,51 @@
 import { spawn, type ChildProcess } from 'node:child_process'
-import { randomBytes, sign } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 
-import { WEB_CONNECT_PROTOCOL_VERSION } from '@yiru/runtime-protocol/web-connect'
-import {
-  RelayBrowserAuthEnvelopeSchema,
-  WEB_CONNECT_MAX_TRANSPORT_FRAME_BYTES
-} from '@yiru/runtime-protocol/web-connect/relay-frames'
-import { machineRelayAuthSigningMessage } from '@yiru/runtime-protocol/web-connect/signing-messages'
-import { WebSocket } from 'ws'
+import type { ConnectIdentityStore, MachineIdentity } from '~main/web-connect/identity'
+import { startRelayBridge, type LocalRuntimeTarget } from '~main/web-connect/relay-bridge'
 import { decodePairingOffer } from '~shared/pairing'
-
-import { RuntimeClientError } from '../runtime-client'
-import { openBrowserChannel } from './browser-channel'
-import { applyBrowserRevocationFrame } from './browser-revocation'
-import { listPairedBrowserAccess, type MachineIdentity, type PairedBrowserAccess } from './identity'
-import {
-  connectionCloseFrame,
-  decodeRelayFrame,
-  encodeRelayFrame,
-  parseConnectionClose
-} from './relay-frame'
+import { RuntimeClientError } from '~shared/runtime-client-error'
 
 type RuntimeReadiness = {
   web: { pairingFile: string }
 }
 
 const RUNTIME_START_TIMEOUT_MS = 30_000
-const RECONNECT_DELAY_MS = 1_000
 
 export async function runForegroundRelay(
-  access: PairedBrowserAccess[],
+  store: ConnectIdentityStore,
   identity: MachineIdentity,
   json: boolean
 ): Promise<void> {
-  const runtime = await startRuntimeHost()
-  const machineId = access[0]?.machineId
+  const machineId = store.listPairedBrowserAccess()[0]?.machineId
   if (!machineId) {
     throw new RuntimeClientError('connect_not_paired', 'No paired browser access was found.')
   }
-  const pairing = readRuntimePairing(runtime.readiness.web.pairingFile)
-  const localSockets = new Map<string, WebSocket>()
-  let stopped = false
-  let relaySocket: WebSocket | null = null
+  const runtime = await startRuntimeHost()
+  const bridge = startRelayBridge({
+    identity,
+    machineId,
+    store,
+    target: readRuntimeTarget(runtime.readiness.web.pairingFile),
+    onOnline: () => {
+      if (json) {
+        console.log(JSON.stringify({ status: 'online', machineId }))
+      } else {
+        console.log('Connected to Yiru Web. Press Ctrl+C to take this computer offline.')
+      }
+    }
+  })
 
   const stop = (): void => {
-    if (stopped) {
-      return
-    }
-    stopped = true
-    for (const local of localSockets.values()) {
-      local.close()
-    }
-    relaySocket?.close()
+    bridge.stop()
     runtime.child.kill('SIGTERM')
   }
   process.once('SIGINT', stop)
   process.once('SIGTERM', stop)
 
-  const connectRelay = (): void => {
-    if (stopped) {
-      return
-    }
-    const socket = new WebSocket(machineSocketUrl(machineId), {
-      maxPayload: WEB_CONNECT_MAX_TRANSPORT_FRAME_BYTES
-    })
-    relaySocket = socket
-    socket.on('open', () => {
-      const timestamp = Date.now()
-      const nonce = randomBase64Url(18)
-      const unsigned = {
-        machineId,
-        timestamp,
-        nonce,
-        runtimePublicKeyB64: pairing.publicKeyB64
-      }
-      socket.send(
-        JSON.stringify({
-          type: 'machine-auth',
-          version: WEB_CONNECT_PROTOCOL_VERSION,
-          ...unsigned,
-          signature: sign(
-            null,
-            Buffer.from(machineRelayAuthSigningMessage(unsigned)),
-            identity.privateKey
-          ).toString('base64url')
-        })
-      )
-    })
-    socket.on('message', (data, isBinary) => {
-      if (isBinary) {
-        socket.close(1008, 'Invalid relay frame')
-        return
-      }
-      const text = data.toString()
-      const envelope = parseBrowserAuthEnvelope(text)
-      if (envelope) {
-        localSockets.get(envelope.connectionId)?.close()
-        let local: WebSocket | null = null
-        local = openBrowserChannel(
-          envelope,
-          listPairedBrowserAccess(),
-          pairing.endpoint,
-          pairing.deviceToken,
-          pairing.publicKeyB64,
-          identity,
-          {
-            onClose: () => {
-              if (localSockets.get(envelope.connectionId) === local) {
-                localSockets.delete(envelope.connectionId)
-                sendRelayJson(socket, connectionCloseFrame(envelope.connectionId))
-              }
-            },
-            sendFrame: (frame, binary) => {
-              const encoded = encodeRelayFrame(envelope.connectionId, frame, binary)
-              if (encoded) {
-                sendRelayJson(socket, encoded)
-              } else {
-                local?.close(1009, 'Relay frame is too large')
-              }
-            },
-            sendReady: (readyMessage) => {
-              const ready = encodeRelayFrame(
-                envelope.connectionId,
-                Buffer.from(JSON.stringify(readyMessage)),
-                false
-              )
-              if (ready) {
-                sendRelayJson(socket, ready)
-              }
-            }
-          }
-        )
-        if (local) {
-          localSockets.set(envelope.connectionId, local)
-        }
-        return
-      }
-      if (applyBrowserRevocationFrame(text)) {
-        return
-      }
-      if (text.includes('"type":"machine-ready"')) {
-        if (json) {
-          console.log(JSON.stringify({ status: 'online', machineId }))
-        } else {
-          console.log('Connected to Yiru Web. Press Ctrl+C to take this computer offline.')
-        }
-        return
-      }
-      const close = parseConnectionClose(text)
-      if (close) {
-        localSockets.get(close.connectionId)?.close()
-        localSockets.delete(close.connectionId)
-        return
-      }
-      const frame = decodeRelayFrame(text)
-      const local = frame ? localSockets.get(frame.connectionId) : null
-      if (frame && local?.readyState === WebSocket.OPEN) {
-        local.send(frame.data, { binary: frame.isBinary })
-      }
-    })
-    socket.on('close', () => {
-      for (const local of localSockets.values()) {
-        local.close()
-      }
-      localSockets.clear()
-      if (!stopped) {
-        setTimeout(connectRelay, RECONNECT_DELAY_MS)
-      }
-    })
-    socket.on('error', () => {})
-  }
-  connectRelay()
-
   await new Promise<void>((resolve, reject) => {
     runtime.child.once('exit', (code) => {
-      stopped = true
-      relaySocket?.close()
-      for (const local of localSockets.values()) {
-        local.close()
-      }
+      bridge.stop()
       process.removeListener('SIGINT', stop)
       process.removeListener('SIGTERM', stop)
       if (code === 0 || code === null) {
@@ -243,7 +109,7 @@ async function startRuntimeHost(): Promise<{ child: ChildProcess; readiness: Run
   return { child, readiness }
 }
 
-function readRuntimePairing(path: string): ReturnType<typeof decodePairingOffer> {
+function readRuntimeTarget(path: string): LocalRuntimeTarget {
   const parsed: unknown = JSON.parse(readFileSync(path, 'utf8'))
   const pairingUrl =
     parsed && typeof parsed === 'object' ? Reflect.get(parsed, 'pairingUrl') : undefined
@@ -253,7 +119,12 @@ function readRuntimePairing(path: string): ReturnType<typeof decodePairingOffer>
       'Runtime pairing credentials are missing.'
     )
   }
-  return decodePairingOffer(pairingUrl)
+  const offer = decodePairingOffer(pairingUrl)
+  return {
+    deviceToken: offer.deviceToken,
+    endpoint: offer.endpoint,
+    runtimePublicKeyB64: offer.publicKeyB64
+  }
 }
 
 function readRuntimeReadiness(value: unknown): RuntimeReadiness | null {
@@ -266,32 +137,4 @@ function readRuntimeReadiness(value: unknown): RuntimeReadiness | null {
   }
   const pairingFile = Reflect.get(web, 'pairingFile')
   return typeof pairingFile === 'string' ? { web: { pairingFile } } : null
-}
-
-function parseBrowserAuthEnvelope(
-  value: string
-): ReturnType<typeof RelayBrowserAuthEnvelopeSchema.parse> | null {
-  try {
-    const parsed = RelayBrowserAuthEnvelopeSchema.safeParse(JSON.parse(value))
-    return parsed.success ? parsed.data : null
-  } catch {
-    return null
-  }
-}
-
-function sendRelayJson(socket: WebSocket, value: unknown): void {
-  if (socket.readyState === WebSocket.OPEN) {
-    socket.send(JSON.stringify(value))
-  }
-}
-
-function machineSocketUrl(machineId: string): string {
-  const origin = new URL(process.env.YIRU_CONNECT_ORIGIN ?? 'https://app.yiru.ai')
-  origin.protocol = origin.protocol === 'https:' ? 'wss:' : 'ws:'
-  origin.pathname = `/api/connect/machines/${encodeURIComponent(machineId)}/socket`
-  return origin.toString()
-}
-
-function randomBase64Url(byteLength: number): string {
-  return randomBytes(byteLength).toString('base64url')
 }

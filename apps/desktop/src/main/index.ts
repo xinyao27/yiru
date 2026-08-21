@@ -288,6 +288,11 @@ import {
 import { recordUpdaterLifecycle } from './updater-lifecycle-diagnostics'
 import { previewWarpThemeImport } from './warp-themes/electron-import-preview'
 import {
+  connectWebConnectIfPaired,
+  initializeWebConnect,
+  installWebConnectDeepLinkListeners
+} from './web-connect/desktop-integration'
+import {
   attachMainWindowServices,
   ensureAutoUpdaterConfigured
 } from './window/attach-main-window-services'
@@ -754,6 +759,11 @@ if (!hasSingleInstanceLock) {
   logSingleInstanceLockFailure()
   app.quit()
 }
+
+// Why: `open-url` can fire before whenReady on macOS, and the second-instance
+// listener must be attached whether or not this process owns the lock — a losing
+// process still forwards its `yiru://` argument to the winner.
+installWebConnectDeepLinkListeners()
 
 // Why: when the lock is held by another process, we've already called
 // app.quit() above. Skip every remaining file-writing side effect so this
@@ -2492,6 +2502,31 @@ app.whenReady().then(async () => {
   initializeShellMobileService(runtimeRpc, {
     openWindowsNetworkSettings: () => shell.openExternal('ms-settings:network-status')
   })
+  // Why: `yiru connect` runs its own relay bridge and starts a `yiru serve`
+  // process as its runtime host. If that child also bridged, one machine would
+  // hold two machine-auth connections and the two bridges would fight over the
+  // same browser channels — so only a real desktop session pairs.
+  if (!serveOptions) {
+    initializeWebConnect({
+      // Why: the same canonical directory the CLI resolves, so `yiru connect` and
+      // the app share one machine identity and one paired-browser list.
+      userDataPath: getCanonicalUserDataPath(),
+      resolveTarget: (name) => runtimeRpc?.createWebConnectTarget(name) ?? null,
+      onStatusChange: (status) => {
+        if (mainWindow && !mainWindow.isDestroyed()) {
+          publishShellEvent(mainWindow.webContents.id, { type: 'webConnectStatus', status })
+        }
+        // Why: an unsolicited pairing request is only safe if the user actually
+        // sees the code, so the window has to come forward to show it.
+        if (status.pendingVerification) {
+          requestDesktopActivation()
+        }
+      },
+      reportError: (message, error) => {
+        console.error(message, error)
+      }
+    })
+  }
 
   startTerminalRuntimeStartupServices()
   app.on('activate', requestDesktopActivation)
@@ -2614,9 +2649,16 @@ app.whenReady().then(async () => {
   // without racing the daemon provider swap.
   const [win] = await Promise.all([
     Promise.resolve(openMainWindow()),
-    runtimeRpc.start().catch((error) => {
-      console.error('[runtime] Failed to start local RPC transport:', error)
-    }),
+    runtimeRpc
+      .start()
+      .then(() => {
+        // Why: an already-paired machine goes back online by itself, but only
+        // once this transport can hand the bridge a local endpoint.
+        connectWebConnectIfPaired()
+      })
+      .catch((error) => {
+        console.error('[runtime] Failed to start local RPC transport:', error)
+      }),
     coworkingOwner?.start()
   ])
 

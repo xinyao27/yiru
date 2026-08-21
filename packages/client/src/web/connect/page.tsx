@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Check, Copy } from '~renderer/components/icons/hugeicons'
+import { ArrowUpRight, Check, Copy, Download } from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import { ButtonGroup, ButtonGroupText } from '~renderer/components/ui/button-group'
@@ -10,6 +10,14 @@ import {
   createStoredWebRuntimeEnvironment,
   saveStoredWebRuntimeEnvironment
 } from '../runtime-environment'
+import { openDesktopPairing, readDesktopSessionNonce, webConnectDeepLink } from './desktop-handoff'
+import {
+  ALL_DOWNLOADS_URL,
+  LINUX_ARM64_DOWNLOAD_URL,
+  LINUX_X64_DOWNLOAD_URL,
+  MACOS_ARM64_DOWNLOAD_URL,
+  MACOS_X64_DOWNLOAD_URL
+} from './download-links'
 import {
   cancelBrowserConnectGrant,
   createBrowserConnectGrant,
@@ -29,7 +37,6 @@ type PairingViewState =
   | { kind: 'paired'; machineId: string; machineName: string }
   | { kind: 'error'; message: string }
 
-const INSTALL_COMMAND = 'curl -fsSL https://yiru.ai/install.sh | sh'
 const STATUS_POLL_INTERVAL_MS = 1_500
 
 type WebConnectProps = { onConnected: () => void }
@@ -140,6 +147,20 @@ export function WebConnect({ onConnected }: WebConnectProps): React.JSX.Element 
     }
   }, [activeGrantId])
 
+  // Why: the app opens this page carrying a one-time nonce, so a grant created
+  // here is handed straight back through the deep link — that round trip is what
+  // lets the app pair without the user comparing a code.
+  useEffect(() => {
+    if (state.kind !== 'ready') {
+      return
+    }
+    const nonce = readDesktopSessionNonce()
+    if (!nonce) {
+      return
+    }
+    openDesktopPairing(state.grant.grant, nonce)
+  }, [state])
+
   const copyCommand = async (command: string): Promise<void> => {
     await navigator.clipboard.writeText(command)
     setCopiedCommand(command)
@@ -177,14 +198,46 @@ export function WebConnect({ onConnected }: WebConnectProps): React.JSX.Element 
           <p className="text-muted-foreground text-sm leading-6">
             {translate(
               'auto.web.WebConnect.installDescription',
-              'Run this once on the macOS or Linux computer you want to use.'
+              'Download Yiru on the computer you want to use, then install it as usual.'
             )}
           </p>
-          <CommandBlock
-            command={INSTALL_COMMAND}
-            copied={copiedCommand === INSTALL_COMMAND}
-            onCopy={copyCommand}
-          />
+          <div className="flex flex-col gap-2">
+            <DownloadLink
+              url={MACOS_ARM64_DOWNLOAD_URL}
+              label={translate(
+                'auto.web.WebConnect.downloadMacArm64',
+                'macOS · Apple silicon (.dmg)'
+              )}
+            />
+            <DownloadLink
+              url={MACOS_X64_DOWNLOAD_URL}
+              label={translate('auto.web.WebConnect.downloadMacX64', 'macOS · Intel (.dmg)')}
+            />
+            <DownloadLink
+              url={LINUX_X64_DOWNLOAD_URL}
+              label={translate('auto.web.WebConnect.downloadLinuxX64', 'Linux · x64 (.AppImage)')}
+            />
+            <DownloadLink
+              url={LINUX_ARM64_DOWNLOAD_URL}
+              label={translate(
+                'auto.web.WebConnect.downloadLinuxArm64',
+                'Linux · arm64 (.AppImage)'
+              )}
+            />
+          </div>
+          <p className="text-muted-foreground text-xs leading-5">
+            <a
+              className="hover:text-foreground underline underline-offset-2"
+              href={ALL_DOWNLOADS_URL}
+              rel="noreferrer"
+              target="_blank"
+            >
+              {translate(
+                'auto.web.WebConnect.allDownloads',
+                'All downloads — .deb, .rpm, and Windows'
+              )}
+            </a>
+          </p>
         </ConnectStep>
 
         <ConnectStep
@@ -196,8 +249,21 @@ export function WebConnect({ onConnected }: WebConnectProps): React.JSX.Element 
             <>
               <p className="text-muted-foreground text-sm leading-6">
                 {translate(
+                  'auto.web.WebConnect.pairAppDescription',
+                  'If Yiru is already running on that computer, let it pair itself.'
+                )}
+              </p>
+              <a
+                className="border-border bg-muted hover:bg-accent flex h-12 items-center justify-between border px-4 text-sm"
+                href={webConnectDeepLink(state.grant.grant, null)}
+              >
+                <span>{translate('auto.web.WebConnect.pairOpenApp', 'Open Yiru and pair')}</span>
+                <ArrowUpRight className="text-muted-foreground" size={16} aria-hidden />
+              </a>
+              <p className="text-muted-foreground text-sm leading-6">
+                {translate(
                   'auto.web.WebConnect.pairDescription',
-                  'Run this single-use command on that computer. It expires after 10 minutes.'
+                  'Or run this single-use command on that computer. It expires after 10 minutes.'
                 )}
               </p>
               <CommandBlock
@@ -215,7 +281,7 @@ export function WebConnect({ onConnected }: WebConnectProps): React.JSX.Element 
               <p className="text-muted-foreground mt-1 text-sm">
                 {translate(
                   'auto.web.WebConnect.verifyDescription',
-                  'The terminal on {{machine}} must show this same code:',
+                  'Yiru on {{machine}} must show this same code:',
                   { machine: state.machineName }
                 )}
               </p>
@@ -257,6 +323,25 @@ export function WebConnect({ onConnected }: WebConnectProps): React.JSX.Element 
         </p>
       </div>
     </main>
+  )
+}
+
+type DownloadLinkProps = {
+  url: string
+  label: string
+}
+
+function DownloadLink(props: DownloadLinkProps): React.JSX.Element {
+  return (
+    <a
+      className="border-border bg-muted hover:bg-accent flex h-12 items-center justify-between border px-4 text-sm"
+      href={props.url}
+      rel="noreferrer"
+      target="_blank"
+    >
+      <span>{props.label}</span>
+      <Download className="text-muted-foreground" size={16} aria-hidden />
+    </a>
   )
 }
 

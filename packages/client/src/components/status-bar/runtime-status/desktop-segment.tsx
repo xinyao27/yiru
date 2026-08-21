@@ -15,6 +15,7 @@ import { useAppStore } from '~renderer/store'
 import type { CliInstallStatus } from '~shared/cli-install-types'
 import type { RuntimeStatus } from '~shared/runtime-types'
 
+import { WebConnectAction } from '../web-connect/action'
 import {
   RuntimeStatusIndicator,
   type RuntimeStatusIndicatorDetail,
@@ -294,7 +295,13 @@ function DesktopRuntimeStatusContent(props: {
     props.environmentId === null,
     cliState
   )
-  return <RuntimeStatusIndicator {...presentation} onOpenChange={refreshCliStatus} />
+  return (
+    <RuntimeStatusIndicator
+      {...presentation}
+      footer={<WebConnectAction />}
+      onOpenChange={refreshCliStatus}
+    />
+  )
 }
 
 export function DesktopRuntimeStatusSegment(): React.JSX.Element | null {

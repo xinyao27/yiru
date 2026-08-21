@@ -12,8 +12,9 @@ import {
   pairingVerificationMessage,
   revokeBrowserAccessSigningMessage
 } from '@yiru/runtime-protocol/web-connect/signing-messages'
+import { RuntimeClientError } from '~shared/runtime-client-error'
 
-import { RuntimeClientError } from '../runtime-client'
+import { connectOrigin } from './connect-origin'
 import type { MachineIdentity } from './identity'
 
 type ExchangedGrant = {
@@ -23,8 +24,6 @@ type ExchangedGrant = {
   verificationCode: string
   expiresAt: number
 }
-
-const DEFAULT_CONNECT_ORIGIN = 'https://app.yiru.ai'
 
 export async function exchangeConnectGrant(args: {
   grant: string
@@ -110,15 +109,6 @@ async function requestJson(pathname: string, body: unknown): Promise<unknown> {
     throw new RuntimeClientError('connect_rejected', readApiError(payload))
   }
   return payload
-}
-
-function connectOrigin(): string {
-  const configured = process.env.YIRU_CONNECT_ORIGIN ?? DEFAULT_CONNECT_ORIGIN
-  const url = new URL(configured)
-  if (url.protocol !== 'https:' && url.hostname !== 'localhost' && url.hostname !== '127.0.0.1') {
-    throw new RuntimeClientError('invalid_environment', 'YIRU_CONNECT_ORIGIN must use HTTPS.')
-  }
-  return url.origin
 }
 
 function readApiError(value: unknown): string {

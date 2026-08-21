@@ -10,7 +10,6 @@ import {
 } from '@yiru/runtime-protocol/web-connect'
 import { hardenExistingSecureFile, writeSecureJsonFile } from '~shared/secure-file'
 
-import { getDefaultUserDataPath } from '../runtime-client'
 import {
   deleteMacMachinePrivateKey,
   readMacMachinePrivateKey,
@@ -45,11 +44,44 @@ type StoredBrowserAccess = {
   entries: PairedBrowserAccess[]
 }
 
+export type ConnectIdentityStore = {
+  browserAccessId: (browser: BrowserIdentity) => string
+  consumeBrowserRelayNonce: (args: {
+    machineId: string
+    browser: BrowserIdentity
+    nonce: string
+  }) => boolean
+  forgetConnectIdentity: () => void
+  listPairedBrowserAccess: () => PairedBrowserAccess[]
+  loadOrCreateMachineIdentity: () => MachineIdentity
+  removePairedBrowserAccess: (browserId: string) => void
+  savePairedBrowserAccess: (entry: PairedBrowserAccess) => void
+}
+
+type ConnectFilePath = (filename: string) => string
+
 const CONNECT_DIRECTORY = 'web-connect'
 const IDENTITY_FILENAME = 'machine-identity.json'
 const ACCESS_FILENAME = 'browser-access.json'
 
-export function loadOrCreateMachineIdentity(): MachineIdentity {
+// Why: the app and the `yiru connect` CLI must read one machine identity and one
+// paired-browser list, so each host passes in the same userData directory rather
+// than this module guessing which process it runs in.
+export function createConnectIdentityStore(userDataPath: string): ConnectIdentityStore {
+  const connectFilePath = (filename: string): string =>
+    join(userDataPath, CONNECT_DIRECTORY, filename)
+  return {
+    browserAccessId,
+    consumeBrowserRelayNonce: (args) => consumeBrowserRelayNonce(connectFilePath, args),
+    forgetConnectIdentity: () => forgetConnectIdentity(connectFilePath),
+    listPairedBrowserAccess: () => listPairedBrowserAccess(connectFilePath),
+    loadOrCreateMachineIdentity: () => loadOrCreateMachineIdentity(connectFilePath),
+    removePairedBrowserAccess: (browserId) => removePairedBrowserAccess(connectFilePath, browserId),
+    savePairedBrowserAccess: (entry) => savePairedBrowserAccess(connectFilePath, entry)
+  }
+}
+
+function loadOrCreateMachineIdentity(connectFilePath: ConnectFilePath): MachineIdentity {
   const path = connectFilePath(IDENTITY_FILENAME)
   const stored = readStoredMachineIdentity(path)
   if (stored) {
@@ -67,7 +99,10 @@ export function loadOrCreateMachineIdentity(): MachineIdentity {
   return { publicKey, privateKey: generated.privateKey }
 }
 
-export function savePairedBrowserAccess(entry: PairedBrowserAccess): void {
+function savePairedBrowserAccess(
+  connectFilePath: ConnectFilePath,
+  entry: PairedBrowserAccess
+): void {
   const path = connectFilePath(ACCESS_FILENAME)
   const stored = readStoredBrowserAccess(path)
   const entries = [
@@ -81,11 +116,10 @@ export function savePairedBrowserAccess(entry: PairedBrowserAccess): void {
   writeSecureJsonFile(path, { version: 1, entries } satisfies StoredBrowserAccess)
 }
 
-export function consumeBrowserRelayNonce(args: {
-  machineId: string
-  browser: BrowserIdentity
-  nonce: string
-}): boolean {
+function consumeBrowserRelayNonce(
+  connectFilePath: ConnectFilePath,
+  args: { machineId: string; browser: BrowserIdentity; nonce: string }
+): boolean {
   const path = connectFilePath(ACCESS_FILENAME)
   const stored = readStoredBrowserAccess(path)
   const entry = stored.entries.find(
@@ -102,7 +136,7 @@ export function consumeBrowserRelayNonce(args: {
   return true
 }
 
-export function listPairedBrowserAccess(): PairedBrowserAccess[] {
+function listPairedBrowserAccess(connectFilePath: ConnectFilePath): PairedBrowserAccess[] {
   return readStoredBrowserAccess(connectFilePath(ACCESS_FILENAME)).entries
 }
 
@@ -112,14 +146,14 @@ export function browserAccessId(browser: BrowserIdentity): string {
     .digest('base64url')
 }
 
-export function removePairedBrowserAccess(browserId: string): void {
+function removePairedBrowserAccess(connectFilePath: ConnectFilePath, browserId: string): void {
   const path = connectFilePath(ACCESS_FILENAME)
   const stored = readStoredBrowserAccess(path)
   const entries = stored.entries.filter((entry) => browserAccessId(entry.browser) !== browserId)
   writeSecureJsonFile(path, { version: 1, entries } satisfies StoredBrowserAccess)
 }
 
-export function forgetConnectIdentity(): void {
+function forgetConnectIdentity(connectFilePath: ConnectFilePath): void {
   const identityPath = connectFilePath(IDENTITY_FILENAME)
   const stored = readStoredMachineIdentity(identityPath)
   if (process.platform === 'darwin' && stored) {
@@ -127,10 +161,6 @@ export function forgetConnectIdentity(): void {
   }
   rmSync(connectFilePath(ACCESS_FILENAME), { force: true })
   rmSync(identityPath, { force: true })
-}
-
-function connectFilePath(filename: string): string {
-  return join(getDefaultUserDataPath(), CONNECT_DIRECTORY, filename)
 }
 
 function readStoredMachineIdentity(

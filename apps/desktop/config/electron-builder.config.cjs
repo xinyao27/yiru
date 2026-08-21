@@ -67,6 +67,16 @@ const winSpeechNativeResource = {
 module.exports = {
   appId: 'com.xinyao27.yiru',
   productName: 'Yiru',
+  // Why: the connect page hands a single-use pairing grant back to this app
+  // through `yiru://connect?grant=…`, which only works if the installer claims
+  // the scheme — macOS reads CFBundleURLTypes from here and NSIS writes the
+  // Windows registry entries. Linux needs the MimeType on its desktop entry.
+  protocols: [
+    {
+      name: 'Yiru',
+      schemes: ['yiru']
+    }
+  ],
   // Why: electron-builder validates this dependency as semver before packing,
   // but does not understand pnpm's catalog: protocol used by source manifests.
   extraMetadata: {
@@ -327,7 +337,10 @@ module.exports = {
       entry: {
         // Why: Electron reports WM_CLASS=yiru for the visible Linux window;
         // GNOME docks need an exact match to group it with yiru.desktop.
-        StartupWMClass: 'yiru'
+        StartupWMClass: 'yiru',
+        // Why: xdg-open resolves `yiru://` links through this handler, which is
+        // how the connect page reaches the installed app on Linux.
+        MimeType: 'x-scheme-handler/yiru;'
       }
     },
     extraResources: [
@@ -356,10 +369,28 @@ module.exports = {
   deb: {
     packageName: 'yiru',
     artifactName: 'yiru_${version}_${arch}.${ext}',
+    // Why: setting `depends` replaces electron-builder's default list rather than
+    // extending it, so Electron's own runtime libraries must be named here or the
+    // installed binary cannot load at all on a minimal host (libnss3 pulls
+    // libnspr4/libnssutil3/libsmime3; libasound2 has no other provider).
+    // Why the alternatives: Ubuntu's 64-bit-time_t rename ships only the `t64`
+    // names (24.04+) while Debian 12 ships only the originals, and neither
+    // provides the other — a single name makes the package uninstallable on one
+    // of them.
     // Why: xvfb lets the bundled `yiru serve` CLI run browser panes on a headless
     // Linux host — Chromium needs a display server even for offscreen rendering,
     // and serve starts Xvfb itself when present (see ensure-virtual-display.ts).
     depends: [
+      'libgtk-3-0t64 | libgtk-3-0',
+      'libatspi2.0-0t64 | libatspi2.0-0',
+      'libasound2t64 | libasound2',
+      'libnss3',
+      'libnotify4',
+      'libxss1',
+      'libxtst6',
+      'libuuid1',
+      'libsecret-1-0',
+      'xdg-utils',
       'python3',
       'python3-gi',
       'gir1.2-atspi-2.0',
@@ -378,9 +409,20 @@ module.exports = {
   rpm: {
     packageName: 'yiru',
     artifactName: 'yiru-${version}.${arch}.${ext}',
-    // Why: see deb depends. RPM distros ship Xvfb as xorg-x11-server-Xvfb (there
-    // is no `xvfb` package), so the name differs from the deb here.
+    // Why: see deb depends — the same replaced-not-extended rule applies, so
+    // Electron's runtime libraries are named here too. RPM distros ship Xvfb as
+    // xorg-x11-server-Xvfb (there is no `xvfb` package), so that name differs
+    // from the deb.
     depends: [
+      'gtk3',
+      'libnotify',
+      'nss',
+      'nspr',
+      'alsa-lib',
+      'libXScrnSaver',
+      '(libXtst or libXtst6)',
+      '(libuuid or libuuid1)',
+      'xdg-utils',
       'python3',
       'python3-gobject',
       'at-spi2-core',

@@ -12,6 +12,7 @@ import { shellAiVaultRuntimeHandlers } from './shell/ai-vault'
 import { shellConfigurationRuntimeHandlers } from './shell/configuration'
 import { shellSystemRuntimeHandlers } from './shell/system'
 import { shellToolsRuntimeHandlers } from './shell/tools'
+import { shellWebConnectRuntimeHandlers } from './shell/web-connect'
 
 export const shellRuntimeHandlers = {
   shell: {
@@ -20,6 +21,7 @@ export const shellRuntimeHandlers = {
     ...shellConfigurationRuntimeHandlers,
     ...shellSystemRuntimeHandlers,
     ...shellToolsRuntimeHandlers,
+    ...shellWebConnectRuntimeHandlers,
     browser: {
       importCookies: runtimeImplementation.shell.browser.importCookies.handler(
         async ({ input, context }) => {

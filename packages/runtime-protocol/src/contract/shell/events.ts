@@ -2,6 +2,7 @@ import { eventIterator, type, type ContractRouter } from '@orpc/contract'
 
 import { withAccess, type RuntimeProcedureMeta } from '../access-meta.js'
 import type { ShellUiEvent } from './ui-events.js'
+import type { ShellWebConnectStatus } from './web-connect.js'
 
 export type ShellBrowserContextMenuRequestedEvent = {
   type: 'browserContextMenuRequested'
@@ -32,6 +33,7 @@ export type ShellStateEvent =
   | { type: 'starNagHide' }
   | { type: 'updaterStatus'; status: unknown }
   | { type: 'updaterClearDismissal' }
+  | { type: 'webConnectStatus'; status: ShellWebConnectStatus }
 
 export type ShellEvent = ShellBrowserEvent | ShellStateEvent | ShellUiEvent
 

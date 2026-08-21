@@ -9,8 +9,8 @@
 建议把最终体验收敛成两个正常入口、一个始终相同的运行命令：
 
 ```bash
-# 安装
-curl -fsSL https://yiru.ai/install.sh | sh
+# 安装：从 app.yiru.ai 的下载入口取 .dmg / .AppImage / .deb / .rpm 自行安装
+#（原先的 `curl -fsSL https://yiru.ai/install.sh | sh` 已下线，脚本不再发布）
 
 # Web 控制台生成；pair 只在首次出现
 yiru connect --pair yrp_<single-use-secret>

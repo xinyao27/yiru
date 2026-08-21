@@ -251,6 +251,26 @@ export class YiruRuntimeRpcServer {
     return true
   }
 
+  // Why: the web-connect relay bridge streams browser traffic into this very
+  // transport, so the browser lands on the same runtime as the desktop window
+  // instead of a second runtime host started beside it.
+  createWebConnectTarget(name: string): {
+    deviceToken: string
+    endpoint: string
+    runtimePublicKeyB64: string
+  } | null {
+    const endpoint = this.getWebSocketEndpoint()
+    const publicKeyB64 = this.getE2EEPublicKey()
+    if (!endpoint || !publicKeyB64 || !this.deviceRegistry) {
+      return null
+    }
+    return {
+      deviceToken: this.deviceRegistry.addRuntimeDevice(name).token,
+      endpoint,
+      runtimePublicKeyB64: publicKeyB64
+    }
+  }
+
   createCoworkingHostPairingOffer(args: {
     name: string
     subject: { nodeId: string; userDisplayName: string }

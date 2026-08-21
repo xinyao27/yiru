@@ -40,6 +40,7 @@ import {
   shellTelemetryContract
 } from './tools.js'
 import { shellUiContract } from './ui.js'
+import { shellWebConnectContract } from './web-connect.js'
 
 export const shellContract = {
   accounts: shellAccountsContract,
@@ -75,6 +76,7 @@ export const shellContract = {
   cache: shellCacheContract,
   ui: shellUiContract,
   updater: shellUpdaterContract,
+  webConnect: shellWebConnectContract,
   yiruProfiles: shellYiruProfilesContract
 } satisfies ContractRouter<RuntimeProcedureMeta>
 
@@ -91,3 +93,4 @@ export * from './runtime-environments.js'
 export * from './system.js'
 export * from './tools.js'
 export * from './ui.js'
+export * from './web-connect.js'

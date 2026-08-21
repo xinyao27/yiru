@@ -689,11 +689,18 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # Why: Linux installs are manual downloads, so provenance is the only way a
+      # user can check an artifact came from this workflow. Attest every published
+      # Linux artifact, not just the AppImage, or `gh attestation verify` fails on
+      # the packages most users actually install.
       - name: Attest Linux release provenance
         if: matrix.platform == 'linux-x64' || matrix.platform == 'linux-arm64'
         uses: actions/attest@v4
         with:
-          subject-path: apps/desktop/dist/yiru-linux*.AppImage
+          subject-path: |
+            apps/desktop/dist/yiru-linux*.AppImage
+            apps/desktop/dist/yiru_*.deb
+            apps/desktop/dist/yiru-*.rpm
 
       - name: Validate SignPath configuration
         if: matrix.platform == 'win'
