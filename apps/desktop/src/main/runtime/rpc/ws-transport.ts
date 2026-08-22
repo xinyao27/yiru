@@ -82,6 +82,9 @@ export class WebSocketTransport implements RpcTransport {
   // Why: maps each WebSocket to the clientId (deviceToken) that authenticated it,
   // so ws.on('close') can notify the runtime which mobile client disconnected.
   private wsClientIds = new Map<WebSocket, string>()
+  // Why: terminal multiplex opens a second socket. Its ticket must reuse the
+  // authority that reached this connection, not the runtime's loopback bind address.
+  private wsConnectionEndpoints = new WeakMap<WebSocket, string>()
   private preAuthTimers = new WeakMap<WebSocket, ReturnType<typeof setTimeout>>()
 
   constructor({
@@ -144,6 +147,14 @@ export class WebSocketTransport implements RpcTransport {
       return addr.port
     }
     return this.port
+  }
+
+  getConnectionEndpoint(ws: WebSocket): string {
+    const endpoint = this.wsConnectionEndpoints.get(ws)
+    if (!endpoint) {
+      throw new Error('WebSocket connection endpoint is unavailable')
+    }
+    return endpoint
   }
 
   async start(): Promise<void> {
@@ -222,11 +233,22 @@ export class WebSocketTransport implements RpcTransport {
       maxPayload: MAX_WS_MESSAGE_BYTES
     })
 
-    wss.on('connection', (ws) => {
+    wss.on('connection', (ws, request) => {
       if (wss.clients.size > MAX_WS_CONNECTIONS) {
         ws.close(1013, 'Maximum connections reached')
         return
       }
+      const scheme = this.tlsCert && this.tlsKey ? 'wss' : 'ws'
+      const authority = request.headers.host?.trim()
+      this.wsConnectionEndpoints.set(
+        ws,
+        authority
+          ? `${scheme}://${authority}`
+          : `${scheme}://${formatSocketAuthority(
+              request.socket.localAddress ?? '127.0.0.1',
+              request.socket.localPort ?? this.resolvedPort
+            )}`
+      )
       this.handleConnection(ws)
     })
 
@@ -401,4 +423,10 @@ export class WebSocketTransport implements RpcTransport {
 
 function isEAddressInUse(error: unknown): boolean {
   return error instanceof Error && 'code' in error && error.code === 'EADDRINUSE'
+}
+
+function formatSocketAuthority(address: string, port: number): string {
+  const normalizedAddress = address.startsWith('::ffff:') ? address.slice(7) : address
+  const host = normalizedAddress.includes(':') ? `[${normalizedAddress}]` : normalizedAddress
+  return `${host}:${port}`
 }

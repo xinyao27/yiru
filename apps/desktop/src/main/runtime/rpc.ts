@@ -721,7 +721,7 @@ export class YiruRuntimeRpcServer {
               socket.device.deviceId,
               input.clientInstanceId,
               input.environmentId,
-              `ws://127.0.0.1:${wsTransport.resolvedPort}`
+              wsTransport.getConnectionEndpoint(socket.ws)
             ),
           activateTerminalMultiplexEpoch: (socket) =>
             this.terminalMultiplex.activateEpoch(socket.connectionId, (code, reason) =>
