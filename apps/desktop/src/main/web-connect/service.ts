@@ -55,7 +55,7 @@ export class WebConnectService {
   getStatus(): WebConnectStatus {
     const access = this.store.listPairedBrowserAccess()
     return {
-      browserUrl: `${connectOrigin()}/connect`,
+      browserUrl: connectOrigin(),
       machineId: access[0]?.machineId ?? null,
       pairedBrowsers: access.length,
       pendingVerification: this.pending
@@ -72,12 +72,13 @@ export class WebConnectService {
   // Why: pairing is browser-initiated by design — the browser's signing key is
   // non-exportable, so the app cannot mint a grant for it. The app instead opens
   // the connect page carrying a nonce and waits for the page to hand a grant back
-  // through the deep link.
+  // through the deep link. The web app is one document served only at the origin
+  // root — it has no router, so any other pathname is a 404 from the asset router.
   createBrowserSessionUrl(): string {
     this.pruneDesktopNonces()
     const nonce = randomBytes(24).toString('base64url')
     this.desktopNonces.set(nonce, Date.now() + DESKTOP_NONCE_TTL_MS)
-    return `${connectOrigin()}/connect#desktop=${nonce}`
+    return `${connectOrigin()}/#desktop=${nonce}`
   }
 
   async handleDeepLink(link: { desktopNonce: string | null; grant: string }): Promise<void> {
