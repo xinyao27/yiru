@@ -102,11 +102,23 @@ export class RemoteTerminalDelivery {
       return true
     }
     if (frame.opcode === TerminalMultiplexOpcode.End) {
-      this.handleEnd(frame)
+      if (!decodeRemoteTerminalEnd(frame)) {
+        this.options.callbacks.onError?.('Invalid remote terminal end record.')
+        return true
+      }
+      this.acks.deferExit(frame.seq)
       return true
     }
     if (frame.opcode === TerminalMultiplexOpcode.ModelRestore) {
-      this.handleModelRestore(frame)
+      const value = decodeRemoteTerminalModelRestore(frame)
+      if (!value) {
+        this.options.callbacks.onError?.('Invalid remote terminal restore record.')
+        return true
+      }
+      this.snapshotting = true
+      this.recoveryRequested = value.snapshotFollows
+      this.snapshot.clear()
+      this.options.setCredit(0)
       return true
     }
     return false
@@ -169,7 +181,7 @@ export class RemoteTerminalDelivery {
       return
     }
     this.expectedSequence = output.endSeq
-    const onParsed = once(() => this.noteParsed(startSeq, output.endSeq, payload.byteLength))
+    const onParsed = once(() => this.acks.noteParsed(startSeq, output.endSeq, payload.byteLength))
     this.options.callbacks.onData(
       data,
       {
@@ -194,6 +206,13 @@ export class RemoteTerminalDelivery {
         this.manualSnapshot.complete(null)
         if (end.status !== 3) {
           this.resumeWithoutSnapshot()
+        }
+      } else if (end.status !== 3) {
+        // Why: the host rebases failed snapshots to this live-tail boundary.
+        // Matching it keeps initial subscribe usable even without scrollback.
+        this.resumeWithoutSnapshot(end.coverageEndSeq)
+        if (end.snapshotId === this.initialSnapshotId) {
+          this.options.callbacks.onSubscribed?.()
         }
       }
       if (end.status === 2) {
@@ -270,16 +289,16 @@ export class RemoteTerminalDelivery {
     this.resumeWithoutSnapshot()
   }
 
-  private resumeWithoutSnapshot(): void {
+  private resumeWithoutSnapshot(coverageEndSeq?: bigint): void {
+    if (coverageEndSeq !== undefined) {
+      this.acks.rebase(coverageEndSeq)
+      this.expectedSequence = coverageEndSeq
+    }
     this.snapshotting = false
     this.options.setCredit(2 * 1024 * 1024)
     for (const output of this.pendingOutput.splice(0)) {
       this.deliverOutput(output)
     }
-  }
-
-  private noteParsed(startSeq: bigint, endSeq: bigint, bytes: number): void {
-    this.acks.noteParsed(startSeq, endSeq, bytes)
   }
 
   private recover(_reason: string): void {
@@ -297,25 +316,5 @@ export class RemoteTerminalDelivery {
       this.options.allocateCorrelationId(),
       encodeTerminalMultiplexJson({ requestedScrollbackRows: 1_000 })
     )
-  }
-
-  private handleEnd(frame: TerminalMultiplexFrame): void {
-    if (!decodeRemoteTerminalEnd(frame)) {
-      this.options.callbacks.onError?.('Invalid remote terminal end record.')
-      return
-    }
-    this.acks.deferExit(frame.seq)
-  }
-
-  private handleModelRestore(frame: TerminalMultiplexFrame): void {
-    const value = decodeRemoteTerminalModelRestore(frame)
-    if (!value) {
-      this.options.callbacks.onError?.('Invalid remote terminal restore record.')
-      return
-    }
-    this.snapshotting = true
-    this.recoveryRequested = value.snapshotFollows
-    this.snapshot.clear()
-    this.options.setCredit(0)
   }
 }

@@ -182,8 +182,12 @@ export class TerminalMultiplexSnapshotCoordinator {
       this.activeReason = null
       if (reason === 1) {
         this.options.output.completeManualSnapshot()
-        this.options.onState(this.options.isDeliveryActive() ? 'live' : 'gated')
+      } else {
+        // Why: unavailable/oversized snapshots still define a live-tail boundary.
+        // Rebase there so a missing model cannot leave output permanently gated.
+        this.options.output.completeSnapshot(sent.coverageEndSeq)
       }
+      this.options.onState(this.options.isDeliveryActive() ? 'live' : 'gated')
       return
     }
     this.pending = { id: snapshotId, coverageEndSeq: sent.coverageEndSeq, reason }

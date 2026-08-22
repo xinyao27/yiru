@@ -183,7 +183,7 @@ import type {
   RuntimeMethodParams,
   RuntimeMethodResult
 } from '~shared/runtime-method-contract'
-import { toRuntimeTerminalPtyId } from '~shared/runtime-terminal-pty-id'
+import { parseRuntimeTerminalPtyId, toRuntimeTerminalPtyId } from '~shared/runtime-terminal-pty-id'
 import { HEADLESS_RUNTIME_WINDOW_ID, type RuntimeDesktopWindowStatus } from '~shared/runtime-types'
 import type {
   RuntimeRepoSearchRefs,
@@ -3336,7 +3336,8 @@ export class YiruRuntimeService {
           if (!leaf.ptyId) {
             return
           }
-          this.recordPtyWorktree(leaf.ptyId, leaf.worktreeId, {
+          const ptyId = this.resolveLocalRuntimeTerminalPtyId(leaf.ptyId)
+          this.recordPtyWorktree(ptyId, leaf.worktreeId, {
             connected: true,
             lastOutputAt: existing?.ptyId === leaf.ptyId ? existing.lastOutputAt : null,
             preview: existing?.ptyId === leaf.ptyId ? existing.preview : '',
@@ -4992,13 +4993,14 @@ export class YiruRuntimeService {
         continue
       }
       const livePty = this.findPtyForMobileTerminalTab(worktreeId, candidate)
-      const ptyId = livePty?.ptyId ?? candidate.ptyId
-      const hasOtherOwner = snapshot.tabs.some(
-        (other) =>
-          other.type === 'terminal' &&
-          other.parentTabId !== closedParentTabId &&
-          other.ptyId === ptyId
-      )
+      const candidatePtyId = livePty?.ptyId ?? candidate.ptyId
+      const ptyId = candidatePtyId ? this.resolveLocalRuntimeTerminalPtyId(candidatePtyId) : null
+      const hasOtherOwner = snapshot.tabs.some((other) => {
+        if (other.type !== 'terminal' || other.parentTabId === closedParentTabId || !other.ptyId) {
+          return false
+        }
+        return this.resolveLocalRuntimeTerminalPtyId(other.ptyId) === ptyId
+      })
       if (ptyId && !hasOtherOwner && (livePty || parseAppSshPtyId(ptyId))) {
         // Why: a live serve leaf can exist before its debounced binding reaches
         // persistence. Include it from the authoritative snapshot so split
@@ -7733,13 +7735,32 @@ export class YiruRuntimeService {
     state.writeChain.finally(() => state.emulator.dispose()).catch(() => state.emulator.dispose())
   }
 
+  private resolveLocalRuntimeTerminalPtyId(ptyId: string): string {
+    let resolvedPtyId = ptyId
+    const visitedPtyIds = new Set([ptyId])
+    while (true) {
+      const runtimeTerminal = parseRuntimeTerminalPtyId(resolvedPtyId)
+      if (!runtimeTerminal || runtimeTerminal.environmentId !== null) {
+        return resolvedPtyId
+      }
+      const nextPtyId = this.terminalSessions.getTerminalHandle(runtimeTerminal.handle)?.ptyId
+      if (!nextPtyId || visitedPtyIds.has(nextPtyId)) {
+        return resolvedPtyId
+      }
+      visitedPtyIds.add(nextPtyId)
+      resolvedPtyId = nextPtyId
+    }
+  }
+
   resolveLeafForHandle(handle: string): { ptyId: string | null } | null {
     const record = this.terminalSessions.getTerminalHandle(handle)
     if (!record) {
       return null
     }
     if (record.tabId.startsWith('pty:')) {
-      return { ptyId: record.ptyId }
+      return {
+        ptyId: record.ptyId ? this.resolveLocalRuntimeTerminalPtyId(record.ptyId) : null
+      }
     }
     const leaf = this.terminalSessions.getGraphLeafByKey(
       this.getLeafKey(record.tabId, record.leafId)
@@ -7747,7 +7768,9 @@ export class YiruRuntimeService {
     if (!leaf) {
       return null
     }
-    return { ptyId: leaf.ptyId }
+    return {
+      ptyId: leaf.ptyId ? this.resolveLocalRuntimeTerminalPtyId(leaf.ptyId) : null
+    }
   }
 
   // Why: remote clients hold handles across transport reconnects. A handle
@@ -7761,7 +7784,9 @@ export class YiruRuntimeService {
       return null
     }
     if (record.tabId.startsWith('pty:')) {
-      return { ptyId: record.ptyId }
+      return {
+        ptyId: record.ptyId ? this.resolveLocalRuntimeTerminalPtyId(record.ptyId) : null
+      }
     }
     const leaf = this.terminalSessions.getGraphLeafByKey(
       this.getLeafKey(record.tabId, record.leafId)
@@ -7775,7 +7800,9 @@ export class YiruRuntimeService {
     ) {
       throw new Error('terminal_handle_stale')
     }
-    return { ptyId: leaf.ptyId }
+    return {
+      ptyId: leaf.ptyId ? this.resolveLocalRuntimeTerminalPtyId(leaf.ptyId) : null
+    }
   }
 
   async resolveTerminalCwd(handle: string): Promise<string | null> {
@@ -10246,11 +10273,14 @@ export class YiruRuntimeService {
 
   getTerminalProcessIncarnation(handle: string): string | null {
     const live = this.getLivePtyForHandle(handle)
-    const record = live?.record ?? this.terminalSessions.getTerminalHandle(handle)
+    if (live) {
+      return `${this.runtimeId}:${live.pty.ptyId}:${live.record.ptyGeneration}`
+    }
+    const record = this.terminalSessions.getTerminalHandle(handle)
     if (!record?.ptyId) {
       return null
     }
-    return `${this.runtimeId}:${record.ptyId}:${record.ptyGeneration}`
+    return `${this.runtimeId}:${this.resolveLocalRuntimeTerminalPtyId(record.ptyId)}:${record.ptyGeneration}`
   }
 
   getExactWorkerProviderSession(
@@ -20611,7 +20641,9 @@ export class YiruRuntimeService {
         this.terminalSessions.getGraphLeafByKey(this.getLeafKey(tab.parentTabId, tab.leafId)) ??
         null
       const liveLeaf = leaf?.ptyId && leaf.connected ? leaf : null
-      const liveLeafPtyId = liveLeaf?.ptyId ?? null
+      const liveLeafPtyId = liveLeaf?.ptyId
+        ? this.resolveLocalRuntimeTerminalPtyId(liveLeaf.ptyId)
+        : null
       const liveLeafPty = liveLeafPtyId
         ? (this.terminalSessions.getPtyRecord(liveLeafPtyId) ?? null)
         : null
@@ -20975,7 +21007,10 @@ export class YiruRuntimeService {
     tab: RuntimeMobileSessionTerminalTab,
     options: { allowWorktreeOnlyMatch?: boolean } = {}
   ): RuntimePtyWorktreeRecord | null {
-    const snapshotPtyId = tab.ptyId ?? tab.parentLayout?.ptyIdsByLeafId?.[tab.leafId] ?? null
+    const rawSnapshotPtyId = tab.ptyId ?? tab.parentLayout?.ptyIdsByLeafId?.[tab.leafId] ?? null
+    const snapshotPtyId = rawSnapshotPtyId
+      ? this.resolveLocalRuntimeTerminalPtyId(rawSnapshotPtyId)
+      : null
     const paneKey = this.getMobileTerminalPaneKey(tab)
     if (snapshotPtyId) {
       const pty = this.terminalSessions.getPtyRecord(snapshotPtyId)
@@ -21576,8 +21611,9 @@ export class YiruRuntimeService {
     if (!record.ptyId) {
       return null
     }
-    const pty = this.terminalSessions.getPtyRecord(record.ptyId)
-    if (!pty || pty.ptyId !== record.ptyId) {
+    const resolvedPtyId = this.resolveLocalRuntimeTerminalPtyId(record.ptyId)
+    const pty = this.terminalSessions.getPtyRecord(resolvedPtyId)
+    if (!pty || pty.ptyId !== resolvedPtyId) {
       return null
     }
     // Why: renderer adoption can race with CLI reads. If this synthetic PTY
@@ -21597,9 +21633,10 @@ export class YiruRuntimeService {
     }
     try {
       const liveLeaf = this.getLiveLeafForHandle(handle)
-      const pty = liveLeaf.leaf.ptyId
-        ? this.terminalSessions.getPtyRecord(liveLeaf.leaf.ptyId)
+      const ptyId = liveLeaf.leaf.ptyId
+        ? this.resolveLocalRuntimeTerminalPtyId(liveLeaf.leaf.ptyId)
         : null
+      const pty = ptyId ? this.terminalSessions.getPtyRecord(ptyId) : null
       // Why: renderer reload adopts the assistant's synthetic handle into the
       // rebuilt leaf graph; reveal must follow that live handle back to its PTY.
       return pty ? { record: liveLeaf.record, pty } : null
