@@ -15,10 +15,12 @@ import { initialAgentTabViewModeProps } from '~renderer/lib/native-chat-initial-
 import { isNativeChatTranscriptLocalReadable } from '~renderer/lib/native-chat-transcript-readability'
 import { useAppStore } from '~renderer/store'
 import { singlePaneLayoutSnapshot } from '~renderer/store/slices/terminal-helpers'
+import { parseRuntimeTerminalPtyId } from '~shared/runtime-terminal-pty-id'
 import { makePaneKey } from '~shared/stable-pane-id'
 
 import { resolveTerminalPresentation } from './terminal-create-presentation'
 import { activateExistingLeafInLayout, addSplitLeafToLayout } from './terminal-reveal-split-layout'
+import { rememberTerminalSessionId } from './terminal-session-id-index'
 
 function tryMakePaneKey(tabId: string, leafId: string): string | null {
   try {
@@ -57,6 +59,7 @@ export function revealTerminalSessionViaShell(
   const {
     worktreeId,
     ptyId,
+    durablePtyId,
     title,
     cwd,
     launchConfig,
@@ -72,6 +75,10 @@ export function revealTerminalSessionViaShell(
     splitDirection,
     splitTelemetrySource
   } = input
+  const runtimePtyId = parseRuntimeTerminalPtyId(ptyId)
+  if (runtimePtyId && durablePtyId) {
+    rememberTerminalSessionId(runtimePtyId.handle, durablePtyId, runtimePtyId.environmentId)
+  }
   const store = useAppStore.getState()
   const terminalPresentation = resolveTerminalPresentation({ presentation, activate })
   const shouldActivate = terminalPresentation === 'focused'

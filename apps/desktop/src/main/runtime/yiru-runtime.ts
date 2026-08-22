@@ -17324,7 +17324,8 @@ export class YiruRuntimeService {
             // shape — sending the bare controller handle here is exactly the
             // "Remote runtime terminal id is invalid" defect (see the mint-side
             // fix note on toRuntimeTerminalPtyId's import above).
-            ptyId: toRuntimeTerminalPtyId(result.id),
+            ptyId: toRuntimeTerminalPtyId(handle),
+            durablePtyId: result.id,
             title: launchOpts.title ?? null,
             ...(cwd !== workspace.path ? { cwd } : {}),
             ...(effectiveLaunchConfig ? { launchConfig: effectiveLaunchConfig } : {}),
@@ -17420,6 +17421,7 @@ export class YiruRuntimeService {
     return {
       handle,
       tabId: reply.tabId,
+      ptyId: createdPtyId,
       worktreeId: worktreeId ?? '',
       title: reply.title,
       surface: 'visible',
@@ -18197,7 +18199,7 @@ export class YiruRuntimeService {
     // wire id) via resolveTerminalTabIdForPtyId's raw string equality —
     // sending the bare controller handle here silently fails that match and
     // the renderer never mounts the tab mobile is waiting on.
-    const ptyId = record.ptyId ? toRuntimeTerminalPtyId(record.ptyId) : undefined
+    const ptyId = record.ptyId ? toRuntimeTerminalPtyId(handle) : undefined
     if (!tabId && !ptyId) {
       return false
     }
@@ -18244,7 +18246,8 @@ export class YiruRuntimeService {
             worktreeId: pty.pty.worktreeId,
             // Why: wire shape must match parseRuntimeTerminalPtyId — see the
             // mint-side fix note where toRuntimeTerminalPtyId is imported above.
-            ptyId: toRuntimeTerminalPtyId(pty.pty.ptyId),
+            ptyId: toRuntimeTerminalPtyId(handle),
+            durablePtyId: pty.pty.ptyId,
             title: getLatestPtyTitle(pty.pty),
             ...(pty.pty.launchConfig
               ? { launchConfig: copySleepingAgentLaunchConfig(pty.pty.launchConfig) }
@@ -18293,7 +18296,8 @@ export class YiruRuntimeService {
       worktreeId: FLOATING_TERMINAL_WORKTREE_ID,
       // Why: wire shape must match parseRuntimeTerminalPtyId — see the
       // mint-side fix note where toRuntimeTerminalPtyId is imported above.
-      ptyId: toRuntimeTerminalPtyId(pty.pty.ptyId),
+      ptyId: toRuntimeTerminalPtyId(handle),
+      durablePtyId: pty.pty.ptyId,
       // Why: agent OSC titles change during startup; the app-owned tab should
       // keep its stable product identity rather than becoming "Claude Code".
       title: 'Friday',
@@ -18469,7 +18473,8 @@ export class YiruRuntimeService {
         worktreeId: workspace.id,
         // Why: wire shape must match parseRuntimeTerminalPtyId — see the
         // mint-side fix note where toRuntimeTerminalPtyId is imported above.
-        ptyId: toRuntimeTerminalPtyId(result.id),
+        ptyId: toRuntimeTerminalPtyId(preAllocatedHandle),
+        durablePtyId: result.id,
         title: null,
         activate: opts.activate !== false,
         tabId: parentTabId,

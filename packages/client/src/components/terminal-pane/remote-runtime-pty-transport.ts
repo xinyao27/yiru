@@ -1,3 +1,4 @@
+import { translate } from '~renderer/i18n/i18n'
 /* eslint-disable max-lines -- Why: remote PTY transport keeps lifecycle, JSON fallback, and binary stream wiring together so reconnect/destroy ordering stays testable as one behavior surface. */
 import { createBrowserUuid } from '~renderer/lib/browser-uuid'
 import { setDriverForPty } from '~renderer/lib/pane-manager/mobile-driver-state'
@@ -8,6 +9,7 @@ import {
   type RemoteRuntimeMultiplexedTerminal
 } from '~renderer/runtime/terminal-multiplex/multiplexer'
 import { getRuntimeTerminalMultiplexer } from '~renderer/runtime/terminal-multiplex/registry'
+import { rememberTerminalSessionId } from '~renderer/runtime/terminal-session-id-index'
 import { publishRendererTerminalSideEffects } from '~renderer/runtime/terminal-side-effect-client'
 import {
   parseRuntimeTerminalPtyId,
@@ -50,13 +52,24 @@ const REMOTE_TERMINAL_INPUT_FLUSH_MS = 8
 const REMOTE_TERMINAL_VIEWPORT_FLUSH_MS = 33
 const HOST_SESSION_ATTACH_POLL_MS = 150
 const HOST_SESSION_ATTACH_TIMEOUT_MS = 15_000
+const PENDING_VIEWPORT_CLAIM_TIMEOUT_MS = 15_000
+
+function remoteTerminalGoneMessage(): string {
+  return translate(
+    'auto.components.terminal.pane.remoteRuntimePtyTransport.gone',
+    'Remote terminal was closed.'
+  )
+}
 
 function isRemoteTerminalGoneMessage(message: string): boolean {
+  const normalized = message.toLowerCase()
   return (
-    message.includes('terminal_handle_stale') ||
-    message.includes('terminal_exited') ||
-    message.includes('terminal_gone') ||
-    message.includes('no_connected_pty')
+    normalized.includes('terminal_handle_stale') ||
+    normalized.includes('terminal handle is stale') ||
+    normalized.includes('terminal_exited') ||
+    normalized.includes('terminal_gone') ||
+    normalized.includes('no_connected_pty') ||
+    normalized.includes('terminal has no connected pty')
   )
 }
 
@@ -107,12 +120,46 @@ export function createRuntimePtyTransport(
   let subscriptionGeneration = 0
   let pendingViewportClaim = false
   let pendingClaimInput = ''
+  let pendingViewportClaimTimer: ReturnType<typeof setTimeout> | null = null
   const viewportClaimReadyWaiters = new Set<(ready: boolean) => void>()
   const clearPendingViewportClaim = (): void => {
+    if (pendingViewportClaimTimer !== null) {
+      clearTimeout(pendingViewportClaimTimer)
+      pendingViewportClaimTimer = null
+    }
     pendingViewportClaim = false
     pendingClaimInput = ''
     for (const resolve of viewportClaimReadyWaiters) {
       resolve(false)
+    }
+    viewportClaimReadyWaiters.clear()
+  }
+  const beginPendingViewportClaim = (): void => {
+    pendingViewportClaim = true
+    if (pendingViewportClaimTimer !== null) {
+      return
+    }
+    pendingViewportClaimTimer = setTimeout(() => {
+      if (!pendingViewportClaim) {
+        return
+      }
+      clearPendingViewportClaim()
+      storedCallbacks.onError?.(remoteTerminalGoneMessage())
+    }, PENDING_VIEWPORT_CLAIM_TIMEOUT_MS)
+  }
+  const finishPendingViewportClaim = (stream: RemoteRuntimeMultiplexedTerminal): void => {
+    if (pendingViewportClaimTimer !== null) {
+      clearTimeout(pendingViewportClaimTimer)
+      pendingViewportClaimTimer = null
+    }
+    pendingViewportClaim = false
+    const queuedInput = pendingClaimInput
+    pendingClaimInput = ''
+    if (queuedInput) {
+      stream.sendInput(queuedInput)
+    }
+    for (const resolve of viewportClaimReadyWaiters) {
+      resolve(true)
     }
     viewportClaimReadyWaiters.clear()
   }
@@ -227,7 +274,7 @@ export function createRuntimePtyTransport(
     const hostHandle = await waitForHostSessionHandle(hostTabId)
     if (!hostHandle || destroyed) {
       if (!destroyed) {
-        storedCallbacks.onError?.('Remote terminal was closed.')
+        storedCallbacks.onError?.(remoteTerminalGoneMessage())
       }
       return undefined
     }
@@ -359,21 +406,25 @@ export function createRuntimePtyTransport(
       return
     }
     const stream = getCurrentMultiplexedStream(targetHandle)
-    if (claim ? stream?.claimViewport(cols, rows) : stream?.resize(cols, rows)) {
+    if (stream && (claim ? stream.claimViewport(cols, rows) : stream.resize(cols, rows))) {
       if (claim) {
-        pendingViewportClaim = false
+        finishPendingViewportClaim(stream)
       }
       return
     }
     if (claim) {
-      pendingViewportClaim = true
+      beginPendingViewportClaim()
     }
     void callRuntime('terminal.updateViewport', {
       terminal: targetHandle,
       client: { id: clientId, type: 'desktop' },
       viewport: { cols, rows },
       ...(claim ? { claim: true } : {})
-    }).catch(() => {})
+    }).catch((error) => {
+      if (isRemoteTerminalGoneMessage(runtimeTerminalErrorMessage(error))) {
+        handleRemoteTerminalError(error)
+      }
+    })
   }
 
   const viewportBatcher = createRemoteRuntimeViewportBatcher(
@@ -431,6 +482,9 @@ export function createRuntimePtyTransport(
       // retires one between snapshots, clear this mirror and wait for the next
       // session-tabs update instead of surfacing a red xterm error.
       retireRemoteTerminalId()
+      if (!isWebTerminalSurfaceTabId(tabId ?? '')) {
+        storedCallbacks.onError?.(remoteTerminalGoneMessage())
+      }
       return
     }
     storedCallbacks.onError?.(message)
@@ -661,16 +715,7 @@ export function createRuntimePtyTransport(
     // tracks the current width instead of stalling until the next resize.
     if (pendingViewportClaim && desiredViewport) {
       nextStream.claimViewport(desiredViewport.cols, desiredViewport.rows)
-      pendingViewportClaim = false
-      const queuedInput = pendingClaimInput
-      pendingClaimInput = ''
-      if (queuedInput) {
-        nextStream.sendInput(queuedInput)
-      }
-      for (const resolve of viewportClaimReadyWaiters) {
-        resolve(true)
-      }
-      viewportClaimReadyWaiters.clear()
+      finishPendingViewportClaim(nextStream)
     } else if (
       desiredViewport &&
       (desiredViewport.cols !== subscribedViewport?.cols ||
@@ -727,6 +772,13 @@ export function createRuntimePtyTransport(
           () => destroyed
         )
         handle = created.terminal.handle
+        if (created.terminal.ptyId) {
+          rememberTerminalSessionId(
+            created.terminal.handle,
+            created.terminal.ptyId,
+            environmentIdForTarget(currentRuntimeTarget)
+          )
+        }
         if (destroyed) {
           // Why: this is a cancelled launch, not a connected shared session.
           // Close the server PTY so rapid tab-open/tab-close does not leak.

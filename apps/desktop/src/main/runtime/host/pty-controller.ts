@@ -47,7 +47,10 @@ export function attachNodeRuntimeHostPtyController(
         throw new Error('runtime_host_remote_pty_unsupported')
       }
       const paneKey = args.tabId && args.leafId ? makePaneKey(args.tabId, args.leafId) : undefined
-      const sessionId = args.sessionId?.trim() || mintPtySessionId(args.worktreeId)
+      const sessionId =
+        args.sessionId?.trim() ||
+        (await (provider.mintAvailablePtySessionId?.(args.worktreeId) ??
+          Promise.resolve(mintPtySessionId(args.worktreeId))))
       const spawnOptions: PtySpawnOptions = {
         cols: args.cols,
         rows: args.rows,

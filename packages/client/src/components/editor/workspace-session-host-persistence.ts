@@ -14,7 +14,10 @@ import {
   type HostSessionSlices,
   type HostIdByWorktreeId
 } from './workspace-session-host-split'
-import { canonicalizeWorkspaceSessionTerminalIds } from './workspace-session-terminal-ids'
+import {
+  exchangePersistedWorkspaceSessionTerminalIds,
+  prepareWorkspaceSessionTerminalIdsForPersistence
+} from './workspace-session-terminal-ids'
 
 export type HostPersistenceState = {
   repos: readonly Pick<Repo, 'id' | 'connectionId' | 'executionHostId'>[]
@@ -209,11 +212,22 @@ export function patchWorkspaceSessionByHost(
   patch: WorkspaceSessionPatch,
   state: HostPersistenceState
 ): Promise<void> {
+  const terminalFields = prepareWorkspaceSessionTerminalIdsForPersistence({
+    tabsByWorktree: patch.tabsByWorktree ?? {},
+    terminalLayoutsByTabId: patch.terminalLayoutsByTabId ?? {}
+  })
+  const durablePatch: WorkspaceSessionPatch = {
+    ...patch,
+    ...(patch.tabsByWorktree ? { tabsByWorktree: terminalFields.tabsByWorktree } : {}),
+    ...(patch.terminalLayoutsByTabId
+      ? { terminalLayoutsByTabId: terminalFields.terminalLayoutsByTabId }
+      : {})
+  }
   const slices = splitWorkspaceSessionByHost(
-    patch as WorkspaceSessionState,
+    durablePatch as WorkspaceSessionState,
     buildHostIdByWorktreeId(state)
   )
-  const local = (slices[LOCAL_EXECUTION_HOST_ID] ?? patch) as WorkspaceSessionPatch
+  const local = (slices[LOCAL_EXECUTION_HOST_ID] ?? durablePatch) as WorkspaceSessionPatch
   const localWrite = api.patch(local)
   for (const [hostId, slice] of nonLocalEntries(slices)) {
     // Why: a failed runtime-partition write must not reject the local chain.
@@ -232,8 +246,12 @@ export async function persistWorkspaceSessionByHost(
   payload: WorkspaceSessionState,
   state: HostPersistenceState
 ): Promise<void> {
-  const slices = splitWorkspaceSessionByHost(payload, buildHostIdByWorktreeId(state))
-  const writes: Promise<void>[] = [api.set(slices[LOCAL_EXECUTION_HOST_ID] ?? payload)]
+  const durablePayload = {
+    ...payload,
+    ...prepareWorkspaceSessionTerminalIdsForPersistence(payload)
+  }
+  const slices = splitWorkspaceSessionByHost(durablePayload, buildHostIdByWorktreeId(state))
+  const writes: Promise<void>[] = [api.set(slices[LOCAL_EXECUTION_HOST_ID] ?? durablePayload)]
   for (const [hostId, slice] of nonLocalEntries(slices)) {
     writes.push(api.set(slice, hostId))
   }
@@ -261,7 +279,7 @@ export async function fetchWorkspaceSessionWithRuntimeHostOwners(
   additionalRuntimeHostIds: readonly ExecutionHostId[] = []
 ): Promise<WorkspaceSessionHostRead> {
   const slices: HostSessionSlices = {
-    [LOCAL_EXECUTION_HOST_ID]: await canonicalizeWorkspaceSessionTerminalIds(await api.get())
+    [LOCAL_EXECUTION_HOST_ID]: await exchangePersistedWorkspaceSessionTerminalIds(await api.get())
   }
   // Why: startup can know saved runtime session hosts before their repo
   // catalogs hydrate, so include those partitions in the first read.
@@ -272,7 +290,7 @@ export async function fetchWorkspaceSessionWithRuntimeHostOwners(
   await Promise.all(
     [...runtimeHostIds].map(async (hostId) => {
       try {
-        slices[hostId] = await canonicalizeWorkspaceSessionTerminalIds(
+        slices[hostId] = await exchangePersistedWorkspaceSessionTerminalIds(
           await api.get(hostId),
           hostId
         )
