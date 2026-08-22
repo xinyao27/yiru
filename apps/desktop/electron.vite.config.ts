@@ -220,7 +220,14 @@ export default defineConfig({
           // this path for `yiru agent hooks ...`, so it must survive rebuilds.
           'agent-hooks/managed-agent-hook-controls': resolve(
             'src/main/agent-hooks/managed-agent-hook-cli-entry.ts'
-          )
+          ),
+          // Why: same rule for `yiru connect` — this build cleans out/main after
+          // build:cli emits it, so v0.0.31 shipped a CLI whose every command died
+          // with MODULE_NOT_FOUND on these three paths. Emitting them here is what
+          // keeps the packaged and dev CLI able to pair a browser.
+          'web-connect/grant-client': resolve('src/main/web-connect/grant-client.ts'),
+          'web-connect/identity': resolve('src/main/web-connect/identity.ts'),
+          'web-connect/relay-bridge': resolve('src/main/web-connect/relay-bridge.ts')
         },
         plugins: [createStartupDiagnosticsBootstrapPlugin(), createPlainNodeEntryGuardPlugin()]
       }

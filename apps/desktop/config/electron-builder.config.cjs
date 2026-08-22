@@ -135,6 +135,7 @@ module.exports = {
     'out/cli/**',
     'out/shared/**',
     'out/main/agent-hooks/**',
+    'out/main/web-connect/**',
     'out/main/antigravity/**',
     'out/main/claude/**',
     'out/main/codex/**',

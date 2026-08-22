@@ -21,7 +21,10 @@ const PLAIN_NODE_ENTRY_NAMES = [
   'parcel-watcher-process-entry',
   'computer-sidecar',
   'agent-hooks/managed-agent-hook-controls',
-  'codex/codex-app-server-grant-entry'
+  'codex/codex-app-server-grant-entry',
+  'web-connect/grant-client',
+  'web-connect/identity',
+  'web-connect/relay-bridge'
 ] as const
 
 const ELECTRON_REQUIRE_RE = /require\(\s*["']electron["']\s*\)/
