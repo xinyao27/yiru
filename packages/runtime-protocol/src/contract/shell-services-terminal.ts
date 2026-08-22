@@ -93,6 +93,9 @@ export const ShellServicesTerminalRevealInputSchema = z
   .object({
     worktreeId: z.string(),
     ptyId: z.string(),
+    // Why: the renderer adopts the runtime handle above for live use, but its
+    // session writer needs the owner id separately so the handle never reaches disk.
+    durablePtyId: z.string().optional(),
     title: z.string().nullable().optional(),
     cwd: z.string().optional(),
     launchConfig: SleepingAgentLaunchConfigSchema,

@@ -1438,7 +1438,11 @@ export function registerPtyHandlers(
         !routesFreshSpawnsToLocalProvider(provider)
       const requestedSessionId = args.sessionId?.trim()
       const sessionId =
-        requestedSessionId ?? (isDaemonHostSpawn ? mintPtySessionId(args.worktreeId) : undefined)
+        requestedSessionId ??
+        (isDaemonHostSpawn
+          ? await (provider.mintAvailablePtySessionId?.(args.worktreeId) ??
+              Promise.resolve(mintPtySessionId(args.worktreeId)))
+          : undefined)
       const effectiveSessionRelayId =
         sessionId !== undefined ? getRelayPtyId(args.connectionId, sessionId) : undefined
       const effectiveSessionAppId =

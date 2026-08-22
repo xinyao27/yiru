@@ -733,6 +733,7 @@ export type TabGroup = {
 // ─── Terminal Tab (legacy — used by persistence and TerminalContentSlice) ─
 export type TerminalTab = {
   id: string
+  /** Why: runtime handles expire with the app, so persistence stores the owner-assigned id. */
   ptyId: string | null
   worktreeId: string
   /** Spawn-time workspace identity; absent legacy bindings are never safe for remote sharing. */
@@ -947,8 +948,7 @@ export type TerminalLayoutSnapshot = {
   root: TerminalPaneLayoutNode | null
   activeLeafId: string | null
   expandedLeafId: string | null
-  /** Live PTY IDs per leaf for in-session remounts such as tab-group moves.
-   *  Not used for app restart because PTYs are transient processes. */
+  /** Why: runtime handles expire with the app, so persistence stores owner-assigned ids. */
   ptyIdsByLeafId?: Record<string, string>
   /** Serialized terminal buffers per leaf for scrollback restoration on restart. */
   buffersByLeafId?: Record<string, string>

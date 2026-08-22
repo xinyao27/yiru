@@ -1,5 +1,6 @@
 import { parseRuntimeTerminalPtyId, toRuntimeTerminalPtyId } from '../runtime-terminal-pty-id'
 import type { RuntimeTerminalSummary } from '../runtime-types'
+import { parseAppSshPtyId } from '../ssh-pty-id'
 import type { TerminalLayoutSnapshot, WorkspaceSessionState } from '../types'
 
 type SessionTerminalIdentity = Pick<
@@ -7,33 +8,45 @@ type SessionTerminalIdentity = Pick<
   'connected' | 'handle' | 'leafId' | 'ptyId' | 'tabId'
 >
 
-type TerminalBinding = {
+export type TerminalBinding = {
   leafId?: string
   tabId: string
 }
 
-export type WorkspaceSessionTerminalIdReconciliation = {
-  migratedIdCount: number
+export type WorkspaceSessionTerminalIdFields = Pick<
+  WorkspaceSessionState,
+  'tabsByWorktree' | 'terminalLayoutsByTabId'
+>
+
+export type WorkspaceSessionTerminalIdExchange = {
+  exchangedIdCount: number
   retiredIdCount: number
   session: WorkspaceSessionState
 }
 
-function isLegacyTerminalId(ptyId: string | null | undefined): ptyId is string {
-  return typeof ptyId === 'string' && parseRuntimeTerminalPtyId(ptyId) === null
+type TerminalIdentityIndexes = {
+  byHandle: ReadonlyMap<string, readonly SessionTerminalIdentity[]>
+  byPtyId: ReadonlyMap<string, readonly SessionTerminalIdentity[]>
 }
 
-export function hasLegacyWorkspaceSessionTerminalIds(session: WorkspaceSessionState): boolean {
+export function hasExchangeableWorkspaceSessionTerminalIds(
+  session: WorkspaceSessionState
+): boolean {
   for (const tabs of Object.values(session.tabsByWorktree)) {
-    if (tabs.some((tab) => isLegacyTerminalId(tab.ptyId))) {
+    if (tabs.some((tab) => isExchangeableTerminalId(tab.ptyId))) {
       return true
     }
   }
   return Object.values(session.terminalLayoutsByTabId).some((layout) =>
-    Object.values(layout.ptyIdsByLeafId ?? {}).some(isLegacyTerminalId)
+    Object.values(layout.ptyIdsByLeafId ?? {}).some(isExchangeableTerminalId)
   )
 }
 
-function selectCanonicalTerminalId(
+function isExchangeableTerminalId(ptyId: string | null | undefined): ptyId is string {
+  return typeof ptyId === 'string' && parseAppSshPtyId(ptyId) === null
+}
+
+function selectRuntimeTerminalId(
   terminals: readonly SessionTerminalIdentity[],
   environmentId: string | null
 ): string | null {
@@ -43,27 +56,48 @@ function selectCanonicalTerminalId(
   return ids.size === 1 ? ([...ids][0] ?? null) : null
 }
 
-function resolveLegacyTerminalId(
-  ptyId: string,
+function selectBoundRuntimeTerminalId(
+  candidates: readonly SessionTerminalIdentity[],
   binding: TerminalBinding,
-  terminalsByPtyId: ReadonlyMap<string, readonly SessionTerminalIdentity[]>,
   environmentId: string | null
 ): string | null {
-  const candidates = terminalsByPtyId.get(ptyId) ?? []
   if (binding.leafId) {
     const exactLeaf = candidates.filter(
       (terminal) => terminal.tabId === binding.tabId && terminal.leafId === binding.leafId
     )
-    const exactLeafId = selectCanonicalTerminalId(exactLeaf, environmentId)
+    const exactLeafId = selectRuntimeTerminalId(exactLeaf, environmentId)
     if (exactLeafId) {
       return exactLeafId
     }
   }
-  const exactTabId = selectCanonicalTerminalId(
+  const exactTabId = selectRuntimeTerminalId(
     candidates.filter((terminal) => terminal.tabId === binding.tabId),
     environmentId
   )
-  return exactTabId ?? selectCanonicalTerminalId(candidates, environmentId)
+  return exactTabId ?? selectRuntimeTerminalId(candidates, environmentId)
+}
+
+function resolvePersistedTerminalId(
+  ptyId: string,
+  binding: TerminalBinding,
+  indexes: TerminalIdentityIndexes,
+  environmentId: string | null
+): string | null {
+  if (parseAppSshPtyId(ptyId)) {
+    return ptyId
+  }
+  const runtimeId = parseRuntimeTerminalPtyId(ptyId)
+  if (runtimeId) {
+    if (runtimeId.environmentId !== environmentId) {
+      return null
+    }
+    return selectBoundRuntimeTerminalId(
+      indexes.byHandle.get(runtimeId.handle) ?? [],
+      binding,
+      environmentId
+    )
+  }
+  return selectBoundRuntimeTerminalId(indexes.byPtyId.get(ptyId) ?? [], binding, environmentId)
 }
 
 function replaceLayoutTerminalIds(
@@ -90,45 +124,12 @@ function replaceLayoutTerminalIds(
   return next
 }
 
-export function reconcileWorkspaceSessionTerminalIds(
-  session: WorkspaceSessionState,
-  terminals: readonly SessionTerminalIdentity[],
-  environmentId: string | null = null
-): WorkspaceSessionTerminalIdReconciliation {
-  if (!hasLegacyWorkspaceSessionTerminalIds(session)) {
-    return { session, migratedIdCount: 0, retiredIdCount: 0 }
-  }
-
-  const terminalsByPtyId = new Map<string, SessionTerminalIdentity[]>()
-  for (const terminal of terminals) {
-    if (!terminal.connected || !terminal.ptyId) {
-      continue
-    }
-    const existing = terminalsByPtyId.get(terminal.ptyId)
-    if (existing) {
-      existing.push(terminal)
-    } else {
-      terminalsByPtyId.set(terminal.ptyId, [terminal])
-    }
-  }
-
-  let migratedIdCount = 0
-  let retiredIdCount = 0
-  const replace = (ptyId: string, binding: TerminalBinding): string | null => {
-    if (!isLegacyTerminalId(ptyId)) {
-      return ptyId
-    }
-    const canonicalId = resolveLegacyTerminalId(ptyId, binding, terminalsByPtyId, environmentId)
-    if (canonicalId) {
-      migratedIdCount += 1
-      return canonicalId
-    }
-    retiredIdCount += 1
-    return null
-  }
-
+export function replaceWorkspaceSessionTerminalIds(
+  fields: WorkspaceSessionTerminalIdFields,
+  replace: (ptyId: string, binding: TerminalBinding) => string | null
+): WorkspaceSessionTerminalIdFields {
   const tabsByWorktree = Object.fromEntries(
-    Object.entries(session.tabsByWorktree).map(([worktreeId, tabs]) => [
+    Object.entries(fields.tabsByWorktree).map(([worktreeId, tabs]) => [
       worktreeId,
       tabs.map((tab) => ({
         ...tab,
@@ -137,15 +138,60 @@ export function reconcileWorkspaceSessionTerminalIds(
     ])
   )
   const terminalLayoutsByTabId = Object.fromEntries(
-    Object.entries(session.terminalLayoutsByTabId).map(([tabId, layout]) => [
+    Object.entries(fields.terminalLayoutsByTabId).map(([tabId, layout]) => [
       tabId,
       replaceLayoutTerminalIds(layout, tabId, replace)
     ])
   )
+  return { tabsByWorktree, terminalLayoutsByTabId }
+}
+
+function indexTerminalIdentities(
+  terminals: readonly SessionTerminalIdentity[]
+): TerminalIdentityIndexes {
+  const byHandle = new Map<string, SessionTerminalIdentity[]>()
+  const byPtyId = new Map<string, SessionTerminalIdentity[]>()
+  for (const terminal of terminals) {
+    if (!terminal.connected || !terminal.ptyId) {
+      continue
+    }
+    const handleEntries = byHandle.get(terminal.handle) ?? []
+    handleEntries.push(terminal)
+    byHandle.set(terminal.handle, handleEntries)
+    const ptyEntries = byPtyId.get(terminal.ptyId) ?? []
+    ptyEntries.push(terminal)
+    byPtyId.set(terminal.ptyId, ptyEntries)
+  }
+  return { byHandle, byPtyId }
+}
+
+export function exchangeWorkspaceSessionTerminalIds(
+  session: WorkspaceSessionState,
+  terminals: readonly SessionTerminalIdentity[],
+  environmentId: string | null = null
+): WorkspaceSessionTerminalIdExchange {
+  if (!hasExchangeableWorkspaceSessionTerminalIds(session)) {
+    return { session, exchangedIdCount: 0, retiredIdCount: 0 }
+  }
+
+  const indexes = indexTerminalIdentities(terminals)
+  let exchangedIdCount = 0
+  let retiredIdCount = 0
+  const fields = replaceWorkspaceSessionTerminalIds(session, (ptyId, binding) => {
+    const runtimeId = resolvePersistedTerminalId(ptyId, binding, indexes, environmentId)
+    if (runtimeId) {
+      if (runtimeId !== ptyId || parseRuntimeTerminalPtyId(ptyId)) {
+        exchangedIdCount += 1
+      }
+      return runtimeId
+    }
+    retiredIdCount += 1
+    return null
+  })
 
   return {
-    session: { ...session, tabsByWorktree, terminalLayoutsByTabId },
-    migratedIdCount,
+    session: { ...session, ...fields },
+    exchangedIdCount,
     retiredIdCount
   }
 }

@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs'
 /* oxlint-disable max-lines -- Why: history error-logging .catch() chains add ~10 lines of
 safety wiring spread across spawn/event-routing; splitting would scatter tightly coupled
 adapter ↔ history lifecycle logic. */
-import { basename } from 'node:path'
+import { basename, join } from 'node:path'
 
 import type { TerminalOscLinkRange } from '@yiru/runtime-protocol/terminal-osc-links'
 import { isShellProcess } from '~shared/agent/detection'
@@ -21,6 +21,7 @@ import type {
 import { DaemonClient } from './client'
 import { getMacDaemonSystemResolverHealth } from './health'
 import { HistoryManager } from './history-manager'
+import { getHistorySessionDirName } from './history-paths'
 import { HistoryReader, type ColdRestoreInfo } from './history-reader'
 import { mintPtySessionId, parsePtySessionId } from './pty-session-id'
 import { CODEX_SHELL_READY_TIMEOUT_MS } from './session'
@@ -91,6 +92,7 @@ export class DaemonPtyAdapter implements IPtyProvider {
   private client: DaemonClient
   private historyManager: HistoryManager | null
   private historyReader: HistoryReader | null
+  private historyPath: string | null
   private respawnFn: (() => Promise<void>) | null
   private onAgentHook: ((envelope: AgentHookRelayEnvelope) => void) | null
   // Why: multiple pane mounts can call spawn() concurrently. If the daemon is
@@ -119,6 +121,7 @@ export class DaemonPtyAdapter implements IPtyProvider {
   private coldRestoreCache = new Map<string, ColdRestorePayload>()
   private sleepRestoreSessionIds = new Set<string>()
   private activeSessionIds = new Set<string>()
+  private freshSessionIdReservations = new Set<string>()
   private dirtySessionVersions = new Map<string, number>()
   // Why: a cold-restored session is a fresh shell whose on-disk checkpoint and
   // log belong to the pre-crash session. Incremental appends would land on
@@ -176,6 +179,7 @@ export class DaemonPtyAdapter implements IPtyProvider {
     })
     this.historyManager = opts.historyPath ? new HistoryManager(opts.historyPath) : null
     this.historyReader = opts.historyPath ? new HistoryReader(opts.historyPath) : null
+    this.historyPath = opts.historyPath ?? null
     this.respawnFn = opts.respawn ?? null
     this.onAgentHook = opts.onAgentHook ?? null
     this.supportsCheckpoints = this.protocolVersion >= 4
@@ -192,6 +196,27 @@ export class DaemonPtyAdapter implements IPtyProvider {
 
   getHistoryManager(): HistoryManager | null {
     return this.historyManager
+  }
+
+  async mintAvailablePtySessionId(worktreeId?: string): Promise<string> {
+    await this.ensureConnected()
+    const result = await this.client.request<ListSessionsResult>('listSessions', undefined)
+    const liveSessionIds = new Set(
+      result.sessions.filter((session) => session.isAlive).map((session) => session.sessionId)
+    )
+    while (true) {
+      const sessionId = mintPtySessionId(worktreeId)
+      if (
+        liveSessionIds.has(sessionId) ||
+        this.freshSessionIdReservations.has(sessionId) ||
+        (this.historyPath !== null &&
+          existsSync(join(this.historyPath, getHistorySessionDirName(sessionId))))
+      ) {
+        continue
+      }
+      this.freshSessionIdReservations.add(sessionId)
+      return sessionId
+    }
   }
 
   async initializeAgentHookHost(config?: {
@@ -211,8 +236,18 @@ export class DaemonPtyAdapter implements IPtyProvider {
   }
 
   private async doSpawn(opts: PtySpawnOptions): Promise<PtySpawnResult> {
-    const sessionId = opts.sessionId ?? mintPtySessionId(opts.worktreeId)
+    const hasProvidedSessionId = opts.sessionId !== undefined
+    const sessionId = opts.sessionId ?? (await this.mintAvailablePtySessionId(opts.worktreeId))
+    try {
+      return await this.spawnSession(opts, sessionId)
+    } finally {
+      if (!hasProvidedSessionId || opts.isNewSession === true) {
+        this.freshSessionIdReservations.delete(sessionId)
+      }
+    }
+  }
 
+  private async spawnSession(opts: PtySpawnOptions, sessionId: string): Promise<PtySpawnResult> {
     if (this.killedSessionTombstones.has(sessionId)) {
       throw new TerminalKilledError(sessionId)
     }
