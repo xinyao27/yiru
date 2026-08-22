@@ -1806,6 +1806,9 @@ export function registerPtyHandlers(
         return false
       }
     },
+    attach: async (ptyId) => {
+      await getProviderForPty(ptyId).attach(ptyId)
+    },
     kill: (ptyId) => {
       let provider: IPtyProvider
       let connectionId: string | null | undefined = ptyOwnership.get(ptyId)

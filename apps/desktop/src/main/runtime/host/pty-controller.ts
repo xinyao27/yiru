@@ -116,6 +116,9 @@ export function attachNodeRuntimeHostPtyController(
         return false
       }
     },
+    attach: async (ptyId) => {
+      await provider.attach(ptyId)
+    },
     kill: (ptyId) => {
       if (provider.hasPty?.(ptyId) === false) {
         return false

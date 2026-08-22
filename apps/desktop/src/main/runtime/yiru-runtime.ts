@@ -5862,13 +5862,6 @@ export class YiruRuntimeService {
     sequenceChars = data.length,
     queryReplyOwner = this.getTerminalQueryReplyOwnerForLiveChunk(ptyId)
   ): number {
-    if (data.includes('LIVE_ID_TRACE_8422')) {
-      console.warn('[DEBUG-flow-8422]', {
-        stage: 'runtime-on-pty-data',
-        ptyId,
-        deliveryHubKeys: [...this.terminalMultiplexDeliveryHubs.keys()]
-      })
-    }
     const outputSequence = (this.ptyOutputSequenceById.get(ptyId) ?? 0) + sequenceChars
     this.ptyOutputSequenceById.set(ptyId, outputSequence)
     const wireByteLength = new TextEncoder().encode(data).byteLength

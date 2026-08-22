@@ -1,6 +1,5 @@
 import { reattachWebglIfNeeded } from './pane-webgl-reattach'
 import { resetWebglTextureAtlas } from './pane-webgl-renderer'
-import { forceRepaintThroughRenderPause } from './terminal-render-pause-release'
 import type { ManagedPaneInternal } from './types'
 
 function scheduleSettledFrame(callback: () => void): void {
@@ -61,10 +60,7 @@ export function schedulePaneRevealRepaint(getPanes: () => Iterable<ManagedPaneIn
 export function schedulePaneRevealPresent(getPanes: () => Iterable<ManagedPaneInternal>): void {
   forEachPaneOnSettledFrame(getPanes, (pane) => {
     reattachWebglIfNeeded(pane)
-    // Why: an update relaunch mounts restored terminals while BrowserWindow is
-    // hidden. The initial focus can arrive before xterm's observer unpauses, so
-    // a plain refresh is swallowed until a tab switch forces a repaint.
-    if (!forceRepaintThroughRenderPause(pane.terminal) && pane.terminal.rows > 0) {
+    if (pane.terminal.rows > 0) {
       pane.terminal.refresh(0, pane.terminal.rows - 1)
     }
   })
