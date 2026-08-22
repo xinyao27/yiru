@@ -4,6 +4,7 @@ import { useAppStore } from '~renderer/store'
 import { splitPathSegments } from '../path-tree'
 import { useFileDeletion } from '../use-file-deletion'
 import type { FileExplorerModel } from './model'
+import { getFileExplorerOwnerUnresolvedMessage } from './operation-owner'
 import type { PierreFileExplorerTreeHandle } from './pierre-file-explorer-tree'
 import { shouldResetFileExplorerForVisibleWorktree } from './reset'
 import type { TreeNode } from './types'
@@ -83,6 +84,24 @@ export function useFileExplorerInteractions(
     tree.resetAndLoad()
     clearFileExplorerUndoHistory()
   }, [owner.visibleFilesWorktreePath, selection.resetSelection]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Why: the first root load can land before the host catalog does — on the web
+  // client the paired runtime answers over the relay seconds after first paint —
+  // and an owner-unresolved failure would otherwise stay on screen until the user
+  // switched workspaces. Retry once the catalog that names the owner arrives —
+  // and only for that failure, so a real read error (missing path, denied
+  // directory) does not re-run on every catalog refresh.
+  const ownerEvidence = useAppStore((state) => state.repos)
+  const ownerWorktreeEvidence = useAppStore((state) => state.worktreesByRepo)
+  useEffect(() => {
+    if (
+      !owner.visibleFilesWorktreePath ||
+      tree.rootError !== getFileExplorerOwnerUnresolvedMessage()
+    ) {
+      return
+    }
+    tree.resetAndLoad()
+  }, [ownerEvidence, ownerWorktreeEvidence]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!owner.visibleFilesWorktreePath) {

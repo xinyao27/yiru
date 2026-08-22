@@ -48,7 +48,13 @@ export function createStoredWebRuntimeEnvironment(args: {
   name: string
   offer: WebPairingOffer
 }): StoredWebRuntimeEnvironment {
-  const id = `web-${createBrowserUuid()}`
+  // Why: this id becomes the workspace owner host (`runtime:<id>`), and every
+  // host-scoped browser partition — the saved session, restored host owners — is
+  // keyed by it. A fresh uuid per pairing orphaned all of that on every re-pair,
+  // so the same machine keeps the same environment identity across pairings.
+  const id = args.offer.relayMachineId
+    ? `web-${args.offer.relayMachineId}`
+    : `web-${createBrowserUuid()}`
   const now = Date.now()
   return {
     id,

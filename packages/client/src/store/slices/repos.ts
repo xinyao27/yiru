@@ -22,7 +22,11 @@ import { filterSetupScriptPromptDismissalsToValidRepos } from '~renderer/compone
 import { translate } from '~renderer/i18n/i18n'
 import { syncRuntimeGitForkDefaultBranch } from '~renderer/runtime/git-client'
 import { notifyInstalledAgentSkillsChanged } from '~renderer/runtime/installed-agent-skill-discovery-state'
-import { callRuntimeOrpc, createRuntimeOrpcClient } from '~renderer/runtime/orpc-client'
+import {
+  callRuntimeOrpc,
+  createRuntimeOrpcClient,
+  isWebRuntimeClient
+} from '~renderer/runtime/orpc-client'
 import { publishRendererCommandResult } from '~renderer/runtime/renderer-command-result-channel'
 import {
   assertRuntimeEnvironmentCapability,
@@ -233,6 +237,31 @@ function getRuntimeTargetHostId(
   return target.kind === 'environment'
     ? toRuntimeExecutionHostId(target.environmentId)
     : LOCAL_EXECUTION_HOST_ID
+}
+
+// Why: the web client owns no local host — `createLocalRuntimeOrpcClient` routes
+// its `local` calls to the paired runtime — so a local-target catalog answers
+// with that same host's projects and stamps them `local`. Every project then
+// exists twice under two hosts, and workspace ownership resolves to
+// "unresolved", which is what made the file explorer refuse to list any
+// workspace. On web the paired environment IS the first-paint host.
+function getFirstPaintCatalogTarget(
+  settings: Pick<GlobalSettings, 'activeRuntimeEnvironmentId'> | null | undefined
+): ReturnType<typeof getActiveRuntimeTarget> | null {
+  if (!isWebRuntimeClient()) {
+    return { kind: 'local' }
+  }
+  const target = getActiveRuntimeTarget(settings)
+  return target.kind === 'environment' ? target : null
+}
+
+function isEnvironmentAlreadyLoaded(
+  firstPaintTarget: ReturnType<typeof getActiveRuntimeTarget> | null,
+  environmentId: string
+): boolean {
+  return (
+    firstPaintTarget?.kind === 'environment' && firstPaintTarget.environmentId === environmentId
+  )
 }
 
 function getProjectSetupRuntimeTarget(
@@ -1543,13 +1572,16 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
       })
     }
 
-    // Local first so local repos are present even if a remote fetch stalls.
+    // Own host first so its repos are present even if another host's fetch stalls.
+    const firstPaintTarget = getFirstPaintCatalogTarget(get().settings)
     let failed = false
     try {
-      applyCatalog(await fetchRepoCatalogForTarget({ kind: 'local' }))
+      if (firstPaintTarget) {
+        applyCatalog(await fetchRepoCatalogForTarget(firstPaintTarget))
+      }
     } catch (err) {
       failed = true
-      console.error('Failed to fetch local repos for all-host load:', err)
+      console.error('Failed to fetch first-paint repos for all-host load:', err)
     }
     if (get().reposFetchGeneration !== generation) {
       return
@@ -1562,19 +1594,21 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
     // Why: unreachable remotes can spend the full connect timeout; merge each
     // resolved host through the state updater so parallel loads do not clobber.
     await Promise.all(
-      environments.map(async (environment) => {
-        try {
-          applyCatalog(
-            await fetchRepoCatalogForTarget({
-              kind: 'environment',
-              environmentId: environment.id
-            })
-          )
-        } catch (err) {
-          failed = true
-          console.warn(`Skipped repos for runtime environment ${environment.id}:`, err)
-        }
-      })
+      environments
+        .filter((environment) => !isEnvironmentAlreadyLoaded(firstPaintTarget, environment.id))
+        .map(async (environment) => {
+          try {
+            applyCatalog(
+              await fetchRepoCatalogForTarget({
+                kind: 'environment',
+                environmentId: environment.id
+              })
+            )
+          } catch (err) {
+            failed = true
+            console.warn(`Skipped repos for runtime environment ${environment.id}:`, err)
+          }
+        })
     )
     // Why: first-paint startup intentionally loads only local repos before
     // remotes answer. Validate repo-scoped UI only once every configured host has
@@ -1607,10 +1641,13 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
       }))
     }
 
+    const firstPaintTarget = getFirstPaintCatalogTarget(get().settings)
     try {
-      applyCatalog(await fetchProjectGroupCatalogForTarget({ kind: 'local' }))
+      if (firstPaintTarget) {
+        applyCatalog(await fetchProjectGroupCatalogForTarget(firstPaintTarget))
+      }
     } catch (err) {
-      console.error('Failed to fetch local project groups for all-host load:', err)
+      console.error('Failed to fetch first-paint project groups for all-host load:', err)
     }
     if (options?.remoteHosts === 'skip') {
       return
@@ -1618,18 +1655,20 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
 
     const environments = await listRuntimeEnvironmentsForAllHostLoad()
     await Promise.all(
-      environments.map(async (environment) => {
-        try {
-          applyCatalog(
-            await fetchProjectGroupCatalogForTarget({
-              kind: 'environment',
-              environmentId: environment.id
-            })
-          )
-        } catch (err) {
-          console.warn(`Skipped project groups for runtime environment ${environment.id}:`, err)
-        }
-      })
+      environments
+        .filter((environment) => !isEnvironmentAlreadyLoaded(firstPaintTarget, environment.id))
+        .map(async (environment) => {
+          try {
+            applyCatalog(
+              await fetchProjectGroupCatalogForTarget({
+                kind: 'environment',
+                environmentId: environment.id
+              })
+            )
+          } catch (err) {
+            console.warn(`Skipped project groups for runtime environment ${environment.id}:`, err)
+          }
+        })
     )
   },
 
@@ -1661,12 +1700,15 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
       }))
     }
 
+    const firstPaintTarget = getFirstPaintCatalogTarget(get().settings)
     let failed = false
     try {
-      applyCatalog(await fetchFolderWorkspaceCatalogForTarget({ kind: 'local' }))
+      if (firstPaintTarget) {
+        applyCatalog(await fetchFolderWorkspaceCatalogForTarget(firstPaintTarget))
+      }
     } catch (err) {
       failed = true
-      console.error('Failed to fetch local folder workspaces for all-host load:', err)
+      console.error('Failed to fetch first-paint folder workspaces for all-host load:', err)
     }
     if (options?.remoteHosts === 'skip') {
       return
@@ -1674,19 +1716,24 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
 
     const environments = await listRuntimeEnvironmentsForAllHostLoad()
     await Promise.all(
-      environments.map(async (environment) => {
-        try {
-          applyCatalog(
-            await fetchFolderWorkspaceCatalogForTarget({
-              kind: 'environment',
-              environmentId: environment.id
-            })
-          )
-        } catch (err) {
-          failed = true
-          console.warn(`Skipped folder workspaces for runtime environment ${environment.id}:`, err)
-        }
-      })
+      environments
+        .filter((environment) => !isEnvironmentAlreadyLoaded(firstPaintTarget, environment.id))
+        .map(async (environment) => {
+          try {
+            applyCatalog(
+              await fetchFolderWorkspaceCatalogForTarget({
+                kind: 'environment',
+                environmentId: environment.id
+              })
+            )
+          } catch (err) {
+            failed = true
+            console.warn(
+              `Skipped folder workspaces for runtime environment ${environment.id}:`,
+              err
+            )
+          }
+        })
     )
     if (!failed) {
       set((s) => ({
