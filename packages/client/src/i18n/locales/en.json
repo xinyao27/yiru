@@ -1522,6 +1522,10 @@
             "b3d8e1f42a": "Restore this terminal",
             "e8c4f2a91b": "Restore all terminals",
             "f2a8b9c1d3": "From your phone",
+            "bc65bdf1a2": "Terminal fitted to Web",
+            "9d8ce04a71": "Use desktop size",
+            "e4af713b2c": "From Web",
+            "94fe1c7b6a": "Web is using this terminal at its window size. Switch to desktop size to fit it here, or collapse to keep watching.",
             "c7e4a2b8f1": "Your phone is in control",
             "d9f3c6e2a4": "Desktop keyboard is paused. Take back this terminal to type here, take back all terminals your phone controls, or collapse to keep watching.",
             "a6b1d8f3e2": "Your phone session ended. Restore to desktop size for this terminal, or for all terminals your phone left at phone size."

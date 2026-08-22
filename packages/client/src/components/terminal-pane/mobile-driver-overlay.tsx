@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useId, useRef, useState, type ReactElement } from 'react'
-import { DeviceMobile as Smartphone } from '~renderer/components/icons/hugeicons'
+import { DeviceMobile as Smartphone, Globe } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
 import type { DriverState } from '~renderer/lib/pane-manager/mobile-driver-state'
+import type { FitHoldMode } from '~renderer/lib/pane-manager/mobile-fit-overrides'
 
 import {
   createMobileDriverOverlayCollapseState,
@@ -13,7 +14,7 @@ import { shouldFocusMobileDriverAction } from './mobile-driver-overlay-focus'
 
 type Props = {
   driver: DriverState
-  hasFitOverride: boolean
+  fitMode: FitHoldMode | null
   onAction: () => void | Promise<void>
   onAllAction?: () => void | Promise<void>
   /** Optional class applied to the rendered root. */
@@ -22,16 +23,18 @@ type Props = {
 
 // Why: see docs/mobile-presence-lock.md. Driving state preserves output streaming
 // so the chip mode lets users keep watching; held-fit state has no live output to
-// preserve, so it stays loud until Restore.
+// preserve, so it stays loud until Restore. Remote viewport ownership uses the
+// same loud-to-chip path so every viewport handoff has one visual language.
 export function MobileDriverOverlay({
   driver,
-  hasFitOverride,
+  fitMode,
   onAction,
   onAllAction,
   rootClassName
 }: Props): ReactElement | null {
   const isMobileDriving = driver.kind === 'mobile'
-  const isHeldAtPhoneFit = !isMobileDriving && hasFitOverride
+  const isHeldAtPhoneFit = !isMobileDriving && fitMode === 'mobile-fit'
+  const isRemoteDesktopFit = !isMobileDriving && fitMode === 'remote-desktop-fit'
   const driverClientId = driver.kind === 'mobile' ? driver.clientId : null
 
   const [collapseState, setCollapseState] = useState(() =>
@@ -58,7 +61,7 @@ export function MobileDriverOverlay({
   }
   const collapsed = currentCollapseState.collapsed
 
-  if (!isMobileDriving && !isHeldAtPhoneFit) {
+  if (!isMobileDriving && !isHeldAtPhoneFit && !isRemoteDesktopFit) {
     return null
   }
 
@@ -90,6 +93,57 @@ export function MobileDriverOverlay({
     }
   }
 
+  if (isRemoteDesktopFit && collapsed) {
+    return (
+      <LockChip
+        actionPending={actionPending}
+        actionLabel={translate(
+          'auto.components.terminal.pane.MobileDriverOverlay.9d8ce04a71',
+          'Use desktop size'
+        )}
+        icon="web"
+        label={translate(
+          'auto.components.terminal.pane.MobileDriverOverlay.bc65bdf1a2',
+          'Terminal fitted to Web'
+        )}
+        onAction={handleAction}
+        onExpand={() => setCollapseState(createMobileDriverOverlayCollapseState(driverClientId))}
+        rootRef={setOverlayRootRef}
+        rootClassName={rootClassName}
+      />
+    )
+  }
+
+  if (isRemoteDesktopFit) {
+    return (
+      <LoudOverlay
+        eyebrow={translate(
+          'auto.components.terminal.pane.MobileDriverOverlay.e4af713b2c',
+          'From Web'
+        )}
+        title={translate(
+          'auto.components.terminal.pane.MobileDriverOverlay.bc65bdf1a2',
+          'Terminal fitted to Web'
+        )}
+        body={translate(
+          'auto.components.terminal.pane.MobileDriverOverlay.94fe1c7b6a',
+          'Web is using this terminal at its window size. Switch to desktop size to fit it here, or collapse to keep watching.'
+        )}
+        actionLabel={translate(
+          'auto.components.terminal.pane.MobileDriverOverlay.9d8ce04a71',
+          'Use desktop size'
+        )}
+        actionPending={actionPending}
+        icon="web"
+        onAction={handleAction}
+        onCollapse={() => setCollapseState({ driverClientId, collapsed: true })}
+        tone="driving"
+        rootRef={setOverlayRootRef}
+        rootClassName={rootClassName}
+      />
+    )
+  }
+
   if (isHeldAtPhoneFit) {
     return (
       <LoudOverlay
@@ -115,6 +169,7 @@ export function MobileDriverOverlay({
           'Restore all terminals'
         )}
         allActionPending={allActionPending}
+        icon="phone"
         onAction={handleAction}
         onAllAction={onAllAction ? handleAllAction : undefined}
         tone="held"
@@ -128,6 +183,15 @@ export function MobileDriverOverlay({
     return (
       <LockChip
         actionPending={actionPending}
+        actionLabel={translate(
+          'auto.components.terminal.pane.MobileDriverOverlay.c6460cf584',
+          'Take back'
+        )}
+        icon="phone"
+        label={translate(
+          'auto.components.terminal.pane.MobileDriverOverlay.c44659e09f',
+          'Phone driving'
+        )}
         onAction={handleAction}
         onExpand={() => setCollapseState(createMobileDriverOverlayCollapseState(driverClientId))}
         rootRef={setOverlayRootRef}
@@ -160,6 +224,7 @@ export function MobileDriverOverlay({
         'Take back all terminals'
       )}
       allActionPending={allActionPending}
+      icon="phone"
       onAction={handleAction}
       onAllAction={onAllAction ? handleAllAction : undefined}
       onCollapse={() => setCollapseState({ driverClientId, collapsed: true })}
@@ -178,6 +243,7 @@ type LoudOverlayProps = {
   actionPending: boolean
   allActionLabel?: string
   allActionPending?: boolean
+  icon: 'phone' | 'web'
   onAction: () => void | Promise<void>
   onAllAction?: () => void | Promise<void>
   onCollapse?: () => void
@@ -194,6 +260,7 @@ function LoudOverlay({
   actionPending,
   allActionLabel,
   allActionPending = false,
+  icon,
   onAction,
   onAllAction,
   onCollapse,
@@ -245,7 +312,11 @@ function LoudOverlay({
               tone === 'driving' ? 'bg-muted' : 'bg-muted/60'
             )}
           >
-            <Smartphone className="text-foreground size-5" aria-hidden="true" />
+            {icon === 'web' ? (
+              <Globe className="text-foreground size-5" aria-hidden="true" />
+            ) : (
+              <Smartphone className="text-foreground size-5" aria-hidden="true" />
+            )}
           </div>
           <div className="flex min-w-0 flex-1 flex-col gap-1">
             <div
@@ -306,14 +377,20 @@ function LoudOverlay({
 
 type ChipProps = {
   actionPending: boolean
+  actionLabel: string
+  icon: 'phone' | 'web'
+  label: string
   onAction: () => void | Promise<void>
-  onExpand: () => void
+  onExpand?: () => void
   rootRef?: (node: HTMLDivElement | null) => void
   rootClassName?: string
 }
 
 function LockChip({
   actionPending,
+  actionLabel,
+  icon,
+  label,
   onAction,
   onExpand,
   rootRef,
@@ -322,23 +399,32 @@ function LockChip({
   return (
     <div
       ref={rootRef}
+      aria-live="polite"
       className={cn(
         'absolute right-2 top-2 z-50 flex items-center gap-1.5 border border-border bg-card px-2 py-1 text-xs font-medium text-card-foreground',
         rootClassName
       )}
     >
-      <Smartphone className="text-foreground size-3" aria-hidden="true" />
-      <Button
-        type="button"
-        variant="ghost"
-        size="xs"
-        className="px-1 font-medium"
-        onClick={onExpand}
-      >
-        {translate('auto.components.terminal.pane.MobileDriverOverlay.c44659e09f', 'Phone driving')}
-      </Button>
+      {icon === 'web' ? (
+        <Globe className="text-foreground size-3" aria-hidden="true" />
+      ) : (
+        <Smartphone className="text-foreground size-3" aria-hidden="true" />
+      )}
+      {onExpand ? (
+        <Button
+          type="button"
+          variant="ghost"
+          size="xs"
+          className="px-1 font-medium"
+          onClick={onExpand}
+        >
+          {label}
+        </Button>
+      ) : (
+        <span className="px-1">{label}</span>
+      )}
       <Button type="button" variant="default" size="xs" onClick={onAction} disabled={actionPending}>
-        {translate('auto.components.terminal.pane.MobileDriverOverlay.c6460cf584', 'Take back')}
+        {actionLabel}
       </Button>
     </div>
   )

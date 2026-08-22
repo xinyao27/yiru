@@ -53,6 +53,11 @@ export async function activateTerminalMultiplexStream(
     return false
   }
   options.registerUnsubscriber(releaseDelivery)
+  // Why: daemon PTYs outlive app/update relaunches, but their live stream is
+  // still attached to the previous process. Register delivery first so bytes
+  // emitted during provider reattach have a consumer, then rebind before the
+  // initial snapshot establishes the renderer's live-tail boundary.
+  await runtime.attachTerminalProducer(ptyId)
   options.registerUnsubscriber(runtime.registerRemoteTerminalViewSubscriber(ptyId))
   for (const unsubscribe of createStreamSubscriptions(options)) {
     options.registerUnsubscriber(unsubscribe)
@@ -97,6 +102,21 @@ export async function activateTerminalMultiplexStream(
       truncated: false
     }
   )
+  if (
+    options.client.type !== 'mobile' &&
+    runtime.getDriver(ptyId).kind !== 'mobile' &&
+    runtime.isRemoteDesktopResizeDriven(ptyId)
+  ) {
+    const fitHold = runtime.getRemoteDesktopFitHold(ptyId, options.subscriptionKey)
+    if (fitHold.mode === 'remote-desktop-fit') {
+      options.sendJson(
+        TerminalMultiplexOpcode.FitOverride,
+        runtime.getTerminalWireByteSequence(ptyId),
+        0,
+        fitHold
+      )
+    }
+  }
   options.send(
     TerminalMultiplexOpcode.Credit,
     0n,
@@ -140,14 +160,22 @@ function createStreamSubscriptions(
         }
       )
     ),
-    runtime.subscribeToFitOverrideChanges(ptyId, (event) =>
+    runtime.subscribeToFitOverrideChanges(ptyId, (event) => {
+      // Why: remote ownership is per subscription. The owning Web/Desktop
+      // renderer keeps its natural grid; the other viewers park at either that
+      // grid or the host grid after an explicit desktop reclaim.
+      const visibleEvent =
+        options.client.type !== 'mobile' &&
+        (event.mode === 'remote-desktop-fit' || event.mode === 'desktop-fit')
+          ? runtime.getRemoteDesktopFitHold(ptyId, options.subscriptionKey)
+          : event
       options.sendJson(
         TerminalMultiplexOpcode.FitOverride,
         runtime.getTerminalWireByteSequence(ptyId),
         0,
-        event
+        visibleEvent
       )
-    ),
+    }),
     runtime.subscribeToDriverChanges(ptyId, (driver) =>
       options.sendJson(
         TerminalMultiplexOpcode.Driver,

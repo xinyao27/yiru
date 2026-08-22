@@ -1759,7 +1759,9 @@ export default function TerminalPane({
           if (pane.terminal.cols < 8 || pane.terminal.rows < 4) {
             return
           }
-          transport.resize(pane.terminal.cols, pane.terminal.rows)
+          if (!transport.claimViewport?.(pane.terminal.cols, pane.terminal.rows)) {
+            transport.resize(pane.terminal.cols, pane.terminal.rows, { claim: true })
+          }
         })
       }
     }
@@ -2616,15 +2618,36 @@ export default function TerminalPane({
   }, [])
 
   const restorePaneTerminalFit = useCallback(
-    async (pane: ManagedPane, ptyId: string): Promise<void> => {
+    async (
+      pane: ManagedPane,
+      ptyId: string,
+      fitMode: 'mobile-fit' | 'remote-desktop-fit'
+    ): Promise<void> => {
       // Why: local and remote runtime PTYs use different transports, but the
       // desktop reclaim button should have one visible recovery behavior.
       // Why: the banner was rendered for this PTY; stale portals must disappear
       // before they can reclaim a different terminal that reused this pane slot.
-      const currentPtyId = paneTransportsRef.current.get(pane.id)?.getPtyId() ?? null
+      const transport = paneTransportsRef.current.get(pane.id)
+      const currentPtyId = transport?.getPtyId() ?? null
       if (currentPtyId !== ptyId) {
         setOverrideTick((n) => n + 1)
         return
+      }
+      if (fitMode === 'remote-desktop-fit' && transport?.claimViewport) {
+        let proposed: { cols: number; rows: number } | undefined
+        try {
+          proposed = pane.fitAddon.proposeDimensions()
+        } catch {
+          proposed = undefined
+        }
+        if (
+          proposed &&
+          proposed.cols > 0 &&
+          proposed.rows > 0 &&
+          transport.claimViewport(proposed.cols, proposed.rows)
+        ) {
+          return
+        }
       }
       const restored = await restoreTerminalFitToDesktop(ptyId, settingsRef.current ?? undefined)
       if (restored) {
@@ -3163,16 +3186,18 @@ export default function TerminalPane({
         if (!ptyId) {
           return null
         }
-        // Why: two-state lock UI. (1) Driver is mobile → presence-lock,
+        // Why: three-state ownership UI. (1) Driver is mobile → presence-lock,
         // input paused (docs/mobile-presence-lock.md). (2) No mobile driver
         // but a phone-fit override is still in place → indefinite hold
         // (docs/mobile-fit-hold.md). MobileDriverOverlay owns the visual
-        // treatment and collapse-to-chip state; both branches share the
+        // treatment and collapse-to-chip state. (3) A Web/remote desktop owns
+        // the PTY grid → the same loud-to-chip handoff UI. All branches share the
         // same local/remote desktop-restore route.
         const driver = getDriverForPty(ptyId)
         const fitMode = getFitOverrideForPty(ptyId)?.mode ?? null
-        const hasFitOverride = fitMode === 'mobile-fit'
-        if (!shouldShowMobileDriverOverlay(driver.kind, fitMode)) {
+        const isWebClient =
+          (globalThis as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__ === true
+        if (!shouldShowMobileDriverOverlay(driver.kind, fitMode, isWebClient)) {
           return null
         }
         // Why: only the pane replaced by native chat should hide terminal-owned
@@ -3186,10 +3211,18 @@ export default function TerminalPane({
           <MobileDriverOverlay
             key={`mobile-driver-${pane.id}-${ptyId}`}
             driver={driver}
-            hasFitOverride={hasFitOverride}
+            fitMode={fitMode}
             rootClassName="mobile-driver-banner"
-            onAction={() => restorePaneTerminalFit(pane, ptyId)}
-            onAllAction={() => restoreAllTerminalFits(pane)}
+            onAction={() =>
+              restorePaneTerminalFit(
+                pane,
+                ptyId,
+                fitMode === 'remote-desktop-fit' ? 'remote-desktop-fit' : 'mobile-fit'
+              )
+            }
+            onAllAction={
+              fitMode === 'remote-desktop-fit' ? undefined : () => restoreAllTerminalFits(pane)
+            }
           />,
           pane.container,
           `mobile-driver-banner-${pane.id}`

@@ -1203,6 +1203,7 @@ type RuntimePtyController = {
     startupCwdFallback?: { kind: 'worktree'; cwd: string }
   }>
   write(ptyId: string, data: string): boolean
+  attach?(ptyId: string): Promise<void>
   kill(ptyId: string): boolean
   stopAndWait?(ptyId: string, opts?: { keepHistory?: boolean }): Promise<boolean>
   getCwd?(ptyId: string): Promise<string | null>
@@ -5861,6 +5862,13 @@ export class YiruRuntimeService {
     sequenceChars = data.length,
     queryReplyOwner = this.getTerminalQueryReplyOwnerForLiveChunk(ptyId)
   ): number {
+    if (data.includes('LIVE_ID_TRACE_8422')) {
+      console.warn('[DEBUG-flow-8422]', {
+        stage: 'runtime-on-pty-data',
+        ptyId,
+        deliveryHubKeys: [...this.terminalMultiplexDeliveryHubs.keys()]
+      })
+    }
     const outputSequence = (this.ptyOutputSequenceById.get(ptyId) ?? 0) + sequenceChars
     this.ptyOutputSequenceById.set(ptyId, outputSequence)
     const wireByteLength = new TextEncoder().encode(data).byteLength
@@ -7108,6 +7116,10 @@ export class YiruRuntimeService {
     }
     this.ptyController.pauseProducer(ptyId)
     return true
+  }
+
+  async attachTerminalProducer(ptyId: string): Promise<void> {
+    await this.ptyController?.attach?.(ptyId)
   }
 
   resumeTerminalProducer(ptyId: string): void {
@@ -8748,10 +8760,12 @@ export class YiruRuntimeService {
     subscriptionKey: string
   ): { mode: 'remote-desktop-fit' | 'desktop-fit'; cols: number; rows: number } {
     const size = this.getTerminalSize(ptyId) ?? { cols: 0, rows: 0 }
+    const owner = this.terminalSessions.getRemoteDesktopOwner(ptyId)
+    const isViewer = Boolean(this.terminalSessions.getRemoteDesktopViewer(ptyId, subscriptionKey))
     return {
-      mode: this.isRemoteDesktopViewerOwner(ptyId, subscriptionKey)
-        ? 'desktop-fit'
-        : 'remote-desktop-fit',
+      // Why: after the host reclaims, connected viewers remain parked at the
+      // host grid so their next input/resize can explicitly claim it again.
+      mode: owner === subscriptionKey || !isViewer ? 'desktop-fit' : 'remote-desktop-fit',
       ...size
     }
   }
@@ -9133,8 +9147,9 @@ export class YiruRuntimeService {
   // Why: invoked from `runtime:restoreTerminalFit` IPC (the desktop "Take
   // back" / "Restore" button). Forces the PTY back to desktop dims and flips
   // the driver to `desktop`, suppressing further mobile-driven dim changes
-  // until a mobile actor takes the floor again. Three cases, each ending in
-  // releaseDesktopTakeBack:
+  // until a mobile actor takes the floor again. The remote-viewer case releases
+  // its viewport floor through the same user-facing restore action. The three
+  // mobile cases each end in releaseDesktopTakeBack:
   //   1. Active mobile subscriber: route through applyMobileDisplayMode so the
   //      existing 'resized' event reaches the phone.
   //   2. Held override, no subscriber (post-indefinite-hold): resolve the
@@ -9195,6 +9210,10 @@ export class YiruRuntimeService {
       this.releaseDesktopTakeBack(ptyId)
       this.setMobileDisplayMode(ptyId, 'auto')
       return true
+    }
+    if (this.terminalSessions.getRemoteDesktopOwner(ptyId)) {
+      const restore = this.resolveRemoteDesktopHostReclaimTarget(ptyId)
+      return this.claimRemoteDesktopHost(ptyId, restore.cols, restore.rows)
     }
     // Why: a stale lock — driver still reads mobile with no active subscriber
     // and no held override (e.g. reclaimed inside the soft-leave grace, or a
