@@ -51,8 +51,10 @@ export async function openWebTerminalMultiplexSubscription({
       return
     }
     isOpen = false
-    abort.abort()
+    // Why: oRPC encodes its abort frame asynchronously. Close the peer first so
+    // it detaches the abort listener before the signal fires against a closed peer.
     peer.close()
+    abort.abort()
   }
   const subscription: WebTerminalMultiplexSubscription = {
     close,

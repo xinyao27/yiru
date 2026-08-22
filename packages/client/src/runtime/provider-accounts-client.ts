@@ -181,8 +181,10 @@ export function watchProviderAccounts(
     close: () => {
       closed = true
       window.clearTimeout(firstSnapshotTimer)
-      abort.abort()
+      // Why: oRPC encodes its abort frame asynchronously, so the connection must
+      // detach that listener before the signal fires against a closed transport.
       closeConnection?.()
+      abort.abort()
     }
   }
 }

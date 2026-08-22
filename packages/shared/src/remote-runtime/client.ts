@@ -476,6 +476,13 @@ export async function subscribeRemoteRuntimeRequest<TResult>(
     let didNotifyClose = false
     const streamAbort = new AbortController()
 
+    const closeDedicatedOrpcSubscription = (): void => {
+      // Why: oRPC encodes its abort frame asynchronously. Close the peer first so
+      // it detaches the abort listener before the signal fires against a closed peer.
+      dedicatedOrpcPeer?.close()
+      streamAbort.abort()
+    }
+
     const notifyClose = (): void => {
       if (!didNotifyClose) {
         didNotifyClose = true
@@ -508,8 +515,7 @@ export async function subscribeRemoteRuntimeRequest<TResult>(
     }
 
     const closeSocketAfterCleanup = (): void => {
-      streamAbort.abort()
-      dedicatedOrpcPeer?.close()
+      closeDedicatedOrpcSubscription()
       const socket = cleanupSocketListeners()
       try {
         socket?.close()
@@ -528,7 +534,7 @@ export async function subscribeRemoteRuntimeRequest<TResult>(
     }, timeoutMs)
 
     const close = (): void => {
-      streamAbort.abort()
+      closeDedicatedOrpcSubscription()
       try {
         ws?.close()
       } catch {
@@ -642,8 +648,7 @@ export async function subscribeRemoteRuntimeRequest<TResult>(
 
     function onClose(code: number, reason: Buffer): void {
       isSocketClosed = true
-      streamAbort.abort()
-      dedicatedOrpcPeer?.close()
+      closeDedicatedOrpcSubscription()
       clearTimeout(timeout)
       cleanupSocketListeners()
       if (!settled) {

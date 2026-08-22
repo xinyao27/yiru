@@ -119,8 +119,10 @@ async function startSharedRuntimeFileWatch(
       { signal: abort.signal }
     )
     shared.unsubscribe = () => {
-      abort.abort()
+      // Why: oRPC encodes its abort frame asynchronously, so the connection must
+      // detach that listener before the signal fires against a closed transport.
       connection.close()
+      abort.abort()
     }
     if (shared.closed || sharedRuntimeFileWatches.get(key) !== shared) {
       shared.unsubscribe()

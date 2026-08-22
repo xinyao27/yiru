@@ -40,8 +40,10 @@ export async function fetchRateLimitSnapshot(): Promise<RateLimitState> {
     }
     throw new Error('Rate-limit snapshot stream closed before its first snapshot.')
   } finally {
-    controller.abort()
+    // Why: oRPC encodes its abort frame asynchronously, so the connection must
+    // detach that listener before the signal fires against a closed transport.
     connection?.close()
+    controller.abort()
   }
 }
 
