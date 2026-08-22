@@ -46,7 +46,13 @@ const PRODUCT_SECURITY_HEADERS = {
     "font-src 'self'",
     "form-action 'none'",
     "frame-ancestors 'none'",
-    "img-src 'self' data: blob:",
+    // Why: repo icons, comment avatars, page favicons, and markdown bodies all
+    // point at arbitrary remote hosts, so a self-only img-src/media-src renders
+    // every one as a broken placeholder here while the desktop shell (no CSP)
+    // looks fine. Availability wins over host allowlisting; the global
+    // no-referrer policy is what keeps these loads from leaking context.
+    "img-src 'self' data: blob: https:",
+    "media-src 'self' data: blob: https:",
     "object-src 'none'",
     "require-trusted-types-for 'script'",
     "script-src 'self'",
