@@ -1177,14 +1177,13 @@ ArrayBuffer；30 分钟 GC soak、真 DOM、Windows 和低配机仍是硬闸门�
 
 ### 25.1 当前发布状态
 
-`terminal.multiplex` 目前仅是受控 canary capability。所有 desktop、packaged desktop 和
-headless `serve` 进程默认不 advertise；仅在启动进程显式设置
-`YIRU_TERMINAL_MULTIPLEX_CANARY=1` 时 advertise。该开关只用于开发和手工 canary，不是
-production rollout 开关。未看到 capability 的 client 必须拒绝打开 bulk ticket；server 也必须
-以 `capability_unsupported` 拒绝 `terminal.openMultiplex` 和 `terminal.multiplex`。唯一例外是
-Electron 的 hardened loopback；这条不 advertise 的内部路径保留本机桌面核心 terminal，但
-不会向 Web/mobile、普通 runtime socket 或 paired RPC 开放。所选 runtime 必须显式启用 canary
-并 advertise 后，Electron 才连接其 multiplex transport。
+`terminal.multiplex` 现在默认 advertise：desktop、packaged desktop 和 headless `serve`
+进程都会广播它。仅在启动进程显式设置 `YIRU_TERMINAL_MULTIPLEX_DISABLED=1` 时才收回。
+之前的默认是反过来的（canary 开关默认关闭），而 Web 客户端在 capability 缺失时会拒绝打开
+bulk ticket——结果 paired browser 拿到的是活着的 PTY 配一个空终端，加上 250 ms 的
+`status.get` 重连风暴。未看到 capability 的 client 仍必须拒绝打开 bulk ticket；server 也仍以
+`capability_unsupported` 拒绝 `terminal.openMultiplex` 和 `terminal.multiplex`。Electron 的
+hardened loopback 不受此开关影响：那条内部路径始终保留本机桌面核心 terminal。
 
 已有 canary 证据仅包括：macOS packaged 真实 xterm 的 CJK/emoji、hidden→reveal、
 renderer reload 和 100 MiB 输出；以及 iOS 模拟器 echo、50 MiB 输出、后台超过 10 秒恢复、

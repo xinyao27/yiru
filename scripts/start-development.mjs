@@ -13,10 +13,7 @@ const result = spawnSync(
     cwd: workspaceRoot,
     env: {
       ...process.env,
-      YIRU_CLI: process.env.YIRU_CLI || developmentDesktopCli,
-      // Why: the native mobile terminal is a canary consumer of the multiplex
-      // transport; production remains gated while the unified dev stack must exercise it.
-      YIRU_TERMINAL_MULTIPLEX_CANARY: process.env.YIRU_TERMINAL_MULTIPLEX_CANARY || '1'
+      YIRU_CLI: process.env.YIRU_CLI || developmentDesktopCli
     },
     shell: process.platform === 'win32',
     stdio: 'inherit'
