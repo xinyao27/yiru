@@ -4516,8 +4516,10 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
         s.activeTabTypeByWorktree[worktreeId] === activeTabType
           ? s.activeTabTypeByWorktree
           : { ...s.activeTabTypeByWorktree, [worktreeId]: activeTabType }
+      const activeWorkspaceKey = worktreeWorkspaceKey(worktreeId)
       const hasStateChange =
         s.activeWorktreeId !== worktreeId ||
+        s.activeWorkspaceKey !== activeWorkspaceKey ||
         // Why: a pending-creation panel can be showing while activeWorktreeId is
         // still the prior worktree. Re-selecting that same worktree must clear
         // the panel, so a non-null activePendingCreationId counts as a change.
@@ -4541,7 +4543,7 @@ export const createWorktreeSlice: StateCreator<AppState, [], [], WorktreeSlice> 
 
       return {
         activeWorktreeId: worktreeId,
-        activeWorkspaceKey: worktreeWorkspaceKey(worktreeId),
+        activeWorkspaceKey,
         activePendingCreationId: null,
         activeFileId,
         activeBrowserTabId,
