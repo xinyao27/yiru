@@ -659,12 +659,8 @@ export class RateLimitService {
           // Why: fetchCodexRateLimits already accepts codexHomePath, so we can
           // point it at the managed account's home directory directly without
           // materializing credentials into the shared runtime location.
-          // Why: opening the account switcher should never start hidden PTYs for
-          // every inactive account. On Windows that fallback can crash inside
-          // ConPTY; RPC-only is enough for this non-critical preview surface.
           const fresh = await fetchCodexRateLimits({
             codexHomePath: account.managedHomePath,
-            allowPtyFallback: false,
             signal
           })
           if (
@@ -1292,12 +1288,6 @@ export class RateLimitService {
     }
   }
 
-  private shouldAllowCodexPtyFallback(): boolean {
-    // Why: quota UI refreshes run in the background. On Windows, hidden PTY
-    // fallback can crash inside ConPTY, so prefer RPC-only degradation there.
-    return process.platform !== 'win32'
-  }
-
   private shouldAllowClaudePtyFallback(
     authPreparation: ClaudeRuntimeAuthPreparation | undefined
   ): boolean {
@@ -1509,7 +1499,6 @@ export class RateLimitService {
       missingWslCodexHome ??
         fetchCodexRateLimits({
           codexHomePath,
-          allowPtyFallback: this.shouldAllowCodexPtyFallback(),
           signal
         }),
       fetchCursorUsageForRuntime({
@@ -1754,7 +1743,6 @@ export class RateLimitService {
         ? Promise.resolve(missingWslCodexHome)
         : fetchCodexRateLimits({
             codexHomePath,
-            allowPtyFallback: this.shouldAllowCodexPtyFallback(),
             signal
           })
     ).catch((err): ProviderRateLimits => ({
