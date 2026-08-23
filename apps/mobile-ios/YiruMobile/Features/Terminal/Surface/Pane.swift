@@ -98,24 +98,6 @@ struct TerminalLivePane: View {
         .task(id: isVisible) {
             await synchronizeDeliveryState()
         }
-        .task(id: model.hasSubscribed && isVisible && model.canAcceptUserInput) {
-            guard isVisible, model.canAcceptUserInput else { return }
-            // Why: a native SwiftTerm surface owns the UITextInput responder. Focus it after the
-            // view has subscribed so hardware-keyboard and accessory input follow the selected
-            // tab rather than the one that happened to be focused first.
-            await Task.yield()
-            guard !Task.isCancelled else { return }
-            model.focus()
-            // Why: SwiftUI may finish attaching the UIViewRepresentable one run-loop after the
-            // subscription state flips. Retry after the host view exists so a cold tab entry does
-            // not leave the terminal rendered but unable to accept hardware or accessory input.
-            try? await Task.sleep(for: .milliseconds(80))
-            guard !Task.isCancelled, isVisible, model.canAcceptUserInput else { return }
-            model.focus()
-            try? await Task.sleep(for: .milliseconds(160))
-            guard !Task.isCancelled, isVisible, model.canAcceptUserInput else { return }
-            model.focus()
-        }
         .sensoryFeedback(.warning, trigger: model.bellRevision)
         .onChange(of: preferences.surfaceConfiguration) { _, configuration in
             model.apply(configuration)

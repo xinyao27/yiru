@@ -239,6 +239,11 @@ private final class YiruTerminalView: TerminalView {
         onQueryReply(Data(data))
     }
 
+    override func mouseModeChanged(source _: Terminal) {
+        // Why: SwiftTerm's mouse mode adds a second pan recognizer that wins over scrollback on iOS.
+        // Keep mouse-aware taps, but leave finger drags to UIScrollView so TUIs remain scrollable.
+    }
+
     private func sendModeAwareArrow(selectorName: String) {
         guard let modeAwareAccessory else { return }
         // Why: SwiftTerm's arrow actions are internal, but its public accessory exposes them to
