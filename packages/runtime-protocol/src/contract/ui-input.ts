@@ -15,13 +15,10 @@ const FEATURE_INTERACTION_ID_SET: ReadonlySet<string> = new Set(RUNTIME_FEATURE_
 const FEATURE_TIP_ID_SET: ReadonlySet<string> = new Set(RUNTIME_FEATURE_TIP_IDS)
 const NullableStringSchema = z.string().nullable()
 const StringArraySchema = z.array(z.string())
-const UnknownRecordSchema = z.record(z.string(), z.unknown())
-const UnknownRecordArraySchema = z.array(UnknownRecordSchema)
 const WorktreeCardPropertySchema = z.enum([
   'status',
   'unread',
   'branch',
-  'automation',
   'comment',
   'ports',
   'inline-agents'
@@ -125,9 +122,7 @@ export const UIUpdateInputSchema = z
   .object({
     lastActiveRepoId: NullableStringSchema.optional(),
     lastActiveWorktreeId: NullableStringSchema.optional(),
-    activeView: z
-      .enum(['home', 'terminal', 'settings', 'automations', 'space', 'skills', 'mobile'])
-      .optional(),
+    activeView: z.enum(['home', 'terminal', 'settings', 'space', 'skills', 'mobile']).optional(),
     sidebarWidth: z.number().finite().optional(),
     rightSidebarOpen: z.boolean().optional(),
     rightSidebarTab: z
@@ -162,7 +157,6 @@ export const UIUpdateInputSchema = z
       .array(z.object({ hostId: z.string(), repoId: z.string() }).strict())
       .optional(),
     hideDefaultBranchWorkspace: z.boolean().optional(),
-    hideAutomationGeneratedWorkspaces: z.boolean().optional(),
     showDotfilesByWorktree: z.record(z.string(), z.boolean()).optional(),
     filterRepoIds: StringArraySchema.optional(),
     collapsedGroups: StringArraySchema.optional(),
@@ -250,14 +244,6 @@ export const UIUpdateInputSchema = z
     projectOrderManualDefaultNoticeDismissed: z.boolean().optional(),
     usagePercentageDisplayChangeNoticeDismissed: z.boolean().optional(),
     usageEmptyStateDismissed: z.boolean().optional(),
-    petVisible: z.boolean().optional(),
-    petId: z.string().optional(),
-    customPets: UnknownRecordArraySchema.optional(),
-    petSize: z.number().finite().optional(),
-    sidekickVisible: z.boolean().optional(),
-    sidekickId: z.string().optional(),
-    customSidekicks: UnknownRecordArraySchema.optional(),
-    sidekickSize: z.number().finite().optional(),
     workspaceCleanup: WorkspaceCleanupSchema.optional(),
     featureTipsSeenIds: FeatureTipIdsSchema.optional(),
     featureInteractions: FeatureInteractionsSchema.optional(),

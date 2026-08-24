@@ -9,7 +9,6 @@ import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
 import { markAgentWorkspaceTrusted } from '~renderer/runtime/agent-trust-client'
 import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
-import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
 import type { ProjectExecutionRuntimeResolution } from '~shared/project-execution-runtime'
 import { makePaneKey } from '~shared/stable-pane-id'
 import { TUI_AGENT_CONFIG } from '~shared/tui-agent/config'
@@ -49,18 +48,10 @@ function getUsableForkBase(
     | { branch?: string | null; isArchived?: boolean; isBare?: boolean; repoId?: string }
     | null
     | undefined,
-  repo: { kind?: string } | null | undefined,
-  worktreeId: string
+  repo: { kind?: string } | null | undefined
 ): string | null {
   const branch = worktree?.branch?.trim()
-  if (
-    worktreeId === FLOATING_TERMINAL_WORKTREE_ID ||
-    !branch ||
-    worktree?.isArchived ||
-    worktree?.isBare ||
-    !repo ||
-    repo.kind === 'folder'
-  ) {
+  if (!branch || worktree?.isArchived || worktree?.isBare || !repo || repo.kind === 'folder') {
     return null
   }
   return branch
@@ -228,7 +219,7 @@ export async function startAgentSessionFork(fork: PreparedAgentSessionFork): Pro
   }
   const sourceRepo = store.repos.find((repo) => repo.id === sourceWorktree.repoId)
   const sourceProjectRuntime = getLocalProjectExecutionRuntimeContext(store, fork.worktreeId)
-  const sourceBranch = getUsableForkBase(sourceWorktree, sourceRepo, fork.worktreeId)
+  const sourceBranch = getUsableForkBase(sourceWorktree, sourceRepo)
   if (!sourceBranch) {
     toast.error(
       translate(

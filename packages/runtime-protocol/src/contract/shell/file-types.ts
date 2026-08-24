@@ -3,12 +3,24 @@ export type ShellFileReadInput = {
   includeLocalLogMetadata?: boolean
 }
 
+export type ShellFileReadChunkInput = {
+  filePath: string
+  offset: number
+  length: number
+}
+
 export type ShellFileReadResult = {
   content: string
   isBinary: boolean
   isImage?: boolean
   mimeType?: string
   fileIdentity?: string
+}
+
+export type ShellFileReadChunkResult = {
+  contentBase64: string
+  bytesRead: number
+  eof: boolean
 }
 
 export type ShellFileDownloadResult =

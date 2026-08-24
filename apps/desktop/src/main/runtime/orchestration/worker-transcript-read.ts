@@ -1,18 +1,18 @@
 import { open, stat } from 'node:fs/promises'
 
 import {
-  resolveNativeChatTranscriptAgent,
-  type AgentType,
-  type NativeChatMessage
+  resolveTranscriptAgent,
+  type AgentTranscriptMessage,
+  type AgentType
 } from '@yiru/workbench-model/agent'
-import { resolveSessionFilePath } from '~main/native-chat/session-file-resolver'
-import { transcriptFallbackId } from '~main/native-chat/transcript-fallback-id'
+import { resolveSessionFilePath } from '~main/runtime/orchestration/agent-transcript/session-file-resolver'
+import { transcriptFallbackId } from '~main/runtime/orchestration/agent-transcript/transcript-fallback-id'
 import {
-  MAX_NATIVE_CHAT_TRANSCRIPT_RECORD_BYTES,
-  nativeChatLineDecoderForAgent,
-  readNativeChatTranscriptTailFile,
-  type NativeChatLineDecoder
-} from '~main/native-chat/transcript-tail-reader'
+  MAX_AGENT_TRANSCRIPT_RECORD_BYTES,
+  agentTranscriptLineDecoderForAgent,
+  readAgentTranscriptTailFile,
+  type AgentTranscriptLineDecoder
+} from '~main/runtime/orchestration/agent-transcript/transcript-tail-reader'
 import type { OrchestrationWorkerReadFallbackReason } from '~shared/orchestration-worker-output'
 
 import {
@@ -31,7 +31,7 @@ type WorkerTranscriptReadFailure = {
 type WorkerTranscriptReadSuccess = {
   ok: true
   filePath: string
-  messages: NativeChatMessage[]
+  messages: AgentTranscriptMessage[]
   nextOffset: number
   limited: boolean
   warnings: string[]
@@ -46,11 +46,11 @@ export async function readWorkerTranscript(args: {
   offset?: number
   limit?: number
 }): Promise<WorkerTranscriptReadResult> {
-  const transcriptAgent = resolveNativeChatTranscriptAgent(args.agent)
+  const transcriptAgent = resolveTranscriptAgent(args.agent)
   if (!transcriptAgent) {
     return { ok: false, reason: 'provider_unsupported', warnings: [] }
   }
-  const decode = nativeChatLineDecoderForAgent(args.agent)
+  const decode = agentTranscriptLineDecoderForAgent(args.agent)
   if (!decode) {
     return { ok: false, reason: 'provider_unsupported', warnings: [] }
   }
@@ -101,9 +101,9 @@ export async function readWorkerTranscript(args: {
 async function readInitialPage(
   filePath: string,
   limit: number,
-  decode: NativeChatLineDecoder
+  decode: AgentTranscriptLineDecoder
 ): Promise<WorkerTranscriptReadSuccess> {
-  const page = await readNativeChatTranscriptTailFile(filePath, limit, decode, false)
+  const page = await readAgentTranscriptTailFile(filePath, limit, decode, false)
   return {
     ok: true,
     filePath,
@@ -118,7 +118,7 @@ async function readForwardPage(
   filePath: string,
   startOffset: number,
   limit: number,
-  decode: NativeChatLineDecoder
+  decode: AgentTranscriptLineDecoder
 ): Promise<WorkerTranscriptReadResult> {
   const fileSize = (await stat(filePath)).size
   if (startOffset > fileSize) {
@@ -136,7 +136,7 @@ async function readForwardPage(
   }
   const scanEnd = Math.min(fileSize, startOffset + MAX_FORWARD_TRANSCRIPT_SCAN_BYTES)
   const handle = await open(filePath, 'r')
-  const messages: NativeChatMessage[] = []
+  const messages: AgentTranscriptMessage[] = []
   let pendingChunks: Buffer[] = []
   let pendingBytes = 0
   let pendingStart = startOffset
@@ -187,7 +187,7 @@ async function readForwardPage(
       return
     }
     pendingBytes += part.length
-    if (pendingBytes > MAX_NATIVE_CHAT_TRANSCRIPT_RECORD_BYTES) {
+    if (pendingBytes > MAX_AGENT_TRANSCRIPT_RECORD_BYTES) {
       pendingChunks = []
       droppingOversizedRecord = true
       oversizedRecordCount++

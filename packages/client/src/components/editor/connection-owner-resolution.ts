@@ -5,7 +5,6 @@ import {
 import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 import type { AppState } from '~renderer/store/types'
 import { getIndexedRepoMap, getIndexedWorktreeMap } from '~renderer/store/worktree-repo-index'
-import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
 import { parseWorkspaceKey } from '~shared/workspace/scope'
 
 import {
@@ -52,7 +51,7 @@ export function getConnectionIdFromState(
   state: ConnectionOwnerState,
   worktreeId: string | null
 ): string | null | undefined {
-  if (!worktreeId || worktreeId === FLOATING_TERMINAL_WORKTREE_ID) {
+  if (!worktreeId) {
     return null
   }
   const parsedWorkspaceKey = parseWorkspaceKey(worktreeId)

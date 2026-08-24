@@ -72,7 +72,7 @@
   border-radius: 8px;
   background: var(--background);
   padding: 12px 14px;
-  font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
+  font-family: var(--font-sans);
   transition:
     border-color 150ms ease,
     background-color 150ms ease;
@@ -233,6 +233,7 @@
 }
 
 .yiru-diff-comment-popover-textarea {
+  field-sizing: content;
   width: 100%;
   min-height: 56px;
   max-height: 240px;

@@ -103,7 +103,7 @@ export type RpcContext = {
   // handlers use this to clean up when that paired device disconnects.
   clientId?: string
   // Why: payload windowing/truncation tuned for the constrained mobile payload
-  // (e.g. native-chat block char cap) must not clip full-screen web/desktop
+  // must not clip full-screen web/desktop
   // clients. Carries the paired device's scope so handlers can gate the diet to
   // phones only. Undefined for in-process callers → treat as full-class (no clip).
   clientKind?: 'mobile' | 'runtime'

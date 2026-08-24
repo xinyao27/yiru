@@ -181,25 +181,3 @@ export type RuntimeGitLocalBranches = {
   current: string | null
   branches: string[]
 }
-
-/** One speech model as presented to the mobile dictation-setup sheet: catalog
- *  metadata joined with live download/ready state. */
-export type RuntimeSpeechModelSummary = {
-  id: string
-  label: string
-  provider: 'local' | 'openai'
-  sizeBytes: number | null
-  recommended: boolean
-  /** Whether the model streams partial results while listening vs. only a final transcript. */
-  streaming: boolean
-  status: 'ready' | 'not-downloaded' | 'downloading' | 'extracting' | 'error'
-  progress: number | null
-}
-
-export type RuntimeSpeechSetupState = {
-  enabled: boolean
-  selectedModelId: string
-  /** 'toggle' = press once to start/stop; 'hold' = dictate while held. */
-  dictationMode: 'toggle' | 'hold'
-  models: RuntimeSpeechModelSummary[]
-}

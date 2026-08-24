@@ -4,8 +4,6 @@ export const STATUS_BAR_CONTEXT_MENU_EXEMPT_PROPS = {
   [STATUS_BAR_CONTEXT_MENU_EXEMPT_ATTR]: ''
 } as const
 
-const FLOATING_TERMINAL_TOGGLE_SELECTOR = '[data-floating-terminal-toggle]'
-
 type ClosestCapableTarget = EventTarget & {
   closest: (selector: string) => Element | null
 }
@@ -38,8 +36,5 @@ export function shouldOpenStatusBarContextMenu(target: EventTarget | null): bool
 
   // Why: Radix portal events can still bubble through the StatusBar React tree;
   // nested status-bar surfaces opt out so their right-clicks stay local.
-  return (
-    closestTarget.closest(FLOATING_TERMINAL_TOGGLE_SELECTOR) === null &&
-    closestTarget.closest(STATUS_BAR_CONTEXT_MENU_EXEMPT_SELECTOR) === null
-  )
+  return closestTarget.closest(STATUS_BAR_CONTEXT_MENU_EXEMPT_SELECTOR) === null
 }

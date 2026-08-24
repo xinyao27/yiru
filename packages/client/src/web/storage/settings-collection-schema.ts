@@ -228,10 +228,6 @@ export function createCollectionSettingSchemas(defaults: GlobalSettings) {
       .array(tuiAgent)
       .transform(normalizeDisabledTuiAgents)
       .catch(defaults.disabledTuiAgents),
-    floatingTerminalTrustedCwds: z
-      .array(z.string())
-      .optional()
-      .catch(defaults.floatingTerminalTrustedCwds),
     agentCmdOverrides: tuiAgentStringRecord.catch(defaults.agentCmdOverrides),
     codexSessionSourceHome: z
       .object({

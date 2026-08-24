@@ -1,11 +1,5 @@
-import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
-import { dirname, join } from 'node:path'
-
-/* eslint-disable max-lines -- Why: this store is the single main-process owner for Claude usage persistence, scan gating, and query semantics. Keeping those policy decisions together avoids split-brain range/scope logic across multiple files. */
 import type { Store } from '~main/persistence'
-import { getRuntimeHostPathsProvider } from '~main/runtime/host/paths-provider'
-import { loadKnownUsageWorktreesByRepo, type UsageWorktreeRef } from '~main/usage-worktree-metadata'
-import type { AutomationRunUsage } from '~shared/automations-types'
+import { loadKnownUsageWorktreesByRepo } from '~main/usage-worktree-metadata'
 import type {
   ClaudeUsageBreakdownKind,
   ClaudeUsageBreakdownRow,
@@ -18,183 +12,36 @@ import type {
   ClaudeUsageSummary
 } from '~shared/claude-usage-types'
 
-import { priceClaudeUsage } from './pricing'
-import { createWorktreeRefs, getSessionProjectLabel, scanClaudeUsageFiles } from './scanner'
+import {
+  buildClaudeUsageBreakdown,
+  buildClaudeUsageDaily,
+  buildClaudeUsageRecentSessions
+} from './query-details'
+import { buildClaudeUsageSummary } from './query-summary'
+import { createWorktreeRefs, scanClaudeUsageFiles } from './scanner'
+import {
+  getClaudeUsageWorktreeFingerprint,
+  loadClaudeUsageState,
+  writeClaudeUsageState
+} from './store-persistence'
 import type { ClaudeUsagePersistedState } from './types'
 
-// Why: v7 adds provider-aware Vertex AI exclusion and nonnegative token
-// normalization. Older aggregates may have priced Vertex rows as Anthropic.
-const SCHEMA_VERSION = 7
+export { initClaudeUsagePath } from './store-persistence'
+
 const STALE_MS = 5 * 60_000
-const AUTOMATION_ATTRIBUTION_WINDOW_MS = 5 * 60_000
-
-// Why: capture the path once the host has installed its paths provider, matching
-// the persistence/collector pattern — Electron's derived userData location still
-// moves under app.setName(), and headless hosts have no Electron at all.
-let _claudeUsageFile: string | null = null
-
-type AutomationUsageLookupInput = {
-  worktreeId: string | null
-  terminalSessionId: string | null
-  startedAt: number | null
-  completedAt: number | null
-}
-
-function estimateCostUsd(
-  model: string | null,
-  inputTokens: number,
-  outputTokens: number,
-  cacheReadTokens: number,
-  cacheWriteTokens: number
-): number | null {
-  const price = priceClaudeUsage({
-    model,
-    inputTokens,
-    outputTokens,
-    cacheReadTokens,
-    cacheWriteTokens
-  })
-  return price.unpricedTokens === 0 ? price.estimatedCostUsd : null
-}
-
-function addKnownCost(left: number | null, right: number | null): number | null {
-  return left === null && right === null ? null : (left ?? 0) + (right ?? 0)
-}
-
-function getDefaultState(): ClaudeUsagePersistedState {
-  return {
-    schemaVersion: SCHEMA_VERSION,
-    worktreeFingerprint: null,
-    processedFiles: [],
-    sessions: [],
-    dailyAggregates: [],
-    scanState: {
-      enabled: true,
-      lastScanStartedAt: null,
-      lastScanCompletedAt: null,
-      lastScanError: null
-    }
-  }
-}
-
-export function initClaudeUsagePath(): void {
-  _claudeUsageFile = join(getRuntimeHostPathsProvider().userDataPath(), 'yiru-claude-usage.json')
-}
-
-function getClaudeUsageFile(): string {
-  if (!_claudeUsageFile) {
-    _claudeUsageFile = join(getRuntimeHostPathsProvider().userDataPath(), 'yiru-claude-usage.json')
-  }
-  return _claudeUsageFile
-}
-
-function getRangeCutoff(range: ClaudeUsageRange): string | null {
-  if (range === 'all') {
-    return null
-  }
-  const days = range === '7d' ? 7 : range === '30d' ? 30 : 90
-  const now = new Date()
-  now.setHours(0, 0, 0, 0)
-  now.setDate(now.getDate() - (days - 1))
-  const year = now.getFullYear()
-  const month = String(now.getMonth() + 1).padStart(2, '0')
-  const day = String(now.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
-}
-
-function getLocalDay(timestamp: string): string | null {
-  const parsed = new Date(timestamp)
-  if (Number.isNaN(parsed.getTime())) {
-    return null
-  }
-  const year = parsed.getFullYear()
-  const month = String(parsed.getMonth() + 1).padStart(2, '0')
-  const day = String(parsed.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
-}
-
-function getWorktreeFingerprint(worktreesByRepo: Map<string, UsageWorktreeRef[]>): string {
-  const rows = [...worktreesByRepo.entries()]
-    .flatMap(([repoId, worktrees]) =>
-      worktrees.map((worktree) =>
-        JSON.stringify({
-          repoId,
-          worktreeId: worktree.worktreeId,
-          path: worktree.path,
-          displayName: worktree.displayName
-        })
-      )
-    )
-    .sort()
-  return JSON.stringify(rows)
-}
-
 export class ClaudeUsageStore {
+  private scanPromise: Promise<void> | null = null
   private state: ClaudeUsagePersistedState
   private readonly store: Store
-  private scanPromise: Promise<void> | null = null
 
   constructor(store: Store) {
     this.store = store
-    this.state = this.load()
-  }
-
-  private load(): ClaudeUsagePersistedState {
-    try {
-      const usageFile = getClaudeUsageFile()
-      if (!existsSync(usageFile)) {
-        return getDefaultState()
-      }
-      const parsed = JSON.parse(readFileSync(usageFile, 'utf-8')) as ClaudeUsagePersistedState
-      if (parsed.schemaVersion !== SCHEMA_VERSION) {
-        // Why: scanner semantics affect persisted totals, so old Claude caches
-        // must be rebuilt after parser/source changes instead of reused briefly.
-        // Usage analytics is local and always available on Home. Schema bumps
-        // migrate older opt-in state to the current always-on behavior.
-        const defaults = getDefaultState()
-        return {
-          ...defaults,
-          scanState: {
-            ...defaults.scanState,
-            enabled: true
-          }
-        }
-      }
-      return {
-        ...getDefaultState(),
-        ...parsed,
-        scanState: {
-          ...getDefaultState().scanState,
-          ...parsed.scanState,
-          enabled: true
-        }
-      }
-    } catch (error) {
-      // Why: Claude usage is a local analytics feature, not primary workspace
-      // state. A corrupt cache should degrade to a fresh rebuild instead of
-      // preventing Yiru from booting, but we leave the file on disk for debugging.
-      console.error('[claude-usage] Failed to load persisted state, starting fresh:', error)
-      return getDefaultState()
-    }
-  }
-
-  private writeToDisk(): void {
-    const usageFile = getClaudeUsageFile()
-    const dir = dirname(usageFile)
-    if (!existsSync(dir)) {
-      mkdirSync(dir, { recursive: true })
-    }
-    // Why: scans can refresh while the app is in active use. Use the same
-    // atomic temp-file pattern as the main store so a crash or concurrent write
-    // cannot leave a truncated analytics file as the common failure mode.
-    const tmpFile = `${usageFile}.${process.pid}.${Date.now()}.${Math.random().toString(16).slice(2)}.tmp`
-    writeFileSync(tmpFile, JSON.stringify(this.state, null, 2), 'utf-8')
-    renameSync(tmpFile, usageFile)
+    this.state = loadClaudeUsageState()
   }
 
   async setEnabled(enabled: boolean): Promise<ClaudeUsageScanState> {
     this.state.scanState.enabled = enabled
-    this.writeToDisk()
+    this.persist()
     return this.getScanState()
   }
 
@@ -213,11 +60,11 @@ export class ClaudeUsageStore {
   ): ClaudeUsageSnapshot {
     return {
       scanState: this.getScanState(),
-      summary: this.buildSummary(scope, range),
-      daily: this.buildDaily(scope, range),
-      modelBreakdown: this.buildBreakdown(scope, range, 'model'),
-      projectBreakdown: this.buildBreakdown(scope, range, 'project'),
-      recentSessions: this.buildRecentSessions(scope, range, recentSessionLimit)
+      summary: buildClaudeUsageSummary(this.state, scope, range),
+      daily: buildClaudeUsageDaily(this.state, scope, range),
+      modelBreakdown: buildClaudeUsageBreakdown(this.state, scope, range, 'model'),
+      projectBreakdown: buildClaudeUsageBreakdown(this.state, scope, range, 'project'),
+      recentSessions: buildClaudeUsageRecentSessions(this.state, scope, range, recentSessionLimit)
     }
   }
 
@@ -225,10 +72,10 @@ export class ClaudeUsageStore {
     if (!this.state.scanState.enabled) {
       return this.getScanState()
     }
-    const currentWorktreeFingerprint = await this.getCurrentWorktreeFingerprint()
+    const currentFingerprint = await this.getCurrentWorktreeFingerprint()
     if (!force && this.state.scanState.lastScanCompletedAt) {
       const ageMs = Date.now() - this.state.scanState.lastScanCompletedAt
-      if (ageMs < STALE_MS && this.state.worktreeFingerprint === currentWorktreeFingerprint) {
+      if (ageMs < STALE_MS && this.state.worktreeFingerprint === currentFingerprint) {
         return this.getScanState()
       }
     }
@@ -236,112 +83,9 @@ export class ClaudeUsageStore {
     return this.getScanState()
   }
 
-  private async runScan(): Promise<void> {
-    if (this.scanPromise) {
-      await this.scanPromise
-      return
-    }
-
-    this.state.scanState.lastScanStartedAt = Date.now()
-    this.state.scanState.lastScanError = null
-    this.writeToDisk()
-
-    this.scanPromise = (async () => {
-      try {
-        const repos = this.store.getRepos()
-        const worktreesByRepo = loadKnownUsageWorktreesByRepo(this.store, repos)
-        const worktreeFingerprint = getWorktreeFingerprint(worktreesByRepo)
-        const result = await scanClaudeUsageFiles(
-          createWorktreeRefs(repos, worktreesByRepo),
-          this.state.worktreeFingerprint === worktreeFingerprint ? this.state.processedFiles : []
-        )
-        this.state.processedFiles = result.processedFiles
-        this.state.sessions = result.sessions
-        this.state.dailyAggregates = result.dailyAggregates
-        this.state.worktreeFingerprint = worktreeFingerprint
-        this.state.scanState.lastScanCompletedAt = Date.now()
-        this.state.scanState.lastScanError = null
-        this.writeToDisk()
-      } catch (error) {
-        this.state.scanState.lastScanError = error instanceof Error ? error.message : String(error)
-        this.writeToDisk()
-      } finally {
-        this.scanPromise = null
-      }
-    })()
-
-    await this.scanPromise
-  }
-
   async getSummary(scope: ClaudeUsageScope, range: ClaudeUsageRange): Promise<ClaudeUsageSummary> {
     await this.refresh(false)
-    return this.buildSummary(scope, range)
-  }
-
-  private buildSummary(scope: ClaudeUsageScope, range: ClaudeUsageRange): ClaudeUsageSummary {
-    const filteredDaily = this.getFilteredDaily(scope, range)
-    const filteredSessions = this.getFilteredSessions(scope, range)
-
-    let inputTokens = 0
-    let outputTokens = 0
-    let cacheReadTokens = 0
-    let cacheWriteTokens = 0
-    let turns = 0
-    let zeroCacheReadTurns = 0
-    const byModel = new Map<string, number>()
-    const byProject = new Map<string, number>()
-    let estimatedCostUsd = 0
-    let hasAnyBillableCost = false
-    let hasUnpricedCost = false
-
-    for (const row of filteredDaily) {
-      inputTokens += row.inputTokens
-      outputTokens += row.outputTokens
-      cacheReadTokens += row.cacheReadTokens
-      cacheWriteTokens += row.cacheWriteTokens
-      turns += row.turnCount
-      zeroCacheReadTurns += row.zeroCacheReadTurnCount
-      const modelKey = row.model ?? 'Unknown model'
-      byModel.set(modelKey, (byModel.get(modelKey) ?? 0) + row.inputTokens + row.outputTokens)
-      byProject.set(
-        row.projectLabel,
-        (byProject.get(row.projectLabel) ?? 0) + row.inputTokens + row.outputTokens
-      )
-      const cost = row.estimatedCostUsd
-      hasUnpricedCost ||= row.unpricedTokens > 0
-      if (cost !== null) {
-        hasAnyBillableCost = true
-        estimatedCostUsd += cost
-      }
-    }
-
-    const topModel =
-      [...byModel.entries()].sort((left, right) => right[1] - left[1])[0]?.[0] ?? null
-    const topProject =
-      [...byProject.entries()].sort((left, right) => right[1] - left[1])[0]?.[0] ?? null
-
-    return {
-      scope,
-      range,
-      sessions: filteredSessions.length,
-      turns,
-      zeroCacheReadTurns,
-      inputTokens,
-      outputTokens,
-      cacheReadTokens,
-      cacheWriteTokens,
-      cacheReuseRate:
-        inputTokens + cacheReadTokens > 0
-          ? cacheReadTokens / (inputTokens + cacheReadTokens)
-          : null,
-      estimatedCostUsd: hasUnpricedCost || !hasAnyBillableCost ? null : estimatedCostUsd,
-      topModel,
-      topProject,
-      // Why: the empty-state UX is scope/range specific. Using global persisted
-      // data here makes the Yiru-only view render empty charts instead of the
-      // intended "no usage for this scope" message when only off-Yiru logs exist.
-      hasAnyClaudeData: filteredSessions.length > 0 || filteredDaily.length > 0
-    }
+    return buildClaudeUsageSummary(this.state, scope, range)
   }
 
   async getDaily(
@@ -349,30 +93,7 @@ export class ClaudeUsageStore {
     range: ClaudeUsageRange
   ): Promise<ClaudeUsageDailyPoint[]> {
     await this.refresh(false)
-    return this.buildDaily(scope, range)
-  }
-
-  private buildDaily(scope: ClaudeUsageScope, range: ClaudeUsageRange): ClaudeUsageDailyPoint[] {
-    const byDay = new Map<string, ClaudeUsageDailyPoint>()
-    for (const row of this.getFilteredDaily(scope, range)) {
-      const existing = byDay.get(row.day) ?? {
-        day: row.day,
-        inputTokens: 0,
-        outputTokens: 0,
-        cacheReadTokens: 0,
-        cacheWriteTokens: 0,
-        estimatedCostUsd: null,
-        unpricedTokens: 0
-      }
-      existing.inputTokens += row.inputTokens
-      existing.outputTokens += row.outputTokens
-      existing.cacheReadTokens += row.cacheReadTokens
-      existing.cacheWriteTokens += row.cacheWriteTokens
-      existing.estimatedCostUsd = addKnownCost(existing.estimatedCostUsd, row.estimatedCostUsd)
-      existing.unpricedTokens += row.unpricedTokens
-      byDay.set(row.day, existing)
-    }
-    return [...byDay.values()].sort((left, right) => left.day.localeCompare(right.day))
+    return buildClaudeUsageDaily(this.state, scope, range)
   }
 
   async getBreakdown(
@@ -381,77 +102,7 @@ export class ClaudeUsageStore {
     kind: ClaudeUsageBreakdownKind
   ): Promise<ClaudeUsageBreakdownRow[]> {
     await this.refresh(false)
-    return this.buildBreakdown(scope, range, kind)
-  }
-
-  private buildBreakdown(
-    scope: ClaudeUsageScope,
-    range: ClaudeUsageRange,
-    kind: ClaudeUsageBreakdownKind
-  ): ClaudeUsageBreakdownRow[] {
-    const rows = new Map<string, ClaudeUsageBreakdownRow>()
-    const unpricedKeys = new Set<string>()
-    const filteredDaily = this.getFilteredDaily(scope, range)
-    const filteredSessions = this.getFilteredSessions(scope, range)
-
-    for (const daily of filteredDaily) {
-      const key = kind === 'model' ? (daily.model ?? 'unknown') : daily.projectKey
-      const label = kind === 'model' ? (daily.model ?? 'Unknown model') : daily.projectLabel
-      const existing = rows.get(key) ?? {
-        key,
-        label,
-        sessions: 0,
-        turns: 0,
-        inputTokens: 0,
-        outputTokens: 0,
-        cacheReadTokens: 0,
-        cacheWriteTokens: 0,
-        estimatedCostUsd: null
-      }
-      existing.turns += daily.turnCount
-      existing.inputTokens += daily.inputTokens
-      existing.outputTokens += daily.outputTokens
-      existing.cacheReadTokens += daily.cacheReadTokens
-      existing.cacheWriteTokens += daily.cacheWriteTokens
-      existing.estimatedCostUsd = addKnownCost(existing.estimatedCostUsd, daily.estimatedCostUsd)
-      if (daily.unpricedTokens > 0) {
-        unpricedKeys.add(key)
-      }
-      rows.set(key, existing)
-    }
-
-    for (const session of filteredSessions) {
-      if (kind === 'model') {
-        const key = session.model ?? 'unknown'
-        const row = rows.get(key)
-        if (row) {
-          row.sessions++
-        }
-        continue
-      }
-      const matchingLocations = session.locationBreakdown.filter((entry) =>
-        scope === 'all' ? true : entry.worktreeId !== null
-      )
-      const seen = new Set<string>()
-      for (const location of matchingLocations) {
-        if (seen.has(location.locationKey)) {
-          continue
-        }
-        seen.add(location.locationKey)
-        const row = rows.get(location.locationKey)
-        if (row) {
-          row.sessions++
-        }
-      }
-    }
-
-    return [...rows.values()]
-      .map((row) => (unpricedKeys.has(row.key) ? { ...row, estimatedCostUsd: null } : row))
-      .sort((left, right) => {
-        const leftTotal = left.inputTokens + left.outputTokens
-        const rightTotal = right.inputTokens + right.outputTokens
-        return rightTotal - leftTotal
-      })
+    return buildClaudeUsageBreakdown(this.state, scope, range, kind)
   }
 
   async getRecentSessions(
@@ -460,225 +111,49 @@ export class ClaudeUsageStore {
     limit = 12
   ): Promise<ClaudeUsageSessionRow[]> {
     await this.refresh(false)
-    return this.buildRecentSessions(scope, range, limit)
+    return buildClaudeUsageRecentSessions(this.state, scope, range, limit)
   }
 
-  private buildRecentSessions(
-    scope: ClaudeUsageScope,
-    range: ClaudeUsageRange,
-    limit = 12
-  ): ClaudeUsageSessionRow[] {
-    return this.getFilteredSessions(scope, range)
-      .slice(0, limit)
-      .map((session) => {
-        const matchingLocations = session.locationBreakdown.filter((entry) =>
-          scope === 'all' ? true : entry.worktreeId !== null
+  private async runScan(): Promise<void> {
+    if (this.scanPromise) {
+      await this.scanPromise
+      return
+    }
+    this.state.scanState.lastScanStartedAt = Date.now()
+    this.state.scanState.lastScanError = null
+    this.persist()
+    this.scanPromise = (async () => {
+      try {
+        const repos = this.store.getRepos()
+        const worktreesByRepo = loadKnownUsageWorktreesByRepo(this.store, repos)
+        const fingerprint = getClaudeUsageWorktreeFingerprint(worktreesByRepo)
+        const result = await scanClaudeUsageFiles(
+          createWorktreeRefs(repos, worktreesByRepo),
+          this.state.worktreeFingerprint === fingerprint ? this.state.processedFiles : []
         )
-        const scopedLocations =
-          matchingLocations.length > 0 ? matchingLocations : session.locationBreakdown
-        const totals = scopedLocations.reduce(
-          (acc, entry) => {
-            acc.turns += entry.turnCount
-            acc.inputTokens += entry.inputTokens
-            acc.outputTokens += entry.outputTokens
-            acc.cacheReadTokens += entry.cacheReadTokens
-            acc.cacheWriteTokens += entry.cacheWriteTokens
-            return acc
-          },
-          {
-            turns: 0,
-            inputTokens: 0,
-            outputTokens: 0,
-            cacheReadTokens: 0,
-            cacheWriteTokens: 0
-          }
-        )
-        const durationMinutes = Math.max(
-          0,
-          Math.round(
-            (new Date(session.lastTimestamp).getTime() -
-              new Date(session.firstTimestamp).getTime()) /
-              60_000
-          )
-        )
-        return {
-          sessionId: session.sessionId,
-          lastActiveAt: session.lastTimestamp,
-          durationMinutes,
-          projectLabel: getSessionProjectLabel(scopedLocations),
-          branch: session.lastGitBranch,
-          model: session.model,
-          turns: totals.turns,
-          inputTokens: totals.inputTokens,
-          outputTokens: totals.outputTokens,
-          cacheReadTokens: totals.cacheReadTokens,
-          cacheWriteTokens: totals.cacheWriteTokens
-        }
-      })
-  }
-
-  async getAutomationRunUsage(input: AutomationUsageLookupInput): Promise<AutomationRunUsage> {
-    const collectedAt = Date.now()
-    const unavailable = (
-      unavailableReason: AutomationRunUsage['unavailableReason'],
-      unavailableMessage: string
-    ): AutomationRunUsage => ({
-      status: 'unavailable',
-      provider: 'claude',
-      model: null,
-      inputTokens: null,
-      outputTokens: null,
-      cacheReadTokens: null,
-      cacheWriteTokens: null,
-      reasoningOutputTokens: null,
-      totalTokens: null,
-      estimatedCostUsd: null,
-      estimatedCostSource: null,
-      providerSessionId: null,
-      attribution: null,
-      collectedAt,
-      unavailableReason,
-      unavailableMessage
-    })
-
-    if (!this.state.scanState.enabled) {
-      return unavailable('usage_not_enabled', 'Claude usage tracking is not enabled.')
-    }
-    if (!input.worktreeId || !input.startedAt || !input.completedAt) {
-      return unavailable('no_matching_session', 'Run session metadata is incomplete.')
-    }
-
-    const scanState = await this.refresh(this.shouldForceAutomationUsageScan(input.completedAt))
-    if (scanState.lastScanError) {
-      return unavailable('scan_failed', scanState.lastScanError)
-    }
-
-    const windowStart = input.startedAt - AUTOMATION_ATTRIBUTION_WINDOW_MS
-    const windowEnd = input.completedAt + AUTOMATION_ATTRIBUTION_WINDOW_MS
-    const candidates = this.state.sessions.filter((session) => {
-      const first = new Date(session.firstTimestamp).getTime()
-      const last = new Date(session.lastTimestamp).getTime()
-      if (!Number.isFinite(first) || !Number.isFinite(last)) {
-        return false
+        this.state.processedFiles = result.processedFiles
+        this.state.sessions = result.sessions
+        this.state.dailyAggregates = result.dailyAggregates
+        this.state.worktreeFingerprint = fingerprint
+        this.state.scanState.lastScanCompletedAt = Date.now()
+        this.state.scanState.lastScanError = null
+        this.persist()
+      } catch (error) {
+        this.state.scanState.lastScanError = error instanceof Error ? error.message : String(error)
+        this.persist()
+      } finally {
+        this.scanPromise = null
       }
-      if (session.sessionId === input.terminalSessionId) {
-        return true
-      }
-      if (first < windowStart || first > windowEnd || last > windowEnd) {
-        return false
-      }
-      return session.locationBreakdown.some((entry) => entry.worktreeId === input.worktreeId)
-    })
-
-    if (candidates.length === 0) {
-      return unavailable('no_matching_session', 'No Claude usage session matched this run.')
-    }
-    if (candidates.length > 1) {
-      return unavailable(
-        'ambiguous_session',
-        'Multiple Claude usage sessions matched this run window.'
-      )
-    }
-
-    const session = candidates[0]
-    const scopedLocations = session.locationBreakdown.filter(
-      (entry) => entry.worktreeId === input.worktreeId
-    )
-    const locations = scopedLocations.length > 0 ? scopedLocations : session.locationBreakdown
-    const totals = locations.reduce(
-      (acc, entry) => {
-        acc.turns += entry.turnCount
-        acc.inputTokens += entry.inputTokens
-        acc.outputTokens += entry.outputTokens
-        acc.cacheReadTokens += entry.cacheReadTokens
-        acc.cacheWriteTokens += entry.cacheWriteTokens
-        return acc
-      },
-      {
-        turns: 0,
-        inputTokens: 0,
-        outputTokens: 0,
-        cacheReadTokens: 0,
-        cacheWriteTokens: 0
-      }
-    )
-    const estimatedCostUsd = estimateCostUsd(
-      session.model,
-      totals.inputTokens,
-      totals.outputTokens,
-      totals.cacheReadTokens,
-      totals.cacheWriteTokens
-    )
-
-    return {
-      status: 'known',
-      provider: 'claude',
-      model: session.model,
-      inputTokens: totals.inputTokens,
-      outputTokens: totals.outputTokens,
-      cacheReadTokens: totals.cacheReadTokens,
-      cacheWriteTokens: totals.cacheWriteTokens,
-      reasoningOutputTokens: null,
-      totalTokens:
-        totals.inputTokens + totals.outputTokens + totals.cacheReadTokens + totals.cacheWriteTokens,
-      estimatedCostUsd,
-      estimatedCostSource: estimatedCostUsd === null ? null : 'api_equivalent',
-      providerSessionId: session.sessionId,
-      // Why: Yiru terminal tab ids and Claude usage session ids are different
-      // systems today, so attribution is intentionally limited to one local
-      // provider session in the run's worktree/time window.
-      attribution: 'provider_session_time_window',
-      collectedAt,
-      unavailableReason: null,
-      unavailableMessage: null
-    }
-  }
-
-  private getFilteredDaily(scope: ClaudeUsageScope, range: ClaudeUsageRange) {
-    const cutoff = getRangeCutoff(range)
-    return this.state.dailyAggregates.filter((entry) => {
-      if (cutoff && entry.day < cutoff) {
-        return false
-      }
-      if (scope === 'yiru' && entry.worktreeId === null) {
-        return false
-      }
-      return true
-    })
-  }
-
-  private getFilteredSessions(scope: ClaudeUsageScope, range: ClaudeUsageRange) {
-    const cutoff = getRangeCutoff(range)
-    return this.state.sessions.filter((session) => {
-      // Why: daily aggregates use local calendar days, so session filtering has
-      // to use the same conversion or the sessions table/counts can disagree
-      // with the chart around UTC day boundaries.
-      const day = getLocalDay(session.lastTimestamp)
-      if (!day) {
-        return false
-      }
-      if (cutoff && day < cutoff) {
-        return false
-      }
-      if (scope === 'yiru') {
-        return session.locationBreakdown.some((entry) => entry.worktreeId !== null)
-      }
-      return true
-    })
-  }
-
-  private shouldForceAutomationUsageScan(completedAt: number): boolean {
-    const { lastScanCompletedAt, lastScanError } = this.state.scanState
-    // Why: attribution needs a scan after the run finishes, but repeated
-    // lookups after that point should not rescan all Claude transcript history.
-    return (
-      Boolean(lastScanError) || lastScanCompletedAt === null || lastScanCompletedAt < completedAt
-    )
+    })()
+    await this.scanPromise
   }
 
   private async getCurrentWorktreeFingerprint(): Promise<string> {
     const repos = this.store.getRepos()
-    const worktreesByRepo = loadKnownUsageWorktreesByRepo(this.store, repos)
-    return getWorktreeFingerprint(worktreesByRepo)
+    return getClaudeUsageWorktreeFingerprint(loadKnownUsageWorktreesByRepo(this.store, repos))
+  }
+
+  private persist(): void {
+    writeClaudeUsageState(this.state)
   }
 }

@@ -88,8 +88,6 @@ export function DiffCommentCard({
     if (!el) {
       return
     }
-    el.style.height = 'auto'
-    el.style.height = `${Math.min(el.scrollHeight, 240)}px`
     el.focus()
     el.setSelectionRange(el.value.length, el.value.length)
     onContentResizeRef.current?.()
@@ -259,9 +257,6 @@ export function DiffCommentCard({
               value={draft}
               onChange={(e) => {
                 setDraft(e.target.value)
-                const el = e.currentTarget
-                el.style.height = 'auto'
-                el.style.height = `${Math.min(el.scrollHeight, 240)}px`
                 onContentResizeRef.current?.()
               }}
               onKeyDown={(e) => {

@@ -19,7 +19,7 @@ export const FEATURE_WALL_WORKFLOWS: readonly FeatureWallWorkflow[] = [
   {
     id: 'agents-orchestration',
     title: 'Agents',
-    lede: 'Run several agents at once, track their progress, and let automation drive Yiru when it helps.',
+    lede: 'Run several agents at once and track their progress across independent workspaces.',
     telemetryTileId: 'tile-04'
   },
   {

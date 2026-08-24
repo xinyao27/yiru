@@ -13,9 +13,7 @@ import {
 export const siteLinks = {
   // Why: these artifact names are version-free so /releases/latest/download/<name> is a
   // permalink to the current build — no metadata fetch, and one click instead of picking from
-  // 17 assets. This used to be a release contract checked by
-  // apps/desktop/scripts/verify-release-required-assets.mjs; that script has been deleted, so
-  // keeping these names in sync with the actual release artifact names is manual now.
+  // 17 assets. Keep these names aligned with the release artifact names.
   // Linux and Windows names live alongside these when they are offered.
   downloadMac: `${YIRU_GITHUB_LATEST_RELEASE_DOWNLOAD_URL}/yiru-macos-arm64.dmg`,
   downloadMacIntel: `${YIRU_GITHUB_LATEST_RELEASE_DOWNLOAD_URL}/yiru-macos-x64.dmg`,

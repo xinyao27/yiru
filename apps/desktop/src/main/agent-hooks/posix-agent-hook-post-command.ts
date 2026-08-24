@@ -1,6 +1,6 @@
 import type { AgentHookSource } from '~shared/agent/hook-relay'
 
-// Why: split out of installer-utils.ts to stay under the 300-line budget —
+// Why: split out of managed-hook-commands.ts to stay under the 300-line budget —
 // this type plus buildPosixAgentHookCurlPostCommand pushed that file over.
 // Copilot's hookEventName, Grok's grokHome, and Antigravity's hook_event_name
 // are the only provider-specific fields the POSIX curl block has ever needed.
@@ -10,7 +10,7 @@ function formatPosixHookDataUrlencodeField(field: PosixAgentHookExtraField): str
   return `  --data-urlencode "${field.key}=${field.value}" \\`
 }
 
-// Why: mirrors buildWindowsAgentHookCurlPostCommand (installer-utils.ts) — same
+// Why: mirrors buildWindowsAgentHookCurlPostCommand (managed-hook-commands.ts) — same
 // wire fields and the same `/hook/<source>` endpoint routing, so POSIX and
 // Windows hook posts diverge only in shell syntax. `fieldsBeforeEnv` lands
 // before `env` (Copilot's hookEventName); `fieldsAfterVersion` lands after

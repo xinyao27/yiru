@@ -1,7 +1,7 @@
 import { resolveRuntimePath } from '@yiru/workbench-model/platform'
 import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
 
-import { FLOATING_TERMINAL_WORKTREE_ID, FRIDAY_WORKTREE_ID } from '../constants'
+import { isEphemeralSetupTerminalWorktreeId } from '../ephemeral-setup-terminal-worktree-id'
 import { parseWorkspaceKey } from '../workspace/scope'
 
 export type TerminalStartupCwdMissingDirFallback = {
@@ -50,10 +50,7 @@ export function resolveTerminalStartupCwdForWorkspace(args: {
   if (!args.requestedCwd || args.requestedCwd.trim().length === 0) {
     return undefined
   }
-  if (
-    args.workspaceId === FLOATING_TERMINAL_WORKTREE_ID ||
-    args.workspaceId === FRIDAY_WORKTREE_ID
-  ) {
+  if (args.workspaceId !== undefined && isEphemeralSetupTerminalWorktreeId(args.workspaceId)) {
     // Why: app-owned synthetic workspaces have no filesystem-shaped worktree
     // id; their callers already resolve and constrain the requested local cwd.
     return args.requestedCwd

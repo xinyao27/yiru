@@ -2,7 +2,7 @@ import { spawn } from 'node:child_process'
 import { readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-import { getIcaclsExePath, resolveCurrentWindowsIdentity } from '../win32-utils'
+import { getIcaclsExePath, resolveCurrentWindowsIdentity } from '../windows-host'
 
 /**
  * Startup ACL grant for the win32 userData tree.
@@ -26,7 +26,7 @@ import { getIcaclsExePath, resolveCurrentWindowsIdentity } from '../win32-utils'
  *   matches, startup performs zero icacls spawns.
  * - When absent, the grant runs asynchronously (never blocks window creation):
  *   userData root + immediate children (`<userData>\*`). Per-write EPERM
- *   retries in codex-accounts/fs-utils and agent-hooks/installer-utils remain
+ *   retries in codex-accounts/atomic-file-operations and agent-hooks/managed-hook-commands remain
  *   the backstop during the brief async window, exactly as they already were
  *   for the (common) case where the old synchronous walk timed out.
  */

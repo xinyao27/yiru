@@ -2,14 +2,6 @@ import { useEffect } from 'react'
 import { toast } from 'sonner'
 import { showTerminalShortcutCaptureNotification } from '~renderer/components/terminal-workspace/terminal-shortcut-capture-notification'
 import { translate } from '~renderer/i18n/i18n'
-import {
-  createFloatingWorkspaceBrowserTab,
-  createFloatingWorkspaceMarkdownTab,
-  createFloatingWorkspaceTerminalTab,
-  handleEmptyFloatingWorkspacePanelCloseShortcut,
-  isFloatingWorkspacePanelFocused,
-  switchFloatingWorkspaceTab
-} from '~renderer/lib/floating-workspace-terminal-actions'
 import { useAppStore } from '~renderer/store'
 import { keybindingMatchesAction, type KeybindingActionId } from '~shared/keybindings'
 import type { TuiAgent } from '~shared/types'
@@ -36,10 +28,6 @@ type TerminalWorkspaceKeyboardShortcutsArgs = {
   handleCloseAllFiles: () => void
 }
 
-// Why: every workspace-level chord (new tab/agent/browser, close, tab
-// switching) must first check whether the floating workspace panel has
-// focus and route there instead, so all of them share one keydown listener
-// rather than each re-deriving that routing decision.
 export function useTerminalWorkspaceKeyboardShortcuts({
   handleNewTab,
   handleNewAgentTab,
@@ -70,7 +58,6 @@ export function useTerminalWorkspaceKeyboardShortcuts({
         : 'linux'
     const onKeyDown = (e: KeyboardEvent): void => {
       const context = getKeybindingContext(e.target)
-      const floatingWorkspaceFocused = isFloatingWorkspacePanelFocused()
       const matchShortcut = (actionId: KeybindingActionId): boolean =>
         keybindingMatchesAction(actionId, e, shortcutPlatform, keybindings, {
           context,
@@ -93,10 +80,6 @@ export function useTerminalWorkspaceKeyboardShortcuts({
       if (!e.repeat && matchShortcut('tab.newTerminal')) {
         e.preventDefault()
         notifyTerminalCapture('tab.newTerminal')
-        if (floatingWorkspaceFocused) {
-          void createFloatingWorkspaceTerminalTab(useAppStore.getState())
-          return
-        }
         handleNewTab()
         return
       }
@@ -139,10 +122,6 @@ export function useTerminalWorkspaceKeyboardShortcuts({
       if (!e.repeat && matchShortcut('tab.newBrowser')) {
         e.preventDefault()
         notifyTerminalCapture('tab.newBrowser')
-        if (floatingWorkspaceFocused) {
-          void createFloatingWorkspaceBrowserTab(useAppStore.getState())
-          return
-        }
         handleNewBrowserTab()
         return
       }
@@ -151,9 +130,7 @@ export function useTerminalWorkspaceKeyboardShortcuts({
       if (!e.repeat && mobileEmulatorEnabled && matchShortcut('tab.newSimulator')) {
         e.preventDefault()
         notifyTerminalCapture('tab.newSimulator')
-        if (!floatingWorkspaceFocused) {
-          handleNewSimulatorTab()
-        }
+        handleNewSimulatorTab()
         return
       }
 
@@ -195,24 +172,7 @@ export function useTerminalWorkspaceKeyboardShortcuts({
       if (!e.repeat && matchShortcut('tab.newMarkdown')) {
         e.preventDefault()
         notifyTerminalCapture('tab.newMarkdown')
-        if (floatingWorkspaceFocused) {
-          void createFloatingWorkspaceMarkdownTab(useAppStore.getState()).catch((err) => {
-            toast.error(
-              err instanceof Error
-                ? err.message
-                : translate(
-                    'auto.components.Terminal.f0600556b3',
-                    'Failed to create untitled markdown file.'
-                  )
-            )
-          })
-          return
-        }
         void handleNewFile()
-        return
-      }
-
-      if (handleEmptyFloatingWorkspacePanelCloseShortcut(e, shortcutPlatform, keybindings)) {
         return
       }
 
@@ -304,13 +264,7 @@ export function useTerminalWorkspaceKeyboardShortcuts({
               ? 'tab.nextSameType'
               : 'tab.previousSameType'
         )
-        if (floatingWorkspaceFocused) {
-          switchFloatingWorkspaceTab(
-            useAppStore.getState(),
-            switchAllTypesDirection ?? switchSameTypeDirection ?? 1,
-            switchAllTypesDirection !== null ? 'all-types' : 'same-type'
-          )
-        } else if (switchAllTypesDirection !== null) {
+        if (switchAllTypesDirection !== null) {
           handleSwitchTabAcrossAllTypes(switchAllTypesDirection)
         } else {
           handleSwitchTab(switchSameTypeDirection ?? 1)
@@ -344,11 +298,7 @@ export function useTerminalWorkspaceKeyboardShortcuts({
         e.preventDefault()
         e.stopPropagation()
         e.stopImmediatePropagation()
-        if (floatingWorkspaceFocused) {
-          switchFloatingWorkspaceTab(useAppStore.getState(), terminalTabDirection, 'terminal')
-        } else {
-          handleSwitchTerminalTab(terminalTabDirection)
-        }
+        handleSwitchTerminalTab(terminalTabDirection)
       }
     }
     window.addEventListener('keydown', onKeyDown, { capture: true })

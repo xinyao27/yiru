@@ -2,7 +2,6 @@ export type ShellWindowUiActions = {
   syncTrafficLights: (zoomFactor: number) => void
   setMarkdownEditorFocused: (focused: boolean) => void
   setTerminalInputFocused: (focused: boolean) => void
-  setFloatingTerminalInputFocused: (focused: boolean) => void
   setShortcutRecorderFocused: (focused: boolean) => void
   minimize: () => void
   maximize: () => void

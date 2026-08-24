@@ -12,7 +12,7 @@ import {
   resolveExternalEditorLaunchSpec,
   type ExternalEditorLaunchSpec
 } from '../external-editor-launch'
-import { getSpawnArgsForWindows } from '../win32-utils'
+import { getSpawnArgsForWindows } from '../windows-host'
 
 export { EXTERNAL_EDITOR_CLI_COMMAND }
 

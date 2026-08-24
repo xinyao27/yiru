@@ -6,7 +6,7 @@ import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 import { iterateProcessOutputLines } from '~shared/process-output-field-scanner'
 import type { GitPushTarget } from '~shared/types'
 
-import { parseGitHubOwnerRepo } from '../github/gh-utils'
+import { parseGitHubOwnerRepo } from '../github/github-cli'
 import type { Store } from '../persistence'
 
 export type GitRemoteExec = (

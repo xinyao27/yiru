@@ -101,12 +101,6 @@ catalog:
   rolldown: ^1.2.4
   serve-sim: ~0.1.45
   shadcn: ^4.18.0
-  sherpa-onnx: 1.12.37
-  sherpa-onnx-darwin-arm64: 1.12.37
-  sherpa-onnx-darwin-x64: 1.12.37
-  sherpa-onnx-linux-arm64: 1.12.37
-  sherpa-onnx-linux-x64: 1.12.37
-  sherpa-onnx-win-x64: 1.12.37
   sonner: ^2.0.8
   tailwindcss: ^4.3.3
   taze: ^21.1.0
@@ -152,7 +146,6 @@ allowBuilds:
   esbuild: true
   msw: false
   node-pty: true
-  sherpa-onnx: true
   workerd: true
 overrides:
   vite: 'catalog:'

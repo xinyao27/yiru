@@ -1,5 +1,5 @@
 import { translate } from '~renderer/i18n/i18n'
-import { findWorktreeById } from '~renderer/store/slices/worktree-helpers'
+import { findWorktreeById } from '~renderer/store/slices/worktree-state'
 import type { AppState } from '~renderer/store/types'
 import type { CoworkingOwnerWorktreeSharing } from '~shared/coworking/ipc-contract'
 import type { Worktree } from '~shared/types'

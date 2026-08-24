@@ -31,6 +31,25 @@ const EMPTY_GIT_STATUS_ENTRIES: readonly unknown[] = []
 // ?? []` would otherwise allocate a fresh empty array each render.
 const EMPTY_GIT_GRAPH_ITEMS: readonly GitHistoryItem[] = []
 
+type GitGraphFindCursor = {
+  query: string
+  index: number
+}
+
+function waitForGitGraphLoad(worktreeId: string): Promise<void> {
+  return new Promise((resolve) => {
+    let unsubscribe = (): void => undefined
+    const completeWhenReady = (state: ReturnType<typeof useAppStore.getState>): void => {
+      if (state.gitGraphByWorktree[worktreeId]?.status !== 'loading-more') {
+        unsubscribe()
+        resolve()
+      }
+    }
+    unsubscribe = useAppStore.subscribe(completeWhenReady)
+    completeWhenReady(useAppStore.getState())
+  })
+}
+
 export function useGitGraphView({ worktreeId, tabId }: { worktreeId: string; tabId: string }) {
   const worktree = useWorktreeById(worktreeId)
   const repo = useRepoById(worktree?.repoId ?? null)
@@ -86,11 +105,20 @@ export function useGitGraphView({ worktreeId, tabId }: { worktreeId: string; tab
 
   const [findOpen, setFindOpen] = useState(false)
   const [findQuery, setFindQuery] = useState(EMPTY_GIT_GRAPH_FIND_STATE.query)
-  const [findIndex, setFindIndex] = useState(EMPTY_GIT_GRAPH_FIND_STATE.currentIndex)
+  const [findCursor, setFindCursor] = useState<GitGraphFindCursor>({
+    query: EMPTY_GIT_GRAPH_FIND_STATE.query,
+    index: EMPTY_GIT_GRAPH_FIND_STATE.currentIndex
+  })
   const findMatchIds = useMemo(
     () => computeGitGraphFindMatches(items, findQuery),
     [items, findQuery]
   )
+  const findIndex =
+    findMatchIds.length === 0
+      ? -1
+      : findCursor.query === findQuery
+        ? Math.min(findCursor.index, findMatchIds.length - 1)
+        : 0
   const currentFindCommitId = findIndex >= 0 ? (findMatchIds[findIndex] ?? null) : null
   const findMatchIdSet = useMemo(() => new Set(findMatchIds), [findMatchIds])
 
@@ -101,10 +129,6 @@ export function useGitGraphView({ worktreeId, tabId }: { worktreeId: string; tab
   }, [])
 
   useEffect(() => {
-    setFindIndex(findMatchIds.length > 0 ? 0 : -1)
-  }, [findMatchIds])
-
-  useEffect(() => {
     if (currentFindCommitId) {
       scrollToCommit(currentFindCommitId)
     }
@@ -112,9 +136,12 @@ export function useGitGraphView({ worktreeId, tabId }: { worktreeId: string; tab
 
   const stepFind = useCallback(
     (direction: 1 | -1) => {
-      setFindIndex((current) => stepGitGraphFindIndex(findMatchIds.length, current, direction))
+      setFindCursor({
+        query: findQuery,
+        index: stepGitGraphFindIndex(findMatchIds.length, findIndex, direction)
+      })
     },
-    [findMatchIds.length]
+    [findIndex, findMatchIds.length, findQuery]
   )
 
   const closeFind = useCallback(() => {
@@ -181,57 +208,57 @@ export function useGitGraphView({ worktreeId, tabId }: { worktreeId: string; tab
   // loaded page yet (skip-based paging). Rather than silently do nothing,
   // keep loading further pages until the parent shows up in `items` or there
   // is no more history / the attempt bound below is hit.
-  const [pendingParentId, setPendingParentId] = useState<string | null>(null)
-  const parentLoadAttemptsRef = useRef(0)
+  const parentSelectionRunRef = useRef(0)
 
   const selectParent = useCallback(
     (parentId: string) => {
-      if (items.some((item) => item.id === parentId)) {
-        setExpandedCommitId(parentId)
-        scrollToCommit(parentId)
-        return
-      }
-      parentLoadAttemptsRef.current = 0
-      setPendingParentId(parentId)
+      const runId = parentSelectionRunRef.current + 1
+      parentSelectionRunRef.current = runId
+      void (async () => {
+        let attempts = 0
+        while (parentSelectionRunRef.current === runId) {
+          const state = useAppStore.getState()
+          const currentGraph = state.gitGraphByWorktree[worktreeId] ?? EMPTY_GIT_GRAPH_STATE
+          const currentRefIds = state.gitGraphSelectedRefIdsByWorktree[worktreeId] ?? null
+          const currentItems = filterGitGraphItemsByBranches(
+            currentGraph.result?.items ?? EMPTY_GIT_GRAPH_ITEMS,
+            currentRefIds
+          )
+          if (currentItems.some((item) => item.id === parentId)) {
+            setExpandedCommitId(parentId)
+            requestAnimationFrame(() => {
+              if (parentSelectionRunRef.current === runId) {
+                scrollToCommit(parentId)
+              }
+            })
+            return
+          }
+          if (currentGraph.status === 'loading-more') {
+            await waitForGitGraphLoad(worktreeId)
+            continue
+          }
+          if (!currentGraph.result?.hasMore || attempts >= MAX_PARENT_LOAD_MORE_ATTEMPTS) {
+            toast.error(
+              translate(
+                'auto.components.workspace-panel.git-graph.useGitGraphView.a1b2c3d4e6',
+                'Could not find that commit in the loaded history'
+              )
+            )
+            return
+          }
+          attempts += 1
+          await loadMoreGitGraph(worktreeId)
+        }
+      })()
     },
-    [items, scrollToCommit]
+    [loadMoreGitGraph, scrollToCommit, worktreeId]
   )
 
   useEffect(() => {
-    if (!pendingParentId) {
-      return
+    return () => {
+      parentSelectionRunRef.current += 1
     }
-    if (items.some((item) => item.id === pendingParentId)) {
-      setExpandedCommitId(pendingParentId)
-      scrollToCommit(pendingParentId)
-      setPendingParentId(null)
-      return
-    }
-    if (isLoadingMore) {
-      return
-    }
-    const attemptsExhausted = parentLoadAttemptsRef.current >= MAX_PARENT_LOAD_MORE_ATTEMPTS
-    if (!graphState.result?.hasMore || attemptsExhausted) {
-      toast.error(
-        translate(
-          'auto.components.workspace-panel.git-graph.useGitGraphView.a1b2c3d4e6',
-          'Could not find that commit in the loaded history'
-        )
-      )
-      setPendingParentId(null)
-      return
-    }
-    parentLoadAttemptsRef.current += 1
-    void loadMoreGitGraph(worktreeId)
-  }, [
-    pendingParentId,
-    items,
-    isLoadingMore,
-    graphState.result?.hasMore,
-    loadMoreGitGraph,
-    worktreeId,
-    scrollToCommit
-  ])
+  }, [worktreeId])
 
   const handleColumnWidthsChange = useCallback(
     (widths: GitGraphColumnWidths) => setGitGraphColumnWidths(worktreeId, widths),

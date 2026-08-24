@@ -10,8 +10,8 @@ import { Badge } from '~renderer/components/ui/badge'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
 
-import { PullRequestIcon, checksLabel } from './helpers'
 import type { WorktreeCardPrDisplay } from './pr-display'
+import { PullRequestIcon, checksLabel } from './presentation'
 
 function MetadataStatusBadge({
   label,

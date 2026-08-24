@@ -47,13 +47,6 @@ type SortableTabProps = {
   onToggleExpand: (tabId: string) => void
   dragData: TabDragItemData
   dropIndicator?: DropIndicator
-  /** True when this tab is an agent terminal that can switch to the native chat
-   *  view. Surfaces the "Switch view" item in the tab context menu. */
-  canToggleViewMode?: boolean
-  /** True when the tab is currently showing the native chat view. */
-  isChatView?: boolean
-  /** Toggle the tab between terminal and native chat view. */
-  onToggleViewMode?: () => void
 }
 
 export const CLOSE_ALL_CONTEXT_MENUS_EVENT = 'yiru-close-all-context-menus'
@@ -76,10 +69,7 @@ export default function SortableTab({
   onTogglePin,
   onToggleExpand,
   dragData,
-  dropIndicator,
-  canToggleViewMode = false,
-  isChatView = false,
-  onToggleViewMode
+  dropIndicator
 }: SortableTabProps): React.JSX.Element {
   // Why: agent-completion unread is pane-keyed and exists even when the
   // experimental generic terminal-attention setting is off. Collapse both
@@ -431,9 +421,6 @@ export default function SortableTab({
         onRenameOpen={handleRenameOpen}
         onSetTabColor={onSetTabColor}
         onTogglePin={onTogglePin}
-        canToggleViewMode={canToggleViewMode}
-        isChatView={isChatView}
-        onToggleViewMode={onToggleViewMode}
       />
     </ContextMenu>
   )

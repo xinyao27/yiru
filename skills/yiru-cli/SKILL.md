@@ -2,7 +2,7 @@
 name: yiru-cli
 description: >-
   Use the public `yiru` CLI to operate Yiru-managed worktrees, folder contexts,
-  terminals, repos, automations, worktree comments, and the browser embedded
+  terminals, repos, worktree comments, and the browser embedded
   inside the Yiru app. Use when the user says "$yiru-cli", "use yiru cli",
   "Yiru worktree", "child worktree", "cardStatus", "spawn codex/claude in a worktree",
   "read/wait/send Yiru terminal", "terminal send", "full handoff", "handover",
@@ -208,26 +208,6 @@ Terminal rules:
 - For long output, use cursor reads. After a limited tail preview, page from `oldestCursor`; after a cursor read, continue with `nextCursor` while `limited` is true and `nextCursor !== latestCursor`.
 - `--direction horizontal` splits left/right. `--direction vertical` splits top/bottom.
 
-## Automations
-
-An automation is a scheduled Yiru prompt run by a chosen provider against either a repo-created worktree or an existing workspace.
-
-```text
-YIRU automations list --json
-YIRU automations show <automationId> --json
-YIRU automations create --name "Daily review" --trigger daily --time 09:00 --prompt "Review open changes" --provider codex --repo id:<repoId> --json
-YIRU automations create --name "Weekday triage" --trigger "0 9 * * 1-5" --prompt "Triage alerts" --provider claude --repo path:/abs/repo --disabled --json
-YIRU automations create --name "Inbox digest" --trigger hourly --prompt "Summarize unread mail" --provider codex --workspace active --reuse-session --json
-YIRU automations edit <automationId> --trigger weekdays --time 09:30 --fresh-session --json
-YIRU automations run <automationId> --json
-YIRU automations runs --id <automationId> --json
-YIRU automations remove <automationId> --json
-```
-
-Schedules accept `hourly`, `daily`, `weekdays`, `weekly`, 5-field cron, or RRULE. Use `--time <HH:MM>` with `daily`/`weekdays`/`weekly`, and `--day <0-6>` only with `weekly` where Sunday is `0`.
-
-Use `--repo <selector>` for a new worktree per run, or `--workspace <selector>` / `--workspace-mode existing` for an existing Yiru worktree. `--repo` and `--workspace` are mutually exclusive. Use `--reuse-session` only for existing-workspace automations; if the previous terminal is gone, Yiru falls back to a fresh session. Prefer `--disabled` while testing setup.
-
 ## Built-In Browser
 
 The built-in browser is Yiru's embedded browser tab surface, scoped to Yiru worktrees; it is not Chrome/Safari or desktop app UI.
@@ -299,7 +279,7 @@ Common recoveries:
 
 ## Next Action
 
-Confirm `YIRU status --json` unless already checked this turn, then choose the narrowest command for the job: `worktree ps/current/create`, `terminal list/read/wait/send`, `automations list`, or built-in browser `snapshot`.
+Confirm `YIRU status --json` unless already checked this turn, then choose the narrowest command for the job: `worktree ps/current/create`, `terminal list/read/wait/send`, or built-in browser `snapshot`.
 
 ## Mobile Emulator (iOS Simulator via serve-sim)
 

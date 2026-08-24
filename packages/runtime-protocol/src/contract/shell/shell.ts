@@ -25,18 +25,14 @@ import {
   shellUpdaterContract
 } from './system.js'
 import {
-  shellAutomationsContract,
   shellCrashReportsContract,
   shellDeveloperPermissionsContract,
   shellDiagnosticsContract,
   shellExportContract,
   shellFeedbackContract,
-  shellFridayContract,
   shellLocalhostWorktreeLabelsContract,
   shellMiniMaxCredentialsContract,
   shellMobileContract,
-  shellPetContract,
-  shellSpeechContract,
   shellTelemetryContract
 } from './tools.js'
 import { shellUiContract } from './ui.js'
@@ -47,13 +43,11 @@ export const shellContract = {
   aiVault: shellAiVaultContract,
   app: shellAppContract,
   browser: shellBrowserContract,
-  automations: shellAutomationsContract,
   crashReports: shellCrashReportsContract,
   developerPermissions: shellDeveloperPermissionsContract,
   diagnostics: shellDiagnosticsContract,
   export: shellExportContract,
   feedback: shellFeedbackContract,
-  friday: shellFridayContract,
   keybindings: shellKeybindingsContract,
   events: shellEventsContract,
   files: shellFilesContract,
@@ -63,14 +57,12 @@ export const shellContract = {
   minimaxCredentials: shellMiniMaxCredentialsContract,
   mobile: shellMobileContract,
   platform: shellPlatformContract,
-  pet: shellPetContract,
   repoHost: shellRepoHostContract,
   runtime: shellRuntimeStateContract,
   runtimeEnvironments: shellRuntimeEnvironmentsContract,
   settings: shellSettingsContract,
   session: shellSessionContract,
   starNag: shellStarNagContract,
-  speech: shellSpeechContract,
   telemetry: shellTelemetryContract,
   onboarding: shellOnboardingContract,
   cache: shellCacheContract,

@@ -1,5 +1,6 @@
 import type React from 'react'
-import { useCallback, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
 import { ContextMenu, ContextMenuTrigger } from '~renderer/components/ui/context-menu'
@@ -117,6 +118,7 @@ export function GitGraphCommitTable({
   onLoadMore: () => void
 }): React.JSX.Element {
   const resizeSessionRef = useRef<ResizeSession | null>(null)
+  const [isResizing, setIsResizing] = useState(false)
 
   const handlePointerMove = useCallback(
     (event: PointerEvent): void => {
@@ -135,9 +137,9 @@ export function GitGraphCommitTable({
 
   const stopResize = useCallback((): void => {
     resizeSessionRef.current = null
+    setIsResizing(false)
     document.removeEventListener('pointermove', handlePointerMove)
     document.removeEventListener('pointerup', stopResize)
-    document.body.style.cursor = ''
   }, [handlePointerMove])
 
   const startResize = useCallback(
@@ -148,12 +150,20 @@ export function GitGraphCommitTable({
         startX: event.clientX,
         startWidth: columnWidths[columnId]
       }
-      document.body.style.cursor = 'col-resize'
+      setIsResizing(true)
       document.addEventListener('pointermove', handlePointerMove)
       document.addEventListener('pointerup', stopResize)
     },
     [columnWidths, handlePointerMove, stopResize]
   )
+
+  useEffect(() => {
+    return () => {
+      resizeSessionRef.current = null
+      document.removeEventListener('pointermove', handlePointerMove)
+      document.removeEventListener('pointerup', stopResize)
+    }
+  }, [handlePointerMove, stopResize])
 
   const graphColumnWidth = layout?.width ?? GIT_GRAPH_DEFAULT_GRID.offsetX * 2
 
@@ -170,6 +180,15 @@ export function GitGraphCommitTable({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
+      {isResizing
+        ? createPortal(
+            <div
+              className="fixed inset-0 z-[2147483647] cursor-col-resize bg-transparent"
+              aria-hidden
+            />,
+            document.body
+          )
+        : null}
       <div className="border-border bg-card flex h-7 shrink-0 items-stretch border-b">
         <div className="shrink-0" style={{ width: graphColumnWidth }} aria-hidden="true" />
         {(['description', 'date', 'author', 'commit'] as const).map((columnId) => (

@@ -59,8 +59,7 @@ const localWorktreeClient: WorktreeWorkspaceApi = {
         : {}),
       parentWorkspace: args.parentWorkspace,
       workspaceStatus: args.workspaceStatus,
-      manualOrder: args.manualOrder,
-      automationProvenanceRequest: args.automationProvenanceRequest
+      manualOrder: args.manualOrder
     }),
   onCreateProgress: (callback) =>
     onLocalHostProgressEvent('worktreeCreateProgress', ({ creationId, phase }) =>

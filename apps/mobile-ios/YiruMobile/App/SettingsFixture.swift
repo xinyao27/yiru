@@ -3,7 +3,6 @@
 
     private enum SettingsFixtureRoute: Hashable {
         case appearance
-        case chat
         case terminal
         case browser
         case notifications
@@ -27,7 +26,6 @@
                 SettingsView(
                     credentialCleanupRepository: dependencies.credentialCleanupRepository,
                     showAppearance: { path.append(.appearance) },
-                    showChat: { path.append(.chat) },
                     showTerminal: { path.append(.terminal) },
                     showBrowser: { path.append(.browser) },
                     showNotifications: { path.append(.notifications) },
@@ -44,7 +42,6 @@
 
         private static var initialPath: [SettingsFixtureRoute] {
             let arguments = ProcessInfo.processInfo.arguments
-            if arguments.contains("--chat-settings-fixture") { return [.chat] }
             if arguments.contains("--terminal-settings-fixture") { return [.terminal] }
             if arguments.contains("--browser-settings-fixture") { return [.browser] }
             if arguments.contains("--notification-settings-fixture") { return [.notifications] }
@@ -59,8 +56,6 @@
             switch route {
             case .appearance:
                 AppearanceSettingsView(preferences: dependencies.settingsPreferences)
-            case .chat:
-                ChatSettingsView(preferences: dependencies.settingsPreferences)
             case .terminal:
                 TerminalSettingsView(
                     preferences: dependencies.terminalPreferences,

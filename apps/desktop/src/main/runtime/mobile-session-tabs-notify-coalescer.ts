@@ -8,7 +8,7 @@
 // immediate flush so they still propagate promptly.
 
 // Trailing-edge window: title/status is latency-sensitive UI, so this is
-// tighter than files.watch's 150ms but looser than native-chat's 40ms.
+// tighter than files.watch's 150ms while still coalescing rapid title updates.
 const SESSION_TABS_FLUSH_MS = 50
 // Force a flush after this long even under sustained churn, so a title that
 // keeps spinning never starves the emit indefinitely.

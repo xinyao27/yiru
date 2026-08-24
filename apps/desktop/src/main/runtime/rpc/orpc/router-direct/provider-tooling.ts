@@ -41,29 +41,13 @@ import {
 } from '~main/runtime/rpc/methods/skill-manage'
 import { handleSkillManageEventsSubscribe } from '~main/runtime/rpc/methods/skill-manage-events'
 import { discoverRuntimeSkills } from '~main/runtime/rpc/methods/skills'
-import {
-  handleSpeechDictationCancel,
-  handleSpeechDictationChunk,
-  handleSpeechDictationFinish,
-  handleSpeechDictationSetup,
-  handleSpeechDictationStart,
-  handleSpeechModelsDelete,
-  handleSpeechModelsDownload,
-  handleSpeechModelsList,
-  handleSpeechOpenAiKeyClear,
-  handleSpeechOpenAiKeyGetStatus,
-  handleSpeechOpenAiKeySave
-} from '~main/runtime/rpc/methods/speech'
-import { handleSpeechEventsSubscribe } from '~main/runtime/rpc/methods/speech-events'
 
 import { runtimeImplementation } from '../access-middleware'
 import { wireRuntimeMethod } from '../registered-method'
 import { wireRuntimeStream } from '../registered-stream'
 
-// Why: accounts, rateLimitResume, skills, and speech are provider-facing
-// tooling — coding-agent provider accounts and their rate limits, agent
-// skill packages, and on-device speech models — grouped apart from
-// workspace/session state they get invoked from.
+// Why: accounts, rateLimitResume, and skills are provider-facing tooling,
+// grouped apart from workspace/session state they get invoked from.
 export const providerToolingRuntimeHandlers = {
   accounts: {
     listCachedClaude: runtimeImplementation.accounts.listCachedClaude.handler(
@@ -190,52 +174,6 @@ export const providerToolingRuntimeHandlers = {
           wireRuntimeStream('skills.manage.events.subscribe', handleSkillManageEventsSubscribe)
         )
       }
-    }
-  },
-  speech: {
-    models: {
-      list: runtimeImplementation.speech.models.list.handler(
-        wireRuntimeMethod('speech.models.list', handleSpeechModelsList)
-      ),
-      download: runtimeImplementation.speech.models.download.handler(
-        wireRuntimeMethod('speech.models.download', handleSpeechModelsDownload)
-      ),
-      delete: runtimeImplementation.speech.models.delete.handler(
-        wireRuntimeMethod('speech.models.delete', handleSpeechModelsDelete)
-      )
-    },
-    openaiKey: {
-      getStatus: runtimeImplementation.speech.openaiKey.getStatus.handler(
-        wireRuntimeMethod('speech.openaiKey.getStatus', handleSpeechOpenAiKeyGetStatus)
-      ),
-      save: runtimeImplementation.speech.openaiKey.save.handler(
-        wireRuntimeMethod('speech.openaiKey.save', handleSpeechOpenAiKeySave)
-      ),
-      clear: runtimeImplementation.speech.openaiKey.clear.handler(
-        wireRuntimeMethod('speech.openaiKey.clear', handleSpeechOpenAiKeyClear)
-      )
-    },
-    dictation: {
-      setup: runtimeImplementation.speech.dictation.setup.handler(
-        wireRuntimeMethod('speech.dictation.setup', handleSpeechDictationSetup)
-      ),
-      start: runtimeImplementation.speech.dictation.start.handler(
-        wireRuntimeMethod('speech.dictation.start', handleSpeechDictationStart)
-      ),
-      chunk: runtimeImplementation.speech.dictation.chunk.handler(
-        wireRuntimeMethod('speech.dictation.chunk', handleSpeechDictationChunk)
-      ),
-      finish: runtimeImplementation.speech.dictation.finish.handler(
-        wireRuntimeMethod('speech.dictation.finish', handleSpeechDictationFinish)
-      ),
-      cancel: runtimeImplementation.speech.dictation.cancel.handler(
-        wireRuntimeMethod('speech.dictation.cancel', handleSpeechDictationCancel)
-      )
-    },
-    events: {
-      subscribe: runtimeImplementation.speech.events.subscribe.handler(
-        wireRuntimeStream('speech.events.subscribe', handleSpeechEventsSubscribe)
-      )
     }
   }
 } as const

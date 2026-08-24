@@ -1,346 +1,171 @@
-import { type JSX, useEffect, useRef } from 'react'
+import { useEffect, useState } from 'react'
+import type { JSX } from 'react'
+import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { translate } from '~renderer/i18n/i18n'
+import { cn } from '~renderer/lib/class-names'
 
 import { ReviewNotesVisualStyles } from './review-animated-visual-notes-styles'
 import {
   ClaudeLogo,
   CodexLogo,
   CornerEnterIcon,
-  CursorIcon,
   MessageIcon,
   NOTE_TARGETS,
-  PlusIcon,
   ReviewAnimatedVisualButton,
   SendIcon
 } from './review-animated-visual-shared'
 import { ReviewDiffRows } from './review-notes-diff-rows'
-import { resetTerminal, runTerminalPhase } from './review-notes-terminal-phase'
-import { ReviewNotesTerminalTail } from './review-notes-terminal-tail'
 
-// Why: this visual mirrors the imperative-DOM pattern used by
-// EditorAnimatedVisual / WorkbenchAnimatedVisual so the loop reads like the
-// reference HTML mock (docs/feature-wall-review-tile-mock.html) instead of
-// fighting React reconciliation across timed beats.
-export function ReviewNotesAnimatedVisual(props: { reducedMotion: boolean }): JSX.Element {
-  const { reducedMotion } = props
-  const rootRef = useRef<HTMLDivElement | null>(null)
+type NotesPhase =
+  | 'idle'
+  | 'composing'
+  | 'saved'
+  | 'send-menu'
+  | 'terminal-started'
+  | 'terminal-loaded'
+  | 'terminal-acknowledged'
+  | 'terminal-fixing'
+
+type NotesStoryboard = {
+  phase: NotesPhase
+  activeTargetIndex: number
+  visibleNoteCount: number
+  draft: string
+}
+
+const EMPTY_NOTES_STORYBOARD: NotesStoryboard = {
+  phase: 'idle',
+  activeTargetIndex: 0,
+  visibleNoteCount: 0,
+  draft: ''
+}
+const COMPLETE_NOTES_STORYBOARD: NotesStoryboard = {
+  phase: 'terminal-fixing',
+  activeTargetIndex: NOTE_TARGETS.length - 1,
+  visibleNoteCount: NOTE_TARGETS.length,
+  draft: ''
+}
+
+function useAnimatedNotesStoryboard(): NotesStoryboard {
+  const [storyboard, setStoryboard] = useState(EMPTY_NOTES_STORYBOARD)
 
   useEffect(() => {
-    if (reducedMotion) {
-      return
-    }
-    const root = rootRef.current
-    if (!root) {
-      return
-    }
-
-    const cursorMaybe = root.querySelector<HTMLDivElement>('[data-cursor]')
-    const popoverMaybe = root.querySelector<HTMLDivElement>('[data-note-popover]')
-    const popInputMaybe = root.querySelector<HTMLDivElement>('[data-pop-input]')
-    const popLineMaybe = root.querySelector<HTMLSpanElement>('[data-pop-line]')
-    const addBtnMaybe = root.querySelector<HTMLButtonElement>('[data-add-note-btn]')
-    const sendChipMaybe = root.querySelector<HTMLSpanElement>('[data-ai-notes-chip]')
-    const sendBtnMaybe = root.querySelector<HTMLButtonElement>('[data-send-btn]')
-    const sendMenuMaybe = root.querySelector<HTMLDivElement>('[data-send-menu]')
-    const aiCountMaybe = root.querySelector<HTMLSpanElement>('[data-ai-count]')
-    const diffBodyMaybe = root.querySelector<HTMLDivElement>('[data-diff-body]')
-    const diffScrollMaybe = root.querySelector<HTMLDivElement>('[data-diffscroll]')
-    const termMaybe = root.querySelector<HTMLDivElement>('[data-term]')
-    if (
-      !cursorMaybe ||
-      !popoverMaybe ||
-      !popInputMaybe ||
-      !popLineMaybe ||
-      !addBtnMaybe ||
-      !sendChipMaybe ||
-      !sendBtnMaybe ||
-      !sendMenuMaybe ||
-      !aiCountMaybe ||
-      !diffBodyMaybe ||
-      !diffScrollMaybe ||
-      !termMaybe
-    ) {
-      return
-    }
-    // Re-bind to non-null locals so closures across `await` keep their
-    // narrowed types — TS flow analysis drops narrowing through async
-    // boundaries.
-    const rootEl: HTMLDivElement = root
-    const cursor: HTMLDivElement = cursorMaybe
-    const popover: HTMLDivElement = popoverMaybe
-    const popInput: HTMLDivElement = popInputMaybe
-    const popLine: HTMLSpanElement = popLineMaybe
-    const addBtn: HTMLButtonElement = addBtnMaybe
-    const sendChip: HTMLSpanElement = sendChipMaybe
-    const sendBtn: HTMLButtonElement = sendBtnMaybe
-    const sendMenu: HTMLDivElement = sendMenuMaybe
-    const aiCount: HTMLSpanElement = aiCountMaybe
-    const diffBody: HTMLDivElement = diffBodyMaybe
-    const diffScroll: HTMLDivElement = diffScrollMaybe
-    const term: HTMLDivElement = termMaybe
-
     let cancelled = false
-    const timers: number[] = []
-    const wait = (ms: number): Promise<void> =>
+    const timers = new Set<number>()
+    const wait = (durationMs: number): Promise<void> =>
       new Promise((resolve) => {
-        const id = window.setTimeout(() => resolve(), ms)
-        timers.push(id)
+        const timer = window.setTimeout(() => {
+          timers.delete(timer)
+          resolve()
+        }, durationMs)
+        timers.add(timer)
       })
-
-    function findDiffRow(hunk: number, lineIdx: number): HTMLDivElement | null {
-      return rootEl.querySelector<HTMLDivElement>(
-        `[data-hunk-idx="${hunk}"][data-line-idx="${lineIdx}"]`
-      )
-    }
-
-    function moveCursor(anchor: HTMLElement, ox = 0, oy = 0): void {
-      const pr = rootEl.getBoundingClientRect()
-      const ar = anchor.getBoundingClientRect()
-      cursor.style.transform = `translate(${ar.left - pr.left + ox}px, ${ar.top - pr.top + oy}px)`
-    }
-
-    function anchorAddBtnTo(row: HTMLElement): void {
-      const dr = diffBody.getBoundingClientRect()
-      const rr = row.getBoundingClientRect()
-      const x = rr.left - dr.left + 4
-      const y = rr.top - dr.top + (rr.height - 18) / 2
-      addBtn.style.left = `${x}px`
-      addBtn.style.top = `${y}px`
-      addBtn.classList.add('is-visible')
-    }
-
-    function anchorPopoverTo(row: HTMLElement): void {
-      const dr = diffBody.getBoundingClientRect()
-      const rr = row.getBoundingClientRect()
-      const popH = popover.offsetHeight || 110
-      const spaceBelow = dr.bottom - rr.bottom
-      const flipAbove = spaceBelow < popH + 12
-      if (flipAbove) {
-        const yAbove = rr.top - dr.top - popH - 4
-        popover.style.top = `${Math.max(8, yAbove)}px`
-      } else {
-        popover.style.top = `${rr.bottom - dr.top + 4}px`
+    const update = (patch: Partial<NotesStoryboard>): void => {
+      if (!cancelled) {
+        setStoryboard((current) => ({ ...current, ...patch }))
       }
     }
-
-    async function fillPopoverInput(text: string): Promise<void> {
-      // Why: clear the popover input to a bare typed-span before the cursor
-      // lands so the placeholder doesn't flash between the click and the
-      // generated note text. Mock: docs/feature-wall-review-tile-mock.html.
-      popInput.innerHTML = '<span data-pop-typed></span><span class="ravs-caret"></span>'
-      const typed = popInput.querySelector<HTMLSpanElement>('[data-pop-typed]')
-      if (!typed) {
-        return
-      }
-      for (const ch of text) {
-        if (cancelled) {
-          return
-        }
-        typed.textContent = (typed.textContent ?? '') + ch
+    const typeDraft = async (text: string): Promise<void> => {
+      for (let index = 1; index <= text.length && !cancelled; index += 1) {
+        update({ draft: text.slice(0, index) })
         await wait(18)
       }
     }
-
-    function showSavedNote(target: { hunk: number; lineIdx: number; body: string }): void {
-      const slot = rootEl.querySelector<HTMLDivElement>(`[data-hunk-slot="${target.hunk}"]`)
-      if (!slot) {
-        return
-      }
-      const lineEl = slot.querySelector<HTMLSpanElement>('[data-slot-line]')
-      const bodyEl = slot.querySelector<HTMLSpanElement>('[data-slot-body]')
-      const row = findDiffRow(target.hunk, target.lineIdx)
-      if (row && lineEl) {
-        const lns = row.querySelectorAll('.ravs-ln')
-        lineEl.textContent = lns[1]?.textContent ?? ''
-      }
-      if (bodyEl) {
-        bodyEl.textContent = target.body
-      }
-      slot.classList.add('is-visible')
-    }
-
-    function resetState(): void {
-      rootEl.querySelectorAll('[data-hunk-slot]').forEach((el) => el.classList.remove('is-visible'))
-      popover.classList.remove('is-visible')
-      // Empty the input so no placeholder flashes between resets.
-      popInput.innerHTML = ''
-      addBtn.classList.remove('is-visible')
-      sendChip.classList.remove('is-visible')
-      sendMenu.classList.remove('is-visible')
-      sendBtn.classList.remove('is-flash')
-      aiCount.textContent = '0'
-      diffScroll.classList.remove('is-hidden')
-      term.classList.remove('is-visible')
-      resetTerminal(term)
-      cursor.classList.remove('is-visible', 'is-clicking')
-      cursor.style.transition = 'none'
-      cursor.style.transform = 'translate(-30px, 220px)'
-      void cursor.offsetWidth
-      cursor.style.transition = ''
-    }
-
-    function getNewLineNo(target: { hunk: number; lineIdx: number }): string {
-      const row = findDiffRow(target.hunk, target.lineIdx)
-      const lns = row?.querySelectorAll('.ravs-ln')
-      return lns?.[1]?.textContent ?? '?'
-    }
-
-    async function loop(): Promise<void> {
+    const play = async (): Promise<void> => {
       while (!cancelled) {
-        resetState()
+        setStoryboard(EMPTY_NOTES_STORYBOARD)
         await wait(520)
-        if (cancelled) {
-          return
-        }
-
-        for (let i = 0; i < NOTE_TARGETS.length; i++) {
-          const target = NOTE_TARGETS[i]
-          const row = findDiffRow(target.hunk, target.lineIdx)
-          if (!row) {
-            continue
-          }
-
-          cursor.classList.add('is-visible')
-          moveCursor(row, -8, 4)
-          anchorAddBtnTo(row)
-          await wait(700)
-          if (cancelled) {
-            return
-          }
-
-          moveCursor(addBtn, 4, 4)
+        for (let index = 0; index < NOTE_TARGETS.length && !cancelled; index += 1) {
+          update({ phase: 'composing', activeTargetIndex: index, draft: '' })
+          await typeDraft(NOTE_TARGETS[index].body)
           await wait(360)
-          if (cancelled) {
-            return
-          }
-
-          cursor.classList.add('is-clicking')
-          await wait(220)
-          if (cancelled) {
-            return
-          }
-          cursor.classList.remove('is-clicking')
-          addBtn.classList.remove('is-visible')
-          const lns = row.querySelectorAll('.ravs-ln')
-          popLine.textContent = lns[1]?.textContent ?? ''
-          // Empty the input before showing the popover so no placeholder
-          // flashes between the click and the typed text.
-          popInput.innerHTML = ''
-          anchorPopoverTo(row)
-          popover.classList.add('is-visible')
-          moveCursor(popInput, 12, 18)
-          await wait(280)
-          if (cancelled) {
-            return
-          }
-
-          await fillPopoverInput(target.body)
-          if (cancelled) {
-            return
-          }
-          await wait(360)
-          if (cancelled) {
-            return
-          }
-
-          const addPopBtn = popover.querySelector<HTMLButtonElement>('.ravs-pop-btn.is-add')
-          if (addPopBtn) {
-            moveCursor(addPopBtn, 30, 10)
-          }
-          await wait(280)
-          if (cancelled) {
-            return
-          }
-          cursor.classList.add('is-clicking')
-          await wait(200)
-          if (cancelled) {
-            return
-          }
-          cursor.classList.remove('is-clicking')
-          popover.classList.remove('is-visible')
-          showSavedNote(target)
-          aiCount.textContent = String(i + 1)
-          if (!sendChip.classList.contains('is-visible')) {
-            sendChip.classList.add('is-visible')
-          }
+          update({ phase: 'saved', visibleNoteCount: index + 1, draft: '' })
           await wait(620)
-          if (cancelled) {
-            return
-          }
         }
-
-        moveCursor(sendBtn, 6, 8)
-        await wait(420)
-        if (cancelled) {
-          return
-        }
-        cursor.classList.add('is-clicking')
-        await wait(200)
-        if (cancelled) {
-          return
-        }
-        cursor.classList.remove('is-clicking')
-        sendMenu.classList.add('is-visible')
-        await wait(420)
-        if (cancelled) {
-          return
-        }
-
-        const claudeRow = sendMenu.querySelector<HTMLDivElement>('[data-send-row="claude"]')
-        if (claudeRow) {
-          claudeRow.classList.add('is-hot')
-          moveCursor(claudeRow, 24, 10)
-        }
-        await wait(540)
-        if (cancelled) {
-          return
-        }
-        cursor.classList.add('is-clicking')
-        await wait(220)
-        if (cancelled) {
-          return
-        }
-        cursor.classList.remove('is-clicking')
-        if (claudeRow) {
-          claudeRow.classList.remove('is-hot')
-        }
-        sendMenu.classList.remove('is-visible')
-        sendBtn.classList.add('is-flash')
-        await wait(560)
-        if (cancelled) {
-          return
-        }
-        sendBtn.classList.remove('is-flash')
-        cursor.classList.remove('is-visible')
-
-        await runTerminalPhase({
-          term,
-          diffScroll,
-          wait,
-          isCancelled: () => cancelled,
-          getNewLineNo
-        })
-        if (cancelled) {
-          return
-        }
-
-        await wait(800)
-        if (cancelled) {
-          return
-        }
+        update({ phase: 'send-menu' })
+        await wait(960)
+        update({ phase: 'terminal-started' })
+        await wait(520)
+        update({ phase: 'terminal-loaded' })
+        await wait(520)
+        update({ phase: 'terminal-acknowledged' })
+        await wait(720)
+        update({ phase: 'terminal-fixing' })
+        await wait(4000)
       }
     }
-
-    void loop()
-
+    void play()
     return () => {
       cancelled = true
-      timers.forEach((t) => window.clearTimeout(t))
+      for (const timer of timers) {
+        window.clearTimeout(timer)
+      }
     }
-  }, [reducedMotion])
+  }, [])
+
+  return storyboard
+}
+
+function TerminalStoryboard({ phase }: { phase: NotesPhase }): JSX.Element {
+  const showLoaded = ['terminal-loaded', 'terminal-acknowledged', 'terminal-fixing'].includes(phase)
+  const showAcknowledged = ['terminal-acknowledged', 'terminal-fixing'].includes(phase)
+  return (
+    <div className="ravs-term-body">
+      <div className="ravs-term-line ravs-term-muted">
+        {translate(
+          'auto.components.feature.wall.ReviewNotesAnimatedVisual.sessionStarted',
+          '● Claude Code session started'
+        )}
+      </div>
+      {showLoaded ? (
+        <div className="ravs-term-line">
+          <span className="ravs-term-check">✓</span>
+          <span className="ravs-term-muted">
+            {translate(
+              'auto.components.feature.wall.ReviewNotesAnimatedVisual.notesLoaded',
+              'Loaded {{value0}} review notes from Yiru',
+              { value0: NOTE_TARGETS.length }
+            )}
+          </span>
+        </div>
+      ) : null}
+      {showAcknowledged
+        ? NOTE_TARGETS.map((target, index) => (
+            <div className="ravs-term-line" key={target.summary}>
+              <span className="ravs-term-glyph">•</span>
+              <span className="ravs-term-muted">
+                {translate(
+                  'auto.components.feature.wall.ReviewNotesAnimatedVisual.reviewNote',
+                  'Review note {{value0}}:',
+                  { value0: index + 1 }
+                )}
+              </span>{' '}
+              {target.summary}
+            </div>
+          ))
+        : null}
+      {phase === 'terminal-fixing' ? (
+        <div className="ravs-term-line">
+          <LoadingIndicator className="text-foreground mr-1.5 size-2 align-[-1px]" />
+          <span className="ravs-term-muted">
+            {translate(
+              'auto.components.feature.wall.ReviewNotesAnimatedVisual.fixingIssues',
+              'Fixing both issues...'
+            )}
+          </span>
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
+function ReviewNotesFrame({ storyboard }: { storyboard: NotesStoryboard }): JSX.Element {
+  const terminalVisible = storyboard.phase.startsWith('terminal-')
+  const composing = storyboard.phase === 'composing'
+  const sendMenuVisible = storyboard.phase === 'send-menu'
 
   return (
-    <div ref={rootRef} className="ravs-window" data-page="notes">
+    <div className="ravs-window" data-page="notes">
       <div className="ravs-difftoolbar">
         <span className="ravs-diff-path">
           {translate(
@@ -348,45 +173,39 @@ export function ReviewNotesAnimatedVisual(props: { reducedMotion: boolean }): JS
             'src/server/migrate.ts (diff)'
           )}
         </span>
-        <span className="ravs-ai-chip" data-ai-notes-chip>
+        <span className={cn('ravs-ai-chip', storyboard.visibleNoteCount > 0 && 'is-visible')}>
           <ReviewAnimatedVisualButton className="ravs-count-btn">
             <MessageIcon />{' '}
             {translate(
               'auto.components.feature.wall.ReviewNotesAnimatedVisual.5cb213f967',
               'AI notes'
             )}{' '}
-            <span className="ravs-count-num" data-ai-count>
-              0
-            </span>
+            <span className="ravs-count-num">{storyboard.visibleNoteCount}</span>
           </ReviewAnimatedVisualButton>
-          <ReviewAnimatedVisualButton className="ravs-send-btn" data-send-btn>
+          <ReviewAnimatedVisualButton className="ravs-send-btn">
             <SendIcon />
-            <span className="ravs-send-glow" />
           </ReviewAnimatedVisualButton>
         </span>
       </div>
-      <div className="ravs-diffbody" data-diff-body>
-        <div className="ravs-diffscroll" data-diffscroll>
-          <ReviewDiffRows />
+      <div className="ravs-diffbody">
+        <div className={cn('ravs-diffscroll', terminalVisible && 'is-hidden')}>
+          <ReviewDiffRows visibleNoteCount={storyboard.visibleNoteCount} />
         </div>
-        <div className="ravs-term" data-term aria-hidden>
-          <div className="ravs-term-body">
-            <div className="ravs-term-line ravs-term-muted" data-term-line-start />
-            <div className="ravs-term-line" data-term-line-loaded />
-            <div className="ravs-term-line" data-term-line-ack-0 />
-            <div className="ravs-term-line" data-term-line-ack-1 />
-            <ReviewNotesTerminalTail />
-          </div>
+        <div className={cn('ravs-term', terminalVisible && 'is-visible')} aria-hidden>
+          <TerminalStoryboard phase={storyboard.phase} />
         </div>
-        <ReviewAnimatedVisualButton className="ravs-add-note-btn" data-add-note-btn aria-hidden>
-          <PlusIcon />
-        </ReviewAnimatedVisualButton>
-        <div className="ravs-popover" data-note-popover>
+        <div
+          className={cn('ravs-popover', composing && 'is-visible')}
+          style={{ top: storyboard.activeTargetIndex === 0 ? 82 : 170 }}
+        >
           <div className="ravs-pop-label">
-            {translate('auto.components.feature.wall.ReviewNotesAnimatedVisual.a7a89d8f94', 'Line')}
-            <span data-pop-line>?</span>
+            {translate('auto.components.feature.wall.ReviewNotesAnimatedVisual.a7a89d8f94', 'Line')}{' '}
+            {storyboard.activeTargetIndex + 1}
           </div>
-          <div className="ravs-pop-input" data-pop-input />
+          <div className="ravs-pop-input">
+            {storyboard.draft}
+            {composing ? <span className="ravs-caret" /> : null}
+          </div>
           <div className="ravs-pop-footer">
             <ReviewAnimatedVisualButton className="ravs-pop-btn is-cancel">
               {translate(
@@ -403,14 +222,14 @@ export function ReviewNotesAnimatedVisual(props: { reducedMotion: boolean }): JS
             </ReviewAnimatedVisualButton>
           </div>
         </div>
-        <div className="ravs-send-menu" data-send-menu>
+        <div className={cn('ravs-send-menu', sendMenuVisible && 'is-visible')}>
           <div className="ravs-menu-section">
             {translate(
               'auto.components.feature.wall.ReviewNotesAnimatedVisual.294aaff104',
               'Send notes to'
             )}
           </div>
-          <div className="ravs-menu-row" data-send-row="claude">
+          <div className={cn('ravs-menu-row', sendMenuVisible && 'is-hot')}>
             <ClaudeLogo />
             <span>
               {translate(
@@ -419,7 +238,7 @@ export function ReviewNotesAnimatedVisual(props: { reducedMotion: boolean }): JS
               )}
             </span>
           </div>
-          <div className="ravs-menu-row" data-send-row="codex">
+          <div className="ravs-menu-row">
             <CodexLogo />
             <span>
               {translate(
@@ -430,11 +249,23 @@ export function ReviewNotesAnimatedVisual(props: { reducedMotion: boolean }): JS
           </div>
         </div>
       </div>
-      <div className="ravs-cursor" data-cursor>
-        <CursorIcon />
-        <span className="ravs-ripple" />
-      </div>
       <ReviewNotesVisualStyles />
     </div>
+  )
+}
+
+function AnimatedReviewNotes(): JSX.Element {
+  return <ReviewNotesFrame storyboard={useAnimatedNotesStoryboard()} />
+}
+
+export function ReviewNotesAnimatedVisual({
+  reducedMotion
+}: {
+  reducedMotion: boolean
+}): JSX.Element {
+  return reducedMotion ? (
+    <ReviewNotesFrame storyboard={COMPLETE_NOTES_STORYBOARD} />
+  ) : (
+    <AnimatedReviewNotes />
   )
 }

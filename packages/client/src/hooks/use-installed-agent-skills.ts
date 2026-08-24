@@ -282,8 +282,8 @@ export function useInstalledAgentSkillNames(
 
   useEffect(() => {
     if (installed && candidateSkillNames.some(isOrchestrationSkillName)) {
-      // Why: older floating-workspace education still keys off this marker; any
-      // surface that detects the orchestration skill should satisfy setup.
+      // Why: every orchestration entry point shares this setup marker, so
+      // detecting the installed skill on one surface satisfies the others.
       markOrchestrationSetupComplete()
     }
   }, [candidateSkillNames, installed])

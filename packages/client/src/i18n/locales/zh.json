@@ -84,7 +84,6 @@
     "toggleLeftSidebar": "显示/隐藏左侧边栏",
     "openExplorerTab": "打开资源管理器标签页",
     "showStatusBar": "显示状态栏",
-    "showAutomationsButton": "显示自动化按钮",
     "showMobileButton": "显示 Yiru 手机端按钮",
     "showTitlebarAppName": "显示标题栏应用名称",
     "view": "查看",
@@ -123,8 +122,6 @@
       "722d03aa62": "崩溃报告对话框出现错误。",
       "8a023cea1f": "重试状态栏以重新挂载其控件。",
       "2e8ff36f94": "状态栏出现错误。",
-      "7cbfbf622f": "重试浮动工作区或关闭并重新打开它。",
-      "1b3024bcd6": "浮动工作区遇到错误。",
       "8d1e160ed1": "重试侧边栏或切换标签页以重新加载此面板。",
       "ed6b168d00": "右侧边栏出现错误。",
       "03a14f6b5b": "重试此页面，或导航到其他 Yiru 界面。",
@@ -152,7 +149,6 @@
       "d54e66004c": "终端",
       "9f0152563e": "移动端",
       "62ca9895a7": "空间",
-      "3443924e91": "自动化",
       "ca6c6eece7": "技能",
       "1b9d9d065f": "设置",
       "c184e056de": "切换右侧边栏 ({{value0}})",
@@ -227,6 +223,33 @@
             "07f788de83": "WebSocket"
           }
         }
+      },
+      "WebRuntimeConnectionPage": {
+        "checkingTitle": "正在连接 {{machine}}",
+        "offlineTitle": "{{machine}} 已离线",
+        "checkingDescription": "Yiru 正在检查已保存的私密连接，然后打开你的项目。",
+        "offlineDescription": "请在该电脑上启动 Yiru 或其 connect 命令。运行时可用后，此页面会自动重新连接。",
+        "checkingStatus": "正在检查运行时状态…",
+        "savedPairing": "配对信息仍保存在此浏览器中，无需运行新的配对命令。",
+        "retry": "重试",
+        "pairAnother": "配对另一台电脑"
+      },
+      "WebRuntimeStatus": {
+        "title": "Yiru CLI 连接",
+        "notPaired": "未配对",
+        "notPairedLabel": "尚未配对 Yiru CLI",
+        "notPairedDescription": "配对一台电脑，通过其 Yiru CLI 处理 Web 端工作。",
+        "computer": "电脑",
+        "checking": "检查中",
+        "checkingLabel": "正在检查 {{machine}} 上的 Yiru CLI",
+        "checkingDescription": "正在检查已保存的私密连接，然后打开你的项目。",
+        "connected": "已连接",
+        "connectedLabel": "已连接 {{machine}} 上的 Yiru CLI",
+        "connectedDescription": "Web 请求将通过 {{machine}} 上的 Yiru CLI 处理。",
+        "offline": "已离线",
+        "offlineLabel": "{{machine}} 上的 Yiru CLI 已离线",
+        "offlineDescription": "请在 {{machine}} 上启动 Yiru 或其 connect 命令，之后会自动重新连接。",
+        "footer": "Yiru CLI 状态"
       }
     },
     "runtime": {
@@ -420,15 +443,6 @@
           }
         }
       },
-      "floating": {
-        "workspace": {
-          "tab": {
-            "creation": {
-              "f3785eddc2": "新浏览器选项卡"
-            }
-          }
-        }
-      },
       "launch": {
         "agent": {
           "in": {
@@ -441,7 +455,7 @@
           },
           "background": {
             "session": {
-              "4ca0651d56": "您的自动化提示未发送 - 打开工作区并粘贴它。"
+              "4ca0651d56": "代理提示未发送——请打开工作区并粘贴提示。"
             }
           }
         },
@@ -632,12 +646,6 @@
       }
     },
     "hooks": {
-      "useAutomationDispatchEvents": {
-        "59718b120b": "目标工作区不再可用。",
-        "16a21d6413": "SSH 重新连接需要交互式凭据。",
-        "386db94f3e": "目标项目不再可用。",
-        "3ad7d77f57": "目标工作区所在的主机与此自动化运行目标不同。"
-      },
       "useComposerState": {
         "7eb3f44ff7": "所选 Agent 已禁用。创建之前选择启用的 Agent。",
         "b2ead86962": "无法解析 PR 基础引用。",
@@ -699,7 +707,6 @@
         "b11a5a48a2": "主题、缩放、应用程序和终端外观、侧边栏和状态栏。",
         "93d88d20bf": "外观",
         "2d0659f6f0": "全局终端、浏览器和 Markdown 选项卡。",
-        "65b19f5bde": "浮动工作区",
         "3d65d3f1b9": "配置对 Yiru 和编码 Agent 的手机模拟器支持。",
         "1e761cff2b": "手机模拟器",
         "e815fd01bd": "主页、链接路由和会话 cookie。",
@@ -1634,6 +1641,10 @@
             "removedTitle": "SSH 主机已移除",
             "removedBody": "此工作区的 SSH 主机已被移除，无法再连接。请移除工作区以清理 — 远程文件不会受影响。",
             "removeWorkspaceButton": "移除工作区"
+          },
+          "remoteRuntimePtyTransport": {
+            "gone": "远程终端已关闭。",
+            "invalidId": "远程运行时终端 ID 无效。"
           }
         }
       },
@@ -1861,24 +1872,6 @@
       },
       "status": {
         "bar": {
-          "PetStatusSegment": {
-            "3668339495": "删除 {{value0}}",
-            "cd8c6c654c": "宠物设置...",
-            "ed176ad68f": "导入 .codex-pet 包...",
-            "59b5955621": "上传您自己的...",
-            "0608ad02a2": "选择宠物",
-            "b75484a01a": "宠物尺寸",
-            "c6aa805b1b": "像素",
-            "2f7bbaa457": "尺寸",
-            "34c25dfe9c": "宠物",
-            "aec479308a": "宠物菜单",
-            "cef0ab4636": "导入宠物包失败",
-            "2021d4f6db": "Pet 包导入需要完全重启应用（不仅是重新加载）。",
-            "f395c9a685": "导入文件失败",
-            "e6234bcc17": "自定义宠物上传需要完全重启应用（不仅是重新加载）。",
-            "6d0a8cd179": "显示宠物",
-            "1fbc51cc77": "隐藏宠物"
-          },
           "PortsStatusSegment": {
             "4ebf90c12e": "未检测到外部端口",
             "7dac3ecc9d": "外部端口",
@@ -2229,6 +2222,35 @@
             "hostAccessFailed": "Could not request remote host access.",
             "requesting": "Waiting…",
             "useAsHost": "Use as host"
+          },
+          "DesktopRuntimeStatus": {
+            "cli": "Yiru CLI",
+            "checking": "正在检查…",
+            "cliUnavailable": "不可用",
+            "cliUnsupported": "不支持",
+            "cliInstalled": "已安装",
+            "cliNotInstalled": "未安装",
+            "cliNeedsRepair": "需要修复",
+            "title": "Yiru 运行时",
+            "host": "主机",
+            "runtimeChecking": "检查中",
+            "runtimeCheckingLabel": "正在检查 {{host}} 上的 Yiru 运行时",
+            "runtimeCheckingDescription": "正在检查当前执行主机是否就绪。",
+            "runtimeReady": "已就绪",
+            "runtimeReadyLabel": "{{host}} 上的 Yiru 运行时已就绪",
+            "localReadyDescription": "Yiru 可以在这台电脑上执行工作。",
+            "remoteReadyDescription": "Yiru 已连接到所选执行主机。",
+            "version": "版本",
+            "runtimeUnavailable": "不可用",
+            "runtimeUnavailableLabel": "{{host}} 上的 Yiru 运行时不可用",
+            "runtimeUnavailableDescription": "当前执行主机尚未就绪，Yiru 会继续自动检查。",
+            "updateRequired": "需要更新",
+            "updateRequiredLabel": "{{host}} 上的 Yiru 运行时需要更新",
+            "updateRequiredDescription": "使用前，请更新这台电脑或所选主机上的 Yiru。",
+            "thisComputer": "本机"
+          },
+          "YiruRuntimeStatus": {
+            "footer": "Yiru 运行时状态"
           }
         }
       },
@@ -2696,7 +2718,9 @@
           "51001182e3": "空目录",
           "971d85cc84": "作为远程项目打开 · {{value0}}",
           "00c4235c10": "没有匹配“{{value0}}”",
-          "largeInputNoMatches": "没有匹配此长输入的结果"
+          "largeInputNoMatches": "没有匹配此长输入的结果",
+          "previewEmptyDirectory": "{{value0}} 为空",
+          "fileHint": "无法将文件作为项目打开"
         },
         "RemoveFolderDialog": {
           "4dc5b5065b": "移除",
@@ -2771,7 +2795,6 @@
           "0c3395fd32": "搜索工作树和浏览器选项卡",
           "c86d83b5c3": "新建",
           "1b5c41caee": "Yiru 手机端",
-          "f323383e9a": "自动化",
           "d599269755": "从侧边栏隐藏",
           "activity": "活动",
           "skills": "Skills"
@@ -2808,8 +2831,7 @@
         "SidebarWorkspaceFilterSection": {
           "c3fa13dc2e": "隐藏默认分支",
           "ed1611b65b": "隐藏休眠项",
-          "82594419ba": "筛选条件",
-          "automationCreated": "隐藏自动化创建的工作区"
+          "82594419ba": "筛选条件"
         },
         "SidebarWorkspaceOptionsMenu": {
           "cardDisplay": {
@@ -2844,7 +2866,6 @@
           "2d74665a56": "端口",
           "65a9820bd1": "已打开的标签页",
           "219ebf1961": "分支名称",
-          "automation": "自动化",
           "folderPathIdentity": "分支 / 文件夹路径"
         },
         "SshDisconnectedDialog": {
@@ -2891,7 +2912,6 @@
           "0d224eff10": "主工作树",
           "runtimeHostDisconnected": "主机已断开连接",
           "runtimeHostProject": "运行时主机上的项目",
-          "automationCreated": "由自动化创建",
           "branchIdentity": "分支",
           "branchFolderPathIdentity": "分支或文件夹路径",
           "ef18787206": "已排队删除",
@@ -2916,14 +2936,6 @@
           "b22f058067": "在 GitHub 上查看",
           "3ea2702e62": "已链接 {{value0}} #{{value1}}",
           "fe075cb851": "工作区笔记",
-          "automationHeader": "自动化",
-          "openAutomation": "打开自动化",
-          "openAutomationRun": "打开运行",
-          "automationCreated": "由自动化创建",
-          "checkingAutomationAvailability": "正在检查自动化可用性...",
-          "automationMissing": "自动化已不可用。",
-          "automationRunMissing": "运行历史已不可用。",
-          "automationAvailabilityUnavailable": "无法检查自动化可用性。",
           "copyLink": "复制链接",
           "copyLinkSuccess": "{{value0}} 已复制",
           "copyLinkFailure": "复制链接失败",
@@ -4004,8 +4016,6 @@
           "61d842eca0": "在侧边栏中显示 Yiru 手机端 快捷方式。它仍然可以从工具箱中获取。",
           "9da1020447": "显示 Yiru 手机端按钮",
           "5db6ba961f": "在左侧边栏顶部显示 Yiru 手机端按钮。",
-          "fa882a3e6b": "在左侧边栏顶部显示“自动化”按钮。",
-          "511f270ebb": "显示自动化按钮",
           "dc29f3cc0d": "侧边栏",
           "ea943d0db0": "选择窗口底部显示的指示器。您还可以右键单击状态栏进行相同的切换。",
           "3e4175e5c6": "状态栏",
@@ -4346,7 +4356,7 @@
           "f24f31a884": "屏幕录制",
           "550cfa3750": "网络摄像头捕获和摄像头驱动的本地测试应用程序。",
           "e5b5f3d6b9": "相机",
-          "cc8151d9fa": "语音输入、转录、录音、sox、ffmpeg 和 Whisper CLI。",
+          "cc8151d9fa": "音频录制、转写、媒体采集以及 sox、ffmpeg 和 Whisper CLI。",
           "16381e040a": "麦克风",
           "dac08ec03e": "处理中..."
         },
@@ -4357,9 +4367,6 @@
           "a20d5ea365": "在终端响铃或 Agent 完成事件后保持窗格级突出显示可见，直到您与该窗格交互。我们在调整信号时进行实验。",
           "ec897e8d89": "终端关注",
           "88b7613afb": "终端响铃和 Agent 完成事件的持久窗格突出显示。",
-          "ca2219fe5e": "显示固定在右下角的小动画宠物。从状态栏宠物菜单中选择一个角色（Claudino、OpenCode、Gremlin）或上传您自己的 PNG、APNG、GIF、WebP、JPG 或 SVG。随时从同一菜单隐藏它，而不禁用此设置。",
-          "dd6f0a1d45": "宠物",
-          "0e89a574ae": "右下角漂浮的动画宠物。",
           "agentHibernation": {
             "copy": "在配置的空闲时间后停止后台 Agent 终端，并在你再次打开时恢复受支持的会话。Agent 睡眠会保留由 Yiru 启动的 Agent 的启动选项。手动启动的 Agent 可能会使用当前的 Yiru 默认值恢复。我们仍在调校安全模型，此功能为实验性功能。",
             "description": "在配置的空闲时间后停止后台 Agent 终端，并在你再次打开时恢复受支持的会话。",
@@ -4368,31 +4375,7 @@
             "idleMinutesSuffix": "分钟",
             "title": "Agent 睡眠",
             "toggleLabel": "切换 Agent 睡眠"
-          },
-          "nativeChat": {
-            "title": "原生聊天",
-            "description": "预览受支持的 Agent 终端会话的桌面聊天界面。",
-            "copy": "添加可从受支持的 Agent 终端窗格切换的原生聊天视图。在我们调整记录保真度、流式传输和终端一致性期间，此功能仍处于实验阶段。",
-            "toggleLabel": "切换原生聊天",
-            "defaultTitle": "默认视图",
-            "defaultCopy": "选择如何打开受支持 Agent 的新终端标签页。",
-            "defaultViewLabel": "默认原生聊天视图",
-            "defaultViewTerminal": "终端聊天",
-            "defaultViewNative": "原生聊天"
           }
-        },
-        "FloatingWorkspacePane": {
-          "aeaf76fda9": "状态栏",
-          "9fb225f2d7": "浮动按钮",
-          "3c900e26e5": "无论切换显示在何处，键盘快捷键都有效。",
-          "5e5a8da236": "切换按钮位置",
-          "505001823e": "选择浮动工作区目录",
-          "81afb79785": "新的浮动终端选项卡从这里开始。 Markdown 笔记保存在 Yiru 应用程序拥有的浮动工作区中。",
-          "12aa09f10c": "终端目录",
-          "41eb95f7f0": "显示浮动工作区按钮和面板。",
-          "5136813663": "启用浮动工作区",
-          "37df688d6f": "启用浮动工作区并选择新选项卡的开始位置。",
-          "1f67f39384": "浮动工作区"
         },
         "AgentCacheTimerSection": {
           "05de84a104": "1小时",
@@ -4547,9 +4530,6 @@
         "GeneralWorkspaceSettingsSection": {
           "3d538a98f7": "从工作区的“打开方式”菜单中选择可用的应用程序。",
           "008f92085f": "在应用程序中打开",
-          "824b98a0d9": "在删除自动化及其运行历史记录之前显示确认信息。",
-          "ea98373cd8": "删除自动化之前询问",
-          "d2dd2ca2e3": "在删除自动化及其运行历史记录之前显示确认对话框。",
           "28bc3d085e": "从上下文菜单中删除工作区之前显示确认信息。失败的删除仍然会出现强制删除后备。",
           "9f380934cf": "删除工作区之前询问",
           "5734db82af": "删除工作区之前显示确认对话框。",
@@ -5327,7 +5307,15 @@
           "updatingServers": "正在更新主机…",
           "yiruVersion": "Yiru v{{value0}}",
           "versionUnavailable": "Yiru 版本不可用",
-          "updateServer": "更新"
+          "updateServer": "更新",
+          "switchLocalFailed": "无法切换到本地桌面。请修复问题后重试。",
+          "disconnectFailed": "无法断开与此 Coworking 主机的连接。请修复问题后重试。",
+          "removeFailed": "移除运行时环境失败。",
+          "hostDisconnectFailed": "断开主机连接失败。",
+          "hostConnectFailed": "连接主机失败。",
+          "hostSwitchFailed": "无法切换主机。请修复问题后重试。",
+          "hostSwitchError": "切换主机失败。",
+          "coworkingHostFallback": "Coworking 主机"
         },
         "RuntimePairingGeneratedUrlRows": {
           "0495f68959": "复制 {{value0}}"
@@ -5392,7 +5380,6 @@
           "6d1a27e193": "主题、缩放、应用程序和终端外观、侧边栏和状态栏。",
           "2b4474780a": "外观",
           "3d9adfe6a5": "全局终端、浏览器和 Markdown 选项卡。",
-          "3eb22a3ada": "浮动工作区",
           "01f9d36292": "配置对 Yiru 和编码 Agent 的手机模拟器支持。",
           "f75daf1002": "手机模拟器",
           "ad9788036f": "主页、链接路由和会话 cookie。",
@@ -6067,10 +6054,6 @@
             "682293cadf": "在左侧边栏顶部显示 Yiru 手机端按钮。",
             "1de96ec8a6": "显示 Yiru 手机端按钮",
             "4c920ab2d1": "日程",
-            "58f4e22fa2": "自动化",
-            "b186f3cefb": "自动化",
-            "ae13a0d340": "在左侧边栏顶部显示“自动化”按钮。",
-            "caa27e1a8e": "显示自动化按钮",
             "2ee4810f38": "GitHub",
             "a895d0f938": "品牌",
             "51f957ce39": "姓名",
@@ -6399,7 +6382,7 @@
               "af122938a3": "语音",
               "259b829b84": "相机",
               "ed7c12bdb4": "麦克风",
-              "6eca1636b7": "允许语音、转录、网络摄像头和媒体捕获工具。",
+              "6eca1636b7": "允许音频录制、转写、摄像头和媒体采集工具。",
               "302c0c42f9": "麦克风和摄像头",
               "4e225e7c56": "开发者工具",
               "6db4fca386": "麦科斯",
@@ -6441,9 +6424,6 @@
             "9f5609bfb8": "覆盖",
             "2a33975d72": "吉祥物",
             "b54cea709b": "伙伴",
-            "051203d37c": "宠物",
-            "6b5a56ac35": "右下角漂浮的动画宠物。",
-            "87d99e634b": "宠物",
             "agentHibernation": {
               "agent": "Agent",
               "agents": "Agent",
@@ -6452,32 +6432,6 @@
               "sleep": "睡眠",
               "terminal": "终端",
               "title": "Agent 睡眠"
-            },
-            "nativeChat": {
-              "title": "原生聊天",
-              "description": "预览受支持的 Agent 终端会话的桌面聊天界面。",
-              "grok": "grok"
-            }
-          }
-        },
-        "floating": {
-          "workspace": {
-            "search": {
-              "94f4d013c8": "状态栏",
-              "a452146574": "切换按钮",
-              "6765b85e48": "启动目录",
-              "a38bfc3f77": "快速面板",
-              "52db6e3baf": "笔记",
-              "156ffeee08": "笔记",
-              "884e5e6132": "markdown",
-              "49db74a92d": "浏览器",
-              "6410fe83d8": "终端",
-              "2b5efa55c9": "全局的",
-              "ebeedb2f6a": "快捷终端",
-              "6f183fa1b9": "浮动码头",
-              "a08e482f6d": "浮动工作区",
-              "b96b5ee6cf": "启用浮动工作区，选择新选项卡的开始位置，然后选择切换按钮的显示位置。",
-              "b2b60e7163": "浮动工作区"
             }
           }
         },
@@ -6595,10 +6549,7 @@
             "7e9b556873": "跳过",
             "ca86dd6e27": "对话",
             "9f8558233a": "确认",
-            "7edf4f69e2": "自动化",
             "84c67d0108": "删除",
-            "a0c44061ee": "在删除自动化及其运行历史记录之前显示确认对话框。",
-            "d0a65b27fd": "删除自动化之前询问",
             "df10666259": "工作树",
             "ae98c9cf36": "删除工作区之前显示确认对话框。",
             "913242091d": "删除工作区之前询问",
@@ -9039,15 +8990,6 @@
           }
         }
       },
-      "pet": {
-        "pet": {
-          "models": {
-            "7433516faf": "格雷姆林",
-            "a84d5677ff": "OpenCode",
-            "2528586aa7": "克劳迪诺"
-          }
-        }
-      },
       "onboarding": {
         "AgentStep": {
           "e6a369bd04": "热门 Agent",
@@ -9477,61 +9419,6 @@
           }
         }
       },
-      "floating": {
-        "terminal": {
-          "FloatingTerminalIconContextMenu": {
-            "8e7d775287": "隐藏浮动工作区",
-            "763f5fa2c1": "手机到浮动按钮",
-            "0ee79e0674": "移至状态栏"
-          },
-          "FloatingTerminalOrchestrationDialog": {
-            "f726054620": "使 Agent 能够通过 Yiru 传递上下文并协调工作。",
-            "1cd3f8af64": "编排技能",
-            "6f0aed26b8": "安装 Yiru CLI 和编排技能，以便 Agent 可以通过 Yiru 进行协调。",
-            "05d7aabc20": "未安装",
-            "630c0ac8c8": "已安装",
-            "dfd021ce46": "检查中...",
-            "543f325a14": "启用编排"
-          },
-          "FloatingTerminalPanel": {
-            "fc1042e92b": "最小化",
-            "8b07759314": "新浏览器",
-            "88ffb502e5": "打开 Markdown 笔记",
-            "629528690b": "新的 Markdown 笔记",
-            "3215fc73e9": "新终端",
-            "da508bd7f5": "保存",
-            "918c2139f3": "不保存",
-            "e7bf09d4d4": "取消",
-            "690b6fb98a": "未保存的更改",
-            "bbc177f98f": "启用",
-            "adc281394d": "关闭",
-            "8cf80db43b": "设置 Yiru CLI 和 Agent 技能，以便 Agent 可以通过 Yiru 进行协调。",
-            "2a3c5ddf5e": "启用编排",
-            "d6b563ae24": "正在加载编辑器...",
-            "8b14ba6c17": "新浏览器选项卡",
-            "b085fb58b5": "该文件有未保存的更改。",
-            "5ddc688c52": "“{{value0}}”有未保存的更改。您想在关闭前保存吗？",
-            "25d7817f79": "终端"
-          },
-          "FloatingTerminalToggleButton": {
-            "3b04b065b5": "显示浮动工作区",
-            "4cb418b991": "显示浮动工作区，有新活动",
-            "5785dd9148": "最小化浮动工作区",
-            "bfe7809a70": "{{value0}} 浮动工作区 ({{value1}})"
-          },
-          "FloatingTerminalWindowControls": {
-            "2f6054342c": "最小化",
-            "1bbaa0302f": "最小化浮动工作区",
-            "3f4ca29961": "最大化浮动工作区",
-            "1c79cba25d": "恢复浮动工作区",
-            "648352c51f": "在浮动工作区中打开 {{value0}}",
-            "82da3701e7": "无法为 {{value0}} 构建启动命令。",
-            "109870e023": "最大化",
-            "b5686fee1e": "恢复",
-            "1e502f1284": "打开"
-          }
-        }
-      },
       "feature": {
         "wall": {
           "AgentCapabilitiesSetupAction": {
@@ -9619,7 +9506,8 @@
             "5a55c00a81": "推出计划",
             "218503f9f3": "自动保存",
             "cda56c5915": "笔记/launch-plan.md",
-            "e16479c1c5": "[data-slash-menu] [data-slash-row].slash-active { background: rgba(24,24,27,0.07); } [data-md-active-line][data-role=\"active\"] { color: rgb(113 113 122); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; } [data-md-active-line][data-role=\"h1\"] { color: inherit; font-family: inherit; font-size: 18px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; margin-top: 6px; } [data-md-caret] { display: inline-block; width: 1.5px; height: 1em; background: currentColor; vertical-align: -2px; margin-left: 1px; animation: md-caret-blink 1.05s steps(1) infinite; } @keyframes md-caret-blink { 0%, 50% { opacity: 1 } 51%, 100% { opacity: 0 } } @keyframes md-block-in { from { opacity: 0; transform: translateY(-2px); } to { opacity: 1; transform: none; } } @keyframes md-cursor-ripple { 0% { transform: scale(0.4); opacity: 0.9; } 100% { transform: scale(1.4); opacity: 0; } } [data-clicking=\"1\"] [data-cursor-ripple] { animation: md-cursor-ripple 460ms ease-out forwards; }"
+            "e16479c1c5": "[data-slash-menu] [data-slash-row].slash-active { background: rgba(24,24,27,0.07); } [data-md-active-line][data-role=\"active\"] { color: rgb(113 113 122); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; } [data-md-active-line][data-role=\"h1\"] { color: inherit; font-family: inherit; font-size: 18px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; margin-top: 6px; } [data-md-caret] { display: inline-block; width: 1.5px; height: 1em; background: currentColor; vertical-align: -2px; margin-left: 1px; animation: md-caret-blink 1.05s steps(1) infinite; } @keyframes md-caret-blink { 0%, 50% { opacity: 1 } 51%, 100% { opacity: 0 } } @keyframes md-block-in { from { opacity: 0; transform: translateY(-2px); } to { opacity: 1; transform: none; } } @keyframes md-cursor-ripple { 0% { transform: scale(0.4); opacity: 0.9; } 100% { transform: scale(1.4); opacity: 0; } } [data-clicking=\"1\"] [data-cursor-ripple] { animation: md-cursor-ripple 460ms ease-out forwards; }",
+            "copy": "复制"
           },
           "FeatureWallBody": {
             "25ec5356d6": "设置"
@@ -9663,7 +9551,11 @@
             "271ea0cbf3": "取消",
             "a7a89d8f94": "线",
             "5cb213f967": "AI 笔记",
-            "1eee3a397e": "src/server/migrate.ts（差异）"
+            "1eee3a397e": "src/server/migrate.ts（差异）",
+            "sessionStarted": "● Claude Code 会话已启动",
+            "notesLoaded": "已从 Yiru 加载 {{value0}} 条审查备注",
+            "reviewNote": "审查备注 {{value0}}：",
+            "fixingIssues": "正在修复这两个问题..."
           },
           "ReviewPRViewAnimatedVisual": {
             "7c2808ecff": "合并前截断。",
@@ -10156,6 +10048,16 @@
           "d07e4b8553": "分支",
           "d16e037f40": "富有的",
           "6c4f1a8d2e": "检查详情不可用。"
+        },
+        "FilePreviewViewer": {
+          "loading": "正在加载预览...",
+          "unsupportedCodec": "内置播放器不支持此文件的媒体编码。",
+          "tooLarge": "文件太大，无法预览（上限为 512 MB）。",
+          "stalled": "文件预览尚未加载完成便已停止。",
+          "outsideRuntime": "远程文件不在所属运行时的工作树内。",
+          "bytes": "{{value0}} B",
+          "kilobytes": "{{value0}} KB",
+          "megabytes": "{{value0}} MB"
         },
         "EditorPanelHeader": {
           "fb8331694e": "打开侧面预览",
@@ -11007,311 +10909,6 @@
           }
         }
       },
-      "automations": {
-        "AutomationCustomCronPanel": {
-          "3e3b2c369f": "cron",
-          "e81a02d61b": "保存前输入有效的五字段 cron。",
-          "968e66d686": "输入一个五字段 cron。",
-          "cadb7b0bc9": "无效的"
-        },
-        "AutomationDetail": {
-          "007c8ad874": "提示词",
-          "a1d52c2189": "使用范围",
-          "449fc83bf7": "token",
-          "401f40ae79": "预计。花费",
-          "a7c312430d": "最后一次运行",
-          "2df8970cd5": "Agent",
-          "e353ab9516": "预检查",
-          "620b22145e": "优雅",
-          "15ea446b93": "会话",
-          "5405a09b1f": "运行位置",
-          "2f8baf5360": "创建自",
-          "578ff46987": "下次运行",
-          "18763ded26": "日程",
-          "dbef8dc110": "此 SSH 自动化仅在 Yiru 可以到达 SSH 远程主机时运行。如果重新连接需要交互式凭据或主机不可用，则运行将记录为已跳过。",
-          "1f6026358e": "删除自动化",
-          "d79452fb30": "恢复自动化",
-          "91a4155e95": "暂停自动化",
-          "4b1ea02d2e": "编辑自动化",
-          "2fb1605beb": "立即运行",
-          "221916d93c": "创建自动化来开始安排 Agent 工作。",
-          "de0fedac06": "每次运行新的",
-          "51a470b966": "SSH",
-          "b09b2384fd": "已暂停",
-          "eaa02014f8": "启用",
-          "29baf8f4c2": "来源"
-        },
-        "AutomationEditorDialog": {
-          "fb1896a5e7": "取消",
-          "57b722cbba": "Agent",
-          "6ff66f9012": "新运行",
-          "a2e688226d": "工作树",
-          "6f9610e667": "工作树在选定的工作区中运行。新运行每次都会从所选分支创建一个新的工作区。",
-          "2c3fd9bfa1": "工作区模式帮助",
-          "b28b140eaf": "工作区",
-          "0d17f4ca8f": "选择项目",
-          "02d351877e": "项目",
-          "a4ac8fcc62": "/目标",
-          "827b25a81e": "支持技能、文件路径和内置命令，例如",
-          "6d778190b7": "每周运行依赖项审计并总结有风险的更改。",
-          "058c23cb3f": "提示词",
-          "c4b19094c2": "日程",
-          "e46c1aa9ad": "创建",
-          "a9d9dccf77": "保存",
-          "777548c2d6": "保存更改",
-          "ff5db28639": "现存的"
-        },
-        "AutomationEditorDialogHeader": {
-          "31f9253920": "使用模板",
-          "7e35393632": "Hermes",
-          "6f309eef8d": "Yiru",
-          "58f56b73d9": "自动化名称",
-          "1d9826933e": "工作日仓库审计",
-          "4133d33862": "创建自动化",
-          "0a75e5e2fa": "创建爱马仕自动化",
-          "03142e7721": "编辑 Hermes 自动化",
-          "17086b48ee": "编辑自动化"
-        },
-        "AutomationMissedRunGraceField": {
-          "0f4459e91d": "48小时",
-          "adbab51feb": "24小时",
-          "ba50e2a230": "12小时",
-          "2dc9ee84d0": "3小时",
-          "521f77cd58": "1小时",
-          "e5ad263ae5": "30分钟",
-          "529dc6c0b7": "没有恩典",
-          "3d70c185c8": "如果 Yiru 或执行主机在计划时间不可用，Yiru 会在该窗口内变得可用时运行一次错过的事件。较旧的错过运行将被跳过。",
-          "3df53d554a": "错过运行恩典帮助",
-          "fc089e5fde": "优雅"
-        },
-        "AutomationPrecheckFields": {
-          "d2a2ac89ac": "10分钟",
-          "bf49585b3c": "5分钟",
-          "d84d3765fd": "2分钟",
-          "c820119736": "1分钟",
-          "51e28cdad9": "30秒",
-          "bb2dfb3629": "暂停",
-          "99a577306c": "gh pr list --json number -q '.[0].number'",
-          "c2a762a180": "预检查"
-        },
-        "AutomationRunHistory": {
-          "402651bfb6": "还没有运行。",
-          "9974a2b429": "状态",
-          "13988187b3": "token",
-          "86a248187e": "花费",
-          "149c0b49c7": "工作区",
-          "8faaa00726": "执行",
-          "53fc5f07ab": "运行历史",
-          "a00e38d1a3": "不适用",
-          "fdb3caa8fb": "已知的"
-        },
-        "AutomationRunPageFrame": {
-          "40a511bed4": "运行上下文",
-          "33741dd973": "返回执行"
-        },
-        "AutomationSchedulePicker": {
-          "22359b186a": "上午或下午",
-          "9e677335b0": "分钟",
-          "6b802ecc99": "小时",
-          "d90981f766": "时间",
-          "6b914c5fbb": "天",
-          "233b8c94b6": "节奏",
-          "b08ccb4d06": "每小时",
-          "8cc026fd73": "每周",
-          "c3e39e17cf": "风俗"
-        },
-        "AutomationSessionField": {
-          "f3c76dce51": "重复利用",
-          "c90888ee94": "新鲜的",
-          "b675112193": "重用将未来的运行发送到之前的实时自动化会话。如果该会话结束，Yiru 将开始新的会话。",
-          "4bdce31f37": "会话重用帮助",
-          "5ad314118e": "会话"
-        },
-        "AutomationsPage": {
-          "2695883141": "删除",
-          "c3a28c9793": "选择一个自动化来查看运行。",
-          "295698292f": "重新运行",
-          "0e110a3469": "执行",
-          "bb1b2cd31e": "概述",
-          "97ff587ee3": "连接此源以检查远程配置文件中的 Hermes 自动化。",
-          "aaa007846f": "来源不可用",
-          "25060635c6": "添加新的",
-          "d207ab4c25": "从模板开始",
-          "15e0bfb13b": "删除",
-          "f4612e3f78": "编辑",
-          "2faecab10b": "立即运行",
-          "82eb6cb933": "来源",
-          "13118faadf": "未知项目",
-          "587a4b205c": "下一步",
-          "761a35834d": "自动化",
-          "73f630b49d": "取消",
-          "1b586f0e2b": "在",
-          "02a33e3204": "从",
-          "9adfab2596": "删除外部自动化",
-          "1e2e41392f": "不要再问",
-          "b264564427": "及其运行历史记录。先前运行创建的工作区不会被删除。",
-          "080dcb5fbb": "删除自动化",
-          "19a6e30eae": "刷新自动化",
-          "8d1afa8269": "添加自动化",
-          "77c2778945": "自动化",
-          "0329f9bef1": "关闭 · Esc",
-          "67c7ff795b": "关闭自动化",
-          "e1bf9b1512": "工作区不可用。",
-          "3e42a5cc1b": "SSH 连接失败。",
-          "9f2855677c": "SSH 连接。",
-          "126d726546": "外部自动化操作失败。",
-          "37288942f0": "外部自动化恢复。",
-          "77c518a34b": "外部自动化暂停。",
-          "4d7878402c": "外部自动化排队。",
-          "4c22bc9913": "外部自动化已删除。",
-          "3a4c476aa0": "无法重新运行自动化。",
-          "a1bdb57008": "自动化运行排队。",
-          "8a3226f172": "打开设置",
-          "d2a01b0b6f": "您可以在“设置”中更改此设置。",
-          "690b94da54": "下次我们将跳过此确认。",
-          "b11170a008": "无法保存自动化。",
-          "2a20596d6b": "自动化已保存。",
-          "244727e655": "自动化已更新。",
-          "77b81bc4ac": "爱马仕自动化创建。",
-          "08efc3ae12": "Hermes 自动化已更新。",
-          "32534e7c9c": "保存前选择一个可用的工作区。",
-          "2360ffc956": "保存前选择已启用的 Agent。",
-          "6e91dab317": "保存前输入有效的高级计划。",
-          "64bdb2304f": "保存前选择支持的计划。",
-          "2430fecf53": "选择运行位置并在保存前输入提示。",
-          "7934ee0d81": "连接SSH",
-          "f93ed7a6f8": "正在连接...",
-          "8705757e27": "工作",
-          "376631ef2b": "恢复",
-          "b457436d6a": "暂停",
-          "0ae52dd760": "爱马仕",
-          "e059042585": "只读",
-          "aecdc3681f": "易于管理",
-          "8500baacb4": "外部来源",
-          "36f71740a7": "选定的工作区",
-          "cd8397cc32": "每次运行新工作区",
-          "dd0bc7a1ba": "每次运行新的",
-          "7b2e285552": "SSH 连接在此客户端中不可用。",
-          "d441032f7e": "暂停",
-          "5918020edc": "执行",
-          "a21f6c33ad": "自动化来源已刷新。",
-          "53f06f0ad5": "重试来源",
-          "pendingAutomationMissing": "自动化已不可用。",
-          "pendingAutomationRunMissing": "运行历史已不可用。"
-        },
-        "CreateFromPicker": {
-          "f061f49e3f": "搜索仓库分支...",
-          "dd3841b442": "分支来自",
-          "ef6d762538": "项目默认",
-          "e53d306056": "{{value0}}（默认）",
-          "79512f22a7": "没有找到分支。",
-          "9ce96621f4": "搜索分支..."
-        },
-        "ExternalAutomationManagers": {
-          "e02f970595": "未找到外部自动化经理。",
-          "6da3bfba4b": "发现自动化。",
-          "3d58d5b67d": "不",
-          "a42bf2b27e": "删除外部自动化",
-          "1c3bfd38fe": "恢复外部自动化",
-          "0def1693bb": "暂停外部自动化",
-          "1df491fd00": "编辑外部自动化",
-          "cc77ba88ff": "运行外部自动化",
-          "5820648765": "最后的",
-          "844f1acb72": "成立",
-          "20fd7a3a15": "下一步",
-          "c6695e6fbd": "外部自动化",
-          "5524365227": "OpenClaw",
-          "766abf833c": "Hermes",
-          "bf5f67b590": "爱马仕",
-          "e66091daf4": "运行",
-          "8e9165af08": "执行",
-          "2b0adbce21": "已暂停",
-          "b3feba84c7": "当前",
-          "92405f1431": "不可用",
-          "dbdcec22bd": "只读",
-          "0a2d4359a8": "易于管理",
-          "330b3c32e8": "可用的",
-          "e2532150ed": "自动化",
-          "701515f010": "自动化"
-        },
-        "ExternalAutomationRunTable": {
-          "0ba9c0a95c": "下一个运行页面",
-          "52d468a0b8": "上一个运行页面",
-          "7475c0ce96": "的",
-          "be551397ca": "状态",
-          "a813df9808": "预览",
-          "d4b34feb66": "运行时间",
-          "2d4388a908": "执行",
-          "9c080765ff": "尚未找到 Hermes 运行信息。",
-          "8ea934cacf": "正在加载运行...",
-          "d5527d8fe7": "运行",
-          "872d032d05": "执行"
-        },
-        "HermesCronOutputView": {
-          "e27c716b43": "提示词",
-          "4557213074": "回复",
-          "05affc68e3": "错误",
-          "88d48157fc": "默认"
-        },
-        "WorkspaceCombobox": {
-          "ee5b280eba": "未找到工作区。",
-          "8e9c8cc6b5": "搜索工作区...",
-          "66a0cd9628": "选择工作区"
-        },
-        "automation": {
-          "templates": {
-            "37571fcb16": "查找卡住的工作、陈旧的生成文件以及失败的本地验证。",
-            "8a0228bea3": "每小时排队检查",
-            "3b7281c75f": "扫描最近的工作并指出正确性、用户体验和测试覆盖率风险。",
-            "6023075b27": "每日变更回顾",
-            "513401db93": "根据当前项目状态准备每周发布风险摘要。",
-            "39ed39280a": "发布准备情况",
-            "a7fbd32ddb": "每个工作日检查依赖关系、失败的测试和有风险的开放变更。",
-            "b84757677d": "工作日仓库审计",
-            "repoHealth": {
-              "category": "Repo 健康",
-              "name": "工作日仓库审计",
-              "prompt": "检查存储库的运行状况。检查依赖项更新、失败的测试、lint/类型检查状态以及有风险的开放更改。总结调查结果并建议下一步行动。"
-            },
-            "releasePrep": {
-              "category": "发布准备",
-              "name": "发布就绪评审",
-              "prompt": "准备发布准备摘要。寻找阻碍因素、未合并的风险变更、缺少验证和文档空白。以简洁的发布/不发布建议结束。"
-            },
-            "recurringReview": {
-              "category": "定期评审",
-              "name": "每日变更回顾",
-              "prompt": "查看此工作区中的最新更改。重点关注正确性风险、用户体验回归、缺失测试和后续任务。保持报告简短且具有可操作性。"
-            },
-            "maintenance": {
-              "category": "维护",
-              "name": "每小时维护检查",
-              "prompt": "检查是否有卡住的工作、过时的生成文件、失败的验证以及任何需要人工注意的内容。仅报告需处理的问题。"
-            }
-          }
-        },
-        "external": {
-          "automation": {
-            "schedule": {
-              "display": {
-                "a8e92b815a": "时间表不可用"
-              }
-            }
-          }
-        },
-        "AutomationProjectCombobox": {
-          "search": "搜索项目/文件夹...",
-          "empty": "没有匹配搜索的项目/文件夹。",
-          "chooseHost": "选择自动化主机",
-          "adding": "正在添加项目…",
-          "addProject": "添加项目"
-        },
-        "AutomationSetupDecisionField": {
-          "5a7863909c": "为每个新工作区运行设置",
-          "18f000ad4e": "高级",
-          "874b72195b": "当此自动化创建工作区时，使用与手动创建工作树相同的方式准备——运行项目的设置并打开其终端标签页。"
-        }
-      },
       "agent": {
         "AgentCombobox": {
           "19522e25ee": "管理 Agent",
@@ -11448,11 +11045,6 @@
             "dismiss": "关闭",
             "later": "稍后"
           }
-        }
-      },
-      "nativeChat": {
-        "contextMenu": {
-          "copy": "复制"
         }
       },
       "yiru": {
@@ -11873,6 +11465,7 @@
       "untitledSession": "当前会话",
       "originalAgent": "原 Agent：{{agent}}",
       "agent": "Agent",
+      "effort": "推理强度",
       "selectAgent": "选择 Agent",
       "detectingAgents": "正在此工作区主机上检测 Agent…",
       "detectionFailed": "无法检测此工作区主机上的 Agent。",
@@ -11891,187 +11484,26 @@
       "sent": "已将会话上下文发送到新的 {{agent}} 会话。",
       "deliveryFailed": "新的 {{agent}} 会话已启动，但无法发送上下文。",
       "launchFailed": "无法启动新的 {{agent}} 会话。",
-      "launchOptions": "启动选项"
-    },
-    "native-chat": {
-      "composer": {
-        "imageUnsupported": "此 Agent 不支持粘贴图片。",
-        "send": "发送",
-        "noPty": "没有实时终端，请切回终端以重新连接。",
-        "locked": "输入正被另一台设备占用。",
-        "placeholder": "发送消息…",
-        "mentionHint": "引用文件：",
-        "attach": "附加文件",
-        "startDictation": "开始听写",
-        "stopDictation": "停止听写",
-        "noSkills": "没有匹配的技能",
-        "noCommandsOrSkills": "没有匹配的命令或技能",
-        "noCommands": "没有匹配的命令",
-        "commands": "命令",
-        "skills": "技能",
-        "loadingSkills": "正在加载技能…",
-        "skillsLoaded": "技能已加载",
-        "skillsUnavailableHost": "此主机不可用技能",
-        "skillsLoadFailed": "无法从此主机加载技能",
-        "retrySkills": "重试",
-        "skillCommandCollision": "也是技能名称 - 由代理决定",
-        "skillMultipleSources": "{{sourceCount}} 个来源 - 由代理解析",
-        "skillScopeProject": "项目",
-        "skillScopePersonal": "个人",
-        "skillScopeBuiltIn": "内置",
-        "skillScopePlugin": "插件",
-        "localAttachmentUnsupported": "远程会话不支持本地附件。",
-        "removeAttachment": "移除附件",
-        "pastedImageLabel": "粘贴的图片",
-        "imagePasteFailed": "图片粘贴失败。",
-        "worktreeNotReady": "工作树未就绪 — 请稍后重试。",
-        "uploadingAttachments": "正在上传 {{value0}} 个文件到远程…",
-        "model": "模型",
-        "modelWithValue": "模型：{{value0}}",
-        "effort": "推理强度",
-        "effortWithValue": "推理强度：{{value0}}",
-        "fastMode": "快速模式",
-        "thinking": "思考",
-        "options": "选项",
-        "sessionOptions": "会话选项",
-        "chooseInAgentPicker": "在代理选择器中选择…",
-        "toggleOption": "切换{{value0}}",
-        "sentNotConfirmed": "已发送给代理 — 尚未确认",
-        "setWhenSessionStarts": "请在会话开始时设置。",
-        "availableAfterSessionStarts": "会话开始后可用。",
-        "optionUpdateFailed": "无法更新选项",
-        "optionValue": {
-          "fast": "快速",
-          "none": "无",
-          "minimal": "最小",
-          "low": "低",
-          "medium": "中",
-          "high": "高",
-          "xhigh": "极高",
-          "max": "最大",
-          "ultra": "超高"
-        },
-        "relaunchWithOtherAgent": "更换 Agent 或模型…"
-      },
-      "tool": {
-        "running": "正在运行…",
-        "result": "结果",
-        "yiru": {
-          "running": "正在运行 {{value0}}",
-          "failed": "{{value0}} 失败",
-          "completedUnknown": "已执行 {{value0}}，结果未关联",
-          "summary": "{{value0}}{{value1}}",
-          "summaryTarget": "{{value0}}{{value1}} {{value2}}",
-          "summaryOutcome": "{{value0}}{{value1}} {{value2}}，{{value3}}",
-          "openTarget": "打开操作目标",
-          "verb": {
-            "captured": "捕获了",
-            "changed": "更改了",
-            "closed": "关闭了",
-            "created": "创建了",
-            "dispatched": "分派了",
-            "focused": "聚焦了",
-            "inspected": "检查了",
-            "navigated": "导航了",
-            "read": "读取了",
-            "removed": "移除了",
-            "replied": "回复了",
-            "ran": "运行了",
-            "sentTo": "发送至",
-            "started": "启动了",
-            "stopped": "停止了",
-            "updated": "更新了",
-            "used": "使用了",
-            "waited": "等待了"
-          },
-          "object": {
-            "automation": "自动化",
-            "automations": "自动化",
-            "browser": "浏览器",
-            "browserTab": "浏览器标签页",
-            "computer": "电脑",
-            "gate": "决策门",
-            "gates": "决策门",
-            "message": "消息",
-            "messages": "消息",
-            "orchestration": "编排",
-            "task": "任务",
-            "tasks": "任务",
-            "terminal": "终端",
-            "terminals": "终端",
-            "worktree": "工作树",
-            "worktrees": "工作树"
-          },
-          "outcome": {
-            "spawned": "启动了 {{value0}}",
-            "to": "发送给 {{value0}}"
-          }
-        }
-      },
-      "status": {
-        "responding": "Agent 正在回复"
-      },
-      "jumpToLatest": "跳到最新消息",
-      "toggle": {
-        "showTerminal": "显示终端",
-        "showChat": "显示聊天视图"
-      },
-      "state": {
-        "loading": {
-          "title": "正在加载对话…",
-          "subtitle": "正在读取 Agent 记录。"
-        },
-        "error": {
-          "title": "无法加载对话",
-          "subtitle": "无法读取记录。请切回终端继续工作。"
-        },
-        "pairHost": "配对主机以查看 Agent 聊天记录。",
-        "notAgent": {
-          "title": "这里没有对话",
-          "subtitle": "此终端未运行可识别的编码 Agent。"
-        },
-        "empty": {
-          "title": "开始与 {{value0}} 聊天",
-          "subtitle": "让 {{value0}} 检查代码、解释输出或进行修改。"
-        }
-      },
-      "stop": "停止 Agent",
-      "copyMessage": {
-        "copied": "已复制",
-        "copy": "复制消息"
-      },
-      "scrollMessageToTop": "将此消息滚动到顶部",
-      "loadingEarlier": "正在加载…",
-      "loadEarlier": "加载更早的消息",
-      "question": {
-        "step": "步骤 {{value0}}",
-        "other": "其他…",
-        "otherPlaceholder": "输入你的回答",
-        "cancel": "取消",
-        "send": "发送回答",
-        "next": "下一步",
-        "skip": "跳过",
-        "sending": "正在发送…"
-      },
-      "approval": {
-        "title": "允许 {{value0}}？",
-        "allow": "允许",
-        "deny": "拒绝"
-      },
-      "launchPromptNotDelivered": "未送达 — 请检查终端"
+      "launchOptions": "启动选项",
+      "cancel": "Cancel",
+      "model": "Model",
+      "fastMode": "Fast mode",
+      "thinking": "Thinking",
+      "optionValue": {
+        "none": "None",
+        "minimal": "Minimal",
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High",
+        "xhigh": "Extra high",
+        "max": "Max",
+        "ultra": "Ultra"
+      }
     },
     "terminalPane": {
       "urlLinkHint": {
         "mac": "⌘+点击：默认浏览器；⇧⌘+点击：Yiru 浏览器",
         "other": "Ctrl+点击：默认浏览器；Shift+Ctrl+点击：Yiru 浏览器"
-      }
-    },
-    "tab": {
-      "bar": {
-        "SortableTabContextMenu": {
-          "switchToTerminalView": "切换到终端视图",
-          "switchToChatView": "切换到聊天视图"
-        }
       }
     },
     "workspace": {
@@ -12084,12 +11516,6 @@
           "githubPullRequestNumber": "PR #{{value0}}"
         }
       }
-    },
-    "friday": {
-      "open": "打开助理",
-      "startError": "全局助理无法启动。",
-      "newConversation": "新建对话",
-      "starting": "正在启动助理…"
     }
   },
   "browser": {
@@ -12239,12 +11665,6 @@
     "mobileWebSocketUnavailable": "Mobile WebSocket transport is unavailable",
     "terminalMultiplexDedicatedConnection": "Terminal multiplex requires its own connection",
     "invalidBinaryStream": "The runtime host received an invalid binary stream"
-  },
-  "automations": {
-    "workspaceTerminalMissing": "Automation workspace was created, but no agent terminal started.",
-    "targetWorkspaceMissing": "The target workspace is no longer available.",
-    "agentBlocked": "Automation agent is blocked: {{reason}}.",
-    "agentIncomplete": "Automation agent did not report completion."
   },
   "notifications": {
     "deliveryProbe": {

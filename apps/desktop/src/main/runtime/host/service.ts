@@ -13,8 +13,6 @@ import {
   type RuntimeCapability
 } from '@yiru/runtime-protocol/capabilities'
 import { agentHookServer } from '~main/agent-hooks/server'
-import { createHeadlessAutomationDispatcher } from '~main/automations/headless-dispatch'
-import { AutomationService } from '~main/automations/service'
 import { AgentBrowserBridge } from '~main/browser/agent-browser-bridge'
 import { ChromeBrowserBackend } from '~main/browser/chrome/backend'
 import { BrowserPageCatalog } from '~main/browser/page/catalog'
@@ -35,7 +33,6 @@ import { OpenCodeUsageStore } from '~main/opencode/usage/store'
 import { initDataPath, Store } from '~main/persistence'
 import type { RateLimitResumeUsageState } from '~main/rate-limit-resume/reset-resolution'
 import { RateLimitResumeService } from '~main/rate-limit-resume/service'
-import { configureOpenAiSpeechStorage } from '~main/speech/openai-api-key-store'
 import { StatsCollector, initStatsPath } from '~main/stats/collector'
 import { getUsageScopePaths } from '~main/stats/usage-scope'
 import { previewWarpThemeImport } from '~main/warp-themes/import-preview'
@@ -103,10 +100,6 @@ export function createNodeRuntimeHostService({
   restartDaemon,
   userDataPath
 }: NodeRuntimeHostServiceOptions): NodeRuntimeHostService {
-  configureOpenAiSpeechStorage({
-    allowPlaintext: false,
-    directory: () => userDataPath
-  })
   initDataPath(userDataPath)
   initStatsPath()
   // Why: runtime credentials and daemon state stay at the installation root,
@@ -155,12 +148,6 @@ export function createNodeRuntimeHostService({
   })
   runtime.setRateLimitResumeService(rateLimitResumes)
   rateLimitResumes.start()
-  const automations = new AutomationService(store, {
-    allowRemoteHostScheduling: true,
-    headlessDispatcher: createHeadlessAutomationDispatcher(runtime)
-  })
-  runtime.setAutomationService(automations)
-  automations.start()
   let browserBridge: AgentBrowserBridge | null = null
   const browserPages = chromeExecutablePath
     ? new BrowserPageCatalog((browserPageId) => {
@@ -249,7 +236,6 @@ export function createNodeRuntimeHostService({
       setGitHubEventPublisher(() => {})
       disposeEventSources()
       unsubscribeShellConnectionLifecycle()
-      automations.stop()
       unregisterCoworkingOwner?.()
       unregisterCoworkingOwner = null
       await coworkingOwner?.stop()

@@ -143,28 +143,7 @@ extension RuntimeClient {
             leafID: wire.leafId,
             content: content,
             launchAgent: wire.launchAgent,
-            resolvedAgentType: wire.resolvedAgentType,
-            agentStatus: wire.agentStatus.map {
-                NativeChatAgentStatus(
-                    state: $0.state,
-                    paneKey: $0.paneKey,
-                    prompt: $0.prompt,
-                    updatedAt: $0.updatedAt,
-                    stateStartedAt: $0.stateStartedAt,
-                    agent: $0.agentType,
-                    interactivePrompt: $0.interactivePrompt,
-                    lastAssistantMessage: $0.lastAssistantMessage,
-                    toolName: $0.toolName,
-                    toolInput: $0.toolInput,
-                    isInterrupted: $0.interrupted == true,
-                    providerSession: $0.providerSession.map {
-                        NativeChatProviderSession(id: $0.id, transcriptPath: $0.transcriptPath)
-                    }
-                )
-            },
-            preferredViewMode: wire.viewMode.map {
-                $0 == .chat ? TerminalTabViewMode.chat : TerminalTabViewMode.terminal
-            }
+            resolvedAgentType: wire.resolvedAgentType ?? wire.agentStatus?.agentType
         )
     }
 
@@ -248,9 +227,7 @@ extension RuntimeClient {
             leafID: tab.leafID,
             content: tab.content,
             launchAgent: tab.launchAgent,
-            resolvedAgentType: tab.resolvedAgentType,
-            agentStatus: tab.agentStatus,
-            preferredViewMode: tab.preferredViewMode
+            resolvedAgentType: tab.resolvedAgentType
         )
     }
 

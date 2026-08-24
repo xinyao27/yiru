@@ -1,4 +1,4 @@
-import type { AgentType, NativeChatMessage } from '@yiru/workbench-model/agent'
+import type { AgentTranscriptMessage, AgentType } from '@yiru/workbench-model/agent'
 
 import type { RuntimeJsonValue } from './json-value.js'
 import type { TerminalRead, TerminalState } from './terminal-results.js'
@@ -208,7 +208,7 @@ export type OrchestrationWorkerSetupReceipt = {
 }
 
 export type OrchestrationWorkerTranscriptPage = {
-  messages: NativeChatMessage[]
+  messages: AgentTranscriptMessage[]
   nextCursor: string
   limited: boolean
   returnedMessageCount: number

@@ -20,7 +20,6 @@ import { cn } from '~renderer/lib/class-names'
 import { OpenInApplicationIcon } from '~renderer/lib/open-in-app-catalog'
 import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
 import { useAppStore } from '~renderer/store'
-import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
 import { WORKSPACE_TITLEBAR_OPEN_IN_ACTION_ID } from '~shared/workspace/panel-titlebar-pinned'
 
 import { getDropIndicatorClasses } from '../workspace-panel/titlebar-drop-indicator'
@@ -52,7 +51,7 @@ export function TabBarOpenInMenuButton({
   const entries = getWorktreeOpenInEntries(openInApplications, getLocalFileManagerLabel())
   const preferredEntry = getPreferredWorktreeOpenInEntry(entries, lastOpenInTargetKey)
 
-  if (!worktree || worktreeId === FLOATING_TERMINAL_WORKTREE_ID || !preferredEntry) {
+  if (!worktree || !preferredEntry) {
     return null
   }
 

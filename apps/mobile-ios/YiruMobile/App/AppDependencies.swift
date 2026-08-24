@@ -12,7 +12,6 @@ struct AppDependencies {
     let homeRuntime: any HomeRuntime
     let homeSnapshotCache: HomeSnapshotCache
     let hostedReviewRepository: any HostedReviewRepository
-    let nativeChatRepository: any NativeChatRepository
     let notificationCoordinator: NotificationCoordinator
     let pairingRuntime: any PairingRuntime
     let recentWorkspaceStore: RecentWorkspaceStore
@@ -55,7 +54,6 @@ struct AppDependencies {
             homeRuntime: runtime,
             homeSnapshotCache: HomeSnapshotCache(),
             hostedReviewRepository: runtime,
-            nativeChatRepository: runtime,
             notificationCoordinator: notificationCoordinator,
             pairingRuntime: DirectPairingClient(hosts: hosts),
             recentWorkspaceStore: RecentWorkspaceStore(),

@@ -81,7 +81,7 @@ Yiru owns:
 
 Agents use the Yiru executable chosen above (on PATH in Yiru terminals) and never have to manage PIDs, state files in /tmp, or raw WS URLs themselves.
 
-**For `pnpm dev` testing:** run `pnpm build:cli` first (rebuilds the CLI + ensures the `yiru-dev` shim points at *this* worktree). Then inside the dev app use `yiru-dev emulator ...` (or the direct `./scripts/yiru-dev.mjs emulator ...` from the repo root). The orchestration preambles and dev launchers automatically select the dev command name so the CLI reaches your in-memory EmulatorBridge / runtime. Plain `yiru` reaches a packaged install instead.
+**For `pnpm dev` testing:** run `pnpm build:cli` first, then start the development app. Inside its terminals, use `yiru-dev emulator ...`; outside the app, call `apps/desktop/scripts/yiru-dev.mjs emulator ...` from the current worktree directly. The orchestration preambles and dev launchers automatically select the dev command name so the CLI reaches your in-memory EmulatorBridge / runtime. Plain `yiru` reaches a packaged install instead.
 
 ## Common operations
 

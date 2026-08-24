@@ -8,7 +8,7 @@ import type {
 
 import { killWithDescendantSweep } from '../pty-descendant-termination'
 import { resolveCliCommand } from '../runtime/cli-command'
-import { getSpawnArgsForWindows } from '../win32-utils'
+import { getSpawnArgsForWindows } from '../windows-host'
 import {
   buildSkillCliInvocation,
   type SkillCliInvocation,

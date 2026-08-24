@@ -7,7 +7,7 @@ import {
   glabHostnameArgs,
   glabRepoExecOptions,
   type ProjectRef
-} from './gl-utils'
+} from './gitlab-cli'
 
 export function parseMergeRequestPayload(stdout: string): { number: number; url: string } | null {
   const trimmed = stdout.trim()

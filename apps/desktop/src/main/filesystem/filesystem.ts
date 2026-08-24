@@ -1,17 +1,12 @@
-import { randomUUID } from 'node:crypto'
-import { readFile, writeFile, stat, lstat, open, rename, rm } from 'node:fs/promises'
-import type { FileHandle } from 'node:fs/promises'
-import { dirname, extname, join } from 'node:path'
-/* eslint-disable max-lines */
-
-import type { RuntimeRendererTarget } from '~main/runtime/host/renderer-target'
+import { lstat, open, readFile, stat, writeFile } from 'node:fs/promises'
+import { extname } from 'node:path'
 
 import { localLogFileIdentity } from '../ai-vault/local-log-tail-reader'
-import { sanitizeLocalDownloadFilename } from '../local-download-filename'
 import type { Store } from '../persistence'
 import { tryDeleteWslUncPath } from '../wsl-unc-delete'
 import { resolveAuthorizedPath, isENOENT, authorizeExternalPath } from './auth'
 import { createDownloadedFolderSessionService } from './downloaded-folder-sessions'
+import { createFileDownloadService } from './file-download-service'
 import { initializeLocalLogTailAuthorization } from './local-log-tail'
 import { createFilesystemMutationService } from './mutations'
 import type { NativePathServices } from './native-path-services'
@@ -20,6 +15,7 @@ import type { NativePathServices } from './native-path-services'
 // ordinary JSON/log files inaccessible before the editor can degrade features.
 const MAX_TEXT_FILE_SIZE = 50 * 1024 * 1024 // 50MB
 const BINARY_PROBE_BYTES = 8192
+const FILE_READ_CHUNK_MAX_BYTES = 512 * 1024
 // Why: previewable binaries (PDFs, images) are rendered by the viewer as
 // base64 blobs, not parsed as text — 5MB is tight for real-world PDFs, and
 // raising this cap only affects binary preview, not text/search paths.
@@ -72,97 +68,6 @@ async function readLocalLogSnapshot(filePath: string): Promise<{
   }
 }
 
-type DownloadFileResult = { canceled: true } | { canceled: false; destinationPath: string }
-
-function validateRequiredString(value: unknown, label: string): string {
-  if (typeof value !== 'string' || value.trim() === '') {
-    throw new Error(`${label} is required`)
-  }
-  return value
-}
-
-function decodeDownloadedFileContent(content: string, encoding: 'utf8' | 'base64'): Buffer {
-  if (encoding === 'base64') {
-    return Buffer.from(content, 'base64')
-  }
-  return Buffer.from(content, 'utf8')
-}
-
-type DownloadSession = {
-  destinationPath: string
-  tempPath: string
-  destinationExisted: boolean
-  handle: FileHandle
-  cleanupTimer: ReturnType<typeof setTimeout>
-  senderId: number
-}
-
-const DOWNLOAD_SESSION_TTL_MS = 30 * 60 * 1000
-
-function createSiblingTransferPath(destinationPath: string, suffix: string): string {
-  return join(dirname(destinationPath), `.${randomUUID()}.${suffix}`)
-}
-
-async function cleanupLocalTransferPath(filePath: string | null): Promise<void> {
-  if (!filePath) {
-    return
-  }
-  await rm(filePath, { force: true }).catch(() => {})
-}
-
-async function inspectDownloadDestination(destinationPath: string): Promise<{ existed: boolean }> {
-  try {
-    const destinationStat = await stat(destinationPath)
-    if (destinationStat.isDirectory()) {
-      throw new Error('Cannot download to a directory')
-    }
-    return { existed: true }
-  } catch (error) {
-    if (isENOENT(error)) {
-      return { existed: false }
-    }
-    throw error
-  }
-}
-
-async function assertDestinationStillUnclaimed(destinationPath: string): Promise<void> {
-  try {
-    await stat(destinationPath)
-  } catch (error) {
-    if (isENOENT(error)) {
-      return
-    }
-    throw error
-  }
-  throw new Error('Destination file appeared before download completed')
-}
-
-async function promoteDownloadedFile(
-  tempPath: string,
-  destinationPath: string,
-  destinationExisted: boolean
-): Promise<void> {
-  if (!destinationExisted) {
-    await assertDestinationStillUnclaimed(destinationPath)
-    await rename(tempPath, destinationPath)
-    return
-  }
-
-  const backupPath = createSiblingTransferPath(destinationPath, 'backup')
-  let backupCreated = false
-  try {
-    await rename(destinationPath, backupPath)
-    backupCreated = true
-    await rename(tempPath, destinationPath)
-    await cleanupLocalTransferPath(backupPath)
-  } catch (error) {
-    if (backupCreated) {
-      await rename(backupPath, destinationPath).catch(() => {})
-    }
-    throw error
-  }
-}
-
 /**
  * Check if a buffer appears to be binary (contains null bytes in first 8KB).
  */
@@ -188,34 +93,9 @@ async function isBinaryFilePrefix(filePath: string): Promise<boolean> {
 }
 
 export function createFilesystemService(store: Store, nativePathServices: NativePathServices) {
-  const downloadSessions = new Map<string, DownloadSession>()
+  const fileDownloads = createFileDownloadService(nativePathServices)
   const folderDownloads = createDownloadedFolderSessionService(nativePathServices)
   const mutations = createFilesystemMutationService(store)
-
-  async function closeDownloadSession(
-    transferId: string,
-    cleanupTemp: boolean
-  ): Promise<DownloadSession | null> {
-    const session = downloadSessions.get(transferId)
-    if (!session) {
-      return null
-    }
-    downloadSessions.delete(transferId)
-    clearTimeout(session.cleanupTimer)
-    await session.handle.close().catch(() => {})
-    if (cleanupTemp) {
-      await cleanupLocalTransferPath(session.tempPath)
-    }
-    return session
-  }
-
-  function cleanupDownloadSessionsForSender(senderId: number): void {
-    for (const [transferId, session] of Array.from(downloadSessions)) {
-      if (session.senderId === senderId) {
-        void closeDownloadSession(transferId, true)
-      }
-    }
-  }
 
   initializeLocalLogTailAuthorization(store)
 
@@ -271,125 +151,41 @@ export function createFilesystemService(store: Store, nativePathServices: Native
       return { content: buffer.toString('utf-8'), isBinary: false }
     },
 
-    saveDownload: async (
-      sender: RuntimeRendererTarget,
-      args: { suggestedName?: string; content?: string; encoding?: 'utf8' | 'base64' }
-    ): Promise<DownloadFileResult> => {
-      const suggestedName = sanitizeLocalDownloadFilename(
-        validateRequiredString(args?.suggestedName, 'suggestedName')
-      )
-      if (typeof args?.content !== 'string') {
-        throw new Error('content is required')
+    readChunk: async (args: {
+      filePath: string
+      offset: number
+      length: number
+    }): Promise<{
+      contentBase64: string
+      bytesRead: number
+      eof: boolean
+    }> => {
+      if (
+        !Number.isSafeInteger(args.offset) ||
+        args.offset < 0 ||
+        !Number.isSafeInteger(args.length) ||
+        args.length <= 0 ||
+        args.length > FILE_READ_CHUNK_MAX_BYTES
+      ) {
+        throw new Error('Invalid file read range')
       }
-      const content = args.content
-      const encoding = args?.encoding === 'base64' ? 'base64' : 'utf8'
-      const destinationPath = await nativePathServices.chooseDownloadFile(sender.id, suggestedName)
-      if (!destinationPath) {
-        return { canceled: true }
-      }
-      const { existed } = await inspectDownloadDestination(destinationPath)
-      const tempPath = createSiblingTransferPath(destinationPath, 'download')
-      let promoted = false
+      const filePath = await resolveAuthorizedPath(args.filePath, store)
+      const handle = await open(filePath, 'r')
       try {
-        await writeFile(tempPath, decodeDownloadedFileContent(content, encoding))
-        await promoteDownloadedFile(tempPath, destinationPath, existed)
-        promoted = true
-        return { canceled: false, destinationPath }
+        const stats = await handle.stat()
+        if (stats.isDirectory()) {
+          throw new Error('Cannot read a directory')
+        }
+        const buffer = Buffer.alloc(Math.min(args.length, Math.max(0, stats.size - args.offset)))
+        const { bytesRead } = await handle.read(buffer, 0, buffer.byteLength, args.offset)
+        return {
+          contentBase64: buffer.subarray(0, bytesRead).toString('base64'),
+          bytesRead,
+          eof: args.offset + bytesRead >= stats.size
+        }
       } finally {
-        if (!promoted) {
-          await cleanupLocalTransferPath(tempPath)
-        }
+        await handle.close()
       }
-    },
-
-    startDownload: async (
-      sender: RuntimeRendererTarget,
-      args: { suggestedName?: string }
-    ): Promise<
-      | { canceled: true }
-      | {
-          canceled: false
-          transferId: string
-          destinationPath: string
-        }
-    > => {
-      const suggestedName = sanitizeLocalDownloadFilename(
-        validateRequiredString(args?.suggestedName, 'suggestedName')
-      )
-      const destinationPath = await nativePathServices.chooseDownloadFile(sender.id, suggestedName)
-      if (!destinationPath) {
-        return { canceled: true }
-      }
-      const { existed } = await inspectDownloadDestination(destinationPath)
-      const tempPath = createSiblingTransferPath(destinationPath, 'download')
-      const transferId = randomUUID()
-      try {
-        const handle = await open(tempPath, 'wx')
-        const senderId = typeof sender.id === 'number' ? sender.id : Number.NaN
-        const cleanupTimer = setTimeout(() => {
-          void closeDownloadSession(transferId, true)
-        }, DOWNLOAD_SESSION_TTL_MS)
-        if (typeof cleanupTimer.unref === 'function') {
-          cleanupTimer.unref()
-        }
-        downloadSessions.set(transferId, {
-          destinationPath,
-          tempPath,
-          destinationExisted: existed,
-          handle,
-          cleanupTimer,
-          senderId
-        })
-        sender.once?.('destroyed', () => cleanupDownloadSessionsForSender(senderId))
-        return { canceled: false, transferId, destinationPath }
-      } catch (error) {
-        await cleanupLocalTransferPath(tempPath)
-        throw error
-      }
-    },
-
-    appendDownloadChunk: async (args: {
-      transferId?: string
-      contentBase64?: string
-    }): Promise<{ ok: true }> => {
-      const transferId = validateRequiredString(args?.transferId, 'transferId')
-      const contentBase64 = validateRequiredString(args?.contentBase64, 'contentBase64')
-      const session = downloadSessions.get(transferId)
-      if (!session) {
-        throw new Error('Download session not found')
-      }
-      await session.handle.writeFile(Buffer.from(contentBase64, 'base64'))
-      return { ok: true }
-    },
-
-    finishDownload: async (args: {
-      transferId?: string
-    }): Promise<{ canceled: false; destinationPath: string }> => {
-      const transferId = validateRequiredString(args?.transferId, 'transferId')
-      const session = await closeDownloadSession(transferId, false)
-      if (!session) {
-        throw new Error('Download session not found')
-      }
-      let promoted = false
-      try {
-        await promoteDownloadedFile(
-          session.tempPath,
-          session.destinationPath,
-          session.destinationExisted
-        )
-        promoted = true
-        return { canceled: false, destinationPath: session.destinationPath }
-      } finally {
-        if (!promoted) {
-          await cleanupLocalTransferPath(session.tempPath)
-        }
-      }
-    },
-
-    cancelDownload: async (args: { transferId?: string }): Promise<{ ok: true }> => {
-      const transferId = validateRequiredString(args?.transferId, 'transferId')
-      await closeDownloadSession(transferId, true)
-      return { ok: true }
     },
 
     write: async (args: { filePath: string; content: string }): Promise<void> => {
@@ -467,6 +263,7 @@ export function createFilesystemService(store: Store, nativePathServices: Native
         throw error
       }
     },
+    ...fileDownloads,
     ...folderDownloads,
     ...mutations
   }

@@ -1,5 +1,5 @@
 // The rate-limit notice as a toast. One surface for every pane: a blocked
-// agent is worth seeing whether the user is in native chat, in a raw terminal,
+// agent is worth seeing whether the user is in a raw terminal,
 // or looking at a different workspace entirely.
 
 import { formatAgentTypeLabel } from '@yiru/workbench-model/agent'
@@ -10,7 +10,7 @@ import { translate } from '~renderer/i18n/i18n'
 import { activateTabAndFocusPane } from '~renderer/lib/activate-tab-and-focus-pane'
 import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
 import { useAppStore } from '~renderer/store'
-import { findWorktreeById } from '~renderer/store/slices/worktree-helpers'
+import { findWorktreeById } from '~renderer/store/slices/worktree-state'
 
 import {
   cancelRateLimitResume,

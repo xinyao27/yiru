@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 // Executes a due resume: replay the prompt that the provider limit cut short
 // into the same pane, then report the outcome back to main.
-import { submitPromptToAgentPty } from '~renderer/components/native-chat/agent-paste-draft'
+import { submitPromptToAgentPty } from '~renderer/components/terminal-pane/agent/draft-delivery'
 import { translate } from '~renderer/i18n/i18n'
 import {
   markRateLimitResumeFailed,

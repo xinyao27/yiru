@@ -12,7 +12,6 @@ import {
 import { getExperimentalPaneSearchEntries, getExperimentalSearchEntry } from './experimental-search'
 import { NumberField, SettingsSwitch } from './form-controls'
 import { HiddenExperimentalGroup } from './hidden-experimental-group'
-import { NativeChatExperimentalSetting } from './native-chat-experimental-setting'
 import { matchesSettingsSearch } from './search'
 import { SearchableSetting } from './searchable-setting'
 
@@ -34,10 +33,6 @@ export function ExperimentalPane({
   hiddenExperimentalUnlocked = false
 }: ExperimentalPaneProps): React.JSX.Element {
   const searchQuery = useAppStore((s) => s.settingsSearchQuery)
-  const showPet = matchesSettingsSearch(searchQuery, [getExperimentalSearchEntry().pet])
-  const showNativeChat = matchesSettingsSearch(searchQuery, [
-    getExperimentalSearchEntry().nativeChat
-  ])
   const showTerminalAttention = matchesSettingsSearch(searchQuery, [
     getExperimentalSearchEntry().terminalAttention
   ])
@@ -53,41 +48,6 @@ export function ExperimentalPane({
 
   return (
     <div className="space-y-4">
-      {showPet ? (
-        <SearchableSetting
-          title={translate('auto.components.settings.ExperimentalPane.dd6f0a1d45', 'Pet')}
-          description={translate(
-            'auto.components.settings.ExperimentalPane.0e89a574ae',
-            'Floating animated pet in the bottom-right corner.'
-          )}
-          keywords={getExperimentalSearchEntry().pet.keywords}
-          className="space-y-3 py-2"
-          id="experimental-pet"
-        >
-          <div className="flex items-start justify-between gap-4">
-            <div className="min-w-0 shrink space-y-1.5">
-              <Label>
-                {translate('auto.components.settings.ExperimentalPane.dd6f0a1d45', 'Pet')}
-              </Label>
-              <p className="text-muted-foreground text-xs">
-                {translate(
-                  'auto.components.settings.ExperimentalPane.ca2219fe5e',
-                  'Shows a small animated pet pinned to the bottom-right corner. Pick a character (Claudino, OpenCode, Gremlin) or upload your own PNG, APNG, GIF, WebP, JPG, or SVG from the status-bar pet menu. Hide it any time from the same menu without disabling this setting.'
-                )}
-              </p>
-            </div>
-            <Switch
-              checked={settings.experimentalPet}
-              onCheckedChange={(checked) => updateSettings({ experimentalPet: checked })}
-            />
-          </div>
-        </SearchableSetting>
-      ) : null}
-
-      {showNativeChat ? (
-        <NativeChatExperimentalSetting settings={settings} updateSettings={updateSettings} />
-      ) : null}
-
       {showTerminalAttention ? (
         <SearchableSetting
           title={translate(

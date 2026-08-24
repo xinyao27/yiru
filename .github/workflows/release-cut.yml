@@ -1293,23 +1293,6 @@ jobs:
             exit 1
           fi
 
-      # Why post-publish for Linux: electron-builder packs and uploads in a
-      # single `--publish always` invocation, so there is no cheap insertion
-      # point between pack and upload without splitting those steps. Running
-      # verify last still blocks the bad release: the binary is uploaded to the
-      # draft, but a failed matrix job blocks `publish-release` from flipping
-      # the release from draft → published, so users never see it. A human then
-      # deletes the draft and re-cuts.
-      #
-      # Why this guards against: a misconfigured CI run where
-      # `YIRU_POSTHOG_WRITE_KEY` is unset or the tag fails to classify
-      # would otherwise produce a binary with `BUILD_IDENTITY = null` and
-      # `WRITE_KEY = null`, which silently disables transport
-      # (`IS_OFFICIAL_BUILD === false`) — the exact failure mode flagged
-      # in PR #1385's deferred follow-up.
-      - name: Verify telemetry constants present in app.asar
-        run: pnpm --filter yiru exec node scripts/verify-telemetry-constants.mjs
-
   build-mac:
     needs:
       - cut
@@ -1384,17 +1367,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ needs.cut.outputs.tag }}
-        run: node apps/desktop/scripts/remove-disabled-windows-release-assets.mjs "$TAG"
-
-      - name: Verify release assets complete
-        # Why: publish-release is the only intended draft -> published
-        # transition. Refuse to un-draft until every updater manifest and
-        # referenced installer asset is present on GitHub.
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ needs.cut.outputs.tag }}
-          YIRU_WINDOWS_RELEASE_ENABLED: ${{ needs.cut.outputs.windows_enabled }}
-        run: node apps/desktop/scripts/verify-release-required-assets.mjs "$TAG"
+        run: node apps/desktop/scripts/publish-complete-draft-releases.mjs remove-windows-assets "$TAG"
 
       - name: Publish release
         # Why: derive `--prerelease` from the tag shape (not from whatever

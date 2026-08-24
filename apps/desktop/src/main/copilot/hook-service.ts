@@ -1,6 +1,3 @@
-/* eslint-disable max-lines -- Why: local status/install/remove and SSH remote
-   install must share the same Copilot event list, script body, and
-   managed-command matching so local and remote hook behavior cannot drift. */
 import { existsSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
@@ -8,11 +5,6 @@ import { join } from 'node:path'
 import type { AgentHookInstallState, AgentHookInstallStatus } from '~shared/agent/hook-types'
 
 import {
-  buildPosixHookEnvironmentGuardLines,
-  buildPosixHookPayloadCapture
-} from '../agent-hooks/hook-stdin-contract'
-import {
-  buildPosixAgentHookCurlPostCommand,
   createManagedCommandMatcher,
   getSharedManagedScriptPath,
   readHooksJson,
@@ -22,13 +14,19 @@ import {
   writeHooksJson,
   writeManagedScript,
   type HookDefinition
-} from '../agent-hooks/installer-utils'
+} from '../agent-hooks/managed-hook-commands'
+import type { RemoteFileOperations } from '../agent-hooks/remote-file-operations'
 import {
   readHooksJsonRemote,
   writeHooksJsonRemote,
   writeManagedScriptRemote
-} from '../agent-hooks/installer-utils-remote'
-import type { RemoteFileOperations } from '../agent-hooks/remote-file-operations'
+} from '../agent-hooks/remote-hook-storage'
+import {
+  definitionHasCurrentCommand,
+  definitionHasStaleManagedCommand,
+  managedHookDefinitionsChanged
+} from './managed-hook-definitions'
+import { getCopilotManagedScript } from './managed-script'
 
 // Why: Copilot's user-level hook files can use VS Code-compatible PascalCase
 // names, which match the event vocabulary already normalized by Yiru's hook
@@ -84,91 +82,6 @@ function getManagedHookDefinition(command: string): HookDefinition {
 
 function getRemoteManagedHookDefinition(command: string): HookDefinition {
   return { type: 'command', bash: command, timeoutSec: 5 }
-}
-
-function definitionHasCurrentCommand(definition: HookDefinition, command: string): boolean {
-  return (
-    definition.command === command ||
-    definition.bash === command ||
-    definition.powershell === command ||
-    (Array.isArray(definition.hooks) && definition.hooks.some((hook) => hook.command === command))
-  )
-}
-
-function definitionHasStaleManagedCommand(
-  definition: HookDefinition,
-  currentCommand: string | null,
-  isManagedCommand: (command: string | undefined) => boolean
-): boolean {
-  const commands = [definition.command, definition.bash, definition.powershell]
-  if (commands.some((command) => isManagedCommand(command) && command !== currentCommand)) {
-    return true
-  }
-  return (
-    Array.isArray(definition.hooks) &&
-    definition.hooks.some(
-      (hook) => isManagedCommand(hook.command) && hook.command !== currentCommand
-    )
-  )
-}
-
-function definitionsChanged(before: HookDefinition[], after: HookDefinition[]): boolean {
-  return (
-    before.length !== after.length ||
-    after.some((definition, index) => definition !== before[index])
-  )
-}
-
-function getManagedScript(target: 'local' | 'posix' = 'local'): string {
-  if (target === 'local' && process.platform === 'win32') {
-    return [
-      "Write-Output '{}'",
-      '$inputData = [Console]::In.ReadToEnd()',
-      // Why: endpoint.cmd is cmd syntax, not PowerShell. Parse its `set KEY=...`
-      // lines so surviving PTYs can refresh to the current runtime host.
-      'if ($env:YIRU_AGENT_HOOK_ENDPOINT -and (Test-Path -LiteralPath $env:YIRU_AGENT_HOOK_ENDPOINT)) {',
-      '  try {',
-      '    Get-Content -LiteralPath $env:YIRU_AGENT_HOOK_ENDPOINT | ForEach-Object {',
-      "      if ($_ -match '^set ([A-Za-z0-9_]+)=(.*)$') {",
-      "        [Environment]::SetEnvironmentVariable($matches[1], $matches[2], 'Process')",
-      '      }',
-      '    }',
-      '  } catch {}',
-      '}',
-      'if (-not $env:YIRU_AGENT_HOOK_PORT -or -not $env:YIRU_AGENT_HOOK_TOKEN -or -not $env:YIRU_PANE_KEY) { exit 0 }',
-      'if ([string]::IsNullOrWhiteSpace($inputData)) { exit 0 }',
-      'try {',
-      '  $payload = $inputData | ConvertFrom-Json',
-      '  $body = @{',
-      '    paneKey = $env:YIRU_PANE_KEY',
-      '    launchToken = $env:YIRU_AGENT_LAUNCH_TOKEN',
-      '    tabId = $env:YIRU_TAB_ID',
-      '    worktreeId = $env:YIRU_WORKTREE_ID',
-      '    hookEventName = $env:YIRU_COPILOT_HOOK_EVENT',
-      '    env = $env:YIRU_AGENT_HOOK_ENV',
-      '    version = $env:YIRU_AGENT_HOOK_VERSION',
-      '    payload = $payload',
-      '  } | ConvertTo-Json -Depth 100',
-      "  Invoke-WebRequest -UseBasicParsing -Method Post -Uri ('http://127.0.0.1:' + $env:YIRU_AGENT_HOOK_PORT + '/hook/copilot') -Headers @{ 'Content-Type'='application/json'; 'X-Yiru-Agent-Hook-Token'=$env:YIRU_AGENT_HOOK_TOKEN } -Body $body -TimeoutSec 2 | Out-Null",
-      '} catch {}',
-      'exit 0',
-      ''
-    ].join('\r\n')
-  }
-
-  return [
-    '#!/bin/sh',
-    "printf '{}\\n'",
-    ...buildPosixHookPayloadCapture(),
-    // Why: Copilot consumes stdout for some hooks, so stdout is emitted before
-    // endpoint refresh, stdin parsing, or the network POST can fail.
-    ...buildPosixHookEnvironmentGuardLines(),
-    buildPosixAgentHookCurlPostCommand('copilot', {
-      fieldsBeforeEnv: [{ key: 'hookEventName', value: '${YIRU_COPILOT_HOOK_EVENT}' }]
-    }),
-    'exit 0',
-    ''
-  ].join('\n')
 }
 
 export class CopilotHookService {
@@ -281,7 +194,7 @@ export class CopilotHookService {
     config.version = 1
     delete config.disableAllHooks
     config.hooks = nextHooks
-    writeManagedScript(scriptPath, getManagedScript())
+    writeManagedScript(scriptPath, getCopilotManagedScript())
     writeHooksJson(configPath, config)
     return this.getStatus()
   }
@@ -339,7 +252,11 @@ export class CopilotHookService {
       // Why: SSH remotes use POSIX scripts regardless of Yiru's local OS. Write
       // the script before hooks/yiru.json so a partial install cannot point
       // Copilot at a missing managed command.
-      await writeManagedScriptRemote(remoteFiles, remoteScriptPath, getManagedScript('posix'))
+      await writeManagedScriptRemote(
+        remoteFiles,
+        remoteScriptPath,
+        getCopilotManagedScript('posix')
+      )
       await writeHooksJsonRemote(remoteFiles, remoteConfigPath, config)
 
       return {
@@ -384,7 +301,7 @@ export class CopilotHookService {
         continue
       }
       const cleaned = removeManagedCommands(definitions, isManagedCommand)
-      changed = changed || definitionsChanged(definitions, cleaned)
+      changed = changed || managedHookDefinitionsChanged(definitions, cleaned)
       if (cleaned.length === 0) {
         delete nextHooks[eventName]
       } else {

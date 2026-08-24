@@ -10,7 +10,7 @@ import {
   wrapWindowsCmdHookCommand,
   type HookDefinition,
   type HooksConfig
-} from '../agent-hooks/installer-utils'
+} from '../agent-hooks/managed-hook-commands'
 
 const DEVIN_SCRIPT_BASE = 'devin-hook'
 

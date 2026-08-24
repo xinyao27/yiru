@@ -129,7 +129,6 @@ nonisolated enum AppDeepLink {
         case "appearance-settings": .appearanceSettings
         case "browser-settings": .browserSettings
         case "connection-log": .connectionLog
-        case "native-chat-settings": .chatSettings
         case "notifications": .notificationSettings
         case "pair", "pair-scan": .pair
         case "settings": .settings

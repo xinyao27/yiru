@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs'
 
-import type { HooksConfig } from './installer-utils'
+import type { HooksConfig } from './managed-hook-commands'
 
 export function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)

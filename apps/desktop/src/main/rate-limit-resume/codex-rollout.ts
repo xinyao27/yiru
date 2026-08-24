@@ -1,8 +1,7 @@
 import { open, stat } from 'node:fs/promises'
 
+import { resolveSessionFilePath } from '~main/runtime/orchestration/agent-transcript/session-file-resolver'
 import type { CodexUsageLimitProbe, RateLimitResumeWindow } from '~shared/rate-limit-resume/types'
-
-import { resolveSessionFilePath } from '../native-chat/session-file-resolver'
 
 const ROLLOUT_TAIL_BYTES = 512 * 1024
 const EXHAUSTED_PERCENT = 100

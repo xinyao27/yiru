@@ -11,7 +11,7 @@ import {
 } from '~renderer/lib/pane-manager/terminal-scroll-intent'
 import type { ScrollState } from '~renderer/lib/pane-manager/types'
 
-import { fitAndFocusPanes, fitPanes, focusActivePane } from './pane-helpers'
+import { fitAndFocusPanes, fitPanes, focusActivePane } from './pane-interactions'
 import { scheduleTabRevealWebglAtlasRecovery } from './terminal-webgl-atlas-recovery'
 
 const VISIBLE_RESUME_FLUSH_CHARS = 256 * 1024

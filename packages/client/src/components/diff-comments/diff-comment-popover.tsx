@@ -174,11 +174,6 @@ export function DiffCommentPopover({
     }
   }, [])
 
-  const autoResize = (el: HTMLTextAreaElement): void => {
-    el.style.height = 'auto'
-    el.style.height = `${Math.min(el.scrollHeight, 240)}px`
-  }
-
   const handleSubmit = async (): Promise<void> => {
     if (submitting) {
       return
@@ -239,10 +234,7 @@ export function DiffCommentPopover({
           className="yiru-diff-comment-popover-textarea focus-visible:border-ring outline-none"
           placeholder={placeholder}
           value={body}
-          onChange={(e) => {
-            setBody(e.target.value)
-            autoResize(e.currentTarget)
-          }}
+          onChange={(e) => setBody(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'Escape') {
               e.preventDefault()

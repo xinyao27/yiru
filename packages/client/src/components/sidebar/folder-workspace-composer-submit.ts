@@ -17,7 +17,7 @@ import {
 } from '~renderer/lib/tui-agent-startup'
 import { activateAndRevealFolderWorkspace } from '~renderer/lib/worktree-activation'
 import { markAgentWorkspaceTrusted } from '~renderer/runtime/agent-trust-client'
-import type { SessionOptionValue } from '~shared/native-chat/session-options'
+import type { SessionOptionValue } from '~shared/agent/session-options'
 import type { LaunchSource } from '~shared/telemetry-events'
 import { TUI_AGENT_CONFIG } from '~shared/tui-agent/config'
 import type { AgentStartupShell } from '~shared/tui-agent/startup-shell'
@@ -27,7 +27,7 @@ import { folderWorkspaceKey } from '~shared/workspace/scope'
 import {
   getLinkedItemDisplayName,
   toFolderWorkspaceLinkedReview
-} from './folder-workspace-composer-helpers'
+} from './folder-workspace-composer-model'
 
 type FolderWorkspaceCreateInput = {
   projectGroupId: string

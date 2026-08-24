@@ -1,4 +1,3 @@
-import { backfillAutomationRunNumbers, pruneAutomationRuns } from '~shared/automation/run-retention'
 import { getDefaultPersistedState } from '~shared/constants'
 import { normalizeFeatureInteractionTelemetryBuckets } from '~shared/feature-interactions'
 import { normalizeFolderWorkspaces } from '~shared/folder-workspaces'
@@ -52,13 +51,8 @@ function decodePersistedStateV1(
   const onboarding = persisted
     ? decodePersistedOnboarding(persisted.onboarding, now)
     : { onboarding: defaults.onboarding, needsSave: false }
-  const rawSettings = persisted?.settings as
-    | (Partial<PersistedState['settings']> & { experimentalSidekick?: boolean })
-    | undefined
-  const settings = decodePersistedSettings(rawSettings, {
-    ...context,
-    legacySidekickEnabled: rawSettings?.experimentalSidekick
-  })
+  const rawSettings = persisted?.settings
+  const settings = decodePersistedSettings(rawSettings, context)
   const ui = decodePersistedUi(persisted?.ui, persisted?.settings, {
     onboarding: onboarding.onboarding,
     repoCount: persisted?.repos?.length ?? 0,
@@ -78,9 +72,6 @@ function decodePersistedStateV1(
   )
   const projectGroups = normalizeProjectGroups(persisted?.projectGroups)
   const terminalSessions = decodePersistedTerminalSessionState(persisted)
-  const rawAutomationRuns = Array.isArray(persisted?.automationRuns) ? persisted.automationRuns : []
-  const automationRuns = pruneAutomationRuns(backfillAutomationRunNumbers(rawAutomationRuns))
-
   return {
     state: {
       ...defaults,
@@ -96,19 +87,13 @@ function decodePersistedStateV1(
         persisted?.workspaceLineageByChildKey,
         now
       ),
-      automations: Array.isArray(persisted?.automations) ? persisted.automations : [],
-      automationRuns,
       settings: settings.settings,
       ui: ui.ui,
       onboarding: onboarding.onboarding,
       workspaceSession: workspaceSessions.workspaceSession,
       workspaceSessionsByHostId: workspaceSessions.workspaceSessionsByHostId
     },
-    needsSave:
-      settings.needsSave ||
-      ui.needsSave ||
-      onboarding.needsSave ||
-      automationRuns.length !== rawAutomationRuns.length,
+    needsSave: settings.needsSave || ui.needsSave || onboarding.needsSave,
     warnings: workspaceSessions.warnings
   }
 }

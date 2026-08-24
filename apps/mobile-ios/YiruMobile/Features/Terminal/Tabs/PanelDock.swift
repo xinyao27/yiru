@@ -22,10 +22,9 @@ nonisolated enum TerminalPanelDockMetrics {
 
     static func canDock(
         availableWidth: CGFloat,
-        isFloating: Bool,
         isWideLayout: Bool
     ) -> Bool {
-        isWideLayout && !isFloating && availableWidth >= wideLayoutMinimum
+        isWideLayout && availableWidth >= wideLayoutMinimum
     }
 
     static func clamp(_ width: CGFloat, availableWidth: CGFloat) -> CGFloat {

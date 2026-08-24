@@ -21,7 +21,6 @@ import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
 import { runQuickCommandInNewTab } from '~renderer/lib/run-quick-command-in-new-tab'
 import { useAppStore } from '~renderer/store'
-import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
 import {
   getTerminalQuickCommandBody,
   getTerminalQuickCommandScope,
@@ -78,12 +77,7 @@ export function TabBarQuickCommandsButton({
     menuOpen: pickerOpen,
     onOpenChange: setPickerOpen
   })
-  // Why: floating terminals use a synthetic worktree id, while quick commands
-  // need a real repository target for both saved scope and execution.
   const repoId = useMemo(() => {
-    if (worktreeId === FLOATING_TERMINAL_WORKTREE_ID) {
-      return null
-    }
     const candidate = getRepoIdFromWorktreeId(worktreeId)
     return repos.some((repo) => repo.id === candidate) ? candidate : null
   }, [repos, worktreeId])

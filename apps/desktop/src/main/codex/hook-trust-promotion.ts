@@ -5,7 +5,7 @@ import {
   createManagedCommandMatcher,
   readHooksJson,
   type HookDefinition
-} from '../agent-hooks/installer-utils'
+} from '../agent-hooks/managed-hook-commands'
 import {
   codexHookSourcePathsEqual,
   getCodexExplicitHomeHookSourcePath,

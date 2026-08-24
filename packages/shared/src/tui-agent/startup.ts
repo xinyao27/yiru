@@ -3,9 +3,9 @@ import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
 import { isShellProcess } from '../agent/detection'
 import { inlineAgentDraftFitsPlatform } from '../agent/draft-platform-limit'
 export { buildAgentResumeStartupPlan } from '@yiru/workbench-model/agent'
+import type { SessionOptionValue } from '../agent/session-options'
 import type { StartupCommandDelivery } from '../codex-startup-delivery'
 import { planHermesStartupQuery } from '../hermes-startup-query'
-import type { SessionOptionValue } from '../native-chat/session-options'
 import { buildSleepingAgentLaunchConfig } from '../sleeping-agent-launch-config'
 import type { TuiAgent } from '../types'
 import { TUI_AGENT_CONFIG } from './config'
@@ -29,7 +29,7 @@ export type AgentStartupPlan = {
   env?: Record<string, string>
   startupCommandDelivery?: StartupCommandDelivery
   /** Values actually emitted into this launch command, kept as base model ids
-   * so the native-chat surface can render only launch-backed state. */
+   * so consumers only observe launch-backed state. */
   sessionOptions?: Record<string, SessionOptionValue>
 }
 

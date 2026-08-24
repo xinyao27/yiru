@@ -4,7 +4,6 @@ struct TerminalAccessoryDock: View {
     let state: TerminalAccessoryState
     let displayMode: TerminalDisplayMode
     let isDisplayModeUpdating: Bool
-    var attachment: TerminalImageAttachment? = nil
     let toggleDisplayMode: () -> Void
     var removeCustomKey: (TerminalCustomKey) -> Void = { _ in }
 
@@ -13,7 +12,6 @@ struct TerminalAccessoryDock: View {
             state: state,
             displayMode: displayMode,
             isDisplayModeUpdating: isDisplayModeUpdating,
-            attachment: attachment,
             toggleDisplayMode: toggleDisplayMode,
             removeCustomKey: removeCustomKey
         )
@@ -26,7 +24,6 @@ struct TerminalAccessoryBar: View {
     let state: TerminalAccessoryState
     let displayMode: TerminalDisplayMode
     let isDisplayModeUpdating: Bool
-    let attachment: TerminalImageAttachment?
     let toggleDisplayMode: () -> Void
     var removeCustomKey: (TerminalCustomKey) -> Void = { _ in }
 
@@ -35,7 +32,7 @@ struct TerminalAccessoryBar: View {
     var body: some View {
         GlassEffectContainer(spacing: TerminalChromeMetrics.accessoryGap) {
             HStack(spacing: TerminalChromeMetrics.accessoryGap) {
-                TerminalToolsMenu(state: state, attachment: attachment)
+                TerminalToolsMenu(state: state)
                     .frame(
                         width: TerminalChromeMetrics.accessoryHitSize,
                         height: TerminalChromeMetrics.accessoryHitSize

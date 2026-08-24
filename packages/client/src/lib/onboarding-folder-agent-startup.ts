@@ -2,9 +2,8 @@ import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
 import type { AgentStartedTelemetry } from '~renderer/lib/agent-started-telemetry'
 import { tuiAgentToAgentKind } from '~renderer/lib/telemetry'
 import { buildAgentStartupPlan } from '~renderer/lib/tui-agent-startup'
+import type { SessionOptionValue } from '~shared/agent/session-options'
 import type { StartupCommandDelivery } from '~shared/codex-startup-delivery'
-import { resolveNativeChatSessionOptionDefaults } from '~shared/native-chat/session-option-defaults'
-import type { SessionOptionValue } from '~shared/native-chat/session-options'
 import {
   resolveTuiAgentLaunchArgs,
   resolveTuiAgentLaunchEnv
@@ -48,10 +47,6 @@ export function buildOnboardingFolderAgentStartup(
     cmdOverrides: settings.agentCmdOverrides ?? {},
     agentArgs: resolveTuiAgentLaunchArgs(agent, settings.agentDefaultArgs),
     agentEnv: resolveTuiAgentLaunchEnv(agent, settings.agentDefaultEnv),
-    sessionOptions: resolveNativeChatSessionOptionDefaults(
-      settings.nativeChatSessionOptions,
-      agent
-    ),
     platform: getClientPlatform(),
     allowEmptyPromptLaunch: true
   })

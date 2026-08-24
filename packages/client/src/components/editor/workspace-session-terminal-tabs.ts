@@ -8,15 +8,11 @@ export function buildSanitizedTabsByWorktree(
   return Object.fromEntries(
     Object.entries(tabsByWorktree).map(([worktreeId, tabs]) => [
       worktreeId,
-      tabs
-        // Why: the app shuts down the assistant PTY on exit; persisting its
-        // runtime-only tab would restore dead terminal chrome on next launch.
-        .filter((tab) => tab.isFriday !== true)
-        .map((tab) => {
-          const { pendingActivationSpawn: _unused, ...rest } = tab
-          void _unused
-          return rest
-        })
+      tabs.map((tab) => {
+        const { pendingActivationSpawn: _unused, ...rest } = tab
+        void _unused
+        return rest
+      })
     ])
   )
 }

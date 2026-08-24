@@ -23,13 +23,13 @@ import {
   writeHooksJson,
   writeManagedScript,
   type HookDefinition
-} from '../agent-hooks/installer-utils'
+} from '../agent-hooks/managed-hook-commands'
+import type { RemoteFileOperations } from '../agent-hooks/remote-file-operations'
 import {
   readHooksJsonRemote,
   writeHooksJsonRemote,
   writeManagedScriptRemote
-} from '../agent-hooks/installer-utils-remote'
-import type { RemoteFileOperations } from '../agent-hooks/remote-file-operations'
+} from '../agent-hooks/remote-hook-storage'
 
 // Why: Gemini CLI fires `BeforeAgent` when a turn starts and `AfterAgent` when
 // it completes. `AfterTool` marks the resumption of model work after a tool

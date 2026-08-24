@@ -5,8 +5,7 @@ import { bindSubscriptionAbort } from './subscription-abort'
 
 let skillUpdateRunSubscriptionSeq = 0
 
-// Why: one shared runner reports to every connected client — read tier, same
-// reasoning as `speech.events.subscribe`. Phase 6 D-stage — plain function
+// Why: one shared runner reports to every connected client. Phase 6 D-stage — plain function
 // with the emit-based streaming shape (`RuntimeOrpcStreamHandler`), called
 // directly from orpc/router-direct.ts via `wireRuntimeStream` instead of
 // through a `defineStreamingMethod` legacy registration.

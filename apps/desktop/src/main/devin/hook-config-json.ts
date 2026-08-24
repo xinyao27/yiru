@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs'
 
 import { parse as parseJsonc, type ParseError } from 'jsonc-parser'
 
-import { isPlainObject, type HooksConfig } from '../agent-hooks/installer-utils'
+import { isPlainObject, type HooksConfig } from '../agent-hooks/managed-hook-commands'
 
 /** Devin documents config.json as JSONC; stock JSON.parse rejects comments. */
 export function readDevinHooksConfig(configPath: string): HooksConfig | null {

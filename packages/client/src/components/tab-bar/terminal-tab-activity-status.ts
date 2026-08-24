@@ -155,7 +155,7 @@ export function hasUnreadAgentCompletionForTerminalTab(
   for (const paneKey of Object.keys(unreadAgentCompletionPanes ?? {})) {
     // paneKey is `${tabId}:${leafId}` and tab ids never contain ":", so the
     // prefix up to the first ":" is the owning tab id (see
-    // selectFloatingWorkspaceHasUnread). Prefix-match to keep legacy keys.
+    // Prefix-match to keep legacy pane keys.
     const separatorIndex = paneKey.indexOf(':')
     const owningTabId = separatorIndex === -1 ? paneKey : paneKey.slice(0, separatorIndex)
     if (owningTabId === tabId) {

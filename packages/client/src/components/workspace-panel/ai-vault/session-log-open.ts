@@ -4,7 +4,7 @@ import { translate } from '~renderer/i18n/i18n'
 import { detectLanguage } from '~renderer/lib/language-detect'
 import { workspaceHostClient } from '~renderer/runtime/workspace-host-client'
 import { useAppStore } from '~renderer/store'
-import { findWorktreeById } from '~renderer/store/slices/worktree-helpers'
+import { findWorktreeById } from '~renderer/store/slices/worktree-state'
 import type { AppState } from '~renderer/store/types'
 import { folderWorkspaceKey } from '~shared/workspace/scope'
 

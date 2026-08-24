@@ -18,7 +18,6 @@ import {
   showLocalPathOpenBlockedToast
 } from '~renderer/components/editor/local-path-open-guard'
 import { resolveMarkdownLinkTarget } from '~renderer/components/editor/markdown-internal-links'
-import { createUntitledMarkdownFileWithTemplateSelection } from '~renderer/components/floating-terminal/create-untitled-markdown'
 import { invalidateAutomaticPushTargetUpstreamStatusCache } from '~renderer/components/workspace-panel/push-target-upstream-refresh-cache'
 import { translate } from '~renderer/i18n/i18n'
 import { extractIpcErrorMessage } from '~renderer/lib/ipc-error'
@@ -48,9 +47,8 @@ import { publishRendererCommandResult } from '~renderer/runtime/renderer-command
 import { settingsForRuntimeOwner } from '~renderer/runtime/rpc-client'
 import { workspaceHostClient } from '~renderer/runtime/workspace-host-client'
 import { pushRecentlyClosedTabKind } from '~renderer/store/slices/recently-closed-tabs'
-import { findWorktreeById, getRepoIdFromWorktreeId } from '~renderer/store/slices/worktree-helpers'
+import { findWorktreeById, getRepoIdFromWorktreeId } from '~renderer/store/slices/worktree-state'
 import type { AppState } from '~renderer/store/types'
-import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
 import { clampMarkdownTocPanelWidth } from '~shared/markdown-toc-panel-width'
 import type {
   GitBranchChangeEntry,
@@ -82,6 +80,7 @@ import {
   type OpenCheckRunDetailsState
 } from './check-run-details-tab'
 import { applyRemoteOperationFollowUp } from './source-control-operation-follow-up'
+import { createUntitledMarkdownFileWithTemplateSelection } from './untitled-markdown'
 
 type RemoteOpKind = SourceControlRemoteOpKind
 
@@ -1069,12 +1068,8 @@ function buildEditorActiveResult(
   activeTabTypeByWorktree: Record<string, WorkspaceVisibleTabType>
 } {
   return {
-    // Why: floating markdown tabs use the editor surface without becoming the
-    // main worktree's active editor. Updating only the per-worktree maps keeps
-    // the workspace behind the floating panel from switching surfaces.
-    ...(worktreeId === FLOATING_TERMINAL_WORKTREE_ID
-      ? {}
-      : { activeFileId: fileId, activeTabType: 'editor' as const }),
+    activeFileId: fileId,
+    activeTabType: 'editor' as const,
     activeFileIdByWorktree: { ...state.activeFileIdByWorktree, [worktreeId]: fileId },
     activeTabTypeByWorktree: { ...state.activeTabTypeByWorktree, [worktreeId]: 'editor' }
   }
@@ -1214,12 +1209,9 @@ function getOpenedEditFileIdAfterOpen(
 }
 
 function shouldHydrateWithOwnedEditorFileId(
-  worktreeId: string,
   runtimeEnvironmentId: string | null | undefined
 ): boolean {
-  return (
-    worktreeId === FLOATING_TERMINAL_WORKTREE_ID || runtimeOwnerKey(runtimeEnvironmentId) !== null
-  )
+  return runtimeOwnerKey(runtimeEnvironmentId) !== null
 }
 
 function addEditorFileIdMigration(
@@ -4621,7 +4613,6 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
           .flat()
           .map((w) => w.id)
       )
-      validWorktreeIds.add(FLOATING_TERMINAL_WORKTREE_ID)
       for (const workspace of s.folderWorkspaces) {
         validWorktreeIds.add(folderWorkspaceKey(workspace.id))
       }
@@ -4647,7 +4638,7 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
           // same path is no longer open in another owner.
           const ownedId = buildOwnedEditorFileId(pf.filePath, worktreeId, pf.runtimeEnvironmentId)
           const id =
-            shouldHydrateWithOwnedEditorFileId(worktreeId, pf.runtimeEnvironmentId) ||
+            shouldHydrateWithOwnedEditorFileId(pf.runtimeEnvironmentId) ||
             usedOpenFileIds.has(pf.filePath)
               ? ownedId
               : pf.filePath

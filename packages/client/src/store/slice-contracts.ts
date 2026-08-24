@@ -1,6 +1,5 @@
 import type { BrowserSlice } from '../components/browser-pane/state'
 import type { CoworkingSharingSlice } from '../components/coworking/state'
-import type { DictationSlice } from '../components/dictation/state'
 import type { DiffCommentsSlice } from '../components/diff-comments/state'
 import type { EditorSlice } from '../components/editor/state'
 import type { GitHubSlice } from '../components/github/state'
@@ -36,8 +35,8 @@ import type { SshSlice } from './slices/ssh'
 import type { TabsSlice } from './slices/tabs'
 import type { TerminalSlice } from './slices/terminals'
 import type { UISlice } from './slices/ui'
-import type { WorktreeSlice } from './slices/worktree-helpers'
 import type { WorktreeNavHistorySlice } from './slices/worktree-nav-history'
+import type { WorktreeSlice } from './slices/worktree-state'
 
 declare module './types' {
   // oxlint-disable-next-line typescript/consistent-type-definitions -- This interface completes the import-free store contract.
@@ -72,7 +71,6 @@ declare module './types' {
       DiffCommentsSlice,
       DetectedAgentsSlice,
       WorktreeNavHistorySlice,
-      DictationSlice,
       WorkspaceCleanupSlice,
       RuntimeStatusSlice,
       PullRequestGenerationSlice,

@@ -12,8 +12,8 @@ import {
   writeManagedScript,
   type HookDefinition,
   type HooksConfig
-} from '../agent-hooks/installer-utils'
-import { writeFileAtomically } from './accounts/fs-utils'
+} from '../agent-hooks/managed-hook-commands'
+import { writeFileAtomically } from './accounts/atomic-file-operations'
 import type { CodexTrustEntry } from './config-toml-trust'
 import { getSystemCodexHomePath } from './home-paths'
 import { getCodexManagedScriptFileName } from './hook-identity'

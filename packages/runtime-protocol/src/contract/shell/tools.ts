@@ -56,31 +56,12 @@ export const shellTelemetryContract = {
   acknowledgeBanner: withAccess(SHELL_TOOLS_WRITE_ACCESS).output(type<void>())
 } satisfies ContractRouter<RuntimeProcedureMeta>
 
-export const shellPetContract = {
-  import: withAccess(SHELL_TOOLS_WRITE_ACCESS).output(type<unknown>()),
-  importPetBundle: withAccess(SHELL_TOOLS_WRITE_ACCESS).output(type<unknown>()),
-  read: withAccess(SHELL_TOOLS_READ_ACCESS)
-    .input(type<{ id: string; fileName: string; kind?: 'image' | 'bundle' }>())
-    .output(type<ArrayBuffer | null>()),
-  delete: withAccess(SHELL_TOOLS_WRITE_ACCESS)
-    .input(type<{ id: string; fileName: string; kind?: 'image' | 'bundle' }>())
-    .output(type<void>())
-} satisfies ContractRouter<RuntimeProcedureMeta>
-
 export const shellMiniMaxCredentialsContract = {
   getStatus: withAccess(SHELL_TOOLS_READ_ACCESS).output(type<unknown>()),
   saveCookie: withAccess(SHELL_TOOLS_WRITE_ACCESS)
     .input(type<{ cookie: string }>())
     .output(type<unknown>()),
   clearCookie: withAccess(SHELL_TOOLS_WRITE_ACCESS).output(type<unknown>())
-} satisfies ContractRouter<RuntimeProcedureMeta>
-
-export const shellAutomationsContract = {
-  runPrecheck: withAccess(SHELL_TOOLS_WRITE_ACCESS).input(type<unknown>()).output(type<unknown>()),
-  markDispatchResult: withAccess(SHELL_TOOLS_WRITE_ACCESS)
-    .input(type<unknown>())
-    .output(type<unknown>()),
-  rendererReady: withAccess(SHELL_TOOLS_WRITE_ACCESS).output(type<void>())
 } satisfies ContractRouter<RuntimeProcedureMeta>
 
 export const shellMobileContract = {
@@ -96,11 +77,6 @@ export const shellDeveloperPermissionsContract = {
   request: withAccess(SHELL_TOOLS_WRITE_ACCESS).input(type<unknown>()).output(type<unknown>())
 } satisfies ContractRouter<RuntimeProcedureMeta>
 
-export const shellFridayContract = {
-  getOrCreate: withAccess(SHELL_TOOLS_WRITE_ACCESS).output(type<unknown>()),
-  restart: withAccess(SHELL_TOOLS_WRITE_ACCESS).output(type<unknown>())
-} satisfies ContractRouter<RuntimeProcedureMeta>
-
 export const shellFeedbackContract = {
   submit: withAccess(SHELL_TOOLS_WRITE_ACCESS).input(type<unknown>()).output(type<unknown>())
 } satisfies ContractRouter<RuntimeProcedureMeta>
@@ -111,8 +87,4 @@ export const shellExportContract = {
 
 export const shellLocalhostWorktreeLabelsContract = {
   register: withAccess(SHELL_TOOLS_WRITE_ACCESS).input(type<unknown>()).output(type<unknown>())
-} satisfies ContractRouter<RuntimeProcedureMeta>
-
-export const shellSpeechContract = {
-  ensureMicrophoneAccess: withAccess(SHELL_TOOLS_WRITE_ACCESS).output(type<void>())
 } satisfies ContractRouter<RuntimeProcedureMeta>

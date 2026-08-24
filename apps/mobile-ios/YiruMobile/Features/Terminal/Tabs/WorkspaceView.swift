@@ -21,7 +21,6 @@ struct TerminalWorkspaceView: View {
     private let connectionRuntime: any HostConnectionRuntime
     private let quickCommandRepository: any TerminalQuickCommandRepository
     private let capabilityRepository: any TerminalHostCapabilityRepository
-    private let nativeChatRepository: any NativeChatRepository
     private let filesRepository: any WorkspaceFilesRepository
     private let sourceRepository: any SourceControlRepository
     private let sourceReviewRepository: any SourceReviewRepository
@@ -49,7 +48,6 @@ struct TerminalWorkspaceView: View {
         workspaceCreationRepository: any WorkspaceCreationRepository,
         quickCommandRepository: any TerminalQuickCommandRepository,
         capabilityRepository: any TerminalHostCapabilityRepository,
-        nativeChatRepository: any NativeChatRepository,
         filesRepository: any WorkspaceFilesRepository,
         sourceRepository: any SourceControlRepository,
         sourceReviewRepository: any SourceReviewRepository,
@@ -73,7 +71,6 @@ struct TerminalWorkspaceView: View {
         self.connectionRuntime = connectionRuntime
         self.quickCommandRepository = quickCommandRepository
         self.capabilityRepository = capabilityRepository
-        self.nativeChatRepository = nativeChatRepository
         self.filesRepository = filesRepository
         self.sourceRepository = sourceRepository
         self.sourceReviewRepository = sourceReviewRepository
@@ -136,7 +133,6 @@ struct TerminalWorkspaceView: View {
                     runtime: runtime,
                     displayModeRuntime: displayModeRuntime,
                     surfaceFactory: surfaceFactory,
-                    nativeChatRepository: nativeChatRepository,
                     preferences: preferences,
                     settingsPreferences: settingsPreferences,
                     showFiles: showFiles,
@@ -197,9 +193,8 @@ struct TerminalWorkspaceView: View {
         .sheet(isPresented: $isNewTabPresented) {
             WorkspaceNewTabChooser(
                 hostID: host.id,
-                repoID: workspace.id == WorkspaceSummary.floatingID ? nil : workspace.repoID,
+                repoID: workspace.repoID,
                 repository: workspaceCreationRepository,
-                isFloatingWorkspace: workspace.id == WorkspaceSummary.floatingID,
                 createAgent: { agentID in
                     Task { await model.createTerminal(agentID: agentID) }
                 },
@@ -270,9 +265,7 @@ struct TerminalWorkspaceView: View {
     }
 
     private func openTerminalURL(_ url: URL) {
-        if workspace.id == WorkspaceSummary.floatingID
-            || settingsPreferences.terminalLinkOpenMode == .phoneBrowser
-        {
+        if settingsPreferences.terminalLinkOpenMode == .phoneBrowser {
             openURL(url)
         } else if hostCapabilities?.browserScreencastSupported == true {
             Task { await model.createBrowser(url: url.absoluteString) }

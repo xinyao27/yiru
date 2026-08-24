@@ -95,8 +95,7 @@ export const UpdatePaneLayout = WorktreeTabSelector.extend({
 export const SetTabProps = WorktreeTabSelector.extend({
   tabId: requiredInputString('Missing tab id'),
   color: z.string().max(64).nullable().optional(),
-  isPinned: z.boolean().optional(),
-  viewMode: z.enum(['terminal', 'chat']).optional()
+  isPinned: z.boolean().optional()
 })
 
 export const CreateTerminalTab = WorktreeTabSelector.extend({
@@ -118,7 +117,6 @@ export const CreateTerminalTab = WorktreeTabSelector.extend({
   launchAgent: z
     .custom<TuiAgent>(isRuntimeTuiAgent, { message: 'Unknown launch agent' })
     .optional(),
-  viewMode: z.enum(['terminal', 'chat']).optional(),
   activate: z.boolean().optional(),
   clientMutationId: z.string().min(1).max(128).optional()
 }).superRefine((value, context) => {

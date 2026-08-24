@@ -8,7 +8,7 @@ import {
   ContextMenuRadioItem,
   ContextMenuTrigger
 } from '~renderer/components/ui/context-menu'
-import { useSidebarResize } from '~renderer/hooks/use-sidebar-resize'
+import { SidebarResizeOverlay, useSidebarResize } from '~renderer/hooks/use-sidebar-resize'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
 import type { ActiveRightSidebarTab } from '~shared/types'
@@ -19,10 +19,7 @@ import {
   type ActivityBarItem
 } from './activity-bar-buttons'
 import { getTopActivityBarLayout } from './activity-bar-overflow'
-import {
-  WORKSPACE_SIDEBAR_CHROME_WIDTH_PROPERTY,
-  WorkspaceSidebarToggleButton
-} from './sidebar-chrome'
+import { setWorkspaceSidebarChromeWidth, WorkspaceSidebarToggleButton } from './sidebar-chrome'
 import {
   WORKSPACE_SIDEBAR_MIN_WIDTH,
   canFitWorkspaceSidebar,
@@ -73,7 +70,12 @@ export function WorkspaceSidebarFrame({
   const isVisible = isOpen && hasSidebarSpace
   const maxWidth = getWorkspaceSidebarMaxWidth(workspaceWidth, activityBarWidth)
   const renderedWidth = clampWorkspaceSidebarWidth(width, workspaceWidth, activityBarWidth)
-  const { containerRef, onResizeStart } = useSidebarResize<HTMLDivElement>({
+  const {
+    containerRef,
+    isResizing,
+    onResizeStart,
+    renderedWidth: liveRenderedWidth
+  } = useSidebarResize<HTMLDivElement>({
     isOpen: isVisible,
     width: renderedWidth,
     minWidth: WORKSPACE_SIDEBAR_MIN_WIDTH,
@@ -122,7 +124,12 @@ export function WorkspaceSidebarFrame({
   ) : null
 
   return (
-    <div ref={containerRef} className="relative flex shrink-0 flex-row overflow-visible">
+    <div
+      ref={containerRef}
+      className="relative flex shrink-0 flex-row overflow-visible"
+      style={{ width: liveRenderedWidth }}
+    >
+      <SidebarResizeOverlay visible={isResizing} />
       {!isVisible ? (
         <div
           ref={collapsedChromeRef}
@@ -249,25 +256,21 @@ function useCollapsedChromeWidth(
   isVisible: boolean
 ): void {
   useLayoutEffect(() => {
-    const root = document.documentElement
     const chrome = chromeRef.current
     if (isVisible || !chrome) {
-      root.style.setProperty(WORKSPACE_SIDEBAR_CHROME_WIDTH_PROPERTY, '0px')
+      setWorkspaceSidebarChromeWidth(0)
       return
     }
 
     const updateWidth = (): void => {
-      root.style.setProperty(
-        WORKSPACE_SIDEBAR_CHROME_WIDTH_PROPERTY,
-        `${chrome.getBoundingClientRect().width}px`
-      )
+      setWorkspaceSidebarChromeWidth(chrome.getBoundingClientRect().width)
     }
     updateWidth()
     const observer = new ResizeObserver(updateWidth)
     observer.observe(chrome)
     return () => {
       observer.disconnect()
-      root.style.setProperty(WORKSPACE_SIDEBAR_CHROME_WIDTH_PROPERTY, '0px')
+      setWorkspaceSidebarChromeWidth(0)
     }
   }, [chromeRef, isVisible])
 }

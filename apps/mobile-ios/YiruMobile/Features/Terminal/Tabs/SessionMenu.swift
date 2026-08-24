@@ -16,10 +16,8 @@ struct TerminalWorkspaceMenu: View {
                     Label("Quick commands", iconID: .arrowRight)
                 }
             }
-            if workspace.id != WorkspaceSummary.floatingID {
-                Button(action: showFiles) {
-                    Label("Open file explorer", iconID: .folder)
-                }
+            Button(action: showFiles) {
+                Label("Open file explorer", iconID: .folder)
             }
             if workspace.kind == .git {
                 Button(action: showSourceControl) {

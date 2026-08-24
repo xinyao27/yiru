@@ -1,30 +1,25 @@
-/* eslint-disable max-lines -- Why: WSL CLI status/install/remove share one state machine;
-   splitting the installer would separate conflict checks from the operations they guard. */
-import { execFile } from 'node:child_process'
-
 import type { CliInstallStatus } from '~shared/cli-install-types'
 import { getYiruCliCommandNameForPlatform } from '~shared/yiru-cli-command-name'
 
 import { getDefaultWslDistro } from '../wsl'
 import { CliInstaller } from './installer'
+import { resolveWslCliReadyState } from './wsl-cli-ready-state'
 import {
-  buildRegistrationLockPrelude,
   buildSafeRemoveCommand,
-  buildSafeReplaceGuard,
   buildWslBridgeScript,
   buildWslLauncher,
-  getBridgePathFromCommandPath,
   getPosixDirname,
   getWslBridgeMarker,
   getWslLauncherMarker,
   parseManagedLauncherTarget,
   quoteShell
 } from './wsl-cli-scripts'
+import { runWslCommand } from './wsl-command-runner'
+import { buildWslRegistrationCommand } from './wsl-registration-command'
 
 const MANAGED_MARKER = getWslLauncherMarker()
 const BRIDGE_MANAGED_MARKER = getWslBridgeMarker()
 const WSL_COMMAND_NAME = getYiruCliCommandNameForPlatform('linux')
-const WSL_COMMAND_TIMEOUT_MS = 10_000
 
 function normalizeManagedScriptContent(content: string): string {
   return content.replace(/\n+$/u, '\n')
@@ -61,7 +56,12 @@ export class WslCliInstaller {
   }
 
   async getStatus(): Promise<CliInstallStatus> {
-    const ready = await this.resolveReadyState()
+    const ready = await resolveWslCliReadyState({
+      platform: this.platform,
+      distro: this.distro,
+      getHostStatus: () => this.hostInstaller.getStatus(),
+      run: (distro, command) => this.run(distro, command)
+    })
     if ('status' in ready) {
       return ready.status
     }
@@ -177,66 +177,28 @@ export class WslCliInstaller {
     // Why: repair passes its fresh probe; re-probing here would double every
     // WSL round trip on the startup reconciliation path.
     const status = precomputedStatus ?? (await this.getStatus())
-    if (!status.supported || !status.commandPath || !status.launcherPath) {
+    if (
+      !status.supported ||
+      !status.commandPath ||
+      !status.launcherPath ||
+      !status.pathDirectory ||
+      !this.distro
+    ) {
       throw new Error(status.detail ?? 'WSL CLI registration is unavailable.')
     }
     if (status.state === 'conflict') {
       throw new Error(`Refusing to replace non-Yiru command at ${status.commandPath}.`)
     }
 
-    // Why: the launcher and PowerShell bridge are one registration; the
-    // command replacement stays a single atomic rename (never missing for a
-    // concurrent shell) while a bridge copy enables rollback of the pair.
     await this.run(
-      this.distro as string,
-      [
-        'set -euo pipefail',
-        `mkdir -p ${quoteShell(status.pathDirectory as string)}`,
-        `mkdir -p ${quoteShell(getPosixDirname(getBridgePathFromCommandPath(status.commandPath)))}`,
-        buildRegistrationLockPrelude(status.commandPath),
-        `command_tmp=${quoteShell(`${status.commandPath}.tmp`)}.$$`,
-        `bridge_path=${quoteShell(getBridgePathFromCommandPath(status.commandPath))}`,
-        'bridge_tmp="${bridge_path}.tmp.$$"',
-        'bridge_backup="${bridge_tmp}.backup"',
-        'bridge_had_original=0',
-        'bridge_touched=0',
-        'committed=0',
-        'rollback() {',
-        '  result=$?',
-        '  set +e',
-        '  if [ "$committed" -ne 1 ]; then',
-        `    if [ "$bridge_had_original" -eq 1 ]; then mv -f "$bridge_backup" ${quoteShell(getBridgePathFromCommandPath(status.commandPath))}; elif [ "$bridge_touched" -eq 1 ]; then rm -f ${quoteShell(getBridgePathFromCommandPath(status.commandPath))}; fi`,
-        '  fi',
-        '  rm -f "$command_tmp" "$bridge_tmp" "$bridge_backup"',
-        '  exit "$result"',
-        '}',
-        'trap rollback EXIT',
-        buildSafeReplaceGuard(status.commandPath, MANAGED_MARKER),
-        buildSafeReplaceGuard(
-          getBridgePathFromCommandPath(status.commandPath),
-          BRIDGE_MANAGED_MARKER
-        ),
-        `cat > "$command_tmp" <<'YIRU_WSL_CLI'`,
-        buildWslLauncher(status.launcherPath, getBridgePathFromCommandPath(status.commandPath)),
-        'YIRU_WSL_CLI',
-        `cat > "$bridge_tmp" <<'YIRU_WSL_BRIDGE'`,
-        buildWslBridgeScript(),
-        'YIRU_WSL_BRIDGE',
-        'chmod 755 "$command_tmp"',
-        'chmod 644 "$bridge_tmp"',
-        buildSafeReplaceGuard(status.commandPath, MANAGED_MARKER),
-        buildSafeReplaceGuard(
-          getBridgePathFromCommandPath(status.commandPath),
-          BRIDGE_MANAGED_MARKER
-        ),
-        `if [ -f ${quoteShell(getBridgePathFromCommandPath(status.commandPath))} ]; then cp -p ${quoteShell(getBridgePathFromCommandPath(status.commandPath))} "$bridge_backup"; bridge_had_original=1; fi`,
-        `mv -f "$bridge_tmp" ${quoteShell(getBridgePathFromCommandPath(status.commandPath))}`,
-        'bridge_touched=1',
-        `mv -f "$command_tmp" ${quoteShell(status.commandPath)}`,
-        'committed=1',
-        'rm -f "$bridge_backup"',
-        'trap - EXIT'
-      ].join('\n')
+      this.distro,
+      buildWslRegistrationCommand({
+        commandPath: status.commandPath,
+        launcherPath: status.launcherPath,
+        pathDirectory: status.pathDirectory,
+        managedMarker: MANAGED_MARKER,
+        bridgeManagedMarker: BRIDGE_MANAGED_MARKER
+      })
     )
     return this.getStatus()
   }
@@ -253,84 +215,11 @@ export class WslCliInstaller {
       throw new Error(`Refusing to remove non-Yiru command at ${status.commandPath}.`)
     }
 
-    await this.run(this.distro as string, buildSafeRemoveCommand(status.commandPath))
-    return this.getStatus()
-  }
-
-  private async resolveReadyState(): Promise<
-    | { status: CliInstallStatus }
-    | {
-        distro: string
-        commandPath: string
-        bridgePath: string
-        launcherPath: string
-        pathConfigured: boolean
-      }
-  > {
-    if (this.platform !== 'win32') {
-      return {
-        status: this.unsupported(
-          'platform_not_supported',
-          'WSL CLI registration is only available on Windows.'
-        )
-      }
-    }
     if (!this.distro) {
-      return {
-        status: this.unsupported('platform_not_supported', 'No WSL distribution is available.')
-      }
+      return status
     }
-
-    const hostStatus = await this.hostInstaller.getStatus()
-    if (!hostStatus.launcherPath) {
-      return {
-        status: this.unsupported(
-          hostStatus.unsupportedReason ?? 'launcher_missing',
-          hostStatus.detail ?? 'The Windows Yiru CLI launcher is missing.'
-        )
-      }
-    }
-
-    const home = (await this.run(this.distro, 'printf %s "$HOME"')).trim()
-    if (!home.startsWith('/')) {
-      return {
-        status: this.unsupported('launcher_missing', 'Unable to resolve the WSL home directory.')
-      }
-    }
-
-    const interopReady =
-      (
-        await this.run(
-          this.distro,
-          '{ command -v powershell.exe >/dev/null 2>&1 || [ -x /mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe ]; } && command -v wslpath >/dev/null 2>&1 && printf yes || printf no'
-        )
-      ).trim() === 'yes'
-    if (!interopReady) {
-      return {
-        status: this.unsupported(
-          'launcher_missing',
-          'WSL Windows interop is unavailable; Yiru cannot launch the Windows CLI from WSL.'
-        )
-      }
-    }
-
-    const pathDirectory = `${home}/.local/bin`
-    const commandPath = `${pathDirectory}/${WSL_COMMAND_NAME}`
-    const pathConfigured =
-      (
-        await this.run(
-          this.distro,
-          `case ":$PATH:" in *:${quoteShell(pathDirectory)}:*) printf yes ;; *) printf no ;; esac`
-        )
-      ).trim() === 'yes'
-
-    return {
-      distro: this.distro,
-      commandPath,
-      bridgePath: getBridgePathFromCommandPath(commandPath),
-      launcherPath: hostStatus.launcherPath,
-      pathConfigured
-    }
+    await this.run(this.distro, buildSafeRemoveCommand(status.commandPath))
+    return this.getStatus()
   }
 
   private async readCommandFile(
@@ -388,77 +277,7 @@ export class WslCliInstaller {
     }
   }
 
-  private unsupported(
-    unsupportedReason: NonNullable<CliInstallStatus['unsupportedReason']>,
-    detail: string
-  ): CliInstallStatus {
-    return {
-      platform: 'linux',
-      commandName: WSL_COMMAND_NAME,
-      commandPath: null,
-      pathDirectory: null,
-      pathConfigured: false,
-      launcherPath: null,
-      installMethod: null,
-      supported: false,
-      state: 'unsupported',
-      currentTarget: null,
-      unsupportedReason,
-      detail
-    }
-  }
-
   private async run(distro: string, command: string): Promise<string> {
     return this.wslRunner(distro, command)
   }
-}
-
-async function runWslCommand(distro: string, command: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    let child: ReturnType<typeof execFile> | null = null
-    let settled = false
-
-    const finish = (error: Error | null, stdout = ''): void => {
-      if (settled) {
-        return
-      }
-      settled = true
-      clearTimeout(timeout)
-      if (error) {
-        reject(error)
-        return
-      }
-      resolve(stdout)
-    }
-
-    // Why: WSL CLI status/install/remove backs Settings UI; a wedged wsl.exe
-    // process must not leave the command registration flow pending forever.
-    const timeout = setTimeout(() => {
-      child?.kill()
-      finish(new Error(`WSL command timed out after ${WSL_COMMAND_TIMEOUT_MS}ms.`))
-    }, WSL_COMMAND_TIMEOUT_MS)
-
-    try {
-      child = execFile(
-        'wsl.exe',
-        ['-d', distro, '--', 'bash', '-lc', buildEncodedWslBashCommand(command)],
-        {
-          encoding: 'utf8',
-          timeout: WSL_COMMAND_TIMEOUT_MS
-        },
-        (error, stdout) => {
-          finish(error ?? null, stdout)
-        }
-      )
-    } catch (error) {
-      finish(error instanceof Error ? error : new Error(String(error)))
-    }
-  })
-}
-
-function buildEncodedWslBashCommand(command: string): string {
-  // Why: raw multiline heredocs can be flattened while crossing wsl.exe's
-  // Windows command-line boundary. Send one shell-safe line and decode inside WSL.
-  const encoded = Buffer.from(command, 'utf8').toString('base64')
-  return `set -o pipefail; printf %s ${quoteShell(encoded)} | base64 -d | bash`
 }

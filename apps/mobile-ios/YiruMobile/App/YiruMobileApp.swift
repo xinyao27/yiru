@@ -53,8 +53,7 @@ struct YiruMobileApp: App {
                 WorkspaceCreationFixtureView()
             } else if ProcessInfo.processInfo.arguments.contains("--settings-fixture") {
                 SettingsFixtureView(dependencies: model.dependencies)
-            } else if ProcessInfo.processInfo.arguments.contains("--chat-settings-fixture")
-                || ProcessInfo.processInfo.arguments.contains("--terminal-settings-fixture")
+            } else if ProcessInfo.processInfo.arguments.contains("--terminal-settings-fixture")
                 || ProcessInfo.processInfo.arguments.contains("--browser-settings-fixture")
                 || ProcessInfo.processInfo.arguments.contains("--notification-settings-fixture")
                 || ProcessInfo.processInfo.arguments.contains("--troubleshooting-fixture")
@@ -102,16 +101,6 @@ struct YiruMobileApp: App {
             } else if ProcessInfo.processInfo.arguments.contains("--terminal-reconnecting-fixture")
             {
                 TerminalActionFixtureView(reconnects: true)
-            } else if ProcessInfo.processInfo.arguments.contains("--chat-working-fixture") {
-                NativeChatFixtureView(scenario: .working)
-            } else if ProcessInfo.processInfo.arguments.contains("--chat-permission-fixture") {
-                NativeChatFixtureView(scenario: .permission)
-            } else if ProcessInfo.processInfo.arguments.contains("--chat-empty-fixture") {
-                NativeChatFixtureView(scenario: .empty)
-            } else if ProcessInfo.processInfo.arguments.contains("--chat-error-fixture") {
-                NativeChatFixtureView(scenario: .error)
-            } else if ProcessInfo.processInfo.arguments.contains("--chat-fixture") {
-                NativeChatFixtureView(scenario: .chat)
             } else if ProcessInfo.processInfo.arguments.contains("--session-content-fixture") {
                 SessionContentFixtureView()
             } else if ProcessInfo.processInfo.arguments.contains("--browser-fixture") {

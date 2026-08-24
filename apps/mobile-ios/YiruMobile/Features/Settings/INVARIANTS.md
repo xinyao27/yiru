@@ -2,7 +2,7 @@
 
 ## Entries
 
-- Settings owns navigation to Appearance, Chat UI, Terminal, Browser, Notifications,
+- Settings owns navigation to Appearance, Terminal, Browser, Notifications,
   Troubleshooting, About, and the DEBUG-only Design System lab. Each child route returns to the
   same Settings stack and does not create a second preference store.
 - Appearance is the source for theme, loader preview/selection, and default session view. Browser

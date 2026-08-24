@@ -2,7 +2,6 @@ import SwiftUI
 
 struct WorkspaceNewTabChooser: View {
     @State private var optionsModel: WorkspaceNewTabOptionsModel
-    let isFloatingWorkspace: Bool
     let createAgent: (String) -> Void
     let createTerminal: () -> Void
     let createMarkdown: () -> Void
@@ -18,7 +17,6 @@ struct WorkspaceNewTabChooser: View {
         hostID: String,
         repoID: String?,
         repository: any WorkspaceCreationRepository,
-        isFloatingWorkspace: Bool,
         createAgent: @escaping (String) -> Void,
         createTerminal: @escaping () -> Void,
         createMarkdown: @escaping () -> Void,
@@ -33,7 +31,6 @@ struct WorkspaceNewTabChooser: View {
                 repository: repository
             )
         )
-        self.isFloatingWorkspace = isFloatingWorkspace
         self.createAgent = createAgent
         self.createTerminal = createTerminal
         self.createMarkdown = createMarkdown
@@ -92,24 +89,22 @@ struct WorkspaceNewTabChooser: View {
                         dismiss()
                         createTerminal()
                     }
-                    if !isFloatingWorkspace {
-                        newTabSeparator
-                        newTabOption(title: Text("Browser"), icon: .globe) {
-                            if browserSupported {
-                                isEnteringBrowser = true
-                            } else {
-                                dismiss()
-                                browserUnavailable()
-                            }
-                        }
-                        newTabSeparator
-                        newTabOption(
-                            title: Text("Markdown Note"),
-                            icon: .fileText
-                        ) {
+                    newTabSeparator
+                    newTabOption(title: Text("Browser"), icon: .globe) {
+                        if browserSupported {
+                            isEnteringBrowser = true
+                        } else {
                             dismiss()
-                            createMarkdown()
+                            browserUnavailable()
                         }
+                    }
+                    newTabSeparator
+                    newTabOption(
+                        title: Text("Markdown Note"),
+                        icon: .fileText
+                    ) {
+                        dismiss()
+                        createMarkdown()
                     }
                 }
             }

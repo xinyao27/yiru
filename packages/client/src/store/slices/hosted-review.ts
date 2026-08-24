@@ -5,29 +5,40 @@ import type {
   HostedReviewCreationEligibilityArgs,
   HostedReviewInfo
 } from '@yiru/workbench-model/review'
-import {
-  getRepoExecutionHostId,
-  parseExecutionHostId,
-  type ExecutionHostId
-} from '@yiru/workbench-model/workspace'
-/* eslint-disable max-lines -- Why: hosted-review cache identity, runtime dispatch,
-and race protection are kept together so branch review lookup invariants stay testable. */
+import { getRepoExecutionHostId, type ExecutionHostId } from '@yiru/workbench-model/workspace'
 import type { StateCreator } from 'zustand'
 import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
 import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
-import type { Repo } from '~shared/types'
 
 import type { AppState } from '../types'
 import { getGitHubPRCacheKey, getLegacyGitHubPRCacheKey } from './github-cache-key'
+import {
+  finishHostedReviewRequest,
+  getInflightHostedReviewRequest,
+  hasNewerHostedReviewCacheEntry,
+  isCurrentHostedReviewRequest,
+  isHostedReviewCacheFresh,
+  isStaleMergedGitHubReviewForHead,
+  nextHostedReviewRequestGeneration,
+  setInflightHostedReviewRequest,
+  shouldRefetchGitHubScopedResultForNoHint,
+  shouldRefetchHostedReviewForLinkedHint,
+  withHostedReviewCacheEntry,
+  type HostedReviewCache
+} from './hosted-review-cache'
 import {
   getHostedReviewCacheKey,
   linkedReviewHintKey,
   type LinkedReviewHints
 } from './hosted-review-cache-identity'
+import {
+  findHostedReviewRepoByPath,
+  settingsForHostedReviewActionOwner,
+  settingsForHostedReviewRepoOwner
+} from './hosted-review-owner'
 
 export { getHostedReviewCacheKey, linkedReviewHintKey } from './hosted-review-cache-identity'
 
-type CacheEntry<T> = { data: T | null; fetchedAt: number; linkedReviewHintKey?: string }
 type FetchOptions = {
   force?: boolean
   repoId?: string
@@ -37,159 +48,8 @@ type FetchOptions = {
 }
 type CreateHostedReviewStoreInput = CreateHostedReviewInput & { repoId?: string | null }
 
-const CACHE_TTL_MS = 60_000
-const HOSTED_REVIEW_CACHE_MAX = 500
-
-const inflightHostedReviewRequests = new Map<
-  string,
-  {
-    promise: Promise<HostedReviewInfo | null>
-    force: boolean
-    generation: number
-    linkedReviewHintKey: string
-  }
->()
-const requestGenerations = new Map<string, number>()
-
-function isFresh<T>(entry: CacheEntry<T> | undefined): entry is CacheEntry<T> {
-  return entry !== undefined && Date.now() - entry.fetchedAt < CACHE_TTL_MS
-}
-
-function findHostedReviewRepoByPath(
-  repos: readonly Repo[] | undefined,
-  repoPath: string,
-  repoId?: string | null
-): Repo | undefined {
-  return repos?.find((candidate) =>
-    repoId ? candidate.id === repoId : candidate.path === repoPath
-  )
-}
-
-function shouldRefetchForLinkedHint(
-  cached: CacheEntry<HostedReviewInfo> | undefined,
-  hintKey: string
-): boolean {
-  return cached !== undefined && hintKey !== '' && (cached.linkedReviewHintKey ?? '') !== hintKey
-}
-
-function isGitHubLinkedReviewHintKey(hintKey: string | undefined): boolean {
-  return hintKey?.split('|').some((key) => key.startsWith('github:')) ?? false
-}
-
-function shouldRefetchGitHubScopedResultForNoHint(
-  cached: CacheEntry<HostedReviewInfo> | undefined,
-  hintKey: string
-): boolean {
-  // Why: a GitHub-scoped result does not prove the branch's publishing remote
-  // has no GitLab/other review for neutral lookup.
-  return (
-    cached !== undefined &&
-    hintKey === '' &&
-    isGitHubLinkedReviewHintKey(cached.linkedReviewHintKey)
-  )
-}
-
-function canReuseInflightHint(inflightHintKey: string, nextHintKey: string): boolean {
-  return inflightHintKey === nextHintKey
-}
-
-function isStaleMergedGitHubReviewForHead(
-  cached: CacheEntry<HostedReviewInfo> | undefined,
-  currentHeadOid: string | null | undefined
-): boolean {
-  // Why: a merged GitHub PR is only shown when the worktree sits on its head
-  // or on a commit confirmed to be part of the PR. The cache key is
-  // branch-scoped, so a worktree that advanced off the merged line of work
-  // must not reuse (or, on failure, preserve) the now-stale merged review.
-  const head = typeof currentHeadOid === 'string' ? currentHeadOid.trim() : ''
-  if (head.length === 0) {
-    return false
-  }
-  const data = cached?.data
-  return (
-    data?.provider === 'github' &&
-    data.state === 'merged' &&
-    typeof data.headSha === 'string' &&
-    data.headSha.length > 0 &&
-    data.headSha !== head &&
-    data.confirmedContainedHeadOid !== head
-  )
-}
-
-function hasNewerHostedReviewCacheEntry(
-  cache: HostedReviewSlice['hostedReviewCache'],
-  cacheKey: string,
-  requestStartedAt: number,
-  requestStartedEntry: CacheEntry<HostedReviewInfo> | undefined
-): boolean {
-  // Why: GitHub refresh events can update this shared cache while a branch
-  // lookup is in flight; older lookups must not resurrect stale results.
-  const entry = cache[cacheKey]
-  return (
-    entry !== undefined &&
-    (entry.fetchedAt > requestStartedAt ||
-      (entry.fetchedAt === requestStartedAt && entry !== requestStartedEntry))
-  )
-}
-
-function withHostedReviewCacheEntry(
-  cache: HostedReviewSlice['hostedReviewCache'],
-  cacheKey: string,
-  entry: CacheEntry<HostedReviewInfo>
-): HostedReviewSlice['hostedReviewCache'] {
-  const next = { ...cache, [cacheKey]: entry }
-  const keys = Object.keys(next)
-  if (keys.length <= HOSTED_REVIEW_CACHE_MAX) {
-    return next
-  }
-  const keep = new Set(
-    keys
-      .map((key) => ({ key, fetchedAt: next[key].fetchedAt }))
-      .sort((a, b) => b.fetchedAt - a.fetchedAt)
-      .slice(0, HOSTED_REVIEW_CACHE_MAX)
-      .map((item) => item.key)
-  )
-  const pruned: HostedReviewSlice['hostedReviewCache'] = {}
-  for (const key of keep) {
-    pruned[key] = next[key]
-  }
-  return pruned
-}
-
-function settingsForHostedReviewRepoOwner(
-  settings: AppState['settings'],
-  repo: Pick<Repo, 'connectionId' | 'executionHostId'> | undefined
-): AppState['settings'] {
-  if (!repo) {
-    return settings
-  }
-  const parsed = parseExecutionHostId(getRepoExecutionHostId(repo))
-  if (parsed?.kind === 'runtime') {
-    return settings
-      ? { ...settings, activeRuntimeEnvironmentId: parsed.environmentId }
-      : ({ activeRuntimeEnvironmentId: parsed.environmentId } as AppState['settings'])
-  }
-  // Why: local and SSH-owned reviews are served by the desktop client's local
-  // IPC path, even when the sidebar is focused on a runtime host.
-  return settings
-    ? { ...settings, activeRuntimeEnvironmentId: null }
-    : ({ activeRuntimeEnvironmentId: null } as AppState['settings'])
-}
-
-function settingsForHostedReviewActionOwner(
-  settings: AppState['settings'],
-  repo: Pick<Repo, 'connectionId' | 'executionHostId'> | undefined
-): AppState['settings'] {
-  // Why: Repo.connectionId is dead — nothing sets it since remote hosts were
-  // removed (#63) — only executionHostId can still make a repo non-local.
-  if (!repo?.executionHostId) {
-    return settings
-  }
-  return settingsForHostedReviewRepoOwner(settings, repo)
-}
-
 export type HostedReviewSlice = {
-  hostedReviewCache: Record<string, CacheEntry<HostedReviewInfo>>
+  hostedReviewCache: HostedReviewCache
   getHostedReviewCreationEligibility: (
     args: HostedReviewCreationEligibilityArgs
   ) => Promise<HostedReviewCreationEligibility>
@@ -306,7 +166,7 @@ export const createHostedReviewSlice: StateCreator<AppState, [], [], HostedRevie
     )
     const cached = get().hostedReviewCache[cacheKey]
     const hintKey = linkedReviewHintKey(options)
-    const linkedRefetch = shouldRefetchForLinkedHint(cached, hintKey)
+    const linkedRefetch = shouldRefetchHostedReviewForLinkedHint(cached, hintKey)
     const scopedResultRefetch = shouldRefetchGitHubScopedResultForNoHint(cached, hintKey)
     const staleMergedHeadRefetch = isStaleMergedGitHubReviewForHead(cached, options?.currentHeadOid)
     if (
@@ -314,20 +174,17 @@ export const createHostedReviewSlice: StateCreator<AppState, [], [], HostedRevie
       !linkedRefetch &&
       !scopedResultRefetch &&
       !staleMergedHeadRefetch &&
-      isFresh(cached)
+      isHostedReviewCacheFresh(cached)
     ) {
       return cached.data
     }
 
-    const inflightRequest = inflightHostedReviewRequests.get(cacheKey)
-    const inflightHasRequestedHint =
-      inflightRequest !== undefined &&
-      canReuseInflightHint(inflightRequest.linkedReviewHintKey, hintKey)
+    const inflightRequest = getInflightHostedReviewRequest(cacheKey)
+    const inflightHasRequestedHint = inflightRequest?.linkedReviewHintKey === hintKey
     const startRequest = (): Promise<HostedReviewInfo | null> => {
-      const generation = (requestGenerations.get(cacheKey) ?? 0) + 1
+      const generation = nextHostedReviewRequestGeneration(cacheKey)
       const requestStartedAt = Date.now()
       const requestStartedEntry = get().hostedReviewCache[cacheKey]
-      requestGenerations.set(cacheKey, generation)
       const request = (async () => {
         try {
           const fallbackGitHubPR =
@@ -353,7 +210,7 @@ export const createHostedReviewSlice: StateCreator<AppState, [], [], HostedRevie
             // longer risks a background socket stampede.
             { timeoutMs: 30_000 }
           )
-          if (requestGenerations.get(cacheKey) === generation) {
+          if (isCurrentHostedReviewRequest(cacheKey, generation)) {
             set((state) => {
               if (
                 hasNewerHostedReviewCacheEntry(
@@ -416,17 +273,11 @@ export const createHostedReviewSlice: StateCreator<AppState, [], [], HostedRevie
           }
           return preserved?.data ?? null
         } finally {
-          const activeRequest = inflightHostedReviewRequests.get(cacheKey)
-          if (activeRequest?.generation === generation) {
-            inflightHostedReviewRequests.delete(cacheKey)
-            if (requestGenerations.get(cacheKey) === generation) {
-              requestGenerations.delete(cacheKey)
-            }
-          }
+          finishHostedReviewRequest(cacheKey, generation)
         }
       })()
 
-      inflightHostedReviewRequests.set(cacheKey, {
+      setInflightHostedReviewRequest(cacheKey, {
         promise: request,
         force: Boolean(options?.force),
         generation,

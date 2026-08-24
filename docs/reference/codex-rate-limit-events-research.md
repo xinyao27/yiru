@@ -182,9 +182,8 @@ production；该方案必须用 CLI/version capability gate，不能被当作永
 [v1 CodexErrorInfo 的 snake-case 序列化](https://github.com/openai/codex/blob/8630bb3caecaff6abc6add450a88035d9f6d3f8c/codex-rs/protocol/src/protocol.rs#L1763-L1771)。
 
 Yiru 已从 Codex hook 保存权威 `transcript_path`
-（`packages/workbench-model/src/agent-session-resume.ts:20-31,173-185`），也已有增量 JSONL tail engine
-（`apps/desktop/src/main/native-chat/transcript-watch-engine.ts:1-14,60-79,130-143`），所以可以较小成本
-添加一个只识别完整 JSON record 的过渡 adapter。当前实现位于
+（`packages/workbench-model/src/agent-session-resume.ts`），因此可以添加一个只识别完整 JSON record 的过渡
+adapter。当前实现位于
 `apps/desktop/src/main/rate-limit-resume/codex-rollout.ts`：renderer 只把 PTY 活动当作检查时机，runtime
 按 hook 的 `session_id`、`transcript_path` 和 `turn_id` 精确读取对应 completion；未知结构直接返回无命中。
 

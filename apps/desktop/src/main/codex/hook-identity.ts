@@ -1,4 +1,4 @@
-import type { HookCommandConfig, HookDefinition } from '../agent-hooks/installer-utils'
+import type { HookCommandConfig, HookDefinition } from '../agent-hooks/managed-hook-commands'
 import type { CodexEventLabel, CodexTrustEntry } from './config-toml-trust'
 
 // Why: Codex's trust hash key uses the snake_case event label (see

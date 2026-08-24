@@ -44,7 +44,7 @@ const PERMISSIONS: PermissionDefinition[] = [
     get description() {
       return translate(
         'auto.components.settings.DeveloperPermissionsPane.cc8151d9fa',
-        'Voice input, transcription, audio recording, sox, ffmpeg, and Whisper CLIs.'
+        'Audio recording, transcription, media capture, sox, ffmpeg, and Whisper CLIs.'
       )
     },
     actionLabel: 'Request',

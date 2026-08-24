@@ -50,7 +50,6 @@ export function handleSessionTabsCreateTerminal(
     ...(params.launchConfig ? { launchConfig: params.launchConfig } : {}),
     ...(params.launchToken ? { launchToken: params.launchToken } : {}),
     ...(params.launchAgent ? { launchAgent: params.launchAgent } : {}),
-    ...(params.viewMode ? { viewMode: params.viewMode } : {}),
     activate: params.activate,
     clientMutationId: params.clientMutationId,
     // Why: a dead client connection must cancel the surface wait instead
@@ -98,8 +97,7 @@ export function handleSessionTabsSetTabProps(params: SetTabPropsInput, { runtime
   return runtime.setMobileSessionTabProps(params.worktree, {
     tabId: params.tabId,
     ...(params.color !== undefined ? { color: params.color } : {}),
-    ...(params.isPinned !== undefined ? { isPinned: params.isPinned } : {}),
-    ...(params.viewMode !== undefined ? { viewMode: params.viewMode } : {})
+    ...(params.isPinned !== undefined ? { isPinned: params.isPinned } : {})
   })
 }
 

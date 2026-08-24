@@ -1,11 +1,5 @@
-import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
-import { dirname, join } from 'node:path'
-
-/* eslint-disable max-lines -- Why: this store owns Codex analytics persistence, scan policy, and renderer query semantics. Keeping them together prevents the Codex range/scope rules from drifting away from the scanner’s event model. */
 import type { Store } from '~main/persistence'
-import { getRuntimeHostPathsProvider } from '~main/runtime/host/paths-provider'
 import { loadKnownUsageWorktreesByRepo, type UsageWorktreeRef } from '~main/usage-worktree-metadata'
-import type { AutomationRunUsage } from '~shared/automations-types'
 import type {
   CodexUsageBreakdownKind,
   CodexUsageBreakdownRow,
@@ -18,200 +12,29 @@ import type {
   CodexUsageSummary
 } from '~shared/codex-usage-types'
 
-import { decodeCodexUsagePersistedState, encodeCodexUsagePersistedState } from './persistence'
-import { priceCodexAggregateUsage } from './pricing'
+import { buildCodexUsageBreakdown } from './breakdown-query'
+import { buildRecentCodexUsageSessions } from './recent-sessions-query'
 import { createWorktreeRefs, scanCodexUsageFiles } from './scanner'
+import { getCodexUsageOwnershipFile, loadCodexUsageState, writeCodexUsageState } from './storage'
+import { buildCodexUsageDaily, buildCodexUsageSummary } from './summary-query'
 import type { CodexUsagePersistedState } from './types'
 
-// Why: v10 drops aggregates created before Codex fork copies were suppressed
-// and cached input stopped being counted twice. Those rows cannot be migrated safely.
-const SCHEMA_VERSION = 10
+export { initCodexUsagePath, normalizePersistedState } from './storage'
+
 const STALE_MS = 5 * 60_000
-const AUTOMATION_ATTRIBUTION_WINDOW_MS = 5 * 60_000
-
-let _codexUsageFile: string | null = null
-let _codexUsageOwnershipFile: string | null = null
-
-type AutomationUsageLookupInput = {
-  worktreeId: string | null
-  terminalSessionId: string | null
-  startedAt: number | null
-  completedAt: number | null
-}
-
-function addKnownCost(left: number | null, right: number | null): number | null {
-  return left === null && right === null ? null : (left ?? 0) + (right ?? 0)
-}
-
-function getDefaultState(): CodexUsagePersistedState {
-  return {
-    schemaVersion: SCHEMA_VERSION,
-    worktreeFingerprint: null,
-    ownershipGeneration: null,
-    processedFiles: [],
-    sessions: [],
-    dailyAggregates: [],
-    scanState: {
-      enabled: true,
-      lastScanStartedAt: null,
-      lastScanCompletedAt: null,
-      lastScanError: null
-    }
-  }
-}
-
-export function normalizePersistedState(state: CodexUsagePersistedState): CodexUsagePersistedState {
-  if (state.schemaVersion !== SCHEMA_VERSION) {
-    // Why: schema changes affect dedupe, attribution, or request-level pricing.
-    // Reusing an older cache would silently serve wrong analytics until a
-    // forced scan, so invalidate it instead of patching partial data.
-    // Usage analytics is local and always available on Home. Schema bumps
-    // migrate older opt-in state to the current always-on behavior.
-    const defaults = getDefaultState()
-    return {
-      ...defaults,
-      scanState: {
-        ...defaults.scanState,
-        enabled: true
-      }
-    }
-  }
-  return {
-    ...state,
-    scanState: {
-      ...state.scanState,
-      enabled: true
-    },
-    sessions: state.sessions.map((session) => ({
-      ...session,
-      locationModelBreakdown: session.locationModelBreakdown ?? []
-    }))
-  }
-}
-
-export function initCodexUsagePath(): void {
-  _codexUsageFile = join(getRuntimeHostPathsProvider().userDataPath(), 'yiru-codex-usage.json')
-  _codexUsageOwnershipFile = join(
-    getRuntimeHostPathsProvider().userDataPath(),
-    'yiru-codex-usage-ownership.sqlite'
-  )
-}
-
-function getCodexUsageOwnershipFile(): string {
-  if (!_codexUsageOwnershipFile) {
-    _codexUsageOwnershipFile = join(
-      getRuntimeHostPathsProvider().userDataPath(),
-      'yiru-codex-usage-ownership.sqlite'
-    )
-  }
-  return _codexUsageOwnershipFile
-}
-
-function getCodexUsageFile(): string {
-  if (!_codexUsageFile) {
-    _codexUsageFile = join(getRuntimeHostPathsProvider().userDataPath(), 'yiru-codex-usage.json')
-  }
-  return _codexUsageFile
-}
-
-function getRangeCutoff(range: CodexUsageRange): string | null {
-  if (range === 'all') {
-    return null
-  }
-  const days = range === '7d' ? 7 : range === '30d' ? 30 : 90
-  const now = new Date()
-  now.setHours(0, 0, 0, 0)
-  now.setDate(now.getDate() - (days - 1))
-  const year = now.getFullYear()
-  const month = String(now.getMonth() + 1).padStart(2, '0')
-  const day = String(now.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
-}
-
-function getLocalDay(timestamp: string): string | null {
-  const parsed = new Date(timestamp)
-  if (Number.isNaN(parsed.getTime())) {
-    return null
-  }
-  const year = parsed.getFullYear()
-  const month = String(parsed.getMonth() + 1).padStart(2, '0')
-  const day = String(parsed.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
-}
-
-type ScopedCodexUsageModelRow = {
-  modelKey: string
-  modelLabel: string
-  hasInferredPricing: boolean
-  eventCount: number
-  inputTokens: number
-  cachedInputTokens: number
-  outputTokens: number
-  reasoningOutputTokens: number
-  totalTokens: number
-}
-
-function getWorktreeFingerprint(worktreesByRepo: Map<string, UsageWorktreeRef[]>): string {
-  const rows = [...worktreesByRepo.entries()]
-    .flatMap(([repoId, worktrees]) =>
-      worktrees.map((worktree) =>
-        JSON.stringify({
-          repoId,
-          worktreeId: worktree.worktreeId,
-          path: worktree.path,
-          displayName: worktree.displayName
-        })
-      )
-    )
-    .sort()
-  return JSON.stringify(rows)
-}
 
 export class CodexUsageStore {
   private state: CodexUsagePersistedState
   private readonly store: Store
-  private shouldCompactPersistedState = false
   private scanPromise: Promise<void> | null = null
 
   constructor(store: Store) {
     this.store = store
-    this.state = this.load()
-    if (this.shouldCompactPersistedState) {
+    const loaded = loadCodexUsageState()
+    this.state = loaded.state
+    if (loaded.shouldCompact) {
       this.writeToDisk()
     }
-  }
-
-  private load(): CodexUsagePersistedState {
-    try {
-      const usageFile = getCodexUsageFile()
-      if (!existsSync(usageFile)) {
-        return getDefaultState()
-      }
-      const parsed = decodeCodexUsagePersistedState(readFileSync(usageFile, 'utf-8'))
-      this.shouldCompactPersistedState = parsed.schemaVersion !== SCHEMA_VERSION
-      return normalizePersistedState({
-        ...getDefaultState(),
-        ...parsed,
-        scanState: {
-          ...getDefaultState().scanState,
-          ...parsed.scanState
-        }
-      })
-    } catch (error) {
-      console.error('[codex-usage] Failed to load persisted state, starting fresh:', error)
-      return getDefaultState()
-    }
-  }
-
-  private writeToDisk(): void {
-    const usageFile = getCodexUsageFile()
-    const dir = dirname(usageFile)
-    if (!existsSync(dir)) {
-      mkdirSync(dir, { recursive: true })
-    }
-    const tmpFile = `${usageFile}.${process.pid}.${Date.now()}.${Math.random().toString(16).slice(2)}.tmp`
-    writeFileSync(tmpFile, encodeCodexUsagePersistedState(this.state), 'utf-8')
-    renameSync(tmpFile, usageFile)
   }
 
   async setEnabled(enabled: boolean): Promise<CodexUsageScanState> {
@@ -235,11 +58,11 @@ export class CodexUsageStore {
   ): CodexUsageSnapshot {
     return {
       scanState: this.getScanState(),
-      summary: this.buildSummary(scope, range),
-      daily: this.buildDaily(scope, range),
-      modelBreakdown: this.buildBreakdown(scope, range, 'model'),
-      projectBreakdown: this.buildBreakdown(scope, range, 'project'),
-      recentSessions: this.buildRecentSessions(scope, range, recentSessionLimit)
+      summary: buildCodexUsageSummary(this.state, scope, range),
+      daily: buildCodexUsageDaily(this.state, scope, range),
+      modelBreakdown: buildCodexUsageBreakdown(this.state, scope, range, 'model'),
+      projectBreakdown: buildCodexUsageBreakdown(this.state, scope, range, 'project'),
+      recentSessions: buildRecentCodexUsageSessions(this.state, scope, range, recentSessionLimit)
     }
   }
 
@@ -247,149 +70,28 @@ export class CodexUsageStore {
     if (!this.state.scanState.enabled) {
       return this.getScanState()
     }
-    const currentWorktreeFingerprint = await this.getCurrentWorktreeFingerprint()
-    if (!force && this.state.scanState.lastScanCompletedAt) {
-      const ageMs = Date.now() - this.state.scanState.lastScanCompletedAt
-      if (ageMs < STALE_MS && this.state.worktreeFingerprint === currentWorktreeFingerprint) {
-        return this.getScanState()
-      }
+    const worktreeFingerprint = await this.getCurrentWorktreeFingerprint()
+    const completedAt = this.state.scanState.lastScanCompletedAt
+    if (
+      !force &&
+      completedAt &&
+      Date.now() - completedAt < STALE_MS &&
+      this.state.worktreeFingerprint === worktreeFingerprint
+    ) {
+      return this.getScanState()
     }
     await this.runScan()
     return this.getScanState()
   }
 
-  private async runScan(): Promise<void> {
-    if (this.scanPromise) {
-      await this.scanPromise
-      return
-    }
-
-    this.state.scanState.lastScanStartedAt = Date.now()
-    this.state.scanState.lastScanError = null
-    // Why: start-only writes rewrite the full usage cache before scan results change.
-
-    this.scanPromise = (async () => {
-      try {
-        const repos = this.store.getRepos()
-        const worktreesByRepo = loadKnownUsageWorktreesByRepo(this.store, repos)
-        const worktreeFingerprint = getWorktreeFingerprint(worktreesByRepo)
-        const canReuseProcessedFiles = this.state.worktreeFingerprint === worktreeFingerprint
-        const result = await scanCodexUsageFiles(
-          createWorktreeRefs(repos, worktreesByRepo),
-          canReuseProcessedFiles ? this.state.processedFiles : [],
-          canReuseProcessedFiles ? this.state.ownershipGeneration : null,
-          getCodexUsageOwnershipFile()
-        )
-        this.state.processedFiles = result.processedFiles
-        this.state.sessions = result.sessions
-        this.state.dailyAggregates = result.dailyAggregates
-        this.state.ownershipGeneration = result.ownershipGeneration
-        this.state.worktreeFingerprint = worktreeFingerprint
-        this.state.scanState.lastScanCompletedAt = Date.now()
-        this.state.scanState.lastScanError = null
-        this.writeToDisk()
-      } catch (error) {
-        this.state.scanState.lastScanError = error instanceof Error ? error.message : String(error)
-        this.writeToDisk()
-      } finally {
-        this.scanPromise = null
-      }
-    })()
-
-    await this.scanPromise
-  }
-
   async getSummary(scope: CodexUsageScope, range: CodexUsageRange): Promise<CodexUsageSummary> {
     await this.refresh(false)
-    return this.buildSummary(scope, range)
-  }
-
-  private buildSummary(scope: CodexUsageScope, range: CodexUsageRange): CodexUsageSummary {
-    const filteredDaily = this.getFilteredDaily(scope, range)
-    const filteredSessions = this.getFilteredSessions(scope, range)
-
-    let inputTokens = 0
-    let cachedInputTokens = 0
-    let outputTokens = 0
-    let reasoningOutputTokens = 0
-    let totalTokens = 0
-    let events = 0
-    let estimatedCostUsd = 0
-    let hasAnyBillableCost = false
-    let hasUnpricedCost = false
-    const byModel = new Map<string, number>()
-    const byProject = new Map<string, number>()
-
-    for (const row of filteredDaily) {
-      inputTokens += row.inputTokens
-      cachedInputTokens += row.cachedInputTokens
-      outputTokens += row.outputTokens
-      reasoningOutputTokens += row.reasoningOutputTokens
-      totalTokens += row.totalTokens
-      events += row.eventCount
-      byModel.set(
-        row.model ?? 'Unknown model',
-        (byModel.get(row.model ?? 'Unknown model') ?? 0) + row.totalTokens
-      )
-      byProject.set(row.projectLabel, (byProject.get(row.projectLabel) ?? 0) + row.totalTokens)
-      const cost = row.estimatedCostUsd
-      hasUnpricedCost ||= row.unpricedTokens > 0
-      if (cost !== null) {
-        hasAnyBillableCost = true
-        estimatedCostUsd += cost
-      }
-    }
-
-    const topModel =
-      [...byModel.entries()].sort((left, right) => right[1] - left[1])[0]?.[0] ?? null
-    const topProject =
-      [...byProject.entries()].sort((left, right) => right[1] - left[1])[0]?.[0] ?? null
-
-    return {
-      scope,
-      range,
-      sessions: filteredSessions.length,
-      events,
-      inputTokens,
-      cachedInputTokens,
-      outputTokens,
-      reasoningOutputTokens,
-      totalTokens,
-      estimatedCostUsd: hasUnpricedCost || !hasAnyBillableCost ? null : estimatedCostUsd,
-      topModel,
-      topProject,
-      hasAnyCodexData: filteredSessions.length > 0 || filteredDaily.length > 0
-    }
+    return buildCodexUsageSummary(this.state, scope, range)
   }
 
   async getDaily(scope: CodexUsageScope, range: CodexUsageRange): Promise<CodexUsageDailyPoint[]> {
     await this.refresh(false)
-    return this.buildDaily(scope, range)
-  }
-
-  private buildDaily(scope: CodexUsageScope, range: CodexUsageRange): CodexUsageDailyPoint[] {
-    const byDay = new Map<string, CodexUsageDailyPoint>()
-    for (const row of this.getFilteredDaily(scope, range)) {
-      const existing = byDay.get(row.day) ?? {
-        day: row.day,
-        inputTokens: 0,
-        cachedInputTokens: 0,
-        outputTokens: 0,
-        reasoningOutputTokens: 0,
-        totalTokens: 0,
-        estimatedCostUsd: null,
-        unpricedTokens: 0
-      }
-      existing.inputTokens += row.inputTokens
-      existing.cachedInputTokens += row.cachedInputTokens
-      existing.outputTokens += row.outputTokens
-      existing.reasoningOutputTokens += row.reasoningOutputTokens
-      existing.totalTokens += row.totalTokens
-      existing.estimatedCostUsd = addKnownCost(existing.estimatedCostUsd, row.estimatedCostUsd)
-      existing.unpricedTokens += row.unpricedTokens
-      byDay.set(row.day, existing)
-    }
-    return [...byDay.values()].sort((left, right) => left.day.localeCompare(right.day))
+    return buildCodexUsageDaily(this.state, scope, range)
   }
 
   async getBreakdown(
@@ -398,83 +100,7 @@ export class CodexUsageStore {
     kind: CodexUsageBreakdownKind
   ): Promise<CodexUsageBreakdownRow[]> {
     await this.refresh(false)
-    return this.buildBreakdown(scope, range, kind)
-  }
-
-  private buildBreakdown(
-    scope: CodexUsageScope,
-    range: CodexUsageRange,
-    kind: CodexUsageBreakdownKind
-  ): CodexUsageBreakdownRow[] {
-    const rows = new Map<string, CodexUsageBreakdownRow>()
-    const unpricedKeys = new Set<string>()
-    const filteredDaily = this.getFilteredDaily(scope, range)
-    const filteredSessions = this.getFilteredSessions(scope, range)
-
-    for (const daily of filteredDaily) {
-      const key = kind === 'model' ? (daily.model ?? 'unknown') : daily.projectKey
-      const label = kind === 'model' ? (daily.model ?? 'Unknown model') : daily.projectLabel
-      const existing = rows.get(key) ?? {
-        key,
-        label,
-        sessions: 0,
-        events: 0,
-        inputTokens: 0,
-        cachedInputTokens: 0,
-        outputTokens: 0,
-        reasoningOutputTokens: 0,
-        totalTokens: 0,
-        estimatedCostUsd: null,
-        hasInferredPricing: false
-      }
-      existing.events += daily.eventCount
-      existing.inputTokens += daily.inputTokens
-      existing.cachedInputTokens += daily.cachedInputTokens
-      existing.outputTokens += daily.outputTokens
-      existing.reasoningOutputTokens += daily.reasoningOutputTokens
-      existing.totalTokens += daily.totalTokens
-      existing.hasInferredPricing ||= daily.hasInferredPricing
-      existing.estimatedCostUsd = addKnownCost(existing.estimatedCostUsd, daily.estimatedCostUsd)
-      if (daily.unpricedTokens > 0) {
-        unpricedKeys.add(key)
-      }
-      rows.set(key, existing)
-    }
-
-    for (const session of filteredSessions) {
-      if (kind === 'model') {
-        const seen = new Set<string>()
-        for (const model of this.getScopedSessionModels(session, scope)) {
-          if (seen.has(model.modelKey)) {
-            continue
-          }
-          seen.add(model.modelKey)
-          const row = rows.get(model.modelKey)
-          if (row) {
-            row.sessions++
-          }
-        }
-        continue
-      }
-      const matchingLocations = session.locationBreakdown.filter((entry) =>
-        scope === 'all' ? true : entry.worktreeId !== null
-      )
-      const seen = new Set<string>()
-      for (const location of matchingLocations) {
-        if (seen.has(location.locationKey)) {
-          continue
-        }
-        seen.add(location.locationKey)
-        const row = rows.get(location.locationKey)
-        if (row) {
-          row.sessions++
-        }
-      }
-    }
-
-    return [...rows.values()]
-      .map((row) => (unpricedKeys.has(row.key) ? { ...row, estimatedCostUsd: null } : row))
-      .sort((left, right) => right.totalTokens - left.totalTokens)
+    return buildCodexUsageBreakdown(this.state, scope, range, kind)
   }
 
   async getRecentSessions(
@@ -483,311 +109,70 @@ export class CodexUsageStore {
     limit = 12
   ): Promise<CodexUsageSessionRow[]> {
     await this.refresh(false)
-    return this.buildRecentSessions(scope, range, limit)
+    return buildRecentCodexUsageSessions(this.state, scope, range, limit)
   }
 
-  private buildRecentSessions(
-    scope: CodexUsageScope,
-    range: CodexUsageRange,
-    limit = 12
-  ): CodexUsageSessionRow[] {
-    return this.getFilteredSessions(scope, range)
-      .slice(0, limit)
-      .map((session) => {
-        const matchingLocations = session.locationBreakdown.filter((entry) =>
-          scope === 'all' ? true : entry.worktreeId !== null
-        )
-        const scopedLocations =
-          matchingLocations.length > 0 ? matchingLocations : session.locationBreakdown
-        const totals = scopedLocations.reduce(
-          (acc, entry) => {
-            acc.events += entry.eventCount
-            acc.inputTokens += entry.inputTokens
-            acc.cachedInputTokens += entry.cachedInputTokens
-            acc.outputTokens += entry.outputTokens
-            acc.reasoningOutputTokens += entry.reasoningOutputTokens
-            acc.totalTokens += entry.totalTokens
-            acc.hasInferredPricing ||= entry.hasInferredPricing
-            return acc
-          },
-          {
-            events: 0,
-            inputTokens: 0,
-            cachedInputTokens: 0,
-            outputTokens: 0,
-            reasoningOutputTokens: 0,
-            totalTokens: 0,
-            hasInferredPricing: false
-          }
-        )
-        const durationMinutes = Math.max(
-          0,
-          Math.round(
-            (new Date(session.lastTimestamp).getTime() -
-              new Date(session.firstTimestamp).getTime()) /
-              60_000
-          )
-        )
-        return {
-          sessionId: session.sessionId,
-          lastActiveAt: session.lastTimestamp,
-          durationMinutes,
-          projectLabel:
-            scopedLocations.length > 1
-              ? 'Multiple locations'
-              : (scopedLocations[0]?.projectLabel ?? session.primaryProjectLabel),
-          model: this.getScopedSessionPrimaryModel(session, scope),
-          events: totals.events,
-          inputTokens: totals.inputTokens,
-          cachedInputTokens: totals.cachedInputTokens,
-          outputTokens: totals.outputTokens,
-          reasoningOutputTokens: totals.reasoningOutputTokens,
-          totalTokens: totals.totalTokens,
-          hasInferredPricing: session.hasInferredPricing || totals.hasInferredPricing
-        }
-      })
+  private async runScan(): Promise<void> {
+    if (this.scanPromise) {
+      await this.scanPromise
+      return
+    }
+    this.state.scanState.lastScanStartedAt = Date.now()
+    this.state.scanState.lastScanError = null
+    this.scanPromise = this.scanUsageFiles().finally(() => {
+      this.scanPromise = null
+    })
+    await this.scanPromise
   }
 
-  async getAutomationRunUsage(input: AutomationUsageLookupInput): Promise<AutomationRunUsage> {
-    const collectedAt = Date.now()
-    const unavailable = (
-      unavailableReason: AutomationRunUsage['unavailableReason'],
-      unavailableMessage: string
-    ): AutomationRunUsage => ({
-      status: 'unavailable',
-      provider: 'codex',
-      model: null,
-      inputTokens: null,
-      outputTokens: null,
-      cacheReadTokens: null,
-      cacheWriteTokens: null,
-      reasoningOutputTokens: null,
-      totalTokens: null,
-      estimatedCostUsd: null,
-      estimatedCostSource: null,
-      providerSessionId: null,
-      attribution: null,
-      collectedAt,
-      unavailableReason,
-      unavailableMessage
-    })
-
-    if (!this.state.scanState.enabled) {
-      return unavailable('usage_not_enabled', 'Codex usage tracking is not enabled.')
-    }
-    if (!input.worktreeId || !input.startedAt || !input.completedAt) {
-      return unavailable('no_matching_session', 'Run session metadata is incomplete.')
-    }
-
-    const scanState = await this.refresh(this.shouldForceAutomationUsageScan(input.completedAt))
-    if (scanState.lastScanError) {
-      return unavailable('scan_failed', scanState.lastScanError)
-    }
-
-    const windowStart = input.startedAt - AUTOMATION_ATTRIBUTION_WINDOW_MS
-    const windowEnd = input.completedAt + AUTOMATION_ATTRIBUTION_WINDOW_MS
-    const candidates = this.state.sessions.filter((session) => {
-      const first = new Date(session.firstTimestamp).getTime()
-      const last = new Date(session.lastTimestamp).getTime()
-      if (!Number.isFinite(first) || !Number.isFinite(last)) {
-        return false
-      }
-      if (session.sessionId === input.terminalSessionId) {
-        return true
-      }
-      if (first < windowStart || first > windowEnd || last > windowEnd) {
-        return false
-      }
-      return session.locationBreakdown.some((entry) => entry.worktreeId === input.worktreeId)
-    })
-
-    if (candidates.length === 0) {
-      return unavailable('no_matching_session', 'No Codex usage session matched this run.')
-    }
-    if (candidates.length > 1) {
-      return unavailable(
-        'ambiguous_session',
-        'Multiple Codex usage sessions matched this run window.'
+  private async scanUsageFiles(): Promise<void> {
+    try {
+      const repos = this.store.getRepos()
+      const worktreesByRepo = loadKnownUsageWorktreesByRepo(this.store, repos)
+      const fingerprint = getWorktreeFingerprint(worktreesByRepo)
+      const canReuseProcessedFiles = this.state.worktreeFingerprint === fingerprint
+      const result = await scanCodexUsageFiles(
+        createWorktreeRefs(repos, worktreesByRepo),
+        canReuseProcessedFiles ? this.state.processedFiles : [],
+        canReuseProcessedFiles ? this.state.ownershipGeneration : null,
+        getCodexUsageOwnershipFile()
       )
+      this.state.processedFiles = result.processedFiles
+      this.state.sessions = result.sessions
+      this.state.dailyAggregates = result.dailyAggregates
+      this.state.ownershipGeneration = result.ownershipGeneration
+      this.state.worktreeFingerprint = fingerprint
+      this.state.scanState.lastScanCompletedAt = Date.now()
+      this.state.scanState.lastScanError = null
+      this.writeToDisk()
+    } catch (error) {
+      this.state.scanState.lastScanError = error instanceof Error ? error.message : String(error)
+      this.writeToDisk()
     }
-
-    const session = candidates[0]
-    const scopedLocations = session.locationBreakdown.filter(
-      (entry) => entry.worktreeId === input.worktreeId
-    )
-    const locations = scopedLocations.length > 0 ? scopedLocations : session.locationBreakdown
-    const totals = locations.reduce(
-      (acc, entry) => {
-        acc.events += entry.eventCount
-        acc.inputTokens += entry.inputTokens
-        acc.cachedInputTokens += entry.cachedInputTokens
-        acc.outputTokens += entry.outputTokens
-        acc.reasoningOutputTokens += entry.reasoningOutputTokens
-        acc.totalTokens += entry.totalTokens
-        return acc
-      },
-      {
-        events: 0,
-        inputTokens: 0,
-        cachedInputTokens: 0,
-        outputTokens: 0,
-        reasoningOutputTokens: 0,
-        totalTokens: 0
-      }
-    )
-    const scopedModelRows = session.locationModelBreakdown.filter(
-      (entry) => entry.worktreeId === input.worktreeId
-    )
-    const modelRows = scopedModelRows.length > 0 ? scopedModelRows : session.modelBreakdown
-    const modelLabels = [...new Set(modelRows.map((entry) => entry.modelLabel))]
-    let estimatedCostUsd = 0
-    let hasKnownCost = false
-    if (scopedModelRows.length > 0) {
-      for (const modelRow of scopedModelRows) {
-        const cost = priceCodexAggregateUsage(
-          modelRow.modelKey,
-          modelRow.inputTokens,
-          modelRow.cachedInputTokens,
-          modelRow.outputTokens
-        )
-        if (cost !== null) {
-          hasKnownCost = true
-          estimatedCostUsd += cost
-        }
-      }
-    } else if (!session.hasMixedModels) {
-      const cost = priceCodexAggregateUsage(
-        session.primaryModel,
-        totals.inputTokens,
-        totals.cachedInputTokens,
-        totals.outputTokens
-      )
-      if (cost !== null) {
-        hasKnownCost = true
-        estimatedCostUsd += cost
-      }
-    }
-
-    return {
-      status: 'known',
-      provider: 'codex',
-      model:
-        modelLabels.length === 1
-          ? modelLabels[0]
-          : session.hasMixedModels
-            ? 'Mixed models'
-            : session.primaryModel,
-      inputTokens: totals.inputTokens,
-      outputTokens: totals.outputTokens,
-      cacheReadTokens: totals.cachedInputTokens,
-      cacheWriteTokens: null,
-      reasoningOutputTokens: totals.reasoningOutputTokens,
-      totalTokens: totals.totalTokens,
-      estimatedCostUsd: hasKnownCost ? estimatedCostUsd : null,
-      estimatedCostSource: hasKnownCost ? 'api_equivalent' : null,
-      providerSessionId: session.sessionId,
-      // Why: Yiru terminal tab ids and Codex usage session ids are different
-      // systems today, so attribution is intentionally limited to one local
-      // provider session in the run's worktree/time window.
-      attribution: 'provider_session_time_window',
-      collectedAt,
-      unavailableReason: null,
-      unavailableMessage: null
-    }
-  }
-
-  private getFilteredDaily(scope: CodexUsageScope, range: CodexUsageRange) {
-    const cutoff = getRangeCutoff(range)
-    return this.state.dailyAggregates.filter((entry) => {
-      if (cutoff && entry.day < cutoff) {
-        return false
-      }
-      if (scope === 'yiru' && entry.worktreeId === null) {
-        return false
-      }
-      return true
-    })
-  }
-
-  private getFilteredSessions(scope: CodexUsageScope, range: CodexUsageRange) {
-    const cutoff = getRangeCutoff(range)
-    return this.state.sessions.filter((session) => {
-      const day = getLocalDay(session.lastTimestamp)
-      if (!day) {
-        return false
-      }
-      if (cutoff && day < cutoff) {
-        return false
-      }
-      if (scope === 'yiru') {
-        return session.locationBreakdown.some((entry) => entry.worktreeId !== null)
-      }
-      return true
-    })
-  }
-
-  private getScopedSessionModels(
-    session: CodexUsagePersistedState['sessions'][number],
-    scope: CodexUsageScope
-  ): ScopedCodexUsageModelRow[] {
-    if (scope === 'all' || session.locationModelBreakdown.length === 0) {
-      return session.modelBreakdown
-    }
-
-    const rows = new Map<string, ScopedCodexUsageModelRow>()
-    for (const entry of session.locationModelBreakdown) {
-      if (entry.worktreeId === null) {
-        continue
-      }
-      const existing = rows.get(entry.modelKey) ?? {
-        modelKey: entry.modelKey,
-        modelLabel: entry.modelLabel,
-        hasInferredPricing: false,
-        eventCount: 0,
-        inputTokens: 0,
-        cachedInputTokens: 0,
-        outputTokens: 0,
-        reasoningOutputTokens: 0,
-        totalTokens: 0
-      }
-      existing.hasInferredPricing ||= entry.hasInferredPricing
-      existing.eventCount += entry.eventCount
-      existing.inputTokens += entry.inputTokens
-      existing.cachedInputTokens += entry.cachedInputTokens
-      existing.outputTokens += entry.outputTokens
-      existing.reasoningOutputTokens += entry.reasoningOutputTokens
-      existing.totalTokens += entry.totalTokens
-      rows.set(entry.modelKey, existing)
-    }
-    return [...rows.values()].sort((left, right) => right.totalTokens - left.totalTokens)
-  }
-
-  private getScopedSessionPrimaryModel(
-    session: CodexUsagePersistedState['sessions'][number],
-    scope: CodexUsageScope
-  ): string | null {
-    const scopedModels = this.getScopedSessionModels(session, scope)
-    if (scopedModels.length === 0) {
-      return session.primaryModel
-    }
-    if (scopedModels.length === 1) {
-      return scopedModels[0]?.modelLabel ?? null
-    }
-    return 'Mixed models'
-  }
-
-  private shouldForceAutomationUsageScan(completedAt: number): boolean {
-    const { lastScanCompletedAt, lastScanError } = this.state.scanState
-    // Why: attribution needs a scan after the run finishes, but repeated
-    // lookups after that point should not rescan all Codex session history.
-    return (
-      Boolean(lastScanError) || lastScanCompletedAt === null || lastScanCompletedAt < completedAt
-    )
   }
 
   private async getCurrentWorktreeFingerprint(): Promise<string> {
     const repos = this.store.getRepos()
-    const worktreesByRepo = loadKnownUsageWorktreesByRepo(this.store, repos)
-    return getWorktreeFingerprint(worktreesByRepo)
+    return getWorktreeFingerprint(loadKnownUsageWorktreesByRepo(this.store, repos))
   }
+
+  private writeToDisk(): void {
+    writeCodexUsageState(this.state)
+  }
+}
+
+function getWorktreeFingerprint(worktreesByRepo: Map<string, UsageWorktreeRef[]>): string {
+  const rows = [...worktreesByRepo.entries()]
+    .flatMap(([repoId, worktrees]) =>
+      worktrees.map((worktree) =>
+        JSON.stringify({
+          repoId,
+          worktreeId: worktree.worktreeId,
+          path: worktree.path,
+          displayName: worktree.displayName
+        })
+      )
+    )
+    .sort()
+  return JSON.stringify(rows)
 }

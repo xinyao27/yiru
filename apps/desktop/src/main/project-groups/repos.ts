@@ -2,9 +2,6 @@ import { homedir } from 'node:os'
 import { join } from 'node:path'
 
 import { normalizeExecutionHostId } from '@yiru/workbench-model/workspace'
-/* eslint-disable max-lines -- Why: repo IPC is intentionally centralized so host
-routing, clone lifecycle, and store persistence stay behind a single audited
-boundary. Splitting by line count would scatter tightly coupled repo behavior. */
 import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
 
 import { invalidateAuthorizedRootsCache } from '../filesystem/auth'

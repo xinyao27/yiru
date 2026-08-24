@@ -17,7 +17,7 @@ import type {
   DeveloperPermissionStatus
 } from '~shared/developer-permissions-types'
 
-import { isMacUserAgent } from '../terminal-pane/pane-helpers'
+import { isMacUserAgent } from '../terminal-pane/pane-interactions'
 
 type FullDiskAccessStatusState = {
   status: DeveloperPermissionStatus | undefined

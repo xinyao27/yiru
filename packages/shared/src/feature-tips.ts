@@ -4,11 +4,11 @@ import {
   type FeatureInteractionState
 } from './feature-interactions'
 
-export type FeatureTipId = 'voice-dictation' | 'yiru-cli' | 'cmd-j-palette'
+export type FeatureTipId = 'yiru-cli' | 'cmd-j-palette'
 
 export type FeatureTipPriority = 'new' | 'unseen'
 
-export type FeatureTipAction = 'enable-voice' | 'setup-cli' | 'learn-cmd-j-palette'
+export type FeatureTipAction = 'setup-cli' | 'learn-cmd-j-palette'
 
 export type FeatureTip = {
   id: FeatureTipId
@@ -24,7 +24,6 @@ export type FeatureTip = {
 
 export type CompletedFeatureTipState = {
   cliInstalled: boolean
-  voiceDictationEnabled: boolean
   featureInteractions?: FeatureInteractionState
 }
 
@@ -51,17 +50,6 @@ export const FEATURE_TIPS = [
     action: 'learn-cmd-j-palette',
     ctaLabel: 'Got it',
     completedByFeatureInteractions: []
-  },
-  {
-    id: 'voice-dictation',
-    priority: 'unseen',
-    eyebrow: 'Tip',
-    title: 'Voice Dictation is here',
-    description:
-      'Speak into any focused pane and Yiru will transcribe it. Press the dictation shortcut to start and stop.',
-    action: 'enable-voice',
-    ctaLabel: 'Set Up Voice',
-    completedByFeatureInteractions: ['voice-dictation']
   }
 ] as const satisfies readonly FeatureTip[]
 
@@ -89,9 +77,6 @@ export function getCompletedFeatureTipIds(state: CompletedFeatureTipState): Set<
   const completedIds = new Set<FeatureTipId>()
   if (state.cliInstalled) {
     completedIds.add('yiru-cli')
-  }
-  if (state.voiceDictationEnabled) {
-    completedIds.add('voice-dictation')
   }
   for (const tip of FEATURE_TIPS) {
     if (

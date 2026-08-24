@@ -5,7 +5,7 @@ Pair the app with Yiru Desktop to keep agent sessions, isolated Git worktrees, t
 Use Yiru Mobile to:
 
 - Open and switch between workspaces and agent sessions.
-- Read and interact with persistent terminals, native chat, files, and browser previews.
+- Read and interact with persistent terminals, files, and browser previews.
 - Review diffs, stage changes, commit work, and manage pull requests.
 - Resume agent history and inspect activity and provider usage.
 - Receive desktop notifications and open the relevant workspace directly.

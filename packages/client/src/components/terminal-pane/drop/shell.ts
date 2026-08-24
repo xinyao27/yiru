@@ -1,7 +1,7 @@
 import { isWindowsAbsolutePathLike } from '@yiru/workbench-model/platform'
 import { isWslUncPath } from '@yiru/workbench-model/platform'
 
-import { isWindowsUserAgent } from '../pane-helpers'
+import { isWindowsUserAgent } from '../pane-interactions'
 
 export type TerminalTargetShell = 'posix' | 'windows'
 

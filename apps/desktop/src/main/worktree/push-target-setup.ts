@@ -5,7 +5,7 @@
 
 import type { GitPushTarget } from '~shared/types'
 
-import { parseGitHubOwnerRepo } from '../github/gh-utils'
+import { parseGitHubOwnerRepo } from '../github/github-cli'
 import type { GitRemoteExec } from './push-target-cleanup'
 
 export async function findRemoteForUrl(

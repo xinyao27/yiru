@@ -1,4 +1,4 @@
-import type { HookCommandConfig, HookDefinition } from '../agent-hooks/installer-utils'
+import type { HookCommandConfig, HookDefinition } from '../agent-hooks/managed-hook-commands'
 import {
   codexAppServerCapabilityCache,
   getCodexAppServerHostKey,

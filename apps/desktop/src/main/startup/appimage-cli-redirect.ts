@@ -28,7 +28,6 @@ const APPIMAGE_DESKTOP_FLAGS = new Set(['--no-sandbox'])
 // launches need a conservative allow-list before bypassing the GUI startup.
 const APPIMAGE_CLI_COMMAND_NAMES = [
   'agent',
-  'automations',
   'back',
   'capture',
   'check',

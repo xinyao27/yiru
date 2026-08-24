@@ -13,8 +13,6 @@ struct TerminalLivePane: View {
     let showFiles: (() -> Void)?
     let showSourceControl: (() -> Void)?
     let showAgentHistory: (() -> Void)?
-    var switchToChat: (() -> Void)? = nil
-    var imageAttachment: TerminalImageAttachment? = nil
     var openTerminalFile: ((TerminalTappedFile) -> Void)? = nil
     var openTerminalURL: ((URL) -> Void)? = nil
 
@@ -34,7 +32,6 @@ struct TerminalLivePane: View {
                         state: model.surface.accessoryState,
                         displayMode: model.displayMode,
                         isDisplayModeUpdating: model.isDisplayModeUpdating,
-                        attachment: imageAttachment,
                         toggleDisplayMode: { Task { await model.toggleDisplayMode() } },
                         removeCustomKey: { preferences.removeCustomKey($0) }
                     )
@@ -106,12 +103,6 @@ struct TerminalLivePane: View {
 
     private var controlsMenu: some View {
         Menu {
-            if let switchToChat {
-                Button(action: switchToChat) {
-                    Label("Switch to chat view", iconID: .chat)
-                }
-            }
-
             if let showQuickCommands {
                 Button(action: showQuickCommands) {
                     Label("Quick commands", iconID: .arrowRight)

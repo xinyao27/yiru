@@ -4,7 +4,6 @@ const FIXED_WORKTREE_CARD_PROPERTIES: WorktreeCardProperty[] = ['status', 'unrea
 
 export const DEFAULT_WORKTREE_CARD_PROPERTIES: WorktreeCardProperty[] = [
   ...FIXED_WORKTREE_CARD_PROPERTIES,
-  'automation',
   'comment',
   'ports',
   // Why: retain the persisted key while the surface now means canonical open
@@ -16,7 +15,6 @@ const WORKTREE_CARD_PROPERTY_ORDER: WorktreeCardProperty[] = [
   'status',
   'unread',
   'branch',
-  'automation',
   'comment',
   'ports',
   'inline-agents'

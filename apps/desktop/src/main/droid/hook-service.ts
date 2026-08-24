@@ -23,13 +23,13 @@ import {
   writeManagedScript,
   type HookDefinition,
   type HooksConfig
-} from '../agent-hooks/installer-utils'
+} from '../agent-hooks/managed-hook-commands'
+import type { RemoteFileOperations } from '../agent-hooks/remote-file-operations'
 import {
   readHooksJsonRemote,
   writeHooksJsonRemote,
   writeManagedScriptRemote
-} from '../agent-hooks/installer-utils-remote'
-import type { RemoteFileOperations } from '../agent-hooks/remote-file-operations'
+} from '../agent-hooks/remote-hook-storage'
 
 // Why: SessionStart is installed (not just listened for) so that resuming a
 // droid session via `droid --resume` resets the per-pane prompt/tool caches

@@ -23,20 +23,6 @@ export type RuntimeGitWorktreeInfo = {
   isMainWorktree: boolean
 }
 
-export type RuntimeAutomationWorkspaceProvenance = {
-  kind: 'created-by-automation'
-  automationId: string
-  automationNameSnapshot: string
-  automationRunId: string
-  automationRunTitleSnapshot: string
-  createdAt: number
-  executionTargetType: 'local'
-  executionTargetId: string
-  projectId: string
-  repoId?: string
-  hostId?: ExecutionHostId
-}
-
 export type RuntimeWorktree = RuntimeGitWorktreeInfo & {
   id: string
   instanceId?: string
@@ -70,7 +56,6 @@ export type RuntimeWorktree = RuntimeGitWorktreeInfo & {
   workspaceStatus?: WorkspaceStatus
   diffComments?: DiffComment[]
   mobileDiffReview?: MobileDiffReviewState
-  automationProvenance?: RuntimeAutomationWorkspaceProvenance
 }
 
 export type RuntimeWorktreeLineageCapture = {

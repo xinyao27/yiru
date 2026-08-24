@@ -43,7 +43,7 @@ import {
 import { settingsForRuntimeOwner } from '~renderer/runtime/rpc-client'
 import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
-import { findWorktreeById } from '~renderer/store/slices/worktree-helpers'
+import { findWorktreeById } from '~renderer/store/slices/worktree-state'
 import { selectWorktreeDiffCommentsOrEmpty } from '~renderer/store/worktree-diff-comments-selector'
 import type {
   DiffComment,

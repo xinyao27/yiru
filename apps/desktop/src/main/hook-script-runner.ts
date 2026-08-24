@@ -130,7 +130,7 @@ export function createSetupRunnerScript(
 export function getSetupRunnerEnvVars(repo: Repo, worktreePath: string): Record<string, string> {
   return {
     ...getSetupEnvVars(repo, worktreePath),
-    // Why: the visible Setup terminal is still unattended automation; user
+    // Why: the visible Setup terminal is still an unattended background task; user
     // terminal opt-out must not let its git commands open credential UI.
     [TERMINAL_GIT_CREDENTIAL_GUARD_POLICY_ENV]: 'guard'
   }

@@ -161,7 +161,7 @@ export function AgentLetterIcon({
         fontSize="8.5"
         fill="currentColor"
         fontWeight="700"
-        fontFamily="system-ui, -apple-system, sans-serif"
+        fontFamily="var(--font-sans)"
       >
         {letter}
       </text>

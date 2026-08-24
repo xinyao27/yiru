@@ -7,7 +7,7 @@ import {
   isWebTerminalSurfaceTabId
 } from '~renderer/runtime/web-runtime-session'
 import { useAppStore } from '~renderer/store'
-import type { Tab, TuiAgent } from '~shared/types'
+import type { TuiAgent } from '~shared/types'
 
 function removeStaleLocalAgentTabsForWebHostLaunch(worktreeId: string): void {
   const state = useAppStore.getState()
@@ -41,7 +41,6 @@ export function launchAgentInWebHostTab(args: {
     submit: boolean
     forcePaste: boolean
   }
-  viewMode?: Tab['viewMode']
   onPromptDelivered?: () => void
 }): Promise<{ delivered: boolean; failureNotified: boolean }> {
   const {
@@ -53,7 +52,6 @@ export function launchAgentInWebHostTab(args: {
     hasPrompt,
     startupPlan,
     promptAfterReady,
-    viewMode,
     onPromptDelivered
   } = args
   removeStaleLocalAgentTabsForWebHostLaunch(worktreeId)
@@ -63,7 +61,6 @@ export function launchAgentInWebHostTab(args: {
     targetGroupId: groupId,
     activate: true,
     ...(cwd?.trim() ? { cwd } : {}),
-    ...(viewMode ? { viewMode } : {}),
     ...(hasPrompt
       ? {
           command: startupPlan.launchCommand,

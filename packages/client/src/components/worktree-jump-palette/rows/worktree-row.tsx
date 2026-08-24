@@ -5,7 +5,7 @@ import StatusIndicator from '~renderer/components/sidebar/status-indicator'
 import { CommandItem } from '~renderer/components/ui/command'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
-import { branchName } from '~renderer/lib/git-utils'
+import { branchName } from '~renderer/lib/git-branch-name'
 import { getWorktreeStatus, getWorktreeStatusLabel } from '~renderer/lib/worktree-status'
 
 import {

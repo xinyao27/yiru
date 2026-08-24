@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useState, type JSX } from 'react'
-import { usePrefersReducedMotion } from '~renderer/components/feature-wall/modal-helpers'
 import { MagnifyingGlass as Search, Plus } from '~renderer/components/icons/hugeicons'
+import { usePrefersReducedMotion } from '~renderer/hooks/use-prefers-reduced-motion'
 import {
   formatShortcutKeyComboDetails,
   useShortcutKeyDetails

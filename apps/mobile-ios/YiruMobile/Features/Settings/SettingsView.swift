@@ -4,7 +4,6 @@ struct SettingsView: View {
     @State private var cleanupModel: CredentialCleanupModel
     @State private var loadTask: Task<Void, Never>?
     let showAppearance: () -> Void
-    let showChat: () -> Void
     let showTerminal: () -> Void
     let showBrowser: () -> Void
     let showNotifications: () -> Void
@@ -16,7 +15,6 @@ struct SettingsView: View {
     init(
         credentialCleanupRepository: any CredentialCleanupRepository,
         showAppearance: @escaping () -> Void,
-        showChat: @escaping () -> Void,
         showTerminal: @escaping () -> Void,
         showBrowser: @escaping () -> Void,
         showNotifications: @escaping () -> Void,
@@ -30,7 +28,6 @@ struct SettingsView: View {
         )
         _loadTask = State(initialValue: nil)
         self.showAppearance = showAppearance
-        self.showChat = showChat
         self.showTerminal = showTerminal
         self.showBrowser = showBrowser
         self.showNotifications = showNotifications
@@ -78,8 +75,6 @@ struct SettingsView: View {
     private var navigationSection: some View {
         SettingsSection {
             SettingsNavigationRow(title: "Appearance", glyph: .palette, action: showAppearance)
-            SettingsDivider(emphasized: true)
-            SettingsNavigationRow(title: "Chat UI", glyph: .chat, action: showChat)
             SettingsDivider(emphasized: true)
             SettingsNavigationRow(title: "Terminal", glyph: .terminal, action: showTerminal)
             SettingsDivider(emphasized: true)

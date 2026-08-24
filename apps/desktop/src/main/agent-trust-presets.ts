@@ -4,7 +4,7 @@ import { basename, dirname, join, resolve } from 'node:path'
 
 import type { AgentTrustInput } from '@yiru/runtime-protocol/contract'
 
-import { writeFileAtomically } from './codex/accounts/fs-utils'
+import { writeFileAtomically } from './codex/accounts/atomic-file-operations'
 import { upsertProjectTrustLevel } from './codex/config-toml-trust'
 import { getYiruManagedCodexHomePath } from './codex/home-paths'
 

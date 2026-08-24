@@ -71,6 +71,10 @@ export function updateSidebarDragPreviewPosition(args: {
   args.preview.style.transform = `translate3d(${x}px, ${y}px, 0) scale(1.015)`
 }
 
+export function removeSidebarDragPreview(preview: HTMLElement | null): void {
+  preview?.remove()
+}
+
 export function createSidebarDragPreview(args: {
   sourceRow: HTMLElement
   pointerX: number

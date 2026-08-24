@@ -95,7 +95,7 @@ import {
 import { installMouseHideWhileTyping } from './mouse-hide-while-typing'
 import { handleOsc52ClipboardRequest } from './osc52-clipboard'
 import { showOsc52ClipboardBlockedToast } from './osc52-clipboard-blocked-toast'
-import { fitAndFocusPanes, fitPanes } from './pane-helpers'
+import { fitAndFocusPanes, fitPanes } from './pane-interactions'
 import { parseOsc7 } from './parse-osc7'
 import { connectPanePty } from './pty/connection'
 import type { PtyTransport } from './pty/transport-types'

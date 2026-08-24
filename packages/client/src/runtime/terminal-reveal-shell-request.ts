@@ -10,11 +10,8 @@ import {
 import { SPLIT_TERMINAL_PANE_EVENT } from '~renderer/constants/terminal'
 import type { SplitTerminalPaneDetail } from '~renderer/constants/terminal'
 import { translate } from '~renderer/i18n/i18n'
-import { getConnectionIdFromState } from '~renderer/lib/connection-context'
-import { initialAgentTabViewModeProps } from '~renderer/lib/native-chat-initial-view-mode'
-import { isNativeChatTranscriptLocalReadable } from '~renderer/lib/native-chat-transcript-readability'
 import { useAppStore } from '~renderer/store'
-import { singlePaneLayoutSnapshot } from '~renderer/store/slices/terminal-helpers'
+import { singlePaneLayoutSnapshot } from '~renderer/store/slices/terminal-layout-state'
 import { parseRuntimeTerminalPtyId } from '~shared/runtime-terminal-pty-id'
 import { makePaneKey } from '~shared/stable-pane-id'
 
@@ -65,8 +62,6 @@ export function revealTerminalSessionViaShell(
     launchConfig,
     launchToken,
     launchAgent,
-    viewMode,
-    isFriday,
     activate,
     presentation,
     tabId,
@@ -119,20 +114,9 @@ export function revealTerminalSessionViaShell(
       activate: shouldActivate,
       ...(launchAgent
         ? {
-            launchAgent,
-            // Why: a paired client resolved explicit mode before PTY
-            // materialization; only omitted mode uses host defaults.
-            ...(viewMode
-              ? { viewMode }
-              : initialAgentTabViewModeProps(store.settings, {
-                  agent: launchAgent,
-                  nativeChatTranscriptIsLocalReadable: isNativeChatTranscriptLocalReadable(
-                    getConnectionIdFromState(store, worktreeId)
-                  )
-                }))
+            launchAgent
           }
         : {}),
-      ...(isFriday ? { isFriday: true } : {}),
       ...(cwd ? { startupCwd: cwd } : {}),
       // Why: tabId hint comes from CLI-spawned PTYs whose env already has the
       // pane key baked in. Adopting the tab under the same id keeps
@@ -151,14 +135,6 @@ export function revealTerminalSessionViaShell(
   if (shouldActivate) {
     store.setActiveTabType('terminal')
     store.setActiveTab(tab.id)
-  }
-  if (viewMode && reusedTab) {
-    // Why: reopening the assistant should return its existing tab to chat
-    // after the user previously used the raw-terminal escape.
-    store.setTabViewMode(tab.id, viewMode)
-  }
-  if (isFriday) {
-    store.markTabAsFriday(tab.id)
   }
   if (shouldSurfaceOwner) {
     store.revealWorktreeInSidebar(worktreeId)

@@ -4,8 +4,6 @@ import type {
   RateLimitResumeSchedule,
   ShellServicesOpenExternalInput,
   ShellServicesOpenExternalOutput,
-  ShellServicesAutomationDispatchInput,
-  ShellServicesAutomationDispatchResult,
   ShellServicesMobileMarkdownReadInput,
   ShellServicesMobileMarkdownReadResult,
   ShellServicesMobileMarkdownSaveInput,
@@ -149,14 +147,6 @@ export async function requestShellOpenExternal(
   }
 }
 
-function getElectronShellServicesConnection(
-  webContentsId: number | undefined
-): ShellServicesConnection | undefined {
-  return webContentsId === undefined
-    ? undefined
-    : connectionsByShellId.get(electronShellServicesConnectionId(webContentsId))
-}
-
 // Why: replaces terminal-tab-close-request-relay.ts's 20s `setTimeout`
 // (Phase 5 slice S4b). Unlike ping/notifications above, a thrown error here
 // (pin rejection, mid-close persistence failure) is not collapsed into
@@ -282,38 +272,6 @@ export async function saveMobileMarkdownViaShell(
     signal: AbortSignal.timeout(20_000)
   })
   return { ok: true, ...output }
-}
-
-// Why: Phase 5 slice S6 (切片 47) — replaces browser-tab.ts's inlined
-// `randomUUID()` + `ipcMain.on('browser:tabCreateReply', …)` + 10s
-// `setTimeout` relay. `webContentsId` here is the authoritative window's id
-// (resolved by the caller via the host's non-throwing window getter), not a
-// request-scoped shell connection id — the CLI/mobile caller asking for a tab has
-// no webContents of its own; it is asking the runtime to act on the one
-// desktop window it manages. Same non-collapsing rule as closeTab/create
-// above: a thrown domain error ("No active worktree", the remote-runtime-
-// active guard) is the caller's real answer, not a shell-unavailable degrade.
-// Why: Phase 5 slice S5 — unlike every reverse call above, the caller here is
-// AutomationService's own scheduler tick, not a forward RPC handler, so there
-// is no RpcContext to read a `shellConnectionId` from. The service instead
-// passes the id of the single webContents it was handed via `setWebContents`.
-// `dispatch` only has to be accepted quickly — the renderer keeps running the
-// actual launch in the background and reports outcomes through the existing
-// local `markDispatchResult` IPC, not through this link.
-export async function requestShellAutomationDispatch(
-  webContentsId: number,
-  input: ShellServicesAutomationDispatchInput
-): Promise<ShellServicesAutomationDispatchResult> {
-  const connection = getElectronShellServicesConnection(webContentsId)
-  if (!connection) {
-    return { ok: false, reason: 'shell-unavailable' }
-  }
-  try {
-    const output = await connection.client.automations.dispatch(input)
-    return { ok: true, ...output }
-  } catch {
-    return { ok: false, reason: 'shell-unavailable' }
-  }
 }
 
 // Why: scheduled dispatch has no active forward request, so the service keeps

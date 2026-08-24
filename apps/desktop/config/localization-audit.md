@@ -26,47 +26,11 @@ are surfaced directly as UI copy:
 - Developer logs, internal diagnostics, test fixtures, and snapshots.
 - Brand, provider, model, command, and product names that should remain exact.
 
-## Inventory Command
+## Review Workflow
 
-Generate a machine-readable inventory:
-
-```sh
-node scripts/audit-localization-coverage.mjs --json --output tmp/localization-candidates.json
-```
-
-Generate a reviewable Markdown inventory:
-
-```sh
-node scripts/audit-localization-coverage.mjs --markdown --output tmp/localization-candidates.md
-```
-
-Run the maintained coverage gate:
-
-```sh
-pnpm run verify:localization-coverage
-```
-
-Sync catalog keys after adding or removing `translate(...)` calls:
-
-```sh
-pnpm run sync:localization-catalog
-```
-
-The sync command adds missing `en.json` entries from each call's string fallback,
-copies untranslated English placeholders into other locale catalogs to keep
-parity, removes locale entries whose English key was deleted, and repairs
-placeholder mismatches. Run the machine-translation bootstrap commands only when
-refreshing real translations, not for ordinary UI copy changes.
-
-The coverage gate compares current candidates against
-`config/localization-coverage-allowlist.json`. The committed allowlist is empty:
-new candidates fail the check and must be localized or added with a reviewed
-reason in the same change.
-
-The script scans `../../packages/client/src` by default. That is the primary UI surface.
-Use `--source-root ../../packages/client/src` for an explicit client audit when checking adjacent
-copy, then classify non-renderer findings carefully because many are diagnostics
-or external tool text.
+The repository does not ship a custom localization scanner or catalog synchronizer. Review
+renderer copy directly against the coverage contract above, update locale catalogs by hand, and
+use normal lint and typechecking for validation.
 
 ## Migration States
 
@@ -94,13 +58,12 @@ Recommended migration order:
 
 ## Proof Strategy
 
-The final gate should combine three checks:
+Final review should combine three checks:
 
-1. Scanner coverage: no unclassified localizable candidates remain.
+1. Source review: no unclassified localizable candidates remain.
 2. Catalog coverage: every supported locale has the same keys as English, with
    matching interpolation variables.
 3. Runtime coverage: English and Simplified Chinese smoke tests show no obvious
    untranslated copy or layout clipping in core screens.
 
-Subagent or human review should verify ambiguous exclusions, but the scanner is
-the coverage source of truth.
+Human review should verify ambiguous exclusions.

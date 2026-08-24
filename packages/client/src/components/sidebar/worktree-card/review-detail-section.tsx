@@ -16,7 +16,7 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { translate } from '~renderer/i18n/i18n'
 
-import { getProviderName, getReviewLabel, ReviewIcon } from '../worktree-review-helpers'
+import { getProviderName, getReviewLabel, ReviewIcon } from '../worktree-review-presentation'
 import { WorktreeCardDetailSection, WorktreeCardDetailSectionContent } from './detail-section'
 import { DetailHeader, MetadataActionIcon } from './metadata-controls'
 import { ReviewChecksBadge, ReviewStateBadge } from './metadata-status-badges'

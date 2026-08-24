@@ -1,11 +1,6 @@
 import type { FeatureInteractionId } from './feature-interactions'
 
-export type ContextualTourId =
-  | 'workspace-agent-sessions'
-  | 'browser'
-  | 'automations'
-  | 'floating-workspace'
-  | 'workspace-creation'
+export type ContextualTourId = 'workspace-agent-sessions' | 'browser' | 'workspace-creation'
 
 export type ContextualTourStepControl = {
   kind: 'auto-rename-branch-from-work'
@@ -96,44 +91,6 @@ export const CONTEXTUAL_TOURS = [
           '[data-contextual-tour-target="browser-import-hint"], [data-contextual-tour-target="browser-import-cookies-control"]',
         // Sit below the Import button with the arrow pointing up at it.
         preferredPlacement: 'bottom'
-      }
-    ]
-  },
-  {
-    id: 'automations',
-    steps: [
-      {
-        title: 'What is an automation?',
-        body: 'Automations run agent work on a schedule. Add an automation by clicking this button.',
-        targetSelector: '[data-contextual-tour-target="automations-create"]',
-        requiredForStart: true
-      },
-      {
-        title: 'Find the results',
-        body: 'Runs show when automations executed, what happened, and where to inspect their output.',
-        targetSelector: '[data-contextual-tour-target="automations-runs"]'
-      }
-    ]
-  },
-  {
-    id: 'floating-workspace',
-    steps: [
-      {
-        title: 'Run an agent across every repo',
-        body: 'Agents here run in any folder you choose. Point one at the directory above your services to work across all your repos at once.',
-        // Why: the per-action anchors only render in the empty state; fall back
-        // to the panel surface when floating tabs already exist.
-        targetSelector:
-          '[data-contextual-tour-target="floating-workspace-new-terminal"], [data-contextual-tour-target="floating-workspace-surface"]',
-        requiredForStart: true,
-        preferredPlacement: 'left'
-      },
-      {
-        title: 'Or use it as a scratchpad',
-        body: 'Open agents, scratch terminals, notes, and browser tabs without cluttering the worktree you’re focused on.',
-        targetSelector:
-          '[data-contextual-tour-target="floating-workspace-new-markdown"], [data-contextual-tour-target="floating-workspace-surface"]',
-        preferredPlacement: 'left'
       }
     ]
   },

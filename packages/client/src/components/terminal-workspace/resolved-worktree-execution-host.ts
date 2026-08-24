@@ -10,7 +10,6 @@ import {
   findIndexedRepoOwner,
   findIndexedWorktreeOwner
 } from '~renderer/lib/worktree-runtime-owner-index'
-import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
 import { folderWorkspaceKey, parseWorkspaceKey } from '~shared/workspace/scope'
 
 function getResolvedFolderHost(
@@ -46,9 +45,6 @@ export function getResolvedExecutionHostIdForWorktree(
 ): ExecutionHostId | null {
   if (!worktreeId) {
     return null
-  }
-  if (worktreeId === FLOATING_TERMINAL_WORKTREE_ID) {
-    return LOCAL_EXECUTION_HOST_ID
   }
   const scope = parseWorkspaceKey(worktreeId)
   if (scope?.type === 'folder') {

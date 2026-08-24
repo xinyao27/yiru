@@ -148,7 +148,7 @@ export async function discoverSkills(args: {
   const homeDir = args.homeDir ?? homedir()
   const roots = [
     ...buildSkillDiscoverySources({ ...args, homeDir }),
-    // Why: plugin discovery is native-chat data keyed to an explicit workspace.
+    // Why: plugin discovery is workspace data keyed to an explicit workspace.
     // Untargeted scans (Settings) keep their pre-picker inventory and cost.
     ...(args.cwd && args.includeCwd !== false
       ? await discoverClaudePluginSkillSources({ homeDir, cwd: args.cwd })

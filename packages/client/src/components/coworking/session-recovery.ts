@@ -131,7 +131,7 @@ export function recoverFromCoworkingSubscriptionError(
       } else {
         setPhase('waiting-control')
       }
-      return
+      break
     case 'pending':
       return
     case 'attached':

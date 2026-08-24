@@ -26,8 +26,7 @@ const YIRU_OWNED_PROVENANCE_META_KEYS = [
   'coworkingIncarnationId',
   'yiruCreatedAt',
   'yiruCreationSource',
-  'yiruCreationWorkspaceLayout',
-  'automationProvenance'
+  'yiruCreationWorkspaceLayout'
 ] as const
 type UnregisteredYiruCleanupMeta = Pick<
   WorktreeMeta,

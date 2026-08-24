@@ -1,16 +1,3 @@
-/* Waveform bars in the FeatureTipsModal voice tip — purely decorative. */
-@keyframes waveform {
-  0%,
-  100% {
-    transform: scaleY(0.4);
-    opacity: 0.6;
-  }
-  50% {
-    transform: scaleY(1);
-    opacity: 1;
-  }
-}
-
 /* CLI feature tip — terminal cursor inside the agent-control command. */
 @keyframes cli-tip-caret {
   0%,

@@ -40,18 +40,18 @@
     {
       "name": "yiru-cli",
       "sourcePath": "skills/yiru-cli",
-      "releaseRevision": 35,
-      "packageDigest": "dbaed624ce7129fc9412ff8eb8a2a125900abfe28f4494bb8c911e19a2c72a64",
-      "gitTreeSha": "7991d6c23e172e6d9f6ec3d6e8e9207603445c61",
+      "releaseRevision": 36,
+      "packageDigest": "bdb4caadf3c382cc83df6d013689cd758bc790d2cd55adac83532a9c20e836f8",
+      "gitTreeSha": "03fba854071d3217415a5cbdb6fbd2aaf036224c",
       "files": [
         {
           "path": "SKILL.md",
-          "size": 21163,
+          "size": 19644,
           "executable": false,
           "classification": "text",
-          "exactSha256": "55ad94294c8a915ea147e17d7330c52390addd94234dffbddeaadb83538227de",
-          "textNormalizedSha256": "55ad94294c8a915ea147e17d7330c52390addd94234dffbddeaadb83538227de",
-          "identitySha256": "55ad94294c8a915ea147e17d7330c52390addd94234dffbddeaadb83538227de"
+          "exactSha256": "4a7b97694acfb0e379728891e162a54797010cc8e1d8b542bb48a051172d095b",
+          "textNormalizedSha256": "4a7b97694acfb0e379728891e162a54797010cc8e1d8b542bb48a051172d095b",
+          "identitySha256": "4a7b97694acfb0e379728891e162a54797010cc8e1d8b542bb48a051172d095b"
         }
       ]
     },
@@ -77,17 +77,17 @@
       "name": "yiru-emulator",
       "sourcePath": "skills/yiru-emulator",
       "releaseRevision": 6,
-      "packageDigest": "e7c4b86269a2bb3a7dca41fed540ddb48de467944c69d08b22f889587d83c36d",
-      "gitTreeSha": "4998e78ef302d6334c8f6e3dc9af68330d8988c4",
+      "packageDigest": "d3977b8795cc86f786903e044153d94a114a7929020591185b19ad0f8e2db620",
+      "gitTreeSha": "7da0fb195083ac8603369636f99d5f203f85907b",
       "files": [
         {
           "path": "SKILL.md",
-          "size": 11379,
+          "size": 11368,
           "executable": false,
           "classification": "text",
-          "exactSha256": "08b1ca1372652eb75876698bb8debe398dd31b9f1a20dd4f4f4e25f805507105",
-          "textNormalizedSha256": "08b1ca1372652eb75876698bb8debe398dd31b9f1a20dd4f4f4e25f805507105",
-          "identitySha256": "08b1ca1372652eb75876698bb8debe398dd31b9f1a20dd4f4f4e25f805507105"
+          "exactSha256": "936485b3e12dca4fea3d64be4c6013a15a3fa474a3f4c3b82410f7e8fa059550",
+          "textNormalizedSha256": "936485b3e12dca4fea3d64be4c6013a15a3fa474a3f4c3b82410f7e8fa059550",
+          "identitySha256": "936485b3e12dca4fea3d64be4c6013a15a3fa474a3f4c3b82410f7e8fa059550"
         }
       ]
     },

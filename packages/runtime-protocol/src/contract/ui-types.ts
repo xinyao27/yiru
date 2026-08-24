@@ -13,9 +13,6 @@ export const RUNTIME_FEATURE_INTERACTION_IDS = [
   'cmd-j-create-workspace',
   'browser',
   'browser-tab-created',
-  'automations',
-  'automation-created',
-  'automation-run',
   'browser-annotations',
   'browser-annotations-sent-to-agent',
   'browser-grab',
@@ -33,8 +30,6 @@ export const RUNTIME_FEATURE_INTERACTION_IDS = [
   'computer-use',
   'codex-account-switching',
   'cookie-import',
-  'floating-workspace',
-  'floating-workspace-hidden',
   'mobile-pairing',
   'notifications',
   'ports',
@@ -46,25 +41,18 @@ export const RUNTIME_FEATURE_INTERACTION_IDS = [
   'terminal-tabs',
   'tab-splits',
   'usage-tracking',
-  'voice-dictation',
   'workspace-cleanup'
 ] as const
 
-export const RUNTIME_FEATURE_TIP_IDS = ['voice-dictation', 'yiru-cli', 'cmd-j-palette'] as const
+export const RUNTIME_FEATURE_TIP_IDS = ['yiru-cli', 'cmd-j-palette'] as const
 
 export type RuntimeFeatureInteractionId = (typeof RUNTIME_FEATURE_INTERACTION_IDS)[number]
 export type RuntimeFeatureTipId = (typeof RUNTIME_FEATURE_TIP_IDS)[number]
-export type RuntimeContextualTourId =
-  | 'workspace-agent-sessions'
-  | 'browser'
-  | 'automations'
-  | 'floating-workspace'
-  | 'workspace-creation'
+export type RuntimeContextualTourId = 'workspace-agent-sessions' | 'browser' | 'workspace-creation'
 export type RuntimeWorktreeCardProperty =
   | 'status'
   | 'unread'
   | 'branch'
-  | 'automation'
   | 'comment'
   | 'ports'
   | 'inline-agents'
@@ -100,31 +88,6 @@ export type RuntimeWorkspaceCleanupUIState = {
     }
   >
 }
-export type RuntimeSpriteAnimation = {
-  row: number
-  frames: number
-  frameDurationsMs?: number[]
-}
-export type RuntimeCustomPet = {
-  id: string
-  label: string
-  fileName: string
-  mimeType: string
-  kind?: 'image' | 'bundle'
-  sprite?: {
-    frameWidth: number
-    frameHeight: number
-    columns: number
-    rows: number
-    sheetWidth: number
-    sheetHeight: number
-    fps: number
-    defaultAnimation?: string
-    animations?: Record<string, RuntimeSpriteAnimation>
-  }
-  spriteFps?: number
-}
-
 export type RuntimeThemeGradientDotMode = 'wheel' | 'tint' | 'grayscale'
 export type RuntimeThemeGradientHarmony =
   | 'floating'
@@ -149,7 +112,7 @@ export type RuntimeThemeGradientTheme = {
 export type RuntimePersistedUIState = {
   lastActiveRepoId: string | null
   lastActiveWorktreeId: string | null
-  activeView: 'home' | 'terminal' | 'settings' | 'automations' | 'space' | 'skills' | 'mobile'
+  activeView: 'home' | 'terminal' | 'settings' | 'space' | 'skills' | 'mobile'
   sidebarWidth: number
   rightSidebarOpen: boolean
   rightSidebarTab: RuntimeWorkspacePanelTabContentType | 'search'
@@ -168,7 +131,6 @@ export type RuntimePersistedUIState = {
   showSleepingWorkspaces?: boolean
   showInactiveWorkspaces?: boolean
   hideDefaultBranchWorkspace: boolean
-  hideAutomationGeneratedWorkspaces?: boolean
   showDotfilesByWorktree?: Record<string, boolean>
   filterRepoIds: string[]
   collapsedGroups: string[]
@@ -240,14 +202,6 @@ export type RuntimePersistedUIState = {
   themeGradientDefault?: RuntimeThemeGradientTheme | null
   themeGradientsByWorkspaceId?: Record<string, RuntimeThemeGradientTheme>
   setupScriptPromptDismissedRepoIds?: string[]
-  petVisible?: boolean
-  petId?: string
-  customPets?: RuntimeCustomPet[]
-  petSize?: number
-  sidekickVisible?: boolean
-  sidekickId?: string
-  customSidekicks?: RuntimeCustomPet[]
-  sidekickSize?: number
   workspaceCleanup?: RuntimeWorkspaceCleanupUIState
   featureTipsSeenIds?: RuntimeFeatureTipId[]
   featureInteractions?: RuntimeFeatureInteractionState

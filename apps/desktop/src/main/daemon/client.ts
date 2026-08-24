@@ -1,15 +1,14 @@
 import { randomUUID } from 'node:crypto'
 import { readFileSync } from 'node:fs'
-/* eslint-disable max-lines -- Why: daemon handshake, RPC, stream events, and reconnect cleanup share one socket lifecycle. */
-import { connect, type Socket } from 'node:net'
+import type { Socket } from 'node:net'
 import { StringDecoder } from 'node:string_decoder'
 
+import { connectDaemonSocket, sendDaemonHello } from './client-handshake'
 import { encodeNdjson, createNdjsonParser } from './ndjson'
 import { addNodePtyRecoveryHint } from './node-pty-error-hints'
 import { PROTOCOL_VERSION, NOTIFY_PREFIX, DaemonProtocolError } from './types'
-import type { HelloMessage, HelloResponse, RpcResponse, DaemonEvent } from './types'
+import type { RpcResponse, DaemonEvent } from './types'
 
-const CONNECT_TIMEOUT_MS = 5000
 const REQUEST_TIMEOUT_MS = 30000
 
 export type DaemonClientOptions = {
@@ -87,12 +86,24 @@ export class DaemonClient {
 
     try {
       // Sequential: control first, then stream
-      this.controlSocket = await this.connectSocket()
-      await this.sendHello(this.controlSocket, token, 'control')
+      this.controlSocket = await connectDaemonSocket(this.socketPath)
+      await sendDaemonHello({
+        socket: this.controlSocket,
+        token,
+        role: 'control',
+        protocolVersion: this.protocolVersion,
+        clientId: this.clientId
+      })
       pendingListenerCleanups.push(this.setupControlParser(this.controlSocket))
 
-      this.streamSocket = await this.connectSocket()
-      await this.sendHello(this.streamSocket, token, 'stream')
+      this.streamSocket = await connectDaemonSocket(this.socketPath)
+      await sendDaemonHello({
+        socket: this.streamSocket,
+        token,
+        role: 'stream',
+        protocolVersion: this.protocolVersion,
+        clientId: this.clientId
+      })
       pendingListenerCleanups.push(this.setupStreamParser(this.streamSocket))
 
       this.connected = true
@@ -195,108 +206,6 @@ export class DaemonClient {
     this.streamSocket?.destroy()
     this.controlSocket = null
     this.streamSocket = null
-  }
-
-  private connectSocket(): Promise<Socket> {
-    return new Promise((resolve, reject) => {
-      const socket = connect(this.socketPath)
-      const cleanup = (): void => {
-        clearTimeout(timer)
-        socket.removeListener('connect', onConnect)
-        socket.removeListener('error', onError)
-      }
-      const onConnect = (): void => {
-        cleanup()
-        resolve(socket)
-      }
-      const onError = (err: Error): void => {
-        cleanup()
-        reject(err)
-      }
-      const timer = setTimeout(() => {
-        cleanup()
-        socket.destroy()
-        reject(new DaemonProtocolError('Connection timed out'))
-      }, CONNECT_TIMEOUT_MS)
-
-      socket.on('connect', onConnect)
-      socket.on('error', onError)
-    })
-  }
-
-  private sendHello(socket: Socket, token: string, role: 'control' | 'stream'): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const hello: HelloMessage = {
-        type: 'hello',
-        version: this.protocolVersion,
-        token,
-        clientId: this.clientId,
-        role
-      }
-
-      let buffer = ''
-      let settled = false
-      let timer: ReturnType<typeof setTimeout> | null = null
-      const cleanup = (): void => {
-        if (timer) {
-          clearTimeout(timer)
-          timer = null
-        }
-        socket.removeListener('data', onData)
-        socket.removeListener('error', onError)
-        socket.removeListener('close', onClose)
-      }
-      const finish = (error?: Error): void => {
-        if (settled) {
-          return
-        }
-        settled = true
-        cleanup()
-        if (error) {
-          reject(error)
-          return
-        }
-        resolve()
-      }
-      // Why: daemon socket chunks can split emoji/box-drawing UTF-8 bytes.
-      // Decoding each Buffer independently would permanently inject U+FFFD.
-      const decoder = new StringDecoder('utf8')
-      const onData = (chunk: Buffer): void => {
-        buffer += decoder.write(chunk)
-        const newlineIdx = buffer.indexOf('\n')
-        if (newlineIdx === -1) {
-          return
-        }
-
-        const line = buffer.slice(0, newlineIdx)
-        try {
-          const response = JSON.parse(line) as HelloResponse
-          if (response.ok) {
-            finish()
-          } else {
-            finish(
-              new DaemonProtocolError(addNodePtyRecoveryHint(response.error ?? 'Hello rejected'))
-            )
-          }
-        } catch {
-          finish(new DaemonProtocolError('Invalid hello response'))
-        }
-      }
-      const onError = (error: Error): void => finish(error)
-      const onClose = (): void =>
-        finish(new DaemonProtocolError('Connection closed before hello response'))
-
-      timer = setTimeout(() => {
-        // Why: a stale daemon can accept the socket but never answer hello;
-        // without a handshake timeout, startup waits forever on ensureConnected().
-        finish(new DaemonProtocolError('Hello response timed out'))
-        socket.destroy()
-      }, CONNECT_TIMEOUT_MS)
-      socket.on('data', onData)
-      socket.on('error', onError)
-      socket.on('close', onClose)
-      socket.write(encodeNdjson(hello))
-    })
   }
 
   private setupControlParser(socket: Socket): () => void {

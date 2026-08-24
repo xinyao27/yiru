@@ -1,4 +1,4 @@
-import { submitPromptToAgentPty } from '~renderer/components/native-chat/agent-paste-draft'
+import { submitPromptToAgentPty } from '~renderer/components/terminal-pane/agent/draft-delivery'
 // Side-effecting handlers behind the notice card's buttons, kept out of the
 // component so it only decides layout and wiring.
 import {

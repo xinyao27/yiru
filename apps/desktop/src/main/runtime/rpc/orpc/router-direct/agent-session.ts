@@ -21,11 +21,6 @@ import {
   handleMobileHostPairingRevokeDevice
 } from '~main/runtime/rpc/methods/mobile-host-pairing'
 import {
-  handleNativeChatReadSession,
-  handleNativeChatSubscribe,
-  handleNativeChatUnsubscribe
-} from '~main/runtime/rpc/methods/native-chat'
-import {
   dismissRuntimeNotifications,
   getMissedRuntimeNotifications,
   handleNotificationsSubscribe,
@@ -51,7 +46,7 @@ import { runtimeImplementation } from '../access-middleware'
 import { wireRuntimeMethod } from '../registered-method'
 import { wireRuntimeStream } from '../registered-stream'
 
-// Why: agentStatus, agentTeams, nativeChat, notifications, mobile pairing,
+// Why: agentStatus, agentTeams, notifications, mobile pairing,
 // and session (the live terminal/browser/editor tabs of a worktree) are all
 // runtime-session-lifecycle surfaces — they track or notify about a live
 // agent/tab/device rather than configuring the workspace or a provider.
@@ -95,17 +90,6 @@ export const agentSessionRuntimeHandlers = {
         wireRuntimeStream('agentStatus.events.subscribe', handleAgentStatusEventsSubscribe)
       )
     }
-  },
-  nativeChat: {
-    subscribe: runtimeImplementation.nativeChat.subscribe.handler(
-      wireRuntimeStream('nativeChat.subscribe', handleNativeChatSubscribe)
-    ),
-    readSession: runtimeImplementation.nativeChat.readSession.handler(
-      wireRuntimeMethod('nativeChat.readSession', handleNativeChatReadSession)
-    ),
-    unsubscribe: runtimeImplementation.nativeChat.unsubscribe.handler(
-      wireRuntimeMethod('nativeChat.unsubscribe', handleNativeChatUnsubscribe)
-    )
   },
   notifications: {
     subscribe: runtimeImplementation.notifications.subscribe.handler(

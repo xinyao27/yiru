@@ -20,7 +20,6 @@ import { getShellUpdaterService } from '~main/shell/updater'
 import { getShellStarNagService } from '~main/star-nag/shell-service'
 import type { RuntimeSyncWindowGraph } from '~shared/runtime-types'
 import type {
-  FloatingTerminalCwdRequest,
   GitHubPRRefreshCandidate,
   GitHubPRRefreshReason,
   UpdateCheckOptions
@@ -50,29 +49,7 @@ export const shellSystemRuntimeHandlers = {
     ),
     setUnreadDockBadgeCount: runtimeImplementation.shell.app.setUnreadDockBadgeCount.handler(
       ({ input }) => getShellAppService().setUnreadDockBadgeCount(input.count)
-    ),
-    getFloatingTerminalCwd: runtimeImplementation.shell.app.getFloatingTerminalCwd.handler(
-      ({ input }) =>
-        getShellAppService().getFloatingTerminalCwd(
-          shellOptionalDocument<FloatingTerminalCwdRequest>(input, 'invalid_floating_terminal_cwd')
-        )
-    ),
-    getFloatingMarkdownDirectory:
-      runtimeImplementation.shell.app.getFloatingMarkdownDirectory.handler(() =>
-        getShellAppService().getFloatingMarkdownDirectory()
-      ),
-    pickFloatingMarkdownDocument:
-      runtimeImplementation.shell.app.pickFloatingMarkdownDocument.handler(({ context }) =>
-        getShellAppService().pickFloatingMarkdownDocument(
-          shellWindow(context.renderingWebContentsId)
-        )
-      ),
-    pickFloatingWorkspaceDirectory:
-      runtimeImplementation.shell.app.pickFloatingWorkspaceDirectory.handler(({ context }) =>
-        getShellAppService().pickFloatingWorkspaceDirectory(
-          shellWindow(context.renderingWebContentsId)
-        )
-      )
+    )
   },
   repoHost: {
     pickFolder: runtimeImplementation.shell.repoHost.pickFolder.handler(() =>
@@ -255,10 +232,6 @@ export const shellSystemRuntimeHandlers = {
     )
   }
 } as const
-
-function shellWindow(webContentsId: number | undefined): BrowserWindow | null {
-  return BrowserWindow.fromWebContents(requireShellRenderer(webContentsId))
-}
 
 function shellOptionalDocument<T>(value: unknown, code: string): T | undefined {
   return value === undefined ? undefined : shellDocument<T>(value, code)

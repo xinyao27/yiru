@@ -1,10 +1,7 @@
 import { useMemo } from 'react'
 import { buildWorktreeChecksReviewIndex } from '~renderer/components/cmd-j/worktree-checks-review-index'
 import { sortWorktreesSmart } from '~renderer/components/sidebar/smart-sort'
-import {
-  isAutomationGeneratedWorkspace,
-  isDefaultBranchWorkspace
-} from '~renderer/components/sidebar/visible-worktrees'
+import { isDefaultBranchWorkspace } from '~renderer/components/sidebar/visible-worktrees'
 import { orderEmptyQueryWorktrees } from '~renderer/components/worktree-jump-palette/order-empty-query-worktrees'
 import {
   getWorktreePaletteSearchScope,
@@ -30,7 +27,6 @@ type WorktreeSearchInput = Pick<
   | 'tabsByWorktree'
   | 'allWorktrees'
   | 'hideDefaultBranchWorkspace'
-  | 'hideAutomationGeneratedWorkspaces'
   | 'showSleepingWorkspaces'
   | 'ptyIdsByTabId'
   | 'browserTabsByWorktree'
@@ -60,7 +56,6 @@ export function useWorktreeSearch(input: WorktreeSearchInput) {
     tabsByWorktree,
     allWorktrees,
     hideDefaultBranchWorkspace,
-    hideAutomationGeneratedWorkspaces,
     showSleepingWorkspaces,
     ptyIdsByTabId,
     browserTabsByWorktree,
@@ -106,9 +101,6 @@ export function useWorktreeSearch(input: WorktreeSearchInput) {
         if (hideDefaultBranchWorkspace && isDefaultBranchWorkspace(worktree)) {
           return false
         }
-        if (hideAutomationGeneratedWorkspaces && isAutomationGeneratedWorkspace(worktree)) {
-          return false
-        }
         if (
           !showSleepingWorkspaces &&
           isInactiveWorkspace(
@@ -126,7 +118,6 @@ export function useWorktreeSearch(input: WorktreeSearchInput) {
     [
       allWorktrees,
       browserTabsByWorktree,
-      hideAutomationGeneratedWorkspaces,
       hideDefaultBranchWorkspace,
       ptyIdsByTabId,
       showSleepingWorkspaces,

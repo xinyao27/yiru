@@ -165,8 +165,7 @@ export const skillManageContract = {
   cancelUpdateRun: withAccess(SKILL_MANAGE_HOST_ACCESS).output(type<SkillUpdateRun>()),
   acknowledgeUpdateRun: withAccess(SKILL_MANAGE_ACK_ACCESS).output(type<SkillUpdateRun>()),
   getUpdateRun: withAccess(SKILL_MANAGE_READ_ACCESS).output(type<SkillUpdateRun>()),
-  // Why: one run at a time, one subscription shape — same reasoning as
-  // `speech.events.subscribe`: reports the shared runner's state, never
+  // Why: one run at a time, one subscription shape: it reports the shared runner's state, never
   // drives it, so subscription count should scale with clients, not verbs.
   events: {
     subscribe: withAccess(SKILL_MANAGE_READ_ACCESS)

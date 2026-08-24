@@ -61,9 +61,9 @@ const yiruRootToolingConfig = defineConfig({
               nursery: 'off'
             },
             rules: {
-              'react-doctor/no-adjust-state-on-prop-change': 'warn',
-              'react-doctor/no-derived-state-effect': 'warn',
-              'react-doctor/no-initialize-state': 'warn'
+              'react-doctor/no-adjust-state-on-prop-change': 'error',
+              'react-doctor/no-derived-state-effect': 'error',
+              'react-doctor/no-initialize-state': 'error'
             },
             ignorePatterns: ['**/node_modules', '**/build', '**/dist', '**/out'],
             options: { typeAware: false, typeCheck: false },
@@ -86,7 +86,7 @@ const yiruRootToolingConfig = defineConfig({
               'react/no-unescaped-entities': 'error',
               'react/require-render-return': 'error',
               'react/rules-of-hooks': 'error',
-              'react/exhaustive-deps': 'warn',
+              'react/exhaustive-deps': 'error',
               'react/jsx-curly-brace-presence': [
                 'error',
                 {
@@ -233,10 +233,6 @@ const yiruRootToolingConfig = defineConfig({
       '~main': resolve(desktopRoot, 'src/main'),
       '~preload': resolve(desktopRoot, 'src/preload')
     }
-  },
-  test: {
-    include: ['apps/**/*.{test,spec}.{ts,tsx}', 'packages/**/*.{test,spec}.{ts,tsx}'],
-    passWithNoTests: true
   }
 })
 

@@ -3,7 +3,7 @@ import type { PathSource, ShellHydrationFailureReason } from '~shared/types'
 import { getAzureDevOpsAuthStatus } from '../azure-devops/client'
 import { getBitbucketAuthStatus } from '../bitbucket/client'
 import { getGiteaAuthStatus } from '../gitea/client'
-import { clearKnownHostsCache } from '../gitlab/gl-utils'
+import { clearKnownHostsCache } from '../gitlab/gitlab-cli'
 import { hydrateShellPath, mergePathSegments } from '../startup/hydrate-shell-path'
 import { hydrateShellPathForAgentDetection } from './agent-detection-shell-path'
 import {
@@ -211,7 +211,7 @@ export async function runPreflightCheck(
   }
 
   if (force) {
-    // Why: the GitLab known-hosts cache (gl-utils) is populated lazily on the
+    // Why: the GitLab known-hosts cache (gitlab-cli) is populated lazily on the
     // first GitLab request and never invalidated within a session. A user who
     // runs `glab auth login` for a self-hosted host after Yiru starts would
     // otherwise see "No GitLab project found" until app relaunch. The Re-check

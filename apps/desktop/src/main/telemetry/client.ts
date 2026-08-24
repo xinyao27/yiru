@@ -50,10 +50,6 @@ import { commonPropsSchema, validate } from './validator'
 // wired but no event transmitted. PR 3 flips it to `true`. Independent of
 // the build-identity gate below: both must be satisfied to transmit, so
 // flipping the flag alone still leaves contributor builds silent.
-//
-// NOTE: scripts/verify-telemetry-constants.mjs greps this declaration shape
-// (`const TELEMETRY_ENABLED = true|false`) to gate release verification. If this moves or
-// becomes computed, update that script's parser in the same change.
 const TELEMETRY_ENABLED = true
 const POSTHOG_HOST = 'https://us.i.posthog.com'
 

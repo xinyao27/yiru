@@ -1,5 +1,5 @@
 import { resolveAgentSessionOptionLaunch } from '../agent/session-option-launch'
-import type { SessionOptionValue } from '../native-chat/session-options'
+import type { SessionOptionValue } from '../agent/session-options'
 import type { TuiAgent } from '../types'
 import { getTuiAgentLaunchCommand, TUI_AGENT_CONFIG } from './config'
 import {

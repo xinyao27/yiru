@@ -7,7 +7,7 @@ import { getWorktreeStatusLabel, type WorktreeStatus } from '~renderer/lib/workt
 
 import StatusIndicator from '../status-indicator'
 import { useWorktreeActivityStatus } from '../use-worktree-activity-status'
-import { getReviewLabel, ReviewIcon } from '../worktree-review-helpers'
+import { getReviewLabel, ReviewIcon } from '../worktree-review-presentation'
 import type { WorktreeCardPrDisplay } from './pr-display'
 
 type WorktreeCardStatusSlotProps = {

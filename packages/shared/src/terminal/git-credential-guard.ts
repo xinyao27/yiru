@@ -6,7 +6,7 @@ const GIT_CONFIG_PROTOCOL_KEY_RE = /^GIT_CONFIG_(?:COUNT|KEY_\d+|VALUE_\d+)$/
 export const TERMINAL_GIT_CREDENTIAL_GUARD_POLICY_ENV =
   'YIRU_INTERNAL_TERMINAL_GIT_CREDENTIAL_GUARD_POLICY'
 
-/** Disable credential UI only for recognized agents and marked automation. */
+/** Disable credential UI only for recognized agents and explicitly unattended launches. */
 export function applyTerminalGitCredentialPromptGuard(
   env: Record<string, string>,
   opts: {

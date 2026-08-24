@@ -58,20 +58,12 @@ export function NoteField({ note, onNoteChange }: NoteFieldProps): React.JSX.Ele
         value={note}
         onChange={(event) => onNoteChange(event.target.value)}
         onPaste={handlePaste}
-        onInput={(event) => {
-          // Why: start at one-line height, grow to fit content so a short
-          // note keeps the dialog compact while longer notes get room to
-          // breathe without a scroll bar until the max-h clamps growth.
-          const ta = event.currentTarget
-          ta.style.height = 'auto'
-          ta.style.height = `${ta.scrollHeight}px`
-        }}
         placeholder={translate(
           'auto.components.NewWorkspaceComposerCard.090cfedeb4',
           'Write a note'
         )}
         rows={1}
-        className="border-input placeholder:text-muted-foreground focus-visible:border-ring max-h-40 w-full min-w-0 resize-none overflow-hidden border bg-transparent px-3 py-1.5 text-sm transition-[color] outline-none"
+        className="border-input placeholder:text-muted-foreground focus-visible:border-ring [field-sizing:content] max-h-40 w-full min-w-0 resize-none overflow-y-auto border bg-transparent px-3 py-1.5 text-sm transition-[color] outline-none"
       />
     </div>
   )

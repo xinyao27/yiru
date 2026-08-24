@@ -4,10 +4,9 @@ import type {
   KeybindingOverrides
 } from '~shared/keybindings'
 
+import { ensureKeybindingDocument, migrateLegacyKeybindingDocument } from './keybinding-document'
 import {
-  ensureKeybindingFile,
   getUserKeybindingsPath,
-  migrateLegacyKeybindings,
   readKeybindingFile,
   writeKeybindingOverride
 } from './keybinding-file'
@@ -28,7 +27,7 @@ export class KeybindingService {
     this.platform = options.platform ?? process.platform
     // Why: older builds persisted custom shortcuts inside global settings.
     // Once a keybindings file exists, it is the sole source of truth.
-    migrateLegacyKeybindings(this.configPath, this.platform, options.getLegacyOverrides?.())
+    migrateLegacyKeybindingDocument(this.configPath, this.platform, options.getLegacyOverrides?.())
   }
 
   getPath(): string {
@@ -52,7 +51,7 @@ export class KeybindingService {
   }
 
   ensureFile(): KeybindingFileSnapshot {
-    ensureKeybindingFile(this.configPath)
+    ensureKeybindingDocument(this.configPath)
     return this.reload()
   }
 

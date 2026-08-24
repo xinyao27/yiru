@@ -370,7 +370,7 @@ export function AgentSessionContinuationDialog({
             disabled={starting}
             onClick={() => onOpenChange(false)}
           >
-            {translate('components.native-chat.question.cancel', 'Cancel')}
+            {translate('components.agentSessionContinuation.cancel', 'Cancel')}
           </Button>
           <Button
             type="button"

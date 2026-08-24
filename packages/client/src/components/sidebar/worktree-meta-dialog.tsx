@@ -24,11 +24,6 @@ import {
   type WorktreeMetaSavedPayload
 } from './worktree-meta-updates'
 
-function resizeCommentTextarea(textarea: HTMLTextAreaElement): void {
-  textarea.style.height = 'auto'
-  textarea.style.height = `${textarea.scrollHeight}px`
-}
-
 const WorktreeMetaDialog = React.memo(function WorktreeMetaDialog() {
   const activeModal = useAppStore((s) => s.activeModal)
   const modalData = useAppStore((s) => s.modalData)
@@ -67,20 +62,8 @@ const WorktreeMetaDialog = React.memo(function WorktreeMetaDialog() {
   }
   prevIsOpenRef.current = isOpen
 
-  const setCommentTextareaRef = useCallback(
-    (textarea: HTMLTextAreaElement | null) => {
-      textareaRef.current = textarea
-      if (textarea && isEditMeta) {
-        resizeCommentTextarea(textarea)
-      }
-    },
-    [isEditMeta]
-  )
-
   const handleCommentChange = useCallback((event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setCommentInput(event.target.value)
-    // Why: notes should grow in the same input event; a passive Effect leaves a stale height.
-    resizeCommentTextarea(event.currentTarget)
   }, [])
 
   const canSave = useMemo(() => {
@@ -243,7 +226,7 @@ const WorktreeMetaDialog = React.memo(function WorktreeMetaDialog() {
               {translate('auto.components.sidebar.WorktreeMetaDialog.9c1d1e9b71', 'Comment')}
             </label>
             <Textarea
-              ref={setCommentTextareaRef}
+              ref={textareaRef}
               value={commentInput}
               onChange={handleCommentChange}
               onKeyDown={handleCommentKeyDown}
@@ -252,7 +235,7 @@ const WorktreeMetaDialog = React.memo(function WorktreeMetaDialog() {
                 'Notes about this worktree...'
               )}
               rows={3}
-              className="border-input placeholder:text-muted-foreground focus-visible:border-ring scrollbar-sleek max-h-60 w-full min-w-0 resize-none overflow-y-auto border bg-transparent px-3 py-2 text-xs transition-[color] outline-none"
+              className="border-input placeholder:text-muted-foreground focus-visible:border-ring scrollbar-sleek [field-sizing:content] max-h-60 w-full min-w-0 resize-none overflow-y-auto border bg-transparent px-3 py-2 text-xs transition-[color] outline-none"
             />
             <p className="text-muted-foreground text-[10px]">
               {translate(

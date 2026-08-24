@@ -5,6 +5,7 @@ import {
   GLOBAL_AGENT_SKILL_SOURCE_KINDS,
   useInstalledAgentSkill
 } from '~renderer/hooks/use-installed-agent-skills'
+import { usePrefersReducedMotion } from '~renderer/hooks/use-prefers-reduced-motion'
 import {
   YIRU_CLI_SKILL_NAME,
   ORCHESTRATION_SKILL_NAME
@@ -26,7 +27,6 @@ import { getWorkbenchSteps, type WorkbenchStepId } from '~shared/workbench-steps
 
 import { getFeatureWallActiveStepCopy } from './active-step-copy'
 import { FeatureWallContinueButton } from './continue-button'
-import { usePrefersReducedMotion } from './modal-helpers'
 import { FeatureWallTourPanel } from './tour-panel'
 import { useFeatureWallCompletion } from './use-feature-wall-completion'
 import { useFeatureWallTourKeyboardShortcut } from './use-feature-wall-tour-keyboard-shortcut'

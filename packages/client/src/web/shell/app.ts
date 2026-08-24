@@ -17,9 +17,5 @@ export const webShellAppApi: ShellAppApi = {
   awaitFirstWindowStartupServices: () => Promise.resolve(),
   startupDiagnostic: () => Promise.resolve(),
   getKeyboardInputSourceId: () => Promise.resolve(null),
-  setUnreadDockBadgeCount: () => Promise.resolve(),
-  getFloatingTerminalCwd: () => Promise.resolve(''),
-  getFloatingMarkdownDirectory: () => Promise.resolve(''),
-  pickFloatingMarkdownDocument: () => Promise.resolve(null),
-  pickFloatingWorkspaceDirectory: () => Promise.resolve(null)
+  setUnreadDockBadgeCount: () => Promise.resolve()
 }

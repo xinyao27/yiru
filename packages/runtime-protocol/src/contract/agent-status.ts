@@ -60,7 +60,7 @@ export const AgentStatusTransferPaneAuthorityInputSchema = z.object({
 // Why: mirrors `~shared/agent/interrupt-intent`'s AgentInterruptInferenceRequest.
 // That type lives under @yiru/shared, which this lower-level protocol
 // package cannot import — the shape is duplicated here as the wire contract,
-// same pattern as native-chat.ts's AgentType cast for a legacy-shaped field.
+// The cast below adapts a legacy-shaped field at the wire boundary.
 export const AgentStatusInferInterruptInputSchema = z.object({
   paneKey: z.string().min(1, 'Missing paneKey'),
   baselineUpdatedAt: z.number(),

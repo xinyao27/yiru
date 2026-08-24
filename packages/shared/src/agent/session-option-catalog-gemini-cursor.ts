@@ -1,9 +1,9 @@
-import type { SessionOptionSelectChoice } from '../native-chat/session-options'
 import type {
   AgentSessionOptionCatalog,
   CatalogModel,
   CatalogOption
 } from './session-option-catalog-types'
+import type { SessionOptionSelectChoice } from './session-options'
 
 function hasModelFlag(tokens: readonly string[]): boolean {
   return tokens.some(

@@ -65,7 +65,7 @@ struct SourceControlActionBar: View {
             // Why: `.controlSize(.large)` (set by `.appButtonContext(.large)`) makes the
             // system `.glassProminent`/`.glass` button style pad out to a dominant pill next
             // to the field, per the button-size contract's 36pt "regular" scenario for a
-            // primary action beside a peer control (see NativeChatPermissionCard). Reuse that
+            // primary action beside a peer control. Reuse that
             // same token here instead of the field's own 44pt height. Without this floor
             // SwiftUI still compresses the glass button when the input is empty, which makes
             // the footer look like a different component.

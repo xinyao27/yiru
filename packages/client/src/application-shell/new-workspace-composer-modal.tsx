@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import AgentSettingsDialog from '~renderer/components/agent/settings-dialog'
 import { NewWorkspaceComposerCard } from '~renderer/components/new-workspace-composer-card/card'
 import { useComposerState } from '~renderer/components/new-workspace/use-composer-state'
-import { getFolderWorkspacePrimaryActionLabel } from '~renderer/components/sidebar/folder-workspace-composer-helpers'
+import { getFolderWorkspacePrimaryActionLabel } from '~renderer/components/sidebar/folder-workspace-composer-model'
 import {
   Dialog,
   DialogContent,

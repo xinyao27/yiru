@@ -1,7 +1,7 @@
 import type {
   AgentProviderSessionMetadata,
   AgentType,
-  NativeChatMessage
+  AgentTranscriptMessage
 } from '@yiru/workbench-model/agent'
 
 import type { RuntimeTerminalRead, RuntimeTerminalState } from './runtime-types'
@@ -29,7 +29,7 @@ export type ExactWorkerProviderSession = {
 }
 
 export type OrchestrationWorkerTranscriptPage = {
-  messages: NativeChatMessage[]
+  messages: AgentTranscriptMessage[]
   nextCursor: string
   limited: boolean
   returnedMessageCount: number

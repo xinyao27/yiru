@@ -1,7 +1,6 @@
 import { oc, type, type ContractRouter } from '@orpc/contract'
 import { z } from 'zod'
 
-import type { RuntimeAutomation, RuntimeAutomationRun } from './automation-types.js'
 import type { RateLimitResumeSchedule } from './rate-limit-resume.js'
 import {
   shellServicesBrowserContract,
@@ -178,34 +177,7 @@ const shellServicesMobileMarkdownContract = {
     .output(ShellServicesMobileMarkdownSaveOutputSchema)
 } satisfies ContractRouter<Record<never, never>>
 
-// Why: Phase 5 slice S5 — the dispatch-handshake family's reverse leg.
-// AutomationService/RateLimitResumeService's schedulers decide *when* a run is
-// due with no RpcContext in play (a setInterval tick, not a forward RPC call),
-// so unlike notifications.report's reverse call there is no caller-supplied
-// request-scoped shell connection to thread through — the service holds its
-// own renderer target (see `setWebContents`) and reverse-calls it directly.
-// `dispatch` only hands the payload off and returns `{ accepted }` fast; the
-// renderer executes the actual (potentially long-running: worktree creation,
-// agent launch, waiting for completion) work in the background and reports
-// outcomes back via the existing local `markDispatchResult`/`markFired`/
-// `markFailed`/`markStale` IPC — those stay off this contract (see
-// main/automations/service.ts, main/rate-limit-resume/service.ts): they are
-// this same process's shell replying to a dispatch it was just handed, not an
-// independently callable host capability, so promoting them here would be
-// inventing a contract member nothing but this one shell will ever call.
-export type ShellServicesAutomationDispatchInput = {
-  automation: RuntimeAutomation
-  run: RuntimeAutomationRun
-  dispatchToken: string
-}
-
 export type ShellServicesDispatchAcceptedOutput = { accepted: boolean }
-
-const shellServicesAutomationsContract = {
-  dispatch: oc
-    .input(type<ShellServicesAutomationDispatchInput>())
-    .output(type<ShellServicesDispatchAcceptedOutput>())
-} satisfies ContractRouter<Record<never, never>>
 
 const shellServicesRateLimitResumeContract = {
   dispatch: oc
@@ -221,7 +193,6 @@ export const shellServicesContract = {
   terminal: shellServicesTerminalContract,
   mobileMarkdown: shellServicesMobileMarkdownContract,
   browser: shellServicesBrowserContract,
-  automations: shellServicesAutomationsContract,
   rateLimitResume: shellServicesRateLimitResumeContract
 } satisfies ContractRouter<Record<never, never>>
 
@@ -276,10 +247,6 @@ export type ShellServicesBrowserTabSetProfileResult =
 
 export type ShellServicesBrowserTabCloseResult =
   | ({ ok: true } & ShellServicesBrowserTabCloseOutput)
-  | { ok: false; reason: ShellServicesUnavailableReason }
-
-export type ShellServicesAutomationDispatchResult =
-  | ({ ok: true } & ShellServicesDispatchAcceptedOutput)
   | { ok: false; reason: ShellServicesUnavailableReason }
 
 export type ShellServicesRateLimitResumeDispatchResult =

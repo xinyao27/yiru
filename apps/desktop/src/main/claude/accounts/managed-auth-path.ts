@@ -1,7 +1,7 @@
 import { existsSync, lstatSync, readFileSync, realpathSync, writeFileSync } from 'node:fs'
 import { join, relative, resolve, sep } from 'node:path'
 
-import { writeFileAtomically } from '~main/codex/accounts/fs-utils'
+import { writeFileAtomically } from '~main/codex/accounts/atomic-file-operations'
 import { getRuntimeHostPathsProvider } from '~main/runtime/host/paths-provider'
 
 const MANAGED_AUTH_MARKER = '.yiru-managed-claude-auth'

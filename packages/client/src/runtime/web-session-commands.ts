@@ -29,7 +29,6 @@ export async function createWebSessionTerminalCommand(args: {
   launchConfig?: SleepingAgentLaunchConfig
   agent?: TuiAgent
   launchAgent?: TuiAgent
-  viewMode?: 'terminal' | 'chat'
   activate?: boolean
 }): Promise<WebSessionCommandResult<RuntimeMobileSessionCreateTerminalResult>> {
   try {
@@ -48,7 +47,6 @@ export async function createWebSessionTerminalCommand(args: {
         ...(args.launchConfig ? { launchConfig: args.launchConfig } : {}),
         agent: args.agent,
         ...(args.launchAgent ? { launchAgent: args.launchAgent } : {}),
-        ...(args.viewMode ? { viewMode: args.viewMode } : {}),
         activate: args.activate !== false
       },
       { timeoutMs: 15_000 }
@@ -104,7 +102,6 @@ export function setWebSessionTabPropsCommand(args: {
   tabId: string
   color?: string | null
   isPinned?: boolean
-  viewMode?: 'terminal' | 'chat'
 }): void {
   const hostTabId = isWebTerminalSurfaceTabId(args.tabId)
     ? toHostSessionTabId(args.tabId)
@@ -116,8 +113,7 @@ export function setWebSessionTabPropsCommand(args: {
       worktree: toRuntimeWorktreeSelector(args.worktreeId),
       tabId: hostTabId,
       ...(args.color !== undefined ? { color: args.color } : {}),
-      ...(args.isPinned !== undefined ? { isPinned: args.isPinned } : {}),
-      ...(args.viewMode !== undefined ? { viewMode: args.viewMode } : {})
+      ...(args.isPinned !== undefined ? { isPinned: args.isPinned } : {})
     },
     { timeoutMs: 15_000 }
   ).catch((error) => {

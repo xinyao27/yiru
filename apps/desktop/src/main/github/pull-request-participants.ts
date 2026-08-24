@@ -6,7 +6,7 @@ import {
   ghRepoExecOptions,
   githubRepoContext,
   type LocalGitExecOptions
-} from './gh-utils'
+} from './github-cli'
 import { noteRateLimitSpend, rateLimitGuard } from './rate-limit'
 
 const PULL_REQUEST_PARTICIPANTS_QUERY = `query($owner: String!, $repo: String!, $number: Int!) {

@@ -1,75 +1,36 @@
-/* eslint-disable max-lines -- Why: local Antigravity install, Windows wrapper
-   generation, status cleanup, and SSH remote install must share one event list
-   and managed-command matcher so stale hook cleanup cannot drift by platform. */
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 
 import type { AgentHookInstallState, AgentHookInstallStatus } from '~shared/agent/hook-types'
 
 import {
-  buildPosixHookEnvironmentGuardLines,
-  buildPosixHookPayloadCapture,
-  buildWindowsHookEnvironmentGuardLines,
-  buildWindowsHookStdinDrainEpilogue,
-  WINDOWS_HOOK_STDIN_DRAIN_COMMAND
-} from '../agent-hooks/hook-stdin-contract'
-import {
-  buildManagedCommandHook,
-  buildPosixAgentHookCurlPostCommand,
-  createManagedCommandMatcher,
   getSharedManagedScriptPath,
-  hookDefinitionHasManagedCommand,
-  MANAGED_HOOK_TIMEOUT_SECONDS,
   readHooksJson,
-  removeManagedCommands,
   wrapPosixHookCommand,
   wrapWindowsCmdHookCommand,
   writeHooksJson,
-  writeManagedScript,
-  type HookDefinition,
-  type HooksConfig
-} from '../agent-hooks/installer-utils'
+  writeManagedScript
+} from '../agent-hooks/managed-hook-commands'
+import type { RemoteFileOperations } from '../agent-hooks/remote-file-operations'
 import {
   readHooksJsonRemote,
   writeHooksJsonRemote,
   writeManagedScriptRemote
-} from '../agent-hooks/installer-utils-remote'
-import type { RemoteFileOperations } from '../agent-hooks/remote-file-operations'
-
-const ANTIGRAVITY_HOOK_BUNDLE_NAME = 'yiru-status'
-
-const ANTIGRAVITY_EVENTS = [
-  {
-    eventName: 'PreInvocation',
-    schema: 'direct',
-    windowsWrapperFileName: 'antigravity-pre-invocation.cmd'
-  },
-  {
-    eventName: 'PostInvocation',
-    schema: 'direct',
-    windowsWrapperFileName: 'antigravity-post-invocation.cmd'
-  },
-  { eventName: 'Stop', schema: 'direct', windowsWrapperFileName: 'antigravity-stop.cmd' },
-  // Why: Antigravity requires PreToolUse hooks to make permission decisions.
-  // Yiru's hook is observational, so installing there can block user tools.
-  {
-    eventName: 'PostToolUse',
-    schema: 'tool',
-    windowsWrapperFileName: 'antigravity-post-tool-use.cmd'
-  }
-] as const
-
-type AntigravityEvent = (typeof ANTIGRAVITY_EVENTS)[number]
-
-const ANTIGRAVITY_MANAGED_SCRIPT_FILE_NAMES = [
-  'antigravity-hook.sh',
-  'antigravity-hook.cmd',
-  ...ANTIGRAVITY_EVENTS.map((event) => event.windowsWrapperFileName)
-] as const
+} from '../agent-hooks/remote-hook-storage'
+import {
+  antigravityBundleHasCommand,
+  antigravityBundleHasStaleCommand,
+  createAntigravityManagedCommandMatcher,
+  getAntigravityHookBundle,
+  getAntigravityHookDefinitions,
+  installAntigravityHookConfig,
+  removeAntigravityHookConfig
+} from './hook-config'
+import { ANTIGRAVITY_EVENTS, type AntigravityEvent } from './hook-events'
+import { getAntigravityManagedScript, getAntigravityWindowsWrapperScript } from './managed-scripts'
 
 function getConfigPath(): string {
-  // Why: Antigravity's hook docs define global hooks in ~/.gemini/config/hooks.json,
-  // not in the CLI settings file used by Gemini CLI.
+  // Why: Antigravity defines global hooks in ~/.gemini/config/hooks.json.
   return join(homedir(), '.gemini', 'config', 'hooks.json')
 }
 
@@ -86,199 +47,9 @@ function getWindowsWrapperScriptPath(event: AntigravityEvent): string {
 }
 
 function getManagedCommand(scriptPath: string, event: AntigravityEvent): string {
-  if (process.platform === 'win32') {
-    return wrapWindowsCmdHookCommand(getWindowsWrapperScriptPath(event))
-  }
-  return wrapPosixHookCommand(scriptPath, { YIRU_ANTIGRAVITY_EVENT: event.eventName })
-}
-
-function getManagedScript(target: 'local' | 'posix' = 'local'): string {
-  if (target === 'local' && process.platform === 'win32') {
-    return [
-      '@echo off',
-      'setlocal',
-      'if /I "%YIRU_ANTIGRAVITY_EVENT%"=="Stop" (',
-      '  echo {"decision":""}',
-      ') else (',
-      '  echo {}',
-      ')',
-      'if defined YIRU_AGENT_HOOK_ENDPOINT if exist "%YIRU_AGENT_HOOK_ENDPOINT%" call "%YIRU_AGENT_HOOK_ENDPOINT%" 2>nul',
-      ...buildWindowsHookEnvironmentGuardLines(),
-      buildWindowsAntigravityHookPostCommand(),
-      'exit /b 0',
-      ...buildWindowsHookStdinDrainEpilogue(),
-      ''
-    ].join('\r\n')
-  }
-
-  return [
-    '#!/bin/sh',
-    'case "$YIRU_ANTIGRAVITY_EVENT" in',
-    '  Stop)',
-    '    printf \'{"decision":""}\\n\'',
-    '    ;;',
-    '  *)',
-    // Why: Antigravity accepts an empty JSON object for passive status hooks;
-    // returning allow/ask/deny from PreToolUse would change the user's tool
-    // permission policy.
-    '    printf "{}\\n"',
-    '    ;;',
-    'esac',
-    // Why: some Antigravity events arrive without stdin but still need a
-    // status post, so the shared capture maps empty input to an object.
-    ...buildPosixHookPayloadCapture('empty-object'),
-    ...buildPosixHookEnvironmentGuardLines(),
-    buildPosixAgentHookCurlPostCommand('antigravity', {
-      fieldsAfterVersion: [{ key: 'hook_event_name', value: '${YIRU_ANTIGRAVITY_EVENT}' }]
-    }),
-    'exit 0',
-    ''
-  ].join('\n')
-}
-
-function getWindowsWrapperScript(eventName: string): string {
-  return [
-    '@echo off',
-    'setlocal',
-    `set "YIRU_ANTIGRAVITY_EVENT=${eventName}"`,
-    'set "YIRU_ANTIGRAVITY_CORE=%~dp0antigravity-hook.cmd"',
-    'if exist "%YIRU_ANTIGRAVITY_CORE%" (',
-    '  call "%YIRU_ANTIGRAVITY_CORE%"',
-    '  exit /b 0',
-    ')',
-    'if /I "%YIRU_ANTIGRAVITY_EVENT%"=="Stop" (',
-    '  echo {"decision":""}',
-    ') else (',
-    '  echo {}',
-    ')',
-    // Why: when the shared core script is missing, this wrapper becomes the
-    // stdin owner and must finish the agent's payload write before returning.
-    WINDOWS_HOOK_STDIN_DRAIN_COMMAND,
-    'exit /b 0',
-    ''
-  ].join('\r\n')
-}
-
-function buildWindowsAntigravityHookPostCommand(): string {
-  // Why: Antigravity hooks are best-effort status updates; do not let a stalled
-  // local listener hold the agent process open. Qualify PowerShell so a
-  // worktree-local powershell.exe cannot hijack hook payloads.
-  return `"%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -NoProfile -ExecutionPolicy Bypass -Command "$utf8=[System.Text.UTF8Encoding]::new($false); [Console]::InputEncoding=$utf8; [Console]::OutputEncoding=$utf8; $inputData=[Console]::In.ReadToEnd(); try { $payload=if ([string]::IsNullOrWhiteSpace($inputData)) { @{} } else { $inputData | ConvertFrom-Json }; $body=@{ paneKey=$env:YIRU_PANE_KEY; launchToken=$env:YIRU_AGENT_LAUNCH_TOKEN; tabId=$env:YIRU_TAB_ID; worktreeId=$env:YIRU_WORKTREE_ID; env=$env:YIRU_AGENT_HOOK_ENV; version=$env:YIRU_AGENT_HOOK_VERSION; hook_event_name=$env:YIRU_ANTIGRAVITY_EVENT; payload=$payload } | ConvertTo-Json -Depth 100 -Compress; $bodyBytes=$utf8.GetBytes($body); Invoke-WebRequest -UseBasicParsing -Method Post -Uri ('http://127.0.0.1:' + $env:YIRU_AGENT_HOOK_PORT + '/hook/antigravity') -ContentType 'application/json; charset=utf-8' -Headers @{ 'X-Yiru-Agent-Hook-Token'=$env:YIRU_AGENT_HOOK_TOKEN } -Body $bodyBytes -TimeoutSec 2 | Out-Null } catch {}"`
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value)
-}
-
-function getBundle(config: HooksConfig): Record<string, unknown> {
-  const existing = config[ANTIGRAVITY_HOOK_BUNDLE_NAME]
-  return isRecord(existing) ? { ...existing } : {}
-}
-
-function hasManagedCommand(definitions: HookDefinition[], command: string): boolean {
-  return definitions.some(
-    (definition) =>
-      definition.command === command ||
-      (Array.isArray(definition.hooks) && definition.hooks.some((hook) => hook.command === command))
-  )
-}
-
-function createAntigravityManagedCommandMatcher(): (command: string | undefined) => boolean {
-  const matchers = ANTIGRAVITY_MANAGED_SCRIPT_FILE_NAMES.map((scriptFileName) =>
-    createManagedCommandMatcher(scriptFileName)
-  )
-  return (command) => matchers.some((matcher) => matcher(command))
-}
-
-function bundleHasStaleManagedCommand(
-  bundle: Record<string, unknown>,
-  isManagedCommand: (command: string | undefined) => boolean,
-  currentCommands: ReadonlySet<string>
-): boolean {
-  for (const definitions of Object.values(bundle)) {
-    if (!Array.isArray(definitions)) {
-      continue
-    }
-    for (const definition of definitions as HookDefinition[]) {
-      if (!hookDefinitionHasManagedCommand(definition, isManagedCommand)) {
-        continue
-      }
-      const commands = [
-        definition.command,
-        definition.bash,
-        definition.powershell,
-        ...(Array.isArray(definition.hooks) ? definition.hooks.map((hook) => hook.command) : [])
-      ]
-      if (
-        commands.some(
-          (command) =>
-            command !== undefined && isManagedCommand(command) && !currentCommands.has(command)
-        )
-      ) {
-        return true
-      }
-    }
-  }
-  return false
-}
-
-function buildEventDefinition(event: AntigravityEvent, command: string): HookDefinition {
-  if (event.schema === 'tool') {
-    return {
-      matcher: '*',
-      hooks: [buildManagedCommandHook(command)]
-    }
-  }
-  // Antigravity's direct-command event schema carries the command on the
-  // definition; add the host-level timeout backstop alongside it.
-  return { type: 'command', command, timeout: MANAGED_HOOK_TIMEOUT_SECONDS }
-}
-
-function removeManagedCommandsFromBundle(
-  bundle: Record<string, unknown>,
-  isManagedCommand: (command: string | undefined) => boolean
-): Record<string, unknown> {
-  const next = { ...bundle }
-  for (const [eventName, definitions] of Object.entries(next)) {
-    if (!Array.isArray(definitions)) {
-      continue
-    }
-    const cleaned = removeManagedCommands(definitions as HookDefinition[], isManagedCommand)
-    if (cleaned.length === 0) {
-      delete next[eventName]
-    } else {
-      next[eventName] = cleaned
-    }
-  }
-  return next
-}
-
-function buildInstalledConfig(
-  config: HooksConfig,
-  commandForEvent: (event: AntigravityEvent) => string,
-  isManagedCommand: (command: string | undefined) => boolean
-): void {
-  const bundle = removeManagedCommandsFromBundle(getBundle(config), isManagedCommand)
-
-  for (const event of ANTIGRAVITY_EVENTS) {
-    const current = Array.isArray(bundle[event.eventName])
-      ? (bundle[event.eventName] as HookDefinition[])
-      : []
-    const cleaned = removeManagedCommands(current, isManagedCommand)
-    bundle[event.eventName] = [...cleaned, buildEventDefinition(event, commandForEvent(event))]
-  }
-
-  config[ANTIGRAVITY_HOOK_BUNDLE_NAME] = bundle
-}
-
-function removeInstalledConfig(config: HooksConfig): void {
-  const isManagedCommand = createAntigravityManagedCommandMatcher()
-  const bundle = removeManagedCommandsFromBundle(getBundle(config), isManagedCommand)
-  if (Object.keys(bundle).length === 0) {
-    delete config[ANTIGRAVITY_HOOK_BUNDLE_NAME]
-    return
-  }
-  config[ANTIGRAVITY_HOOK_BUNDLE_NAME] = bundle
+  return process.platform === 'win32'
+    ? wrapWindowsCmdHookCommand(getWindowsWrapperScriptPath(event))
+    : wrapPosixHookCommand(scriptPath, { YIRU_ANTIGRAVITY_EVENT: event.eventName })
 }
 
 export class AntigravityHookService {
@@ -296,12 +67,12 @@ export class AntigravityHookService {
       }
     }
 
-    const bundle = getBundle(config)
+    const bundle = getAntigravityHookBundle(config)
     const isManagedCommand = createAntigravityManagedCommandMatcher()
     const currentCommands = new Set(
       ANTIGRAVITY_EVENTS.map((event) => getManagedCommand(scriptPath, event))
     )
-    const staleManagedPresent = bundleHasStaleManagedCommand(
+    const staleManagedPresent = antigravityBundleHasStaleCommand(
       bundle,
       isManagedCommand,
       currentCommands
@@ -309,10 +80,8 @@ export class AntigravityHookService {
     const missing: string[] = []
     let presentCount = 0
     for (const event of ANTIGRAVITY_EVENTS) {
-      const definitions = Array.isArray(bundle[event.eventName])
-        ? (bundle[event.eventName] as HookDefinition[])
-        : []
-      if (hasManagedCommand(definitions, getManagedCommand(scriptPath, event))) {
+      const definitions = getAntigravityHookDefinitions(bundle[event.eventName])
+      if (antigravityBundleHasCommand(definitions, getManagedCommand(scriptPath, event))) {
         presentCount += 1
       } else {
         missing.push(event.eventName)
@@ -352,19 +121,18 @@ export class AntigravityHookService {
       }
     }
 
-    buildInstalledConfig(
+    installAntigravityHookConfig(
       config,
       (event) => getManagedCommand(scriptPath, event),
       createAntigravityManagedCommandMatcher()
     )
-    writeManagedScript(scriptPath, getManagedScript())
+    writeManagedScript(scriptPath, getAntigravityManagedScript())
     if (process.platform === 'win32') {
-      // Why: Antigravity wraps hook commands in cmd.exe. Keeping event env
-      // setup inside event-specific .cmd files avoids nested hooks.json quotes.
+      // Why: event-specific wrappers avoid nested hooks.json quoting on Windows.
       for (const event of ANTIGRAVITY_EVENTS) {
         writeManagedScript(
           getWindowsWrapperScriptPath(event),
-          getWindowsWrapperScript(event.eventName)
+          getAntigravityWindowsWrapperScript(event.eventName)
         )
       }
     }
@@ -391,15 +159,18 @@ export class AntigravityHookService {
         }
       }
 
-      buildInstalledConfig(
+      installAntigravityHookConfig(
         config,
         (event) =>
           wrapPosixHookCommand(remoteScriptPath, { YIRU_ANTIGRAVITY_EVENT: event.eventName }),
         createAntigravityManagedCommandMatcher()
       )
-      await writeManagedScriptRemote(remoteFiles, remoteScriptPath, getManagedScript('posix'))
+      await writeManagedScriptRemote(
+        remoteFiles,
+        remoteScriptPath,
+        getAntigravityManagedScript('posix')
+      )
       await writeHooksJsonRemote(remoteFiles, remoteConfigPath, config)
-
       return {
         agent: 'antigravity',
         state: 'installed',
@@ -407,13 +178,13 @@ export class AntigravityHookService {
         managedHooksPresent: true,
         detail: null
       }
-    } catch (err) {
+    } catch (error) {
       return {
         agent: 'antigravity',
         state: 'error',
         configPath: remoteConfigPath,
         managedHooksPresent: false,
-        detail: err instanceof Error ? err.message : String(err)
+        detail: error instanceof Error ? error.message : String(error)
       }
     }
   }
@@ -430,8 +201,7 @@ export class AntigravityHookService {
         detail: 'Could not parse Antigravity hooks.json'
       }
     }
-
-    removeInstalledConfig(config)
+    removeAntigravityHookConfig(config)
     writeHooksJson(configPath, config)
     return this.getStatus()
   }

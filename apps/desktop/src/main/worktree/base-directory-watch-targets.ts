@@ -17,7 +17,7 @@ import type {
   WorktreeBaseWatchTarget
 } from './base-directory-event-filter'
 import { shouldEmitBoundedWarning } from './bounded-warning-dedupe'
-import { resolveWorktreeCommonGitDirectory } from './common-git-directory'
+import { resolveWorktreeCommonGitDirectory } from './git-directory'
 import { computeWorkspaceRoot, getWorktreePathSettings } from './logic'
 
 const missingRootWarnings = new Set<string>()

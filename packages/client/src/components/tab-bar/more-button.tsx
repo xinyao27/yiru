@@ -15,7 +15,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
 import { useAppStore } from '~renderer/store'
-import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
 
 import { getTitlebarMoreDropIndicatorClasses } from '../workspace-panel/titlebar-drop-indicator'
 import type { WorkspacePanelTitlebarModel } from '../workspace-panel/use-workspace-panel-titlebar-model'
@@ -34,7 +33,7 @@ export function TabBarMoreButton({
 }): React.JSX.Element | null {
   const worktree = useAppStore((state) => state.getKnownWorktreeById(worktreeId) ?? null)
   const repos = useAppStore((state) => state.repos)
-  const canOpenWorktree = Boolean(worktree && worktreeId !== FLOATING_TERMINAL_WORKTREE_ID)
+  const canOpenWorktree = Boolean(worktree)
   const canShowQuickCommands =
     canOpenWorktree && repos.some((repo) => repo.id === getRepoIdFromWorktreeId(worktreeId))
   const [menuOpen, setMenuOpen] = useState(false)

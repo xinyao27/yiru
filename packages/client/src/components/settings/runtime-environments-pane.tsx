@@ -1,61 +1,31 @@
-import {
-  describeRuntimeCompatBlock,
-  evaluateRuntimeCompat,
-  MIN_COMPATIBLE_RUNTIME_SERVER_VERSION,
-  PROJECT_HOST_SETUP_RUNTIME_CAPABILITY,
-  RUNTIME_PROTOCOL_VERSION,
-  PROJECT_SOURCE_CONTEXT_RUNTIME_CAPABILITY,
-  WORKSPACE_RUN_CONTEXT_RUNTIME_CAPABILITY,
-  type RuntimeCompatVerdict
-} from '@yiru/runtime-protocol/capabilities'
-import { useCallback, useEffect, useState } from 'react'
-import { toast } from 'sonner'
-/* eslint-disable max-lines -- Why: the Coworking host settings pane keeps active
-   host selection, saved host mutation, and confirmation dialogs together so
-   the state transitions stay auditable. */
-import {
-  Warning as AlertTriangle,
-  HardDrives as Host,
-  HardDrive as HostOff,
-  Trash as Trash2,
-  CaretDown as ChevronDown,
-  ArrowClockwise as RefreshCw
-} from '~renderer/components/icons/hugeicons'
-import { LoadingIndicator } from '~renderer/components/loading-indicator'
-import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
-import { translate } from '~renderer/i18n/i18n'
-import { cn } from '~renderer/lib/class-names'
+import { useEffect, useState } from 'react'
 import {
   getUpdateCheckClickOptions,
   getUpdateCheckHint
 } from '~renderer/lib/update-check-click-options'
-import { unwrapRuntimeRpcResult } from '~renderer/runtime/rpc-client'
-import { runtimeEnvironmentsClient } from '~renderer/runtime/runtime-environments-client'
 import { useAppStore } from '~renderer/store'
 import type { PublicKnownRuntimeEnvironment } from '~shared/runtime-environments'
-import type { RuntimeStatus } from '~shared/runtime-types'
 import type { GlobalSettings } from '~shared/types'
 
-import { Button } from '../ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle
-} from '../ui/dialog'
-import { Label } from '../ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
-import {
-  getRemoteServerManualUpdateHelp,
-  RemoteServerUpdateStatus
-} from './remote-server-update-status'
+import { RuntimeEnvironmentAdvanced } from './runtime-environment-advanced'
+import { RuntimeEnvironmentDialogs } from './runtime-environment-dialogs'
+import { RuntimeEnvironmentList } from './runtime-environment-list'
+import { LOCAL_RUNTIME_VALUE, NO_RUNTIME_VALUE } from './runtime-environment-status'
 import { getRuntimeEnvironmentsSearchEntry } from './runtime-environments-search'
 import { SearchableSetting } from './searchable-setting'
+import { useRuntimeEnvironmentActions } from './use-runtime-environment-actions'
+import { useRuntimeEnvironmentList } from './use-runtime-environment-list'
 
-const LOCAL_RUNTIME_VALUE = '__local__'
-const NO_RUNTIME_VALUE = '__none__'
+export {
+  evaluateHostDetails,
+  getActiveServerModeDescription,
+  getHostDetailsDescription,
+  getHostDetailsSummary,
+  getHostModelCapabilitySummary,
+  getRuntimeCapabilitiesSummary,
+  getRuntimeServerConnectionState,
+  type RuntimeHostDetails
+} from './runtime-environment-status'
 
 type RuntimeEnvironmentsPaneProps = {
   settings: GlobalSettings
@@ -63,201 +33,24 @@ type RuntimeEnvironmentsPaneProps = {
   allowLocalRuntime?: boolean
 }
 
-export type RuntimeHostDetails = {
-  status: 'loading' | 'ready' | 'error'
-  runtimeStatus: RuntimeStatus | null
-  compatibility: RuntimeCompatVerdict | null
-  error: string | null
-}
-
-export function evaluateHostDetails(status: RuntimeStatus): RuntimeCompatVerdict {
-  return evaluateRuntimeCompat({
-    clientProtocolVersion: RUNTIME_PROTOCOL_VERSION,
-    minCompatibleServerProtocolVersion: MIN_COMPATIBLE_RUNTIME_SERVER_VERSION,
-    serverProtocolVersion: status.runtimeProtocolVersion ?? status.protocolVersion,
-    serverMinCompatibleClientProtocolVersion:
-      status.minCompatibleRuntimeClientVersion ?? status.minCompatibleMobileVersion
-  })
-}
-
-export function getHostDetailsSummary(details: RuntimeHostDetails | undefined): string {
-  if (!details || details.status === 'loading') {
-    return translate('auto.components.settings.RuntimeEnvironmentsPane.5120beaac6', 'Checking…')
-  }
-  if (details.status === 'error') {
-    return translate(
-      'auto.components.settings.RuntimeEnvironmentsPane.c8791efc45',
-      'Status unavailable'
-    )
-  }
-  if (details.compatibility?.kind === 'blocked') {
-    return details.compatibility.reason === 'client-too-old'
-      ? translate('auto.components.settings.RuntimeEnvironmentsPane.62ac182a27', 'Update client')
-      : translate('auto.components.settings.RuntimeEnvironmentsPane.86ed75bec8', 'Update host')
-  }
-  return translate('auto.components.settings.RuntimeEnvironmentsPane.9a91c4a0eb', 'Compatible')
-}
-
-export function getHostDetailsDescription(details: RuntimeHostDetails | undefined): string | null {
-  if (!details || details.status === 'loading') {
-    return null
-  }
-  if (details.status === 'error') {
-    return details.error
-  }
-  if (details.compatibility?.kind === 'blocked') {
-    return describeRuntimeCompatBlock(details.compatibility)
-  }
-  return null
-}
-
-export function getRuntimeCapabilitiesSummary(status: RuntimeStatus | null | undefined): string {
-  const capabilities = status?.capabilities ?? []
-  if (capabilities.length === 0) {
-    return translate(
-      'auto.components.settings.RuntimeEnvironmentsPane.4b5c6d7e8f',
-      'No capabilities reported'
-    )
-  }
-  const visibleCapabilities = capabilities.slice(0, 3).join(', ')
-  const hiddenCount = capabilities.length - 3
-  return hiddenCount > 0 ? `${visibleCapabilities} +${hiddenCount}` : visibleCapabilities
-}
-
-export function getHostModelCapabilitySummary(
-  status: RuntimeStatus | null | undefined
-): string | null {
-  if (!status) {
-    return null
-  }
-  const capabilities = status.capabilities
-  if (!capabilities) {
-    return translate(
-      'auto.components.settings.RuntimeEnvironmentsPane.hostModelCapabilityUnknown',
-      'Host model support: checking host capabilities'
-    )
-  }
-  const missing = [
-    PROJECT_HOST_SETUP_RUNTIME_CAPABILITY,
-    PROJECT_SOURCE_CONTEXT_RUNTIME_CAPABILITY,
-    WORKSPACE_RUN_CONTEXT_RUNTIME_CAPABILITY
-  ].filter((capability) => !capabilities.includes(capability))
-  if (missing.length === 0) {
-    return translate(
-      'auto.components.settings.RuntimeEnvironmentsPane.hostModelCapabilitySupported',
-      'Host model support: ready'
-    )
-  }
-  const missingLabels = missing.map(getHostModelCapabilityLabel)
-  return translate(
-    'auto.components.settings.RuntimeEnvironmentsPane.hostModelCapabilityMissing',
-    'Host model support: update host for {{value0}}',
-    { value0: missingLabels.join(', ') }
-  )
-}
-
-function getHostModelCapabilityLabel(capability: string): string {
-  switch (capability) {
-    case PROJECT_HOST_SETUP_RUNTIME_CAPABILITY:
-      return translate(
-        'auto.components.settings.RuntimeEnvironmentsPane.hostModelCapabilityProjectSetup',
-        'project setup'
-      )
-    case PROJECT_SOURCE_CONTEXT_RUNTIME_CAPABILITY:
-      return translate(
-        'auto.components.settings.RuntimeEnvironmentsPane.hostModelCapabilityProjectSourceContext',
-        'project source context'
-      )
-    case WORKSPACE_RUN_CONTEXT_RUNTIME_CAPABILITY:
-      return translate(
-        'auto.components.settings.RuntimeEnvironmentsPane.hostModelCapabilityWorkspaceRunContext',
-        'workspace run context'
-      )
-    default:
-      return capability
-  }
-}
-
-export function getActiveServerModeDescription(allowLocalRuntime: boolean): string {
-  return allowLocalRuntime
-    ? translate(
-        'auto.components.settings.RuntimeEnvironmentsPane.3f67e8078a',
-        'Use this computer by default. Choose a saved Coworking host only when you want supported projects, files, terminals, provider checks, and browser/mobile handoff to run through that host.'
-      )
-    : translate(
-        'auto.components.settings.RuntimeEnvironmentsPane.2c85efb3e8',
-        'Selecting a saved Coworking host makes this browser use that paired runtime as its default host.'
-      )
-}
-
-type RuntimeServerConnectionState = 'connected' | 'checking' | 'disconnected'
-
-export function getRuntimeServerConnectionState(
-  details: RuntimeHostDetails | undefined
-): RuntimeServerConnectionState {
-  if (!details || details.status === 'loading') {
-    return 'checking'
-  }
-  if (details.status !== 'ready' || details.compatibility?.kind === 'blocked') {
-    return 'disconnected'
-  }
-  // Why: an attached, reachable, compatible host is "Connected" (and exposes
-  // Disconnect). Whether it is the default *active* host is a separate concept,
-  // surfaced by the Advanced > active host selector and the row's help text —
-  // it must not change this connection label, or the dot/label/button disagree.
-  return 'connected'
-}
-
-function getRuntimeServerConnectionLabel(state: RuntimeServerConnectionState): string {
-  switch (state) {
-    case 'connected':
-      return translate(
-        'auto.components.settings.RuntimeEnvironmentsPane.serverConnected',
-        'Connected'
-      )
-    case 'checking':
-      return translate(
-        'auto.components.settings.RuntimeEnvironmentsPane.serverChecking',
-        'Checking…'
-      )
-    case 'disconnected':
-      return translate(
-        'auto.components.settings.RuntimeEnvironmentsPane.serverDisconnected',
-        'Disconnected'
-      )
-  }
-}
-
-function getRuntimeServerDotClass(state: RuntimeServerConnectionState): string {
-  switch (state) {
-    case 'connected':
-      return 'bg-emerald-500'
-    case 'checking':
-      return 'bg-yellow-500'
-    case 'disconnected':
-      return 'bg-muted-foreground/40'
-  }
-}
-
 export function RuntimeEnvironmentsPane({
   settings,
   switchRuntimeEnvironment,
   allowLocalRuntime = true
 }: RuntimeEnvironmentsPaneProps): React.JSX.Element {
-  const [environments, setEnvironments] = useState<PublicKnownRuntimeEnvironment[]>([])
-  const [isLoading, setIsLoading] = useState(false)
-  const [detailsByEnvironmentId, setDetailsByEnvironmentId] = useState<
-    Record<string, RuntimeHostDetails>
-  >({})
-  const [connectingId, setConnectingId] = useState<string | null>(null)
-  const [switchingValue, setSwitchingValue] = useState<string | null>(null)
-  const [removingId, setRemovingId] = useState<string | null>(null)
-  const [disconnectingId, setDisconnectingId] = useState<string | null>(null)
+  const list = useRuntimeEnvironmentList()
+  const actions = useRuntimeEnvironmentActions({
+    settings,
+    switchRuntimeEnvironment,
+    allowLocalRuntime,
+    environments: list.environments,
+    loadEnvironments: list.loadEnvironments,
+    mountedRef: list.mountedRef,
+    setDetailsByEnvironmentId: list.setDetailsByEnvironmentId
+  })
   const [pendingSwitchValue, setPendingSwitchValue] = useState<string | null>(null)
   const [pendingRemove, setPendingRemove] = useState<PublicKnownRuntimeEnvironment | null>(null)
   const [advancedOpen, setAdvancedOpen] = useState(false)
-  const [switchError, setSwitchError] = useState<string | null>(null)
-  const [removeError, setRemoveError] = useState<string | null>(null)
   const remoteServerUpdates = useAppStore((state) => state.remoteServerUpdates)
   const remoteServerUpdatesChecking = useAppStore((state) => state.remoteServerUpdatesChecking)
   const remoteServerUpdatesRunning = useAppStore((state) => state.remoteServerUpdatesRunning)
@@ -265,369 +58,23 @@ export function RuntimeEnvironmentsPane({
   const setRemoteServerUpdateDialogOpen = useAppStore(
     (state) => state.setRemoteServerUpdateDialogOpen
   )
-  const mountedRef = useMountedRef()
-  const updateCheckHint = getUpdateCheckHint()
-  const activeValue =
-    settings.activeRuntimeEnvironmentId ??
-    (allowLocalRuntime ? LOCAL_RUNTIME_VALUE : NO_RUNTIME_VALUE)
-  const isBusy =
-    connectingId !== null ||
-    switchingValue !== null ||
-    removingId !== null ||
-    disconnectingId !== null
-  const removingActiveHost = pendingRemove?.id === settings.activeRuntimeEnvironmentId
-  const searchEntry = getRuntimeEnvironmentsSearchEntry()
+  const environmentIdsKey = list.environments.map((environment) => environment.id).join('\n')
 
-  const loadEnvironments = useCallback(async (): Promise<void> => {
-    if (mountedRef.current) {
-      setIsLoading(true)
-    }
-    try {
-      const nextEnvironments = await runtimeEnvironmentsClient.list()
-      // Why: drop store status for hosts no longer saved so stale hosts don't
-      // linger in the sidebar registry.
-      useAppStore.getState().setRuntimeEnvironments(nextEnvironments)
-      if (mountedRef.current) {
-        setEnvironments(nextEnvironments)
-        setDetailsByEnvironmentId((current) => {
-          const next: Record<string, RuntimeHostDetails> = {}
-          for (const environment of nextEnvironments) {
-            next[environment.id] = current[environment.id] ?? {
-              status: 'loading',
-              runtimeStatus: null,
-              compatibility: null,
-              error: null
-            }
-          }
-          return next
-        })
-      }
-      await Promise.allSettled(
-        nextEnvironments.map(async (environment) => {
-          try {
-            const response = await runtimeEnvironmentsClient.getStatus({
-              selector: environment.id,
-              timeoutMs: 10_000
-            })
-            const runtimeStatus = unwrapRuntimeRpcResult<RuntimeStatus>(response)
-            // Why: feed the live status into the store so sidebar host pickers
-            // reflect manual refreshes, not just the settings pane.
-            useAppStore.getState().setRuntimeEnvironmentStatus(environment.id, {
-              status: runtimeStatus,
-              checkedAt: Date.now()
-            })
-            if (!mountedRef.current) {
-              return
-            }
-            setDetailsByEnvironmentId((current) => ({
-              ...current,
-              [environment.id]: {
-                status: 'ready',
-                runtimeStatus,
-                compatibility: evaluateHostDetails(runtimeStatus),
-                error: null
-              }
-            }))
-          } catch (error) {
-            // Why: record the failed probe (null status) so the sidebar can
-            // distinguish unreachable from never-checked.
-            useAppStore.getState().setRuntimeEnvironmentStatus(environment.id, {
-              status: null,
-              checkedAt: Date.now()
-            })
-            if (!mountedRef.current) {
-              return
-            }
-            setDetailsByEnvironmentId((current) => ({
-              ...current,
-              [environment.id]: {
-                status: 'error',
-                runtimeStatus: null,
-                compatibility: null,
-                error: error instanceof Error ? error.message : String(error)
-              }
-            }))
-          }
-        })
-      )
-    } catch (error) {
-      if (mountedRef.current) {
-        toast.error(
-          error instanceof Error
-            ? error.message
-            : translate(
-                'auto.components.settings.RuntimeEnvironmentsPane.e6410d72c3',
-                'Failed to load runtime environments.'
-              )
-        )
-      }
-    } finally {
-      if (mountedRef.current) {
-        setIsLoading(false)
-      }
-    }
-  }, [mountedRef])
-
-  useEffect(() => {
-    void loadEnvironments()
-  }, [loadEnvironments])
-
-  const environmentIdsKey = environments.map((environment) => environment.id).join('\n')
   useEffect(() => {
     void refreshRemoteServerUpdates()
   }, [environmentIdsKey, refreshRemoteServerUpdates])
 
-  const removeEnvironment = async (
-    environment: PublicKnownRuntimeEnvironment
-  ): Promise<boolean> => {
-    setRemovingId(environment.id)
-    setRemoveError(null)
-    try {
-      if (settings.activeRuntimeEnvironmentId === environment.id) {
-        if (!allowLocalRuntime) {
-          // Why: clearing the Web active host also clears the browser credential needed
-          // to sign its revocation, so revoke before switching the local setting to null.
-          await runtimeEnvironmentsClient.remove({ selector: environment.id })
-        }
-        const switched = await switchRuntimeEnvironment(null)
-        if (!switched) {
-          if (mountedRef.current) {
-            setRemoveError(
-              allowLocalRuntime
-                ? 'Could not switch to Local desktop. Fix the issue and try again.'
-                : 'Could not disconnect from this Coworking host. Fix the issue and try again.'
-            )
-          }
-          return false
-        }
-        if (!allowLocalRuntime) {
-          await loadEnvironments()
-          if (mountedRef.current) {
-            toast.success(
-              translate(
-                'auto.components.settings.RuntimeEnvironmentsPane.b5b5114cb0',
-                'Removed {{value0}}.',
-                { value0: environment.name }
-              )
-            )
-          }
-          return true
-        }
-      }
-      await runtimeEnvironmentsClient.remove({ selector: environment.id })
-      await loadEnvironments()
-      if (mountedRef.current) {
-        toast.success(
-          translate(
-            'auto.components.settings.RuntimeEnvironmentsPane.b5b5114cb0',
-            'Removed {{value0}}.',
-            { value0: environment.name }
-          )
-        )
-      }
-      return true
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : 'Failed to remove runtime environment.'
-      if (mountedRef.current) {
-        setRemoveError(message)
-        toast.error(message)
-      }
-      return false
-    } finally {
-      if (mountedRef.current) {
-        setRemovingId(null)
-      }
-    }
+  const activeValue =
+    settings.activeRuntimeEnvironmentId ??
+    (allowLocalRuntime ? LOCAL_RUNTIME_VALUE : NO_RUNTIME_VALUE)
+  const searchEntry = getRuntimeEnvironmentsSearchEntry()
+  const cancelSwitch = (): void => {
+    actions.setSwitchError(null)
+    setPendingSwitchValue(null)
   }
-
-  const disconnectEnvironment = async (
-    environment: PublicKnownRuntimeEnvironment
-  ): Promise<boolean> => {
-    setDisconnectingId(environment.id)
-    setSwitchError(null)
-    try {
-      if (settings.activeRuntimeEnvironmentId === environment.id) {
-        const switched = await switchRuntimeEnvironment(null)
-        if (!switched) {
-          if (mountedRef.current) {
-            setSwitchError(
-              allowLocalRuntime
-                ? 'Could not switch to Local desktop. Fix the issue and try again.'
-                : 'Could not disconnect from this Coworking host. Fix the issue and try again.'
-            )
-          }
-          return false
-        }
-      }
-      await runtimeEnvironmentsClient.disconnect({ selector: environment.id })
-      // Why: disconnect is non-destructive; keep the saved host but show the
-      // user that this live client is no longer attached to it.
-      useAppStore.getState().setRuntimeEnvironmentStatus(environment.id, {
-        status: null,
-        checkedAt: Date.now()
-      })
-      if (mountedRef.current) {
-        setDetailsByEnvironmentId((current) => ({
-          ...current,
-          [environment.id]: {
-            status: 'error',
-            runtimeStatus: null,
-            compatibility: null,
-            error: null
-          }
-        }))
-        toast.success(
-          translate(
-            'auto.components.settings.RuntimeEnvironmentsPane.disconnectedServer',
-            'Disconnected from {{value0}}.',
-            { value0: environment.name }
-          )
-        )
-      }
-      return true
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to disconnect host.'
-      if (mountedRef.current) {
-        setSwitchError(message)
-        toast.error(message)
-      }
-      return false
-    } finally {
-      if (mountedRef.current) {
-        setDisconnectingId(null)
-      }
-    }
-  }
-
-  const connectEnvironment = async (
-    environment: PublicKnownRuntimeEnvironment
-  ): Promise<boolean> => {
-    setConnectingId(environment.id)
-    setSwitchError(null)
-    try {
-      const response = await runtimeEnvironmentsClient.getStatus({
-        selector: environment.id,
-        timeoutMs: 15_000
-      })
-      const runtimeStatus = unwrapRuntimeRpcResult<RuntimeStatus>(response)
-      const compatibility = evaluateHostDetails(runtimeStatus)
-      // Why: row Connect is reachability only. The Advanced selector is the
-      // explicit default-host control and should be the only active-host path.
-      useAppStore.getState().setRuntimeEnvironmentStatus(environment.id, {
-        status: runtimeStatus,
-        checkedAt: Date.now()
-      })
-      if (mountedRef.current) {
-        setDetailsByEnvironmentId((current) => ({
-          ...current,
-          [environment.id]: {
-            status: 'ready',
-            runtimeStatus,
-            compatibility,
-            error: null
-          }
-        }))
-      }
-      if (compatibility.kind === 'blocked') {
-        const message = describeRuntimeCompatBlock(compatibility)
-        if (mountedRef.current) {
-          setSwitchError(message)
-          toast.error(message)
-        }
-        return false
-      }
-      const store = useAppStore.getState()
-      // Why: Connect is not the active-host selector anymore, but connected
-      // hosts should still contribute their projects/workspaces to the sidebar.
-      const repos = await store.fetchRuntimeEnvironmentRepos(environment.id)
-      await Promise.all(repos.map((repo) => useAppStore.getState().fetchWorktrees(repo.id)))
-      await useAppStore.getState().fetchWorktreeLineage()
-      if (mountedRef.current) {
-        toast.success(
-          translate(
-            'auto.components.settings.RuntimeEnvironmentsPane.runtimeReachable',
-            '{{value0}} is reachable.',
-            { value0: environment.name }
-          )
-        )
-      }
-      return true
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to connect host.'
-      useAppStore.getState().setRuntimeEnvironmentStatus(environment.id, {
-        status: null,
-        checkedAt: Date.now()
-      })
-      if (mountedRef.current) {
-        setDetailsByEnvironmentId((current) => ({
-          ...current,
-          [environment.id]: {
-            status: 'error',
-            runtimeStatus: null,
-            compatibility: null,
-            error: message
-          }
-        }))
-        setSwitchError(message)
-        toast.error(message)
-      }
-      return false
-    } finally {
-      if (mountedRef.current) {
-        setConnectingId(null)
-      }
-    }
-  }
-
-  const switchToValue = async (value: string): Promise<boolean> => {
-    if (value === NO_RUNTIME_VALUE) {
-      return false
-    }
-    setSwitchingValue(value)
-    setSwitchError(null)
-    try {
-      const switched = await switchRuntimeEnvironment(
-        allowLocalRuntime && value === LOCAL_RUNTIME_VALUE ? null : value
-      )
-      if (switched) {
-        if (mountedRef.current) {
-          toast.success(
-            translate(
-              'auto.components.settings.RuntimeEnvironmentsPane.99ac81fb43',
-              'Switched to {{value0}}.',
-              { value0: getEnvironmentLabel(value) }
-            )
-          )
-        }
-        return true
-      }
-      if (mountedRef.current) {
-        setSwitchError('Could not switch hosts. Fix the issue and try again.')
-      }
-      return false
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to switch hosts.'
-      if (mountedRef.current) {
-        setSwitchError(message)
-        toast.error(message)
-      }
-      return false
-    } finally {
-      if (mountedRef.current) {
-        setSwitchingValue(null)
-      }
-    }
-  }
-
-  const getEnvironmentLabel = (value: string): string => {
-    if (value === LOCAL_RUNTIME_VALUE) {
-      return 'Local desktop'
-    }
-    if (value === NO_RUNTIME_VALUE) {
-      return 'No host connected'
-    }
-    return environments.find((environment) => environment.id === value)?.name ?? 'Coworking host'
+  const cancelRemove = (): void => {
+    actions.setRemoveError(null)
+    setPendingRemove(null)
   }
 
   return (
@@ -637,554 +84,75 @@ export function RuntimeEnvironmentsPane({
       keywords={searchEntry.keywords}
       className="space-y-4 py-2"
     >
-      <div className="space-y-3">
-        <div
-          data-settings-section="remote-server-updates"
-          className="flex items-center justify-between gap-3"
-        >
-          <div className="min-w-0 space-y-0.5">
-            <div className="text-sm font-medium">
-              {translate(
-                'auto.components.settings.RuntimeEnvironmentsPane.connectToRemoteServers',
-                'Coworking hosts'
-              )}
-            </div>
-            <p className="text-muted-foreground text-xs">
-              {translate(
-                'auto.components.settings.RuntimeEnvironmentsPane.connectToRemoteServersHelp',
-                'Connect, disconnect, or inspect hosts authorized through Coworking.'
-              )}
-            </p>
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
-            {environments.length > 0 ? (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="gap-1.5"
-                title={updateCheckHint}
-                onClick={(event) => {
-                  setRemoteServerUpdateDialogOpen(true)
-                  void refreshRemoteServerUpdates(getUpdateCheckClickOptions(event))
-                }}
-                disabled={remoteServerUpdatesChecking && remoteServerUpdates.size === 0}
-              >
-                {remoteServerUpdatesChecking || remoteServerUpdatesRunning ? (
-                  <LoadingIndicator />
-                ) : (
-                  <RefreshCw />
-                )}
-                {remoteServerUpdatesRunning
-                  ? translate(
-                      'auto.components.settings.RuntimeEnvironmentsPane.updatingServers',
-                      'Updating hosts…'
-                    )
-                  : translate(
-                      'auto.components.settings.RuntimeEnvironmentsPane.reviewServerUpdates',
-                      'Check for host updates'
-                    )}
-              </Button>
-            ) : null}
-          </div>
-        </div>
-
-        <div className="border-border/50 bg-card/30 border">
-          {environments.length === 0 ? (
-            <div className="text-muted-foreground px-3 py-4 text-sm">
-              {translate(
-                'auto.components.settings.RuntimeEnvironmentsPane.9a3758d983',
-                'No Coworking hosts connected.'
-              )}
-            </div>
-          ) : (
-            <div className="divide-border/50 divide-y">
-              {environments.map((environment) => (
-                <div
-                  key={environment.id}
-                  data-settings-section={environment.id}
-                  className="flex items-center gap-3 px-4 py-3"
-                >
-                  {(() => {
-                    const details = detailsByEnvironmentId[environment.id]
-                    const detailsDescription = getHostDetailsDescription(details)
-                    const isActive = settings.activeRuntimeEnvironmentId === environment.id
-                    const connectionState = getRuntimeServerConnectionState(details)
-                    const remoteUpdate = remoteServerUpdates.get(environment.id)
-                    // A connected host exposes Disconnect; otherwise Connect.
-                    const isReachable = connectionState === 'connected'
-                    const actionBusy =
-                      connectingId === environment.id ||
-                      switchingValue === environment.id ||
-                      disconnectingId === environment.id ||
-                      removingId === environment.id
-                    return (
-                      <>
-                        <Host className="text-muted-foreground size-4 shrink-0" />
-                        <div className="min-w-0 flex-1">
-                          <div className="flex min-w-0 items-center gap-2">
-                            <div className="truncate text-sm font-medium">{environment.name}</div>
-                            <span
-                              className={cn(
-                                'size-2 shrink-0',
-                                getRuntimeServerDotClass(connectionState)
-                              )}
-                            />
-                            <span className="text-muted-foreground text-[11px]">
-                              {getRuntimeServerConnectionLabel(connectionState)}
-                            </span>
-                            {details?.compatibility?.kind === 'blocked' ? (
-                              <AlertTriangle className="text-destructive size-3.5 shrink-0" />
-                            ) : details?.status === 'loading' ? (
-                              <LoadingIndicator className="text-muted-foreground size-3.5 shrink-0" />
-                            ) : null}
-                          </div>
-                          <p className="text-muted-foreground truncate text-xs">
-                            {isActive
-                              ? translate(
-                                  'auto.components.settings.RuntimeEnvironmentsPane.activeServerRowHelp',
-                                  'Active Coworking host for host-routed projects, terminals, and provider checks.'
-                                )
-                              : getHostDetailsSummary(details)}
-                          </p>
-                          {detailsDescription ? (
-                            <p
-                              className={cn(
-                                'mt-0.5 truncate text-xs',
-                                details?.compatibility?.kind === 'blocked'
-                                  ? 'text-destructive'
-                                  : 'text-muted-foreground'
-                              )}
-                            >
-                              {detailsDescription}
-                            </p>
-                          ) : null}
-                          {remoteUpdate ? (
-                            <div className="mt-1 flex flex-wrap items-center gap-2">
-                              <span className="text-muted-foreground text-[11px]">
-                                {remoteUpdate.currentVersion
-                                  ? translate(
-                                      'auto.components.settings.RuntimeEnvironmentsPane.yiruVersion',
-                                      'Yiru v{{value0}}',
-                                      { value0: remoteUpdate.currentVersion }
-                                    )
-                                  : translate(
-                                      'auto.components.settings.RuntimeEnvironmentsPane.versionUnavailable',
-                                      'Yiru version unavailable'
-                                    )}
-                              </span>
-                              <RemoteServerUpdateStatus entry={remoteUpdate} compact />
-                            </div>
-                          ) : null}
-                          {remoteUpdate?.phase === 'manual' ? (
-                            <p className="text-muted-foreground mt-1 text-xs">
-                              {getRemoteServerManualUpdateHelp(remoteUpdate)}
-                            </p>
-                          ) : null}
-                          {remoteUpdate?.phase === 'failed' && remoteUpdate.error ? (
-                            <p className="text-destructive mt-1 text-xs">{remoteUpdate.error}</p>
-                          ) : null}
-                        </div>
-                        <div className="flex shrink-0 items-center gap-1">
-                          {remoteUpdate?.phase === 'available' ||
-                          remoteUpdate?.phase === 'failed' ? (
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="xs"
-                              onClick={() => setRemoteServerUpdateDialogOpen(true)}
-                              disabled={remoteServerUpdatesRunning}
-                            >
-                              {translate(
-                                'auto.components.settings.RuntimeEnvironmentsPane.updateServer',
-                                'Update'
-                              )}
-                            </Button>
-                          ) : null}
-                          {isReachable ? (
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="xs"
-                              className="gap-1.5"
-                              onClick={() => void disconnectEnvironment(environment)}
-                              disabled={actionBusy}
-                            >
-                              {disconnectingId === environment.id ? (
-                                <LoadingIndicator className="size-3" />
-                              ) : (
-                                <HostOff className="size-3" />
-                              )}
-                              {translate(
-                                'auto.components.settings.RuntimeEnvironmentsPane.disconnect',
-                                'Disconnect'
-                              )}
-                            </Button>
-                          ) : (
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="xs"
-                              className="gap-1.5"
-                              onClick={() => void connectEnvironment(environment)}
-                              disabled={actionBusy || connectionState === 'checking'}
-                            >
-                              {connectingId === environment.id ? (
-                                <LoadingIndicator className="size-3" />
-                              ) : (
-                                <Host className="size-3" />
-                              )}
-                              {translate(
-                                'auto.components.settings.RuntimeEnvironmentsPane.connect',
-                                'Connect'
-                              )}
-                            </Button>
-                          )}
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => {
-                              setRemoveError(null)
-                              setPendingRemove(environment)
-                            }}
-                            className="text-muted-foreground size-7 hover:text-red-400"
-                            disabled={isBusy}
-                            aria-label={translate(
-                              'auto.components.settings.RuntimeEnvironmentsPane.aeb26635d2',
-                              'Remove {{value0}}',
-                              { value0: environment.name }
-                            )}
-                          >
-                            {removingId === environment.id ? (
-                              <LoadingIndicator className="size-3" />
-                            ) : (
-                              <Trash2 className="size-3" />
-                            )}
-                          </Button>
-                        </div>
-                      </>
-                    )
-                  })()}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div data-settings-section="default-runtime">
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => setAdvancedOpen((current) => !current)}
-          className="-ml-2 text-xs"
-        >
-          {translate('auto.components.settings.RuntimeEnvironmentsPane.advanced', 'Advanced')}
-          <ChevronDown
-            className={cn('size-4 transition-transform', advancedOpen && 'rotate-180')}
-          />
-        </Button>
-
-        <div
-          className={cn(
-            'grid overflow-hidden transition-[grid-template-rows] duration-200 ease-out',
-            advancedOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
-          )}
-          aria-hidden={!advancedOpen}
-        >
-          <div className="min-h-0">
-            <div
-              className={cn(
-                'space-y-2 px-1 pt-3 pb-1 transition-[opacity,transform] duration-150 ease-out',
-                advancedOpen
-                  ? 'translate-y-0 opacity-100 delay-200'
-                  : '-translate-y-1 opacity-0 delay-0'
-              )}
-            >
-              <div className="space-y-1">
-                <Label id="runtime-active-server-label">
-                  {translate(
-                    'auto.components.settings.RuntimeEnvironmentsPane.64b6bea541',
-                    'Default runtime'
-                  )}
-                </Label>
-                <p className="text-muted-foreground text-xs">
-                  {getActiveServerModeDescription(allowLocalRuntime)}
-                </p>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <Select
-                  value={activeValue}
-                  onValueChange={(value) => {
-                    if (value !== activeValue) {
-                      setSwitchError(null)
-                      setPendingSwitchValue(value)
-                    }
-                  }}
-                  disabled={isBusy}
-                >
-                  <SelectTrigger
-                    size="sm"
-                    className="min-w-[260px]"
-                    aria-labelledby="runtime-active-server-label"
-                  >
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {allowLocalRuntime ? (
-                      <SelectItem value={LOCAL_RUNTIME_VALUE}>
-                        {translate(
-                          'auto.components.settings.RuntimeEnvironmentsPane.78692becbd',
-                          'Local desktop'
-                        )}
-                      </SelectItem>
-                    ) : environments.length === 0 ? (
-                      <SelectItem value={NO_RUNTIME_VALUE} disabled>
-                        {translate(
-                          'auto.components.settings.RuntimeEnvironmentsPane.b07070ed3c',
-                          'No Coworking host connected'
-                        )}
-                      </SelectItem>
-                    ) : null}
-                    {environments.map((environment) => (
-                      <SelectItem key={environment.id} value={environment.id}>
-                        {environment.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon-sm"
-                  aria-label={translate(
-                    'auto.components.settings.RuntimeEnvironmentsPane.6ce4664003',
-                    'Refresh hosts'
-                  )}
-                  title={translate(
-                    'auto.components.settings.RuntimeEnvironmentsPane.6ce4664003',
-                    'Refresh hosts'
-                  )}
-                  onClick={() => void loadEnvironments()}
-                  disabled={isLoading || isBusy}
-                >
-                  {isLoading ? <LoadingIndicator /> : <RefreshCw />}
-                </Button>
-              </div>
-              {environments.length > 0 ? (
-                <div className="space-y-2 pt-2">
-                  <div className="text-xs font-medium">
-                    {translate(
-                      'auto.components.settings.RuntimeEnvironmentsPane.serverDetails',
-                      'Host details'
-                    )}
-                  </div>
-                  <div className="border-border/50 bg-card/30 space-y-1 border p-2">
-                    {environments.map((environment) => {
-                      const details = detailsByEnvironmentId[environment.id]
-                      return (
-                        <div
-                          key={environment.id}
-                          className="text-muted-foreground grid gap-1 px-2 py-1.5 text-[11px] sm:grid-cols-[minmax(0,9rem)_minmax(0,1fr)]"
-                        >
-                          <div className="text-foreground truncate font-medium">
-                            {environment.name}
-                          </div>
-                          <div className="min-w-0 space-y-0.5">
-                            <div className="truncate font-mono">
-                              {environment.endpoints[0]?.endpoint ??
-                                translate(
-                                  'auto.components.settings.RuntimeEnvironmentsPane.6ef71985da',
-                                  'No endpoint'
-                                )}
-                            </div>
-                            {details?.runtimeStatus ? (
-                              <div className="truncate">
-                                {translate(
-                                  'auto.components.settings.RuntimeEnvironmentsPane.0ef838094a',
-                                  'Protocol {{value0}}',
-                                  {
-                                    value0:
-                                      details.runtimeStatus?.runtimeProtocolVersion ??
-                                      details.runtimeStatus?.protocolVersion ??
-                                      0
-                                  }
-                                )}
-                                {details.runtimeStatus.hostPlatform
-                                  ? ` · ${details.runtimeStatus.hostPlatform}`
-                                  : ''}
-                                {' · '}
-                                {getRuntimeCapabilitiesSummary(details.runtimeStatus)}
-                              </div>
-                            ) : null}
-                            {getHostModelCapabilitySummary(details?.runtimeStatus) ? (
-                              <div className="truncate">
-                                {getHostModelCapabilitySummary(details?.runtimeStatus)}
-                              </div>
-                            ) : null}
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              ) : null}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <Dialog
-        open={pendingSwitchValue !== null}
-        onOpenChange={(open) => {
-          if (!open && switchingValue === null) {
-            setSwitchError(null)
-            setPendingSwitchValue(null)
+      <RuntimeEnvironmentList
+        environments={list.environments}
+        detailsByEnvironmentId={list.detailsByEnvironmentId}
+        activeEnvironmentId={settings.activeRuntimeEnvironmentId ?? null}
+        updates={remoteServerUpdates}
+        updatesChecking={remoteServerUpdatesChecking}
+        updatesRunning={remoteServerUpdatesRunning}
+        updateCheckHint={getUpdateCheckHint()}
+        connectingId={actions.connectingId}
+        switchingValue={actions.switchingValue}
+        disconnectingId={actions.disconnectingId}
+        removingId={actions.removingId}
+        isBusy={actions.isBusy}
+        onCheckUpdates={(event) => {
+          setRemoteServerUpdateDialogOpen(true)
+          void refreshRemoteServerUpdates(getUpdateCheckClickOptions(event))
+        }}
+        onOpenUpdates={() => setRemoteServerUpdateDialogOpen(true)}
+        onConnect={(environment) => void actions.connectEnvironment(environment)}
+        onDisconnect={(environment) => void actions.disconnectEnvironment(environment)}
+        onRemove={(environment) => {
+          actions.setRemoveError(null)
+          setPendingRemove(environment)
+        }}
+      />
+      <RuntimeEnvironmentAdvanced
+        open={advancedOpen}
+        onOpenChange={setAdvancedOpen}
+        allowLocalRuntime={allowLocalRuntime}
+        activeValue={activeValue}
+        environments={list.environments}
+        detailsByEnvironmentId={list.detailsByEnvironmentId}
+        isBusy={actions.isBusy}
+        isLoading={list.isLoading}
+        onSelect={(value) => {
+          if (value && value !== activeValue) {
+            actions.setSwitchError(null)
+            setPendingSwitchValue(value)
           }
         }}
-      >
-        <DialogContent className="max-w-sm sm:max-w-sm" showCloseButton={false}>
-          <DialogHeader>
-            <DialogTitle className="text-sm">
-              {translate(
-                'auto.components.settings.RuntimeEnvironmentsPane.d570c35a99',
-                'Switch Host'
-              )}
-            </DialogTitle>
-            <DialogDescription>
-              {translate(
-                'auto.components.settings.RuntimeEnvironmentsPane.b2290ed203',
-                'Yiru will focus this host and load its projects. Existing terminals and browser tabs on other hosts stay alive.'
-              )}
-            </DialogDescription>
-          </DialogHeader>
-          {pendingSwitchValue ? (
-            <div className="border-border/70 bg-muted/35 border px-3 py-2 text-xs">
-              <div className="text-muted-foreground">
-                {translate(
-                  'auto.components.settings.RuntimeEnvironmentsPane.05e0fc3ebf',
-                  'Switch to'
-                )}
-              </div>
-              <div className="mt-0.5 truncate font-medium">
-                {getEnvironmentLabel(pendingSwitchValue)}
-              </div>
-            </div>
-          ) : null}
-          {switchError ? <p className="text-destructive text-sm">{switchError}</p> : null}
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setSwitchError(null)
-                setPendingSwitchValue(null)
-              }}
-              disabled={switchingValue !== null}
-            >
-              {translate('auto.components.settings.RuntimeEnvironmentsPane.af53761f31', 'Cancel')}
-            </Button>
-            <Button
-              onClick={() => {
-                const value = pendingSwitchValue
-                if (!value) {
-                  return
-                }
-                void switchToValue(value).then((switched) => {
-                  if (switched && mountedRef.current) {
-                    setPendingSwitchValue(null)
-                  }
-                })
-              }}
-              disabled={switchingValue !== null}
-            >
-              {switchingValue !== null ? <LoadingIndicator /> : null}
-              {translate('auto.components.settings.RuntimeEnvironmentsPane.d2e00809e4', 'Switch')}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog
-        open={pendingRemove !== null}
-        onOpenChange={(open) => {
-          if (!open && removingId === null) {
-            setRemoveError(null)
-            setPendingRemove(null)
-          }
+        onRefresh={() => void list.loadEnvironments()}
+      />
+      <RuntimeEnvironmentDialogs
+        pendingSwitchValue={pendingSwitchValue}
+        pendingRemove={pendingRemove}
+        switchingValue={actions.switchingValue}
+        removingId={actions.removingId}
+        switchError={actions.switchError}
+        removeError={actions.removeError}
+        removingActiveHost={pendingRemove?.id === settings.activeRuntimeEnvironmentId}
+        allowLocalRuntime={allowLocalRuntime}
+        getEnvironmentLabel={actions.getEnvironmentLabel}
+        onCancelSwitch={cancelSwitch}
+        onConfirmSwitch={(value) => {
+          void actions.switchToValue(value).then((switched) => {
+            if (switched && list.mountedRef.current) {
+              setPendingSwitchValue(null)
+            }
+          })
         }}
-      >
-        <DialogContent className="max-w-sm sm:max-w-sm" showCloseButton={false}>
-          <DialogHeader>
-            <DialogTitle className="text-sm">
-              {translate(
-                'auto.components.settings.RuntimeEnvironmentsPane.bb90dd6487',
-                'Remove Host'
-              )}
-            </DialogTitle>
-            <DialogDescription>
-              {removingActiveHost
-                ? allowLocalRuntime
-                  ? translate(
-                      'auto.components.settings.RuntimeEnvironmentsPane.9f7665a01b',
-                      'Removing the active host first switches Yiru back to Local desktop. Existing host sessions are left alone.'
-                    )
-                  : translate(
-                      'auto.components.settings.RuntimeEnvironmentsPane.b2fda48c39',
-                      'Removing the active host disconnects this browser from that host. Existing host sessions are left alone.'
-                    )
-                : translate(
-                    'auto.components.settings.RuntimeEnvironmentsPane.ed3e3f069d',
-                    'This removes the saved host from Yiru. It does not change the active host.'
-                  )}
-            </DialogDescription>
-          </DialogHeader>
-          {pendingRemove ? (
-            <div className="border-border/70 bg-muted/35 border px-3 py-2 text-xs">
-              <div className="truncate font-medium">{pendingRemove.name}</div>
-              <div className="text-muted-foreground mt-0.5 truncate font-mono">
-                {pendingRemove.endpoints[0]?.endpoint ??
-                  translate(
-                    'auto.components.settings.RuntimeEnvironmentsPane.6ef71985da',
-                    'No endpoint'
-                  )}
-              </div>
-            </div>
-          ) : null}
-          {removeError ? <p className="text-destructive text-sm">{removeError}</p> : null}
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setRemoveError(null)
-                setPendingRemove(null)
-              }}
-              disabled={removingId !== null}
-            >
-              {translate('auto.components.settings.RuntimeEnvironmentsPane.af53761f31', 'Cancel')}
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => {
-                const environment = pendingRemove
-                if (!environment) {
-                  return
-                }
-                void removeEnvironment(environment).then((removed) => {
-                  if (removed && mountedRef.current) {
-                    setPendingRemove(null)
-                  }
-                })
-              }}
-              disabled={removingId !== null}
-            >
-              {removingId !== null ? <LoadingIndicator /> : <Trash2 />}
-              {translate('auto.components.settings.RuntimeEnvironmentsPane.d25f0688b1', 'Remove')}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        onCancelRemove={cancelRemove}
+        onConfirmRemove={(environment) => {
+          void actions.removeEnvironment(environment).then((removed) => {
+            if (removed && list.mountedRef.current) {
+              setPendingRemove(null)
+            }
+          })
+        }}
+      />
     </SearchableSetting>
   )
 }

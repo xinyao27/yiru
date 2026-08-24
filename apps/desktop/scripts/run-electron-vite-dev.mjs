@@ -99,7 +99,7 @@ function seedDevInstanceIdentityEnv() {
   }
   if (label) {
     // Why: parallel `pn dev` runs need a stable origin label for window titles,
-    // Dock names, and automation sessions without re-running git in Electron.
+    // Dock names, and scripted development sessions without re-running git in Electron.
     process.env.YIRU_DEV_INSTANCE_LABEL ||= label
   }
   process.env.YIRU_DEV_DOCK_TITLE ||= dockTitle

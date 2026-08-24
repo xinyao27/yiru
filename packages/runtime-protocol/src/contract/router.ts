@@ -7,7 +7,6 @@ import { accountsContract } from './accounts.js'
 import { agentStatusContract } from './agent-status.js'
 import { agentTeamsContract } from './agent-teams.js'
 import { aiVaultContract } from './ai-vault.js'
-import { automationContract } from './automations.js'
 import { browserContract } from './browser/browser.js'
 import {
   CLI_INSTALL_CONTRACT,
@@ -36,7 +35,6 @@ import { gitlabContract } from './gitlab.js'
 import { hostContract } from './host-capabilities.js'
 import { hostedReviewContract } from './hosted-review.js'
 import { mobileContract } from './mobile-development-pairing.js'
-import { nativeChatContract } from './native-chat.js'
 import { notebookContract } from './notebook.js'
 import { notificationsContract } from './notifications.js'
 import { orchestrationContract } from './orchestration.js'
@@ -54,7 +52,6 @@ import { markdownContract, sessionContract } from './session-tabs.js'
 import { settingsContract } from './settings.js'
 import { shellContract } from './shell/shell.js'
 import { skillsContract } from './skills.js'
-import { speechContract } from './speech.js'
 import { statsContract } from './stats.js'
 import { STATUS_GET_CONTRACT, statusContract } from './status.js'
 import {
@@ -77,7 +74,6 @@ export const runtimeContract = {
   agentStatus: agentStatusContract,
   agentTeams: agentTeamsContract,
   aiVault: aiVaultContract,
-  automation: automationContract,
   browser: browserContract,
   cli: cliContract,
   clipboard: clipboardContract,
@@ -95,7 +91,6 @@ export const runtimeContract = {
   hostedReview: hostedReviewContract,
   mobile: mobileContract,
   markdown: markdownContract,
-  nativeChat: nativeChatContract,
   notebook: notebookContract,
   notifications: notificationsContract,
   orchestration: orchestrationContract,
@@ -111,7 +106,6 @@ export const runtimeContract = {
   settings: settingsContract,
   shell: shellContract,
   skills: skillsContract,
-  speech: speechContract,
   stats: statsContract,
   status: statusContract,
   terminal: terminalContract,
@@ -136,7 +130,6 @@ export { RuntimeProcedureMetaSchema } from './access-meta.js'
 export * from './agent-status.js'
 export * from './agent-teams.js'
 export * from './ai-vault.js'
-export * from './automations.js'
 export * from './browser/browser.js'
 export * from './accounts.js'
 export * from './cli.js'
@@ -161,7 +154,6 @@ export { hostContract } from './host-capabilities.js'
 export type { AgentTrustInput, AgentTrustPreset, RuntimeHostPlatform } from './host-capabilities.js'
 export * from './hosted-review.js'
 export * from './mobile-development-pairing.js'
-export * from './native-chat.js'
 export * from './notebook.js'
 export * from './notifications.js'
 export * from './orchestration.js'
@@ -180,7 +172,6 @@ export * from './shell-services-terminal.js'
 export * from './shell-services-ui.js'
 export * from './shell-services.js'
 export * from './skills.js'
-export * from './speech.js'
 export * from './stats.js'
 export * from './status.js'
 export * from './terminal.js'

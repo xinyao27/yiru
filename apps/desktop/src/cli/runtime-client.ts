@@ -1,14 +1,12 @@
-// Why: the runtime client used to live here as a single file. It was split
-// into ./runtime/{types,metadata,transport,status,launch,client}.ts so each
-// concern can be tested in isolation. This barrel preserves the original
-// import surface so call sites (src/cli/index.ts, tests) remain unchanged.
+// Why: the CLI runtime is a deep module with this narrow public interface;
+// callers should not depend on its transport and lifecycle implementation files.
+export { RuntimeClient } from './runtime/client'
+export { serveYiruApp } from './runtime/launch'
+export { getDefaultUserDataPath } from './runtime/metadata'
 export {
-  RuntimeClient,
   RuntimeClientError,
   RuntimeRpcFailureError,
-  serveYiruApp,
-  getDefaultUserDataPath,
   type RuntimeRpcFailure,
   type RuntimeRpcResponse,
   type RuntimeRpcSuccess
-} from './runtime/index'
+} from './runtime/types'

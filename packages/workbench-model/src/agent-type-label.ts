@@ -1,7 +1,6 @@
 import type { AgentType } from './agent-status-types'
 
-// Shared so the desktop renderer and the mobile app show the same agent name
-// (e.g. native chat's empty state on both surfaces) from one source of truth.
+// Why: desktop and mobile must show the same agent name from one source of truth.
 const WELL_KNOWN_LABELS: Record<string, string> = {
   claude: 'Claude',
   openclaude: 'OpenClaude',

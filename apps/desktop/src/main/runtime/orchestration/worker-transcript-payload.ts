@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto'
 
-import type { NativeChatBlock, NativeChatMessage } from '@yiru/workbench-model/agent'
+import type { AgentTranscriptBlock, AgentTranscriptMessage } from '@yiru/workbench-model/agent'
 
 export const DEFAULT_WORKER_TRANSCRIPT_MESSAGE_LIMIT = 40
 export const MAX_WORKER_TRANSCRIPT_MESSAGE_LIMIT = 50
@@ -37,15 +37,15 @@ export function redactWorkerTerminalLines(lines: readonly string[]): {
 }
 
 export function boundWorkerTranscriptMessages(
-  messages: readonly NativeChatMessage[],
+  messages: readonly AgentTranscriptMessage[],
   transcriptPath?: string
 ): {
-  messages: NativeChatMessage[]
+  messages: AgentTranscriptMessage[]
   limited: boolean
   warnings: string[]
 } {
   const warnings = new Set<string>()
-  const bounded: NativeChatMessage[] = []
+  const bounded: AgentTranscriptMessage[] = []
   let bytes = 2
   for (const message of messages) {
     const next = boundMessage(message, transcriptPath, warnings)
@@ -61,10 +61,10 @@ export function boundWorkerTranscriptMessages(
 }
 
 function boundMessage(
-  message: NativeChatMessage,
+  message: AgentTranscriptMessage,
   transcriptPath: string | undefined,
   warnings: Set<string>
-): NativeChatMessage {
+): AgentTranscriptMessage {
   const blocks = message.blocks.slice(0, MAX_WORKER_TRANSCRIPT_BLOCKS)
   if (blocks.length < message.blocks.length) {
     warnings.add('Some transcript blocks were omitted from oversized messages.')
@@ -79,7 +79,7 @@ function boundMessage(
   }
 }
 
-function boundBlock(block: NativeChatBlock, warnings: Set<string>): NativeChatBlock {
+function boundBlock(block: AgentTranscriptBlock, warnings: Set<string>): AgentTranscriptBlock {
   if (block.type === 'text') {
     return { ...block, text: clipText(block.text, warnings) }
   }

@@ -30,7 +30,13 @@ type RelayedMessage = {
 }
 
 export async function syncFederatedDispatch(
-  runtime: YiruRuntimeService,
+  runtime: Pick<
+    YiruRuntimeService,
+    | 'callOrchestrationWorkerServer'
+    | 'getOrchestrationDb'
+    | 'notifyMessageArrived'
+    | 'resolveOrchestrationWorkerServer'
+  >,
   dispatchId: string
 ): Promise<{ imported: number; acknowledgedThrough: number }> {
   const db = runtime.getOrchestrationDb()

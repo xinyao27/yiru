@@ -1,10 +1,6 @@
 import React from 'react'
 import { toast } from 'sonner'
-import {
-  CalendarDots as CalendarClock,
-  Pencil,
-  Note as StickyNote
-} from '~renderer/components/icons/hugeicons'
+import { Pencil, Note as StickyNote } from '~renderer/components/icons/hugeicons'
 import { SelectedTextCopyMenu } from '~renderer/components/selected-text-copy-menu'
 import { HoverCard, HoverCardTrigger, HoverCardContent } from '~renderer/components/ui/hover-card'
 import { translate } from '~renderer/i18n/i18n'
@@ -13,8 +9,7 @@ import { shellClient } from '~renderer/runtime/shell-client'
 
 import CommentMarkdown from '../comment-markdown'
 import { WORKTREE_NATIVE_CONTEXT_MENU_ATTR } from '../worktree-context-menu/opening-policy'
-import { getReviewLabel, ReviewIcon } from '../worktree-review-helpers'
-import { WorktreeCardAutomationDetailSection } from './automation-detail-section'
+import { getReviewLabel, ReviewIcon } from '../worktree-review-presentation'
 import { WorktreeCardDetailSection, WorktreeCardDetailSectionContent } from './detail-section'
 import { useWorktreeCardDetailsHoverControl } from './details-hover-state'
 import { WorktreeCardHoverIdentityHeader } from './hover-identity-header'
@@ -36,22 +31,18 @@ function hasComment(comment: string | null): boolean {
   return (comment ?? '').trim().length > 0
 }
 
-export function hasWorktreeCardDetails({
-  review,
-  comment,
-  automationProvenance
-}: WorktreeCardMetaBadgesProps): boolean {
-  return Boolean(review || hasComment(comment) || automationProvenance)
+export function hasWorktreeCardDetails({ review, comment }: WorktreeCardMetaBadgesProps): boolean {
+  return Boolean(review || hasComment(comment))
 }
 
 export const WorktreeCardMetaBadges = React.forwardRef<
   HTMLDivElement,
   WorktreeCardMetaBadgesRootProps
 >(function WorktreeCardMetaBadges(
-  { review, comment, automationProvenance, className, ...props },
+  { review, comment, className, ...props },
   ref
 ): React.JSX.Element | null {
-  if (!hasWorktreeCardDetails({ review, comment, automationProvenance })) {
+  if (!hasWorktreeCardDetails({ review, comment })) {
     return null
   }
 
@@ -77,16 +68,6 @@ export const WorktreeCardMetaBadges = React.forwardRef<
           <StickyNote className="text-muted-foreground" />
         </MetaIconBadge>
       )}
-      {automationProvenance && (
-        <MetaIconBadge
-          label={translate(
-            'auto.components.sidebar.WorktreeCardMeta.automationCreated',
-            'Created by automation'
-          )}
-        >
-          <CalendarClock className="text-muted-foreground" />
-        </MetaIconBadge>
-      )}
       {review && (
         <MetaIconBadge
           label={translate(
@@ -105,13 +86,11 @@ export const WorktreeCardMetaBadges = React.forwardRef<
 export function WorktreeCardDetailsHover({
   review,
   comment,
-  automationProvenance,
   children,
   branchName,
   workspaceTitle,
   identityOrder = 'workspace-first',
   workspaceTitleRenameDisabled = false,
-  automationHostId,
   detailsAfter,
   openDelay = 250,
   closeDelay = 120,
@@ -120,8 +99,6 @@ export function WorktreeCardDetailsHover({
   onEditComment,
   onOpenReviewInYiru,
   onUnlinkReview,
-  onOpenAutomation,
-  onOpenAutomationRun,
   hoverControl
 }: WorktreeCardDetailsHoverProps): React.JSX.Element {
   const internalHoverControl = useWorktreeCardDetailsHoverControl()
@@ -156,13 +133,6 @@ export function WorktreeCardDetailsHover({
     },
     [handleHoverOpenChange, workspaceTitleEditing]
   )
-  const dismissAndRun = React.useCallback(
-    (handler: ((event: React.MouseEvent) => void) | undefined) => (event: React.MouseEvent) => {
-      closeHover()
-      handler?.(event)
-    },
-    [closeHover]
-  )
   const copyLinkedWorkItemLink = React.useCallback(async (url: string, label: string) => {
     try {
       // Why: Electron clipboard IPC remains reliable from nested hover/dropdown
@@ -193,11 +163,7 @@ export function WorktreeCardDetailsHover({
 
   const showIdentityHeader = Boolean(branchName || workspaceTitle)
 
-  if (
-    !showIdentityHeader &&
-    !hasWorktreeCardDetails({ review, comment, automationProvenance }) &&
-    !detailsAfter
-  ) {
+  if (!showIdentityHeader && !hasWorktreeCardDetails({ review, comment }) && !detailsAfter) {
     return children
   }
 
@@ -237,17 +203,6 @@ export function WorktreeCardDetailsHover({
             onUnlinkReview={onUnlinkReview}
             closeHover={closeHover}
           />
-
-          {automationProvenance && (
-            <WorktreeCardAutomationDetailSection
-              provenance={automationProvenance}
-              worktreeHostId={automationHostId}
-              onOpenAutomation={onOpenAutomation ? dismissAndRun(onOpenAutomation) : undefined}
-              onOpenAutomationRun={
-                onOpenAutomationRun ? dismissAndRun(onOpenAutomationRun) : undefined
-              }
-            />
-          )}
 
           {hasComment(comment) && (
             <WorktreeCardDetailSection>

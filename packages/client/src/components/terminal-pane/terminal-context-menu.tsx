@@ -5,13 +5,11 @@ import {
   Copy,
   Eraser,
   GitFork,
-  Chat as MessageSquare,
   Layout as PanelBottomClose,
   Layout as PanelsTopLeft,
   Sidebar as PanelRightClose,
   Pencil,
   Play,
-  TerminalWindow as SquareTerminal,
   ArrowsOut as Maximize2,
   ArrowsIn as Minimize2,
   Plus,
@@ -34,7 +32,6 @@ import type { KeybindingOverrides } from '~shared/keybindings'
 import { isTerminalAgentQuickCommand } from '~shared/terminal/quick-commands'
 import type { TerminalQuickCommand } from '~shared/types'
 
-import { isMacPlatform, nativeChatToggleShortcutLabel } from '../native-chat/shortcut'
 import { AgentSessionContinuationMenuItem } from './agent/session-continuation-menu-item'
 import { TerminalIdMenuItems } from './terminal-id-menu-items'
 
@@ -56,9 +53,6 @@ type TerminalContextMenuProps = {
   canContinueAgentSessionInNewSession: boolean
   onContinueAgentSessionInNewSession: () => void
   onForkAgentSession: () => void
-  canToggleNativeChat: boolean
-  isNativeChatView: boolean
-  onToggleNativeChat: () => void
   onCopyAgentSessionContext: () => void
   repoQuickCommands: TerminalQuickCommand[]
   globalQuickCommands: TerminalQuickCommand[]
@@ -90,9 +84,6 @@ export default function TerminalContextMenu({
   canContinueAgentSessionInNewSession,
   onContinueAgentSessionInNewSession,
   onForkAgentSession,
-  canToggleNativeChat,
-  isNativeChatView,
-  onToggleNativeChat,
   onCopyAgentSessionContext,
   repoQuickCommands,
   globalQuickCommands,
@@ -118,8 +109,7 @@ export default function TerminalContextMenu({
       expand: formatPrimaryShortcutLabel('terminal.expandPane', keybindings),
       setTitle: formatPrimaryShortcutLabel('terminal.setTitle', keybindings),
       clearPaneTitle: formatPrimaryShortcutLabel('terminal.clearPaneTitle', keybindings),
-      close: formatPrimaryShortcutLabel('terminal.closePane', keybindings),
-      nativeChat: nativeChatToggleShortcutLabel(isMacPlatform())
+      close: formatPrimaryShortcutLabel('terminal.closePane', keybindings)
     }),
     [keybindings]
   )
@@ -232,21 +222,6 @@ export default function TerminalContextMenu({
         <ClipboardCopy />
         {translate('auto.components.terminal.pane.TerminalContextMenu.cff67afad1', 'Copy Context')}
       </ContextMenuItem>
-      {canToggleNativeChat ? (
-        <ContextMenuItem onClick={onToggleNativeChat}>
-          {isNativeChatView ? <SquareTerminal /> : <MessageSquare />}
-          {isNativeChatView
-            ? translate(
-                'components.tab.bar.SortableTabContextMenu.switchToTerminalView',
-                'Switch to terminal view'
-              )
-            : translate(
-                'components.tab.bar.SortableTabContextMenu.switchToChatView',
-                'Switch to chat view'
-              )}
-          <ContextMenuShortcut>{shortcuts.nativeChat}</ContextMenuShortcut>
-        </ContextMenuItem>
-      ) : null}
       <ContextMenuSeparator />
       <ContextMenuItem className="whitespace-nowrap" onClick={onSplitRight}>
         <PanelRightClose />

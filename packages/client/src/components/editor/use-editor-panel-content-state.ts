@@ -1,44 +1,23 @@
-/* oxlint-disable max-lines -- Why: content loading, retry, and external-change
-   subscriptions share in-flight caches and state setters; splitting them would
-   make the hook coordination harder to audit. */
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { OpenFile } from '~renderer/components/editor/state'
-import {
-  getConnectionIdForFile,
-  isWorktreeConnectionResolved
-} from '~renderer/lib/connection-context'
 import { joinPath } from '~renderer/lib/path'
-import { getRuntimeFileReadScope, readRuntimeFileContent } from '~renderer/runtime/file-client'
-import {
-  getRuntimeGitBranchDiff,
-  getRuntimeGitCommitDiff,
-  getRuntimeGitDiff,
-  getRuntimeGitScope
-} from '~renderer/runtime/git-client'
-import { settingsForRuntimeOwner } from '~renderer/runtime/rpc-client'
-import { workspaceHostClient } from '~renderer/runtime/workspace-host-client'
-import { useAppStore } from '~renderer/store'
+import type { useAppStore } from '~renderer/store'
 
-import { getDiskBaselineSignature } from './diff-content-signature'
 import {
-  WORKTREE_OWNER_NOT_READY_ERROR,
-  type DiffContent,
-  type FileContent
-} from './panel-content-types'
-import {
-  isReloadableSingleFileDiffTab,
-  shouldReloadDiffOnGitStatusChange
-} from './panel-diff-reload'
+  readEditorDiffContent,
+  readEditorFileContent,
+  stampCleanTabDiskBaseline
+} from './panel-content-readers'
+import type { DiffContent, FileContent } from './panel-content-types'
+import { isReloadableSingleFileDiffTab } from './panel-diff-reload'
 import { canUseChangesModeForFile } from './panel-file-mode'
+import { useEditorPanelContentReload } from './use-editor-panel-content-reload'
 import {
   useEditorPanelExternalContentEvents,
   usePruneClosedEditorContent
 } from './use-editor-panel-external-content-events'
 import { useEditorPanelFileLoadRetry } from './use-editor-panel-file-load-retry'
 import { useLocalLogTail } from './use-local-log-tail'
-
-const inFlightFileReads = new Map<string, Promise<FileContent>>()
-const inFlightDiffReads = new Map<string, Promise<DiffContent>>()
 
 type GitStatusByWorktree = ReturnType<typeof useAppStore.getState>['gitStatusByWorktree']
 type EditorViewModeByFile = ReturnType<typeof useAppStore.getState>['editorViewMode']
@@ -55,45 +34,6 @@ type UseEditorPanelContentStateResult = {
   fileContents: Record<string, FileContent>
   diffContents: Record<string, DiffContent>
   reloadContent: (file: OpenFile) => void
-}
-
-// Why: a clean load re-baselines what this tab's future edits are based on; a
-// dirty tab keeps its baseline (its draft still derives from the older content
-// the signature was taken over). Best-effort metadata — a failure here must
-// not convert an already-delivered load into an error view, hence the guard.
-function stampCleanTabDiskBaseline(id: string, result: FileContent): void {
-  if (result.isBinary || result.loadError) {
-    return
-  }
-  try {
-    const state = useAppStore.getState()
-    const loadedFile = state.openFiles.find((file) => file.id === id)
-    if (loadedFile && !loadedFile.isDirty) {
-      state.setLastKnownDiskSignature(id, getDiskBaselineSignature(result.content))
-    }
-  } catch (err) {
-    console.warn('[editor] failed to stamp disk baseline', err)
-  }
-}
-
-function inFlightReadKey(connectionId: string | undefined, filePath: string): string {
-  return `${connectionId ?? ''}::${filePath}`
-}
-
-function inFlightDiffKey(
-  file: OpenFile,
-  connectionId: string | undefined,
-  compareAgainstHead = false
-): string {
-  const branch =
-    file.diffSource === 'branch' && file.branchCompare
-      ? `${file.branchCompare.baseOid ?? ''}..${file.branchCompare.headOid ?? ''}::${file.branchOldPath ?? ''}`
-      : ''
-  const commit =
-    file.diffSource === 'commit' && file.commitCompare
-      ? `${file.commitCompare.parentOid ?? 'empty-tree'}..${file.commitCompare.commitOid}::${file.branchOldPath ?? ''}`
-      : ''
-  return `${connectionId ?? ''}::${file.diffSource ?? ''}::${compareAgainstHead ? 'head' : 'default'}::${file.filePath}::${branch}::${commit}`
 }
 
 export function useEditorPanelContentState({
@@ -135,61 +75,14 @@ export function useEditorPanelContentState({
       fileReadGenerationCounterRef.current = generation
       fileReadGenerationRef.current[id] = generation
       try {
-        const resolvedConnectionId = getConnectionIdForFile(worktreeId ?? null, filePath)
-        const connectionId = resolvedConnectionId ?? undefined
         const restoredOpenFile = openFilesRef.current.find((file) => file.id === id)
-        const activeSettings = useAppStore.getState().settings
-        const readSettings = settingsForRuntimeOwner(
-          activeSettings,
-          restoredOpenFile?.runtimeEnvironmentId
-        )
-        if (
-          resolvedConnectionId === undefined &&
-          !readSettings?.activeRuntimeEnvironmentId?.trim() &&
-          !isWorktreeConnectionResolved(worktreeId ?? null)
-        ) {
-          // Why: the backing repo hasn't hydrated yet (SSH still connecting), so
-          // we can't tell local from remote. Reading locally would deny a remote
-          // path with a terminal "access denied" (#6648); fail retryably instead.
-          throw new Error(WORKTREE_OWNER_NOT_READY_ERROR)
-        }
-        if (restoredOpenFile?.filePath === filePath && restoredOpenFile.relativePath === filePath) {
-          if (readSettings?.activeRuntimeEnvironmentId?.trim() || connectionId) {
-            // Why: restored external-file tabs contain client-local absolute
-            // paths. Remote runtime and SSH workspaces cannot read those paths
-            // without an explicit upload/import flow.
-            throw new Error('External local files are not available for remote workspaces.')
-          }
-          // Why: restored external-file tabs need their main-process path grant
-          // refreshed because that authorization is only held in memory.
-          await workspaceHostClient.fileHost.authorizeExternalPath({ targetPath: filePath })
-        }
-        const readScope = getRuntimeFileReadScope(readSettings, connectionId)
-        const key = inFlightReadKey(readScope, filePath)
-        if (options?.force) {
-          // Why: forced reloads must not attach to a currently registered read
-          // started before the external change landed.
-          inFlightFileReads.delete(key)
-        }
-        let pending = inFlightFileReads.get(key)
-        if (!pending) {
-          pending = readRuntimeFileContent({
-            settings: readSettings,
-            filePath,
-            relativePath: restoredOpenFile?.relativePath ?? relativePath,
-            worktreeId,
-            connectionId,
-            includeLocalLogMetadata:
-              restoredOpenFile?.readOnly === true && restoredOpenFile.liveTail === true
-          }) as Promise<FileContent>
-          inFlightFileReads.set(key, pending)
-          queueMicrotask(() => {
-            if (inFlightFileReads.get(key) === pending) {
-              inFlightFileReads.delete(key)
-            }
-          })
-        }
-        const result = await pending
+        const result = await readEditorFileContent({
+          filePath,
+          force: options?.force,
+          relativePath,
+          restoredOpenFile,
+          worktreeId
+        })
         if (fileReadGenerationRef.current[id] !== generation) {
           return
         }
@@ -219,93 +112,7 @@ export function useEditorPanelContentState({
       diffReadGenerationCounterRef.current = generation
       diffReadGenerationRef.current[file.id] = generation
       try {
-        const worktreePath = file.filePath.slice(
-          0,
-          file.filePath.length - file.relativePath.length - 1
-        )
-        const branchCompare =
-          file.branchCompare?.baseOid && file.branchCompare.headOid && file.branchCompare.mergeBase
-            ? file.branchCompare
-            : null
-        const commitCompare = file.commitCompare?.commitOid ? file.commitCompare : null
-        const connectionId = getConnectionIdForFile(file.worktreeId, file.filePath) ?? undefined
-        const activeSettings = useAppStore.getState().settings
-        const fileSettings = settingsForRuntimeOwner(activeSettings, file.runtimeEnvironmentId)
-        const gitScope = getRuntimeGitScope(fileSettings, connectionId)
-        const effectiveDiffSource: typeof file.diffSource =
-          file.mode === 'edit' ? 'unstaged' : file.diffSource
-        const compareAgainstHead = file.mode === 'edit'
-        const key = inFlightDiffKey(
-          { ...file, diffSource: effectiveDiffSource },
-          gitScope ?? undefined,
-          compareAgainstHead
-        )
-        if (options?.force) {
-          // Why: forced diff reloads must not attach to a read started before
-          // the external change landed.
-          inFlightDiffReads.delete(key)
-        }
-        let pending = inFlightDiffReads.get(key)
-        if (!pending) {
-          pending = (
-            effectiveDiffSource === 'commit'
-              ? commitCompare
-                ? getRuntimeGitCommitDiff(
-                    {
-                      settings: fileSettings,
-                      worktreeId: file.worktreeId,
-                      worktreePath,
-                      connectionId
-                    },
-                    {
-                      commitOid: commitCompare.commitOid,
-                      parentOid: commitCompare.parentOid,
-                      filePath: file.relativePath,
-                      oldPath: file.branchOldPath
-                    }
-                  )
-                : Promise.reject(new Error('Missing commit comparison for diff tab.'))
-              : effectiveDiffSource === 'branch' && branchCompare
-                ? getRuntimeGitBranchDiff(
-                    {
-                      settings: fileSettings,
-                      worktreeId: file.worktreeId,
-                      worktreePath,
-                      connectionId
-                    },
-                    {
-                      compare: {
-                        baseRef: branchCompare.baseRef,
-                        baseOid: branchCompare.baseOid!,
-                        headOid: branchCompare.headOid!,
-                        mergeBase: branchCompare.mergeBase!
-                      },
-                      filePath: file.relativePath,
-                      oldPath: file.branchOldPath
-                    }
-                  )
-                : getRuntimeGitDiff(
-                    {
-                      settings: fileSettings,
-                      worktreeId: file.worktreeId,
-                      worktreePath,
-                      connectionId
-                    },
-                    {
-                      filePath: file.relativePath,
-                      staged: effectiveDiffSource === 'staged',
-                      compareAgainstHead
-                    }
-                  )
-          ) as Promise<DiffContent>
-          inFlightDiffReads.set(key, pending)
-          queueMicrotask(() => {
-            if (inFlightDiffReads.get(key) === pending) {
-              inFlightDiffReads.delete(key)
-            }
-          })
-        }
-        const result = await pending
+        const result = await readEditorDiffContent(file, options?.force === true)
         if (diffReadGenerationRef.current[file.id] !== generation) {
           return
         }
@@ -413,15 +220,15 @@ export function useEditorPanelContentState({
     } else if (isReloadableSingleFileDiffTab(fileToLoad) && !diffContents[fileToLoad.id]) {
       void loadDiffContent(fileToLoad)
     }
-    // oxlint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    activeFile?.id,
-    activeFile?.mode,
-    activeFile?.conflictReview?.selectedFileId,
-    activeFile?.conflictReview?.snapshotTimestamp,
-    selectedConflictReviewFile?.id,
+    activeFile,
+    diffContents,
+    fileContents,
+    gitStatusEntries,
     isChangesMode,
-    gitStatusEntries
+    loadDiffContent,
+    loadFileContent,
+    selectedConflictReviewFile
   ])
 
   useEditorPanelFileLoadRetry({
@@ -433,102 +240,17 @@ export function useEditorPanelContentState({
     setFileContents
   })
 
-  const changesStatusEntries = activeFile?.worktreeId ? gitStatusEntries : undefined
-  const activeFileGitStatusEntries = useMemo(() => {
-    if (!activeFile?.relativePath || !changesStatusEntries) {
-      return undefined
-    }
-    return changesStatusEntries.filter((entry) => entry.path === activeFile.relativePath)
-  }, [activeFile?.relativePath, changesStatusEntries])
-  const activeFileGitStatusSignature = useMemo(() => {
-    if (!activeFileGitStatusEntries) {
-      return ''
-    }
-    return JSON.stringify(
-      activeFileGitStatusEntries.map((entry) => ({
-        area: entry.area,
-        status: entry.status,
-        conflictStatus: entry.conflictStatus
-      }))
-    )
-  }, [activeFileGitStatusEntries])
-  const activeFileShouldReloadOnGitStatusChange = useMemo(
-    () =>
-      activeFile
-        ? shouldReloadDiffOnGitStatusChange(activeFile, activeFileGitStatusEntries)
-        : false,
-    [activeFile, activeFileGitStatusEntries]
-  )
-  useEffect(() => {
-    if (!activeFile?.id) {
-      return
-    }
-    const current = openFilesRef.current.find((f) => f.id === activeFile.id)
-    if (!current) {
-      return
-    }
-    if (!(isChangesMode || activeFileShouldReloadOnGitStatusChange)) {
-      return
-    }
-    // Why: the lazy-load effect already fetches on first open; forcing here
-    // races a duplicate git-diff RPC for the same tab.
-    if (!diffContentsRef.current[current.id]) {
-      return
-    }
-    void loadDiffContent(current, { force: true })
-  }, [
-    activeFileShouldReloadOnGitStatusChange,
-    activeFileGitStatusSignature,
+  useEditorPanelContentReload({
+    activeFile,
+    diffContentsRef,
+    gitStatusEntries,
     isChangesMode,
-    activeFile?.id,
-    loadDiffContent
-  ])
-
-  useEffect(() => {
-    const nonce = activeFile?.diffContentReloadNonce
-    if (!activeFile?.id || nonce === undefined || nonce === 0) {
-      return
-    }
-    const current = openFilesRef.current.find((f) => f.id === activeFile.id)
-    if (!current || !isReloadableSingleFileDiffTab(current)) {
-      return
-    }
-    setDiffContents((prev) => {
-      if (!prev[current.id]) {
-        return prev
-      }
-      const next = { ...prev }
-      delete next[current.id]
-      return next
-    })
-    void loadDiffContent(current, { force: true })
-  }, [activeFile?.diffContentReloadNonce, activeFile?.id, loadDiffContent])
-
-  useEffect(() => {
-    const nonce = activeFile?.fileContentReloadNonce
-    if (!activeFile?.id || nonce === undefined || nonce === 0) {
-      return
-    }
-    const current = openFilesRef.current.find((f) => f.id === activeFile.id)
-    if (
-      !current ||
-      current.isDirty ||
-      (current.mode !== 'edit' && current.mode !== 'markdown-preview')
-    ) {
-      return
-    }
-    setFileContents((prev) => {
-      if (!prev[current.id]) {
-        return prev
-      }
-      const next = { ...prev }
-      delete next[current.id]
-      return next
-    })
-    void loadFileContent(current.filePath, current.id, current.worktreeId, current.relativePath, {
-      force: true
-    })
-  }, [activeFile?.fileContentReloadNonce, activeFile?.filePath, activeFile?.id, loadFileContent])
+    loadDiffContent,
+    loadFileContent,
+    openFilesRef,
+    setDiffContents,
+    setFileContents
+  })
 
   useEditorPanelExternalContentEvents({
     loadDiffContent,

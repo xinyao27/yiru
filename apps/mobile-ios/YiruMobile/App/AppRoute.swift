@@ -3,7 +3,6 @@ enum AppRoute: Hashable {
     case designSystemCatalog
     case settings
     case appearanceSettings
-    case chatSettings
     case browserSettings
     case connectionLog
     case notificationSettings
@@ -36,7 +35,7 @@ extension AppRoute {
             .workspaceSession(let host, _, _):
             host.id
         case .activityInsights, .designSystemCatalog, .settings, .appearanceSettings,
-            .chatSettings, .browserSettings, .connectionLog, .notificationSettings,
+            .browserSettings, .connectionLog, .notificationSettings,
             .troubleshooting, .about, .terminalSettings, .pair, .pairConfirm,
             .pairLinkError, .terminalPrototype:
             nil

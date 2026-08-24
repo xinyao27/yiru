@@ -70,16 +70,6 @@ extension RuntimeClient: WorkspaceRepository {
         )
     }
 
-    func supportsFloatingWorkspace(for hostID: String) async -> Bool {
-        let status: MobileRuntimeStatusWire? = try? await callRuntime(
-            hostID: hostID,
-            path: MobileTerminalWireContract.statusPath,
-            input: RuntimeVoidInput(),
-            output: MobileRuntimeStatusWire.self
-        )
-        return status?.floatingWorkspaceEnabled == true
-    }
-
     private func runtimeStatus(for hostID: String, timeout: Duration) async throws
         -> MobileRuntimeStatusWire
     {

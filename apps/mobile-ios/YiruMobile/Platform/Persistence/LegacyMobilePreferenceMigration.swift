@@ -13,7 +13,6 @@ enum LegacyMobilePreferenceMigration {
         if !defaults.bool(forKey: markerKey) {
             copyString("yiru:themeMode:v1", from: storage, to: defaults)
             copyString("yiru:loaderStyle", from: storage, to: defaults)
-            copyString("yiru:defaultSessionView", from: storage, to: defaults)
             copyString("yiru:terminalLinkOpenMode", from: storage, to: defaults)
             copyNumber("yiru:hostDockWidth", from: storage, to: defaults)
             copyNumber("yiru:hostSidebarWidth", from: storage, to: defaults)
@@ -30,7 +29,6 @@ enum LegacyMobilePreferenceMigration {
             migrateTerminalAccessoryLayout(from: storage, to: defaults)
             migrateCustomShortcuts(from: storage, to: defaults)
             migrateRecentWorkspace(from: storage, to: defaults)
-            migrateNativeChatOverrides(from: storage, to: defaults)
             migrateNotificationWatermarks(from: storage, to: defaults)
             migratePendingCredentialCleanup(from: storage, to: defaults)
             // Why: a valid manifest can temporarily arrive before its file-backed values during
@@ -181,36 +179,6 @@ enum LegacyMobilePreferenceMigration {
             )
         else { return }
         defaults.set(encoded, forKey: destinationKey)
-    }
-
-    private static func migrateNativeChatOverrides(
-        from storage: LegacyExpoAsyncStorage,
-        to defaults: UserDefaults
-    ) {
-        let prefix = "yiru:nativeChatTabs:"
-        for entry in storage.values(withPrefix: prefix) {
-            let suffix = String(entry.key.dropFirst(prefix.count))
-            let components = suffix.split(separator: ":", maxSplits: 1).map(String.init)
-            guard components.count == 2,
-                let hostID = components[0].removingPercentEncoding,
-                let workspaceID = components[1].removingPercentEncoding
-            else { continue }
-            let destinationKey = "\(prefix)\(hostID):\(workspaceID)"
-            guard defaults.object(forKey: destinationKey) == nil,
-                let data = entry.value.data(using: .utf8),
-                let object = try? JSONSerialization.jsonObject(with: data)
-            else { continue }
-
-            var values: [String: String] = [:]
-            if let legacyIDs = object as? [String] {
-                values = Dictionary(uniqueKeysWithValues: legacyIDs.map { ($0, "chat") })
-            } else if let dictionary = object as? [String: String] {
-                values = dictionary.filter { $0.value == "chat" || $0.value == "terminal" }
-            }
-            if let encoded = try? JSONEncoder().encode(values) {
-                defaults.set(encoded, forKey: destinationKey)
-            }
-        }
     }
 
     private static func migrateNotificationWatermarks(

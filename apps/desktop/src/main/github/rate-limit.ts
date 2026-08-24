@@ -20,7 +20,7 @@ import {
   type GhRateLimitBucket
 } from '../git/gh-rate-limit-breaker'
 import { ghExecFileAsync } from '../git/runner'
-import { acquire, release } from './gh-utils'
+import { acquire, release } from './github-cli'
 
 // Why: GitHub explicitly states `GET /rate_limit` does NOT count against
 // any bucket, so the only reason to cache is to avoid spawning a `gh`

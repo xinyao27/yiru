@@ -23,9 +23,9 @@ export type AgentProviderSessionMetadata = {
   key: AgentProviderSessionKey
   id: string
   /** Authoritative on-disk transcript/rollout path reported by the agent's hook
-   *  (Claude/Codex `transcript_path`), when available. Native chat reads this
-   *  directly because recent Claude Code versions name the transcript file with a
-   *  UUID that differs from the hook `session_id`, so reconstructing the path from
+   *  (Claude/Codex `transcript_path`), when available. Read this directly because
+   *  recent Claude Code versions name the transcript file with a UUID that differs
+   *  from the hook `session_id`, so reconstructing the path from
    *  `id` alone fails. Claude/Codex still resume by id; Pi uses its reported
    *  session file as the authoritative `--session` resume locator. */
   transcriptPath?: string
@@ -102,9 +102,9 @@ function readSessionId(record: Record<string, unknown>, keys: readonly string[])
   return null
 }
 
-/** The agent hook's authoritative transcript/rollout path, when present. Used by
- *  native chat to read the exact file rather than reconstructing it from the
- *  session id (which recent Claude Code no longer matches to the file name). */
+/** The agent hook's authoritative transcript/rollout path, when present. Use
+ *  the exact file rather than reconstructing it from the session id, which
+ *  recent Claude Code no longer matches to the file name. */
 function readTranscriptPathFromKeys(
   record: Record<string, unknown>,
   keys: readonly string[]
@@ -175,9 +175,8 @@ export function extractAgentProviderSession(
   payload: Record<string, unknown>
 ): AgentProviderSessionMetadata | null {
   switch (source) {
-    // Native-chat agents: also capture the hook's authoritative transcript_path,
-    // since recent Claude Code names the transcript file with a UUID that differs
-    // from the hook session_id (so the id-based glob no longer finds it).
+    // Why: recent Claude Code names the transcript file with a UUID that differs
+    // from the hook session id, so retain the hook's authoritative path.
     case 'claude':
     case 'codex': {
       const id = readSessionId(payload, ['session_id'])

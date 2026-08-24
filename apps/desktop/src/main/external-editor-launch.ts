@@ -5,7 +5,7 @@ import { parseWslUncPath } from '@yiru/workbench-model/platform'
 import { isVsCodeLauncherExecutable } from '~shared/vscode-remote-ssh-launcher'
 
 import { resolveCliCommand } from './runtime/cli-command'
-import { getCmdExePath } from './win32-utils'
+import { getCmdExePath } from './windows-host'
 
 export const EXTERNAL_EDITOR_CLI_COMMAND = 'code'
 const WINDOWS_CONSOLE_EDITORS = new Set(['nvim', 'vim'])

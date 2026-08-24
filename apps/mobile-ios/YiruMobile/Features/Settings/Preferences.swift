@@ -24,11 +24,6 @@ nonisolated enum AppThemeMode: String, CaseIterable, Identifiable, Sendable {
     }
 }
 
-nonisolated enum DefaultSessionView: String, Sendable {
-    case terminal
-    case chat
-}
-
 nonisolated enum TerminalLinkOpenMode: String, CaseIterable, Identifiable, Sendable {
     case yiruBrowser = "yiru-browser"
     case phoneBrowser = "phone-browser"

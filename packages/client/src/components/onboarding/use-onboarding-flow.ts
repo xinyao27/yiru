@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { applyDocumentTheme } from '~renderer/components/editor/document-theme'
-import { isWindowsUserAgent } from '~renderer/components/terminal-pane/pane-helpers'
+import { isWindowsUserAgent } from '~renderer/components/terminal-pane/pane-interactions'
 import { translate } from '~renderer/i18n/i18n'
 import { getAgentCatalog } from '~renderer/lib/agent-catalog'
 import { getSelectedNestedRepoPathsInScanOrder } from '~renderer/lib/nested-repo-selected-paths'

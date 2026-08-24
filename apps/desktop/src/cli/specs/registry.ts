@@ -2,7 +2,6 @@ import type { CommandSpec } from '../args'
 import { CONNECT_COMMAND_SPECS } from '../connect/spec'
 import { MOBILE_COMMAND_SPECS } from '../mobile/development-pairing'
 import { AGENT_HOOK_COMMAND_SPECS } from './agent-hooks'
-import { AUTOMATION_COMMAND_SPECS } from './automations'
 import { BROWSER_ADVANCED_COMMAND_SPECS } from './browser-advanced'
 import { BROWSER_BASIC_COMMAND_SPECS } from './browser-basic'
 import { COMPUTER_COMMAND_SPECS } from './computer'
@@ -22,7 +21,6 @@ export const COMMAND_SPECS: CommandSpec[] = [
   ...PROJECT_COMMAND_SPECS,
   ...SESSION_COMMAND_SPECS,
   ...FILE_COMMAND_SPECS,
-  ...AUTOMATION_COMMAND_SPECS,
   ...BROWSER_BASIC_COMMAND_SPECS,
   ...BROWSER_ADVANCED_COMMAND_SPECS,
   ...ORCHESTRATION_COMMAND_SPECS,

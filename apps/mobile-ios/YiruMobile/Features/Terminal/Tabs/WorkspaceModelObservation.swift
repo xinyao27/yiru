@@ -80,7 +80,6 @@ extension TerminalWorkspaceModel {
     }
 
     func observeDisplayName() async {
-        guard worktreeID != WorkspaceSummary.floatingID else { return }
         while !Task.isCancelled {
             guard isConnected else {
                 do {

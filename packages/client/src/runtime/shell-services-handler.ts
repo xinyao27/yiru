@@ -1,12 +1,10 @@
 import { implement } from '@orpc/server'
 import { shellServicesContract } from '@yiru/runtime-protocol/contract'
-import { handleAutomationDispatchRequest } from '~renderer/components/automations/use-automation-dispatch-events'
 import { buildWorkspaceSessionPayload } from '~renderer/components/editor/workspace-session'
 import { persistWorkspaceSessionByHost } from '~renderer/components/editor/workspace-session-host-persistence'
 import { handleRateLimitResumeDispatchRequest } from '~renderer/components/rate-limit-resume/use-rate-limit-resume-dispatch'
 import { closeTerminalTab } from '~renderer/components/terminal/tab-actions'
 import { useAppStore } from '~renderer/store'
-import type { Automation, AutomationRun } from '~shared/automations-types'
 import type { RateLimitResumeSchedule } from '~shared/rate-limit-resume/types'
 
 import {
@@ -165,28 +163,8 @@ export function createShellServicesRouter() {
       ),
       tabClose: implementer.browser.tabClose.handler(({ input }) => closeBrowserTabViaShell(input))
     },
-    // Why: Phase 5 slice S5 — AutomationService/RateLimitResumeService hand
-    // off dispatch here and get `{ accepted: true }` back immediately; the
-    // actual work (worktree creation, launching the agent, waiting for it to
-    // finish) can run for as long as the automation/resume takes, so it must
-    // not block this RPC's response. Outcomes are reported back separately
-    // through the existing local `markDispatchResult`/`markFired`/
-    // `markFailed`/`markStale` IPC, unaffected by this reverse link.
-    // The contract widens Automation/AutomationRun/RateLimitResumeSchedule to
-    // their structurally-identical `Runtime*` contract counterparts (the
-    // contract package can't import desktop's shared types); narrowing back
-    // here is safe, same precedent as notifications.ts's
-    // `toNotificationDispatchRequest`.
-    automations: {
-      dispatch: implementer.automations.dispatch.handler(({ input }) => {
-        void handleAutomationDispatchRequest({
-          automation: input.automation as Automation,
-          run: input.run as AutomationRun,
-          dispatchToken: input.dispatchToken
-        })
-        return { accepted: true }
-      })
-    },
+    // Why: the scheduler needs an immediate acknowledgement while the agent
+    // may keep running for much longer; completion is reported separately.
     rateLimitResume: {
       dispatch: implementer.rateLimitResume.dispatch.handler(({ input }) => {
         void handleRateLimitResumeDispatchRequest(input as RateLimitResumeSchedule)

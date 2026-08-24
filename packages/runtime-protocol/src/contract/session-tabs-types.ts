@@ -49,7 +49,6 @@ export type RuntimeMobileSessionTerminalTab = {
   parentLayout?: RuntimeTerminalLayoutSnapshot
   color?: string | null
   isPinned?: boolean
-  viewMode?: 'terminal' | 'chat'
   isActive: boolean
 }
 

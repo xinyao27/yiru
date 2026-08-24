@@ -5,14 +5,12 @@ import {
   toRuntimeExecutionHostId
 } from '@yiru/workbench-model/workspace'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { FloatingTerminalIconContextMenu } from '~renderer/components/floating-terminal/icon-context-menu'
 /* eslint-disable max-lines -- Why: the status bar keeps provider rendering,
 interaction menus, and compact-layout behavior together so the hover/click
 states stay consistent across Claude and Codex. */
 import {
   ActivityIcon as Activity,
   Plug,
-  Layout as PanelsTopLeft,
   ArrowCounterClockwise as RotateCcw,
   CaretDown as ChevronDown,
   CaretRight as ChevronRight,
@@ -47,14 +45,11 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger
 } from '~renderer/components/ui/dropdown-menu'
-import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { useDetectedAgents, type AgentDetectionTarget } from '~renderer/hooks/use-detected-agents'
-import { useShortcutLabel } from '~renderer/hooks/use-shortcut-label'
 import { translate } from '~renderer/i18n/i18n'
 import { AgentIcon } from '~renderer/lib/agent-catalog'
 import { cn } from '~renderer/lib/class-names'
 import { markLiveCodexSessionsForRestart } from '~renderer/lib/codex-session-restart'
-import { TOGGLE_FLOATING_TERMINAL_EVENT } from '~renderer/lib/floating-terminal'
 import { lazyWithRetry } from '~renderer/lib/lazy-with-retry'
 import {
   getWindowsTerminalCapabilityOwnerKey,
@@ -69,7 +64,6 @@ import {
 import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
 import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
-import { selectFloatingWorkspaceHasUnread } from '~renderer/store/selectors'
 import type {
   CursorRateLimitRefreshContext,
   ProviderRateLimits,
@@ -107,13 +101,6 @@ import { formatUsagePercentageLabel } from './usage-percentage-label'
 import { getUsageProviderAccountsSectionId } from './usage-provider-settings-target'
 import { UsageRosterPanel } from './usage-roster-panel'
 
-type StatusBarProps = {
-  floatingTerminalOpen: boolean
-}
-
-const PetStatusSegment = lazyWithRetry(() =>
-  import('./pet-status-segment').then((module) => ({ default: module.PetStatusSegment }))
-)
 const ResourceUsageStatusSegment = lazyWithRetry(() =>
   import('./resource-usage-status-segment').then((module) => ({
     default: module.ResourceUsageStatusSegment
@@ -1782,8 +1769,7 @@ function useStatusBarMenuFocusHandoff(): {
 
 const CLOSE_ALL_CONTEXT_MENUS_EVENT = 'yiru-close-all-context-menus'
 
-function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Element | null {
-  const floatingTerminalShortcut = useShortcutLabel('floatingTerminal.toggle')
+function StatusBarInner(): React.JSX.Element | null {
   const rateLimits = useAppStore((s) => s.rateLimits)
   const settings = useAppStore((s) => s.settings)
   const refreshRateLimits = useAppStore((s) => s.refreshRateLimits)
@@ -1800,13 +1786,6 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
   const statusBarVisible = useAppStore((s) => s.statusBarVisible)
   const statusBarItems = useAppStore((s) => s.statusBarItems)
   const recordFeatureInteraction = useAppStore((s) => s.recordFeatureInteraction)
-  // Why: same launcher attention dot as the floating-button trigger, so an
-  // unacknowledged bell/agent-completion in the floating workspace is visible
-  // whichever trigger location the user picked (see FloatingTerminalToggleButton).
-  const hasFloatingUnread = useAppStore(selectFloatingWorkspaceHasUnread)
-  const floatingTerminalEnabled = settings?.floatingTerminalEnabled === true
-  const floatingTerminalTriggerLocation =
-    settings?.floatingTerminalTriggerLocation ?? 'floating-button'
   // Why: usage bars exist to surface CLI rate limits — showing one for an
   // agent that isn't on the user's PATH is just noise (e.g. a fresh Ubuntu
   // install showing "Gemini Usage" with no Gemini CLI installed). We gate
@@ -1837,11 +1816,6 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
   }, [usageExecutionHostId])
   const { detectedIds: detectedAgentIds } = useDetectedAgents(agentDetectionTarget)
   const previousCursorRefreshContextRef = useRef(cursorRefreshContext)
-  // Why: pet segment intentionally does NOT participate in statusBarItems
-  // (see design doc — gating with both the experimental flag and a
-  // statusBarItems checkbox would double-toggle the surface). It is driven
-  // purely by the experimentalPet settings flag.
-  const petEnabled = useAppStore((s) => s.settings?.experimentalPet === true)
   const toggleStatusBarItem = useAppStore((s) => s.toggleStatusBarItem)
   const usageEmptyStateDismissed = useAppStore((s) => s.usageEmptyStateDismissed)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -2046,8 +2020,6 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
   const showOpencodeGo = visibleOpencodeGo !== null && statusBarItems.includes('opencode-go')
   const showResourceUsage = statusBarItems.includes('resource-usage')
   const showPorts = statusBarItems.includes('ports')
-  const showFloatingTerminalToggle =
-    floatingTerminalEnabled && floatingTerminalTriggerLocation === 'status-bar'
   // Why: which usage-meter children actually render — excludes resource-usage
   // and other non-meter status items so the % display change callout only
   // opens when there is a real meter cluster to anchor to.
@@ -2099,13 +2071,6 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
     showMiniMax ? visibleMiniMax : null,
     showGrok ? visibleGrok : null
   ].filter((provider): provider is ProviderRateLimits => provider !== null)
-  const floatingTerminalActionLabel = floatingTerminalOpen
-    ? 'Minimize Floating Workspace'
-    : 'Show Floating Workspace'
-  // Why: only while the panel is closed; the dot reflects unacknowledged
-  // floating-workspace activity and clears via the shared unread paths.
-  const showFloatingWorkspaceAttentionDot = !floatingTerminalOpen && hasFloatingUnread
-
   return (
     <ContextMenu open={menuOpen} onOpenChange={setMenuOpen}>
       {/* Why: the footer extends supported native window material across the same
@@ -2237,59 +2202,16 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
         <div className="flex-1" />
 
         {/* Why: workspace panel toggles moved to the titlebar; the trailing status
-          edge now owns system icons (resource usage, ports, floating workspace). */}
+          edge now owns system icons such as resource usage and ports. */}
         <div className="flex h-full shrink-0 items-center gap-0.5">
           <SkillUpdateStatusSegment />
           <RemoteServerUpdateStatusSegment iconOnly />
           <UpdateStatusSegment compact={compact} iconOnly />
           <React.Suspense fallback={null}>
-            {petEnabled ? <PetStatusSegment /> : null}
             {showResourceUsage ? <ResourceUsageStatusSegment compact={compact} iconOnly /> : null}
             {showPorts ? <PortsStatusSegment compact={compact} iconOnly /> : null}
           </React.Suspense>
           <CoworkingAvailabilityStatusSegment />
-          {showFloatingTerminalToggle && (
-            <FloatingTerminalIconContextMenu
-              currentLocation="status-bar"
-              className="relative h-full"
-            >
-              <Tooltip>
-                <TooltipTrigger
-                  render={
-                    // Why: match neighboring status-bar icon chrome (borderless quiet
-                    // hover) so the floating-workspace toggle doesn't read as a boxed card.
-                    <Button
-                      variant="status-bar-icon"
-                      size="icon-status-bar-wide"
-                      type="button"
-                      className="relative"
-                      aria-label={
-                        showFloatingWorkspaceAttentionDot
-                          ? `${floatingTerminalActionLabel}, new activity`
-                          : floatingTerminalActionLabel
-                      }
-                      onClick={() => {
-                        window.dispatchEvent(new CustomEvent(TOGGLE_FLOATING_TERMINAL_EVENT))
-                      }}
-                    >
-                      <PanelsTopLeft className="size-3.5" />
-                      {showFloatingWorkspaceAttentionDot ? (
-                        // Why: amber = Yiru's "needs attention" convention.
-                        <span
-                          aria-hidden
-                          data-floating-terminal-attention
-                          className="pointer-events-none absolute top-0.5 right-0.5 size-1.5 bg-amber-500"
-                        />
-                      ) : null}
-                    </Button>
-                  }
-                />
-                <TooltipContent side="top" sideOffset={6}>
-                  {floatingTerminalActionLabel} ({floatingTerminalShortcut})
-                </TooltipContent>
-              </Tooltip>
-            </FloatingTerminalIconContextMenu>
-          )}
           <YiruRuntimeStatusSegment />
         </div>
       </ContextMenuTrigger>

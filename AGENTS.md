@@ -110,7 +110,7 @@ A feature folder holds everything that belongs only to that feature — componen
 
 Role-named folders (`hooks/`, `lib/`, `store/`) are for things used by three or more unrelated features.
 
-Past ~15 files, a feature folder has sub-features inside it — nest them (`native-chat/composer/`, `native-chat/transcript/`). A folder's entry point is named for the folder's job (`panel.tsx`, `pane.tsx`, `page.tsx`), never `index.tsx`: barrels hide the dependency graph and defeat tree-shaking.
+Past ~15 files, a feature folder has sub-features inside it — nest them (`source-control/commit/`, `source-control/diff/`). A folder's entry point is named for the folder's job (`panel.tsx`, `pane.tsx`, `page.tsx`), never `index.tsx`: barrels hide the dependency graph and defeat tree-shaking.
 
 ### The touch budget
 
@@ -130,7 +130,7 @@ cannot be observed with the same information in the isolated renderer.
 Filenames are lowercase kebab-case, always. Beyond that, files and symbols follow the same rules:
 
 - **Name the thing, not the role.** `tab-group-state.ts`, `terminal-orphan-cleanup.ts` — not `tabs-helpers.ts`, `terminal-utils.ts`. Reaching for `helpers` means the file has more than one responsibility, or a better name is hiding in what the code operates on.
-- **Don't repeat the folder.** In `native-chat/` the file is `composer.tsx`, not `native-chat-composer.tsx`. Prefix-stuttering makes every listing unscannable.
+- **Don't repeat the folder.** In `source-control/` the file is `panel.tsx`, not `source-control-panel.tsx`. Prefix-stuttering makes every listing unscannable.
 - **Short and concrete** — two or three words. If you need five, it's doing five things.
 - **Domain over mechanism:** `resolveWorktreeBaseRef`, not `processData`. Booleans read as assertions (`isGitBashAvailable`, `hasUncommittedChanges`). Don't encode the type in the name (`worktreeList`, not `worktreeArray`) or abbreviate past recognition (`repo` is established here; `wt` isn't).
 - `PascalCase` types and components, `camelCase` values, `SCREAMING_SNAKE` module constants with a unit suffix where there is one (`KEYBOARD_INPUT_SOURCE_TIMEOUT_MS`). Props types are `<Component>Props`.

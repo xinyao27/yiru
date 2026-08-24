@@ -1,4 +1,3 @@
-import { useRef } from 'react'
 import type { ComponentType, JSX, ReactNode } from 'react'
 import {
   Files,
@@ -13,8 +12,12 @@ import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
 
 import { ReviewPRViewVisualStyles } from './review-animated-visual-pr-view-styles'
-import { CheckTinyIcon, ChevDownIcon, CursorIcon } from './review-animated-visual-shared'
-import { useReviewPrViewAnimation } from './review-pr-view-animation'
+import { CheckTinyIcon, ChevDownIcon } from './review-animated-visual-shared'
+import {
+  COMPLETE_REVIEW_PR_PHASE,
+  useReviewPrStoryboard,
+  type ReviewPrPhase
+} from './review-pr-view-storyboard'
 
 type SidebarTabId = 'explorer' | 'search' | 'source-control'
 
@@ -52,7 +55,11 @@ const SIDEBAR_TABS: readonly {
   }
 ]
 
-function SidebarTabs(props: { active: SidebarTabId; interactiveReview?: boolean }): JSX.Element {
+function SidebarTabs(props: {
+  active: SidebarTabId
+  interactiveReview?: boolean
+  reviewHovered?: boolean
+}): JSX.Element {
   const sourceControlShortcutLabel = useShortcutLabel('sidebar.sourceControl.toggle')
   const reviewTooltip =
     sourceControlShortcutLabel === 'Unassigned'
@@ -67,23 +74,22 @@ function SidebarTabs(props: { active: SidebarTabId; interactiveReview?: boolean 
       {SIDEBAR_TABS.map((tab) => {
         const Icon = tab.icon
         const isActive = tab.id === props.active
-        const className = cn('ravpr-tab', isActive && 'is-active')
         return (
           <span
             key={tab.id}
-            className={className}
+            className={cn(
+              'ravpr-tab',
+              isActive && 'is-active',
+              props.reviewHovered && tab.id === 'source-control' && 'is-hovered'
+            )}
             aria-label={tab.label}
-            data-review-tab={
-              props.interactiveReview && tab.id === 'source-control' ? '' : undefined
-            }
-            data-explorer-tab={props.interactiveReview && tab.id === 'explorer' ? '' : undefined}
           >
             <Icon size={16} aria-hidden />
           </span>
         )
       })}
       {props.interactiveReview ? (
-        <span className="ravpr-tooltip" data-review-tooltip>
+        <span className={cn('ravpr-tooltip', props.reviewHovered && 'is-visible')}>
           {reviewTooltip}
         </span>
       ) : null}
@@ -112,9 +118,9 @@ function ExplorerSkeletonRow(props: { active?: boolean; width: number }): JSX.El
   )
 }
 
-function CommentCard(props: { index: number; path: string; children: ReactNode }): JSX.Element {
+function CommentCard(props: { path: string; children: ReactNode; visible: boolean }): JSX.Element {
   return (
-    <div className="ravpr-comment-card" data-comment-card={props.index}>
+    <div className={cn('ravpr-comment-card', props.visible && 'is-visible')}>
       <div className="ravpr-comment-head">
         <span className="ravpr-avatar" />
         <span className="ravpr-author" />
@@ -125,19 +131,23 @@ function CommentCard(props: { index: number; path: string; children: ReactNode }
   )
 }
 
-// Why: the Review PR visual mirrors the real combined panel: the workspace
-// opens Changes & Review before selecting its Review view.
-export function ReviewPRViewAnimatedVisual(props: { reducedMotion: boolean }): JSX.Element {
-  const { reducedMotion } = props
-  const rootRef = useRef<HTMLDivElement | null>(null)
-
-  useReviewPrViewAnimation(rootRef, reducedMotion)
+function ReviewPrViewFrame(props: { phase: ReviewPrPhase }): JSX.Element {
+  const { phase } = props
+  const isReviewOpen = phase !== 'explorer' && phase !== 'review-hover'
+  const areChecksVisible = phase !== 'explorer' && phase !== 'review-hover' && phase !== 'review'
+  const isVerified = phase === 'verified' || phase === 'first-comment' || phase === 'complete'
+  const areCommentsVisible = phase === 'first-comment' || phase === 'complete'
+  const commentCount = phase === 'complete' ? 2 : phase === 'first-comment' ? 1 : 0
 
   return (
-    <div ref={rootRef} className="ravpr-stage" data-page="pr-view">
+    <div className="ravpr-stage">
       <div className="ravpr-stack">
-        <div className="ravpr-sidebar is-visible" data-checks-sidebar-peek>
-          <SidebarTabs active="explorer" interactiveReview />
+        <div className={cn('ravpr-sidebar is-visible', isReviewOpen && 'is-hiding')}>
+          <SidebarTabs
+            active="explorer"
+            interactiveReview
+            reviewHovered={phase === 'review-hover'}
+          />
           <div className="ravpr-explorer">
             <div className="ravpr-heading">
               {translate(
@@ -154,7 +164,7 @@ export function ReviewPRViewAnimatedVisual(props: { reducedMotion: boolean }): J
           </div>
         </div>
 
-        <div className="ravpr-card" data-pr-view-card>
+        <div className={cn('ravpr-card', isReviewOpen && 'is-visible')}>
           <SidebarTabs active="source-control" />
           <div className="border-border shrink-0 border-y p-1.5">
             <div className="bg-muted flex h-7 p-0.5 text-xs font-medium">
@@ -192,7 +202,6 @@ export function ReviewPRViewAnimatedVisual(props: { reducedMotion: boolean }): J
               variant="ghost"
               size="xs"
               className="ravpr-merge focus-visible:bg-accent h-auto border-0 p-0"
-              data-merge-btn
               type="button"
             >
               <GitMerge className="size-3" />
@@ -203,16 +212,18 @@ export function ReviewPRViewAnimatedVisual(props: { reducedMotion: boolean }): J
               <ChevDownIcon />
             </Button>
 
-            <div className="ravpr-reveal" data-checks-block>
-              <div className="ravpr-section-row" data-check-summary>
+            <div className={cn('ravpr-reveal', areChecksVisible && 'is-visible')}>
+              <div className={cn('ravpr-section-row', isVerified && 'is-done')}>
                 <StatusCell />
-                <span className="ravpr-label" data-check-summary-label>
+                <span className="ravpr-label">
                   {translate(
-                    'auto.components.feature.wall.ReviewPRViewAnimatedVisual.9a097cae12',
-                    '1 pending'
+                    isVerified
+                      ? 'auto.components.feature.wall.ReviewPRViewAnimatedVisual.ca36f7b27c'
+                      : 'auto.components.feature.wall.ReviewPRViewAnimatedVisual.9a097cae12',
+                    isVerified ? 'Passed' : '1 pending'
                   )}
                 </span>
-                <span className="ravpr-meta" data-check-summary-meta>
+                <span className="ravpr-meta">
                   {translate(
                     'auto.components.feature.wall.ReviewPRViewAnimatedVisual.d340c052fb',
                     'verify'
@@ -220,7 +231,7 @@ export function ReviewPRViewAnimatedVisual(props: { reducedMotion: boolean }): J
                 </span>
               </div>
               <div className="ravpr-check-list">
-                <div className="ravpr-check-row" data-check-row="verify">
+                <div className={cn('ravpr-check-row', isVerified && 'is-done')}>
                   <StatusCell />
                   <span>
                     {translate(
@@ -228,10 +239,12 @@ export function ReviewPRViewAnimatedVisual(props: { reducedMotion: boolean }): J
                       'verify'
                     )}
                   </span>
-                  <span className="ravpr-check-state" data-check-verify-state>
+                  <span className="ravpr-check-state">
                     {translate(
-                      'auto.components.feature.wall.ReviewPRViewAnimatedVisual.8ed213397c',
-                      'Running'
+                      isVerified
+                        ? 'auto.components.feature.wall.ReviewPRViewAnimatedVisual.ca36f7b27c'
+                        : 'auto.components.feature.wall.ReviewPRViewAnimatedVisual.8ed213397c',
+                      isVerified ? 'Passed' : 'Running'
                     )}
                   </span>
                 </div>
@@ -268,7 +281,7 @@ export function ReviewPRViewAnimatedVisual(props: { reducedMotion: boolean }): J
               </div>
             </div>
 
-            <div className="ravpr-reveal" data-comments-block>
+            <div className={cn('ravpr-reveal', areCommentsVisible && 'is-visible')}>
               <div className="ravpr-section-row">
                 <MessageSquare className="size-3.5" />
                 <span className="ravpr-label">
@@ -278,7 +291,7 @@ export function ReviewPRViewAnimatedVisual(props: { reducedMotion: boolean }): J
                   )}
                 </span>
                 <span className="ravpr-meta">
-                  <span data-comments-count>0</span>{' '}
+                  <span>{commentCount}</span>{' '}
                   {translate(
                     'auto.components.feature.wall.ReviewPRViewAnimatedVisual.fb1a856b6d',
                     'open'
@@ -286,13 +299,16 @@ export function ReviewPRViewAnimatedVisual(props: { reducedMotion: boolean }): J
                 </span>
               </div>
               <div className="ravpr-comment-list">
-                <CommentCard index={0} path="src/main/diagnostics.ts">
+                <CommentCard visible={commentCount >= 1} path="src/main/diagnostics/diagnostics.ts">
                   {translate(
                     'auto.components.feature.wall.ReviewPRViewAnimatedVisual.71828fba75',
                     'Can we include the failing command in the diagnostic payload?'
                   )}
                 </CommentCard>
-                <CommentCard index={1} path="tests/diagnostics.test.ts">
+                <CommentCard
+                  visible={commentCount >= 2}
+                  path="src/main/diagnostics/main-thread-churn-probe.ts"
+                >
                   {translate(
                     'auto.components.feature.wall.ReviewPRViewAnimatedVisual.6f4c2d7cb7',
                     'Add a coverage case for'
@@ -313,11 +329,22 @@ export function ReviewPRViewAnimatedVisual(props: { reducedMotion: boolean }): J
           </div>
         </div>
       </div>
-      <div className="ravpr-cursor" data-cursor>
-        <CursorIcon />
-        <span className="ravpr-ripple" />
-      </div>
       <ReviewPRViewVisualStyles />
     </div>
+  )
+}
+
+function AnimatedReviewPrView(): JSX.Element {
+  const phase = useReviewPrStoryboard()
+  return <ReviewPrViewFrame phase={phase} />
+}
+
+// Why: the Review PR visual mirrors the real combined panel: the workspace
+// opens Changes & Review before selecting its Review view.
+export function ReviewPRViewAnimatedVisual(props: { reducedMotion: boolean }): JSX.Element {
+  return props.reducedMotion ? (
+    <ReviewPrViewFrame phase={COMPLETE_REVIEW_PR_PHASE} />
+  ) : (
+    <AnimatedReviewPrView />
   )
 }

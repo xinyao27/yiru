@@ -1,8 +1,6 @@
 import SwiftUI
 
 struct TerminalTabContextActions {
-    let viewMode: TerminalTabViewMode
-    let switchView: (() -> Void)?
     let displayMode: TerminalDisplayMode
     let isDisplayModeUpdating: Bool
     let toggleDisplayMode: () -> Void
@@ -146,15 +144,6 @@ struct TerminalTabStrip: View {
             if tab.id == activeTabID, case .terminal = tab.content,
                 let actions = terminalTabContextActions
             {
-                if let switchView = actions.switchView {
-                    Button(action: switchView) {
-                        Label(
-                            actions.viewMode == .chat
-                                ? "Switch to terminal view" : "Switch to chat view",
-                            iconID: actions.viewMode == .chat ? .terminal : .chat
-                        )
-                    }
-                }
                 Button(action: actions.toggleDisplayMode) {
                     Label(
                         actions.displayMode == .auto ? "Switch to Desktop" : "Switch to Phone",

@@ -6,7 +6,7 @@
 // untouched. Appending table headers is always valid TOML, so the block can live
 // at the end of any existing file.
 
-import { MANAGED_HOOK_TIMEOUT_SECONDS } from '../agent-hooks/installer-utils'
+import { MANAGED_HOOK_TIMEOUT_SECONDS } from '../agent-hooks/managed-hook-commands'
 
 // Why: mirror the Claude-compatible events Yiru normalizes for status. Kimi uses
 // these exact event names (see normalizeKimiEvent), so each maps to a

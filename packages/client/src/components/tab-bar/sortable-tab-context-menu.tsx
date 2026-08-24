@@ -1,10 +1,8 @@
 import {
-  Chat as MessageSquare,
   Sidebar as PanelRightClose,
   PushPin as Pin,
   PushPinSlash as PinOff,
   Pencil,
-  TerminalWindow as SquareTerminal,
   List as ListX,
   X
 } from '~renderer/components/icons/hugeicons'
@@ -100,14 +98,6 @@ type SortableTabContextMenuProps = {
   onRenameOpen: () => void
   onSetTabColor: (tabId: string, color: string | null) => void
   onTogglePin: () => void
-  /** True when this tab is an agent terminal that can switch to the native chat
-   *  view; gates the "Switch view" menu item. */
-  canToggleViewMode?: boolean
-  /** True when the tab is currently showing the native chat view (drives the
-   *  item's label/icon between "chat" and "terminal"). */
-  isChatView?: boolean
-  /** Toggle the tab between terminal and native chat view. */
-  onToggleViewMode?: () => void
 }
 
 export function SortableTabContextMenu({
@@ -124,10 +114,7 @@ export function SortableTabContextMenu({
   onCloseToRight,
   onRenameOpen,
   onSetTabColor,
-  onTogglePin,
-  canToggleViewMode = false,
-  isChatView = false,
-  onToggleViewMode
+  onTogglePin
 }: SortableTabContextMenuProps): React.JSX.Element {
   const keybindings = useAppStore((state) => state.keybindings)
   const splitRightShortcut = formatShortcutLabel('terminal.splitRight', keybindings)
@@ -147,27 +134,6 @@ export function SortableTabContextMenu({
         splitRightShortcut={splitRightShortcut}
         splitDownShortcut={splitDownShortcut}
       />
-      {canToggleViewMode && onToggleViewMode ? (
-        <>
-          <ContextMenuSeparator />
-          <ContextMenuItem onClick={onToggleViewMode}>
-            {isChatView ? (
-              <SquareTerminal className="size-3.5 shrink-0" />
-            ) : (
-              <MessageSquare className="size-3.5 shrink-0" />
-            )}
-            {isChatView
-              ? translate(
-                  'components.tab.bar.SortableTabContextMenu.switchToTerminalView',
-                  'Switch to terminal view'
-                )
-              : translate(
-                  'components.tab.bar.SortableTabContextMenu.switchToChatView',
-                  'Switch to chat view'
-                )}
-          </ContextMenuItem>
-        </>
-      ) : null}
       <ContextMenuSeparator />
       <ContextMenuItem onClick={onTogglePin}>
         {isPinned ? (

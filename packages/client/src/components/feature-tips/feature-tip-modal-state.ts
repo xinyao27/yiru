@@ -7,14 +7,12 @@ import {
   type FeatureTip,
   type FeatureTipId
 } from '~shared/feature-tips'
-import type { GlobalSettings } from '~shared/types'
 
 export function getFeatureTipForModal(args: {
   cliInstalled: boolean
   modalData: Record<string, unknown>
   seenTipIds: readonly FeatureTipId[]
   featureInteractions: FeatureInteractionState
-  settings: { voice?: GlobalSettings['voice'] } | null | undefined
 }): FeatureTip | null {
   const modalTipId = isFeatureTipId(args.modalData.tipId) ? args.modalData.tipId : null
   if (modalTipId) {
@@ -25,7 +23,6 @@ export function getFeatureTipForModal(args: {
     seenTipIds: new Set(args.seenTipIds),
     completedTipIds: getCompletedFeatureTipIds({
       cliInstalled: args.cliInstalled,
-      voiceDictationEnabled: args.settings?.voice?.enabled === true,
       featureInteractions: args.featureInteractions
     })
   })

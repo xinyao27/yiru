@@ -11,7 +11,6 @@ const UNSUPPORTED_TUI_AGENT_ARGS: Partial<Record<TuiAgent, readonly string[]>> =
 const FIXED_WORKTREE_CARD_PROPERTIES: RuntimeWorktreeCardProperty[] = ['status', 'unread']
 const DEFAULT_WORKTREE_CARD_PROPERTIES: RuntimeWorktreeCardProperty[] = [
   ...FIXED_WORKTREE_CARD_PROPERTIES,
-  'automation',
   'comment',
   'ports',
   'inline-agents'
@@ -20,7 +19,6 @@ const WORKTREE_CARD_PROPERTY_ORDER: RuntimeWorktreeCardProperty[] = [
   'status',
   'unread',
   'branch',
-  'automation',
   'comment',
   'ports',
   'inline-agents'

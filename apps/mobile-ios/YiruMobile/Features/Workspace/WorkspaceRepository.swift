@@ -3,7 +3,6 @@ nonisolated protocol WorkspaceRepository: Sendable {
     func workspaceListViewSettings(for hostID: String) async throws -> WorkspaceListViewSettings
     func setWorkspaceCollapsedGroups(hostID: String, groups: Set<String>) async throws
     func workspaceHostCompatibility(for hostID: String) async -> WorkspaceHostCompatibility?
-    func supportsFloatingWorkspace(for hostID: String) async -> Bool
     func allWorkspaceTabUpdates(for hostID: String) async throws
         -> AsyncThrowingStream<[String: [WorkspaceOpenTab]], Error>
     func activateWorkspace(hostID: String, workspaceID: String) async throws
@@ -16,8 +15,6 @@ nonisolated protocol WorkspaceRepository: Sendable {
 
 extension WorkspaceRepository {
     func workspaceHostCompatibility(for hostID: String) async -> WorkspaceHostCompatibility? { nil }
-
-    func supportsFloatingWorkspace(for hostID: String) async -> Bool { false }
 
     func workspaceListViewSettings(for hostID: String) async throws -> WorkspaceListViewSettings {
         .standard

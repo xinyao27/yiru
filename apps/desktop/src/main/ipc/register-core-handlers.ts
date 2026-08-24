@@ -7,8 +7,6 @@ import {
   scanRuntimeAiVaultSessions
 } from '../ai-vault/runtime-session-scanner'
 import type { AiVaultSessionRuntimeTarget } from '../ai-vault/session/root-configuration'
-import type { AutomationService } from '../automations/service'
-import { initializeShellAutomationService } from '../automations/shell-service'
 import { setTrustedBrowserRendererWebContentsId } from '../browser/browser'
 import { setAgentBrowserBridgeRef } from '../browser/page/control'
 import type { CrashReportStore } from '../crash-reporting/crash-report-store'
@@ -54,7 +52,6 @@ export function registerCoreHandlers(
   stats: StatsCollector,
   rateLimits: RateLimitService,
   mainWindowWebContentsId: number | null = null,
-  automations?: AutomationService,
   agentAwakeService?: AgentAwakeService,
   crashReports?: CrashReportStore,
   keybindings?: KeybindingService,
@@ -71,7 +68,7 @@ export function registerCoreHandlers(
   }
   registered = true
 
-  initializeShellAppService(store, { onBeforeRelaunch: lifecycleOptions.onBeforeRelaunch })
+  initializeShellAppService({ onBeforeRelaunch: lifecycleOptions.onBeforeRelaunch })
   initializeShellMiniMaxCredentialsService(rateLimits)
   initializeShellGitHubWindowService(store, stats)
   if (crashReports) {
@@ -87,9 +84,6 @@ export function registerCoreHandlers(
   // `src/main/observability/`, never from `src/main/telemetry/`. Order is
   // not load-bearing; both register independent ipcMain channels.
   initializeShellSettingsService(store, agentAwakeService)
-  if (automations) {
-    initializeShellAutomationService(automations)
-  }
   if (keybindings) {
     initializeShellKeybindingsService(keybindings)
   }

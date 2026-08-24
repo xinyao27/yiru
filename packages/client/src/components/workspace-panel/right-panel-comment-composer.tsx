@@ -96,15 +96,6 @@ export function RightPanelCommentComposer({
   const isMac = navigator.userAgent.includes('Mac')
 
   useEffect(() => {
-    const textarea = textareaRef.current
-    if (!textarea) {
-      return
-    }
-    textarea.style.height = '0px'
-    textarea.style.height = `${Math.min(textarea.scrollHeight, 180)}px`
-  }, [body])
-
-  useEffect(() => {
     if (!autoFocus) {
       clearRightPanelCommentFocusTimer(autoFocusTimerRef)
       return
@@ -241,7 +232,7 @@ export function RightPanelCommentComposer({
         ref={setTextareaRef}
         value={body}
         rows={3}
-        className="text-foreground placeholder:text-muted-foreground block max-h-44 min-h-20 w-full min-w-0 resize-none bg-transparent px-2.5 py-2 text-[12px] leading-relaxed outline-none disabled:cursor-not-allowed disabled:opacity-60"
+        className="text-foreground placeholder:text-muted-foreground block [field-sizing:content] max-h-44 min-h-20 w-full min-w-0 resize-none overflow-y-auto bg-transparent px-2.5 py-2 text-[12px] leading-relaxed outline-none disabled:cursor-not-allowed disabled:opacity-60"
         placeholder={placeholder}
         disabled={disabled || submitting}
         aria-invalid={Boolean(error)}

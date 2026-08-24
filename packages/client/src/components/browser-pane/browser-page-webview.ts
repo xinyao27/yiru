@@ -9,6 +9,26 @@ import {
 } from '~renderer/runtime/browser-webview-registry'
 import { YIRU_BROWSER_GUEST_WEB_PREFERENCES_ATTRIBUTE } from '~shared/browser/guest-web-preferences'
 
+export function navigateBrowserPageWebview(webview: BrowserWebviewElement, url: string): void {
+  webview.src = url
+}
+
+export function setBrowserPageWebviewInputLocked(
+  webview: BrowserWebviewElement,
+  inputLocked: boolean
+): void {
+  webview.style.pointerEvents = inputLocked ? 'none' : 'auto'
+}
+
+export function setBrowserPageWebviewFailureHidden(
+  webview: BrowserWebviewElement,
+  hidden: boolean
+): void {
+  // Why: Electron webviews paint in a native compositor layer, so CSS visibility
+  // can leave a black guest above React's failure overlay on some Electron builds.
+  webview.style.display = hidden ? 'none' : 'flex'
+}
+
 export function ensureBrowserPageWebview({
   browserTabId,
   container,
@@ -44,7 +64,7 @@ export function ensureBrowserPageWebview({
     activeContainer = refreshedContainer
   }
   if (webview) {
-    webview.style.pointerEvents = inputLocked ? 'none' : 'auto'
+    setBrowserPageWebviewInputLocked(webview, inputLocked)
     return { container: activeContainer, created, webview }
   }
 
@@ -59,7 +79,7 @@ export function ensureBrowserPageWebview({
   webview.style.width = '100%'
   webview.style.height = '100%'
   webview.style.border = 'none'
-  webview.style.pointerEvents = inputLocked ? 'none' : 'auto'
+  setBrowserPageWebviewInputLocked(webview, inputLocked)
   // Why: some pages never paint a background, and a white viewport matches
   // normal browser behavior instead of leaking Yiru chrome through the guest.
   webview.style.background = '#ffffff'

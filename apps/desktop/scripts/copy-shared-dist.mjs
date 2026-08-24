@@ -1,9 +1,10 @@
-import { copyFileSync, mkdirSync, readdirSync, rmSync } from 'node:fs'
+import { chmodSync, copyFileSync, mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, relative } from 'node:path'
 
 const appRoot = join(import.meta.dirname, '..')
+const compiledOutput = join(appRoot, 'out')
 const sharedDist = join(appRoot, '..', '..', 'packages', 'shared', 'dist')
-const sharedOutput = join(appRoot, 'out', 'shared')
+const sharedOutput = join(compiledOutput, 'shared')
 
 function listCommonJsFiles(directory) {
   const files = []
@@ -28,4 +29,23 @@ for (const source of listCommonJsFiles(sharedDist)) {
   const destination = join(sharedOutput, relative(sharedDist, source))
   mkdirSync(dirname(destination), { recursive: true })
   copyFileSync(source, destination)
+}
+
+// Why: the app package is ESM, while the CLI is emitted as CommonJS and also
+// runs outside Electron from the unpacked application resources.
+writeFileSync(
+  join(compiledOutput, 'package.json'),
+  `${JSON.stringify(
+    {
+      name: 'yiru-compiled-output',
+      type: 'commonjs',
+      private: true
+    },
+    null,
+    2
+  )}\n`
+)
+
+if (process.platform !== 'win32') {
+  chmodSync(join(compiledOutput, 'cli', 'index.js'), 0o755)
 }

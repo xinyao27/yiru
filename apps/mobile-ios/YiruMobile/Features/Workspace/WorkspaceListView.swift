@@ -8,7 +8,6 @@ struct WorkspaceListView: View {
     @State private var isCreationPresented = false
     @State private var actionTarget: WorkspaceSummary?
     @State private var isAgentHistoryAvailable = false
-    @State private var isFloatingWorkspaceAvailable = false
     @State private var isRemoveHostPresented = false
     @State private var hostRemovalFailure: LocalizedStringResource?
     private let creationRepository: any WorkspaceCreationRepository
@@ -18,7 +17,6 @@ struct WorkspaceListView: View {
     private let showAccounts: () -> Void
     private let showSourceControl: (WorkspaceSummary) -> Void
     private let showAgentHistory: (WorkspaceSummary) -> Void
-    private let showFloatingWorkspace: () -> Void
     private let showPairing: () -> Void
     private let hostsChanged: () -> Void
     private let leaveHost: (() -> Void)?
@@ -36,7 +34,6 @@ struct WorkspaceListView: View {
         showAccounts: @escaping () -> Void,
         showSourceControl: @escaping (WorkspaceSummary) -> Void,
         showAgentHistory: @escaping (WorkspaceSummary) -> Void,
-        showFloatingWorkspace: @escaping () -> Void,
         showPairing: @escaping () -> Void,
         hostsChanged: @escaping () -> Void = {},
         leaveHost: (() -> Void)? = nil,
@@ -51,7 +48,6 @@ struct WorkspaceListView: View {
         self.showAccounts = showAccounts
         self.showSourceControl = showSourceControl
         self.showAgentHistory = showAgentHistory
-        self.showFloatingWorkspace = showFloatingWorkspace
         self.showPairing = showPairing
         self.hostsChanged = hostsChanged
         self.leaveHost = leaveHost
@@ -111,13 +107,11 @@ struct WorkspaceListView: View {
         .toolbar {
             WorkspaceListToolbar(
                 model: model,
-                isFloatingWorkspaceAvailable: isFloatingWorkspaceAvailable,
                 isSearchPresented: $isSearchPresented,
                 isCreationPresented: $isCreationPresented,
                 leaveHost: leaveHost,
                 hideSidebar: hideSidebar,
-                showAccounts: showAccounts,
-                showFloatingWorkspace: showFloatingWorkspace
+                showAccounts: showAccounts
             )
         }
         .sheet(isPresented: $isSearchPresented) {
@@ -222,9 +216,6 @@ struct WorkspaceListView: View {
             }
             isAgentHistoryAvailable =
                 (try? await agentHistoryRepository.supportsAgentHistory(for: host.id)) == true
-        }
-        .task(id: model.canUseHost) {
-            isFloatingWorkspaceAvailable = await model.supportsFloatingWorkspace()
         }
     }
 

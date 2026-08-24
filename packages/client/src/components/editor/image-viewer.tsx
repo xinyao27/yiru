@@ -32,17 +32,21 @@ import PdfViewer from './pdf-viewer'
 const FALLBACK_IMAGE_MIME_TYPE = 'image/png'
 
 type ImageViewerProps = {
-  content: string
+  content?: string
   filePath: string
   mimeType?: string
   layout?: 'fill' | 'intrinsic'
+  src?: string
+  byteLength?: number
 }
 
 export default function ImageViewer({
-  content,
+  content = '',
   filePath,
   mimeType = FALLBACK_IMAGE_MIME_TYPE,
-  layout = 'fill'
+  layout = 'fill',
+  src,
+  byteLength
 }: ImageViewerProps): JSX.Element {
   const [isPopupOpen, setIsPopupOpen] = useState(false)
   const [inlineZoom, setInlineZoom] = useState(1)
@@ -56,7 +60,7 @@ export default function ImageViewer({
 
   const filename = useMemo(() => filePath.split(/[/\\]/).pop() || filePath, [filePath])
   const cleanedContent = useMemo(() => content.replace(/\s/g, ''), [content])
-  const imageStateKey = `${filePath}\n${mimeType}\n${cleanedContent}`
+  const imageStateKey = `${filePath}\n${mimeType}\n${src ?? cleanedContent}`
   const [lastImageStateKey, setLastImageStateKey] = useState(imageStateKey)
   if (lastImageStateKey !== imageStateKey) {
     setLastImageStateKey(imageStateKey)
@@ -67,12 +71,12 @@ export default function ImageViewer({
   const isPdf = mimeType === 'application/pdf'
   const isIntrinsicLayout = layout === 'intrinsic'
   const previewSrc = useMemo(
-    () => buildImageDataUri(mimeType, cleanedContent),
-    [cleanedContent, mimeType]
+    () => src ?? buildImageDataUri(mimeType, cleanedContent),
+    [cleanedContent, mimeType, src]
   )
   const imageError = previewSrc !== null && failedPreviewSrc === previewSrc
   const estimatedSize = useMemo(() => {
-    const bytes = Math.floor((cleanedContent.length * 3) / 4)
+    const bytes = byteLength ?? Math.floor((cleanedContent.length * 3) / 4)
     if (bytes < 1024) {
       return `${bytes} B`
     }
@@ -80,7 +84,7 @@ export default function ImageViewer({
       return `${(bytes / 1024).toFixed(1)} KB`
     }
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-  }, [cleanedContent])
+  }, [byteLength, cleanedContent])
   const inlineZoomPercent = Math.round(inlineZoom * 100)
   const inlineImageLayoutSize = useMemo(
     () =>
@@ -215,7 +219,7 @@ export default function ImageViewer({
   }, [isPopupOpen])
 
   if (isPdf) {
-    return <PdfViewer content={cleanedContent} filePath={filePath} />
+    return <PdfViewer content={cleanedContent} filePath={filePath} src={src} />
   }
 
   if (imageError) {

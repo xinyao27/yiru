@@ -1,7 +1,10 @@
 import { randomUUID } from 'node:crypto'
 import { lstatSync, rmSync } from 'node:fs'
 
-import { copyFileWithWindowsRetry, renameFileWithWindowsRetry } from './codex/accounts/fs-utils'
+import {
+  copyFileWithWindowsRetry,
+  renameFileWithWindowsRetry
+} from './codex/accounts/atomic-file-operations'
 
 export function writeRollingFileBackup(sourcePath: string, backupPath: string): void {
   try {

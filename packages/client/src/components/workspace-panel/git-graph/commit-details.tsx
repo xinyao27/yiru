@@ -1,5 +1,5 @@
 import type React from 'react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ArrowUpRight } from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { Button } from '~renderer/components/ui/button'
@@ -81,31 +81,42 @@ export function GitGraphCommitDetails({
   onOpenAllChanges: () => void
   onSelectParent: (parentId: string) => void
 }): React.JSX.Element {
-  const [state, setState] = useState<GitGraphCommitFilesState>({ status: 'loading' })
-  const loadedForRef = useRef<string | null>(null)
+  const [loadedState, setLoadedState] = useState<{
+    commitId: string
+    state: GitGraphCommitFilesState
+  } | null>(null)
+  const state =
+    loadedState?.commitId === item.id ? loadedState.state : { status: 'loading' as const }
   const messageBody = formatGitGraphMessageBody(item.subject, item.message)
 
   useEffect(() => {
-    if (loadedForRef.current === item.id) {
-      return
-    }
-    loadedForRef.current = item.id
-    setState({ status: 'loading' })
+    let cancelled = false
     loadCommitFiles(item)
-      .then((entries) => setState({ status: 'ready', entries }))
-      .catch((error: unknown) => {
-        loadedForRef.current = null
-        setState({
-          status: 'error',
-          error:
-            error instanceof Error
-              ? error.message
-              : translate(
-                  'auto.components.workspace-panel.git-graph.CommitDetails.a1b2c3d4e5',
-                  'Failed to load commit files'
-                )
-        })
+      .then((entries) => {
+        if (!cancelled) {
+          setLoadedState({ commitId: item.id, state: { status: 'ready', entries } })
+        }
       })
+      .catch((error: unknown) => {
+        if (!cancelled) {
+          setLoadedState({
+            commitId: item.id,
+            state: {
+              status: 'error',
+              error:
+                error instanceof Error
+                  ? error.message
+                  : translate(
+                      'auto.components.workspace-panel.git-graph.CommitDetails.a1b2c3d4e5',
+                      'Failed to load commit files'
+                    )
+            }
+          })
+        }
+      })
+    return () => {
+      cancelled = true
+    }
   }, [item, loadCommitFiles])
 
   return (

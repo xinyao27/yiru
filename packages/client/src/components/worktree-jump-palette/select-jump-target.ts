@@ -11,7 +11,7 @@ import type { WorkspaceTabPaletteSearchResult } from '~renderer/components/workt
 import { translate } from '~renderer/i18n/i18n'
 import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
 import { useAppStore } from '~renderer/store'
-import { findWorktreeById } from '~renderer/store/slices/worktree-helpers'
+import { findWorktreeById } from '~renderer/store/slices/worktree-state'
 import type { BrowserPage, BrowserWorkspace, Worktree } from '~shared/types'
 
 import type { PaletteStoreState } from './use-palette-store-state'

@@ -10,7 +10,7 @@ import {
   getSettingsForWorktreeRuntimeOwner
 } from '~renderer/lib/worktree-runtime-owner'
 import { useAppStore } from '~renderer/store'
-import { getRepoIdFromWorktreeId } from '~renderer/store/slices/worktree-helpers'
+import { getRepoIdFromWorktreeId } from '~renderer/store/slices/worktree-state'
 import type { AppState } from '~renderer/store/types'
 import { parseWorkspaceKey } from '~shared/workspace/scope'
 

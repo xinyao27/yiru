@@ -9,7 +9,7 @@ import {
   githubRepoContext,
   release,
   type LocalGitExecOptions
-} from './gh-utils'
+} from './github-cli'
 
 // Why: hosted files must exceed the renderer's large-diff threshold before raw fetches stop.
 const GITHUB_RAW_CONTENT_MAX_BUFFER_BYTES = 8 * 1024 * 1024

@@ -172,7 +172,12 @@ import { BrowserLoadFailureOverlay } from './browser-load-failure-overlay'
 import { BrowserMobileDriverOverlay } from './browser-mobile-driver-overlay'
 import { formatByteCount, formatPermissionNotice, formatPopupNotice } from './browser-notices'
 import { isBrowserPagePanePaintable } from './browser-page-paintability'
-import { ensureBrowserPageWebview } from './browser-page-webview'
+import {
+  ensureBrowserPageWebview,
+  navigateBrowserPageWebview,
+  setBrowserPageWebviewFailureHidden,
+  setBrowserPageWebviewInputLocked
+} from './browser-page-webview'
 import {
   addBrowserPageZoomEventListener,
   applyBrowserPageZoom,
@@ -191,6 +196,7 @@ import { MarkupDrawButton } from './markup/draw-button'
 import { MarkupOverlay } from './markup/overlay'
 import { useMarkupMode, type MarkupCaptureContext } from './markup/use-markup-mode'
 import { getBrowserPagesForWorkspace } from './page-selection'
+import { decodeRemoteBrowserFrameUrl } from './remote-browser-frame-decoder'
 import { getRemoteBrowserFrameStyle } from './remote-browser-frame-style'
 import {
   getRemoteBrowserKeyboardShortcut,
@@ -260,19 +266,6 @@ type BrowserOverlayViewport = {
   scrollX: number
   scrollY: number
   version: number
-}
-
-function decodeRemoteBrowserFrameUrl(url: string): Promise<void> {
-  const image = new window.Image()
-  image.decoding = 'async'
-  image.src = url
-  if (typeof image.decode === 'function') {
-    return image.decode()
-  }
-  return new Promise((resolve, reject) => {
-    image.onload = () => resolve()
-    image.onerror = () => reject(new Error('Remote browser frame failed to decode.'))
-  })
 }
 
 type RemoteBrowserStreamToken = {
@@ -772,7 +765,7 @@ function retryBrowserTabLoad(
     loading: true,
     title: retryUrl
   })
-  webview.src = retryUrl
+  navigateBrowserPageWebview(webview, retryUrl)
 }
 
 export default function BrowserPane({
@@ -918,7 +911,6 @@ function RemoteBrowserPagePane({
   const [remoteError, setRemoteError] = useState<string | null>(null)
   const [contextMenu, setContextMenu] = useState<RemoteBrowserContextMenu | null>(null)
   const [busy, setBusy] = useState(false)
-  const contextMenuRef = useRef<HTMLDivElement>(null)
   const remotePageIdRef = useRef<string | null>(null)
   const remoteViewportSizeRef = useRef<RemoteBrowserViewportSize | null>(null)
   const remoteCssViewportSizeRef = useRef<RemoteBrowserViewportSize | null>(null)
@@ -1288,28 +1280,6 @@ function RemoteBrowserPagePane({
     }
     window.addEventListener('keydown', handleKeyDown, true)
     return () => window.removeEventListener('keydown', handleKeyDown, true)
-  }, [contextMenu])
-
-  useLayoutEffect(() => {
-    const el = contextMenuRef.current
-    if (!el || !contextMenu) {
-      return
-    }
-    el.style.left = `${contextMenu.x}px`
-    el.style.top = `${contextMenu.y}px`
-    const rect = el.getBoundingClientRect()
-    const offsetX = contextMenu.x - rect.left
-    const offsetY = contextMenu.y - rect.top
-    let renderX = contextMenu.x
-    let renderY = contextMenu.y
-    if (rect.right > window.innerWidth) {
-      renderX = contextMenu.x - rect.width
-    }
-    if (rect.bottom > window.innerHeight) {
-      renderY = contextMenu.y - rect.height
-    }
-    el.style.left = `${Math.max(0, renderX) + offsetX}px`
-    el.style.top = `${Math.max(0, renderY) + offsetY}px`
   }, [contextMenu])
 
   useEffect(() => {
@@ -2451,7 +2421,6 @@ function RemoteBrowserPagePane({
             }
           />
           <PopoverContent
-            ref={contextMenuRef}
             role="menu"
             data-testid="remote-browser-context-menu"
             side="bottom"
@@ -2915,7 +2884,6 @@ function BrowserPagePane({
     pageUrl: string
     selectionText: string
   } | null>(null)
-  const contextMenuRef = useRef<HTMLDivElement>(null)
   const [findOpen, setFindOpen] = useState(false)
   const grab = useGrabMode(browserTab.id)
 
@@ -3281,44 +3249,6 @@ function BrowserPagePane({
     }
     window.addEventListener('keydown', handleKeyDown, true)
     return () => window.removeEventListener('keydown', handleKeyDown, true)
-  }, [contextMenu])
-
-  // Why: position: fixed can be offset by ancestor CSS properties (backdrop-filter,
-  // transform, will-change) that create new containing blocks. Even with a Portal to
-  // document.body, global CSS or Electron chrome can shift the element. Measuring the
-  // actual rendered position and correcting before paint is immune to all of these.
-  // Additionally, flip the menu when it would overflow the viewport edge so right-clicking
-  // near the screen border keeps the entire menu visible.
-  useLayoutEffect(() => {
-    const el = contextMenuRef.current
-    if (!el || !contextMenu) {
-      return
-    }
-    el.style.left = `${contextMenu.x}px`
-    el.style.top = `${contextMenu.y}px`
-    const rect = el.getBoundingClientRect()
-
-    // Why: CSS containing blocks can shift "fixed" elements. Capture the offset
-    // between where we asked CSS to place the element and where it actually rendered.
-    const offsetX = contextMenu.x - rect.left
-    const offsetY = contextMenu.y - rect.top
-
-    let renderX = contextMenu.x
-    let renderY = contextMenu.y
-
-    // Flip so the opposite corner aligns with the cursor when the menu overflows.
-    if (rect.right > window.innerWidth) {
-      renderX = contextMenu.x - rect.width
-    }
-    if (rect.bottom > window.innerHeight) {
-      renderY = contextMenu.y - rect.height
-    }
-
-    renderX = Math.max(0, renderX)
-    renderY = Math.max(0, renderY)
-
-    el.style.left = `${renderX + offsetX}px`
-    el.style.top = `${renderY + offsetY}px`
   }, [contextMenu])
 
   useEffect(() => {
@@ -3898,7 +3828,7 @@ function BrowserPagePane({
       }
       trackNextLoadingEventRef.current = normalizedUrl !== YIRU_BROWSER_BLANK_URL
       lastKnownWebviewUrlRef.current = normalizedUrl
-      webview.src = normalizedUrl
+      navigateBrowserPageWebview(webview, normalizedUrl)
       if (normalizedUrl !== YIRU_BROWSER_BLANK_URL) {
         keepAddressBarFocusRef.current = false
         if (document.activeElement === addressBarInputRef.current) {
@@ -4185,7 +4115,7 @@ function BrowserPagePane({
         normalizeBrowserNavigationUrl(initialBrowserUrlRef.current) ?? YIRU_BROWSER_BLANK_URL
       trackNextLoadingEventRef.current = initialUrl !== YIRU_BROWSER_BLANK_URL
       lastKnownWebviewUrlRef.current = initialUrl
-      webview.src = initialUrl
+      navigateBrowserPageWebview(webview, initialUrl)
     }
 
     return () => {
@@ -4314,7 +4244,7 @@ function BrowserPagePane({
       // event so only real navigations, not tab activation churn, show loading UI.
       trackNextLoadingEventRef.current = normalizedUrl !== YIRU_BROWSER_BLANK_URL
       lastKnownWebviewUrlRef.current = normalizedUrl
-      webview.src = normalizedUrl
+      navigateBrowserPageWebview(webview, normalizedUrl)
       if (normalizedUrl !== YIRU_BROWSER_BLANK_URL) {
         keepAddressBarFocusRef.current = false
         if (document.activeElement === addressBarInputRef.current) {
@@ -4794,7 +4724,7 @@ function BrowserPagePane({
         trackNextLoadingEventRef.current = targetUrl !== YIRU_BROWSER_BLANK_URL
         lastKnownWebviewUrlRef.current =
           normalizeBrowserNavigationUrl(browserModelUrl) ?? browserModelUrl
-        webview.src = targetUrl
+        navigateBrowserPageWebview(webview, targetUrl)
         if (targetUrl !== YIRU_BROWSER_BLANK_URL) {
           focusWebviewNow()
         }
@@ -4911,7 +4841,7 @@ function BrowserPagePane({
     }
     // Why: desktop reclaim uses a React overlay, but Electron webviews can
     // keep receiving native input unless their own hit testing is disabled.
-    webview.style.pointerEvents = inputLocked ? 'none' : 'auto'
+    setBrowserPageWebviewInputLocked(webview, inputLocked)
   }, [inputLocked])
 
   useEffect(() => {
@@ -4919,11 +4849,7 @@ function BrowserPagePane({
     if (!webview) {
       return
     }
-    // Why: Electron webviews render in their own compositor layer, so a React
-    // overlay can sit "under" a failed guest and still look like a black page.
-    // Fully removing the guest from layout is more reliable than visibility
-    // toggles here; some Electron builds keep painting a hidden guest layer.
-    webview.style.display = showFailureOverlay ? 'none' : 'flex'
+    setBrowserPageWebviewFailureHidden(webview, showFailureOverlay)
   }, [showFailureOverlay])
 
   const handleInternalFileDragOver = useCallback((event: DragEvent<HTMLDivElement>) => {
@@ -5056,7 +4982,6 @@ function BrowserPagePane({
             }
           />
           <PopoverContent
-            ref={contextMenuRef}
             role="menu"
             data-testid="browser-context-menu"
             side="bottom"

@@ -93,7 +93,7 @@ function dispatchEmulatorEvent(
       return
     case 'paneFocus':
       handlers.onPaneFocus(event)
-      return
+      break
     case 'ready':
     case 'end':
       break

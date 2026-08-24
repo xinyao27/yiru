@@ -5,7 +5,7 @@ import {
   X
 } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
-import { useSidebarResize } from '~renderer/hooks/use-sidebar-resize'
+import { SidebarResizeOverlay, useSidebarResize } from '~renderer/hooks/use-sidebar-resize'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
 import { useAppStore } from '~renderer/store'
@@ -137,7 +137,7 @@ export function MarkdownTableOfContentsPanel({
     markdownTocPanelWidth,
     layoutWidth ?? undefined
   )
-  const { containerRef, onResizeStart } = useSidebarResize<HTMLElement>({
+  const { containerRef, isResizing, onResizeStart, renderedWidth } = useSidebarResize<HTMLElement>({
     isOpen: true,
     width: renderedPanelWidth,
     minWidth: MARKDOWN_TOC_PANEL_MIN_WIDTH,
@@ -178,12 +178,14 @@ export function MarkdownTableOfContentsPanel({
   return (
     <aside
       ref={containerRef}
+      style={{ width: renderedWidth }}
       className="markdown-toc-panel border-border/72 relative flex shrink-0 flex-col border-r bg-[color-mix(in_srgb,var(--background)_88%,var(--editor-surface))] @max-[560px]/markdown-preview:absolute @max-[560px]/markdown-preview:inset-y-0 @max-[560px]/markdown-preview:left-0 @max-[560px]/markdown-preview:z-30"
       aria-label={translate(
         'auto.components.editor.MarkdownTableOfContentsPanel.27d0a9c49a',
         'Table of contents'
       )}
     >
+      <SidebarResizeOverlay visible={isResizing} />
       <div className="markdown-toc-header border-border/72 text-muted-foreground flex min-h-10 min-w-0 items-center gap-2 border-b py-0 pr-2.5 pl-3 text-xs font-semibold">
         <ListTree className="text-muted-foreground size-3.5 shrink-0" />
         <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">

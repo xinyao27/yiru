@@ -1,7 +1,7 @@
 import type { DragEndEvent, DragMoveEvent, DragOverEvent } from '@dnd-kit/core'
 import { useCallback, useState } from 'react'
 
-import type { TabDragItemData } from './use-tab-drag-split'
+import type { TabDragItemData } from './tab-drag-data'
 
 // Why: when a tab is dragged over another tab's sortable rect, we compute
 // which side of the hovered tab the drop will land on (before vs. after).

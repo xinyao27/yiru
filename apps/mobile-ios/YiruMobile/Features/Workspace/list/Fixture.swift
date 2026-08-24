@@ -23,7 +23,6 @@
                     showAccounts: {},
                     showSourceControl: { _ in },
                     showAgentHistory: { _ in },
-                    showFloatingWorkspace: {},
                     showPairing: {},
                     selectWorkspace: { _, _ in }
                 )

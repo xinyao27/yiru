@@ -6,7 +6,7 @@ import {
   normalizeRuntimePathForComparison
 } from '@yiru/workbench-model/platform'
 
-import { writeFileAtomically } from './accounts/fs-utils'
+import { writeFileAtomically } from './accounts/atomic-file-operations'
 
 // State files for the session index heal: which backfilled rollouts exist
 // (the backfill audit ledger), which thread ids this pass already processed

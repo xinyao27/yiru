@@ -18,7 +18,7 @@ type OpenMarkdownDocumentOptions = {
   anchor?: string | null
 }
 
-type UseMarkdownDocumentsResult = {
+export type UseMarkdownDocumentsResult = {
   markdownDocuments: MarkdownDocument[]
   openMarkdownDocument: (
     document: MarkdownDocument,

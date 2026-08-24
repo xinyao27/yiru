@@ -90,11 +90,7 @@ export function PierreDiffCommentComposer({
             placeholder={placeholder ?? 'Add note for the AI'}
             value={body}
             rows={3}
-            onChange={(event) => {
-              setBody(event.target.value)
-              event.currentTarget.style.height = 'auto'
-              event.currentTarget.style.height = `${Math.min(event.currentTarget.scrollHeight, 240)}px`
-            }}
+            onChange={(event) => setBody(event.target.value)}
             onKeyDown={(event) => {
               if (event.key === 'Escape') {
                 event.preventDefault()

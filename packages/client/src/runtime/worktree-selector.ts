@@ -1,6 +1,3 @@
-import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
-import { isEphemeralSetupTerminalWorktreeId } from '~shared/ephemeral-setup-terminal-worktree-id'
-
 const RUNTIME_WORKTREE_ID_SELECTOR_PREFIX = 'id:'
 const RUNTIME_WORKTREE_PATH_SELECTOR_PREFIX = 'path:'
 
@@ -21,14 +18,6 @@ export function toRuntimeWorktreePathSelector(worktreePath: string): string {
   return `${RUNTIME_WORKTREE_PATH_SELECTOR_PREFIX}${trimmed}`
 }
 
-/**
- * Runtime selector for a terminal's worktree id. Ephemeral setup terminals have no
- * worktree on the runtime, so resolve them to the floating-terminal scope (home dir)
- * every runtime understands; other ids map to their own `id:` selector.
- */
 export function toRuntimeTerminalWorktreeSelector(worktreeId: string): string {
-  if (isEphemeralSetupTerminalWorktreeId(worktreeId.trim())) {
-    return toRuntimeWorktreeSelector(FLOATING_TERMINAL_WORKTREE_ID)
-  }
   return toRuntimeWorktreeSelector(worktreeId)
 }

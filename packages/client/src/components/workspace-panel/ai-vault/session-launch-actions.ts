@@ -15,7 +15,7 @@ import {
 } from '~renderer/lib/worktree-activation'
 import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
-import { findWorktreeById } from '~renderer/store/slices/worktree-helpers'
+import { findWorktreeById } from '~renderer/store/slices/worktree-state'
 import type { Worktree } from '~shared/types'
 import { parseWorkspaceKey } from '~shared/workspace/scope'
 

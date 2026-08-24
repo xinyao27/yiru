@@ -1,6 +1,6 @@
 // Adapter over the WSL hook relay's file bridge. It lets the shared remote
 // hook installers write into a WSL distro's home over the relay's already-open
-// stdio channel. Only the primitives `installer-utils-remote.ts` touches are
+// stdio channel. Only the primitives `remote-hook-storage.ts` touches are
 // implemented.
 import { WSL_HOOK_FS_METHODS, type WslFsResult } from '~shared/wsl-hook-relay-contract'
 
@@ -36,7 +36,7 @@ export async function installWslGuestHooks(options: {
   }
 }
 
-// Why: installer-utils-remote classifies remote file failures by numeric status
+// Why: remote-hook-storage classifies remote file failures by numeric status
 // codes (missing entry=2, already-exists=4). Map guest POSIX errno onto those
 // so the shared classifiers keep working across transports.
 const REMOTE_FILE_ERROR_CODE_BY_ERRNO: Record<string, number> = {

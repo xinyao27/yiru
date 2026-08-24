@@ -6,7 +6,7 @@ import {
   ghRepoExecOptions,
   githubRepoContext,
   type LocalGitExecOptions
-} from './gh-utils'
+} from './github-cli'
 import { getPRReviewCommentLineNumbersFromPatch } from './pr-review-comment-lines'
 import { noteRateLimitSpend, rateLimitGuard } from './rate-limit'
 

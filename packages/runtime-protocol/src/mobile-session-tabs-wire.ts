@@ -69,7 +69,6 @@ const MobileSessionTerminalTabBaseSchema = MobileSessionTabBaseSchema.extend({
   parentTabId: z.string().min(1),
   leafId: z.string().min(1),
   ptyId: z.string().nullable().optional(),
-  viewMode: z.enum(['terminal', 'chat']).optional(),
   launchAgent: z.string().optional(),
   resolvedAgentType: z.string().optional(),
   agentStatus: z

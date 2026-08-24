@@ -3,16 +3,12 @@ import type { ContextualTourId } from './contextual-tours'
 export const FEATURE_EDUCATION_CONTEXTUAL_TOUR_IDS = [
   'workspace-agent-sessions',
   'browser',
-  'automations',
-  'floating-workspace',
   'workspace-creation'
 ] as const satisfies readonly ContextualTourId[]
 
 export const FEATURE_EDUCATION_SOURCES = [
   'workspace_agent_sessions_visible',
   'browser_visible',
-  'automations_open',
-  'floating_workspace_visible',
   'workspace_creation_visible',
   'workspace_creation_modal',
   'setup_guide_parallel_work',

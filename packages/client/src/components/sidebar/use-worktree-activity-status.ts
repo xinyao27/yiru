@@ -4,7 +4,7 @@ import { resolveWorktreeStatus, type WorktreeStatus } from '~renderer/lib/worktr
 import { useAppStore } from '~renderer/store'
 
 import { selectWorktreeAgentActivitySummary } from './worktree-agent-activity-summary'
-import { EMPTY_BROWSER_TABS, EMPTY_TABS } from './worktree-card/helpers'
+import { EMPTY_BROWSER_TABS, EMPTY_TABS } from './worktree-card/presentation'
 import {
   selectLivePtyIdsForWorktree,
   selectTerminalLayoutRootsForWorktree,

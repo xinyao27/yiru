@@ -2,13 +2,11 @@ import SwiftUI
 
 struct WorkspaceListToolbar: ToolbarContent {
     let model: WorkspaceListModel
-    let isFloatingWorkspaceAvailable: Bool
     @Binding var isSearchPresented: Bool
     @Binding var isCreationPresented: Bool
     let leaveHost: (() -> Void)?
     let hideSidebar: (() -> Void)?
     let showAccounts: () -> Void
-    let showFloatingWorkspace: () -> Void
 
     var body: some ToolbarContent {
         if let leaveHost {
@@ -39,12 +37,6 @@ struct WorkspaceListToolbar: ToolbarContent {
                     Label("New workspace", iconID: .add)
                 }
                 .disabled(!model.canUseHost)
-                if isFloatingWorkspaceAvailable {
-                    Button(action: showFloatingWorkspace) {
-                        Label("Floating Workspace", iconID: .terminal)
-                    }
-                    .disabled(!model.canUseHost)
-                }
                 Button(action: showAccounts) {
                     Label("Accounts", iconID: .account)
                 }

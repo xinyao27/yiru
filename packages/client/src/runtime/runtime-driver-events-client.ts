@@ -36,7 +36,7 @@ function handleRuntimeDriverSubscriptionEvent(
     case 'browserDriverChanged':
     case 'terminalFitOverrideChanged':
       handlers.onEvent(event)
-      return
+      break
     case 'end':
       break
   }

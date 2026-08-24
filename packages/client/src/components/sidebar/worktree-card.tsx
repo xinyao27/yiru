@@ -52,7 +52,6 @@ import { writeWorkspaceDragData } from './workspace-status'
 import { WorktreeCardControlGrants } from './worktree-card/control-grants'
 import { useWorktreeCardDetailsHoverControl } from './worktree-card/details-hover-state'
 import { isEventTargetInsideCurrentTarget } from './worktree-card/dom-events'
-import { CONFLICT_OPERATION_LABELS } from './worktree-card/helpers'
 import {
   WorktreeCardDetailsHover,
   hasWorktreeCardDetails,
@@ -64,6 +63,7 @@ import {
   isCachedMergedBranchPRCurrentForWorktree
 } from './worktree-card/pr-display'
 import type { WorktreeCardPrDisplay } from './worktree-card/pr-display'
+import { CONFLICT_OPERATION_LABELS } from './worktree-card/presentation'
 import { WorktreeCardStatusSlot } from './worktree-card/status-slot'
 import { WorktreeCardSurface, type WorktreeCardSurfaceActiveVariant } from './worktree-card/surface'
 import { WorktreeCardTabs } from './worktree-card/tabs'
@@ -228,8 +228,6 @@ const WorktreeCard = React.memo(function WorktreeCard({
   onRevokeCoworkingControlGrant
 }: WorktreeCardProps) {
   const openModal = useAppStore((s) => s.openModal)
-  const openAutomationsPage = useAppStore((s) => s.openAutomationsPage)
-  const setPendingAutomationRunNavigation = useAppStore((s) => s.setPendingAutomationRunNavigation)
   const updateWorktreeMeta = useAppStore((s) => s.updateWorktreeMeta)
   const deleteFolderWorkspace = useAppStore((s) => s.deleteFolderWorkspace)
   const setActiveWorktree = useAppStore((s) => s.setActiveWorktree)
@@ -253,53 +251,6 @@ const WorktreeCard = React.memo(function WorktreeCard({
       })
     },
     [worktree, openModal]
-  )
-
-  const handleOpenAutomation = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation()
-      const automationId = worktree.automationProvenance?.automationId
-      if (!automationId) {
-        return
-      }
-      const hostId = worktree.automationProvenance?.hostId ?? worktree.hostId
-      setPendingAutomationRunNavigation({
-        automationId,
-        runId: null,
-        ...(hostId ? { hostId } : {})
-      })
-      openAutomationsPage()
-    },
-    [
-      openAutomationsPage,
-      setPendingAutomationRunNavigation,
-      worktree.automationProvenance?.automationId,
-      worktree.automationProvenance?.hostId,
-      worktree.hostId
-    ]
-  )
-
-  const handleOpenAutomationRun = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation()
-      const provenance = worktree.automationProvenance
-      if (!provenance) {
-        return
-      }
-      const hostId = provenance.hostId ?? worktree.hostId
-      setPendingAutomationRunNavigation({
-        automationId: provenance.automationId,
-        runId: provenance.automationRunId,
-        ...(hostId ? { hostId } : {})
-      })
-      openAutomationsPage()
-    },
-    [
-      openAutomationsPage,
-      setPendingAutomationRunNavigation,
-      worktree.automationProvenance,
-      worktree.hostId
-    ]
   )
 
   const deleteState = useAppStore((s) => s.deleteStateByWorktreeId[worktree.id])
@@ -439,7 +390,6 @@ const WorktreeCard = React.memo(function WorktreeCard({
   const deleteModifierPressed = useWorkspaceDeleteModifierPressed()
 
   const showStatus = cardProps.includes('status')
-  const showAutomation = cardProps.includes('automation')
   const showComment = cardProps.includes('comment')
   const showPorts = cardProps.includes('ports')
   const shouldRefreshHostedReview = showStatus
@@ -778,7 +728,6 @@ const WorktreeCard = React.memo(function WorktreeCard({
   const hoverReview = prDisplay
   const workspaceStatusReview = statusPrDisplay ?? hoverReview
   const hoverComment = worktree.comment
-  const metaAutomationProvenance = showAutomation ? worktree.automationProvenance : null
   const metaComment = showComment ? hoverComment : null
   // Why: `inline-agents` is the persisted compatibility key, but the rendered
   // source is now the canonical unified-tab model. Agent activity never creates
@@ -814,7 +763,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
         return
       case 'gitea':
         void updateWorktreeMeta(worktree.id, { linkedGiteaPR: null })
-        return
+        break
       case 'unsupported':
       case undefined:
         break
@@ -822,8 +771,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
   }, [hoverReview?.provider, updateWorktreeMeta, worktree.id])
   const hasDetails = hasWorktreeCardDetails({
     review: null,
-    comment: metaComment,
-    automationProvenance: metaAutomationProvenance
+    comment: metaComment
   })
   const hasPorts = showPorts && workspacePorts.length > 0
   const cacheStartedAt = usePromptCacheCountdownStartedAt(worktree.id, showAggregateCacheTimer)
@@ -866,8 +814,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
   const hasHoverDetails =
     hasWorktreeCardDetails({
       review: hoverReview,
-      comment: hoverComment,
-      automationProvenance: metaAutomationProvenance
+      comment: hoverComment
     }) ||
     workspacePorts.length > 0 ||
     hasHoverIdentity
@@ -899,12 +846,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
       <div className="flex shrink-0 items-center gap-1">
         {hasPorts && <WorktreeCardPortsTrigger ports={workspacePorts} />}
         {hasDetails && (
-          <WorktreeCardMetaBadges
-            review={null}
-            comment={metaComment}
-            automationProvenance={metaAutomationProvenance}
-            className="ml-0 pr-0"
-          />
+          <WorktreeCardMetaBadges review={null} comment={metaComment} className="ml-0 pr-0" />
         )}
       </div>
     ) : null
@@ -1336,8 +1278,6 @@ const WorktreeCard = React.memo(function WorktreeCard({
       <WorktreeCardDetailsHover
         review={hoverReview}
         comment={hoverComment}
-        automationProvenance={metaAutomationProvenance}
-        automationHostId={worktree.hostId}
         branchName={hoverBranchName}
         workspaceTitle={hoverWorkspaceTitle}
         workspaceTitleRenameDisabled={isDeleting || affiliateListMode}
@@ -1348,8 +1288,6 @@ const WorktreeCard = React.memo(function WorktreeCard({
         hoverControl={detailsHoverControl}
         onRenameWorkspaceTitle={affiliateListMode ? undefined : handleRenameTitle}
         onEditComment={affiliateListMode ? undefined : handleEditComment}
-        onOpenAutomation={affiliateListMode ? undefined : handleOpenAutomation}
-        onOpenAutomationRun={affiliateListMode ? undefined : handleOpenAutomationRun}
         // Why: branch lookup can show a review without persisted metadata. Only
         // expose unlink when this workspace has an explicit linked PR/MR.
         onUnlinkReview={

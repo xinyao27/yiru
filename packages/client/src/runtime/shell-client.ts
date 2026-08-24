@@ -43,24 +43,16 @@ import {
   type ShellUpdaterApi
 } from './shell-system-client'
 import {
-  shellAutomationsApi,
   shellDeveloperPermissionsApi,
   shellExportApi,
-  shellFridayApi,
   shellLocalhostWorktreeLabelsApi,
   shellMiniMaxCredentialsApi,
   shellMobileApi,
-  shellPetApi,
-  shellSpeechApi,
-  type ShellAutomationsApi,
   type ShellDeveloperPermissionsApi,
   type ShellExportApi,
-  type ShellFridayApi,
   type ShellLocalhostWorktreeLabelsApi,
   type ShellMiniMaxCredentialsApi,
-  type ShellMobileApi,
-  type ShellPetApi,
-  type ShellSpeechApi
+  type ShellMobileApi
 } from './shell-tools-client'
 import { electronShellUiApi, type ShellUiApi } from './shell-ui-client'
 import { shellWebConnectApi, type ShellWebConnectApi } from './shell-web-connect-client'
@@ -69,14 +61,12 @@ import { getWebShellUIApi } from './web-ui-shell-client'
 
 type RendererShellClient = {
   accounts: ShellAccountsApi
-  automations: ShellAutomationsApi
   app: ShellAppApi
   crashReports: ShellCrashReportsApi
   developerPermissions: ShellDeveloperPermissionsApi
   diagnostics: ShellDiagnosticsApi
   export: ShellExportApi
   feedback: ShellFeedbackApi
-  friday: ShellFridayApi
   repoHost: ShellRepoHostApi
   runtime: ShellRuntimeStateApi
   gh: ShellGitHubApi
@@ -84,8 +74,6 @@ type RendererShellClient = {
   localhostWorktreeLabels: ShellLocalhostWorktreeLabelsApi
   minimaxCredentials: ShellMiniMaxCredentialsApi
   mobile: ShellMobileApi
-  pet: ShellPetApi
-  speech: ShellSpeechApi
   starNag: ShellStarNagApi
   updater: ShellUpdaterApi
   telemetry: ShellTelemetryApi
@@ -108,14 +96,12 @@ function isWebShellClient(): boolean {
 // oRPC host; the web build supplies the same shape explicitly.
 export const shellClient: RendererShellClient = {
   accounts: shellAccountsApi,
-  automations: shellAutomationsApi,
   app: shellAppApi,
   crashReports: shellCrashReportsApi,
   developerPermissions: shellDeveloperPermissionsApi,
   diagnostics: shellDiagnosticsApi,
   export: shellExportApi,
   feedback: shellFeedbackApi,
-  friday: shellFridayApi,
   repoHost: shellRepoHostApi,
   runtime: shellRuntimeStateApi,
   gh: shellGitHubApi,
@@ -123,8 +109,6 @@ export const shellClient: RendererShellClient = {
   localhostWorktreeLabels: shellLocalhostWorktreeLabelsApi,
   minimaxCredentials: shellMiniMaxCredentialsApi,
   mobile: shellMobileApi,
-  pet: shellPetApi,
-  speech: shellSpeechApi,
   starNag: shellStarNagApi,
   updater: shellUpdaterApi,
   telemetry: shellTelemetryApi,

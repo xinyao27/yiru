@@ -22,13 +22,6 @@ const OptionalTuiAgent = z
   .transform((value): TuiAgent | undefined => (isTuiAgent(value) ? value : undefined))
   .optional()
 
-const AutomationWorkspaceProvenanceRequest = z.object({
-  automationId: z.string(),
-  automationRunId: z.string(),
-  dispatchToken: z.string(),
-  createRequestId: z.string()
-})
-
 export const WorktreeListParams = z.object({
   repo: OptionalString,
   limit: OptionalFiniteNumber
@@ -142,8 +135,7 @@ export const WorktreeCreate = z
     // Why: mirrors preload's `CreateWorktreeArgs.pendingFirstAgentMessageRename`
     // — see packages/runtime-protocol's WorktreeCreateInputSchema for the oRPC
     // twin of this legacy schema.
-    pendingFirstAgentMessageRename: OptionalBoolean,
-    automationProvenanceRequest: AutomationWorkspaceProvenanceRequest.optional()
+    pendingFirstAgentMessageRename: OptionalBoolean
   })
   .superRefine((params, ctx) => {
     if ((params.parentWorkspace || params.parentWorktree) && params.noParent === true) {

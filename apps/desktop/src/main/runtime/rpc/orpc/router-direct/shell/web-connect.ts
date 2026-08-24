@@ -1,10 +1,9 @@
+import { runtimeImplementation } from '~main/runtime/rpc/orpc/access-middleware'
 import { requireShellRenderer } from '~main/shell/files'
 import {
   getWebConnectService,
   openWebConnectBrowserSession
 } from '~main/web-connect/desktop-integration'
-
-import { runtimeImplementation } from '../../access-middleware'
 
 export const shellWebConnectRuntimeHandlers = {
   webConnect: {

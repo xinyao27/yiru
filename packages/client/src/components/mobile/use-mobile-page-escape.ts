@@ -10,7 +10,7 @@ function isEditableElement(target: EventTarget | null): target is HTMLElement {
 }
 
 export function useMobilePageEscape(onClose: () => void): void {
-  // Why: mirror Automations — Esc first exits field focus, then closes the page.
+  // Why: Esc first exits field focus, then closes the page.
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent): void {
       if (event.key !== 'Escape' || event.defaultPrevented) {

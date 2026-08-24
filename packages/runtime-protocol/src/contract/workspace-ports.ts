@@ -89,7 +89,7 @@ export const workspacePortsContract = {
     .input(WorkspacePortKillInputSchema)
     .output(type<RuntimeWorkspacePortKillResult>()),
   // Why: reports state, never drives it — same reasoning as
-  // `agentStatus.events`/`speech.events`, so tier is `read` rather than
+  // `agentStatus.events`, so tier is `read` rather than
   // `WORKSPACE_PORT_ACCESS`'s `host` (that tier covers `scan`/`kill`, which
   // enumerate/signal host processes).
   events: {

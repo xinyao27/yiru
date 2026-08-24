@@ -11,7 +11,7 @@ import type { YiruRuntimeService } from './yiru-runtime'
 const WORKTREE_TEARDOWN_CONCURRENCY = 32
 
 export type WorktreeTeardownDeps = {
-  runtime?: YiruRuntimeService
+  runtime?: Pick<YiruRuntimeService, 'stopTerminalsForWorktree'>
   localProvider: IPtyProvider
   onPtyStopped?: (ptyId: string) => void
   timeoutMs?: number

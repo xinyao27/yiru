@@ -1,4 +1,4 @@
-import type { TabDropZone } from './use-tab-drag-split'
+import type { TabDropZone } from './tab-drag-data'
 
 /** Matches TabGroupPanel tab row height (`h-[32px]`). */
 export const TAB_GROUP_TAB_STRIP_HEIGHT_PX = 32

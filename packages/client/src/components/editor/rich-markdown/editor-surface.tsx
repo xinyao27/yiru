@@ -41,6 +41,7 @@ type RichMarkdownEditorSurfaceProps = {
   editorFontZoomLevel: number
   rootElement: HTMLDivElement | null
   rootRef: (node: HTMLDivElement | null) => void
+  isModifierHeld: boolean
   scrollContainerRef: React.RefObject<HTMLDivElement | null>
   headerSlot?: React.ReactNode
   reviewRailExpanded: boolean
@@ -129,6 +130,7 @@ export function RichMarkdownEditorSurface({
   editorFontZoomLevel,
   rootElement,
   rootRef,
+  isModifierHeld,
   scrollContainerRef,
   headerSlot,
   reviewRailExpanded,
@@ -205,7 +207,8 @@ export function RichMarkdownEditorSurface({
         // lookups elsewhere in this feature.
         className={cn(
           'rich-markdown-editor-shell relative flex h-full min-h-0 min-w-0 flex-1 flex-col bg-background',
-          reviewRailExpanded && 'has-rich-markdown-review-notes'
+          reviewRailExpanded && 'has-rich-markdown-review-notes',
+          isModifierHeld && 'rich-markdown-mod-held'
         )}
         style={{ '--editor-font-zoom-level': editorFontZoomLevel } as React.CSSProperties}
       >

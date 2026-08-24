@@ -5,11 +5,8 @@ import { translate } from '~renderer/i18n/i18n'
 import { getAgentLaunchPlatformForRepo } from '~renderer/lib/agent-launch-platform'
 import { deliverLaunchPromptToAgentTab } from '~renderer/lib/agent-launch-prompt-delivery'
 import { seedCommandCodeSubmittedPromptStatus } from '~renderer/lib/command-code-prompt-status-seed'
-import { getConnectionIdFromState } from '~renderer/lib/connection-context'
 import { launchAgentInWebHostTab } from '~renderer/lib/launch-agent-web-host-tab'
 import { getLocalProjectExecutionRuntimeContext } from '~renderer/lib/local-preflight-context'
-import { initialAgentTabViewModeProps } from '~renderer/lib/native-chat-initial-view-mode'
-import { isNativeChatTranscriptLocalReadable } from '~renderer/lib/native-chat-transcript-readability'
 import { CLIENT_PLATFORM } from '~renderer/lib/new-workspace'
 import { track, tuiAgentToAgentKind } from '~renderer/lib/telemetry'
 import {
@@ -21,8 +18,7 @@ import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runti
 import { isWebRuntimeSessionActive } from '~renderer/runtime/web-runtime-session'
 import { useAppStore } from '~renderer/store'
 import { repoIsRemote } from '~shared/agent/launch-remote'
-import { resolveNativeChatSessionOptionDefaults } from '~shared/native-chat/session-option-defaults'
-import type { SessionOptionValue } from '~shared/native-chat/session-options'
+import type { SessionOptionValue } from '~shared/agent/session-options'
 import type { LaunchSource } from '~shared/telemetry-events'
 import { TUI_AGENT_CONFIG } from '~shared/tui-agent/config'
 import {
@@ -30,8 +26,6 @@ import {
   resolveTuiAgentLaunchEnv
 } from '~shared/tui-agent/launch-defaults'
 import type { TuiAgent } from '~shared/types'
-
-import { seedNativeChatAppliedSessionOptions } from '../components/native-chat/session/option-cache'
 
 export type LaunchAgentInNewTabArgs = {
   agent: TuiAgent
@@ -136,9 +130,7 @@ export function launchAgentInNewTab(args: LaunchAgentInNewTabArgs): LaunchAgentI
     isRemote,
     agentArgs: effectiveAgentArgs,
     agentEnv,
-    sessionOptions:
-      args.sessionOptions ??
-      resolveNativeChatSessionOptionDefaults(store.settings?.nativeChatSessionOptions, agent)
+    sessionOptions: args.sessionOptions
   }
   const trimmedPrompt = prompt?.trim() ?? ''
   const hasPrompt = trimmedPrompt.length > 0
@@ -211,18 +203,6 @@ export function launchAgentInNewTab(args: LaunchAgentInNewTabArgs): LaunchAgentI
     return null
   }
 
-  // Why: host-owned paired tabs must receive the same initial-view decision as
-  // local tabs; the remote host cannot infer this client's draft/default choice.
-  const viewModePromptDelivery =
-    hasPrompt && isFollowupPath && promptDelivery === 'auto-submit' ? 'draft' : promptDelivery
-  const initialViewModeProps = initialAgentTabViewModeProps(store.settings, {
-    agent,
-    promptDelivery: viewModePromptDelivery,
-    nativeChatTranscriptIsLocalReadable: isNativeChatTranscriptLocalReadable(
-      getConnectionIdFromState(store, worktreeId)
-    )
-  })
-
   const runtimeEnvironmentId = getRuntimeEnvironmentIdForWorktree(store, worktreeId)
   if (isWebRuntimeSessionActive(runtimeEnvironmentId)) {
     const webHostDelivery = launchAgentInWebHostTab({
@@ -242,9 +222,6 @@ export function launchAgentInNewTab(args: LaunchAgentInNewTabArgs): LaunchAgentI
             }
           }
         : {}),
-      // Why: omission means terminal locally, but would let a paired host apply
-      // its own default; send the client's resolved terminal choice explicitly.
-      viewMode: initialViewModeProps.viewMode ?? 'terminal',
       onPromptDelivered
     })
     return {
@@ -262,16 +239,10 @@ export function launchAgentInNewTab(args: LaunchAgentInNewTabArgs): LaunchAgentI
   // lands after mount the agent binary never starts; the user sees a bare shell.
   // Since both calls happen synchronously in the same React batch, the queue
   // is in place by the time the pane commits.
-  // Why: the followup path pastes the prompt as an unsubmitted draft (submit
-  // stays false), so gate the initial chat view like a `draft` launch —
-  // otherwise a default `auto-submit` followup would open native chat with no
-  // submitted turn to render.
   const tab = store.createTab(worktreeId, groupId, undefined, {
     launchAgent: agent,
-    quickCommandLabel,
-    ...initialViewModeProps
+    quickCommandLabel
   })
-  seedNativeChatAppliedSessionOptions(tab.id, agent, startupPlan.sessionOptions)
   if (initialCwd?.trim()) {
     // Why: queue before mount so local, WSL, and SSH continuations preserve their subdirectory.
     store.queueTabInitialCwd(tab.id, initialCwd)

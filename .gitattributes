@@ -1,4 +1,3 @@
 /apps/desktop/scripts/yiru-dev.mjs text eol=lf
-/apps/desktop/scripts/verify-cli-bin.mjs text eol=lf
 /skills/*/SKILL.md text eol=lf
 /apps/desktop/src/cli/bundled-skill-guides.ts text eol=lf

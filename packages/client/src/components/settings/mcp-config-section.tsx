@@ -28,7 +28,7 @@ import {
 } from '~shared/mcp-config'
 import type { Repo, Worktree } from '~shared/types'
 
-import { isWindowsUserAgent } from '../terminal-pane/pane-helpers'
+import { isWindowsUserAgent } from '../terminal-pane/pane-interactions'
 import { Button } from '../ui/button'
 import { McpConfigFileRow, type LoadedMcpConfigInspection } from './mcp-config-file-row'
 import { loadMcpConfigInspections } from './mcp-config-inspection'

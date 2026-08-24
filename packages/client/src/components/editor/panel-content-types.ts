@@ -1,5 +1,7 @@
 import type { GitDiffResult } from '~shared/types'
 
+import type { FilePreview } from './file-preview-kind'
+
 /**
  * Thrown when a worktree's host owner is not yet known (the backing repo has
  * not hydrated). The retry gate treats this as transient so the read recovers
@@ -21,6 +23,7 @@ export const WORKTREE_OWNER_UNREACHABLE_ERROR =
 export type FileContent = {
   content: string
   isBinary: boolean
+  preview?: FilePreview
   isImage?: boolean
   mimeType?: string
   fileIdentity?: string

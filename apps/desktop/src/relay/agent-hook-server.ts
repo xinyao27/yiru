@@ -1,7 +1,4 @@
 import { randomUUID } from 'node:crypto'
-/* eslint-disable max-lines -- Why: relay hook parsing, replay cache, endpoint
-   writing, and assistant-message retry state are one lifecycle unit; splitting
-   them would obscure cleanup ordering across remote PTY reconnects. */
 // Why: relay-side adapter for the shared agent-hook listener pipeline. Hosts
 // a loopback HTTP server (same shape as Yiru's main-process server: bind
 // 127.0.0.1:0, bearer-token auth, /hook/<source> routing) and forwards every
@@ -21,10 +18,8 @@ import {
   clearPaneCacheState,
   createHookListenerState,
   getEndpointFileName,
-  hasPendingAgentResultText,
   HOOK_REQUEST_SLOWLORIS_MS,
   normalizeHookPayload,
-  preparePendingGrokResultDiscovery,
   readRequestBody,
   resolveHookSource,
   writeEndpointFile,
@@ -38,6 +33,8 @@ import {
 } from '~shared/agent/hook-relay'
 import { YIRU_HOOK_PROTOCOL_VERSION } from '~shared/agent/hook-types'
 
+import { AgentHookMessageRetry } from './agent-hook-message-retry'
+
 export type RelayHookForward = (envelope: AgentHookRelayEnvelope) => void
 
 // Why: relay's userData equivalent. Lives under $HOME so each user on a
@@ -46,8 +43,6 @@ export type RelayHookForward = (envelope: AgentHookRelayEnvelope) => void
 // server is the only consumer.
 const RELAY_HOOKS_DIR_NAME = '.yiru-relay'
 const RELAY_HOOKS_SUBDIR = 'agent-hooks'
-const ASSISTANT_MESSAGE_RETRY_ATTEMPTS = 5
-const ASSISTANT_MESSAGE_RETRY_MS = 50
 
 // Why: cap env/version metadata at 64 chars so a misbehaving agent CLI
 // cannot grow lastEnvelopeMetaByPaneKey unboundedly per pane via the cache
@@ -109,7 +104,7 @@ export class RelayAgentHookServer {
     string,
     { source: AgentHookSource; env?: string; version?: string }
   > = new Map()
-  private assistantMessageRetryTimers = new Map<string, ReturnType<typeof setTimeout>>()
+  private assistantMessageRetry: AgentHookMessageRetry
   private forward: RelayHookForward
   private fixedToken: string | undefined
   private preferredPort: number
@@ -122,6 +117,12 @@ export class RelayAgentHookServer {
     this.fixedToken = options.token
     this.preferredPort = options.preferredPort ?? 0
     this.forward = options.forward
+    this.assistantMessageRetry = new AgentHookMessageRetry({
+      state: this.state,
+      env: this.env,
+      isActive: () => this.server !== null,
+      applyEvent: (event, source, env, version) => this.applyEvent(event, source, env, version)
+    })
   }
 
   async start(options: RelayHookServerStartOptions = {}): Promise<void> {
@@ -206,10 +207,7 @@ export class RelayAgentHookServer {
     this.port = 0
     this.token = ''
     this.endpointFileWritten = false
-    for (const timer of this.assistantMessageRetryTimers.values()) {
-      clearTimeout(timer)
-    }
-    this.assistantMessageRetryTimers.clear()
+    this.assistantMessageRetry.clearAll()
     clearAllListenerCaches(this.state)
     this.lastEnvelopeMetaByPaneKey.clear()
   }
@@ -241,7 +239,7 @@ export class RelayAgentHookServer {
    *  resurfaces as a ghost event on a later reconnect. Symmetric with the
    *  local server's clearPaneState on PTY teardown. */
   clearPaneState(paneKey: string): void {
-    this.clearAssistantMessageRetry(paneKey)
+    this.assistantMessageRetry.clear(paneKey)
     clearPaneCacheState(this.state, paneKey)
     this.lastEnvelopeMetaByPaneKey.delete(paneKey)
   }
@@ -296,12 +294,11 @@ export class RelayAgentHookServer {
       }
       const event = normalizeHookPayload(this.state, source, body, this.env)
       if (event) {
-        // TODO: once normalizeHookPayload returns validated env/version, drop
-        // bodyEnv/bodyVersion and source those from the listener result instead.
+        // Why: normalizeHookPayload does not yet expose validated envelope metadata.
         const env = this.bodyEnv(body)
         const version = this.bodyVersion(body)
         this.applyEvent(event, source, env, version)
-        this.scheduleAssistantMessageRetry(source, body, event, env, version)
+        this.assistantMessageRetry.schedule(source, body, event, env, version)
       }
       res.writeHead(204)
       res.end()
@@ -355,7 +352,7 @@ export class RelayAgentHookServer {
     version?: string
   ): void {
     if (event.payload.state !== 'done' || event.payload.lastAssistantMessage) {
-      this.clearAssistantMessageRetry(event.paneKey)
+      this.assistantMessageRetry.clear(event.paneKey)
     }
     // Why: delete-then-set keeps Map insertion order equal to last-update
     // recency, so the cache cap below always evicts the longest-idle pane.
@@ -373,129 +370,21 @@ export class RelayAgentHookServer {
     this.forwardEvent(event, source, env, version)
   }
 
-  private clearAssistantMessageRetry(paneKey: string): void {
-    const timer = this.assistantMessageRetryTimers.get(paneKey)
-    if (!timer) {
-      return
-    }
-    clearTimeout(timer)
-    this.assistantMessageRetryTimers.delete(paneKey)
-  }
-
-  private scheduleAssistantMessageRetry(
-    source: AgentHookSource,
-    body: unknown,
-    original: AgentHookEventPayload,
-    env?: string,
-    version?: string,
-    attempt = 1,
-    discoveryReady = false
-  ): void {
-    if (
-      original.payload.lastAssistantMessage ||
-      !hasPendingAgentResultText(source, body) ||
-      attempt > ASSISTANT_MESSAGE_RETRY_ATTEMPTS
-    ) {
-      return
-    }
-    this.clearAssistantMessageRetry(original.paneKey)
-    if (!discoveryReady) {
-      const discovery = preparePendingGrokResultDiscovery(source, body)
-      if (discovery) {
-        // Why: remote slug-group discovery can outlive the bounded transcript-
-        // flush timers, so completion itself drives the first retry.
-        void discovery
-          .then(() => {
-            if (this.server) {
-              this.applyAssistantMessageRetry(source, body, original, env, version, 1, true)
-            }
-          })
-          .catch((err) => {
-            process.stderr.write(
-              `[relay-hook-server] Grok result discovery failed: ${err instanceof Error ? err.message : String(err)}\n`
-            )
-          })
-        return
-      }
-    }
-    const timer = setTimeout(() => {
-      try {
-        this.assistantMessageRetryTimers.delete(original.paneKey)
-        this.applyAssistantMessageRetry(
-          source,
-          body,
-          original,
-          env,
-          version,
-          attempt + 1,
-          discoveryReady
-        )
-      } catch (err) {
-        process.stderr.write(
-          `[relay-hook-server] assistant message retry failed: ${err instanceof Error ? err.message : String(err)}\n`
-        )
-      }
-    }, ASSISTANT_MESSAGE_RETRY_MS)
-    this.assistantMessageRetryTimers.set(original.paneKey, timer)
-    if (typeof timer.unref === 'function') {
-      timer.unref()
-    }
-  }
-
-  private applyAssistantMessageRetry(
-    source: AgentHookSource,
-    body: unknown,
-    original: AgentHookEventPayload,
-    env: string | undefined,
-    version: string | undefined,
-    nextAttempt: number,
-    requireExactOriginal: boolean
-  ): void {
-    const current = this.state.lastStatusByPaneKey.get(original.paneKey)
-    if (
-      !current ||
-      (requireExactOriginal && current !== original) ||
-      current.payload.agentType !== original.payload.agentType ||
-      current.payload.prompt !== original.payload.prompt ||
-      current.payload.lastAssistantMessage
-    ) {
-      return
-    }
-    const event = normalizeHookPayload(this.state, source, body, this.env)
-    if (!event?.payload.lastAssistantMessage) {
-      this.scheduleAssistantMessageRetry(
-        source,
-        body,
-        original,
-        env,
-        version,
-        nextAttempt,
-        requireExactOriginal
-      )
-      return
-    }
-    this.applyEvent(event, source, env, version)
-  }
-
   private bodyEnv(body: unknown): string | undefined {
-    if (typeof body !== 'object' || body === null) {
-      return undefined
-    }
-    const v = (body as Record<string, unknown>).env
-    if (typeof v !== 'string' || v.length === 0 || v.length > MAX_HOOK_META_LEN) {
-      return undefined
-    }
-    return v
+    return readHookMetadata(body, 'env')
   }
 
   private bodyVersion(body: unknown): string | undefined {
-    if (typeof body !== 'object' || body === null) {
-      return undefined
-    }
-    const v = (body as Record<string, unknown>).version
-    if (typeof v !== 'string' || v.length === 0 || v.length > MAX_HOOK_META_LEN) {
-      return undefined
-    }
-    return v
+    return readHookMetadata(body, 'version')
   }
+}
+
+function readHookMetadata(body: unknown, field: 'env' | 'version'): string | undefined {
+  if (typeof body !== 'object' || body === null) {
+    return undefined
+  }
+  const value: unknown = Reflect.get(body, field)
+  return typeof value === 'string' && value.length > 0 && value.length <= MAX_HOOK_META_LEN
+    ? value
+    : undefined
 }

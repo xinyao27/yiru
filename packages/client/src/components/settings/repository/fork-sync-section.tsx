@@ -114,7 +114,7 @@ export function RepositoryForkSyncSection({
     }
     updateRepo(repo.id, { forkSyncMode: nextMode })
     if (nextMode === 'safe-auto') {
-      // Why: users enabling automation should immediately learn whether the
+      // Why: users enabling scheduled fork sync should immediately learn whether the
       // fork can be fast-forwarded safely instead of waiting for the next reload.
       void syncNow()
     }

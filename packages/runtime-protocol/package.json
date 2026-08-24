@@ -168,15 +168,6 @@
       "require": "./dist/mobile-clipboard-wire.js",
       "default": "./dist/mobile-clipboard-wire.js"
     },
-    "./mobile-native-chat-wire": {
-      "types": "./src/mobile-native-chat-wire.ts",
-      "react-native": "./src/mobile-native-chat-wire.ts",
-      "browser": "./src/mobile-native-chat-wire.ts",
-      "development": "./src/mobile-native-chat-wire.ts",
-      "import": "./dist/esm/mobile-native-chat-wire.mjs",
-      "require": "./dist/mobile-native-chat-wire.js",
-      "default": "./dist/mobile-native-chat-wire.js"
-    },
     "./mobile-notifications-wire": {
       "types": "./src/mobile-notifications-wire.ts",
       "react-native": "./src/mobile-notifications-wire.ts",

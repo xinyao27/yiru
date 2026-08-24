@@ -33,6 +33,7 @@ import {
 import { requestStablePaneFit } from '~renderer/lib/pane-manager/pane-fit-resize-observer'
 /* oxlint-disable max-lines */
 import type { PaneManager, ManagedPane } from '~renderer/lib/pane-manager/pane-manager'
+import { markPaneContainerPtyId } from '~renderer/lib/pane-manager/pane-pty-binding-dom'
 import {
   PANE_PTY_RESIZE_HOLD_FLUSH_EVENT,
   queuePanePtyResizeIfHeld,
@@ -1875,7 +1876,7 @@ export function connectPanePty(
 
   const setPanePtyFitBinding = (ptyId: string): void => {
     bindPanePtyId(pane.id, ptyId, deps.tabId)
-    pane.container.dataset.ptyId = ptyId
+    markPaneContainerPtyId(pane.container, ptyId)
     // Why: override hydration can arrive before this pane knows its PTY. Once
     // data-pty-id is bound, safeFit can park xterm at the held phone grid.
     if (getFitOverrideForPty(ptyId)) {

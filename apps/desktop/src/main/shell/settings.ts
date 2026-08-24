@@ -13,7 +13,6 @@ import { normalizeUiLanguage } from '~shared/ui-language'
 import type { AgentAwakeService } from '../agent-awake-service'
 import { applyAgentStatusHooksEnabled } from '../agent-hooks/managed-agent-hook-controls'
 import { applyAppIcon } from '../app-icon'
-import { sanitizeFloatingWorkspaceDirectorySetting } from '../filesystem/floating-workspace-directory'
 import { setMainUiLanguage } from '../i18n/main-i18n'
 import { rebuildAppMenu } from '../menu/register-app-menu'
 import { applyElectronProxySettings } from '../network/proxy-settings'
@@ -43,10 +42,7 @@ function sanitizeRendererSettingsUpdate(args: Partial<GlobalSettings>): Partial<
 // rebuilt after any update so the checkbox `checked` state stays in sync
 // with the persisted value. Electron doesn't reactively re-render menu
 // items when the backing state changes.
-const APPEARANCE_MENU_KEYS: readonly (keyof GlobalSettings)[] = [
-  'showAutomationsButton',
-  'showMobileButton'
-]
+const APPEARANCE_MENU_KEYS: readonly (keyof GlobalSettings)[] = ['showMobileButton']
 
 export function initializeShellSettingsService(
   store: Store,
@@ -92,15 +88,6 @@ function createShellSettingsService(store: Store, agentAwakeService?: AgentAwake
     originWebContentsId: number
   ): Promise<GlobalSettings> => {
     const sanitizedArgs = sanitizeRendererSettingsUpdate(args)
-    // Why: Floating Workspace grants are trusted only when written by the
-    // main-process directory picker, never by renderer-provided settings IPC.
-    delete sanitizedArgs.floatingTerminalTrustedCwds
-    if (typeof args.floatingTerminalCwd === 'string') {
-      sanitizedArgs.floatingTerminalCwd = await sanitizeFloatingWorkspaceDirectorySetting(
-        store,
-        args.floatingTerminalCwd
-      )
-    }
     if ('httpProxyUrl' in args) {
       const proxyUrl = normalizeProxyUrl(args.httpProxyUrl)
       sanitizedArgs.httpProxyUrl = proxyUrl.ok ? proxyUrl.value : ''

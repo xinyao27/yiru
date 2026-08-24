@@ -4,7 +4,7 @@ import {
   ORCHESTRATION_CLI_COMMAND_LOOP_MS,
   ORCHESTRATION_CLI_COMMAND_TIMINGS_MS
 } from '~renderer/components/feature-wall/agents-orchestration/orchestration-types'
-import { usePrefersReducedMotion } from '~renderer/components/feature-wall/modal-helpers'
+import { usePrefersReducedMotion } from '~renderer/hooks/use-prefers-reduced-motion'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
 

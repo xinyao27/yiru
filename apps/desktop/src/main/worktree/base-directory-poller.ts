@@ -7,7 +7,7 @@ import type {
   WorktreeBaseRepoWatchConfig,
   WorktreeBaseWatchTarget
 } from './base-directory-event-filter'
-import { startGitCommonWatch } from './git-common-watch'
+import { startGitCommonWatch } from './git-metadata-watch'
 
 export type WorktreeBasePollEvent = { type: 'create' | 'update' | 'delete'; path: string }
 

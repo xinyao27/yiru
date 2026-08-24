@@ -3,8 +3,8 @@ import { join } from 'node:path'
 
 import type { CodexManagedAccount } from '~shared/types'
 
+import { writeFileAtomically } from './atomic-file-operations'
 import { codexAuthMatchesManagedAccount, compareCodexAuthFreshness } from './codex-auth-identity'
-import { writeFileAtomically } from './fs-utils'
 import { assertOwnedHostCodexManagedHomePath } from './host-codex-managed-home-ownership'
 
 export const LEGACY_SHARED_AUTH_MIGRATION_MARKER = 'per-account-auth-migration-v1.json'

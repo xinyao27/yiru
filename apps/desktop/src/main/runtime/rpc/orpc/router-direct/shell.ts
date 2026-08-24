@@ -39,6 +39,9 @@ export const shellRuntimeHandlers = {
       read: runtimeImplementation.shell.files.read.handler(({ input }) =>
         getShellFilesService().read(input)
       ),
+      readChunk: runtimeImplementation.shell.files.readChunk.handler(({ input }) =>
+        getShellFilesService().readChunk(input)
+      ),
       saveDownload: runtimeImplementation.shell.files.saveDownload.handler(({ input, context }) =>
         getShellFilesService().saveDownload(
           requireShellRenderer(context.renderingWebContentsId),
@@ -233,13 +236,6 @@ export const shellRuntimeHandlers = {
             input.focused
           )
       ),
-      setFloatingTerminalInputFocused:
-        runtimeImplementation.shell.ui.setFloatingTerminalInputFocused.handler(
-          ({ input, context }) =>
-            requireShellWindowUi(context.renderingWebContentsId).setFloatingTerminalInputFocused(
-              input.focused
-            )
-        ),
       setShortcutRecorderFocused: runtimeImplementation.shell.ui.setShortcutRecorderFocused.handler(
         ({ input, context }) =>
           requireShellWindowUi(context.renderingWebContentsId).setShortcutRecorderFocused(

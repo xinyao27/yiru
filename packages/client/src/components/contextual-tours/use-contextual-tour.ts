@@ -6,8 +6,6 @@ import { hasFeatureInteraction, type FeatureInteractionState } from '~shared/fea
 const TOUR_SOURCES = {
   'workspace-agent-sessions': 'workspace_agent_sessions_visible',
   browser: 'browser_visible',
-  automations: 'automations_open',
-  'floating-workspace': 'floating_workspace_visible',
   'workspace-creation': 'workspace_creation_visible'
 } satisfies Record<ContextualTourId, string>
 

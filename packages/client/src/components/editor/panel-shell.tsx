@@ -2,7 +2,7 @@ import { Suspense, type JSX, type Ref } from 'react'
 import type { OpenFile } from '~renderer/components/editor/state'
 import { translate } from '~renderer/i18n/i18n'
 import { useAppStore } from '~renderer/store'
-import { findWorktreeById } from '~renderer/store/slices/worktree-helpers'
+import { findWorktreeById } from '~renderer/store/slices/worktree-state'
 
 import { EditorContent } from './content'
 import type { DiffContent, FileContent } from './panel-content-types'

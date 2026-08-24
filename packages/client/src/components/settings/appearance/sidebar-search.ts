@@ -77,34 +77,6 @@ export const getShowPinnedWorktreesInGroupsEntry = createLocalizedCatalog(
 export const getSidebarEntries = createLocalizedCatalog((): SettingsSearchEntry[] => [
   {
     title: translate(
-      'auto.components.settings.appearance.search.caa27e1a8e',
-      'Show Automations Button'
-    ),
-    description: translate(
-      'auto.components.settings.appearance.search.ae13a0d340',
-      'Show the Automations button at the top of the left sidebar.'
-    ),
-    keywords: [
-      ...translateSearchKeyword(
-        'auto.components.settings.appearance.search.b186f3cefb',
-        'automations'
-      ),
-      ...translateSearchKeyword(
-        'auto.components.settings.appearance.search.58f4e22fa2',
-        'automation'
-      ),
-      ...translateSearchKeyword(
-        'auto.components.settings.appearance.search.4c920ab2d1',
-        'schedule'
-      ),
-      ...translateSearchKeyword('auto.components.settings.appearance.search.5bff6a2ef0', 'sidebar'),
-      ...translateSearchKeyword('auto.components.settings.appearance.search.6cf5f54ce1', 'button'),
-      ...translateSearchKeyword('auto.components.settings.appearance.search.648eeada79', 'hide'),
-      ...translateSearchKeyword('auto.components.settings.appearance.search.ac79fe4a04', 'show')
-    ]
-  },
-  {
-    title: translate(
       'auto.components.settings.appearance.search.1de96ec8a6',
       'Show Yiru Mobile Button'
     ),

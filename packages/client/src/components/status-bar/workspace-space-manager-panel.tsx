@@ -40,7 +40,7 @@ import type { WorktreeForceDeleteReason } from '~shared/workspace/worktree-remov
 
 import { prepareActiveWorktreeFocusAfterDelete } from '../sidebar/active-worktree-focus-after-delete'
 import { runWorktreeBatchDelete } from '../sidebar/delete-worktree/flow'
-import { branchDisplayName } from '../sidebar/worktree-card/helpers'
+import { branchDisplayName } from '../sidebar/worktree-card/presentation'
 import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'
 import {

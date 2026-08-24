@@ -1,0 +1,35 @@
+import { getRepoExecutionHostId, parseExecutionHostId } from '@yiru/workbench-model/workspace'
+import type { GlobalSettings, Repo } from '~shared/types'
+
+type RuntimeFocusSettings = Pick<GlobalSettings, 'activeRuntimeEnvironmentId'> | null | undefined
+
+export function findHostedReviewRepoByPath(
+  repos: readonly Repo[] | undefined,
+  repoPath: string,
+  repoId?: string | null
+): Repo | undefined {
+  return repos?.find((candidate) =>
+    repoId ? candidate.id === repoId : candidate.path === repoPath
+  )
+}
+
+export function settingsForHostedReviewRepoOwner(
+  settings: RuntimeFocusSettings,
+  repo: Pick<Repo, 'connectionId' | 'executionHostId'> | undefined
+): RuntimeFocusSettings {
+  if (!repo) {
+    return settings
+  }
+  const parsed = parseExecutionHostId(getRepoExecutionHostId(repo))
+  return {
+    activeRuntimeEnvironmentId: parsed?.kind === 'runtime' ? parsed.environmentId : null
+  }
+}
+
+export function settingsForHostedReviewActionOwner(
+  settings: RuntimeFocusSettings,
+  repo: Pick<Repo, 'connectionId' | 'executionHostId'> | undefined
+): RuntimeFocusSettings {
+  // Why: connectionId is no longer populated; executionHostId is the ownership source.
+  return repo?.executionHostId ? settingsForHostedReviewRepoOwner(settings, repo) : settings
+}

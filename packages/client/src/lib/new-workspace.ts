@@ -2,9 +2,9 @@ import { slugifyForWorkspaceName } from '@yiru/workbench-model/workspace'
 import {
   getSettingsForAgentTabRuntimeOwner,
   pasteDraftToAgentPtyWhenReady
-} from '~renderer/components/native-chat/agent-paste-draft'
-import { showAutomationPromptNotSentToast } from '~renderer/lib/agent-background-session-timeout-toast'
+} from '~renderer/components/terminal-pane/agent/draft-delivery'
 import { sendFollowupPromptWhenAgentReady } from '~renderer/lib/agent-followup-delivery'
+import { showAgentPromptNotSentToast } from '~renderer/lib/agent-prompt-timeout-toast'
 import { createBrowserUuid } from '~renderer/lib/browser-uuid'
 import type { AgentStartupPlan } from '~renderer/lib/tui-agent-startup'
 import { useAppStore } from '~renderer/store'
@@ -241,7 +241,7 @@ async function deliverAgentStartupToTerminal(
     // Why: a dropped follow-up is otherwise silent — surface the same toast the
     // draft path uses so the user knows to open the workspace and paste it.
     if (!delivered) {
-      showAutomationPromptNotSentToast(startup.agent)
+      showAgentPromptNotSentToast(startup.agent)
     }
   }
 
@@ -258,7 +258,7 @@ async function deliverAgentStartupToTerminal(
       // planning is unavailable, so this paste is the first delivery attempt.
       forcePaste: true,
       // Why: surface a dropped draft instead of silently losing it.
-      onTimeout: () => showAutomationPromptNotSentToast(startup.agent)
+      onTimeout: () => showAgentPromptNotSentToast(startup.agent)
     })
   }
 }

@@ -1,6 +1,5 @@
 import { CONNECT_HANDLERS } from './connect/command'
 import { AGENT_HOOK_HANDLERS } from './handlers/agent-hooks'
-import { AUTOMATION_HANDLERS } from './handlers/automations'
 import { BROWSER_CAPTURE_HANDLERS } from './handlers/browser-capture'
 import { BROWSER_COOKIE_HANDLERS } from './handlers/browser-cookie'
 import { BROWSER_ENV_HANDLERS } from './handlers/browser-env'
@@ -41,7 +40,6 @@ function buildHandlers(): Map<string, CommandHandler> {
   const groups = [
     CONNECT_HANDLERS,
     CORE_HANDLERS,
-    AUTOMATION_HANDLERS,
     PROJECT_HANDLERS,
     REPO_HANDLERS,
     SESSION_HANDLERS,

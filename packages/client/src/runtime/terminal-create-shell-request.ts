@@ -9,9 +9,6 @@ import {
 } from '~renderer/application-shell/use-ipc-events'
 import { requestBackgroundTerminalWorktreeMount } from '~renderer/components/terminal/background-terminal-worktree-mount'
 import { translate } from '~renderer/i18n/i18n'
-import { getConnectionIdFromState } from '~renderer/lib/connection-context'
-import { initialAgentTabViewModeProps } from '~renderer/lib/native-chat-initial-view-mode'
-import { isNativeChatTranscriptLocalReadable } from '~renderer/lib/native-chat-transcript-readability'
 import { useAppStore } from '~renderer/store'
 import type { AppState } from '~renderer/store/types'
 
@@ -84,14 +81,6 @@ export function createTerminalTabViaShell(
     ? {
         ...(shouldActivate ? {} : { activate: false, recordInteraction: false }),
         launchAgent: input.launchAgent,
-        ...(input.viewMode
-          ? { viewMode: input.viewMode }
-          : initialAgentTabViewModeProps(store.settings, {
-              agent: input.launchAgent,
-              nativeChatTranscriptIsLocalReadable: isNativeChatTranscriptLocalReadable(
-                getConnectionIdFromState(store, worktreeId)
-              )
-            })),
         ...(input.cwd ? { startupCwd: input.cwd } : {})
       }
     : shouldActivate

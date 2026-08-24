@@ -1,3 +1,4 @@
+export * from './file/blob'
 export * from './file/context'
 export * from './file/download'
 export * from './file/import'

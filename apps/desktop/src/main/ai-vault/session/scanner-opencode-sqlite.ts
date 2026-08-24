@@ -1,5 +1,5 @@
 import type { AiVaultSession, AiVaultSessionPreviewMessage } from '@yiru/workbench-model/agent'
-import { columnExists, tableExists } from '~main/opencode/usage/schema-helpers'
+import { columnExists, tableExists } from '~main/opencode/usage/schema-introspection'
 import SyncDatabase from '~main/sqlite/sync-database'
 
 import {

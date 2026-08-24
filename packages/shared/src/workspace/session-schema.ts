@@ -88,8 +88,7 @@ const terminalTabSchema = z.object({
   launchAgent: z
     .custom<TuiAgent>((v) => isTuiAgent(v))
     .optional()
-    .catch(undefined),
-  isFriday: z.boolean().optional()
+    .catch(undefined)
 })
 
 // ─── Unified tab model ──────────────────────────────────────────────
@@ -121,14 +120,7 @@ const tabSchema = z.object({
   sortOrder: z.number(),
   createdAt: z.number(),
   isPreview: z.boolean().optional(),
-  isPinned: z.boolean().optional(),
-  // Why: persist the per-tab native-chat view mode so 'chat' survives reload /
-  // session restore. `.catch('terminal')` tolerates unknown future values (a
-  // newer build that wrote an unrecognized mode) by degrading to the safe
-  // default instead of failing the whole-session parse. Legacy/missing stays
-  // undefined → 'terminal' in the renderer.
-  viewMode: z.enum(['terminal', 'chat']).catch('terminal').optional(),
-  isFriday: z.boolean().optional()
+  isPinned: z.boolean().optional()
 })
 
 const retiredSidebarTabContentTypes = new Set([

@@ -1,6 +1,4 @@
-/* eslint-disable max-lines -- Why: parsing, sanitizing, migrating, and writing the keybindings file must stay together so file-format edge cases share one validation path. */
-import { existsSync, mkdirSync, readFileSync, renameSync, unlinkSync, writeFileSync } from 'node:fs'
-import { dirname, join } from 'node:path'
+import { join } from 'node:path'
 
 import {
   findKeybindingConflicts,
@@ -17,71 +15,18 @@ import {
   type KeybindingPlatform
 } from '~shared/keybindings'
 
-type JsonObject = Record<string, unknown>
+import {
+  isKeybindingJsonObject,
+  readKeybindingJsonDocument,
+  writeKeybindingJsonDocument,
+  type KeybindingJsonObject
+} from './keybinding-document'
 
-const FILE_VERSION = 1
 const PLATFORM_KEYS: readonly KeybindingPlatform[] = ['darwin', 'linux', 'win32']
 const ROOT_KEYS = new Set(['$schema', 'version', 'keybindings', 'platforms'])
 
 export function getUserKeybindingsPath(homePath: string): string {
   return join(homePath, '.yiru', 'keybindings.json')
-}
-
-function isJsonObject(value: unknown): value is JsonObject {
-  return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
-}
-
-function createEmptyDocument(): JsonObject {
-  return {
-    version: FILE_VERSION,
-    keybindings: {},
-    platforms: {
-      darwin: {},
-      linux: {},
-      win32: {}
-    }
-  }
-}
-
-function readJsonDocument(path: string): {
-  exists: boolean
-  document: JsonObject | null
-  error?: string
-} {
-  if (!existsSync(path)) {
-    return { exists: false, document: createEmptyDocument() }
-  }
-  try {
-    const parsed = JSON.parse(readFileSync(path, 'utf8')) as unknown
-    if (!isJsonObject(parsed)) {
-      return { exists: true, document: null, error: 'Keybindings file must contain a JSON object.' }
-    }
-    return { exists: true, document: parsed }
-  } catch (error) {
-    return {
-      exists: true,
-      document: null,
-      error: error instanceof Error ? error.message : String(error)
-    }
-  }
-}
-
-function writeJsonDocument(path: string, document: JsonObject): void {
-  mkdirSync(dirname(path), { recursive: true })
-  const tempPath = `${path}.tmp`
-  try {
-    writeFileSync(tempPath, `${JSON.stringify(document, null, 2)}\n`, 'utf8')
-    renameSync(tempPath, path)
-  } catch (error) {
-    try {
-      if (existsSync(tempPath)) {
-        unlinkSync(tempPath)
-      }
-    } catch {
-      // Ignore cleanup failure; the original write error is more actionable.
-    }
-    throw error
-  }
 }
 
 function normalizeBindingValue(
@@ -136,7 +81,7 @@ function parseBindingSection(
   if (value === undefined) {
     return {}
   }
-  if (!isJsonObject(value)) {
+  if (!isKeybindingJsonObject(value)) {
     diagnostics.push({
       severity: 'error',
       section,
@@ -175,14 +120,14 @@ function parseBindingSection(
 }
 
 function parsePlatformOverrides(
-  document: JsonObject,
+  document: KeybindingJsonObject,
   diagnostics: KeybindingFileDiagnostic[]
 ): Partial<Record<KeybindingPlatform, KeybindingOverrides>> {
   const rawPlatforms = document.platforms
   if (rawPlatforms === undefined) {
     return {}
   }
-  if (!isJsonObject(rawPlatforms)) {
+  if (!isKeybindingJsonObject(rawPlatforms)) {
     diagnostics.push({
       severity: 'error',
       section: 'platforms',
@@ -252,7 +197,7 @@ export function readKeybindingFile(
 ): KeybindingFileSnapshot {
   const keybindingPlatform = getKeybindingPlatform(platform)
   const diagnostics: KeybindingFileDiagnostic[] = []
-  const readResult = readJsonDocument(path)
+  const readResult = readKeybindingJsonDocument(path)
   if (!readResult.document) {
     return {
       path,
@@ -293,32 +238,6 @@ export function readKeybindingFile(
   }
 }
 
-export function ensureKeybindingFile(path: string): void {
-  if (existsSync(path)) {
-    return
-  }
-  writeJsonDocument(path, createEmptyDocument())
-}
-
-export function migrateLegacyKeybindings(
-  path: string,
-  platform: NodeJS.Platform,
-  legacyOverrides: KeybindingOverrides | undefined
-): void {
-  if (existsSync(path) || !legacyOverrides || Object.keys(legacyOverrides).length === 0) {
-    return
-  }
-  const keybindingPlatform = getKeybindingPlatform(platform)
-  const document = createEmptyDocument()
-  document.platforms = {
-    darwin: {},
-    linux: {},
-    win32: {},
-    [keybindingPlatform]: legacyOverrides
-  }
-  writeJsonDocument(path, document)
-}
-
 export function writeKeybindingOverride(
   path: string,
   platform: NodeJS.Platform,
@@ -347,13 +266,13 @@ export function writeKeybindingOverride(
     )
   }
 
-  const readResult = readJsonDocument(path)
+  const readResult = readKeybindingJsonDocument(path)
   if (!readResult.document) {
     throw new Error(readResult.error ?? 'Could not read keybindings file.')
   }
 
   const document = { ...readResult.document }
-  const common = isJsonObject(document.keybindings)
+  const common = isKeybindingJsonObject(document.keybindings)
     ? { ...document.keybindings }
     : { ...currentSnapshot.commonOverrides }
   for (const rootKey of Object.keys(document)) {
@@ -361,10 +280,9 @@ export function writeKeybindingOverride(
       delete document[rootKey]
     }
   }
-  const platforms = isJsonObject(document.platforms) ? { ...document.platforms } : {}
-  const activePlatform = isJsonObject(platforms[keybindingPlatform])
-    ? { ...(platforms[keybindingPlatform] as JsonObject) }
-    : {}
+  const platforms = isKeybindingJsonObject(document.platforms) ? { ...document.platforms } : {}
+  const platformBindings = platforms[keybindingPlatform]
+  const activePlatform = isKeybindingJsonObject(platformBindings) ? { ...platformBindings } : {}
 
   if (normalizedBindings === null) {
     // Why: Settings edits are scoped to the current platform. A hand-authored
@@ -375,16 +293,16 @@ export function writeKeybindingOverride(
     activePlatform[actionId] = normalizedBindings
   }
 
-  document.version = FILE_VERSION
+  document.version = 1
   document.keybindings = common
   document.platforms = {
     ...platforms,
-    darwin: isJsonObject(platforms.darwin) ? platforms.darwin : {},
-    linux: isJsonObject(platforms.linux) ? platforms.linux : {},
-    win32: isJsonObject(platforms.win32) ? platforms.win32 : {},
+    darwin: isKeybindingJsonObject(platforms.darwin) ? platforms.darwin : {},
+    linux: isKeybindingJsonObject(platforms.linux) ? platforms.linux : {},
+    win32: isKeybindingJsonObject(platforms.win32) ? platforms.win32 : {},
     [keybindingPlatform]: activePlatform
   }
 
-  writeJsonDocument(path, document)
+  writeKeybindingJsonDocument(path, document)
   return readKeybindingFile(path, platform)
 }

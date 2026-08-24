@@ -120,7 +120,6 @@
     "toggleLeftSidebar": "Toggle Left Sidebar",
     "openExplorerTab": "Open Explorer Tab",
     "showStatusBar": "Show Status Bar",
-    "showAutomationsButton": "Show Automations Button",
     "showMobileButton": "Show Yiru Mobile Button",
     "showTitlebarAppName": "Show Titlebar App Name",
     "view": "View",
@@ -159,8 +158,6 @@
       "722d03aa62": "The crash report dialog hit an error.",
       "8a023cea1f": "Retry the status bar to remount its controls.",
       "2e8ff36f94": "The status bar hit an error.",
-      "7cbfbf622f": "Retry the floating workspace or close and reopen it.",
-      "1b3024bcd6": "The floating workspace hit an error.",
       "8d1e160ed1": "Retry the sidebar or switch tabs to reload this surface.",
       "ed6b168d00": "The right sidebar hit an error.",
       "03a14f6b5b": "Retry the page or navigate to another Yiru surface.",
@@ -188,7 +185,6 @@
       "d54e66004c": "terminal",
       "9f0152563e": "mobile",
       "62ca9895a7": "space",
-      "3443924e91": "automations",
       "ca6c6eece7": "skills",
       "1b9d9d065f": "settings",
       "c184e056de": "Toggle right sidebar ({{value0}})",
@@ -263,6 +259,33 @@
             "07f788de83": "WebSocket"
           }
         }
+      },
+      "WebRuntimeConnectionPage": {
+        "checkingTitle": "Connecting to {{machine}}",
+        "offlineTitle": "{{machine}} is offline",
+        "checkingDescription": "Yiru is checking the saved private connection before opening your projects.",
+        "offlineDescription": "Start Yiru or its connect command on that computer. This page will reconnect automatically when the runtime is available.",
+        "checkingStatus": "Checking runtime status…",
+        "savedPairing": "Your pairing is still saved in this browser; no new pairing command is needed.",
+        "retry": "Try again",
+        "pairAnother": "Pair another computer"
+      },
+      "WebRuntimeStatus": {
+        "title": "Yiru CLI connection",
+        "notPaired": "Not paired",
+        "notPairedLabel": "No Yiru CLI paired",
+        "notPairedDescription": "Pair a computer to route Web work through its Yiru CLI.",
+        "computer": "Computer",
+        "checking": "Checking",
+        "checkingLabel": "Checking the Yiru CLI on {{machine}}",
+        "checkingDescription": "Checking the saved private connection before opening your projects.",
+        "connected": "Connected",
+        "connectedLabel": "Yiru CLI connected on {{machine}}",
+        "connectedDescription": "Web requests are routed through the Yiru CLI on {{machine}}.",
+        "offline": "Offline",
+        "offlineLabel": "Yiru CLI offline on {{machine}}",
+        "offlineDescription": "Start Yiru or its connect command on {{machine}}. Reconnection is automatic.",
+        "footer": "Yiru CLI status"
       }
     },
     "runtime": {
@@ -456,15 +479,6 @@
           }
         }
       },
-      "floating": {
-        "workspace": {
-          "tab": {
-            "creation": {
-              "f3785eddc2": "New Browser Tab"
-            }
-          }
-        }
-      },
       "launch": {
         "agent": {
           "in": {
@@ -477,7 +491,7 @@
           },
           "background": {
             "session": {
-              "4ca0651d56": "Your automation prompt wasn't sent — open the workspace and paste it."
+              "4ca0651d56": "Your agent prompt wasn't sent — open the workspace and paste it."
             }
           }
         },
@@ -668,12 +682,6 @@
       }
     },
     "hooks": {
-      "useAutomationDispatchEvents": {
-        "59718b120b": "The target workspace is no longer available.",
-        "16a21d6413": "SSH reconnect requires interactive credentials.",
-        "386db94f3e": "The target project is no longer available.",
-        "3ad7d77f57": "The target workspace is on a different host than this automation run target."
-      },
       "useComposerState": {
         "7eb3f44ff7": "Selected agent is disabled. Choose an enabled agent before creating.",
         "b2ead86962": "Failed to resolve PR base.",
@@ -735,7 +743,6 @@
         "b11a5a48a2": "Theme, zoom, app and terminal appearance, sidebars, and status bar.",
         "93d88d20bf": "Appearance",
         "2d0659f6f0": "Global terminal, browser, and markdown tabs.",
-        "65b19f5bde": "Floating Workspace",
         "3d65d3f1b9": "Configure mobile emulator support for Yiru and coding agents.",
         "1e761cff2b": "Mobile Emulator",
         "e815fd01bd": "Home page, link routing, and session cookies.",
@@ -1670,6 +1677,10 @@
             "removedTitle": "SSH host removed",
             "removedBody": "The SSH host for this workspace was removed, so it can no longer connect. Remove the workspace to clear it — remote files are left untouched.",
             "removeWorkspaceButton": "Remove workspace"
+          },
+          "remoteRuntimePtyTransport": {
+            "gone": "Remote terminal was closed.",
+            "invalidId": "Remote runtime terminal id is invalid."
           }
         }
       },
@@ -1897,24 +1908,6 @@
       },
       "status": {
         "bar": {
-          "PetStatusSegment": {
-            "3668339495": "Remove {{value0}}",
-            "cd8c6c654c": "Pet settings…",
-            "ed176ad68f": "Import .codex-pet bundle…",
-            "59b5955621": "Upload your own…",
-            "0608ad02a2": "Choose pet",
-            "b75484a01a": "Pet size",
-            "c6aa805b1b": "px",
-            "2f7bbaa457": "Size",
-            "34c25dfe9c": "Pet",
-            "aec479308a": "Pet menu",
-            "cef0ab4636": "Failed to import pet bundle",
-            "2021d4f6db": "Pet bundle import needs a full app restart (not just reload).",
-            "f395c9a685": "Failed to import file",
-            "e6234bcc17": "Custom pet upload needs a full app restart (not just reload).",
-            "6d0a8cd179": "Show pet",
-            "1fbc51cc77": "Hide pet"
-          },
           "PortsStatusSegment": {
             "4ebf90c12e": "No external ports detected",
             "7dac3ecc9d": "External Ports",
@@ -2265,6 +2258,35 @@
             "hostAccessFailed": "Could not request remote host access.",
             "requesting": "Waiting…",
             "useAsHost": "Use as host"
+          },
+          "DesktopRuntimeStatus": {
+            "cli": "Yiru CLI",
+            "checking": "Checking…",
+            "cliUnavailable": "Unavailable",
+            "cliUnsupported": "Not supported",
+            "cliInstalled": "Installed",
+            "cliNotInstalled": "Not installed",
+            "cliNeedsRepair": "Needs repair",
+            "title": "Yiru Runtime",
+            "host": "Host",
+            "runtimeChecking": "Checking",
+            "runtimeCheckingLabel": "Checking Yiru Runtime on {{host}}",
+            "runtimeCheckingDescription": "Checking whether the current execution host is ready.",
+            "runtimeReady": "Ready",
+            "runtimeReadyLabel": "Yiru Runtime ready on {{host}}",
+            "localReadyDescription": "Yiru can execute work on this computer.",
+            "remoteReadyDescription": "Yiru is connected to the selected execution host.",
+            "version": "Version",
+            "runtimeUnavailable": "Unavailable",
+            "runtimeUnavailableLabel": "Yiru Runtime unavailable on {{host}}",
+            "runtimeUnavailableDescription": "The current execution host is not ready. Yiru will keep checking automatically.",
+            "updateRequired": "Update required",
+            "updateRequiredLabel": "Yiru Runtime update required on {{host}}",
+            "updateRequiredDescription": "Update Yiru on this computer or the selected host before using it.",
+            "thisComputer": "This computer"
+          },
+          "YiruRuntimeStatus": {
+            "footer": "Yiru Runtime status"
           }
         }
       },
@@ -2759,7 +2781,9 @@
           "51001182e3": "Empty directory",
           "971d85cc84": "Opens as a project on this host · {{value0}}",
           "00c4235c10": "No matches for '{{value0}}'",
-          "largeInputNoMatches": "No matches for this long input"
+          "largeInputNoMatches": "No matches for this long input",
+          "previewEmptyDirectory": "{{value0}} is empty",
+          "fileHint": "Files can't be opened as a project"
         },
         "RemoveFolderDialog": {
           "4dc5b5065b": "Remove",
@@ -2834,7 +2858,6 @@
           "0c3395fd32": "Search worktrees and browser tabs",
           "c86d83b5c3": "New",
           "1b5c41caee": "Yiru Mobile",
-          "f323383e9a": "Automations",
           "d599269755": "Hide from sidebar",
           "activity": "Activity",
           "skills": "Skills"
@@ -2871,8 +2894,7 @@
         "SidebarWorkspaceFilterSection": {
           "c3fa13dc2e": "Hide default branch",
           "ed1611b65b": "Hide sleeping",
-          "82594419ba": "Filters",
-          "automationCreated": "Hide automation-created"
+          "82594419ba": "Filters"
         },
         "sidebarHostOptions": {
           "3e102f111c": "All hosts",
@@ -2907,7 +2929,6 @@
           "b759bb87ee": "Agents that need attention, then most recent activity.",
           "503462f2b4": "Agent Activity",
           "3728165cdd": "Name",
-          "automation": "Automation",
           "0f9b959b31": "PR",
           "e029a2d775": "Status",
           "c2c7a45cda": "None",
@@ -2962,7 +2983,6 @@
           "0d224eff10": "Primary worktree",
           "runtimeHostDisconnected": "Runtime host disconnected",
           "runtimeHostProject": "Project on runtime host",
-          "automationCreated": "Created by automation",
           "branchIdentity": "Branch",
           "branchFolderPathIdentity": "Branch or folder path",
           "ef18787206": "Queued for deletion",
@@ -2990,15 +3010,7 @@
           "copyLinkFailure": "Failed to copy link",
           "reviewLinkLabel": "{{value0}} link",
           "3ea2702e62": "Linked {{value0}} #{{value1}}",
-          "fe075cb851": "Workspace notes",
-          "automationHeader": "Automation",
-          "openAutomation": "Open automation",
-          "openAutomationRun": "Open run",
-          "automationCreated": "Created by automation",
-          "checkingAutomationAvailability": "Checking automation availability...",
-          "automationMissing": "Automation no longer available.",
-          "automationRunMissing": "Run history no longer available.",
-          "automationAvailabilityUnavailable": "Automation availability could not be checked."
+          "fe075cb851": "Workspace notes"
         },
         "WorktreeCardMetadataStatusBadges": {
           "fe188062a1": "State: Open",
@@ -4058,8 +4070,6 @@
           "61d842eca0": "Show the Yiru Mobile shortcut in the sidebar. It remains available from Toolbox.",
           "9da1020447": "Show Yiru Mobile Button",
           "5db6ba961f": "Show the Yiru Mobile button at the top of the left sidebar.",
-          "fa882a3e6b": "Show the Automations button at the top of the left sidebar.",
-          "511f270ebb": "Show Automations Button",
           "dc29f3cc0d": "Sidebar",
           "ea943d0db0": "Choose which indicators appear at the bottom of the window. You can also right-click the status bar for the same toggles.",
           "3e4175e5c6": "Status Bar",
@@ -4397,7 +4407,7 @@
           "f24f31a884": "Screen Recording",
           "550cfa3750": "Webcam capture and camera-driven local test apps.",
           "e5b5f3d6b9": "Camera",
-          "cc8151d9fa": "Voice input, transcription, audio recording, sox, ffmpeg, and Whisper CLIs.",
+          "cc8151d9fa": "Audio recording, transcription, media capture, sox, ffmpeg, and Whisper CLIs.",
           "16381e040a": "Microphone",
           "dac08ec03e": "Working..."
         },
@@ -4416,34 +4426,7 @@
             "idleMinutesSuffix": "minutes",
             "title": "Agent sleep",
             "toggleLabel": "Toggle agent sleep"
-          },
-          "ca2219fe5e": "Shows a small animated pet pinned to the bottom-right corner. Pick a character (Claudino, OpenCode, Gremlin) or upload your own PNG, APNG, GIF, WebP, JPG, or SVG from the status-bar pet menu. Hide it any time from the same menu without disabling this setting.",
-          "dd6f0a1d45": "Pet",
-          "0e89a574ae": "Floating animated pet in the bottom-right corner.",
-          "nativeChat": {
-            "title": "Native chat",
-            "description": "Preview the desktop chat surface for supported agent terminal sessions.",
-            "copy": "Adds a native chat view you can switch to from supported agent terminal panes. Experimental while we tune transcript fidelity, streaming, and terminal parity.",
-            "toggleLabel": "Toggle native chat",
-            "defaultTitle": "Default view",
-            "defaultCopy": "Choose how new supported agent terminal tabs open.",
-            "defaultViewLabel": "Default native chat view",
-            "defaultViewTerminal": "Terminal chat",
-            "defaultViewNative": "Native chat"
           }
-        },
-        "FloatingWorkspacePane": {
-          "aeaf76fda9": "Status Bar",
-          "9fb225f2d7": "Floating Button",
-          "3c900e26e5": "The keyboard shortcut works regardless of where the toggle is shown.",
-          "5e5a8da236": "Toggle Button Location",
-          "505001823e": "Choose floating workspace directory",
-          "81afb79785": "New floating terminal tabs start here. Markdown notes are saved in Yiru's app-owned floating workspace.",
-          "12aa09f10c": "Terminal Directory",
-          "41eb95f7f0": "Shows the floating workspace button and panel.",
-          "5136813663": "Enable Floating Workspace",
-          "37df688d6f": "Enable the floating workspace and choose where new tabs start.",
-          "1f67f39384": "Floating Workspace"
         },
         "AgentCacheTimerSection": {
           "05de84a104": "1 hour",
@@ -4598,9 +4581,6 @@
         "GeneralWorkspaceSettingsSection": {
           "3d538a98f7": "Choose apps available from a workspace's Open in menu.",
           "008f92085f": "Open In Apps",
-          "824b98a0d9": "Show a confirmation before deleting automations and their run history.",
-          "ea98373cd8": "Ask Before Deleting Automations",
-          "d2dd2ca2e3": "Show a confirmation dialog before deleting an automation and its run history.",
           "28bc3d085e": "Show a confirmation before deleting a workspace from the context menu. Failed deletes still surface a Force Delete fallback.",
           "9f380934cf": "Ask Before Deleting Workspaces",
           "5734db82af": "Show a confirmation dialog before deleting a workspace.",
@@ -5415,7 +5395,15 @@
           "updatingServers": "Updating hosts…",
           "yiruVersion": "Yiru v{{value0}}",
           "versionUnavailable": "Yiru version unavailable",
-          "updateServer": "Update"
+          "updateServer": "Update",
+          "switchLocalFailed": "Could not switch to Local desktop. Fix the issue and try again.",
+          "disconnectFailed": "Could not disconnect from this Coworking host. Fix the issue and try again.",
+          "removeFailed": "Failed to remove runtime environment.",
+          "hostDisconnectFailed": "Failed to disconnect host.",
+          "hostConnectFailed": "Failed to connect host.",
+          "hostSwitchFailed": "Could not switch hosts. Fix the issue and try again.",
+          "hostSwitchError": "Failed to switch hosts.",
+          "coworkingHostFallback": "Coworking host"
         },
         "RuntimePairingGeneratedUrlRows": {
           "0495f68959": "Copy {{value0}}"
@@ -5480,7 +5468,6 @@
           "6d1a27e193": "Theme, zoom, app and terminal appearance, sidebars, and status bar.",
           "2b4474780a": "Appearance",
           "3d9adfe6a5": "Global terminal, browser, and markdown tabs.",
-          "3eb22a3ada": "Floating Workspace",
           "01f9d36292": "Configure mobile emulator support for Yiru and coding agents.",
           "f75daf1002": "Mobile Emulator",
           "ad9788036f": "Home page, link routing, and session cookies.",
@@ -6157,10 +6144,6 @@
             "682293cadf": "Show the Yiru Mobile button at the top of the left sidebar.",
             "1de96ec8a6": "Show Yiru Mobile Button",
             "4c920ab2d1": "schedule",
-            "58f4e22fa2": "automation",
-            "b186f3cefb": "automations",
-            "ae13a0d340": "Show the Automations button at the top of the left sidebar.",
-            "caa27e1a8e": "Show Automations Button",
             "2ee4810f38": "github",
             "a895d0f938": "brand",
             "51f957ce39": "name",
@@ -6487,7 +6470,7 @@
               "af122938a3": "voice",
               "259b829b84": "camera",
               "ed7c12bdb4": "microphone",
-              "6eca1636b7": "Allow voice, transcription, webcam, and media capture tools.",
+              "6eca1636b7": "Allow audio recording, transcription, webcam, and media capture tools.",
               "302c0c42f9": "Microphone and Camera",
               "4e225e7c56": "developer tools",
               "6db4fca386": "macos",
@@ -6537,36 +6520,7 @@
             "65df471ab2": "animated",
             "9f5609bfb8": "overlay",
             "2a33975d72": "mascot",
-            "b54cea709b": "sidekick",
-            "051203d37c": "pet",
-            "6b5a56ac35": "Floating animated pet in the bottom-right corner.",
-            "87d99e634b": "Pet",
-            "nativeChat": {
-              "title": "Native chat",
-              "description": "Preview the desktop chat surface for supported agent terminal sessions.",
-              "grok": "grok"
-            }
-          }
-        },
-        "floating": {
-          "workspace": {
-            "search": {
-              "94f4d013c8": "status bar",
-              "a452146574": "toggle button",
-              "6765b85e48": "launch directory",
-              "a38bfc3f77": "quick panel",
-              "52db6e3baf": "notes",
-              "156ffeee08": "note",
-              "884e5e6132": "markdown",
-              "49db74a92d": "browser",
-              "6410fe83d8": "terminal",
-              "2b5efa55c9": "global",
-              "ebeedb2f6a": "quick terminal",
-              "6f183fa1b9": "floating terminal",
-              "a08e482f6d": "floating workspace",
-              "b96b5ee6cf": "Enable the floating workspace, choose where new tabs start, and choose where the toggle button appears.",
-              "b2b60e7163": "Floating Workspace"
-            }
+            "b54cea709b": "sidekick"
           }
         },
         "general": {
@@ -6683,10 +6637,7 @@
             "7e9b556873": "skip",
             "ca86dd6e27": "dialog",
             "9f8558233a": "confirm",
-            "7edf4f69e2": "automation",
             "84c67d0108": "delete",
-            "a0c44061ee": "Show a confirmation dialog before deleting an automation and its run history.",
-            "d0a65b27fd": "Ask Before Deleting Automations",
             "df10666259": "worktree",
             "ae98c9cf36": "Show a confirmation dialog before deleting a workspace.",
             "913242091d": "Ask Before Deleting Workspaces",
@@ -9075,15 +9026,6 @@
           }
         }
       },
-      "pet": {
-        "pet": {
-          "models": {
-            "7433516faf": "Gremlin",
-            "a84d5677ff": "OpenCode",
-            "2528586aa7": "Claudino"
-          }
-        }
-      },
       "onboarding": {
         "AgentStep": {
           "e6a369bd04": "Popular agents",
@@ -9513,61 +9455,6 @@
           }
         }
       },
-      "floating": {
-        "terminal": {
-          "FloatingTerminalIconContextMenu": {
-            "8e7d775287": "Hide Floating Workspace",
-            "763f5fa2c1": "Move to Floating Button",
-            "0ee79e0674": "Move to Status Bar"
-          },
-          "FloatingTerminalOrchestrationDialog": {
-            "f726054620": "Enables agents to hand off context and coordinate work through Yiru.",
-            "1cd3f8af64": "Orchestration skill",
-            "6f0aed26b8": "Install the Yiru CLI and orchestration skill so agents can coordinate through Yiru.",
-            "05d7aabc20": "Not installed",
-            "630c0ac8c8": "Installed",
-            "dfd021ce46": "Checking...",
-            "543f325a14": "Enable orchestration"
-          },
-          "FloatingTerminalPanel": {
-            "fc1042e92b": "Minimize",
-            "8b07759314": "New Browser",
-            "88ffb502e5": "Open Markdown Note",
-            "629528690b": "New Markdown Note",
-            "3215fc73e9": "New Terminal",
-            "da508bd7f5": "Save",
-            "918c2139f3": "Don't Save",
-            "e7bf09d4d4": "Cancel",
-            "690b6fb98a": "Unsaved Changes",
-            "bbc177f98f": "Enable",
-            "adc281394d": "Dismiss",
-            "8cf80db43b": "Set up the Yiru CLI and agent skill so agents can coordinate through Yiru.",
-            "2a3c5ddf5e": "Enable orchestration",
-            "d6b563ae24": "Loading editor...",
-            "8b14ba6c17": "New Browser Tab",
-            "b085fb58b5": "This file has unsaved changes.",
-            "5ddc688c52": "\"{{value0}}\" has unsaved changes. Do you want to save before closing?",
-            "25d7817f79": "terminal"
-          },
-          "FloatingTerminalToggleButton": {
-            "3b04b065b5": "Show floating workspace",
-            "4cb418b991": "Show floating workspace, new activity",
-            "5785dd9148": "Minimize floating workspace",
-            "bfe7809a70": "{{value0}} floating workspace ({{value1}})"
-          },
-          "FloatingTerminalWindowControls": {
-            "2f6054342c": "Minimize",
-            "1bbaa0302f": "Minimize floating workspace",
-            "3f4ca29961": "Maximize floating workspace",
-            "1c79cba25d": "Restore floating workspace",
-            "648352c51f": "Open {{value0}} in floating workspace",
-            "82da3701e7": "Could not build launch command for {{value0}}.",
-            "109870e023": "Maximize",
-            "b5686fee1e": "Restore",
-            "1e502f1284": "Open"
-          }
-        }
-      },
       "feature": {
         "wall": {
           "AgentCapabilitiesSetupAction": {
@@ -9655,7 +9542,8 @@
             "5a55c00a81": "Launch plan",
             "218503f9f3": "autosaved",
             "cda56c5915": "notes / launch-plan.md",
-            "e16479c1c5": "[data-slash-menu] [data-slash-row].slash-active { background: rgba(24,24,27,0.07); } [data-md-active-line][data-role=\"active\"] { color: rgb(113 113 122); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; } [data-md-active-line][data-role=\"h1\"] { color: inherit; font-family: inherit; font-size: 18px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; margin-top: 6px; } [data-md-caret] { display: inline-block; width: 1.5px; height: 1em; background: currentColor; vertical-align: -2px; margin-left: 1px; animation: md-caret-blink 1.05s steps(1) infinite; } @keyframes md-caret-blink { 0%, 50% { opacity: 1 } 51%, 100% { opacity: 0 } } @keyframes md-block-in { from { opacity: 0; transform: translateY(-2px); } to { opacity: 1; transform: none; } } @keyframes md-cursor-ripple { 0% { transform: scale(0.4); opacity: 0.9; } 100% { transform: scale(1.4); opacity: 0; } } [data-clicking=\"1\"] [data-cursor-ripple] { animation: md-cursor-ripple 460ms ease-out forwards; }"
+            "e16479c1c5": "[data-slash-menu] [data-slash-row].slash-active { background: rgba(24,24,27,0.07); } [data-md-active-line][data-role=\"active\"] { color: rgb(113 113 122); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; } [data-md-active-line][data-role=\"h1\"] { color: inherit; font-family: inherit; font-size: 18px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; margin-top: 6px; } [data-md-caret] { display: inline-block; width: 1.5px; height: 1em; background: currentColor; vertical-align: -2px; margin-left: 1px; animation: md-caret-blink 1.05s steps(1) infinite; } @keyframes md-caret-blink { 0%, 50% { opacity: 1 } 51%, 100% { opacity: 0 } } @keyframes md-block-in { from { opacity: 0; transform: translateY(-2px); } to { opacity: 1; transform: none; } } @keyframes md-cursor-ripple { 0% { transform: scale(0.4); opacity: 0.9; } 100% { transform: scale(1.4); opacity: 0; } } [data-clicking=\"1\"] [data-cursor-ripple] { animation: md-cursor-ripple 460ms ease-out forwards; }",
+            "copy": "Copy"
           },
           "FeatureWallBody": {
             "25ec5356d6": "Setup"
@@ -9699,7 +9587,11 @@
             "271ea0cbf3": "Cancel",
             "a7a89d8f94": "Line",
             "5cb213f967": "AI notes",
-            "1eee3a397e": "src/server/migrate.ts (diff)"
+            "1eee3a397e": "src/server/migrate.ts (diff)",
+            "sessionStarted": "● Claude Code session started",
+            "notesLoaded": "Loaded {{value0}} review notes from Yiru",
+            "reviewNote": "Review note {{value0}}:",
+            "fixingIssues": "Fixing both issues..."
           },
           "ReviewPRViewAnimatedVisual": {
             "7c2808ecff": "truncation before merge.",
@@ -10192,6 +10084,16 @@
           "d07e4b8553": "branch",
           "d16e037f40": "rich",
           "6c4f1a8d2e": "Check details are unavailable."
+        },
+        "FilePreviewViewer": {
+          "loading": "Loading preview...",
+          "unsupportedCodec": "This file's media codec isn't supported by the built-in player.",
+          "tooLarge": "File is too large to preview (512 MB limit).",
+          "stalled": "File preview stopped loading before it was complete.",
+          "outsideRuntime": "Remote file is outside the owning runtime worktree.",
+          "bytes": "{{value0}} B",
+          "kilobytes": "{{value0}} KB",
+          "megabytes": "{{value0}} MB"
         },
         "EditorPanelHeader": {
           "fb8331694e": "Open Preview to the Side",
@@ -11043,311 +10945,6 @@
           }
         }
       },
-      "automations": {
-        "AutomationCustomCronPanel": {
-          "3e3b2c369f": "Cron expression",
-          "e81a02d61b": "Enter a valid five-field cron before saving.",
-          "968e66d686": "Enter a five-field cron.",
-          "cadb7b0bc9": "invalid"
-        },
-        "AutomationDetail": {
-          "007c8ad874": "Prompt",
-          "a1d52c2189": "Usage coverage",
-          "449fc83bf7": "Tokens",
-          "401f40ae79": "Est. spend",
-          "a7c312430d": "Last run",
-          "2df8970cd5": "Agent",
-          "e353ab9516": "Precheck",
-          "620b22145e": "Grace",
-          "15ea446b93": "Session",
-          "5405a09b1f": "Run location",
-          "2f8baf5360": "Create from",
-          "578ff46987": "Next run",
-          "18763ded26": "Schedule",
-          "dbef8dc110": "This SSH automation runs only while Yiru can reach the SSH host. If reconnect needs interactive credentials or the host is unavailable, the run is recorded as skipped.",
-          "1f6026358e": "Delete automation",
-          "d79452fb30": "Resume automation",
-          "91a4155e95": "Pause automation",
-          "4b1ea02d2e": "Edit automation",
-          "2fb1605beb": "Run Now",
-          "221916d93c": "Create an automation to start scheduling agent work.",
-          "de0fedac06": "new_per_run",
-          "51a470b966": "ssh",
-          "b09b2384fd": "Paused",
-          "eaa02014f8": "Enabled",
-          "29baf8f4c2": "Source"
-        },
-        "AutomationEditorDialog": {
-          "fb1896a5e7": "Cancel",
-          "57b722cbba": "Agent",
-          "6ff66f9012": "New run",
-          "a2e688226d": "Worktree",
-          "6f9610e667": "Worktree runs in the selected workspace. New run creates a fresh workspace from the selected branch each time.",
-          "2c3fd9bfa1": "Workspace mode help",
-          "b28b140eaf": "Workspace",
-          "0d17f4ca8f": "Select project",
-          "02d351877e": "Project",
-          "a4ac8fcc62": "/goal",
-          "827b25a81e": "Supports skills, file paths, and built-in commands like",
-          "6d778190b7": "Run the weekly dependency audit and summarize risky changes.",
-          "058c23cb3f": "Prompt",
-          "c4b19094c2": "Schedule",
-          "e46c1aa9ad": "Create",
-          "a9d9dccf77": "Save",
-          "777548c2d6": "Save Changes",
-          "ff5db28639": "existing"
-        },
-        "AutomationEditorDialogHeader": {
-          "31f9253920": "Use template",
-          "7e35393632": "Hermes",
-          "6f309eef8d": "Yiru",
-          "58f56b73d9": "Automation name",
-          "1d9826933e": "Weekday repo audit",
-          "4133d33862": "Create automation",
-          "0a75e5e2fa": "Create Hermes automation",
-          "03142e7721": "Edit Hermes automation",
-          "17086b48ee": "Edit automation"
-        },
-        "AutomationMissedRunGraceField": {
-          "0f4459e91d": "48 hours",
-          "adbab51feb": "24 hours",
-          "ba50e2a230": "12 hours",
-          "2dc9ee84d0": "3 hours",
-          "521f77cd58": "1 hour",
-          "e5ad263ae5": "30 minutes",
-          "529dc6c0b7": "No grace",
-          "3d70c185c8": "If Yiru or the execution host was unavailable at the scheduled time, Yiru runs one missed occurrence when it becomes available within this window. Older missed runs are skipped.",
-          "3df53d554a": "Missed-run grace help",
-          "fc089e5fde": "Grace"
-        },
-        "AutomationPrecheckFields": {
-          "d2a2ac89ac": "10 min",
-          "bf49585b3c": "5 min",
-          "d84d3765fd": "2 min",
-          "c820119736": "1 min",
-          "51e28cdad9": "30 sec",
-          "bb2dfb3629": "Timeout",
-          "99a577306c": "gh pr list --json number -q '.[0].number'",
-          "c2a762a180": "Precheck"
-        },
-        "AutomationRunHistory": {
-          "402651bfb6": "No runs yet.",
-          "9974a2b429": "Status",
-          "13988187b3": "Tokens",
-          "86a248187e": "Spend",
-          "149c0b49c7": "Workspace",
-          "8faaa00726": "Run",
-          "53fc5f07ab": "Run history",
-          "a00e38d1a3": "n/a",
-          "fdb3caa8fb": "known"
-        },
-        "AutomationRunPageFrame": {
-          "40a511bed4": "Run context",
-          "33741dd973": "Back to runs"
-        },
-        "AutomationSchedulePicker": {
-          "22359b186a": "AM or PM",
-          "9e677335b0": "Minute",
-          "6b802ecc99": "Hour",
-          "d90981f766": "Time",
-          "6b914c5fbb": "Day",
-          "233b8c94b6": "Cadence",
-          "b08ccb4d06": "hourly",
-          "8cc026fd73": "weekly",
-          "c3e39e17cf": "custom"
-        },
-        "AutomationSessionField": {
-          "f3c76dce51": "Reuse",
-          "c90888ee94": "Fresh",
-          "b675112193": "Reuse sends future runs to the previous live automation session. If that session is gone, Yiru starts a fresh one.",
-          "4bdce31f37": "Session reuse help",
-          "5ad314118e": "Session"
-        },
-        "AutomationsPage": {
-          "2695883141": "delete",
-          "c3a28c9793": "Select an automation to view runs.",
-          "295698292f": "Rerun",
-          "0e110a3469": "Runs",
-          "bb1b2cd31e": "Overview",
-          "97ff587ee3": "Connect this source to check for Hermes automations in the remote profile.",
-          "aaa007846f": "source unavailable",
-          "25060635c6": "Add new",
-          "d207ab4c25": "Start from a template",
-          "15e0bfb13b": "Delete",
-          "f4612e3f78": "Edit",
-          "2faecab10b": "Run Now",
-          "82eb6cb933": "source",
-          "13118faadf": "Unknown project",
-          "587a4b205c": "Next",
-          "761a35834d": "Automation",
-          "73f630b49d": "Cancel",
-          "1b586f0e2b": "on",
-          "02a33e3204": "from",
-          "9adfab2596": "Delete External Automation",
-          "1e2e41392f": "Don't ask again",
-          "b264564427": "and its run history. Workspaces created by previous runs are not deleted.",
-          "080dcb5fbb": "Delete Automation",
-          "19a6e30eae": "Refresh automations",
-          "8d1afa8269": "Add automation",
-          "77c2778945": "Automations",
-          "0329f9bef1": "Close · Esc",
-          "67c7ff795b": "Close automations",
-          "e1bf9b1512": "Workspace is not available.",
-          "3e42a5cc1b": "SSH connection failed.",
-          "9f2855677c": "SSH connected.",
-          "126d726546": "External automation action failed.",
-          "37288942f0": "External automation resumed.",
-          "77c518a34b": "External automation paused.",
-          "4d7878402c": "External automation queued.",
-          "4c22bc9913": "External automation deleted.",
-          "3a4c476aa0": "Failed to rerun automation.",
-          "a1bdb57008": "Automation run queued.",
-          "8a3226f172": "Open Settings",
-          "d2a01b0b6f": "You can change this in Settings.",
-          "690b94da54": "We'll skip this confirmation next time.",
-          "b11170a008": "Failed to save automation.",
-          "2a20596d6b": "Automation saved.",
-          "244727e655": "Automation updated.",
-          "77b81bc4ac": "Hermes automation created.",
-          "08efc3ae12": "Hermes automation updated.",
-          "32534e7c9c": "Choose an available workspace before saving.",
-          "2360ffc956": "Choose an enabled agent before saving.",
-          "6e91dab317": "Enter a valid advanced schedule before saving.",
-          "64bdb2304f": "Pick a supported schedule before saving.",
-          "2430fecf53": "Choose a run location and enter a prompt before saving.",
-          "7934ee0d81": "Connect SSH",
-          "f93ed7a6f8": "Connecting...",
-          "8705757e27": "job",
-          "376631ef2b": "Resume",
-          "b457436d6a": "Pause",
-          "0ae52dd760": "hermes",
-          "e059042585": "Read-only",
-          "aecdc3681f": "Manageable",
-          "8500baacb4": "external source",
-          "36f71740a7": "Selected workspace",
-          "cd8397cc32": "New workspace each run",
-          "dd0bc7a1ba": "new_per_run",
-          "7b2e285552": "SSH connections are unavailable in this client.",
-          "d441032f7e": "pause",
-          "5918020edc": "run",
-          "a21f6c33ad": "Automation source refreshed.",
-          "53f06f0ad5": "Retry source",
-          "pendingAutomationMissing": "Automation no longer available.",
-          "pendingAutomationRunMissing": "Run history no longer available."
-        },
-        "CreateFromPicker": {
-          "f061f49e3f": "Search repo branches...",
-          "dd3841b442": "Branch from",
-          "ef6d762538": "Project default",
-          "e53d306056": "{{value0}} (default)",
-          "79512f22a7": "No branches found.",
-          "9ce96621f4": "Searching branches..."
-        },
-        "ExternalAutomationManagers": {
-          "e02f970595": "No external automation managers found.",
-          "6da3bfba4b": "automations found.",
-          "3d58d5b67d": "No",
-          "a42bf2b27e": "Delete external automation",
-          "1c3bfd38fe": "Resume external automation",
-          "0def1693bb": "Pause external automation",
-          "1df491fd00": "Edit external automation",
-          "cc77ba88ff": "Run external automation",
-          "5820648765": "Last",
-          "844f1acb72": "found",
-          "20fd7a3a15": "next",
-          "c6695e6fbd": "External automations",
-          "5524365227": "OpenClaw",
-          "766abf833c": "Hermes",
-          "bf5f67b590": "hermes",
-          "e66091daf4": "runs",
-          "8e9165af08": "run",
-          "2b0adbce21": "Paused",
-          "b3feba84c7": "Active",
-          "92405f1431": "Unavailable",
-          "dbdcec22bd": "Read-only",
-          "0a2d4359a8": "Manageable",
-          "330b3c32e8": "available",
-          "e2532150ed": "automations",
-          "701515f010": "automation"
-        },
-        "ExternalAutomationRunTable": {
-          "0ba9c0a95c": "Next run page",
-          "52d468a0b8": "Previous run page",
-          "7475c0ce96": "of",
-          "be551397ca": "Status",
-          "a813df9808": "Preview",
-          "d4b34feb66": "Run time",
-          "2d4388a908": "Runs",
-          "9c080765ff": "No Hermes runs found yet.",
-          "8ea934cacf": "Loading runs...",
-          "d5527d8fe7": "runs",
-          "872d032d05": "run"
-        },
-        "HermesCronOutputView": {
-          "e27c716b43": "Prompt",
-          "4557213074": "Response",
-          "05affc68e3": "Error",
-          "88d48157fc": "default"
-        },
-        "WorkspaceCombobox": {
-          "ee5b280eba": "No workspaces found.",
-          "8e9c8cc6b5": "Search workspaces...",
-          "66a0cd9628": "Select workspace"
-        },
-        "automation": {
-          "templates": {
-            "37571fcb16": "Look for stuck work, stale generated files, and failed local validation.",
-            "8a0228bea3": "Hourly queue check",
-            "3b7281c75f": "Scan recent work and call out correctness, UX, and test coverage risks.",
-            "6023075b27": "Daily change review",
-            "513401db93": "Prepare a weekly release risk summary from the current project state.",
-            "39ed39280a": "Release readiness",
-            "a7fbd32ddb": "Check dependencies, failing tests, and risky open changes each weekday.",
-            "b84757677d": "Weekday repo audit",
-            "repoHealth": {
-              "category": "Repo health",
-              "name": "Weekday repo audit",
-              "prompt": "Review the repository health. Check dependency updates, failing tests, lint/typecheck status, and risky open changes. Summarize findings and suggest the next action."
-            },
-            "releasePrep": {
-              "category": "Release prep",
-              "name": "Release readiness review",
-              "prompt": "Prepare a release readiness summary. Look for blockers, unmerged risky changes, missing validation, and documentation gaps. End with a concise release/no-release recommendation."
-            },
-            "recurringReview": {
-              "category": "Recurring review",
-              "name": "Daily change review",
-              "prompt": "Review recent changes in this workspace. Focus on correctness risks, UX regressions, missing tests, and follow-up tasks. Keep the report short and actionable."
-            },
-            "maintenance": {
-              "category": "Maintenance",
-              "name": "Hourly maintenance check",
-              "prompt": "Check for stuck work, stale generated files, failing validation, and anything that needs human attention. Report only actionable issues."
-            }
-          }
-        },
-        "external": {
-          "automation": {
-            "schedule": {
-              "display": {
-                "a8e92b815a": "Schedule unavailable"
-              }
-            }
-          }
-        },
-        "AutomationProjectCombobox": {
-          "search": "Search projects/folders...",
-          "empty": "No projects/folders match your search.",
-          "chooseHost": "Choose automation host",
-          "adding": "Adding project…",
-          "addProject": "Add project"
-        },
-        "AutomationSetupDecisionField": {
-          "5a7863909c": "Run setup for each new workspace",
-          "18f000ad4e": "Advanced",
-          "874b72195b": "When this automation creates a workspace, prepare it the same way creating a worktree by hand does — run the project's setup and open its terminal tabs."
-        }
-      },
       "agent": {
         "AgentCombobox": {
           "19522e25ee": "Manage agents",
@@ -11484,11 +11081,6 @@
             "dismiss": "Dismiss",
             "later": "Later"
           }
-        }
-      },
-      "nativeChat": {
-        "contextMenu": {
-          "copy": "Copy"
         }
       },
       "yiru": {
@@ -11909,6 +11501,7 @@
       "untitledSession": "Current session",
       "originalAgent": "Original Agent: {{agent}}",
       "agent": "Agent",
+      "effort": "Effort",
       "selectAgent": "Select an Agent",
       "detectingAgents": "Detecting Agents on this workspace host…",
       "detectionFailed": "Could not detect Agents on this workspace host.",
@@ -11927,187 +11520,26 @@
       "sent": "Session context sent to {{agent}} in a new session.",
       "deliveryFailed": "The new {{agent}} session started, but its context could not be sent.",
       "launchFailed": "Could not start a new {{agent}} session.",
-      "launchOptions": "Launch options"
-    },
-    "native-chat": {
-      "composer": {
-        "imageUnsupported": "Image paste is not supported for this agent.",
-        "send": "Send",
-        "noPty": "No live terminal — toggle back to reconnect.",
-        "locked": "Input is held by another device.",
-        "placeholder": "Send a message…",
-        "mentionHint": "Referencing file:",
-        "attach": "Attach file",
-        "startDictation": "Start dictation",
-        "stopDictation": "Stop dictation",
-        "noSkills": "No matching skills",
-        "noCommandsOrSkills": "No matching commands or skills",
-        "noCommands": "No matching commands",
-        "commands": "Commands",
-        "skills": "Skills",
-        "loadingSkills": "Loading skills...",
-        "skillsLoaded": "Skills loaded",
-        "skillsUnavailableHost": "Skills are unavailable for this host",
-        "skillsLoadFailed": "Could not load skills from this host",
-        "retrySkills": "Retry",
-        "skillCommandCollision": "Also a skill name - agent decides",
-        "skillMultipleSources": "{{sourceCount}} sources - agent resolves",
-        "skillScopeProject": "Project",
-        "skillScopePersonal": "Personal",
-        "skillScopeBuiltIn": "Built-in",
-        "skillScopePlugin": "Plugin",
-        "localAttachmentUnsupported": "Local attachments are not available for remote sessions.",
-        "removeAttachment": "Remove attachment",
-        "pastedImageLabel": "Pasted image",
-        "imagePasteFailed": "Image paste failed.",
-        "worktreeNotReady": "Worktree not ready — try again in a moment.",
-        "uploadingAttachments": "Uploading {{value0}} file(s) to remote…",
-        "model": "Model",
-        "modelWithValue": "Model: {{value0}}",
-        "effort": "Effort",
-        "effortWithValue": "Effort: {{value0}}",
-        "fastMode": "Fast mode",
-        "thinking": "Thinking",
-        "options": "Options",
-        "sessionOptions": "Session options",
-        "chooseInAgentPicker": "Choose in agent picker…",
-        "toggleOption": "Toggle {{value0}}",
-        "sentNotConfirmed": "Sent to the agent — not confirmed",
-        "setWhenSessionStarts": "Set when the session starts.",
-        "availableAfterSessionStarts": "Available after the session starts.",
-        "optionUpdateFailed": "Could not update option",
-        "optionValue": {
-          "fast": "Fast",
-          "none": "None",
-          "minimal": "Minimal",
-          "low": "Low",
-          "medium": "Medium",
-          "high": "High",
-          "xhigh": "Extra high",
-          "max": "Max",
-          "ultra": "Ultra"
-        },
-        "relaunchWithOtherAgent": "Switch Agent or model…"
-      },
-      "tool": {
-        "running": "Running…",
-        "result": "Result",
-        "yiru": {
-          "running": "Running {{value0}}",
-          "failed": "{{value0}} failed",
-          "completedUnknown": "Finished {{value0}}; result unavailable",
-          "summary": "{{value0}} {{value1}}",
-          "summaryTarget": "{{value0}} {{value1}} {{value2}}",
-          "summaryOutcome": "{{value0}} {{value1}} {{value2}}, {{value3}}",
-          "openTarget": "Open action target",
-          "verb": {
-            "captured": "Captured",
-            "changed": "Changed",
-            "closed": "Closed",
-            "created": "Created",
-            "dispatched": "Dispatched",
-            "focused": "Focused",
-            "inspected": "Inspected",
-            "navigated": "Navigated",
-            "read": "Read",
-            "removed": "Removed",
-            "replied": "Replied to",
-            "ran": "Ran",
-            "sentTo": "Sent to",
-            "started": "Started",
-            "stopped": "Stopped",
-            "updated": "Updated",
-            "used": "Used",
-            "waited": "Waited for"
-          },
-          "object": {
-            "automation": "automation",
-            "automations": "automations",
-            "browser": "browser",
-            "browserTab": "browser tab",
-            "computer": "computer",
-            "gate": "gate",
-            "gates": "gates",
-            "message": "message",
-            "messages": "messages",
-            "orchestration": "orchestration",
-            "task": "task",
-            "tasks": "tasks",
-            "terminal": "terminal",
-            "terminals": "terminals",
-            "worktree": "worktree",
-            "worktrees": "worktrees"
-          },
-          "outcome": {
-            "spawned": "spawned {{value0}}",
-            "to": "to {{value0}}"
-          }
-        }
-      },
-      "status": {
-        "responding": "Agent is responding"
-      },
-      "jumpToLatest": "Jump to latest",
-      "toggle": {
-        "showTerminal": "Show terminal",
-        "showChat": "Show chat view"
-      },
-      "state": {
-        "loading": {
-          "title": "Loading conversation…",
-          "subtitle": "Reading the agent transcript."
-        },
-        "error": {
-          "title": "Could not load conversation",
-          "subtitle": "The transcript could not be read. Toggle back to the terminal to keep working."
-        },
-        "pairHost": "Pair a host to view agent chat history.",
-        "notAgent": {
-          "title": "No conversation here",
-          "subtitle": "This terminal is not running a recognized coding agent."
-        },
-        "empty": {
-          "title": "Start a chat with {{value0}}",
-          "subtitle": "Ask {{value0}} to inspect code, explain output, or make a change."
-        }
-      },
-      "stop": "Stop the agent",
-      "copyMessage": {
-        "copied": "Copied",
-        "copy": "Copy message"
-      },
-      "scrollMessageToTop": "Scroll this message to top",
-      "loadingEarlier": "Loading…",
-      "loadEarlier": "Load earlier messages",
-      "question": {
-        "step": "Step {{value0}}",
-        "other": "Other…",
-        "otherPlaceholder": "Type your answer",
-        "cancel": "Cancel",
-        "send": "Send answer",
-        "next": "Next",
-        "skip": "Skip",
-        "sending": "Sending…"
-      },
-      "approval": {
-        "title": "Allow {{value0}}?",
-        "allow": "Allow",
-        "deny": "Deny"
-      },
-      "launchPromptNotDelivered": "Not delivered — check the terminal"
+      "launchOptions": "Launch options",
+      "cancel": "Cancel",
+      "model": "Model",
+      "fastMode": "Fast mode",
+      "thinking": "Thinking",
+      "optionValue": {
+        "none": "None",
+        "minimal": "Minimal",
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High",
+        "xhigh": "Extra high",
+        "max": "Max",
+        "ultra": "Ultra"
+      }
     },
     "terminalPane": {
       "urlLinkHint": {
         "mac": "⌘+click for default browser or ⇧⌘+click for Yiru Browser",
         "other": "Ctrl+click for default browser or Shift+Ctrl+click for Yiru Browser"
-      }
-    },
-    "tab": {
-      "bar": {
-        "SortableTabContextMenu": {
-          "switchToTerminalView": "Switch to terminal view",
-          "switchToChatView": "Switch to chat view"
-        }
       }
     },
     "workspace": {
@@ -12120,12 +11552,6 @@
           "githubPullRequestNumber": "PR #{{value0}}"
         }
       }
-    },
-    "friday": {
-      "open": "Open Assistant",
-      "startError": "Friday could not start.",
-      "newConversation": "New conversation",
-      "starting": "Starting assistant…"
     }
   },
   "worktree": {
@@ -12239,12 +11665,6 @@
     "mobileWebSocketUnavailable": "Mobile WebSocket transport is unavailable",
     "terminalMultiplexDedicatedConnection": "Terminal multiplex requires its own connection",
     "invalidBinaryStream": "The runtime host received an invalid binary stream"
-  },
-  "automations": {
-    "workspaceTerminalMissing": "Automation workspace was created, but no agent terminal started.",
-    "targetWorkspaceMissing": "The target workspace is no longer available.",
-    "agentBlocked": "Automation agent is blocked: {{reason}}.",
-    "agentIncomplete": "Automation agent did not report completion."
   },
   "notifications": {
     "deliveryProbe": {

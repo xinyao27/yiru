@@ -17,8 +17,6 @@ export type ShellUiApi = {
   onToggleLeftSidebar: (callback: () => void) => Unsubscribe
   onToggleRightSidebar: (callback: () => void) => Unsubscribe
   onToggleWorktreePalette: (callback: () => void) => Unsubscribe
-  onToggleFloatingTerminal: (callback: () => void) => Unsubscribe
-  onToggleAssistant: (callback: () => void) => Unsubscribe
   onTerminalShortcutCaptured: (
     callback: (data: { actionId: KeybindingActionId }) => void
   ) => Unsubscribe
@@ -47,7 +45,6 @@ export type ShellUiApi = {
   onCtrlTabKeyDown: (callback: (data: { shiftKey: boolean }) => void) => Unsubscribe
   onCtrlTabKeyUp: (callback: () => void) => Unsubscribe
   onToggleStatusBar: (callback: () => void) => Unsubscribe
-  onDictationKeyDown: (callback: () => void) => Unsubscribe
   onExportPdfRequested: (callback: () => void) => Unsubscribe
   onAppMenuPaste: (callback: () => void) => Unsubscribe
   onEditableContextPaste: (callback: (data: { plainTextOnly: boolean }) => void) => Unsubscribe
@@ -80,7 +77,6 @@ export type ShellUiApi = {
   syncTrafficLights: (zoomFactor: number) => void
   setMarkdownEditorFocused: (focused: boolean) => void
   setTerminalInputFocused: (focused: boolean) => void
-  setFloatingTerminalInputFocused: (focused: boolean) => void
   setShortcutRecorderFocused: (focused: boolean) => void
   minimize: () => void
   maximize: () => void
@@ -131,8 +127,6 @@ export const electronShellUiApi: ShellUiApi = {
   onToggleLeftSidebar: (callback) => subscribeType('uiToggleLeftSidebar', callback),
   onToggleRightSidebar: (callback) => subscribeType('uiToggleRightSidebar', callback),
   onToggleWorktreePalette: (callback) => subscribeType('uiToggleWorktreePalette', callback),
-  onToggleFloatingTerminal: (callback) => subscribeType('uiToggleFloatingTerminal', callback),
-  onToggleAssistant: (callback) => subscribeType('uiToggleAssistant', callback),
   onTerminalShortcutCaptured: (callback) =>
     subscribeShellEvent((event) => {
       if (event.type === 'uiTerminalShortcutCaptured' && isKeybindingActionId(event.actionId)) {
@@ -209,7 +203,6 @@ export const electronShellUiApi: ShellUiApi = {
     }),
   onCtrlTabKeyUp: (callback) => subscribeType('uiCtrlTabKeyUp', callback),
   onToggleStatusBar: (callback) => subscribeType('uiToggleStatusBar', callback),
-  onDictationKeyDown: (callback) => subscribeType('uiDictationKeyDown', callback),
   onExportPdfRequested: (callback) => subscribeType('uiExportPdfRequested', callback),
   onAppMenuPaste: (callback) => subscribeType('uiAppMenuPaste', callback),
   onEditableContextPaste: (callback) =>
@@ -286,10 +279,6 @@ export const electronShellUiApi: ShellUiApi = {
     fireShellUi(callShellOrpc((client) => client.shell.ui.setMarkdownEditorFocused, { focused })),
   setTerminalInputFocused: (focused) =>
     fireShellUi(callShellOrpc((client) => client.shell.ui.setTerminalInputFocused, { focused })),
-  setFloatingTerminalInputFocused: (focused) =>
-    fireShellUi(
-      callShellOrpc((client) => client.shell.ui.setFloatingTerminalInputFocused, { focused })
-    ),
   setShortcutRecorderFocused: (focused) =>
     fireShellUi(callShellOrpc((client) => client.shell.ui.setShortcutRecorderFocused, { focused })),
   minimize: () => fireShellUi(callShellOrpc((client) => client.shell.ui.minimize, undefined)),

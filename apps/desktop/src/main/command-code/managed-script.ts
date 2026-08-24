@@ -3,7 +3,7 @@ import {
   buildWindowsHookEnvironmentGuardLines,
   buildWindowsHookStdinDrainEpilogue
 } from '../agent-hooks/hook-stdin-contract'
-import { buildWindowsAgentHookPostCommand } from '../agent-hooks/installer-utils'
+import { buildWindowsAgentHookPostCommand } from '../agent-hooks/managed-hook-commands'
 
 export type CommandCodeManagedScriptTarget = 'local' | 'posix'
 

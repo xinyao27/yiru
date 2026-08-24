@@ -23,10 +23,6 @@ extension AppModel {
         routes.append(.appearanceSettings)
     }
 
-    func showChatSettings() {
-        routes.append(.chatSettings)
-    }
-
     func showBrowserSettings() {
         routes.append(.browserSettings)
     }
@@ -198,10 +194,6 @@ extension AppModel {
     ) {
         dependencies.recentWorkspaceStore.save(host: host, workspace: workspace)
         routes.append(.workspaceSession(host, workspace, initialTab))
-    }
-
-    func showFloatingWorkspace(host: HostProfile) {
-        routes.append(.workspaceSession(host, .floating(hostID: host.id), nil))
     }
 
     func showTerminalSettings() {

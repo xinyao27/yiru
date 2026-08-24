@@ -1,4 +1,3 @@
-/* eslint-disable max-lines -- Why: this file is the central main-window IPC wiring point; splitting it during the mobile release compatibility rebase would increase release risk. */
 import { dialog, type OpenDialogOptions } from 'electron'
 import type { BrowserWindow } from 'electron'
 
@@ -7,8 +6,6 @@ import { hasSystemMediaAccess, requestSystemMediaAccess } from '../browser/media
 import type { ClaudeRuntimeAuthPreparation } from '../claude/accounts/runtime-auth-service'
 import type { ClaudeAccountSelectionTarget } from '../claude/accounts/runtime-selection'
 import type { CodexAccountSelectionTarget } from '../codex/accounts/runtime-selection'
-import type { FridayService } from '../friday/service'
-import { initializeShellFridayService } from '../friday/shell-service'
 import { hydrateLocalPtyRegistryAtBoot } from '../memory/hydrate-local-pty-registry'
 import type { Store } from '../persistence'
 import { initializeShellRepoHostService } from '../project-groups/repos'
@@ -54,7 +51,6 @@ export function attachMainWindowServices(
     // Why: lets the PTY orphan sweep skip the one crash-recovery reload (#5787).
     isRecoveryReloadInFlight?: (webContentsId: number) => boolean
     onBeforeUpdateQuit?: () => void | Promise<void>
-    friday?: FridayService
   }
 ): void {
   registerAppReloadHandler(mainWindow, options?.onBeforeRendererReload)
@@ -85,9 +81,6 @@ export function attachMainWindowServices(
       isRecoveryReloadInFlight: options?.isRecoveryReloadInFlight
     }
   )
-  if (options?.friday) {
-    initializeShellFridayService(mainWindow, options.friday)
-  }
   // Why: the Manage Sessions settings panel (docs/daemon-staleness-ux.md §Phase 1)
   // uses a narrow `pty:management:*` IPC surface that reads the live
   // DaemonPtyRouter via getDaemonProvider(). Registering here — after

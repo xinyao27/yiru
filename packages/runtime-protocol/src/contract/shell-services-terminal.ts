@@ -51,7 +51,6 @@ export const ShellServicesTerminalCreateInputSchema = z
     launchAgent: z
       .custom<TuiAgent>(isRuntimeTuiAgent, { message: 'Unknown launch agent' })
       .optional(),
-    viewMode: z.enum(['terminal', 'chat']).optional(),
     startupCommandDelivery: z.enum(['fast', 'shell-ready']).optional(),
     title: z.string().optional(),
     activate: z.boolean().optional(),
@@ -103,8 +102,6 @@ export const ShellServicesTerminalRevealInputSchema = z
     launchAgent: z
       .custom<TuiAgent>(isRuntimeTuiAgent, { message: 'Unknown launch agent' })
       .optional(),
-    viewMode: z.enum(['terminal', 'chat']).optional(),
-    isFriday: z.boolean().optional(),
     activate: z.boolean().optional(),
     presentation: z.enum(['background', 'focused']).optional(),
     tabId: z.string().optional(),

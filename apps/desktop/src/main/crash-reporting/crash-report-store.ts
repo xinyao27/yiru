@@ -13,7 +13,7 @@ import {
   type CrashReportStatus
 } from '~shared/crash-reporting'
 
-import { grantDirAclAsync, isPermissionError } from '../win32-utils'
+import { grantDirAclAsync, isPermissionError } from '../windows-host'
 
 const MAX_REPORTS = 5
 const RELATED_CRASH_WINDOW_MS = 5_000

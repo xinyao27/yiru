@@ -46,8 +46,6 @@ export type ShellUiEvent =
   | { type: 'uiToggleLeftSidebar' }
   | { type: 'uiToggleRightSidebar' }
   | { type: 'uiToggleWorktreePalette' }
-  | { type: 'uiToggleFloatingTerminal' }
-  | { type: 'uiToggleAssistant' }
   | { type: 'uiTerminalShortcutCaptured'; actionId: string }
   | { type: 'uiOpenQuickOpen' }
   | { type: 'uiToggleQuickCommandsMenu' }
@@ -74,7 +72,6 @@ export type ShellUiEvent =
   | { type: 'uiCtrlTabKeyDown'; shiftKey: boolean }
   | { type: 'uiCtrlTabKeyUp' }
   | { type: 'uiToggleStatusBar' }
-  | { type: 'uiDictationKeyDown' }
   | { type: 'uiExportPdfRequested' }
   | { type: 'uiAppMenuPaste' }
   | { type: 'uiEditableContextPaste'; plainTextOnly: boolean }

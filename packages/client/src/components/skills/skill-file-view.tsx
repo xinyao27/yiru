@@ -16,8 +16,15 @@ type FileViewState =
   | { status: 'text'; content: string; truncated: boolean }
   | { status: 'error'; message: string }
 
+type FileViewRequestState = {
+  directoryPath: string
+  relativePath: string
+  view: FileViewState
+}
+
 const FRONTMATTER_RE = /^---\s*\n([\s\S]*?)\n---\s*(?:\n|$)/
 const MARKDOWN_EXTENSION_RE = /\.(?:md|markdown|mdx)$/i
+const LOADING_FILE_VIEW: FileViewState = { status: 'loading' }
 
 // Why: the markdown renderer has no frontmatter plugin, so a leading `---`
 // block would parse as a setext heading and scramble the metadata. Split it out
@@ -72,20 +79,31 @@ export function SkillFileView({
   directoryPath,
   relativePath
 }: SkillFileViewProps): React.JSX.Element {
-  const [state, setState] = useState<FileViewState>({ status: 'loading' })
+  const [requestState, setRequestState] = useState<FileViewRequestState | null>(null)
+  const state =
+    requestState?.directoryPath === directoryPath && requestState.relativePath === relativePath
+      ? requestState.view
+      : LOADING_FILE_VIEW
 
   useEffect(() => {
     let cancelled = false
-    setState({ status: 'loading' })
     readSkillManageDirFile({ directoryPath, relativePath })
       .then((result) => {
         if (!cancelled) {
-          setState(toViewState(relativePath, result))
+          setRequestState({
+            directoryPath,
+            relativePath,
+            view: toViewState(relativePath, result)
+          })
         }
       })
       .catch(() => {
         if (!cancelled) {
-          setState({ status: 'error', message: describeReadFailure('unreadable') })
+          setRequestState({
+            directoryPath,
+            relativePath,
+            view: { status: 'error', message: describeReadFailure('unreadable') }
+          })
         }
       })
     return () => {

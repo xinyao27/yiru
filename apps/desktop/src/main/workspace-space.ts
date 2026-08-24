@@ -4,7 +4,7 @@ import type {
 } from '~shared/workspace/space-types'
 
 import type { Store } from './persistence'
-import { analyzeWorkspaceSpace, WorkspaceSpaceScanCancelledError } from './workspace-space-analysis'
+import { analyzeWorkspaceSpace, WorkspaceSpaceScanCancelledError } from './workspace-space/analysis'
 
 const PROGRESS_EMIT_INTERVAL_MS = 100
 

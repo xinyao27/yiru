@@ -98,7 +98,6 @@ export function usePaletteStoreState() {
   const runtimeEnvironments = useAppStore((s) => s.runtimeEnvironments)
   const runtimeStatusByEnvironmentId = useAppStore((s) => s.runtimeStatusByEnvironmentId)
   const hideDefaultBranchWorkspace = useAppStore((s) => s.hideDefaultBranchWorkspace)
-  const hideAutomationGeneratedWorkspaces = useAppStore((s) => s.hideAutomationGeneratedWorkspaces)
   const showSleepingWorkspaces = useAppStore((s) => s.showSleepingWorkspaces)
   const lastVisitedAtByWorktreeId = useAppStore((s) => s.lastVisitedAtByWorktreeId)
   const workspacePortScan = useAppStore((s) => s.workspacePortScan?.result ?? null)
@@ -157,7 +156,6 @@ export function usePaletteStoreState() {
     runtimeEnvironments,
     runtimeStatusByEnvironmentId,
     hideDefaultBranchWorkspace,
-    hideAutomationGeneratedWorkspaces,
     showSleepingWorkspaces,
     lastVisitedAtByWorktreeId,
     workspacePortScan,

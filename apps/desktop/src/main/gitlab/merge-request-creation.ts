@@ -22,7 +22,7 @@ import {
   glabHostnameArgs,
   glabRepoExecOptions,
   release
-} from './gl-utils'
+} from './gitlab-cli'
 import { findOpenMRByHeadBase, parseMergeRequestPayload } from './merge-request-creation-lookup'
 
 function execErrorMessage(error: unknown): string {

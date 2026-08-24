@@ -1,8 +1,7 @@
 import { nativeImage, type NativeImage } from 'electron'
 
 // Why: amber-500 (#f59e0b) is Yiru's "needs attention / unread" color, matching
-// the renderer launcher dot and the tab-unread bell. Kept in sync with the
-// bg-amber-500 used in FloatingTerminalToggleButton.
+// the renderer launcher dot and the tab-unread bell.
 const DOT_RGB = { r: 0xf5, g: 0x9e, b: 0x0b }
 // A near-white halo separates the dot from the icon glyph on any tray theme.
 const RING_RGB = { r: 0xff, g: 0xff, b: 0xff }

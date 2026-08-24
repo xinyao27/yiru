@@ -11,7 +11,6 @@ import { translateMain } from '../i18n/main-i18n'
 import { publishShellEvent } from '../shell/events'
 
 export type AppearanceMenuState = {
-  showAutomationsButton: boolean
   showMobileButton: boolean
   statusBarVisible: boolean
 }
@@ -170,7 +169,7 @@ function buildAndApplyMenu(options: RegisterAppMenuOptions): void {
         label: translateMain('menu.paste', 'Paste'),
         accelerator: 'CmdOrCtrl+V',
         click: () => {
-          // Why: a focused terminal/native-chat pane is not a native editable
+          // Why: a focused terminal pane is not a native editable
           // control, so raw Electron paste cannot know which Yiru surface owns it.
           const webContents = BrowserWindow.getFocusedWindow()?.webContents
           if (webContents) {
@@ -215,12 +214,6 @@ function buildAndApplyMenu(options: RegisterAppMenuOptions): void {
         click: () => onToggleAppearance('statusBarVisible')
       },
       { type: 'separator' },
-      {
-        label: translateMain('menu.showAutomationsButton', 'Show Automations Button'),
-        type: 'checkbox',
-        checked: appearance.showAutomationsButton,
-        click: () => onToggleAppearance('showAutomationsButton')
-      },
       {
         label: translateMain('menu.showMobileButton', 'Show Yiru Mobile Button'),
         type: 'checkbox',

@@ -1,4 +1,7 @@
-import { isMacUserAgent, isWindowsUserAgent } from '~renderer/components/terminal-pane/pane-helpers'
+import {
+  isMacUserAgent,
+  isWindowsUserAgent
+} from '~renderer/components/terminal-pane/pane-interactions'
 import { Separator } from '~renderer/components/ui/separator'
 import { useAppStore } from '~renderer/store'
 import type { GlobalSettings } from '~shared/types'

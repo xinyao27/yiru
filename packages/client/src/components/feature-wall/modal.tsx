@@ -9,7 +9,7 @@ import {
 import { translate } from '~renderer/i18n/i18n'
 import { useAppStore } from '~renderer/store'
 
-import { getFeatureWallOpenSource } from './modal-helpers'
+import { getFeatureWallOpenSource } from './modal-source'
 import { FeatureWallTourSurface } from './tour-surface'
 
 export default function FeatureWallModal(): JSX.Element | null {

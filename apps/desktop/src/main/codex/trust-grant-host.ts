@@ -1,7 +1,7 @@
 import { execFileSync } from 'node:child_process'
 
 import { resolveCodexCommand } from '../runtime/cli-command'
-import { getSpawnArgsForWindows } from '../win32-utils'
+import { getSpawnArgsForWindows } from '../windows-host'
 import {
   buildWslCodexAppServerArgs,
   buildWslCodexIdentityArgs,

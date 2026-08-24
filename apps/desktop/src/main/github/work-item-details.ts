@@ -9,7 +9,7 @@ import {
   githubRepoContext,
   release,
   type LocalGitExecOptions
-} from './gh-utils'
+} from './github-cli'
 import {
   getPullRequestFiles,
   getPullRequestFileViewedStates,

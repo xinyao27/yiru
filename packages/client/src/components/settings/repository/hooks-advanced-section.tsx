@@ -62,7 +62,6 @@ export function RepositoryHooksAdvancedSection({
         open={advancedMatchesSearch || isAdvancedOpen}
         onToggle={(event) => {
           if (advancedMatchesSearch) {
-            event.currentTarget.open = true
             return
           }
           onAdvancedOpenChange(event.currentTarget.open)

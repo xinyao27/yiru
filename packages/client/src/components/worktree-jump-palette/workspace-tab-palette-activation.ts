@@ -6,7 +6,7 @@ import {
   isWebRuntimeSessionActive
 } from '~renderer/runtime/web-runtime-session'
 import { useAppStore } from '~renderer/store'
-import { findWorktreeById } from '~renderer/store/slices/worktree-helpers'
+import { findWorktreeById } from '~renderer/store/slices/worktree-state'
 import type { AppState } from '~renderer/store/types'
 
 import type { WorkspaceTabPaletteSearchResult } from './workspace-tab-palette-search'

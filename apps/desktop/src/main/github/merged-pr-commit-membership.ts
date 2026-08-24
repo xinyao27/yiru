@@ -1,4 +1,4 @@
-import { ghExecFileAsync } from './gh-utils'
+import { ghExecFileAsync } from './github-cli'
 import { noteRateLimitSpend, rateLimitGuard } from './rate-limit'
 import type { OwnerRepo } from './repository-identity'
 

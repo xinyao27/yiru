@@ -1,6 +1,5 @@
 import { agentSessionRuntimeHandlers } from './router-direct/agent-session'
 import { aiVaultRuntimeHandlers } from './router-direct/ai-vault'
-import { automationRuntimeHandlers } from './router-direct/automation'
 import { browserRuntimeHandlers } from './router-direct/browser'
 import { clientSurfaceRuntimeHandlers } from './router-direct/client-surface'
 import { computerUseRuntimeHandlers } from './router-direct/computer-use'
@@ -34,7 +33,7 @@ import { workspaceRuntimeHandlers } from './router-direct/workspace'
 // router-direct/ groups the domains that share a feature area (workspace,
 // source control, provider tooling, provider usage, host tooling, client
 // surfaces, agent session, ai-vault, git, github, gitlab, computer-use,
-// automation, emulator, files, hosted-review, host-telemetry,
+// emulator, files, hosted-review, host-telemetry,
 // editor-documents, runtime-events, browser); add a migrated domain to the
 // group it belongs with. `ai-vault.ts` and `provider-usage.ts` (切片 80) each
 // stand alone rather than joining a same-file neighbor: both are single-leaf
@@ -107,7 +106,6 @@ import { workspaceRuntimeHandlers } from './router-direct/workspace'
 export const directRuntimeOrpcHandlers = {
   ...agentSessionRuntimeHandlers,
   ...aiVaultRuntimeHandlers,
-  ...automationRuntimeHandlers,
   ...browserRuntimeHandlers,
   ...clientSurfaceRuntimeHandlers,
   ...computerUseRuntimeHandlers,

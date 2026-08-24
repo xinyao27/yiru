@@ -15,7 +15,7 @@ import {
   resolveCommitMessageSelectedModel,
   resolveCommitMessageSelectedThinking,
   seedCommitMessageAiEnablePatch
-} from './ai-commit-pr-settings-helpers'
+} from './ai-commit-pr-settings-state'
 
 export type AiCommitPrSettingsViewModel = {
   config: CommitMessageAiSettings

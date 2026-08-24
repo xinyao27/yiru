@@ -1,7 +1,7 @@
 import { detectLanguage } from '~renderer/lib/language-detect'
 import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
 import { useAppStore } from '~renderer/store'
-import { findWorktreeById } from '~renderer/store/slices/worktree-helpers'
+import { findWorktreeById } from '~renderer/store/slices/worktree-state'
 
 import {
   getOpenableAnnotationLine,

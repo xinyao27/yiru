@@ -2,7 +2,7 @@ import type { CliInstallStatus } from '~shared/cli-install-types'
 import type { FeatureInteractionState } from '~shared/feature-interactions'
 import type { FeatureTipId } from '~shared/feature-tips'
 import { getCompletedFeatureTipIds, getOrderedUnseenFeatureTips } from '~shared/feature-tips'
-import type { GlobalSettings, OnboardingState } from '~shared/types'
+import type { OnboardingState } from '~shared/types'
 
 import { shouldShowOnboarding } from '../onboarding/should-show-onboarding'
 
@@ -25,7 +25,7 @@ export function getFeatureTipsAppOpenDecision(args: {
   onboarding: OnboardingState | null
   persistedUIReady: boolean
   promptedThisSession: boolean
-  settings: { voice?: GlobalSettings['voice'] } | null | undefined
+  settings: object | null | undefined
   suppressedByOnboardingThisSession: boolean
 }): FeatureTipsAppOpenDecision {
   if (args.onboarding !== null && shouldShowOnboarding(args.onboarding)) {
@@ -49,7 +49,6 @@ export function getFeatureTipsAppOpenDecision(args: {
     seenTipIds: new Set<FeatureTipId>(args.featureTipsSeenIds),
     completedTipIds: getCompletedFeatureTipIds({
       cliInstalled: args.cliInstalled,
-      voiceDictationEnabled: args.settings.voice?.enabled === true,
       featureInteractions: args.featureInteractions
     })
   })

@@ -7,7 +7,7 @@ import {
   planAgentCliArgsSuffix,
   type AgentStartupPlan
 } from '~renderer/lib/tui-agent-startup'
-import type { SessionOptionValue } from '~shared/native-chat/session-options'
+import type { SessionOptionValue } from '~shared/agent/session-options'
 import { TUI_AGENT_CONFIG } from '~shared/tui-agent/config'
 import { isTuiAgentEnabled } from '~shared/tui-agent/selection'
 import type { TuiAgent } from '~shared/types'

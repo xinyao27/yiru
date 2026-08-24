@@ -1,4 +1,3 @@
-import { seedNativeChatAppliedSessionOptions } from '~renderer/components/native-chat/session/option-cache'
 import { createBrowserUuid } from '~renderer/lib/browser-uuid'
 import { ensureAgentStartupInTerminal } from '~renderer/lib/new-workspace'
 import type { WorktreeCreationRequest } from '~renderer/lib/pending-worktree-creation'
@@ -124,16 +123,6 @@ export async function completeWorktreeCreationHandoff(
 
   // Why: clear synchronously so panel→terminal commits without an empty frame.
   useAppStore.getState().removePendingWorktreeCreation(creationId)
-  if (request.startupPlan && request.agent) {
-    const optionScopeKey = primaryTabId ?? result.startupTerminal?.tabId
-    if (optionScopeKey) {
-      seedNativeChatAppliedSessionOptions(
-        optionScopeKey,
-        request.agent,
-        request.startupPlan.sessionOptions
-      )
-    }
-  }
   if (request.startupPlan && !backendSpawned) {
     void ensureAgentStartupInTerminal({
       worktreeId: worktree.id,

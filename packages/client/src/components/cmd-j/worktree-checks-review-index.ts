@@ -1,6 +1,6 @@
 import type { HostedReviewInfo } from '@yiru/workbench-model/review'
 import { LOCAL_EXECUTION_HOST_ID } from '@yiru/workbench-model/workspace'
-import { branchName } from '~renderer/lib/git-utils'
+import { branchName } from '~renderer/lib/git-branch-name'
 import { getGitHubPRCacheKey } from '~renderer/store/slices/github-cache-key'
 import { getHostedReviewCacheKey } from '~renderer/store/slices/hosted-review-cache-identity'
 import { getRepoHostIdentityForParts } from '~renderer/store/slices/repo-host-identity'

@@ -39,13 +39,6 @@ export const WorktreeActivateInputSchema = WorktreeSelectorInputSchema.extend({
   notifyClients: OptionalBoolean
 })
 
-const AutomationWorkspaceProvenanceRequestSchema = z.object({
-  automationId: z.string(),
-  automationRunId: z.string(),
-  dispatchToken: z.string(),
-  createRequestId: z.string()
-})
-
 export const WorktreeCreateInputSchema = z
   .object({
     repo: RepoSelectorSchema,
@@ -118,8 +111,7 @@ export const WorktreeCreateInputSchema = z
     // `CreateWorktreeArgs.pendingFirstAgentMessageRename`).
     // `runtime.createManagedWorktree` already accepts this field — only the
     // RPC input schema was missing it.
-    pendingFirstAgentMessageRename: OptionalBoolean,
-    automationProvenanceRequest: AutomationWorkspaceProvenanceRequestSchema.optional()
+    pendingFirstAgentMessageRename: OptionalBoolean
   })
   .superRefine((params, context) => {
     if ((params.parentWorkspace || params.parentWorktree) && params.noParent === true) {

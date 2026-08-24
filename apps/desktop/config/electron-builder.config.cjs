@@ -3,10 +3,6 @@ const { execFileSync } = require('node:child_process')
 const { join, resolve } = require('node:path')
 const electronBuilderNativeRebuild = require('../scripts/electron-builder-native-rebuild.cjs')
 const {
-  assertPackagedDaemonEntryExists,
-  verifyPackagedDaemonEntryBoots
-} = require('../scripts/verify-packaged-daemon-entry.cjs')
-const {
   createPackagedRuntimeNodeModuleResources,
   prunePackagedRuntimeNodeModules,
   verifyPackagedRuntimeDeps
@@ -38,7 +34,7 @@ const runtimeHostExtraResource = {
   from: 'out/runtime-host',
   to: 'runtime-host'
 }
-// Why: the main bundle, packaged CLI, SSH paths, and speech worker all execute
+// Why: the main bundle, packaged CLI, and SSH paths all execute
 // from package directories where pnpm's symlink farm is absent. Copy the exact
 // runtime dependency closure to Resources/node_modules so bare require() calls
 // do not fall through to a developer checkout's node_modules.
@@ -50,19 +46,6 @@ const commonExtraResources = [
   ...packagedRuntimeNodeModuleResources,
   skillFreshnessResources
 ]
-const macSpeechNativeResource = {
-  from: 'node_modules/sherpa-onnx-darwin-${arch}',
-  to: 'node_modules/sherpa-onnx-darwin-${arch}'
-}
-const linuxSpeechNativeResource = {
-  from: 'node_modules/sherpa-onnx-linux-${arch}',
-  to: 'node_modules/sherpa-onnx-linux-${arch}'
-}
-const winSpeechNativeResource = {
-  from: 'node_modules/sherpa-onnx-win-x64',
-  to: 'node_modules/sherpa-onnx-win-x64'
-}
-
 /** @type {import('electron-builder').Configuration} */
 module.exports = {
   appId: 'com.xinyao27.yiru',
@@ -127,9 +110,6 @@ module.exports = {
   // before the GUI process starts, so those deps need the same treatment.
   // Why: out/package.json pins compiled output to CommonJS so parent
   // package.json files with type=module cannot change the packaged CLI loader.
-  // Why: sherpa-onnx native bindings (platform-specific subpackages) must be
-  // unpacked because they ship .node addons + .dylib/.so files that cannot be
-  // dlopen()'d from inside the asar archive.
   asarUnpack: [
     'out/package.json',
     'out/cli/**',
@@ -145,7 +125,7 @@ module.exports = {
     'out/main/gemini/**',
     'out/main/grok/**',
     'out/main/hermes/**',
-    'out/main/win32-utils.js',
+    'out/main/windows-host.js',
     'out/main/daemon-entry.js',
     'out/main/computer-sidecar.js',
     'out/main/parcel-watcher-process-entry.js',
@@ -154,8 +134,7 @@ module.exports = {
     'node_modules/ws/**',
     'node_modules/tweetnacl/**',
     'node_modules/zod/**',
-    'node_modules/yaml/**',
-    'node_modules/sherpa-onnx*/**'
+    'node_modules/yaml/**'
   ],
   afterPack: async (context) => {
     const resourcesDir =
@@ -172,20 +151,6 @@ module.exports = {
     }
     prunePackagedRuntimeNodeModules(resourcesDir, context.electronPlatformName, context.arch)
     verifyPackagedRuntimeDeps(resourcesDir)
-    // Why: daemon-entry loads target-arch node-pty, so only boot it on the host slice.
-    const archEnumByNodeArch = { ia32: 0, x64: 1, armv7l: 2, arm64: 3 }
-    const hostArchEnum = archEnumByNodeArch[process.arch]
-    if (context.arch === hostArchEnum || context.arch === 4) {
-      verifyPackagedDaemonEntryBoots(resourcesDir)
-    } else {
-      // Why: a cross-arch slice can't be booted by the host Node, but the
-      // unpacked entry must still exist — its absence is a layout regression
-      // regardless of arch, so only the boot is skipped, not the check.
-      assertPackagedDaemonEntryExists(resourcesDir)
-      console.log(
-        `[verify-packaged-daemon-entry] skipped boot on cross-arch slice (target ${context.arch}, host ${process.arch})`
-      )
-    }
     chmodUnixCliLaunchers(resourcesDir, context.electronPlatformName)
     chmodMacServeSimHelpers(resourcesDir, context.electronPlatformName)
     for (const filename of readdirSync(resourcesDir)) {
@@ -218,7 +183,6 @@ module.exports = {
     },
     extraResources: [
       ...commonExtraResources,
-      winSpeechNativeResource,
       {
         from: 'resources/win32/bin/yiru.cmd',
         to: 'bin/yiru.cmd'
@@ -279,7 +243,6 @@ module.exports = {
     notarize: isMacRelease,
     extraResources: [
       ...commonExtraResources,
-      macSpeechNativeResource,
       {
         from: 'resources/darwin/bin/yiru',
         to: 'bin/yiru'
@@ -346,7 +309,6 @@ module.exports = {
     },
     extraResources: [
       ...commonExtraResources,
-      linuxSpeechNativeResource,
       {
         from: 'resources/linux/bin/yiru',
         to: 'bin/yiru'

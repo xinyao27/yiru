@@ -90,37 +90,6 @@ export function GeneralWorkspaceSettingsSection({
         </SearchableSetting>
       </div>
 
-      <div id="general-skip-delete-automation-confirm" className="scroll-mt-6">
-        <SearchableSetting
-          title={translate(
-            'auto.components.settings.GeneralWorkspaceSettingsSection.ea98373cd8',
-            'Ask Before Deleting Automations'
-          )}
-          description={translate(
-            'auto.components.settings.GeneralWorkspaceSettingsSection.d2dd2ca2e3',
-            'Show a confirmation dialog before deleting an automation and its run history.'
-          )}
-          keywords={['delete', 'automation', 'confirm', 'dialog', 'skip', 'prompt']}
-        >
-          <SettingsSwitchRow
-            label={translate(
-              'auto.components.settings.GeneralWorkspaceSettingsSection.ea98373cd8',
-              'Ask Before Deleting Automations'
-            )}
-            description={translate(
-              'auto.components.settings.GeneralWorkspaceSettingsSection.824b98a0d9',
-              'Show a confirmation before deleting automations and their run history.'
-            )}
-            checked={!settings.skipDeleteAutomationConfirm}
-            onChange={() =>
-              updateSettings({
-                skipDeleteAutomationConfirm: !settings.skipDeleteAutomationConfirm
-              })
-            }
-          />
-        </SearchableSetting>
-      </div>
-
       <div
         id="general-open-in-apps"
         data-settings-section="general-open-in-apps"

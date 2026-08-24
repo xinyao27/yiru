@@ -1,5 +1,5 @@
-import type { SessionOptionSelectChoice } from '../native-chat/session-options'
 import type { AgentSessionOptionCatalog, CatalogOption } from './session-option-catalog-types'
+import type { SessionOptionSelectChoice } from './session-options'
 
 function hasFlag(tokens: readonly string[], flags: readonly string[]): boolean {
   return tokens.some((token) =>
@@ -100,7 +100,7 @@ export const CLAUDE_SESSION_OPTION_CATALOG: AgentSessionOptionCatalog = {
       build: (value) => `/model ${String(value)}`,
       pickerCommand: '/model',
       // Why: Claude sometimes confirms a cached-history switch. Detect the
-      // actual prompt so ordinary model changes stay in native chat.
+      // actual prompt so ordinary model changes stay in the current session.
       detectAgentInteraction: 'claude-model-switch-confirmation'
     }
   }

@@ -212,6 +212,7 @@ import {
   getProjectGroupHeaderSectionEndByGroupId,
   getRepoHeaderSectionEndByRepoId
 } from './worktree-header-section-boundaries'
+import { markWorktreeLegendScrollRoot } from './worktree-legend-scroll-root'
 import {
   getReorderedWorktreeIdsToUnnest,
   getWorktreeLineageDropTargetId
@@ -294,6 +295,7 @@ import {
 import {
   createSidebarDragPreview,
   isSidebarPointerDragBlocked,
+  removeSidebarDragPreview,
   setSidebarPointerDragDocumentStyles,
   updateSidebarDragPreviewPosition
 } from './worktree-sidebar-pointer-drag-dom'
@@ -418,44 +420,6 @@ function getMountedWorktreeOptions(worktreeId: string, root?: ParentNode | null)
     }
   })
   return result
-}
-
-function markSidebarWorktreeActiveImmediately(worktreeId: string, primaryRowKey?: string): void {
-  const sidebar = document.querySelector<HTMLElement>('[data-worktree-sidebar]')
-  const nextOptions = getMountedWorktreeOptions(worktreeId, sidebar)
-  const nextOption = nextOptions[0]
-  if (!nextOption) {
-    return
-  }
-
-  sidebar
-    ?.querySelectorAll<HTMLElement>('[role="option"][aria-current="page"]')
-    .forEach((option) => option.removeAttribute('aria-current'))
-
-  for (const option of nextOptions) {
-    option.setAttribute('aria-current', 'page')
-  }
-  sidebar
-    ?.querySelectorAll<HTMLElement>('[data-worktree-card-surface][data-worktree-card-active]')
-    .forEach((surface) => {
-      if (!nextOptions.some((option) => option.contains(surface))) {
-        surface.removeAttribute('data-worktree-card-active')
-      }
-    })
-  for (const option of nextOptions) {
-    const activeSurfaceVariant =
-      primaryRowKey !== undefined
-        ? option.dataset.worktreeRowKey === primaryRowKey
-          ? 'primary'
-          : 'secondary'
-        : option === nextOption
-          ? 'primary'
-          : 'secondary'
-    const surface = option.matches('[data-worktree-card-surface]')
-      ? option
-      : option.querySelector<HTMLElement>('[data-worktree-card-surface]')
-    surface?.setAttribute('data-worktree-card-active', activeSurfaceVariant)
-  }
 }
 
 function revealMountedWorktreeElement(
@@ -655,7 +619,6 @@ type LegendWorktreeViewportProps = {
   selectedWorktreeIds: ReadonlySet<string>
   selectedWorktrees: readonly Worktree[]
   onSelectionGesture: (event: React.MouseEvent<HTMLElement>, worktreeId: string) => boolean
-  onImmediateWorktreeActivate: (worktreeId: string, rowKey: string | undefined) => void
   onContextMenuSelect: (
     event: React.MouseEvent<HTMLElement>,
     worktree: Worktree
@@ -1339,7 +1302,6 @@ const LegendWorktreeViewport = React.memo(function LegendWorktreeViewport({
   selectedWorktreeIds,
   selectedWorktrees,
   onSelectionGesture,
-  onImmediateWorktreeActivate,
   onContextMenuSelect,
   repoMap,
   worktreeMap,
@@ -1453,7 +1415,9 @@ const LegendWorktreeViewport = React.memo(function LegendWorktreeViewport({
       })
   }, [])
   const legendListRef = useRef<LegendListRef>(null)
-  const visibleWorkspaceRowIndexesRef = useRef<readonly number[]>([])
+  const [visibleWorkspaceRowIndexes, setVisibleWorkspaceRowIndexes] = useState<readonly number[]>(
+    []
+  )
   const reportVisibleRowsRef = useRef<(indexes: readonly number[]) => void>(() => {})
   const [dragOverStatus, setDragOverStatus] = useState<WorkspaceStatus | null>(null)
   const [pinDragOver, setPinDragOver] = useState(false)
@@ -1870,9 +1834,8 @@ const LegendWorktreeViewport = React.memo(function LegendWorktreeViewport({
   const handleImmediateWorktreeRowActivate = useCallback(
     (worktreeId: string, rowKey: string | undefined): void => {
       setPrimaryActiveWorktreeRow(rowKey ? { worktreeId, rowKey } : null)
-      onImmediateWorktreeActivate(worktreeId, rowKey)
     },
-    [onImmediateWorktreeActivate]
+    []
   )
   const firstHeaderIndex = useMemo(
     () => renderRows.findIndex((row) => row.type === 'header' || row.type === 'host-header'),
@@ -2566,7 +2529,7 @@ const LegendWorktreeViewport = React.memo(function LegendWorktreeViewport({
     if (drag.frameId !== null) {
       window.cancelAnimationFrame(drag.frameId)
     }
-    drag.preview?.remove()
+    removeSidebarDragPreview(drag.preview)
     worktreePointerDragRef.current = null
     setSidebarPointerDragDocumentStyles(false)
     setDragOverStatus(null)
@@ -2590,7 +2553,7 @@ const LegendWorktreeViewport = React.memo(function LegendWorktreeViewport({
         clearWorktreeDrag()
       }
       if (node) {
-        node.dataset.worktreeSidebar = ''
+        markWorktreeLegendScrollRoot(node)
       }
       scrollRef.current = node
     },
@@ -3546,8 +3509,6 @@ const LegendWorktreeViewport = React.memo(function LegendWorktreeViewport({
         : undefined,
     workspaceRows: workspaceSidebarRows
   } satisfies ActiveDescendantInput
-  const activeDescendantInputRef = useRef(activeDescendantInput)
-  activeDescendantInputRef.current = activeDescendantInput
 
   const reportVisibleRows = useCallback(
     (visibleIndexes: readonly number[]) => {
@@ -3623,29 +3584,24 @@ const LegendWorktreeViewport = React.memo(function LegendWorktreeViewport({
       const indexes = info.viewableItems
         .map((item) => item.index)
         .sort((left, right) => left - right)
-      visibleWorkspaceRowIndexesRef.current = indexes
+      setVisibleWorkspaceRowIndexes((current) =>
+        current.length === indexes.length &&
+        current.every((index, position) => index === indexes[position])
+          ? current
+          : indexes
+      )
       reportVisibleRowsRef.current(indexes)
-      const activeDescendantId = getActiveDescendantOptionId({
-        ...activeDescendantInputRef.current,
-        visibleIndexes: indexes
-      })
-      const container = scrollRef.current
-      if (activeDescendantId) {
-        container?.setAttribute('aria-activedescendant', activeDescendantId)
-      } else {
-        container?.removeAttribute('aria-activedescendant')
-      }
     },
     []
   )
 
   useEffect(() => {
-    reportVisibleRows(visibleWorkspaceRowIndexesRef.current)
-  }, [documentVisibilityRevision, reportVisibleRows])
+    reportVisibleRows(visibleWorkspaceRowIndexes)
+  }, [documentVisibilityRevision, reportVisibleRows, visibleWorkspaceRowIndexes])
 
   const activeDescendantId = getActiveDescendantOptionId({
     ...activeDescendantInput,
-    visibleIndexes: visibleWorkspaceRowIndexesRef.current
+    visibleIndexes: visibleWorkspaceRowIndexes
   })
 
   const hasWorkspaceDropTargets = useMemo(
@@ -5150,7 +5106,6 @@ const WorktreeList = React.memo(function WorktreeList({ scrollOffsetRef }: Workt
   const showSleepingWorkspaces = useAppStore((s) => s.showSleepingWorkspaces)
   const agentStatusEpoch = useAppStore((s) => (!showSleepingWorkspaces ? s.agentStatusEpoch : 0))
   const hideDefaultBranchWorkspace = useAppStore((s) => s.hideDefaultBranchWorkspace)
-  const hideAutomationGeneratedWorkspaces = useAppStore((s) => s.hideAutomationGeneratedWorkspaces)
   const filterRepoIds = useAppStore((s) => s.filterRepoIds)
   const openModal = useAppStore((s) => s.openModal)
   const openSettingsPage = useAppStore((s) => s.openSettingsPage)
@@ -5491,7 +5446,6 @@ const WorktreeList = React.memo(function WorktreeList({ scrollOffsetRef }: Workt
             Date.now()
           ),
       hideDefaultBranchWorkspace,
-      hideAutomationGeneratedWorkspaces,
       repoMap,
       workspaceHostScope,
       visibleWorkspaceHostIds,
@@ -5515,7 +5469,6 @@ const WorktreeList = React.memo(function WorktreeList({ scrollOffsetRef }: Workt
     filterRepoIds,
     showSleepingWorkspaces,
     hideDefaultBranchWorkspace,
-    hideAutomationGeneratedWorkspaces,
     workspaceHostScope,
     visibleWorkspaceHostIds,
     settings,
@@ -5950,13 +5903,6 @@ const WorktreeList = React.memo(function WorktreeList({ scrollOffsetRef }: Workt
     },
     [selectedWorktreeIds, selectedWorktrees]
   )
-
-  const handleImmediateWorktreeActivate = useCallback((worktreeId: string, rowKey?: string) => {
-    // Why: React-rendering the full virtualized sidebar on the pointer path is
-    // visible latency. Mutate only the selected-row affordance; store state
-    // reconciles the same attributes after activation settles.
-    markSidebarWorktreeActiveImmediately(worktreeId, rowKey)
-  }, [])
 
   // Why: coworking routes are not scoped to one sidebar worktree, so no card
   // should appear selected while one is active.
@@ -6467,7 +6413,6 @@ const WorktreeList = React.memo(function WorktreeList({ scrollOffsetRef }: Workt
       showSleepingWorkspaces,
       filterRepoIds,
       hideDefaultBranchWorkspace,
-      hideAutomationGeneratedWorkspaces,
       visibleWorkspaceHostIds,
       workspaceHostScope
     }),
@@ -6475,7 +6420,6 @@ const WorktreeList = React.memo(function WorktreeList({ scrollOffsetRef }: Workt
       showSleepingWorkspaces,
       filterRepoIds,
       hideDefaultBranchWorkspace,
-      hideAutomationGeneratedWorkspaces,
       visibleWorkspaceHostIds,
       workspaceHostScope
     ]
@@ -6483,9 +6427,6 @@ const WorktreeList = React.memo(function WorktreeList({ scrollOffsetRef }: Workt
   const hasFilters = sidebarHasActiveFilters(filterState)
   const setShowSleepingWorkspaces = useAppStore((s) => s.setShowSleepingWorkspaces)
   const setHideDefaultBranchWorkspace = useAppStore((s) => s.setHideDefaultBranchWorkspace)
-  const setHideAutomationGeneratedWorkspaces = useAppStore(
-    (s) => s.setHideAutomationGeneratedWorkspaces
-  )
   const setFilterRepoIds = useAppStore((s) => s.setFilterRepoIds)
   const setVisibleWorkspaceHostIds = useAppStore((s) => s.setVisibleWorkspaceHostIds)
 
@@ -6500,9 +6441,6 @@ const WorktreeList = React.memo(function WorktreeList({ scrollOffsetRef }: Workt
     if (actions.resetHideDefaultBranchWorkspace) {
       setHideDefaultBranchWorkspace(false)
     }
-    if (actions.resetHideAutomationGeneratedWorkspaces) {
-      setHideAutomationGeneratedWorkspaces(false)
-    }
     if (actions.resetVisibleWorkspaceHostIds) {
       setVisibleWorkspaceHostIds(null)
     }
@@ -6510,7 +6448,6 @@ const WorktreeList = React.memo(function WorktreeList({ scrollOffsetRef }: Workt
     setShowSleepingWorkspaces,
     setFilterRepoIds,
     setHideDefaultBranchWorkspace,
-    setHideAutomationGeneratedWorkspaces,
     setVisibleWorkspaceHostIds,
     filterState
   ])
@@ -6765,7 +6702,6 @@ const WorktreeList = React.memo(function WorktreeList({ scrollOffsetRef }: Workt
         selectedWorktreeIds={selectedWorktreeIds}
         selectedWorktrees={selectedWorktrees}
         onSelectionGesture={updateSelectionForGesture}
-        onImmediateWorktreeActivate={handleImmediateWorktreeActivate}
         onContextMenuSelect={selectForContextMenu}
         repoMap={repoMap}
         worktreeMap={worktreeMap}

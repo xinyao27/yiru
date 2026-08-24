@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 import { FolderPlus } from '~renderer/components/icons/hugeicons'
 import { LoadingIndicator } from '~renderer/components/loading-indicator'
 import { TooltipProvider } from '~renderer/components/ui/tooltip'
-import { useSidebarResize } from '~renderer/hooks/use-sidebar-resize'
+import { SidebarResizeOverlay, useSidebarResize } from '~renderer/hooks/use-sidebar-resize'
 import { cn } from '~renderer/lib/class-names'
 import { lazyWithRetry } from '~renderer/lib/lazy-with-retry'
 import { useAppStore } from '~renderer/store'
@@ -41,10 +41,6 @@ function Sidebar({ worktreeScrollOffsetRef, appearanceStyle }: SidebarProps): Re
   const fetchAllWorktrees = useAppStore((s) => s.fetchAllWorktrees)
   const activeModal = useAppStore((s) => s.activeModal)
   const { nativeDropTarget, dropHandlers, affordance } = useSidebarProjectDrop()
-
-  const setLiveSidebarWidth = React.useCallback((width: number) => {
-    document.documentElement.style.setProperty('--workspace-sidebar-live-width', `${width}px`)
-  }, [])
 
   // Fetch worktrees when repos are added/removed
   const repoCount = repos.length
@@ -87,15 +83,15 @@ function Sidebar({ worktreeScrollOffsetRef, appearanceStyle }: SidebarProps): Re
     void fetchAllWorktrees().then(() => fetchWorktreeLineage())
   }, [onlineRuntimeEnvKey, fetchAllWorktrees, fetchWorktreeLineage])
 
-  const { containerRef, onResizeStart, isResizing } = useSidebarResize<HTMLDivElement>({
-    isOpen: sidebarOpen,
-    width: sidebarWidth,
-    minWidth: MIN_WIDTH,
-    maxWidth: MAX_WIDTH,
-    deltaSign: 1,
-    setWidth: setSidebarWidth,
-    onDraftWidthChange: setLiveSidebarWidth
-  })
+  const { containerRef, onResizeStart, isResizing, renderedWidth } =
+    useSidebarResize<HTMLDivElement>({
+      isOpen: sidebarOpen,
+      width: sidebarWidth,
+      minWidth: MIN_WIDTH,
+      maxWidth: MAX_WIDTH,
+      deltaSign: 1,
+      setWidth: setSidebarWidth
+    })
 
   return (
     <TooltipProvider>
@@ -107,7 +103,7 @@ function Sidebar({ worktreeScrollOffsetRef, appearanceStyle }: SidebarProps): Re
           'worktree-sidebar-theme bg-sidebar scrollbar-sleek-parent relative flex min-h-0 flex-shrink-0 flex-col',
           sidebarOpen && 'border-border border-r'
         )}
-        style={appearanceStyle}
+        style={{ ...appearanceStyle, width: renderedWidth }}
         {...dropHandlers}
       >
         {/* Why: clip sidebar content without clipping the handle's titlebar extension. */}
@@ -161,6 +157,8 @@ function Sidebar({ worktreeScrollOffsetRef, appearanceStyle }: SidebarProps): Re
           </div>
         )}
       </div>
+
+      <SidebarResizeOverlay visible={isResizing} />
 
       {/* Dialogs render outside sidebar to avoid clipping. Lazy-load them only
       for the modal that needs their flow-specific hooks and UI. */}

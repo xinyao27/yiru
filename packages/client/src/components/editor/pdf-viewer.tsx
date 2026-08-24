@@ -33,11 +33,12 @@ const MAX_SCALE = 5
 const SCALE_STEP = 1.25
 
 type PdfViewerProps = {
-  content: string
+  content?: string
   filePath: string
+  src?: string
 }
 
-export default function PdfViewer({ content, filePath }: PdfViewerProps): JSX.Element {
+export default function PdfViewer({ content = '', filePath, src }: PdfViewerProps): JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null)
   const viewerDivRef = useRef<HTMLDivElement>(null)
   const [pdfError, setPdfError] = useState<string | null>(null)
@@ -55,23 +56,29 @@ export default function PdfViewer({ content, filePath }: PdfViewerProps): JSX.El
   useEffect(() => {
     const container = containerRef.current
     const viewerDiv = viewerDivRef.current
-    if (!container || !viewerDiv || !cleanedContent) {
+    if (!container || !viewerDiv || (!cleanedContent && !src)) {
       return
     }
 
     setPdfError(null)
     let cancelled = false
 
-    let binary: string
-    try {
-      binary = window.atob(cleanedContent)
-    } catch {
-      setPdfError('Failed to decode PDF content')
-      return
-    }
-    const bytes = new Uint8Array(binary.length)
-    for (let i = 0; i < binary.length; i += 1) {
-      bytes[i] = binary.charCodeAt(i)
+    let source: { url: string } | { data: Uint8Array<ArrayBuffer> }
+    if (src) {
+      source = { url: src }
+    } else {
+      let binary: string
+      try {
+        binary = window.atob(cleanedContent)
+      } catch {
+        setPdfError('Failed to decode PDF content')
+        return
+      }
+      const bytes = new Uint8Array(binary.length)
+      for (let i = 0; i < binary.length; i += 1) {
+        bytes[i] = binary.charCodeAt(i)
+      }
+      source = { data: bytes }
     }
 
     const eventBus = new EventBus()
@@ -102,7 +109,7 @@ export default function PdfViewer({ content, filePath }: PdfViewerProps): JSX.El
     }
     eventBus.on('scalechanging', handleScaleChanging)
 
-    const loadingTask = pdfjsLib.getDocument({ data: bytes })
+    const loadingTask = pdfjsLib.getDocument(source)
 
     loadingTask.promise
       .then((doc) => {
@@ -142,7 +149,7 @@ export default function PdfViewer({ content, filePath }: PdfViewerProps): JSX.El
       findControllerRef.current = null
       pdfViewerRef.current = null
     }
-  }, [cleanedContent])
+  }, [cleanedContent, src])
 
   const closeFindBar = useCallback(() => {
     const eventBus = eventBusRef.current

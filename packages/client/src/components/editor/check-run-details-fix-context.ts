@@ -9,7 +9,7 @@ import { getWorktreeGitIdentityDisplay } from '~renderer/lib/worktree-git-identi
 import { useAppStore } from '~renderer/store'
 import { getGitHubPRCacheKey } from '~renderer/store/slices/github-cache-key'
 import { getHostedReviewCacheKey } from '~renderer/store/slices/hosted-review-cache-identity'
-import { findWorktreeById } from '~renderer/store/slices/worktree-helpers'
+import { findWorktreeById } from '~renderer/store/slices/worktree-state'
 import type { PRCheckDetail, PRCheckRunDetails, Repo } from '~shared/types'
 
 import { gitHubPRToChecksPanelReview } from '../workspace-panel/checks-panel/review'

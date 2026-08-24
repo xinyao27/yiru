@@ -3,16 +3,16 @@ import { isPaneColumnSplitDropNoOp } from '~renderer/store/slices/pane-column-sp
 import type { TabGroup, TabGroupLayoutNode } from '~shared/types'
 
 import {
-  resolvePaneColumnEdgeZone,
-  TAB_GROUP_TAB_STRIP_HEIGHT_PX,
-  type PaneColumnSplitTarget
-} from './tab-drop-zone'
-import {
   canDropTabIntoPaneBody,
   isPaneDropData,
   isTabDragData,
   type TabDragItemData
-} from './use-tab-drag-split'
+} from './tab-drag-data'
+import {
+  resolvePaneColumnEdgeZone,
+  TAB_GROUP_TAB_STRIP_HEIGHT_PX,
+  type PaneColumnSplitTarget
+} from './tab-drop-zone'
 
 export type TabGroupPanelGeometryEntry = {
   groupId: string

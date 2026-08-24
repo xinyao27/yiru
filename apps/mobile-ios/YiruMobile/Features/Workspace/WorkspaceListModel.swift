@@ -107,11 +107,6 @@ final class WorkspaceListModel {
         await load(replacingFailure: snapshot == nil)
     }
 
-    func supportsFloatingWorkspace() async -> Bool {
-        guard canUseHost else { return false }
-        return await repository.supportsFloatingWorkspace(for: hostID)
-    }
-
     func setSearchText(_ value: String) {
         guard searchText != value else { return }
         searchText = value

@@ -45,14 +45,12 @@
     "build:machine-key-macos": "node scripts/build-machine-key-macos.mjs",
     "build:notification-status-macos": "node scripts/build-notification-status-macos.mjs",
     "build:native": "node scripts/build-native-for-platform.mjs",
-    "verify:computer-native": "node scripts/verify-computer-native.mjs",
-    "verify:cli-runtime": "node scripts/verify-cli-bin.mjs --run-help",
-    "build:cli": "vp run build:workspace-deps && vp run build:machine-key-macos -- --single-arch && tsc -p config/tsconfig.cli.json --outDir out --composite false --incremental false && node scripts/copy-shared-dist.mjs && node scripts/build-cli-orpc-client.mjs && node scripts/rewrite-emitted-aliases.mjs && node scripts/verify-cli-bin.mjs --fix-executable --fix-package-json && node scripts/install-dev-cli.mjs",
+    "build:cli": "vp run build:workspace-deps && vp run build:machine-key-macos -- --single-arch && tsc -p config/tsconfig.cli.json --outDir out --composite false --incremental false && node scripts/copy-shared-dist.mjs && node scripts/build-cli-orpc-client.mjs && node scripts/rewrite-emitted-aliases.mjs",
     "build:electron-vite": "vp run generate:i18n && node scripts/run-electron-vite-build.mjs",
-    "build:web": "vp run generate:i18n && node scripts/run-vite-web-build.mjs && node scripts/verify-web-build.mjs",
-    "build:desktop": "vp run typecheck && vp run build:relay && vp run build:runtime-host && vp run build:cli && vp run build:electron-vite && vp run build:web && vp run verify:cli-runtime",
+    "build:web": "vp run generate:i18n && node scripts/run-vite-web-build.mjs",
+    "build:desktop": "vp run typecheck && vp run build:relay && vp run build:runtime-host && vp run build:cli && vp run build:electron-vite && vp run build:web",
     "build": "vp run build:desktop && vp run build:native",
-    "build:release": "vp run build:relay && vp run build:runtime-host && vp run build:native && vp run verify:computer-native && vp run build:cli && vp run build:machine-key-macos && vp run build:electron-vite && vp run build:web && vp run verify:cli-runtime",
+    "build:release": "vp run build:relay && vp run build:runtime-host && vp run build:native && vp run build:cli && vp run build:machine-key-macos && vp run build:electron-vite && vp run build:web",
     "postinstall": "node scripts/rebuild-native-deps.mjs",
     "build:unpack": "vp run build && vp run ensure:electron-runtime && electron-builder --config config/electron-builder.config.cjs --dir",
     "build:win": "vp run build:desktop && vp run ensure:electron-runtime && electron-builder --config config/electron-builder.config.cjs --win",
@@ -77,7 +75,6 @@
     "posthog-node": "catalog:",
     "qrcode": "catalog:",
     "serve-sim": "catalog:",
-    "sherpa-onnx": "catalog:",
     "tweetnacl": "catalog:",
     "undici": "catalog:",
     "ws": "catalog:desktop",
@@ -105,12 +102,5 @@
     "typescript-api": "catalog:",
     "vite": "catalog:",
     "vite-plus": "catalog:"
-  },
-  "optionalDependencies": {
-    "sherpa-onnx-darwin-arm64": "catalog:",
-    "sherpa-onnx-darwin-x64": "catalog:",
-    "sherpa-onnx-linux-arm64": "catalog:",
-    "sherpa-onnx-linux-x64": "catalog:",
-    "sherpa-onnx-win-x64": "catalog:"
   }
 }

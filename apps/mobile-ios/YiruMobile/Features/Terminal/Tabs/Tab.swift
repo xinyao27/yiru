@@ -47,8 +47,6 @@ nonisolated struct TerminalWorkspaceTab: Identifiable, Hashable, Sendable {
     let content: TerminalWorkspaceTabContent
     let launchAgent: String?
     let resolvedAgentType: String?
-    let agentStatus: NativeChatAgentStatus?
-    let preferredViewMode: TerminalTabViewMode?
 
     init(
         id: String,
@@ -58,9 +56,7 @@ nonisolated struct TerminalWorkspaceTab: Identifiable, Hashable, Sendable {
         leafID: String?,
         content: TerminalWorkspaceTabContent,
         launchAgent: String? = nil,
-        resolvedAgentType: String? = nil,
-        agentStatus: NativeChatAgentStatus? = nil,
-        preferredViewMode: TerminalTabViewMode? = nil
+        resolvedAgentType: String? = nil
     ) {
         self.id = id
         self.title = title
@@ -70,8 +66,6 @@ nonisolated struct TerminalWorkspaceTab: Identifiable, Hashable, Sendable {
         self.content = content
         self.launchAgent = launchAgent
         self.resolvedAgentType = resolvedAgentType
-        self.agentStatus = agentStatus
-        self.preferredViewMode = preferredViewMode
     }
 
     var displayTitle: String {
@@ -126,7 +120,7 @@ nonisolated struct TerminalWorkspaceTab: Identifiable, Hashable, Sendable {
 
     var terminalAgentID: String? {
         guard case .terminal = content else { return nil }
-        let candidate = [agentStatus?.agent, resolvedAgentType, launchAgent]
+        let candidate = [resolvedAgentType, launchAgent]
             .compactMap { value -> String? in
                 guard let value else { return nil }
                 let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -163,11 +157,6 @@ nonisolated struct TerminalWorkspaceTab: Identifiable, Hashable, Sendable {
         }
         return nil
     }
-}
-
-nonisolated enum TerminalTabViewMode: String, Hashable, Sendable {
-    case terminal
-    case chat
 }
 
 nonisolated struct TerminalWorkspaceSnapshot: Sendable {

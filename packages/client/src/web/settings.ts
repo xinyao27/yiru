@@ -3,7 +3,7 @@ import {
   normalizePRBotAuthorOverrides
 } from '@yiru/workbench-model/review'
 import { normalizeAutoRenameBranchFromWorkDefaultOn } from '~shared/auto-rename-branch-from-work-settings'
-import { getDefaultSettings, getDefaultVoiceSettings } from '~shared/constants'
+import { getDefaultSettings } from '~shared/constants'
 import { normalizeTerminalCursorStyleDefault } from '~shared/terminal/cursor-style-settings'
 import { normalizeTerminalCustomThemes } from '~shared/terminal/custom-themes'
 import {
@@ -59,7 +59,6 @@ export function readWebSettings(): GlobalSettings {
   return mergeSettings(
     {
       ...defaults,
-      floatingTerminalEnabled: false,
       rightSidebarOpenByDefault: false,
       activeRuntimeEnvironmentId: environment?.id ?? null
     },
@@ -183,7 +182,6 @@ function mergeSettings(
       updates.agentDefaultArgs ?? base.agentDefaultArgs
     ),
     agentDefaultEnv: normalizeTuiAgentEnvRecord(updates.agentDefaultEnv ?? base.agentDefaultEnv),
-    voice: { ...getDefaultVoiceSettings(), ...base.voice, ...updates.voice },
     activeRuntimeEnvironmentId:
       getWebActiveEnvironment()?.id ?? updates.activeRuntimeEnvironmentId ?? null,
     terminalCustomThemes: normalizeTerminalCustomThemes(

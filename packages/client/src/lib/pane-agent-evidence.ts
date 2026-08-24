@@ -116,6 +116,6 @@ export function resolvePaneAgentActivity(
 }
 
 // Deliberately absent: a resolvePaneAgentOwner precedence resolver. The only
-// Phase 2 identity consumer (native-chat toggle) reads hook identity without a
+// Agent identity consumers read hook identity without a
 // freshness gate, so a gated owner resolver would change its behavior; the
 // owner resolver lands with its first real consumer in a later slice.

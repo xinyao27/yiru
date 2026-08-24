@@ -8,9 +8,6 @@ export type FeatureInteractionId =
   | 'cmd-j-create-workspace'
   | 'browser'
   | 'browser-tab-created'
-  | 'automations'
-  | 'automation-created'
-  | 'automation-run'
   | 'browser-annotations'
   | 'browser-annotations-sent-to-agent'
   | 'browser-grab'
@@ -28,8 +25,6 @@ export type FeatureInteractionId =
   | 'computer-use'
   | 'codex-account-switching'
   | 'cookie-import'
-  | 'floating-workspace'
-  | 'floating-workspace-hidden'
   | 'mobile-pairing'
   | 'notifications'
   | 'ports'
@@ -41,7 +36,6 @@ export type FeatureInteractionId =
   | 'terminal-tabs'
   | 'tab-splits'
   | 'usage-tracking'
-  | 'voice-dictation'
   | 'workspace-cleanup'
 
 export type FeatureInteractionDefinition = {
@@ -65,9 +59,6 @@ export const FEATURE_INTERACTIONS = [
   { id: 'cmd-j-create-workspace', interaction: 'workspace creation started from Cmd+J' },
   { id: 'browser', interaction: 'in-app browser opened' },
   { id: 'browser-tab-created', interaction: 'browser tab explicitly created' },
-  { id: 'automations', interaction: 'Automations page opened' },
-  { id: 'automation-created', interaction: 'automation created' },
-  { id: 'automation-run', interaction: 'automation run queued' },
   { id: 'browser-annotations', interaction: 'browser annotation added, copied, or cleared' },
   {
     id: 'browser-annotations-sent-to-agent',
@@ -106,11 +97,6 @@ export const FEATURE_INTERACTIONS = [
     interaction: 'Codex managed account added, selected, reauthenticated, or removed'
   },
   { id: 'cookie-import', interaction: 'browser cookies imported or cleared' },
-  { id: 'floating-workspace', interaction: 'Floating Workspace opened or configured' },
-  {
-    id: 'floating-workspace-hidden',
-    interaction: 'Floating Workspace explicitly hidden or disabled'
-  },
   { id: 'mobile-pairing', interaction: 'mobile pairing enabled or QR code generated' },
   { id: 'notifications', interaction: 'desktop notifications enabled or tested' },
   { id: 'ports', interaction: 'Ports popover opened, configured, or port action used' },
@@ -134,7 +120,6 @@ export const FEATURE_INTERACTIONS = [
     id: 'usage-tracking',
     interaction: 'Home usage analytics or provider usage details opened or refreshed'
   },
-  { id: 'voice-dictation', interaction: 'dictation session started' },
   {
     id: 'workspace-cleanup',
     interaction: 'workspace disk space scan, review, or cleanup action used'

@@ -22,11 +22,6 @@
         case hostedReview
         case terminalChrome
         case terminalActions
-        case chat
-        case chatWorking
-        case chatPermission
-        case chatEmpty
-        case chatError
         case sessionContent
         case browser
         case hostEdit
@@ -56,11 +51,6 @@
             case .hostedReview: "Pull request"
             case .terminalChrome: "Session chrome"
             case .terminalActions: "Terminal actions"
-            case .chat: "Chat transcript"
-            case .chatWorking: "Agent working"
-            case .chatPermission: "Permission request"
-            case .chatEmpty: "Empty chat"
-            case .chatError: "Chat error"
             case .sessionContent: "Markdown and diff tabs"
             case .browser: "Browser tab"
             case .hostEdit: "Edit host"
@@ -76,7 +66,7 @@
             case .pairingScan: "Camera access, scanner, paste-code fallback, and invalid codes."
             case .pairingConfirm: "Desktop identity, endpoint, pairing progress, and failure."
             case .notificationOptIn: "One-time notification permission decision."
-            case .settings: "Appearance, chat, terminal, browser, notifications, and diagnostics."
+            case .settings: "Appearance, terminal, browser, notifications, and diagnostics."
             case .workspaceList: "Pinned, project, lineage, agent, file, and browser rows."
             case .workspaceCreation: "Repository, source, agent, setup, trust, and submit controls."
             case .workspaceActions: "Source control, history, sleep, pin, and delete actions."
@@ -90,11 +80,6 @@
             case .hostedReview: "Pull request status, reviewers, checks, and mutations."
             case .terminalChrome: "Tabs, terminal surface, composer, and accessory bar."
             case .terminalActions: "Rename, quick commands, new tabs, and action sheets."
-            case .chat: "Messages, Markdown, tool activity, copying, and the composer."
-            case .chatWorking: "Streaming response, neutral loader, and stop action."
-            case .chatPermission: "Blocked agent and the native permission controls."
-            case .chatEmpty: "First-message state inside the real session chrome."
-            case .chatError: "Transcript failure while the terminal remains connected."
             case .sessionContent: "Production markdown, file, and diff renderers."
             case .browser: "Remote viewport and native browser controls."
             case .hostEdit: "Host name, endpoint, save, and connection actions."
@@ -110,8 +95,7 @@
             case .workspaceList, .workspaceCreation, .workspaceActions, .accounts, .agentHistory,
                 .files, .filePreview, .sourceControl, .commitHistory, .sourceReview, .hostedReview:
                 .workspace
-            case .terminalChrome, .terminalActions, .chat, .chatWorking, .chatPermission,
-                .chatEmpty, .chatError, .sessionContent, .browser:
+            case .terminalChrome, .terminalActions, .sessionContent, .browser:
                 .session
             }
         }
@@ -135,7 +119,7 @@
         var detail: LocalizedStringResource? {
             switch self {
             case .session:
-                "Exercise the production session shell with deterministic terminal, chat, file, and browser states."
+                "Exercise the production session shell with deterministic terminal, file, and browser states."
             case .workspace:
                 "Inspect production data-heavy routes without pairing a desktop."
             case .system:
@@ -279,16 +263,6 @@
                 }
             case .terminalActions:
                 TerminalActionFixtureView()
-            case .chat:
-                NativeChatFixtureView(scenario: .chat)
-            case .chatWorking:
-                NativeChatFixtureView(scenario: .working)
-            case .chatPermission:
-                NativeChatFixtureView(scenario: .permission)
-            case .chatEmpty:
-                NativeChatFixtureView(scenario: .empty)
-            case .chatError:
-                NativeChatFixtureView(scenario: .error)
             case .sessionContent:
                 SessionContentFixtureView()
             case .browser:

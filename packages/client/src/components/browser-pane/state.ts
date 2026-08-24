@@ -37,7 +37,7 @@ import { pickNeighbor } from '~renderer/store/slices/tab-group-state'
 import type { AppState } from '~renderer/store/types'
 import { GRAB_BUDGET, type BrowserPageAnnotation } from '~shared/browser/grab-types'
 import { redactKagiSessionToken } from '~shared/browser/url'
-import { FLOATING_TERMINAL_WORKTREE_ID, YIRU_BROWSER_BLANK_URL } from '~shared/constants'
+import { YIRU_BROWSER_BLANK_URL } from '~shared/constants'
 import type {
   BrowserCookieImportResult,
   BrowserCookieImportSummary,
@@ -595,9 +595,8 @@ export const createBrowserSlice: StateCreator<AppState, [], [], BrowserSlice> = 
 
       const shouldActivate = options?.activate ?? true
       const shouldUpdateGlobalActiveSurface = shouldActivate && s.activeWorktreeId === worktreeId
-      const shouldFocusFloatingTab = shouldActivate && worktreeId === FLOATING_TERMINAL_WORKTREE_ID
       const shouldFocusAddressBar =
-        (shouldUpdateGlobalActiveSurface || shouldFocusFloatingTab) &&
+        shouldUpdateGlobalActiveSurface &&
         (options?.focusAddressBar ??
           (page.url === 'about:blank' || page.url === YIRU_BROWSER_BLANK_URL))
 
@@ -1620,7 +1619,6 @@ export const createBrowserSlice: StateCreator<AppState, [], [], BrowserSlice> = 
         .flat()
         .map((worktree) => worktree.id)
     )
-    validWorktreeIdsForCleanup.add(FLOATING_TERMINAL_WORKTREE_ID)
     for (const workspace of currentState.folderWorkspaces) {
       validWorktreeIdsForCleanup.add(folderWorkspaceKey(workspace.id))
     }
@@ -1653,7 +1651,6 @@ export const createBrowserSlice: StateCreator<AppState, [], [], BrowserSlice> = 
           .flat()
           .map((worktree) => worktree.id)
       )
-      validWorktreeIds.add(FLOATING_TERMINAL_WORKTREE_ID)
       for (const workspace of s.folderWorkspaces) {
         validWorktreeIds.add(folderWorkspaceKey(workspace.id))
       }

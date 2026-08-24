@@ -1,0 +1,188 @@
+import type { AppState } from '../types'
+
+type OrphanTerminalDetectionState = Pick<
+  AppState,
+  'tabsByWorktree' | 'unifiedTabsByWorktree' | 'ptyIdsByTabId'
+>
+
+type OrphanTerminalCleanupState = Pick<
+  AppState,
+  | 'tabsByWorktree'
+  | 'ptyIdsByTabId'
+  | 'runtimePaneTitlesByTabId'
+  | 'expandedPaneByTabId'
+  | 'canExpandPaneByTabId'
+  | 'terminalLayoutsByTabId'
+  | 'pendingStartupByTabId'
+  | 'pendingInitialCwdByTabId'
+  | 'pendingSetupSplitByTabId'
+  | 'automaticAgentResumeClaimsByTabId'
+  | 'tabBarOrderByWorktree'
+  | 'cacheTimerByKey'
+  | 'activeTabIdByWorktree'
+  | 'activeTabId'
+>
+
+type OrphanTerminalAgentStatusSweepState = Pick<AppState, 'dropAgentStatusByTabPrefix'>
+
+/**
+ * Sweep live + retained agent status for tabs that orphan reconciliation is
+ * about to remove.
+ *
+ * Why: buildOrphanTerminalCleanupPatch drops the tab from `tabsByWorktree`,
+ * and the retention sync reads a pane leaving the live×tab join as "this agent
+ * disappeared" — snapshotting every `done` row under it into
+ * `retainedAgentsByPaneKey`. That snapshot is then unreachable: no future tab
+ * close can match a tab id that no longer exists, so the row shows a completed
+ * agent forever. closeTab already plants the same suppressors; orphan
+ * reconciliation is the same teardown and must plant them too.
+ *
+ * Slept and hibernated tabs keep their wake-hint `tab.ptyId`, so
+ * getOrphanTerminalIds never classifies them as orphans and their retained
+ * completion evidence survives.
+ */
+export function dropOrphanTerminalAgentStatus(
+  state: OrphanTerminalAgentStatusSweepState,
+  worktreeId: string,
+  orphanTerminalIds: ReadonlySet<string>
+): void {
+  for (const tabId of orphanTerminalIds) {
+    state.dropAgentStatusByTabPrefix(tabId, { worktreeId })
+  }
+}
+
+export function getOrphanTerminalIds(
+  state: OrphanTerminalDetectionState,
+  worktreeId: string
+): Set<string> {
+  const runtimeTabs = state.tabsByWorktree[worktreeId] ?? []
+  const unifiedTerminalEntityIds = new Set(
+    (state.unifiedTabsByWorktree[worktreeId] ?? [])
+      .filter((tab) => tab.contentType === 'terminal')
+      .map((tab) => tab.entityId)
+  )
+
+  return new Set(
+    runtimeTabs
+      .filter((tab) => {
+        if (unifiedTerminalEntityIds.has(tab.id)) {
+          return false
+        }
+        const livePtyIds = state.ptyIdsByTabId[tab.id] ?? []
+        return livePtyIds.length === 0 && tab.ptyId == null
+      })
+      .map((tab) => tab.id)
+  )
+}
+
+export function buildOrphanTerminalCleanupPatch(
+  state: OrphanTerminalCleanupState,
+  worktreeId: string,
+  orphanTerminalIds: Set<string>
+): Pick<
+  AppState,
+  | 'tabsByWorktree'
+  | 'ptyIdsByTabId'
+  | 'runtimePaneTitlesByTabId'
+  | 'expandedPaneByTabId'
+  | 'canExpandPaneByTabId'
+  | 'terminalLayoutsByTabId'
+  | 'pendingStartupByTabId'
+  | 'pendingInitialCwdByTabId'
+  | 'pendingSetupSplitByTabId'
+  | 'automaticAgentResumeClaimsByTabId'
+  | 'tabBarOrderByWorktree'
+  | 'cacheTimerByKey'
+  | 'activeTabIdByWorktree'
+  | 'activeTabId'
+> {
+  if (orphanTerminalIds.size === 0) {
+    return {
+      tabsByWorktree: state.tabsByWorktree,
+      ptyIdsByTabId: state.ptyIdsByTabId,
+      runtimePaneTitlesByTabId: state.runtimePaneTitlesByTabId,
+      expandedPaneByTabId: state.expandedPaneByTabId,
+      canExpandPaneByTabId: state.canExpandPaneByTabId,
+      terminalLayoutsByTabId: state.terminalLayoutsByTabId,
+      pendingStartupByTabId: state.pendingStartupByTabId,
+      pendingInitialCwdByTabId: state.pendingInitialCwdByTabId,
+      pendingSetupSplitByTabId: state.pendingSetupSplitByTabId,
+      automaticAgentResumeClaimsByTabId: state.automaticAgentResumeClaimsByTabId,
+      tabBarOrderByWorktree: state.tabBarOrderByWorktree,
+      cacheTimerByKey: state.cacheTimerByKey,
+      activeTabIdByWorktree: state.activeTabIdByWorktree,
+      activeTabId: state.activeTabId
+    }
+  }
+
+  const nextTabs = (state.tabsByWorktree[worktreeId] ?? []).filter(
+    (tab) => !orphanTerminalIds.has(tab.id)
+  )
+  const nextPtyIdsByTabId = { ...state.ptyIdsByTabId }
+  const nextRuntimePaneTitlesByTabId = { ...state.runtimePaneTitlesByTabId }
+  const nextExpandedPaneByTabId = { ...state.expandedPaneByTabId }
+  const nextCanExpandPaneByTabId = { ...state.canExpandPaneByTabId }
+  const nextTerminalLayoutsByTabId = { ...state.terminalLayoutsByTabId }
+  const nextPendingStartupByTabId = { ...state.pendingStartupByTabId }
+  const nextPendingInitialCwdByTabId = { ...state.pendingInitialCwdByTabId }
+  const nextPendingSetupSplitByTabId = { ...state.pendingSetupSplitByTabId }
+  const nextAutomaticAgentResumeClaimsByTabId = {
+    ...state.automaticAgentResumeClaimsByTabId
+  }
+  const nextTabBarOrderByWorktree = {
+    ...state.tabBarOrderByWorktree,
+    [worktreeId]: (state.tabBarOrderByWorktree[worktreeId] ?? []).filter(
+      (tabId) => !orphanTerminalIds.has(tabId)
+    )
+  }
+  const nextCacheTimerByKey = { ...state.cacheTimerByKey }
+
+  // Why: orphan runtime terminals no longer have a backing unified tab or live
+  // PTY, so every per-tab cache keyed off that runtime ID must disappear with
+  // the tab. Centralizing the cleanup keeps orphan detection and teardown in
+  // lockstep across both tab creation and reconciliation paths.
+  for (const orphanTabId of orphanTerminalIds) {
+    delete nextPtyIdsByTabId[orphanTabId]
+    delete nextRuntimePaneTitlesByTabId[orphanTabId]
+    delete nextExpandedPaneByTabId[orphanTabId]
+    delete nextCanExpandPaneByTabId[orphanTabId]
+    delete nextTerminalLayoutsByTabId[orphanTabId]
+    delete nextPendingStartupByTabId[orphanTabId]
+    delete nextPendingInitialCwdByTabId[orphanTabId]
+    delete nextPendingSetupSplitByTabId[orphanTabId]
+    delete nextAutomaticAgentResumeClaimsByTabId[orphanTabId]
+    for (const key of Object.keys(nextCacheTimerByKey)) {
+      if (key.startsWith(`${orphanTabId}:`)) {
+        delete nextCacheTimerByKey[key]
+      }
+    }
+  }
+
+  const nextActiveTabIdByWorktree = {
+    ...state.activeTabIdByWorktree,
+    [worktreeId]: orphanTerminalIds.has(state.activeTabIdByWorktree[worktreeId] ?? '')
+      ? (nextTabs[0]?.id ?? null)
+      : state.activeTabIdByWorktree[worktreeId]
+  }
+
+  return {
+    tabsByWorktree: {
+      ...state.tabsByWorktree,
+      [worktreeId]: nextTabs
+    },
+    ptyIdsByTabId: nextPtyIdsByTabId,
+    runtimePaneTitlesByTabId: nextRuntimePaneTitlesByTabId,
+    expandedPaneByTabId: nextExpandedPaneByTabId,
+    canExpandPaneByTabId: nextCanExpandPaneByTabId,
+    terminalLayoutsByTabId: nextTerminalLayoutsByTabId,
+    pendingStartupByTabId: nextPendingStartupByTabId,
+    pendingInitialCwdByTabId: nextPendingInitialCwdByTabId,
+    pendingSetupSplitByTabId: nextPendingSetupSplitByTabId,
+    automaticAgentResumeClaimsByTabId: nextAutomaticAgentResumeClaimsByTabId,
+    tabBarOrderByWorktree: nextTabBarOrderByWorktree,
+    cacheTimerByKey: nextCacheTimerByKey,
+    activeTabIdByWorktree: nextActiveTabIdByWorktree,
+    activeTabId:
+      state.activeTabId && orphanTerminalIds.has(state.activeTabId) ? null : state.activeTabId
+  }
+}

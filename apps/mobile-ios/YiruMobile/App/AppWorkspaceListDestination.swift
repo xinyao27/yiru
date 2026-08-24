@@ -32,10 +32,6 @@ struct AppWorkspaceListDestinationView: View {
                 replaceDetail?(.agentHistory(host, workspace))
                     ?? model.showAgentHistory(host: host, workspace: workspace)
             },
-            showFloatingWorkspace: {
-                replaceDetail?(.workspaceSession(host, .floating(hostID: host.id), nil))
-                    ?? model.showFloatingWorkspace(host: host)
-            },
             showPairing: model.showPairing,
             hostsChanged: model.hostsDidChange,
             leaveHost: leaveHost,

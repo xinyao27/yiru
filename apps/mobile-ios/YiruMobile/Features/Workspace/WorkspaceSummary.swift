@@ -56,8 +56,6 @@ nonisolated struct WorkspaceAgent: Codable, Hashable, Sendable {
 }
 
 nonisolated struct WorkspaceSummary: Codable, Identifiable, Hashable, Sendable {
-    static let floatingID = "global-floating-terminal"
-
     let id: String
     let kind: WorkspaceKind
     let repoID: String
@@ -166,13 +164,6 @@ nonisolated struct WorkspaceSummary: Codable, Identifiable, Hashable, Sendable {
         hasAttachedPty = false
     }
 
-    static func floating(hostID: String) -> WorkspaceSummary {
-        WorkspaceSummary(
-            floatingHostID: hostID,
-            name: String(localized: "Floating Workspace")
-        )
-    }
-
     static func legacyCached(
         hostID: String,
         worktreeID: String,
@@ -194,46 +185,6 @@ nonisolated struct WorkspaceSummary: Codable, Identifiable, Hashable, Sendable {
             activity: activity,
             savedAt: savedAt
         )
-    }
-
-    private init(floatingHostID: String, name: String) {
-        id = Self.floatingID
-        kind = .folderWorkspace
-        repoID = ""
-        executionHostID = floatingHostID
-        resumeTargetStatus = "local"
-        terminalPlatform = nil
-        priorWorktreeIDs = []
-        repoName = ""
-        path = ""
-        branch = ""
-        self.name = name
-        workspaceStatus = "active"
-        isArchived = false
-        isMainWorktree = false
-        reportedMainWorktree = nil
-        hasHostSidebarActivity = false
-        worktreeInstanceID = nil
-        lineageWorktreeInstanceID = nil
-        parentWorktreeInstanceID = nil
-        parentWorktreeID = nil
-        childWorktreeIDs = []
-        sortOrder = 0
-        manualOrder = nil
-        createdAt = nil
-        linkedPullRequest = nil
-        linkedGitLabMergeRequest = nil
-        comment = ""
-        isPinned = false
-        isActive = true
-        isUnread = false
-        liveTerminalCount = 0
-        hasAttachedPty = false
-        lastActivity = nil
-        lastOutput = nil
-        preview = ""
-        activity = .active
-        agents = []
     }
 
     private init(

@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { SYNC_FIT_PANES_EVENT } from '~renderer/constants/terminal'
 import type { PaneManager } from '~renderer/lib/pane-manager/pane-manager'
 
-import { fitPanes } from './pane-helpers'
+import { fitPanes } from './pane-interactions'
 
 type UseTerminalContainerFitSyncArgs = {
   isVisible: boolean

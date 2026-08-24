@@ -11,13 +11,13 @@ import {
   buildWindowsAgentHookPostCommand,
   writeHooksJson,
   writeManagedScript
-} from '../agent-hooks/installer-utils'
+} from '../agent-hooks/managed-hook-commands'
+import type { RemoteFileOperations } from '../agent-hooks/remote-file-operations'
 import {
   readTextFileRemote,
   writeHooksJsonRemote,
   writeManagedScriptRemote
-} from '../agent-hooks/installer-utils-remote'
-import type { RemoteFileOperations } from '../agent-hooks/remote-file-operations'
+} from '../agent-hooks/remote-hook-storage'
 import {
   mergeHookInstallDetail,
   parseDevinHooksConfigText,

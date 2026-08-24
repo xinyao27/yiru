@@ -9,12 +9,8 @@ import {
   ArrowClockwise as RefreshCw
 } from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
-import { TOGGLE_FLOATING_TERMINAL_EVENT } from '~renderer/lib/floating-terminal'
-import { isFloatingWorkspacePanelVisible } from '~renderer/lib/floating-workspace-terminal-actions'
-import { detectLanguage } from '~renderer/lib/language-detect'
 import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
-import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
 
 import { Button } from '../ui/button'
 import {
@@ -44,89 +40,10 @@ export function KeybindingsFileActions(): React.JSX.Element {
   const openKeybindingsFile = useAppStore((state) => state.openKeybindingsFile)
   const revealKeybindingsFile = useAppStore((state) => state.revealKeybindingsFile)
   const reloadKeybindings = useAppStore((state) => state.reloadKeybindings)
-  const openFiles = useAppStore((state) => state.openFiles)
-  const openFile = useAppStore((state) => state.openFile)
-  const closeFile = useAppStore((state) => state.closeFile)
-  const updateSettings = useAppStore((state) => state.updateSettings)
-  const floatingTerminalEnabled = useAppStore(
-    (state) => state.settings?.floatingTerminalEnabled === true
-  )
-  const floatingTerminalToggleFrameRef = React.useRef<number | null>(null)
-
-  const cancelFloatingTerminalToggleFrame = React.useCallback((): void => {
-    if (floatingTerminalToggleFrameRef.current === null) {
-      return
-    }
-    cancelAnimationFrame(floatingTerminalToggleFrameRef.current)
-    floatingTerminalToggleFrameRef.current = null
-  }, [])
-
-  const setActionsRootNode = React.useCallback(
-    (node: HTMLDivElement | null): void => {
-      // Why: the deferred floating-terminal toggle belongs to this settings control.
-      if (!node) {
-        cancelFloatingTerminalToggleFrame()
-      }
-    },
-    [cancelFloatingTerminalToggleFrame]
-  )
 
   const prepareKeybindingsPath = async (): Promise<string | null> => {
     const snapshot = await ensureKeybindingsFile()
     return snapshot?.path ?? keybindingSnapshot?.path ?? null
-  }
-
-  const editKeybindingsInYiru = async (): Promise<void> => {
-    try {
-      const filePath = await prepareKeybindingsPath()
-      if (!filePath) {
-        toast.error(
-          translate(
-            'auto.components.settings.KeybindingsFileActions.cdf794f46d',
-            'Keybindings file is not available.'
-          )
-        )
-        return
-      }
-      const existingFile = openFiles.find(
-        (file) => file.filePath === filePath && file.worktreeId === FLOATING_TERMINAL_WORKTREE_ID
-      )
-      if (existingFile && !existingFile.isDirty) {
-        // Why: a prior denied read can leave a focused error tab. Reopen a
-        // clean tab after authorization so the editor retries the file load.
-        closeFile(existingFile.id)
-      }
-      openFile(
-        {
-          filePath,
-          relativePath: 'keybindings.json',
-          worktreeId: FLOATING_TERMINAL_WORKTREE_ID,
-          language: detectLanguage('keybindings.json'),
-          mode: 'edit',
-          runtimeEnvironmentId: null
-        },
-        { preview: false, suppressActiveRuntimeFallback: true }
-      )
-      if (!floatingTerminalEnabled) {
-        await updateSettings({ floatingTerminalEnabled: true })
-      }
-      cancelFloatingTerminalToggleFrame()
-      floatingTerminalToggleFrameRef.current = requestAnimationFrame(() => {
-        floatingTerminalToggleFrameRef.current = null
-        if (!isFloatingWorkspacePanelVisible()) {
-          window.dispatchEvent(new CustomEvent(TOGGLE_FLOATING_TERMINAL_EVENT))
-        }
-      })
-    } catch (error) {
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : translate(
-              'auto.components.settings.KeybindingsFileActions.dd532a01ce',
-              'Failed to open keybindings in Yiru.'
-            )
-      )
-    }
   }
 
   const openKeybindingsInExternalEditor = async (command: 'code' | 'cursor'): Promise<void> => {
@@ -158,22 +75,16 @@ export function KeybindingsFileActions(): React.JSX.Element {
   }
 
   return (
-    <div
-      ref={setActionsRootNode}
-      className="border-border bg-background inline-flex shrink-0 overflow-hidden border"
-    >
+    <div className="border-border bg-background inline-flex shrink-0 overflow-hidden border">
       <Button
         type="button"
         variant="ghost"
         size="xs"
         className="border-0"
-        onClick={() => void editKeybindingsInYiru()}
+        onClick={() => void openKeybindingsFile()}
       >
         <FileText className="size-3" />
-        {translate(
-          'auto.components.settings.KeybindingsFileActions.1c2be2b2c6',
-          'Edit File in Yiru'
-        )}
+        {translate('auto.components.settings.KeybindingsFileActions.1c2be2b2c6', 'Open File')}
       </Button>
       <DropdownMenu>
         <DropdownMenuTrigger

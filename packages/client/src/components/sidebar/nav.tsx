@@ -2,7 +2,6 @@ import React from 'react'
 import {
   ActivityIcon as Activity,
   BookOpen,
-  CalendarDots as CalendarClock,
   DeviceMobile as Smartphone,
   MagnifyingGlass as Search
 } from '~renderer/components/icons/hugeicons'
@@ -32,12 +31,6 @@ export function shouldShowMobileButton(
   return settings?.showMobileButton !== false
 }
 
-export function shouldShowAutomationsButton(
-  settings: Pick<GlobalSettings, 'showAutomationsButton'> | null | undefined
-): boolean {
-  return settings?.showAutomationsButton !== false
-}
-
 const SidebarNav = React.memo(function SidebarNav() {
   // Why: this memo boundary needs its own language subscription.
   useUiLocale()
@@ -45,20 +38,14 @@ const SidebarNav = React.memo(function SidebarNav() {
   const openHomePage = useAppStore((s) => s.openHomePage)
   const openModal = useAppStore((s) => s.openModal)
   const openSkillsPage = useAppStore((s) => s.openSkillsPage)
-  const openAutomationsPage = useAppStore((s) => s.openAutomationsPage)
   const openMobilePage = useAppStore((s) => s.openMobilePage)
   const updateSettings = useAppStore((s) => s.updateSettings)
   const activeView = useAppStore((s) => s.activeView)
-  const showAutomationsButton = useAppStore((s) => shouldShowAutomationsButton(s.settings))
   const showMobileButton = useAppStore((s) => shouldShowMobileButton(s.settings))
   const homeActive = activeView === 'home'
   const skillsActive = activeView === 'skills'
-  const automationsActive = activeView === 'automations'
   const mobileActive = activeView === 'mobile'
   const mobileOnboardingBadge = useMobileSidebarOnboardingBadge(showMobileButton)
-  const hideAutomationsButton = React.useCallback(() => {
-    void updateSettings({ showAutomationsButton: false })
-  }, [updateSettings])
   const hideMobileButton = React.useCallback(() => {
     void updateSettings({ showMobileButton: false })
   }, [updateSettings])
@@ -128,39 +115,6 @@ const SidebarNav = React.memo(function SidebarNav() {
           {translate('auto.components.sidebar.SidebarNav.skills', 'Skills')}
         </span>
       </Button>
-      {showAutomationsButton ? (
-        <ContextMenu>
-          <ContextMenuTrigger
-            render={
-              <Button
-                variant="ghost"
-                size="sm"
-                type="button"
-                onClick={openAutomationsPage}
-                aria-current={automationsActive ? 'page' : undefined}
-                className={cn(
-                  'border-0 justify-start whitespace-normal gap-2 focus-visible:bg-accent',
-                  'flex w-full px-2 py-1.5 text-left text-[13px] tracking-tight transition-colors',
-                  automationsActive
-                    ? 'bg-accent text-accent-foreground'
-                    : 'text-sidebar-foreground/60'
-                )}
-              >
-                <CalendarClock
-                  className={cn(
-                    'size-4 shrink-0',
-                    !automationsActive && 'text-sidebar-foreground/30'
-                  )}
-                />
-                <span className="flex-1">
-                  {translate('auto.components.sidebar.SidebarNav.f323383e9a', 'Automations')}
-                </span>
-              </Button>
-            }
-          />
-          <HideSidebarMenu onHide={hideAutomationsButton} />
-        </ContextMenu>
-      ) : null}
       {showMobileButton ? (
         <ContextMenu>
           <ContextMenuTrigger

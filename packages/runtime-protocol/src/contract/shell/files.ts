@@ -6,6 +6,8 @@ import type {
   ShellFileDownloadResult,
   ShellFileDownloadSessionResult,
   ShellFileMutationResult,
+  ShellFileReadChunkInput,
+  ShellFileReadChunkResult,
   ShellFileReadInput,
   ShellFileReadResult,
   ShellFileStatResult,
@@ -31,6 +33,9 @@ export const shellFilesContract = {
   read: withAccess(SHELL_READ_ACCESS)
     .input(type<ShellFileReadInput>())
     .output(type<ShellFileReadResult>()),
+  readChunk: withAccess(SHELL_READ_ACCESS)
+    .input(type<ShellFileReadChunkInput>())
+    .output(type<ShellFileReadChunkResult>()),
   saveDownload: withAccess(SHELL_HOST_ACCESS)
     .input(type<{ suggestedName: string; content: string; encoding: 'utf8' | 'base64' }>())
     .output(type<ShellFileDownloadResult>()),

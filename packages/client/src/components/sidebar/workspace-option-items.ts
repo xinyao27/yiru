@@ -16,16 +16,6 @@ const WORKTREE_CARD_METADATA_OPTIONS: WorktreeCardPropertyOption[] = [
     }
   },
   {
-    id: 'automation',
-    properties: ['automation'],
-    get label() {
-      return translate(
-        'auto.components.sidebar.SidebarWorkspaceOptionsMenu.automation',
-        'Automation'
-      )
-    }
-  },
-  {
     id: 'ports',
     properties: ['ports'],
     get label() {

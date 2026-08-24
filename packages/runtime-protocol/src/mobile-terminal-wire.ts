@@ -29,7 +29,6 @@ export const MobileRuntimeStatusSchema = z.object({
   runtimeProtocolVersion: z.number().int().nonnegative().optional(),
   minCompatibleRuntimeClientVersion: z.number().int().nonnegative().optional(),
   capabilities: z.array(z.string()).optional(),
-  floatingWorkspaceEnabled: z.boolean().optional(),
   hostPlatform: z.string().optional(),
   terminalWindowsShell: z.string().nullable().optional(),
   protocolVersion: z.number().int().nonnegative().optional(),

@@ -87,8 +87,8 @@ export function handleUIGet(_params: unknown, { runtime }: RpcContext): RuntimeU
 
 export const handleUISet = ((params, { runtime, principal }) => {
   assertHookTrustWritable(params, callerClassOf(principal))
-  // Why: the wire schema retains legacy UI keys and permissive uploaded-pet metadata
-  // that the persisted desktop type intentionally narrows after hydration.
+  // Why: the wire schema retains legacy UI keys that the persisted desktop type
+  // intentionally narrows after hydration.
   return { ui: runtime.updateUIState(params as Partial<PersistedUIState>) }
 }) satisfies RpcHandler<UIUpdateInput, RuntimeUIResult>
 

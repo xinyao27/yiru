@@ -69,8 +69,6 @@ export function readProfileState(profileId: string, userDataPath: string): Trans
       : {},
     migrationUnsupportedPtyEntries: arrayOrEmpty(parsed.migrationUnsupportedPtyEntries),
     legacyPaneKeyAliasEntries: arrayOrEmpty(parsed.legacyPaneKeyAliasEntries),
-    automations: arrayOrEmpty(parsed.automations),
-    automationRuns: arrayOrEmpty(parsed.automationRuns),
     onboarding: isRecord(parsed.onboarding)
       ? { ...defaults.onboarding, ...parsed.onboarding }
       : defaults.onboarding,

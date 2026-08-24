@@ -36,6 +36,10 @@ export type SkillDetailProps = {
 }
 
 const EMPTY_FILES: SkillDirectoryEntry[] = []
+type SkillListingState = {
+  directoryPath: string
+  listing: SkillDirectoryListing
+}
 
 function SkillDetailActions({
   skill,
@@ -124,23 +128,26 @@ function SkillDetailActions({
 
 export function SkillDetail(props: SkillDetailProps): React.JSX.Element {
   const { skill } = props
-  const [listing, setListing] = useState<SkillDirectoryListing | null>(null)
+  const [listingState, setListingState] = useState<SkillListingState | null>(null)
   const [selectedRelativePath, setSelectedRelativePath] = useState(SKILL_FILE_NAME)
   const directoryPath = skill.directoryPath
   const placements = skillPlacements(skill)
+  const listing = listingState?.directoryPath === directoryPath ? listingState.listing : null
 
   useEffect(() => {
     let cancelled = false
-    setListing(null)
     listSkillManageFiles(directoryPath)
       .then((result) => {
         if (!cancelled) {
-          setListing(result)
+          setListingState({ directoryPath, listing: result })
         }
       })
       .catch(() => {
         if (!cancelled) {
-          setListing({ ok: false, reason: 'unreadable' })
+          setListingState({
+            directoryPath,
+            listing: { ok: false, reason: 'unreadable' }
+          })
         }
       })
     return () => {

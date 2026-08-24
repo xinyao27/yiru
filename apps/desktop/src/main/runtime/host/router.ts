@@ -12,7 +12,6 @@ import { wireRuntimeMethod } from '../rpc/orpc/registered-method'
 import { assertRuntimeOrpcRouterComplete } from '../rpc/orpc/router-completeness'
 import { agentSessionRuntimeHandlers } from '../rpc/orpc/router-direct/agent-session'
 import { aiVaultRuntimeHandlers } from '../rpc/orpc/router-direct/ai-vault'
-import { automationRuntimeHandlers } from '../rpc/orpc/router-direct/automation'
 import { clientSurfaceRuntimeHandlers } from '../rpc/orpc/router-direct/client-surface'
 import { computerUseRuntimeHandlers } from '../rpc/orpc/router-direct/computer-use'
 import { coworkingHostRuntimeHandlers } from '../rpc/orpc/router-direct/coworking-host'
@@ -53,7 +52,6 @@ const nodeRuntimeHostHandlers = {
   // Why: the host's attached RateLimitService owns snapshots and change notifications.
   accounts: providerToolingRuntimeHandlers.accounts,
   ...aiVaultRuntimeHandlers,
-  ...automationRuntimeHandlers,
   clipboard: clientSurfaceRuntimeHandlers.clipboard,
   // Why: host RPC mutations notify the same Store bridged by host/event-sources.ts.
   settings: clientSurfaceRuntimeHandlers.settings,
@@ -87,9 +85,6 @@ const nodeRuntimeHostHandlers = {
     manage: providerToolingRuntimeHandlers.skills.manage
   },
   ...providerUsageRuntimeHandlers,
-  // Why: save stays mounted so the storage domain can report its precise
-  // encryption-unavailable failure; host composition forbids plaintext fallback.
-  speech: providerToolingRuntimeHandlers.speech,
   mobile: nodeMobileHandlers,
   updater: {
     // Why: the default remote-server updater adapter is the headless authority:
@@ -132,7 +127,6 @@ const nodeRuntimeHostContract = {
   agentStatus: runtimeContract.agentStatus,
   agentTeams: runtimeContract.agentTeams,
   aiVault: runtimeContract.aiVault,
-  automation: runtimeContract.automation,
   clipboard: runtimeContract.clipboard,
   cli: runtimeContract.cli,
   computer: runtimeContract.computer,
@@ -157,7 +151,6 @@ const nodeRuntimeHostContract = {
   },
   hostedReview: runtimeContract.hostedReview,
   markdown: runtimeContract.markdown,
-  nativeChat: runtimeContract.nativeChat,
   mobile: runtimeContract.mobile,
   notebook: runtimeContract.notebook,
   notifications: runtimeContract.notifications,
@@ -171,7 +164,6 @@ const nodeRuntimeHostContract = {
   runtime: runtimeContract.runtime,
   settings: runtimeContract.settings,
   session: runtimeContract.session,
-  speech: runtimeContract.speech,
   skills: {
     discover: runtimeContract.skills.discover,
     manage: runtimeContract.skills.manage

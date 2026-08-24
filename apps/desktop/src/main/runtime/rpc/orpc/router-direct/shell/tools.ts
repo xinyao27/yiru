@@ -1,10 +1,5 @@
 import { BrowserWindow } from 'electron'
 import {
-  markShellAutomationDispatchResult,
-  markShellAutomationRendererReady,
-  runShellAutomationPrecheck
-} from '~main/automations/shell-service'
-import {
   copyLatestShellCrashDiagnostics,
   dismissShellCrashReport,
   getLatestPendingShellCrashReport,
@@ -20,50 +15,21 @@ import {
 } from '~main/developer-permissions'
 import { getShellDiagnosticsService } from '~main/diagnostics/diagnostics'
 import { exportShellHtmlToPdf } from '~main/export/export'
-import {
-  getOrCreateShellFridaySession,
-  restartShellFridaySession
-} from '~main/friday/shell-service'
 import { getShellMiniMaxCredentialsService } from '~main/minimax/credentials'
 import { getShellMobileService } from '~main/mobile/shell-service'
-import { getShellPetService } from '~main/pet/pet'
 import { registerShellLocalhostWorktreeLabel } from '~main/ports/localhost-worktree-labels'
 import { runtimeImplementation } from '~main/runtime/rpc/orpc/access-middleware'
 import { requireShellRenderer } from '~main/shell/files'
-import { ensureShellMicrophoneAccess } from '~main/speech/speech'
 import {
   acknowledgeShellTelemetryBanner,
   getShellTelemetryConsentState,
   setShellTelemetryOptIn,
   trackShellTelemetry
 } from '~main/telemetry/telemetry'
-import type { AutomationDispatchResult } from '~shared/automations-types'
 import type { CrashReportCopyDiagnosticsArgs, CrashReportSubmitArgs } from '~shared/crash-reporting'
 import type { DeveloperPermissionId } from '~shared/developer-permissions-types'
 
 export const shellToolsRuntimeHandlers = {
-  automations: {
-    runPrecheck: runtimeImplementation.shell.automations.runPrecheck.handler(
-      ({ input, context }) => {
-        requireToolRenderer(context.renderingWebContentsId)
-        return runShellAutomationPrecheck(
-          shellDocument<{ automationId: string; runId: string }>(input, 'invalid_automation')
-        )
-      }
-    ),
-    markDispatchResult: runtimeImplementation.shell.automations.markDispatchResult.handler(
-      ({ input, context }) => {
-        requireToolRenderer(context.renderingWebContentsId)
-        return markShellAutomationDispatchResult(
-          shellDocument<AutomationDispatchResult>(input, 'invalid_automation_dispatch_result')
-        )
-      }
-    ),
-    rendererReady: runtimeImplementation.shell.automations.rendererReady.handler(({ context }) => {
-      requireToolRenderer(context.renderingWebContentsId)
-      markShellAutomationRendererReady()
-    })
-  },
   crashReports: {
     getLatestPending: runtimeImplementation.shell.crashReports.getLatestPending.handler(
       ({ context }) => {
@@ -163,22 +129,6 @@ export const shellToolsRuntimeHandlers = {
       }
     )
   },
-  pet: {
-    import: runtimeImplementation.shell.pet.import.handler(({ context }) =>
-      getShellPetService().import(shellWindow(context.renderingWebContentsId))
-    ),
-    importPetBundle: runtimeImplementation.shell.pet.importPetBundle.handler(({ context }) =>
-      getShellPetService().importPetBundle(shellWindow(context.renderingWebContentsId))
-    ),
-    read: runtimeImplementation.shell.pet.read.handler(({ input, context }) => {
-      requireToolRenderer(context.renderingWebContentsId)
-      return getShellPetService().read(input)
-    }),
-    delete: runtimeImplementation.shell.pet.delete.handler(({ input, context }) => {
-      requireToolRenderer(context.renderingWebContentsId)
-      return getShellPetService().delete(input)
-    })
-  },
   minimaxCredentials: {
     getStatus: runtimeImplementation.shell.minimaxCredentials.getStatus.handler(({ context }) => {
       requireToolRenderer(context.renderingWebContentsId)
@@ -216,14 +166,6 @@ export const shellToolsRuntimeHandlers = {
         return getShellMobileService().openWindowsNetworkSettings()
       })
   },
-  friday: {
-    getOrCreate: runtimeImplementation.shell.friday.getOrCreate.handler(({ context }) =>
-      getOrCreateShellFridaySession(requireToolRenderer(context.renderingWebContentsId).id)
-    ),
-    restart: runtimeImplementation.shell.friday.restart.handler(({ context }) =>
-      restartShellFridaySession(requireToolRenderer(context.renderingWebContentsId).id)
-    )
-  },
   developerPermissions: {
     getStatus: runtimeImplementation.shell.developerPermissions.getStatus.handler(({ context }) => {
       requireToolRenderer(context.renderingWebContentsId)
@@ -259,14 +201,6 @@ export const shellToolsRuntimeHandlers = {
       ({ input, context }) => {
         requireToolRenderer(context.renderingWebContentsId)
         return registerShellLocalhostWorktreeLabel(input)
-      }
-    )
-  },
-  speech: {
-    ensureMicrophoneAccess: runtimeImplementation.shell.speech.ensureMicrophoneAccess.handler(
-      ({ context }) => {
-        requireToolRenderer(context.renderingWebContentsId)
-        return ensureShellMicrophoneAccess()
       }
     )
   }

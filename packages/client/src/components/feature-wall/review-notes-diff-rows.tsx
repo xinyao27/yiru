@@ -2,7 +2,7 @@ import type { JSX } from 'react'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
 
-import { HUNKS, tokenize, type DiffLine } from './review-animated-visual-shared'
+import { HUNKS, NOTE_TARGETS, tokenize, type DiffLine } from './review-animated-visual-shared'
 
 // Why: pre-flatten hunks into rows with computed line numbers so the
 // imperative animation loop only mutates classes/inline styles, never DOM
@@ -63,7 +63,7 @@ function buildDiffRows(): DiffRow[] {
   return result
 }
 
-export function ReviewDiffRows(): JSX.Element {
+export function ReviewDiffRows({ visibleNoteCount }: { visibleNoteCount: number }): JSX.Element {
   const rows = buildDiffRows()
   return (
     <>
@@ -79,17 +79,29 @@ export function ReviewDiffRows(): JSX.Element {
           )
         }
         if (r.kind === 'slot') {
+          const targetIndex = NOTE_TARGETS.findIndex((target) => target.hunk === r.hunk)
+          const target = NOTE_TARGETS[targetIndex]
+          const targetRow = rows.find(
+            (row) =>
+              row.kind === 'line' && row.hunk === target?.hunk && row.lineIdx === target?.lineIdx
+          )
           return (
-            <div key={r.key} className="ravs-note-row" data-hunk-slot={r.hunk}>
+            <div
+              key={r.key}
+              className={cn(
+                'ravs-note-row',
+                targetIndex >= 0 && targetIndex < visibleNoteCount && 'is-visible'
+              )}
+            >
               <div className="ravs-note-card">
                 <div className="ravs-note-meta">
                   {translate(
                     'auto.components.feature.wall.review.notes.diff.rows.f621c734f8',
                     'Note · line'
                   )}
-                  <span data-slot-line>?</span>
+                  <span>{targetRow?.newNo || targetRow?.oldNo || '?'}</span>
                 </div>
-                <div className="ravs-note-body" data-slot-body />
+                <div className="ravs-note-body">{target?.body}</div>
               </div>
             </div>
           )

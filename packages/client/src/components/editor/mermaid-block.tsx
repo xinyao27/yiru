@@ -1,9 +1,10 @@
 import DOMPurify from 'dompurify'
 import type mermaidNamespace from 'mermaid'
-import React, { useEffect, useId, useRef, useState } from 'react'
+import React, { useEffect, useId, useMemo, useState } from 'react'
 import { translate } from '~renderer/i18n/i18n'
 
 import { getMermaidConfig } from './mermaid-config'
+import { removeMermaidErrorNode } from './mermaid-error-node'
 
 type MermaidApi = typeof mermaidNamespace
 
@@ -54,8 +55,9 @@ export default function MermaidBlock({
   htmlLabels = false
 }: MermaidBlockProps): React.JSX.Element {
   const id = useId().replace(/:/g, '_')
-  const containerRef = useRef<HTMLDivElement>(null)
   const [error, setError] = useState<string | null>(null)
+  const [svg, setSvg] = useState('')
+  const sanitizedMarkup = useMemo(() => ({ __html: svg }), [svg])
 
   useEffect(() => {
     let cancelled = false
@@ -73,21 +75,18 @@ export default function MermaidBlock({
         // broken foreignObject label path again.
         mermaid.initialize(getMermaidConfig(isDark, htmlLabels))
         const { svg } = await mermaid.render(`mermaid-${id}`, content)
-        if (!cancelled && containerRef.current) {
+        if (!cancelled) {
           // Why: although mermaid uses DOMPurify internally, we add an explicit
           // sanitization pass as defense-in-depth against XSS in case upstream
           // behaviour changes or a mermaid version ships without sanitization.
-          containerRef.current.innerHTML = DOMPurify.sanitize(svg, {
-            USE_PROFILES: { svg: true }
-          })
+          setSvg(DOMPurify.sanitize(svg, { USE_PROFILES: { svg: true } }))
           setError(null)
         }
       } catch (err) {
         if (!cancelled) {
           setError(err instanceof Error ? err.message : 'Invalid mermaid syntax')
           // Mermaid leaves an error element in the DOM on failure — clean it up.
-          const errorEl = document.getElementById(`d${`mermaid-${id}`}`)
-          errorEl?.remove()
+          removeMermaidErrorNode(`mermaid-${id}`)
         }
       }
     }
@@ -114,5 +113,10 @@ export default function MermaidBlock({
     )
   }
 
-  return <div className="mermaid-block [&_svg]:h-auto [&_svg]:max-w-full" ref={containerRef} />
+  return (
+    <div
+      className="mermaid-block [&_svg]:h-auto [&_svg]:max-w-full"
+      dangerouslySetInnerHTML={sanitizedMarkup}
+    />
+  )
 }

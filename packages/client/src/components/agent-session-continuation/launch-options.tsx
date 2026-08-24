@@ -2,19 +2,16 @@ import type { AgentType } from '@yiru/workbench-model/agent'
 import React, { useCallback, useMemo, useState } from 'react'
 import { translate } from '~renderer/i18n/i18n'
 import { getAgentSessionOptionCatalog } from '~shared/agent/session-option-catalog'
-import type {
-  SessionOptionDescriptor,
-  SessionOptionValue
-} from '~shared/native-chat/session-options'
+import type { SessionOptionDescriptor, SessionOptionValue } from '~shared/agent/session-options'
 
-import {
-  nativeChatSessionChoiceLabel,
-  nativeChatSessionOptionLabel
-} from '../native-chat/session/option-labels'
-import { buildNativeChatSessionOptionSnapshot } from '../native-chat/session/option-snapshot'
 import { Label } from '../ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import { Switch } from '../ui/switch'
+import {
+  agentLaunchChoiceLabel,
+  agentLaunchOptionLabel,
+  buildAgentLaunchOptionDescriptors
+} from './launch-option-descriptors'
 
 export type ContinuationLaunchOptions = {
   model: string | null
@@ -79,25 +76,10 @@ function useLaunchDescriptors(
     if (!catalog) {
       return []
     }
-    const trackedValues = Object.fromEntries(
-      Object.entries(options.values).map(([id, value]) => [
-        id,
-        { value, source: 'applied' as const }
-      ])
-    )
-    return buildNativeChatSessionOptionSnapshot({
+    return buildAgentLaunchOptionDescriptors({
       catalog,
-      models: catalog.models,
-      record: {
-        agent,
-        ...(options.model ? { model: { value: options.model, source: 'applied' as const } } : {}),
-        ...(options.model
-          ? { valuesByModel: { [options.model]: trackedValues } }
-          : { valuesByModel: {} })
-      },
-      // Why: nothing is running yet, so every launch-flag-backed option is a
-      // free choice — exactly what draft mode already models.
-      mode: 'draft'
+      modelId: options.model,
+      values: options.values
     })
   }, [agent, options])
 }
@@ -109,7 +91,7 @@ function DescriptorField(props: {
   portalRoot: HTMLElement | null
 }): React.JSX.Element | null {
   const { descriptor, disabled, onSelect, portalRoot } = props
-  const label = nativeChatSessionOptionLabel(descriptor)
+  const label = agentLaunchOptionLabel(descriptor)
   if (descriptor.kind.type === 'boolean') {
     return (
       <div className="flex items-center justify-between gap-3">
@@ -126,7 +108,7 @@ function DescriptorField(props: {
     (choice) => choice.value === descriptor.kind.currentValue
   )
   const selectedLabel = selectedChoice
-    ? nativeChatSessionChoiceLabel(selectedChoice)
+    ? agentLaunchChoiceLabel(selectedChoice)
     : descriptor.kind.currentValue
   return (
     <div className="flex items-center justify-between gap-3">
@@ -146,7 +128,7 @@ function DescriptorField(props: {
         <SelectContent portalContainer={portalRoot} align="start" alignItemWithTrigger={false}>
           {descriptor.kind.choices.map((choice) => (
             <SelectItem key={choice.value} value={choice.value}>
-              {nativeChatSessionChoiceLabel(choice)}
+              {agentLaunchChoiceLabel(choice)}
             </SelectItem>
           ))}
         </SelectContent>

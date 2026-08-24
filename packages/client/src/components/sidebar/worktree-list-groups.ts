@@ -16,7 +16,7 @@ import {
   PushPin as Pin
 } from '~renderer/components/icons/hugeicons'
 import { translate } from '~renderer/i18n/i18n'
-import { branchName } from '~renderer/lib/git-utils'
+import { branchName } from '~renderer/lib/git-branch-name'
 import {
   getRepoDisplayLabelKey,
   getRepoDisplayLabelsByPath

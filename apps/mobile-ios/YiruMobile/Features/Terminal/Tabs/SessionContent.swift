@@ -17,7 +17,6 @@ struct TerminalWorkspaceContentView: View {
     let runtime: any TerminalSessionRuntime
     let displayModeRuntime: any TerminalDisplayModeRuntime
     let surfaceFactory: any TerminalSurfaceFactory
-    let nativeChatRepository: any NativeChatRepository
     let preferences: TerminalPreferences
     let settingsPreferences: SettingsPreferences
     let showFiles: () -> Void
@@ -73,7 +72,6 @@ struct TerminalWorkspaceContentView: View {
             sessionContentWidth = width
             if !TerminalPanelDockMetrics.canDock(
                 availableWidth: width,
-                isFloating: workspace.id == WorkspaceSummary.floatingID,
                 isWideLayout: layoutMetrics.isWideLayout
             ) {
                 activePanel = nil
@@ -142,15 +140,12 @@ struct TerminalWorkspaceContentView: View {
                     RetainedTerminalPane(
                         host: host,
                         worktreeID: workspace.id,
-                        tab: tab,
                         target: target,
                         runtime: runtime,
                         displayModeRuntime: displayModeRuntime,
                         surfaceFactory: surfaceFactory,
-                        nativeChatRepository: nativeChatRepository,
                         preferences: preferences,
                         hostConnectionIsReady: model.isConnected,
-                        settingsPreferences: settingsPreferences,
                         isVisible: tab.id == model.activeTabID,
                         topChrome: tabStrip,
                         activateSelection: {
@@ -158,8 +153,7 @@ struct TerminalWorkspaceContentView: View {
                         },
                         closeTerminal: { Task { await model.close(tab) } },
                         showQuickCommands: quickCommandsAvailable ? showQuickCommands : nil,
-                        showFiles: workspace.id == WorkspaceSummary.floatingID
-                            ? nil : { requestPanel(.files) },
+                        showFiles: { requestPanel(.files) },
                         showSourceControl: workspace.kind == .git
                             ? { requestPanel(.sourceControl) } : nil,
                         showAgentHistory: workspace.kind == .git && agentHistoryAvailable
@@ -300,7 +294,6 @@ struct TerminalWorkspaceContentView: View {
     private var canDockPanel: Bool {
         TerminalPanelDockMetrics.canDock(
             availableWidth: sessionContentWidth,
-            isFloating: workspace.id == WorkspaceSummary.floatingID,
             isWideLayout: layoutMetrics.isWideLayout
         )
     }

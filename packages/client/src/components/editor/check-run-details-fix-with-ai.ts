@@ -6,7 +6,7 @@ import { getConnectionId } from '~renderer/lib/connection-context'
 import { readSourceControlLaunchRecipeAgentId } from '~renderer/lib/source-control-launch-agent-selection'
 import { resolveSourceControlLaunchPlatform } from '~renderer/lib/source-control-launch-platform'
 import { useAppStore } from '~renderer/store'
-import { findWorktreeById } from '~renderer/store/slices/worktree-helpers'
+import { findWorktreeById } from '~renderer/store/slices/worktree-state'
 import { resolveSourceControlActionRecipe } from '~shared/source-control/ai'
 import type {
   SourceControlActionRecipe,

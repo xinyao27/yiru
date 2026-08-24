@@ -56,9 +56,6 @@ export const shellUiContract = {
   setTerminalInputFocused: withAccess(SHELL_HOST_ACCESS)
     .input(type<{ focused: boolean }>())
     .output(type<void>()),
-  setFloatingTerminalInputFocused: withAccess(SHELL_HOST_ACCESS)
-    .input(type<{ focused: boolean }>())
-    .output(type<void>()),
   setShortcutRecorderFocused: withAccess(SHELL_HOST_ACCESS)
     .input(type<{ focused: boolean }>())
     .output(type<void>()),

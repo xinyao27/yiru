@@ -8,7 +8,6 @@ import {
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/lib/class-names'
 import { focusTerminalTabSurface } from '~renderer/lib/focus-terminal-tab-surface'
-import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
 import { brandEphemeralSetupTerminalWorktreeId } from '~shared/ephemeral-setup-terminal-worktree-id'
 
@@ -55,8 +54,8 @@ export function OnboardingInlineCommandTerminal({
   onInteracted,
   onTerminalExit
 }: OnboardingInlineCommandTerminalProps): React.JSX.Element {
-  // Why: brand the id so a remote runtime scopes this ephemeral terminal to the
-  // floating terminal instead of rejecting the synthetic id.
+  // Why: brand the id so a remote runtime resolves this ephemeral terminal to
+  // its own home directory instead of rejecting the synthetic id.
   const worktreeId = useMemo(
     () => brandEphemeralSetupTerminalWorktreeId(worktreeIdProp),
     [worktreeIdProp]
@@ -72,7 +71,6 @@ export function OnboardingInlineCommandTerminal({
       window.matchMedia('(prefers-reduced-motion: reduce)').matches,
     []
   )
-  const [cwd, setCwd] = useState<string | null>(null)
   const [tabId, setTabId] = useState<string | null>(null)
   // Why: starts at `prefersReducedMotion` so users opted out of motion never
   // see the slide-in frame; otherwise we flip to true after first paint so the
@@ -84,18 +82,6 @@ export function OnboardingInlineCommandTerminal({
   useEffect(() => {
     onOpened?.()
   }, [onOpened])
-
-  useEffect(() => {
-    let cancelled = false
-    void shellClient.app.getFloatingTerminalCwd({ path: '~' }).then((nextCwd) => {
-      if (!cancelled) {
-        setCwd(nextCwd)
-      }
-    })
-    return () => {
-      cancelled = true
-    }
-  }, [])
 
   useEffect(() => {
     const tab = createTab(worktreeId, undefined, shellOverride, {
@@ -202,7 +188,7 @@ export function OnboardingInlineCommandTerminal({
   }, [autoScrollIntoView, command, tabId])
 
   useEffect(() => {
-    if (!tabId || !cwd || autoInsertedRef.current === command) {
+    if (!tabId || autoInsertedRef.current === command) {
       return
     }
     let canceled = false
@@ -260,7 +246,7 @@ export function OnboardingInlineCommandTerminal({
         window.clearTimeout(insertionTimer)
       }
     }
-  }, [command, cwd, insertCommand, tabId])
+  }, [command, insertCommand, tabId])
 
   // Why: grid 0fr → 1fr animates to the child's natural height without a
   // hardcoded max-height, so we don't leave dead space if the terminal
@@ -292,11 +278,10 @@ export function OnboardingInlineCommandTerminal({
           onKeyDownCapture={(event) => onInteracted?.('keyboard', event)}
           onPointerDownCapture={() => onInteracted?.('pointer')}
         >
-          {cwd && tabId ? (
+          {tabId ? (
             <TerminalPane
               tabId={tabId}
               worktreeId={worktreeId}
-              cwd={cwd}
               isActive
               isVisible
               showSplitButton={false}

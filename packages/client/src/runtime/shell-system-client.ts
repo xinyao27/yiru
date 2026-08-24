@@ -11,8 +11,6 @@ import type {
   GitHubPRRefreshEnqueueResult,
   GitHubPRRefreshReason,
   GitHubViewer,
-  FloatingTerminalCwdRequest,
-  MarkdownDocument,
   UpdateCheckOptions,
   UpdateStatus
 } from '~shared/types'
@@ -41,10 +39,6 @@ export type ShellAppApi = {
   startupDiagnostic: (event: string, details?: Record<string, unknown>) => Promise<void>
   getKeyboardInputSourceId: () => Promise<string | null>
   setUnreadDockBadgeCount: (count: number) => Promise<void>
-  getFloatingTerminalCwd: (args?: FloatingTerminalCwdRequest) => Promise<string>
-  getFloatingMarkdownDirectory: () => Promise<string>
-  pickFloatingMarkdownDocument: () => Promise<MarkdownDocument | null>
-  pickFloatingWorkspaceDirectory: () => Promise<string | null>
 }
 export type ShellRepoHostApi = {
   pickFolder: () => Promise<string | null>
@@ -139,17 +133,7 @@ const electronAppApi: ShellAppApi = {
   getKeyboardInputSourceId: () =>
     callShellOrpc((client) => client.shell.app.getKeyboardInputSourceId, undefined),
   setUnreadDockBadgeCount: (count) =>
-    callShellOrpc((client) => client.shell.app.setUnreadDockBadgeCount, { count }),
-  getFloatingTerminalCwd: (input) =>
-    callShellOrpc((client) => client.shell.app.getFloatingTerminalCwd, input),
-  getFloatingMarkdownDirectory: () =>
-    callShellOrpc((client) => client.shell.app.getFloatingMarkdownDirectory, undefined),
-  pickFloatingMarkdownDocument: async () =>
-    restoreShellDocument(
-      await callShellOrpc((client) => client.shell.app.pickFloatingMarkdownDocument, undefined)
-    ),
-  pickFloatingWorkspaceDirectory: () =>
-    callShellOrpc((client) => client.shell.app.pickFloatingWorkspaceDirectory, undefined)
+    callShellOrpc((client) => client.shell.app.setUnreadDockBadgeCount, { count })
 }
 
 const electronRepoHostApi: ShellRepoHostApi = {

@@ -41,7 +41,6 @@ await build({
         ),
         'mobile-files-wire': resolve(import.meta.dirname, 'src/mobile-files-wire.ts'),
         'mobile-clipboard-wire': resolve(import.meta.dirname, 'src/mobile-clipboard-wire.ts'),
-        'mobile-native-chat-wire': resolve(import.meta.dirname, 'src/mobile-native-chat-wire.ts'),
         'mobile-notifications-wire': resolve(
           import.meta.dirname,
           'src/mobile-notifications-wire.ts'

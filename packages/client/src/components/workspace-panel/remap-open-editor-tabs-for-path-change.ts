@@ -5,7 +5,6 @@ import {
 import { detectLanguage } from '~renderer/lib/language-detect'
 import { basename } from '~renderer/lib/path'
 import { useAppStore } from '~renderer/store'
-import { FLOATING_TERMINAL_WORKTREE_ID } from '~shared/constants'
 
 function isPathInsideOrEqual(rootPath: string, candidatePath: string): boolean {
   if (candidatePath === rootPath) {
@@ -114,8 +113,7 @@ function getUpdatedRelativePath({
   const usesInitiatingWorktreeRoot =
     initiatingWorktreeId !== undefined
       ? worktreeId === initiatingWorktreeId
-      : worktreeId !== FLOATING_TERMINAL_WORKTREE_ID &&
-        worktreeRelative !== null &&
+      : worktreeRelative !== null &&
         normalizeRuntimePathSeparators(worktreeRelative) === normalizedRelativePath
   const relativeRoot = usesInitiatingWorktreeRoot
     ? initiatingWorktreePath

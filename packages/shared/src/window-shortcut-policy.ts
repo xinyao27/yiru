@@ -32,8 +32,6 @@ export type WindowShortcutAction =
   | { type: 'openSettings' }
   | { type: 'forceReload' }
   | { type: 'toggleWorktreePalette' }
-  | { type: 'toggleAssistant' }
-  | { type: 'toggleFloatingTerminal' }
   | { type: 'toggleLeftSidebar' }
   | { type: 'toggleRightSidebar' }
   | { type: 'openQuickOpen' }
@@ -44,7 +42,6 @@ export type WindowShortcutAction =
   | { type: 'jumpToWorktreeIndex'; index: number }
   | { type: 'jumpToTabIndex'; index: number }
   | { type: 'worktreeHistoryNavigate'; direction: 'back' | 'forward' }
-  | { type: 'dictationKeyDown' }
 
 type WindowShortcutResolveOptions = KeybindingMatchOptions
 
@@ -170,14 +167,6 @@ export function resolveWindowShortcutAction(
     }
   }
 
-  if (actionMatches('floatingTerminal.toggle', input, platform, keybindings, options)) {
-    return { type: 'toggleFloatingTerminal' }
-  }
-
-  if (actionMatches('assistant.toggle', input, platform, keybindings, options)) {
-    return { type: 'toggleAssistant' }
-  }
-
   if (actionMatches('zoom.in', input, platform, keybindings, options)) {
     return { type: 'zoom', direction: 'in' }
   }
@@ -226,10 +215,6 @@ export function resolveWindowShortcutAction(
 
   if (actionMatches('workspace.delete', input, platform, keybindings, options)) {
     return { type: 'deleteCurrentWorkspace' }
-  }
-
-  if (actionMatches('voice.dictation', input, platform, keybindings, options)) {
-    return { type: 'dictationKeyDown' }
   }
 
   if (actionMatches('tab.previousRecent', input, platform, keybindings, options)) {
@@ -287,10 +272,6 @@ export function getWindowShortcutActionId(action: WindowShortcutAction): Keybind
       return 'app.forceReload'
     case 'toggleWorktreePalette':
       return 'worktree.palette'
-    case 'toggleFloatingTerminal':
-      return 'floatingTerminal.toggle'
-    case 'toggleAssistant':
-      return 'assistant.toggle'
     case 'toggleLeftSidebar':
       return 'sidebar.left.toggle'
     case 'toggleRightSidebar':
@@ -307,8 +288,6 @@ export function getWindowShortcutActionId(action: WindowShortcutAction): Keybind
       return 'tab.previousRecent'
     case 'worktreeHistoryNavigate':
       return action.direction === 'back' ? 'worktree.history.back' : 'worktree.history.forward'
-    case 'dictationKeyDown':
-      return 'voice.dictation'
     case 'jumpToWorktreeIndex':
       return 'workspace.selectByIndex'
     case 'jumpToTabIndex':

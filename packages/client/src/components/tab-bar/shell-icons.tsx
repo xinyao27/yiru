@@ -68,7 +68,7 @@ function WslIcon({ size = 14 }: { size?: number }): React.JSX.Element {
         fontSize="7"
         fontWeight="800"
         fill="#1F1F1F"
-        fontFamily="system-ui, -apple-system, sans-serif"
+        fontFamily="var(--font-sans)"
       >
         {translate('auto.components.tab.bar.shell.icons.e9b2e70613', 'WSL')}
       </text>

@@ -80,7 +80,7 @@ import { statRuntimePath } from '~renderer/runtime/file-client'
 import { settingsForRuntimeOwner } from '~renderer/runtime/rpc-client'
 import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store'
-import { findWorktreeById } from '~renderer/store/slices/worktree-helpers'
+import { findWorktreeById } from '~renderer/store/slices/worktree-state'
 import type { DiffComment, MarkdownDocument, Worktree } from '~shared/types'
 
 import { DiffCommentCard } from '../diff-comments/diff-comment-card'
@@ -2143,12 +2143,7 @@ function MarkdownAnnotationComposer({
           'Add note for the AI'
         )}
         value={body}
-        onChange={(event) => {
-          setBody(event.target.value)
-          const el = event.currentTarget
-          el.style.height = 'auto'
-          el.style.height = `${Math.min(el.scrollHeight, 240)}px`
-        }}
+        onChange={(event) => setBody(event.target.value)}
         onKeyDown={(event) => {
           if (event.key === 'Escape') {
             event.preventDefault()

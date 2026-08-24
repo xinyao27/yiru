@@ -1,6 +1,5 @@
 import type { AgentType } from '@yiru/workbench-model/agent'
 
-import type { SessionOptionValue } from '../native-chat/session-options'
 import {
   CLAUDE_SESSION_OPTION_CATALOG,
   CODEX_SESSION_OPTION_CATALOG
@@ -15,6 +14,7 @@ import type {
   CatalogModel,
   CatalogOption
 } from './session-option-catalog-types'
+import type { SessionOptionValue } from './session-options'
 
 export type {
   AgentSessionOptionCatalog,

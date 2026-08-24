@@ -1,9 +1,26 @@
+import { useSyncExternalStore } from 'react'
 import { SidebarSimple as PanelRight } from '~renderer/components/icons/hugeicons'
 import { Button } from '~renderer/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/components/ui/tooltip'
 import { translate } from '~renderer/i18n/i18n'
 
-export const WORKSPACE_SIDEBAR_CHROME_WIDTH_PROPERTY = '--workspace-sidebar-chrome-width'
+let workspaceSidebarChromeWidth = 0
+const workspaceSidebarChromeWidthListeners = new Set<() => void>()
+
+function subscribeToWorkspaceSidebarChromeWidth(listener: () => void): () => void {
+  workspaceSidebarChromeWidthListeners.add(listener)
+  return () => workspaceSidebarChromeWidthListeners.delete(listener)
+}
+
+export function setWorkspaceSidebarChromeWidth(width: number): void {
+  if (workspaceSidebarChromeWidth === width) {
+    return
+  }
+  workspaceSidebarChromeWidth = width
+  for (const listener of workspaceSidebarChromeWidthListeners) {
+    listener()
+  }
+}
 
 type WorkspaceSidebarToggleButtonProps = {
   onToggle: () => void
@@ -45,10 +62,10 @@ export function WorkspaceSidebarToggleButton({
 }
 
 export function WorkspaceSidebarChromeSpacer(): React.JSX.Element {
-  return (
-    <div
-      className="h-full shrink-0 [-webkit-app-region:no-drag]"
-      style={{ width: `var(${WORKSPACE_SIDEBAR_CHROME_WIDTH_PROPERTY}, 0px)` }}
-    />
+  const width = useSyncExternalStore(
+    subscribeToWorkspaceSidebarChromeWidth,
+    () => workspaceSidebarChromeWidth,
+    () => 0
   )
+  return <div className="h-full shrink-0 [-webkit-app-region:no-drag]" style={{ width }} />
 }

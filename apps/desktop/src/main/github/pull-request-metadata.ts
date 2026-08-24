@@ -10,7 +10,7 @@ import {
   release,
   type LocalGitExecOptions,
   type OwnerRepo
-} from './gh-utils'
+} from './github-cli'
 
 export async function addPullRequestComment(
   repoPath: string,

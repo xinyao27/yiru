@@ -1,5 +1,5 @@
 import React from 'react'
-import { GitMerge, Moon, FlowArrow as Workflow } from '~renderer/components/icons/hugeicons'
+import { GitMerge, Moon } from '~renderer/components/icons/hugeicons'
 import { Switch } from '~renderer/components/ui/switch'
 import { translate } from '~renderer/i18n/i18n'
 import { useAppStore } from '~renderer/store'
@@ -9,10 +9,6 @@ const SidebarWorkspaceFilterSection = React.memo(function SidebarWorkspaceFilter
   const setShowSleepingWorkspaces = useAppStore((s) => s.setShowSleepingWorkspaces)
   const hideDefaultBranchWorkspace = useAppStore((s) => s.hideDefaultBranchWorkspace)
   const setHideDefaultBranchWorkspace = useAppStore((s) => s.setHideDefaultBranchWorkspace)
-  const hideAutomationGeneratedWorkspaces = useAppStore((s) => s.hideAutomationGeneratedWorkspaces)
-  const setHideAutomationGeneratedWorkspaces = useAppStore(
-    (s) => s.setHideAutomationGeneratedWorkspaces
-  )
 
   return (
     <>
@@ -38,15 +34,6 @@ const SidebarWorkspaceFilterSection = React.memo(function SidebarWorkspaceFilter
         )}
         checked={hideDefaultBranchWorkspace}
         onChange={setHideDefaultBranchWorkspace}
-      />
-      <FilterToggleRow
-        icon={<Workflow className="size-3.5" />}
-        label={translate(
-          'auto.components.sidebar.SidebarWorkspaceFilterSection.automationCreated',
-          'Hide automation-created'
-        )}
-        checked={hideAutomationGeneratedWorkspaces}
-        onChange={setHideAutomationGeneratedWorkspaces}
       />
     </>
   )

@@ -7,7 +7,6 @@ import {
 
 import { createBrowserSlice } from '../components/browser-pane/state'
 import { createCoworkingSharingSlice } from '../components/coworking/state'
-import { createDictationSlice } from '../components/dictation/state'
 import { createDiffCommentsSlice } from '../components/diff-comments/state'
 import { createEditorSlice } from '../components/editor/state'
 import { createGitHubSlice } from '../components/github/state'
@@ -78,7 +77,6 @@ export const useAppStore = create<AppState>()((...a) => ({
   ...createDiffCommentsSlice(...a),
   ...createDetectedAgentsSlice(...a),
   ...createWorktreeNavHistorySlice(...a),
-  ...createDictationSlice(...a),
   ...createWorkspaceCleanupSlice(...a),
   ...createRuntimeStatusSlice(...a),
   ...createPullRequestGenerationSlice(...a),

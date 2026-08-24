@@ -24,7 +24,7 @@ struct TerminalSettingsView: View {
     var body: some View {
         ScrollView(showsIndicators: false) {
             // Why: SettingsSpacing keeps this screen's heading-to-content and
-            // section-to-section rhythm identical to Appearance, Chat UI, and Browser so the
+            // section-to-section rhythm identical to Appearance and Browser so the
             // whole Settings cluster reads as one system rather than four independently tuned
             // screens.
             LazyVStack(alignment: .leading, spacing: 0) {

@@ -15,7 +15,7 @@ import { registerPendingEditorFlush } from '../pending-flush'
 import { useEditorScrollRestore } from '../use-editor-scroll-restore'
 import { useLinkBubble } from '../use-link-bubble'
 import { useLocalImagePick } from '../use-local-image-pick'
-import { useModifierHeldClass } from '../use-modifier-held-class'
+import { useModifierHeld } from '../use-modifier-held'
 import {
   isRichMarkdownContextCommandTarget,
   runRichMarkdownContextCommand
@@ -285,7 +285,7 @@ export default function RichMarkdownEditor({
 
   useEditorScrollRestore(scrollContainerRef, scrollCacheKey, editor)
 
-  useModifierHeldClass(rootRef, isMac)
+  const isModifierHeld = useModifierHeld(isMac)
 
   useRichMarkdownReviewEditorEffects({
     canAnnotateRichMarkdown: review.canAnnotateRichMarkdown,
@@ -364,6 +364,7 @@ export default function RichMarkdownEditor({
       editorFontZoomLevel={editorFontZoomLevel}
       rootElement={rootRef.current}
       rootRef={setRootElement}
+      isModifierHeld={isModifierHeld}
       scrollContainerRef={scrollContainerRef}
       headerSlot={headerSlot}
       reviewRailExpanded={review.reviewRailExpanded}

@@ -510,7 +510,6 @@ nonisolated struct MobileRuntimeStatusWire: Codable, Equatable, Sendable {
     let runtimeProtocolVersion: Int?
     let minCompatibleRuntimeClientVersion: Int?
     let capabilities: [String]?
-    let floatingWorkspaceEnabled: Bool?
     let hostPlatform: String?
     let terminalWindowsShell: String?
     let protocolVersion: Int?
@@ -1172,11 +1171,6 @@ nonisolated enum MobileSessionTerminalStatusWire: String, Decodable, Sendable {
     case ready = "ready"
 }
 
-nonisolated enum MobileSessionTerminalViewModeWire: String, Decodable, Sendable {
-    case terminal = "terminal"
-    case chat = "chat"
-}
-
 nonisolated enum MobileMarkdownSourceWire: String, Decodable, Sendable {
     case draft
     case file
@@ -1253,7 +1247,6 @@ nonisolated struct MobileSessionTabWire: Decodable, Sendable {
     let parentTabId: String?
     let leafId: String?
     let ptyId: String?
-    let viewMode: MobileSessionTerminalViewModeWire?
     let launchAgent: String?
     let resolvedAgentType: String?
     let agentStatus: MobileSessionAgentStatusWire?
@@ -2408,122 +2401,6 @@ nonisolated enum MobileFilesWireContract {
     static let readTerminalArtifactPath = "/files/readTerminalArtifact"
     static let readTerminalArtifactPreviewPath = "/files/readTerminalArtifactPreview"
     static let writeTerminalArtifactPath = "/files/writeTerminalArtifact"
-}
-
-nonisolated struct MobileNativeChatSessionRequestWire: Encodable, Sendable {
-    let agent: String
-    let sessionId: String
-    let limit: Int?
-    let subscriptionId: String?
-    let transcriptPath: String?
-    let beforeOffset: Int?
-}
-
-indirect enum MobileJSONValueWire: Decodable, Sendable {
-    case null
-    case boolean(Bool)
-    case number(Double)
-    case string(String)
-    case array([MobileJSONValueWire])
-    case object([String: MobileJSONValueWire])
-
-    init(from decoder: any Decoder) throws {
-        let container = try decoder.singleValueContainer()
-        if container.decodeNil() {
-            self = .null
-        } else if let value = try? container.decode(Bool.self) {
-            self = .boolean(value)
-        } else if let value = try? container.decode(Double.self) {
-            self = .number(value)
-        } else if let value = try? container.decode(String.self) {
-            self = .string(value)
-        } else if let value = try? container.decode([MobileJSONValueWire].self) {
-            self = .array(value)
-        } else {
-            self = .object(try container.decode([String: MobileJSONValueWire].self))
-        }
-    }
-}
-
-nonisolated enum MobileNativeChatBlockWire: Decodable, Sendable {
-    case text(String)
-    case toolCall(name: String, input: MobileJSONValueWire, callId: String?)
-    case toolResult(output: String, isError: Bool, callId: String?, outputSegments: [String]?)
-    case image(path: String?, url: String?, alt: String?)
-
-    private enum BlockType: String, Decodable {
-        case text
-        case toolCall = "tool-call"
-        case toolResult = "tool-result"
-        case image = "image-ref"
-    }
-    private enum CodingKeys: String, CodingKey {
-        case type
-        case text
-        case name
-        case input
-        case callId
-        case output
-        case isError
-        case outputSegments
-        case path
-        case url
-        case alt
-    }
-
-    init(from decoder: any Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        switch try container.decode(BlockType.self, forKey: .type) {
-        case .text: self = .text(try container.decode(String.self, forKey: .text))
-        case .toolCall:
-            self = .toolCall(
-                name: try container.decode(String.self, forKey: .name),
-                input: try container.decode(MobileJSONValueWire.self, forKey: .input),
-                callId: try container.decodeIfPresent(String.self, forKey: .callId))
-        case .toolResult:
-            self = .toolResult(
-                output: try container.decode(String.self, forKey: .output),
-                isError: try container.decodeIfPresent(Bool.self, forKey: .isError) ?? false,
-                callId: try container.decodeIfPresent(String.self, forKey: .callId),
-                outputSegments: try container.decodeIfPresent(
-                    [String].self, forKey: .outputSegments))
-        case .image:
-            self = .image(
-                path: try container.decodeIfPresent(String.self, forKey: .path),
-                url: try container.decodeIfPresent(String.self, forKey: .url),
-                alt: try container.decodeIfPresent(String.self, forKey: .alt))
-        }
-    }
-}
-
-nonisolated struct MobileNativeChatMessageWire: Decodable, Sendable {
-    let id: String
-    let role: String
-    let blocks: [MobileNativeChatBlockWire]
-    let timestamp: Double?
-    let source: String
-    let turnId: String?
-}
-
-nonisolated struct MobileNativeChatReadResultWire: Decodable, Sendable {
-    let messages: [MobileNativeChatMessageWire]?
-    let hasMore: Bool?
-    let beforeOffset: Int?
-    let error: String?
-    let notFound: Bool?
-}
-
-nonisolated struct MobileNativeChatSubscriptionEventWire: Decodable, Sendable {
-    let type: String
-    let messages: [MobileNativeChatMessageWire]?
-    let hasMore: Bool?
-    let beforeOffset: Int?
-    let error: String?
-}
-
-nonisolated enum MobileNativeChatWireContract {
-    static let readPath = "/nativeChat/readSession"
-    static let subscribePath = "/nativeChat/subscribe"
 }
 
 nonisolated enum MobileNotificationEventWire: Decodable, Sendable {

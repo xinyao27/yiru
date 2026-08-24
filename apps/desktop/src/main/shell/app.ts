@@ -1,23 +1,10 @@
 import { spawn } from 'node:child_process'
 
 import { is } from '@electron-toolkit/utils'
-import type { BrowserWindow } from 'electron'
-import { app, dialog } from 'electron'
+import { app } from 'electron'
 import type { AppIdentity } from '~shared/app-identity'
-import type { FloatingTerminalCwdRequest, MarkdownDocument } from '~shared/types'
 
 import { setUnreadDockBadgeCount } from '../dock/unread-badge'
-import { authorizeExternalPath } from '../filesystem/auth'
-import {
-  ensureDefaultFloatingWorkspacePath,
-  grantFloatingWorkspaceDirectory,
-  resolveFloatingTerminalCwd
-} from '../filesystem/floating-workspace-directory'
-import {
-  isMarkdownDocumentName,
-  markdownDocumentFromFilePath
-} from '../filesystem/markdown-documents'
-import type { Store } from '../persistence'
 import { getDevInstanceIdentity } from '../startup/dev-instance-identity'
 import { destroySystemTray } from '../tray/system-tray'
 
@@ -35,51 +22,6 @@ const MAC_SELECTED_INPUT_SOURCES_JSON_COMMAND = [
 
 type RegisterAppHandlersOptions = {
   onBeforeRelaunch?: () => void | Promise<void>
-}
-
-async function pickFloatingMarkdownDocument(
-  parentWindow: BrowserWindow | null
-): Promise<MarkdownDocument | null> {
-  const cwd = await ensureDefaultFloatingWorkspacePath()
-  const options = {
-    defaultPath: cwd,
-    properties: ['openFile'],
-    filters: [{ name: 'Markdown', extensions: ['md', 'mdx', 'markdown'] }]
-  } satisfies Electron.OpenDialogOptions
-  const result = parentWindow
-    ? await dialog.showOpenDialog(parentWindow, options)
-    : await dialog.showOpenDialog(options)
-  if (result.canceled || result.filePaths.length === 0) {
-    return null
-  }
-  const filePath = result.filePaths[0]
-  if (!isMarkdownDocumentName(filePath)) {
-    throw new Error('Selected file is not a markdown document.')
-  }
-  authorizeExternalPath(filePath)
-  return markdownDocumentFromFilePath(cwd, filePath, { outsideRootRelativePath: 'basename' })
-}
-
-async function pickFloatingWorkspaceDirectory(
-  parentWindow: BrowserWindow | null,
-  store: Store
-): Promise<string | null> {
-  const options = {
-    // Why: this picker grants access to an existing workspace directory.
-    // Creation belongs to explicit file/write actions, not typeahead input.
-    properties: ['openDirectory']
-  } satisfies Electron.OpenDialogOptions
-  const result = parentWindow
-    ? await dialog.showOpenDialog(parentWindow, options)
-    : await dialog.showOpenDialog(options)
-  if (result.canceled || result.filePaths.length === 0) {
-    return null
-  }
-  const selectedDir = result.filePaths[0]
-  // Why: a user-approved picker selection is a trust grant for later Floating
-  // Workspace markdown creation, unlike arbitrary typed settings text.
-  await grantFloatingWorkspaceDirectory(store, selectedDir)
-  return selectedDir
 }
 
 function readCommandStdout(
@@ -224,11 +166,8 @@ type ShellAppService = ReturnType<typeof createShellAppService>
 
 let shellAppService: ShellAppService | null = null
 
-export function initializeShellAppService(
-  store: Store,
-  options: RegisterAppHandlersOptions = {}
-): void {
-  shellAppService = createShellAppService(store, options)
+export function initializeShellAppService(options: RegisterAppHandlersOptions = {}): void {
+  shellAppService = createShellAppService(options)
 }
 
 export function getShellAppService(): ShellAppService {
@@ -238,7 +177,7 @@ export function getShellAppService(): ShellAppService {
   return shellAppService
 }
 
-function createShellAppService(store: Store, options: RegisterAppHandlersOptions) {
+function createShellAppService(options: RegisterAppHandlersOptions) {
   const getIdentity = (): AppIdentity => {
     const identity = getDevInstanceIdentity(is.dev)
     return {
@@ -319,13 +258,7 @@ function createShellAppService(store: Store, options: RegisterAppHandlersOptions
     getKeyboardInputSourceId,
     relaunch,
     restart,
-    setUnreadDockBadgeCount: setDockBadgeCount,
-    getFloatingTerminalCwd: (args?: FloatingTerminalCwdRequest): Promise<string> =>
-      resolveFloatingTerminalCwd(store, args),
-    getFloatingMarkdownDirectory: ensureDefaultFloatingWorkspacePath,
-    pickFloatingMarkdownDocument,
-    pickFloatingWorkspaceDirectory: (parentWindow: BrowserWindow | null) =>
-      pickFloatingWorkspaceDirectory(parentWindow, store)
+    setUnreadDockBadgeCount: setDockBadgeCount
   }
 }
 

@@ -5,7 +5,6 @@ import {
 } from '@yiru/workbench-model/agent'
 /* oxlint-disable max-lines -- Why: this App-level IPC bridge intentionally keeps the renderer's main-process event contract in one place so shortcut, runtime, updater, and agent-status wiring do not drift across files. */
 import { useEffect } from 'react'
-import { toast } from 'sonner'
 import {
   acquireBrowserAutomationVisibility,
   releaseBrowserAutomationVisibility
@@ -36,17 +35,7 @@ import { showTerminalShortcutCaptureNotification } from '~renderer/components/te
 import { requestBackgroundTerminalWorktreeMount } from '~renderer/components/terminal/background-terminal-worktree-mount'
 import { showWorkspaceSidebar } from '~renderer/components/workspace-panel/show-sidebar'
 import { translate } from '~renderer/i18n/i18n'
-import { TOGGLE_FLOATING_TERMINAL_EVENT } from '~renderer/lib/floating-terminal'
-import {
-  createFloatingWorkspaceBrowserTab,
-  createFloatingWorkspaceMarkdownTab,
-  createFloatingWorkspaceTerminalTab,
-  isEmptyFloatingWorkspacePanelVisible,
-  isFloatingWorkspacePanelFocused,
-  switchFloatingWorkspaceTab
-} from '~renderer/lib/floating-workspace-terminal-actions'
 import { focusTerminalTabSurface } from '~renderer/lib/focus-terminal-tab-surface'
-import { requestFriday } from '~renderer/lib/friday'
 import { openMobileEmulatorTab } from '~renderer/lib/open-mobile-emulator-tab'
 import {
   hydrateBrowserDrivers,
@@ -90,7 +79,6 @@ import {
   resolveAgentStatusIdentity,
   shouldSuppressInheritedTerminalStatus
 } from '~shared/agent/status-identity'
-import { FRIDAY_WORKTREE_ID } from '~shared/constants'
 import type { RuntimeClientEvent } from '~shared/runtime-client-events'
 import type { RuntimeBrowserDriverState, RuntimeTerminalDriverState } from '~shared/runtime-types'
 import { parsePaneKey } from '~shared/stable-pane-id'
@@ -825,18 +813,6 @@ export function useIpcEvents(): void {
       })
     )
 
-    unsubs.push(
-      shellClient.ui.onToggleFloatingTerminal(() => {
-        window.dispatchEvent(new CustomEvent(TOGGLE_FLOATING_TERMINAL_EVENT))
-      })
-    )
-
-    unsubs.push(
-      shellClient.ui.onToggleAssistant(() => {
-        requestFriday()
-      })
-    )
-
     if (shellClient.ui.onTerminalShortcutCaptured) {
       unsubs.push(
         shellClient.ui.onTerminalShortcutCaptured(({ actionId }) => {
@@ -1073,10 +1049,6 @@ export function useIpcEvents(): void {
     unsubs.push(
       shellClient.ui.onNewBrowserTab(() => {
         const store = useAppStore.getState()
-        if (isFloatingWorkspacePanelFocused()) {
-          void createFloatingWorkspaceBrowserTab(store)
-          return
-        }
         const worktreeId = store.activeWorktreeId
         if (worktreeId) {
           const environmentId = getWorktreeRuntimeEnvironmentId(worktreeId)
@@ -1111,19 +1083,6 @@ export function useIpcEvents(): void {
     unsubs.push(
       shellClient.ui.onNewMarkdownTab(() => {
         const store = useAppStore.getState()
-        if (isFloatingWorkspacePanelFocused()) {
-          void createFloatingWorkspaceMarkdownTab(store).catch((err) => {
-            toast.error(
-              err instanceof Error
-                ? err.message
-                : translate(
-                    'auto.hooks.useIpcEvents.56d3ec4203',
-                    'Failed to create untitled markdown file.'
-                  )
-            )
-          })
-          return
-        }
         const worktreeId = store.activeWorktreeId
         if (!worktreeId) {
           return
@@ -1181,10 +1140,6 @@ export function useIpcEvents(): void {
     unsubs.push(
       shellClient.ui.onNewTerminalTab(() => {
         const store = useAppStore.getState()
-        if (isFloatingWorkspacePanelFocused()) {
-          void createFloatingWorkspaceTerminalTab(store)
-          return
-        }
         const worktreeId = store.activeWorktreeId
         if (!worktreeId) {
           return
@@ -1231,10 +1186,6 @@ export function useIpcEvents(): void {
 
     unsubs.push(
       shellClient.ui.onCloseActiveTab(() => {
-        if (isEmptyFloatingWorkspacePanelVisible()) {
-          window.dispatchEvent(new Event(TOGGLE_FLOATING_TERMINAL_EVENT))
-          return
-        }
         const store = useAppStore.getState()
         if (store.activeTabType === 'browser' && store.activeBrowserTabId) {
           const tabId = store.activeBrowserTabId
@@ -1271,32 +1222,17 @@ export function useIpcEvents(): void {
 
     unsubs.push(
       shellClient.ui.onSwitchTab((direction) => {
-        const store = useAppStore.getState()
-        if (isFloatingWorkspacePanelFocused()) {
-          switchFloatingWorkspaceTab(store, direction, 'same-type')
-          return
-        }
         handleSwitchTab(direction)
       })
     )
     unsubs.push(
       shellClient.ui.onSwitchTabAcrossAllTypes((direction) => {
-        const store = useAppStore.getState()
-        if (isFloatingWorkspacePanelFocused()) {
-          switchFloatingWorkspaceTab(store, direction, 'all-types')
-          return
-        }
         handleSwitchTabAcrossAllTypes(direction)
       })
     )
     unsubs.push(shellClient.ui.onSwitchRecentTab(handleSwitchRecentTab))
     unsubs.push(
       shellClient.ui.onSwitchTerminalTab((direction) => {
-        const store = useAppStore.getState()
-        if (isFloatingWorkspacePanelFocused()) {
-          switchFloatingWorkspaceTab(store, direction, 'terminal')
-          return
-        }
         handleSwitchTerminalTab(direction)
       })
     )
@@ -1469,14 +1405,6 @@ export function useIpcEvents(): void {
         repoConnectionResolved,
         owningWorktreeId
       } = resolvePaneKey(store, paneKey)
-      if (!exists && data.worktreeId === FRIDAY_WORKTREE_ID) {
-        // Why: assistant hooks may arrive before its hidden PTY is adopted by
-        // the floating tab; native chat still needs the hook-owned provider id.
-        exists = true
-        owningWorktreeId = FRIDAY_WORKTREE_ID
-        repoConnectionId = null
-        repoConnectionResolved = true
-      }
       if (!exists && hasRuntimeBackedAgentStatusAttribution(data)) {
         // Why: orchestration worker hooks can carry main-side worktree
         // attribution before this renderer has a terminal tab for the pane.

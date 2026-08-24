@@ -25,14 +25,7 @@ export const shellAppContract = {
   getKeyboardInputSourceId: withAccess(SHELL_SYSTEM_READ_ACCESS).output(type<string | null>()),
   setUnreadDockBadgeCount: withAccess(SHELL_SYSTEM_WRITE_ACCESS)
     .input(type<{ count: number }>())
-    .output(type<void>()),
-  getFloatingTerminalCwd: withAccess(SHELL_SYSTEM_READ_ACCESS)
-    .input(type<unknown>())
-    .output(type<string>()),
-  getFloatingMarkdownDirectory: withAccess(SHELL_SYSTEM_READ_ACCESS).output(type<string>()),
-  pickFloatingMarkdownDocument: withAccess(SHELL_SYSTEM_WRITE_ACCESS).output(type<unknown>()),
-  pickFloatingWorkspaceDirectory:
-    withAccess(SHELL_SYSTEM_WRITE_ACCESS).output(type<string | null>())
+    .output(type<void>())
 } satisfies ContractRouter<RuntimeProcedureMeta>
 
 export const shellRepoHostContract = {

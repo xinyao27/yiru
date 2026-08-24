@@ -11,7 +11,7 @@ import {
 } from '~renderer/components/worktree-jump-palette/new-workspace-composer-repo'
 import { coworkingSharingClient } from '~renderer/runtime/coworking-sharing-client'
 import { useAppStore } from '~renderer/store'
-import { findWorktreeById } from '~renderer/store/slices/worktree-helpers'
+import { findWorktreeById } from '~renderer/store/slices/worktree-state'
 
 import { runWorktreeDelete } from '../sidebar/delete-worktree/flow'
 import type { PaletteStoreState } from './use-palette-store-state'

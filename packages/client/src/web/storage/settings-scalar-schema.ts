@@ -161,8 +161,6 @@ export function createScalarSettingSchemas(defaults: GlobalSettings) {
     httpProxyBypassRules: optionalString.catch(defaults.httpProxyBypassRules),
     electronHttp1CompatibilityMode: optionalBoolean.catch(defaults.electronHttp1CompatibilityMode),
     localhostWorktreeLabelsEnabled: optionalBoolean.catch(defaults.localhostWorktreeLabelsEnabled),
-    openAgentTabsInChatByDefault: optionalBoolean.catch(defaults.openAgentTabsInChatByDefault),
-    experimentalNativeChat: optionalBoolean.catch(defaults.experimentalNativeChat),
     lastOpenInTargetKey: openInTargetKey.optional().catch(defaults.lastOpenInTargetKey),
     rightSidebarOpenByDefault: z.boolean().catch(defaults.rightSidebarOpenByDefault),
     showGitIgnoredFiles: optionalBoolean.catch(defaults.showGitIgnoredFiles),
@@ -174,24 +172,12 @@ export function createScalarSettingSchemas(defaults: GlobalSettings) {
       .boolean()
       .catch(defaults.sourceControlCompareAgainstUpstream),
     showTitlebarAppName: z.boolean().catch(defaults.showTitlebarAppName),
-    showAutomationsButton: optionalBoolean.catch(defaults.showAutomationsButton),
     showMobileButton: optionalBoolean.catch(defaults.showMobileButton),
     ctrlTabOrderMode: z.enum(['mru', 'sequential']).optional().catch(defaults.ctrlTabOrderMode),
     terminalShortcutPolicy: z
       .enum(['yiru-first', 'terminal-first'])
       .optional()
       .catch(defaults.terminalShortcutPolicy),
-    floatingTerminalEnabled: z.boolean().catch(defaults.floatingTerminalEnabled),
-    floatingTerminalDefaultedForAllUsers: optionalBoolean.catch(
-      defaults.floatingTerminalDefaultedForAllUsers
-    ),
-    floatingTerminalCwd: z.string().catch(defaults.floatingTerminalCwd),
-    floatingTerminalCwdMigratedToAppWorkspace: optionalBoolean.catch(
-      defaults.floatingTerminalCwdMigratedToAppWorkspace
-    ),
-    floatingTerminalTriggerLocation: z
-      .enum(['floating-button', 'status-bar'])
-      .catch(defaults.floatingTerminalTriggerLocation),
     diffDefaultView: z.enum(['inline', 'side-by-side']).catch(defaults.diffDefaultView),
     diffWordWrap: z.boolean().catch(defaults.diffWordWrap),
     promptCacheTimerEnabled: z.boolean().catch(defaults.promptCacheTimerEnabled),
@@ -217,7 +203,6 @@ export function createScalarSettingSchemas(defaults: GlobalSettings) {
     skipCloseTerminalWithRunningProcessConfirm: z
       .boolean()
       .catch(defaults.skipCloseTerminalWithRunningProcessConfirm),
-    skipDeleteAutomationConfirm: z.boolean().catch(defaults.skipDeleteAutomationConfirm),
     skipCodexRateLimitResetConfirm: z.boolean().catch(defaults.skipCodexRateLimitResetConfirm),
     opencodeSessionCookie: z.string().catch(defaults.opencodeSessionCookie),
     opencodeWorkspaceId: z.string().catch(defaults.opencodeWorkspaceId),
@@ -243,8 +228,6 @@ export function createScalarSettingSchemas(defaults: GlobalSettings) {
     mobileAutoRestoreFitMs: z
       .union([finiteNumber, z.null()])
       .catch(defaults.mobileAutoRestoreFitMs),
-    experimentalPet: z.boolean().catch(defaults.experimentalPet),
-    experimentalSidekick: optionalBoolean.catch(defaults.experimentalSidekick),
     experimentalTerminalAttention: z.boolean().catch(defaults.experimentalTerminalAttention),
     experimentalAgentHibernation: optionalBoolean.catch(defaults.experimentalAgentHibernation),
     agentHibernationIdleMs: optionalFiniteNumber.catch(defaults.agentHibernationIdleMs),

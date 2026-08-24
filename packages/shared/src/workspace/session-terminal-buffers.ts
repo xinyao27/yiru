@@ -1,7 +1,7 @@
 import { parseExecutionHostId } from '@yiru/workbench-model/workspace'
 import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
 
-import { FLOATING_TERMINAL_WORKTREE_ID } from '../constants'
+import { isEphemeralSetupTerminalWorktreeId } from '../ephemeral-setup-terminal-worktree-id'
 import { TERMINAL_SCROLLBACK_SESSION_BUFFER_BYTE_LIMIT } from '../terminal/scrollback-limits'
 import type { Repo, WorkspaceSessionState } from '../types'
 import { clampUtf8TextTail, measureUtf8ByteLength } from '../utf8-byte-limits'
@@ -22,7 +22,7 @@ function shouldPreserveTerminalScrollbackBuffersForRepoMap(
   worktreeId: string | undefined,
   repoById: ReadonlyMap<string, RepoTerminalScrollbackOwner>
 ): boolean {
-  if (worktreeId === undefined || worktreeId === FLOATING_TERMINAL_WORKTREE_ID) {
+  if (worktreeId === undefined || isEphemeralSetupTerminalWorktreeId(worktreeId)) {
     return false
   }
   const repoId = getRepoIdFromWorktreeId(worktreeId)

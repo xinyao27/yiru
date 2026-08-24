@@ -1,4 +1,3 @@
-import type { RuntimeSpeechModelSummary } from '@yiru/runtime-protocol/contract'
 import {
   getRepoExecutionHostId,
   LOCAL_EXECUTION_HOST_ID,
@@ -20,7 +19,10 @@ import { toast } from 'sonner'
 import { useConfirmationDialog } from '~renderer/components/confirmation-dialog'
 import { applyDocumentTheme } from '~renderer/components/editor/document-theme'
 import { useSkillFreshness } from '~renderer/components/skills/use-skill-freshness'
-import { isMacUserAgent, isWindowsUserAgent } from '~renderer/components/terminal-pane/pane-helpers'
+import {
+  isMacUserAgent,
+  isWindowsUserAgent
+} from '~renderer/components/terminal-pane/pane-interactions'
 import { useSystemPrefersDark } from '~renderer/components/terminal-pane/use-system-prefers-dark'
 import { useActiveProjectSkillRuntime } from '~renderer/hooks/use-active-project-skill-runtime'
 import {
@@ -52,7 +54,7 @@ import { listInstalledFontFamilies } from '~renderer/runtime/settings-import-cli
 import { useAppStore } from '~renderer/store'
 import { getProjectHostSetupProjectionFromState } from '~renderer/store/selectors'
 import { getRepoHostIdentity } from '~renderer/store/slices/repo-host-identity'
-import { DEFAULT_APP_FONT_FAMILY, getDefaultVoiceSettings } from '~shared/constants'
+import { DEFAULT_APP_FONT_FAMILY } from '~shared/constants'
 import { keybindingMatchesAction } from '~shared/keybindings'
 import { isFolderRepo } from '~shared/repo-kind'
 import type { SkillFreshnessInventory } from '~shared/skill-freshness'
@@ -81,7 +83,6 @@ import {
 import { CoworkingSettingsPane } from './coworking/pane'
 import { DeveloperPermissionsPane } from './developer-permissions-pane'
 import { ExperimentalPane } from './experimental-pane'
-import { FloatingWorkspacePane } from './floating-workspace-pane'
 import { GeneralPane } from './general/pane'
 import { GitPane } from './git-pane'
 import { GitProviderApiBudgetPane } from './git-provider-api-budget-pane'
@@ -112,7 +113,6 @@ import { TerminalPane } from './terminal/pane'
 import { useGhosttyImport } from './use-ghostty-import'
 import { isWebClientLocation, useSettingsNavigationMetadata } from './use-navigation-metadata'
 import { useWarpThemeImport } from './use-warp-theme-import'
-import { VoicePane } from './voice-pane'
 
 const DevToolsPane = import.meta.env.DEV
   ? lazy(() => import('./devtools-pane').then((module) => ({ default: module.DevToolsPane })))
@@ -224,20 +224,6 @@ function getSkillNavInstallStatus(skill: {
   return getSkillFreshnessDisplayStatus(skill.inventory, skill.name)
 }
 
-function hasReadyVoiceModel(
-  settings: GlobalSettings,
-  modelStates: readonly RuntimeSpeechModelSummary[]
-): boolean {
-  const voiceSettings = settings.voice ?? getDefaultVoiceSettings()
-  if (
-    voiceSettings.sttModel !== '' &&
-    modelStates.some((state) => state.id === voiceSettings.sttModel && state.status === 'ready')
-  ) {
-    return true
-  }
-  return modelStates.some((state) => state.status === 'ready')
-}
-
 function getSettingsScrollTarget(
   sectionId: string,
   container?: HTMLElement | null
@@ -317,8 +303,6 @@ function Settings({ sidebarAppearanceStyle }: SettingsProps): React.JSX.Element 
   const settingsSearchInputQuery = useAppStore((s) => s.settingsSearchInputQuery)
   const settingsSearchQuery = useAppStore((s) => s.settingsSearchQuery)
   const setSettingsSearchQuery = useAppStore((s) => s.setSettingsSearchQuery)
-  const modelStates = useAppStore((s) => s.modelStates)
-  const refreshModelStates = useAppStore((s) => s.refreshModelStates)
 
   // Why: collapse repo rows into one entry per project (derived from repos so it
   // matches the nav metadata exactly) — the source of truth for the pane list.
@@ -364,7 +348,6 @@ function Settings({ sidebarAppearanceStyle }: SettingsProps): React.JSX.Element 
   // rail, which doesn't run under WSL, so the nav pill stays presence-only there.
   const { inventory: skillFreshnessInventory } = useSkillFreshness()
   const skillFreshnessApplies = activeSkillRuntime.agentRuntime?.runtime !== 'wsl'
-  const [voiceModelStatesLoading, setVoiceModelStatesLoading] = useState(showDesktopOnlySettings)
   // Why: the Terminal settings section shares one search index with the
   // sidebar. We trim platform-only entries on other platforms so search never
   // reveals controls that the renderer will intentionally hide.
@@ -535,25 +518,6 @@ function Settings({ sidebarAppearanceStyle }: SettingsProps): React.JSX.Element 
     void fetchSettings()
     void fetchKeybindings()
   }, [fetchKeybindings, fetchSettings])
-
-  useEffect(() => {
-    if (!showDesktopOnlySettings) {
-      setVoiceModelStatesLoading(false)
-      return
-    }
-    let canceled = false
-    // Why: modelStates starts empty, so Voice should not briefly look missing
-    // before the first speech-model scan reports the real installed state.
-    setVoiceModelStatesLoading(true)
-    void refreshModelStates().finally(() => {
-      if (!canceled) {
-        setVoiceModelStatesLoading(false)
-      }
-    })
-    return () => {
-      canceled = true
-    }
-  }, [refreshModelStates, showDesktopOnlySettings])
 
   useEffect(() => {
     const hasVisibleOverlay = (): boolean =>
@@ -765,29 +729,16 @@ function Settings({ sidebarAppearanceStyle }: SettingsProps): React.JSX.Element 
           inventory: applicableFreshnessInventory
         })
       )
-      if (settings) {
-        next.set(
-          'voice',
-          voiceModelStatesLoading
-            ? 'checking'
-            : hasReadyVoiceModel(settings, modelStates)
-              ? 'installed'
-              : 'install'
-        )
-      }
     }
     return next
   }, [
     computerUseSkillInstalled,
     computerUseSkillLoading,
-    modelStates,
     orchestrationSkillInstalled,
     orchestrationSkillLoading,
-    settings,
     showDesktopOnlySettings,
     skillFreshnessApplies,
-    skillFreshnessInventory,
-    voiceModelStatesLoading
+    skillFreshnessInventory
   ])
   const navSections = useMemo(
     () =>
@@ -1297,36 +1248,20 @@ function Settings({ sidebarAppearanceStyle }: SettingsProps): React.JSX.Element 
                     </SettingsSection>
 
                     {showDesktopOnlySettings ? (
-                      <>
-                        <SettingsSection
-                          id="computer-use"
-                          title={translate(
-                            'auto.components.settings.Settings.c9841721cb',
-                            'Computer Use'
-                          )}
-                          description={translate(
-                            'auto.components.settings.Settings.7118953f14',
-                            'Enable agents to control any app on your computer.'
-                          )}
-                          searchEntries={getSectionSearchEntries('computer-use')}
-                        >
-                          {isSectionMounted('computer-use') ? <ComputerUsePane /> : null}
-                        </SettingsSection>
-
-                        <SettingsSection
-                          id="voice"
-                          title={translate('auto.components.settings.Settings.5063bb47a5', 'Voice')}
-                          description={translate(
-                            'auto.components.settings.Settings.eb1176a14e',
-                            'Local speech-to-text dictation with on-device models.'
-                          )}
-                          searchEntries={getSectionSearchEntries('voice')}
-                        >
-                          {isSectionMounted('voice') ? (
-                            <VoicePane settings={settings} updateSettings={updateSettings} />
-                          ) : null}
-                        </SettingsSection>
-                      </>
+                      <SettingsSection
+                        id="computer-use"
+                        title={translate(
+                          'auto.components.settings.Settings.c9841721cb',
+                          'Computer Use'
+                        )}
+                        description={translate(
+                          'auto.components.settings.Settings.7118953f14',
+                          'Enable agents to control any app on your computer.'
+                        )}
+                        searchEntries={getSectionSearchEntries('computer-use')}
+                      >
+                        {isSectionMounted('computer-use') ? <ComputerUsePane /> : null}
+                      </SettingsSection>
                     ) : null}
 
                     <SettingsSection
@@ -1524,26 +1459,6 @@ function Settings({ sidebarAppearanceStyle }: SettingsProps): React.JSX.Element 
                         ) : null}
                       </SettingsSection>
                     ) : null}
-
-                    <SettingsSection
-                      id="floating-workspace"
-                      title={translate(
-                        'auto.components.settings.Settings.3eb22a3ada',
-                        'Floating Workspace'
-                      )}
-                      description={translate(
-                        'auto.components.settings.Settings.3d9adfe6a5',
-                        'Global terminal, browser, and markdown tabs.'
-                      )}
-                      searchEntries={getSectionSearchEntries('floating-workspace')}
-                    >
-                      {isSectionMounted('floating-workspace') ? (
-                        <FloatingWorkspacePane
-                          settings={settings}
-                          updateSettings={updateSettings}
-                        />
-                      ) : null}
-                    </SettingsSection>
 
                     <SettingsSection
                       id="appearance"

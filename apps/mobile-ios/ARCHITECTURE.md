@@ -113,10 +113,9 @@ Workspace session 以 `session.tabs` publication 为唯一 tab 权威源；本�
 短期 close tombstone 和已访问 terminal surface 集合。`publicationEpoch + snapshotVersion` 拒绝同一
 publisher 的倒序 snapshot，隐藏 tab 保留 renderer，但将 terminal delivery interest 降为 background。
 
-Terminal 与 Native Chat 共用同一个 `TerminalLiveModel`。连接状态和 terminal action notice 由
-feature-owned status overlays 渲染在 composition surface 上，而不是绑定到 terminal renderer
-的可见性；因此切换 Chat/Terminal、窄宽布局或 iPad master-detail 时，重连、retry、Stop 失败和
-其他 transient feedback 都仍然可见，并且不会推开 transcript 或 composer 的布局。
+Terminal 连接状态和 terminal action notice 由 feature-owned status overlays 渲染在
+composition surface 上，而不是绑定到 terminal renderer 的可见性；因此切换窄宽布局或 iPad
+master-detail 时，重连、retry、Stop 失败和其他 transient feedback 都仍然可见。
 
 ## 文件和 API 边界
 

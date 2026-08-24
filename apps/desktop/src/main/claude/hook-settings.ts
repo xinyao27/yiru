@@ -10,7 +10,7 @@ import {
   wrapWindowsGitBashHookCommand,
   type HookDefinition,
   type HooksConfig
-} from '../agent-hooks/installer-utils'
+} from '../agent-hooks/managed-hook-commands'
 
 export type ClaudeCompatibleHookSettings = {
   configDirName: '.claude' | '.openclaude'

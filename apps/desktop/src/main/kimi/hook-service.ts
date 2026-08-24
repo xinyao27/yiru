@@ -23,13 +23,13 @@ import {
   getSharedManagedScriptPath,
   wrapPosixHookCommand,
   writeManagedScript
-} from '../agent-hooks/installer-utils'
+} from '../agent-hooks/managed-hook-commands'
+import type { RemoteFileOperations } from '../agent-hooks/remote-file-operations'
 import {
   readTextFileRemote,
   writeManagedScriptRemote,
   writeTextFileRemoteAtomic
-} from '../agent-hooks/installer-utils-remote'
-import type { RemoteFileOperations } from '../agent-hooks/remote-file-operations'
+} from '../agent-hooks/remote-hook-storage'
 import {
   applyManagedKimiHooks,
   KIMI_HOOK_EVENTS,

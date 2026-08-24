@@ -19,6 +19,7 @@ import {
   NEW_FILE_NAME,
   NEW_FOLDER_NAME
 } from './pierre-file-tree-data'
+import { clearPierreRenameInput } from './pierre-rename-input'
 import type { InlineInput } from './row'
 
 export type { PierreFileExplorerTreeHandle } from './pierre-file-explorer-tree-contract'
@@ -280,8 +281,7 @@ export const PierreFileExplorerTree = forwardRef<
       }
       // Why: Trees derives the rename value from the required placeholder path,
       // while Yiru's new-file flow intentionally starts with an empty field.
-      input.value = ''
-      input.dispatchEvent(new Event('input', { bubbles: true, composed: true }))
+      clearPierreRenameInput(input)
     })
   }, [inlineInput, model, treeData.canonicalPathByAbsolutePath, worktreePath])
 

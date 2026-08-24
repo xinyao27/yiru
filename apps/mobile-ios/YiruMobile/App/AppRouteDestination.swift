@@ -32,7 +32,6 @@ struct AppRouteDestinationView: View {
             SettingsView(
                 credentialCleanupRepository: model.dependencies.credentialCleanupRepository,
                 showAppearance: model.showAppearanceSettings,
-                showChat: model.showChatSettings,
                 showTerminal: model.showTerminalSettings,
                 showBrowser: model.showBrowserSettings,
                 showNotifications: model.showNotificationSettings,
@@ -46,8 +45,6 @@ struct AppRouteDestinationView: View {
             )
         case .appearanceSettings:
             AppearanceSettingsView(preferences: model.dependencies.settingsPreferences)
-        case .chatSettings:
-            ChatSettingsView(preferences: model.dependencies.settingsPreferences)
         case .browserSettings:
             BrowserSettingsView(preferences: model.dependencies.settingsPreferences)
         case .notificationSettings:
@@ -209,7 +206,6 @@ struct AppRouteDestinationView: View {
                 workspaceCreationRepository: model.dependencies.workspaceCreationRepository,
                 quickCommandRepository: model.dependencies.terminalQuickCommandRepository,
                 capabilityRepository: model.dependencies.runtimeClient,
-                nativeChatRepository: model.dependencies.nativeChatRepository,
                 filesRepository: model.dependencies.filesRepository,
                 sourceRepository: model.dependencies.sourceControlRepository,
                 sourceReviewRepository: model.dependencies.sourceReviewRepository,

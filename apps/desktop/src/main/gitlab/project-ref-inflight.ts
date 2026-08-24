@@ -1,4 +1,4 @@
-import type { ProjectRef } from './gl-utils'
+import type { ProjectRef } from './gitlab-cli'
 
 const projectRefInFlight = new Map<string, Promise<ProjectRef | null>>()
 

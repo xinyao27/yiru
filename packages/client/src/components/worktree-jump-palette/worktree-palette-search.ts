@@ -1,5 +1,5 @@
 import type { HostedReviewInfo } from '@yiru/workbench-model/review'
-import { branchName } from '~renderer/lib/git-utils'
+import { branchName } from '~renderer/lib/git-branch-name'
 import type { Repo, Worktree } from '~shared/types'
 
 import { extractWorktreePaletteCommentSnippet } from './worktree-palette-comment-snippet'

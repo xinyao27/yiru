@@ -56,7 +56,6 @@ export type RuntimeStatusResult = {
   hostPlatform?: RuntimeHostPlatformName
   terminalWindowsShell?: string | null
   deviceScope?: RuntimeDeviceScope
-  floatingWorkspaceEnabled?: boolean
   protocolVersion?: number
   minCompatibleMobileVersion?: number
 }

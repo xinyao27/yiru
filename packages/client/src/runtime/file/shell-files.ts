@@ -13,6 +13,8 @@ export const shellFilesClient = {
       filePath: args.filePath,
       includeLocalLogMetadata: args.includeLocalLogMetadata
     }),
+  readFileChunk: (args: { filePath: string; offset: number; length: number }) =>
+    callShellOrpc((client) => client.shell.files.readChunk, args),
   saveDownloadedFile: (input: {
     suggestedName: string
     content: string

@@ -4,15 +4,28 @@ import { execFileSync } from 'node:child_process'
 import { appendFileSync } from 'node:fs'
 import { pathToFileURL } from 'node:url'
 
-import {
-  getWindowsReleaseAssetNames,
-  readWindowsReleaseEnabled,
-  verifyRequiredReleaseAssets
-} from './verify-release-required-assets.mjs'
-
 const API_VERSION = '2026-03-10'
 const RELEASE_CUT_AUTHOR = 'github-actions[bot]'
 const DESKTOP_RC_TAG_PATTERN = /^v[0-9]+\.[0-9]+\.[0-9]+-rc\.[0-9]+$/
+const WINDOWS_RELEASE_ASSET_NAMES = [
+  'latest.yml',
+  'yiru-windows-setup.exe',
+  'yiru-windows-setup.exe.blockmap'
+]
+
+export function readWindowsReleaseEnabled(env = process.env) {
+  const value = env.YIRU_WINDOWS_RELEASE_ENABLED
+  if (value == null || value.trim().length === 0) {
+    return true
+  }
+  if (value === 'true') {
+    return true
+  }
+  if (value === 'false') {
+    return false
+  }
+  throw new Error('YIRU_WINDOWS_RELEASE_ENABLED must be "true" or "false"')
+}
 
 export function isReleaseCutDraft(release) {
   return (
@@ -84,7 +97,7 @@ async function fetchReleases(repo, token, fetchImpl) {
 }
 
 export async function deleteWindowsReleaseAssets({ repo, release, token, fetchImpl = fetch }) {
-  const windowsNames = new Set(getWindowsReleaseAssetNames())
+  const windowsNames = new Set(WINDOWS_RELEASE_ASSET_NAMES)
   const assets = Array.isArray(release?.assets) ? release.assets : []
   const deleted = []
 
@@ -132,7 +145,6 @@ export async function publishCompleteDraftReleases({
   token,
   includeWindows = true,
   fetchImpl = fetch,
-  verifyReleaseAssets = verifyRequiredReleaseAssets,
   removeWindowsReleaseAssets = deleteWindowsReleaseAssets,
   isDraftBuiltFromCurrentRef = ({ tag }) => isTagBuiltFromCurrentRef(tag),
   log = console.log
@@ -170,17 +182,8 @@ export async function publishCompleteDraftReleases({
       }
     }
 
-    try {
-      await verifyReleaseAssets({ repo, tag, token, includeWindows })
-    } catch (error) {
-      const reason = error instanceof Error ? error.message.split('\n')[0] : String(error)
-      skipped.push({ tag, reason })
-      log(`Skipping incomplete RC draft release ${tag}: ${reason}`)
-      continue
-    }
-
-    // Why: only release-cut-authored RC drafts with a complete asset set are
-    // resumed here; incomplete drafts stay private for the normal rebuild path.
+    // Why: workflow dependencies finish the release-cut build jobs before this
+    // resume path publishes their bot-authored drafts.
     await githubJson(
       fetchImpl,
       `https://api.github.com/repos/${repo}/releases/${release.id}`,
@@ -194,11 +197,11 @@ export async function publishCompleteDraftReleases({
       }
     )
     published.push(tag)
-    log(`Published complete RC draft release ${tag}`)
+    log(`Published RC draft release ${tag}`)
   }
 
   if (published.length === 0 && skipped.length === 0) {
-    log('No complete release-cut RC drafts to publish.')
+    log('No release-cut RC drafts to publish.')
   }
 
   return { published, skipped }
@@ -223,6 +226,22 @@ export function writeGithubOutputs({ published, skipped }, outputPath = process.
 async function main() {
   const token = process.env.GH_TOKEN || process.env.GITHUB_TOKEN
   const repo = process.env.GITHUB_REPOSITORY || 'xinyao27/yiru'
+  const [command, tag] = process.argv.slice(2)
+
+  if (command === 'remove-windows-assets') {
+    if (!tag) {
+      throw new Error('Usage: publish-complete-draft-releases.mjs remove-windows-assets <tag>')
+    }
+    const deleted = await deleteWindowsReleaseAssetsForTag({ repo, tag, token })
+    if (deleted.length > 0) {
+      console.log(`Removed disabled Windows assets from ${repo}@${tag}: ${deleted.join(', ')}`)
+    }
+    return
+  }
+  if (command) {
+    throw new Error(`Unknown command: ${command}`)
+  }
+
   const includeWindows = readWindowsReleaseEnabled()
   const result = await publishCompleteDraftReleases({ repo, token, includeWindows })
   writeGithubOutputs(result)

@@ -55,7 +55,6 @@ export class YiruCoworkingHostSessions {
         command: record.resumeCommand,
         cwd: target.ownerWorktree.worktreePath,
         launchAgent: record.provider,
-        viewMode: 'chat',
         presentation: 'background',
         beforeAgentTrust: async () => {
           context.signal.throwIfAborted()
