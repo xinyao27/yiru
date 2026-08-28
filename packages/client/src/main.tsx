@@ -3,16 +3,16 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 
 import App from './application-shell/shell'
-import { applyDocumentTheme } from './components/editor/document-theme'
-import { RecoverableRenderErrorBoundary } from './components/error-boundaries/recoverable-render-error-boundary'
-import { HugeiconsIconContextProvider } from './components/icons/context-provider'
-import { translate } from './i18n/i18n'
-import { I18nProvider } from './i18n/provider'
-import { useUiLocale } from './i18n/use-ui-locale'
 import {
   installRendererCrashDiagnostics,
   recordRendererCrashBreadcrumb
-} from './lib/crash-diagnostics'
+} from './crash-report/diagnostics'
+import { applyDocumentTheme } from './editor/document-theme'
+import { RecoverableRenderErrorBoundary } from './error-boundaries/recoverable-render-error-boundary'
+import { translate } from './i18n/i18n'
+import { I18nProvider } from './i18n/provider'
+import { useUiLocale } from './i18n/use-ui-locale'
+import { HugeiconsIconContextProvider } from './icons/context-provider'
 import { shouldEnableReactGrab } from './react-grab-dev-gate'
 import { startShellEventStream } from './runtime/shell-events-client'
 import { hydrateShellSettings } from './runtime/shell-state-client'

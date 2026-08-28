@@ -146,7 +146,9 @@ struct TerminalTabStrip: View {
             {
                 Button(action: actions.toggleDisplayMode) {
                     Label(
-                        actions.displayMode == .auto ? "Switch to Desktop" : "Switch to Phone",
+                        actions.displayMode == .auto
+                            ? "Switch to Host Size"
+                            : "Switch to Phone Fit",
                         iconID: actions.displayMode == .auto ? .monitor : .deviceMobile
                     )
                 }

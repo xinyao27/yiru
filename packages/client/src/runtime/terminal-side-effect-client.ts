@@ -1,4 +1,4 @@
-import type { TerminalSideEffectBatch } from '~shared/terminal/side-effect-facts'
+import type { TerminalSideEffectBatch } from '@yiru/runtime-protocol/workbench/terminal/side-effect-facts'
 
 const subscribers = new Set<(batch: TerminalSideEffectBatch) => void>()
 

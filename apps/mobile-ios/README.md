@@ -5,7 +5,7 @@ Yiru 唯一的移动端客户端，原生 iOS 26，不承担 Android 或 Web 兼
 技术基线：
 
 - iOS / iPadOS 26 起
-- Xcode 26.6 稳定版
+- Xcode 26.5（与 CI 和发布工作流一致）
 - Swift 6 language mode，Swift 6.3 编译器，完整 strict concurrency
 - SwiftUI、Observation、NavigationStack 与系统 Liquid Glass
 - 固定版本 SwiftTerm 1.18.0，通过 Yiru 自有 `TerminalSurface` adapter 嵌入
@@ -25,7 +25,7 @@ xcodebuild -downloadComponent MetalToolchain
 ```sh
 vp run yiru-mobile-ios#project:generate
 vp run yiru-mobile-ios#dev
-vp run yiru-mobile-ios#verify
+vp run yiru-mobile-ios#check
 ```
 
 代码结构和依赖规则见 [ARCHITECTURE.md](./ARCHITECTURE.md)，视觉规则见

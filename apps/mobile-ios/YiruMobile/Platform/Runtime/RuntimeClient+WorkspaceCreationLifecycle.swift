@@ -16,11 +16,13 @@ extension RuntimeClient {
         for attempt in 0..<attemptLimit {
             let candidate = attempt == 0 ? baseName : "\(baseName)-\(attempt + 1)"
             do {
+                let revision = try await workspaceRevision(hostID: hostID, scope: draft.repoID)
                 let result: MobileWorkspaceCreateResultWire = try await callRuntime(
                     hostID: hostID,
                     path: MobileRuntimeWireContract.worktreeCreatePath,
                     input: MobileWorkspaceCreateRequestWire(
                         repo: "id:\(draft.repoID)",
+                        expectedRevision: revision,
                         name: candidate,
                         displayName: draft.displayName,
                         baseBranch: nonempty(draft.baseBranch),
@@ -75,6 +77,16 @@ extension RuntimeClient {
     private func nonempty(_ value: String) -> String? {
         let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
         return trimmed.isEmpty ? nil : trimmed
+    }
+
+    private func workspaceRevision(hostID: String, scope: String) async throws -> Int {
+        let result: MobileWorkspaceRevisionResultWire = try await callRuntime(
+            hostID: hostID,
+            path: MobileRuntimeWireContract.workspaceEventsListPath,
+            input: MobileWorkspaceRevisionRequestWire(scope: scope, limit: 1),
+            output: MobileWorkspaceRevisionResultWire.self
+        )
+        return result.revision
     }
 
     private func isRetryableWorkspaceCreateConflict(_ message: String?) -> Bool {

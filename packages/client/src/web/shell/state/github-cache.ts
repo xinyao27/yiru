@@ -1,5 +1,5 @@
+import type { PRInfo } from '@yiru/runtime-protocol/workbench/types'
 import { isJsonRecord, readLocalJson, writeLocalJson } from '~renderer/web/storage/local-json'
-import type { PRInfo } from '~shared/types'
 
 const GITHUB_CACHE_STORAGE_KEY = 'yiru.web.githubCache.v1'
 

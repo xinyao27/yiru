@@ -1,6 +1,10 @@
 import type { TerminalOpenMultiplexResult } from '@yiru/runtime-protocol/contract'
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 import { TERMINAL_MULTIPLEX_DEFAULT_MAX_FRAME_BYTES } from '@yiru/runtime-protocol/terminal-multiplex/frame'
+import {
+  hasBrowserHostTerminalMultiplex,
+  openConfiguredBrowserHostTerminalMultiplex
+} from '~renderer/runtime/browser-host-runtime'
 import type { RuntimeClientTarget } from '~renderer/runtime/orpc-client'
 import {
   openAuthenticatedRuntimeLoopbackSocket,
@@ -45,6 +49,16 @@ export async function openTerminalMultiplexSubscription(
     ticket.maxFrameBytes !== TERMINAL_MULTIPLEX_DEFAULT_MAX_FRAME_BYTES
   ) {
     throw new Error('Runtime host returned an invalid terminal bulk ticket.')
+  }
+  if (hasBrowserHostTerminalMultiplex()) {
+    return openConfiguredBrowserHostTerminalMultiplex({
+      environmentIdentity: options.environmentIdentity,
+      onBinary: options.onBinary,
+      onClose: options.onClose,
+      onError: options.onError,
+      onResponse: options.onResponse,
+      ticket
+    })
   }
   if (isWebRuntimeClient()) {
     return openWebRuntimeTerminalMultiplex(options, ticket)

@@ -2,9 +2,9 @@
 
 - The route opens from Home, the activity deep link, or the full-screen insights presentation;
   the leading close action returns to the previous route without changing Home state.
-- Cached aggregate data remains visible while a desktop is reconnecting. A cold route waits for a
-  connected desktop instead of issuing stats RPCs to saved but disconnected hosts.
-- A cold route with no connected desktop renders the empty aggregate and remains dismissible; it
+- Cached aggregate data remains visible while a host is reconnecting. A cold route waits for a
+  connected host instead of issuing stats RPCs to saved but disconnected hosts.
+- A cold route with no connected host renders the empty aggregate and remains dismissible; it
   never pins a full-screen loader while the global reconnect notice is available.
 - `activityStats` is requested only for hosts whose `RuntimeConnectionSnapshot.phase` is
   `connected`; a connected transition refreshes the selected range, while disconnects preserve the

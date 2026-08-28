@@ -221,9 +221,8 @@ extension AppModel {
     }
 }
 
-// Why: the host's own browser needs a `file://` URL for the absolute path it already
-// resolved, mirroring the desktop-authoritative encoding in
-// packages/workbench-model/src/file-uri-path.ts so the same worktree path round-trips.
+// Why: the host browser needs a `file://` URL for the daemon-authoritative absolute path; encode
+// each path segment so spaces and platform-specific roots round-trip without changing identity.
 nonisolated private func fileURIFromFilesystemPath(_ path: String) -> URL? {
     let normalizedPath = path.replacingOccurrences(of: "\\", with: "/")
     let segments = normalizedPath.split(separator: "/", omittingEmptySubsequences: false)

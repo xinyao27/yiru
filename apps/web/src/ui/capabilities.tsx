@@ -3,10 +3,8 @@
  * tell what it is about, and not enough for a reader either — the demo shows the
  * product working but never says what it is for.
  *
- * Every number and platform name here is checkable in the repository rather than
- * chosen for effect: the agent count is the TuiAgent union in
- * @yiru/workbench-model, the review platforms are HostedReviewCreationProvider,
- * the hosts are what the runtime clients route to.
+ * Every claim here is checkable in the current daemon, extension, and mobile
+ * source rather than inherited from the retired Electron product.
  */
 const sections = [
   {
@@ -18,12 +16,16 @@ const sections = [
     body: 'Claude Code, Codex, Gemini CLI, Copilot CLI, Cursor, Aider, Amp, OpenCode, Goose, Cline, Continue, Factory Droid, Grok and twenty-two more run as the terminal programs they already are. Yiru starts, monitors and resumes their sessions and keeps provider-specific behaviour isolated, so your authentication, model access and usage limits stay where they were.'
   },
   {
-    heading: 'Wherever the code actually lives',
-    body: 'A workspace runs on your own machine, inside a WSL distribution, over SSH, or through a relay-connected host. Filesystem, git, terminal and search operations are routed to whichever host owns the worktree, and cached host state never leaks between them — so a repository that only exists on a build box is still a normal workspace.'
+    heading: 'The daemon goes where the code lives',
+    body: 'The single Yiru binary can run locally, inside WSL, or on a remote machine reached through SSH forwarding or a private network. The extension stores remote connection tokens only on that browser and never guesses which project a page belongs to.'
   },
   {
-    heading: 'Review the evidence, then merge',
-    body: 'Read the diff, annotate individual lines to queue follow-up work, inspect checks, and open or read pull requests on GitHub, GitLab, Azure DevOps and Gitea. The iOS and Android companions pair with the desktop app for the same review and merge, for the part of the loop that happens away from the desk.'
+    heading: 'Chrome is the work surface',
+    body: 'The side panel is a cross-tab navigator and each Yiru tab is a workspace. Deterministic page context, element picking, DevTools sensors, replay and visual evidence connect a browser problem to the exact worktree and agent session that owns it.'
+  },
+  {
+    heading: 'Stay in the loop from iOS',
+    body: 'The iOS companion pairs directly with a daemon using end-to-end encryption. It can follow sessions, receive notifications, inspect changes and send follow-up instructions without routing repository access through a Yiru cloud relay.'
   }
 ]
 

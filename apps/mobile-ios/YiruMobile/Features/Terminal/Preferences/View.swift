@@ -31,7 +31,7 @@ struct TerminalSettingsView: View {
                 SettingsHeading(
                     title: "WHEN YOU LEAVE THE APP",
                     detail:
-                        "While you're using a terminal on your phone, Yiru shrinks it to fit your screen. When you close the app or switch away, this controls whether it stays at phone size (so interactive CLI tools don't reflow) or resizes back to your desktop. You can always use Restore this terminal or Restore all terminals on the banner to resize manually."
+                        "While you're using a terminal on your phone, Yiru shrinks it to fit your screen. When you close the app or switch away, this controls whether it stays at phone size (so interactive CLI tools don't reflow) or restores the host grid. You can always use Restore this terminal or Restore all terminals on the banner to resize manually."
                 )
                 autoRestoreContent
                     .padding(.top, SettingsSpacing.headingToContent)
@@ -39,7 +39,7 @@ struct TerminalSettingsView: View {
                 SettingsHeading(
                     title: "TEXT SIZE",
                     detail:
-                        "Scale the terminal text. Smaller sizes fit more columns with side margins; larger sizes show fewer columns — drag sideways to pan. You can also pinch to zoom in the terminal itself, which updates this setting. Per-device display only; doesn't change the desktop terminal."
+                        "Scale the terminal text. Smaller sizes fit more columns with side margins; larger sizes show fewer columns — drag sideways to pan. You can also pinch to zoom in the terminal itself, which updates this setting. This display setting stays on the phone and does not change the daemon PTY."
                 )
                 .padding(.top, SettingsSpacing.betweenSections)
                 textSizeContent
@@ -95,7 +95,7 @@ struct TerminalSettingsView: View {
             }
         } else if autoRestore.hosts.isEmpty {
             SettingsSection {
-                Text("No paired desktops yet. Pair one to control terminal behavior.")
+                Text("No paired daemons yet. Pair one to control terminal behavior.")
                     .font(.system(size: Theme.Typography.supporting))
                     .foregroundStyle(Theme.Colors.mutedForeground)
                     .padding(Theme.Spacing.medium)

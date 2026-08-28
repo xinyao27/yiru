@@ -1,5 +1,5 @@
+import type { RuntimeSyncWindowGraph } from '@yiru/runtime-protocol/workbench/runtime-types'
 import type { ShellRuntimeStateApi } from '~renderer/runtime/shell-system-client'
-import type { RuntimeSyncWindowGraph } from '~shared/runtime-types'
 
 import { callWebRuntimeProcedure } from '../runtime-connection'
 
@@ -11,8 +11,6 @@ export function createWebShellRuntimeApi(): ShellRuntimeStateApi {
       }),
     getTerminalFitOverrides: () => Promise.resolve([]),
     getTerminalDrivers: () => Promise.resolve([]),
-    getBrowserDrivers: () => Promise.resolve([]),
-    restoreTerminalFit: () => Promise.resolve({ restored: false }),
-    reclaimBrowserForDesktop: () => Promise.resolve({ reclaimed: false })
+    restoreTerminalFit: () => Promise.resolve({ restored: false })
   }
 }

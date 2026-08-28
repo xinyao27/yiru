@@ -17,7 +17,7 @@ export type RuntimeGraphStatus = 'ready' | 'reloading' | 'unavailable'
 
 export type RuntimeDesktopWindowStatus = 'available' | 'openable' | 'initializing' | 'blocked'
 
-export type RuntimeDeviceScope = 'mobile' | 'runtime' | 'coworking-host'
+export type RuntimeDeviceScope = 'mobile' | 'runtime'
 
 export type RuntimeRemoteUpdateSupport = {
   installMode: 'interactive' | 'supervised-headless-serve' | 'unsupported-headless-serve'

@@ -219,11 +219,13 @@ extension RuntimeClient: WorkspaceRepository {
     }
 
     func setWorkspacePinned(hostID: String, workspaceID: String, isPinned: Bool) async throws {
+        let revision = try await workspaceMutationRevision(hostID: hostID, workspaceID: workspaceID)
         let _: MobileWorkspacePinResultWire = try await callRuntime(
             hostID: hostID,
             path: MobileRuntimeWireContract.worktreeSetPath,
             input: MobileWorkspacePinRequestWire(
                 worktree: worktreeSelector(workspaceID),
+                expectedRevision: revision,
                 isPinned: isPinned
             ),
             output: MobileWorkspacePinResultWire.self
@@ -231,17 +233,32 @@ extension RuntimeClient: WorkspaceRepository {
     }
 
     func removeWorkspace(hostID: String, workspaceID: String) async throws {
+        let revision = try await workspaceMutationRevision(hostID: hostID, workspaceID: workspaceID)
         let result: MobileWorkspaceRemoveResultWire = try await callRuntime(
             hostID: hostID,
             path: MobileRuntimeWireContract.worktreeRemovePath,
             input: MobileWorkspaceRemoveRequestWire(
                 worktree: worktreeSelector(workspaceID),
+                expectedRevision: revision,
                 force: true,
                 runHooks: nil
             ),
             output: MobileWorkspaceRemoveResultWire.self
         )
         guard result.removed else { throw WorkspaceRepositoryError.rejectedMutation }
+    }
+
+    func workspaceMutationRevision(hostID: String, workspaceID: String) async throws -> Int {
+        let result: MobileWorktreeShowResultWire = try await callRuntime(
+            hostID: hostID,
+            path: MobileRuntimeWireContract.worktreeShowPath,
+            input: MobileWorktreeShowRequestWire(worktree: worktreeSelector(workspaceID)),
+            output: MobileWorktreeShowResultWire.self
+        )
+        guard let revision = result.revision else {
+            throw WorkspaceRepositoryError.rejectedMutation
+        }
+        return revision
     }
 
     func fetchWorkspaces(for hostID: String) async throws -> WorkspaceSnapshot {

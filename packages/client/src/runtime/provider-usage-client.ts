@@ -7,7 +7,7 @@ import type {
   OpenCodeUsageSnapshot,
   ProviderUsageSnapshotInput
 } from '@yiru/runtime-protocol/provider-usage'
-import { useAppStore } from '~renderer/store'
+import { useAppStore } from '~renderer/store/state'
 
 import {
   callRuntimeOrpc,

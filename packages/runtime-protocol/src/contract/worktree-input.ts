@@ -42,6 +42,8 @@ export const WorktreeActivateInputSchema = WorktreeSelectorInputSchema.extend({
 export const WorktreeCreateInputSchema = z
   .object({
     repo: RepoSelectorSchema,
+    expectedRevision: z.number().int().nonnegative(),
+    operationId: OptionalString,
     name: OptionalString,
     baseBranch: OptionalString,
     compareBaseRef: OptionalString,
@@ -137,6 +139,7 @@ export const WorktreePrefetchCreateBaseInputSchema = z.object({
 })
 
 export const WorktreeSetInputSchema = WorktreeSelectorInputSchema.extend({
+  expectedRevision: z.number().int().nonnegative(),
   displayName: OptionalString,
   comment: OptionalPlainString,
   linkedPR: TriStateLinkedReviewNumber,
@@ -178,6 +181,7 @@ export const WorktreeSetInputSchema = WorktreeSelectorInputSchema.extend({
 })
 
 export const WorktreeRemoveInputSchema = WorktreeSelectorInputSchema.extend({
+  expectedRevision: z.number().int().nonnegative(),
   force: OptionalBoolean,
   runHooks: OptionalBoolean
 })
@@ -221,6 +225,7 @@ export type WorktreePsInput = z.infer<typeof WorktreePsInputSchema>
 export type WorktreeSortOrderInput = z.infer<typeof WorktreeSortOrderInputSchema>
 export type WorktreeSelectorInput = z.infer<typeof WorktreeSelectorInputSchema>
 export type WorktreeActivateInput = z.infer<typeof WorktreeActivateInputSchema>
+export type WorktreeCreateWireInput = z.input<typeof WorktreeCreateInputSchema>
 export type WorktreeCreateInput = z.infer<typeof WorktreeCreateInputSchema>
 export type WorktreePrefetchCreateBaseInput = z.infer<typeof WorktreePrefetchCreateBaseInputSchema>
 export type WorktreeSetInput = z.infer<typeof WorktreeSetInputSchema>

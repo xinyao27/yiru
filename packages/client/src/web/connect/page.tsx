@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
-import { ArrowUpRight, Check, Copy, Download } from '~renderer/components/icons/hugeicons'
-import { LoadingIndicator } from '~renderer/components/loading-indicator'
-import { Button } from '~renderer/components/ui/button'
-import { ButtonGroup, ButtonGroupText } from '~renderer/components/ui/button-group'
-import { ScrollArea } from '~renderer/components/ui/scroll-area'
 import { translate } from '~renderer/i18n/i18n'
+import { ArrowUpRight, Check, Copy, Download } from '~renderer/icons/hugeicons'
+import { LoadingIndicator } from '~renderer/loading/indicator'
+import { Button } from '~renderer/ui/button'
+import { ButtonGroup, ButtonGroupText } from '~renderer/ui/button-group'
+import { ScrollArea } from '~renderer/ui/scroll-area'
 
 import {
   createStoredWebRuntimeEnvironment,

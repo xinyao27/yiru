@@ -1,0 +1,96 @@
+import {
+  getRepoExecutionHostId,
+  parseExecutionHostId
+} from '@yiru/runtime-protocol/model/workspace'
+import { isFolderRepo } from '@yiru/runtime-protocol/workbench/repo-kind'
+import type { Repo, YiruHooks } from '@yiru/runtime-protocol/workbench/types'
+import { useEffect, useRef, useState } from 'react'
+import { getRepoHostIdentity } from '~renderer/repo/state/host-identity'
+import { checkRuntimeHooks } from '~renderer/runtime/hooks-client'
+
+export type ProjectHooksState = {
+  hasHooks: boolean
+  hooks: YiruHooks | null
+  mayNeedUpdate: boolean
+}
+
+export function useProjectHooks(repos: readonly Repo[], neededRepos: readonly Repo[]) {
+  const [hooksByRepoHost, setHooksByRepoHost] = useState<Record<string, ProjectHooksState>>({})
+  const requestSequenceRef = useRef(0)
+
+  useEffect(() => {
+    const liveRepoHosts = new Set(repos.map(getRepoHostIdentity))
+    setHooksByRepoHost((previous) => {
+      const next = Object.fromEntries(
+        Object.entries(previous).filter(([identity]) => liveRepoHosts.has(identity))
+      ) as Record<string, ProjectHooksState>
+      return Object.keys(next).length === Object.keys(previous).length ? previous : next
+    })
+  }, [repos])
+
+  useEffect(() => {
+    if (neededRepos.length === 0) {
+      return
+    }
+
+    let isStale = false
+    const requestSequence = ++requestSequenceRef.current
+    const liveRepoHosts = new Set(repos.map(getRepoHostIdentity))
+
+    void Promise.all(
+      neededRepos.map(async (repo) => {
+        const repoHostIdentity = getRepoHostIdentity(repo)
+        if (isFolderRepo(repo)) {
+          setHooksByRepoHost((previous) =>
+            previous[repoHostIdentity]
+              ? previous
+              : {
+                  ...previous,
+                  [repoHostIdentity]: { hasHooks: false, hooks: null, mayNeedUpdate: false }
+                }
+          )
+          return
+        }
+        try {
+          const hostId = getRepoExecutionHostId(repo)
+          const parsedHost = parseExecutionHostId(hostId)
+          const result = await checkRuntimeHooks(
+            {
+              activeRuntimeEnvironmentId:
+                parsedHost?.kind === 'runtime' ? parsedHost.environmentId : null
+            },
+            repo.id,
+            hostId
+          )
+          if (isStale || requestSequence !== requestSequenceRef.current) {
+            return
+          }
+          setHooksByRepoHost((previous) =>
+            liveRepoHosts.has(repoHostIdentity)
+              ? { ...previous, [repoHostIdentity]: result }
+              : previous
+          )
+        } catch {
+          if (isStale || requestSequence !== requestSequenceRef.current) {
+            return
+          }
+          setHooksByRepoHost((previous) => {
+            if (!liveRepoHosts.has(repoHostIdentity) || previous[repoHostIdentity]) {
+              return previous
+            }
+            return {
+              ...previous,
+              [repoHostIdentity]: { hasHooks: false, hooks: null, mayNeedUpdate: false }
+            }
+          })
+        }
+      })
+    )
+
+    return () => {
+      isStale = true
+    }
+  }, [neededRepos, repos])
+
+  return hooksByRepoHost
+}

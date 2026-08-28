@@ -1,4 +1,4 @@
-import { DEFAULT_APP_FONT_FAMILY } from '~shared/constants'
+import { DEFAULT_APP_FONT_FAMILY } from '@yiru/runtime-protocol/workbench/constants'
 
 const APP_FONT_FALLBACKS = [
   DEFAULT_APP_FONT_FAMILY,

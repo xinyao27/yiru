@@ -2,6 +2,12 @@ import { eventIterator, type, type ContractRouter } from '@orpc/contract'
 
 import { withAccess, type RuntimeProcedureMeta } from './access-meta.js'
 import {
+  WorktreeArchiveInputSchema,
+  WorktreeArchiveListInputSchema,
+  WorktreeArchiveRestoreInputSchema,
+  type RuntimeWorktreeArchive
+} from './worktree-archive.js'
+import {
   WorktreeActivateInputSchema,
   WorktreeCreateInputSchema,
   WorktreeDetectedListInputSchema,
@@ -41,12 +47,18 @@ const WORKTREE_CONTROL_ACCESS = { scope: 'worktree', tier: 'control' } as const
 const MOBILE = { mobile: true } as const
 
 export const worktreeContract = {
+  archive: withAccess(PROJECT_HOST_ACCESS)
+    .input(WorktreeArchiveInputSchema)
+    .output(type<{ archive: RuntimeWorktreeArchive; revision: number }>()),
   ps: withAccess(PROJECT_READ_ACCESS, MOBILE)
     .input(WorktreePsInputSchema)
     .output(type<RuntimeWorktreePsResult>()),
   list: withAccess(PROJECT_READ_ACCESS)
     .input(WorktreeListInputSchema)
     .output(type<RuntimeWorktreeListResult>()),
+  listArchives: withAccess(PROJECT_READ_ACCESS)
+    .input(WorktreeArchiveListInputSchema)
+    .output(type<{ archives: RuntimeWorktreeArchive[] }>()),
   detectedList: withAccess(PROJECT_READ_ACCESS)
     .input(WorktreeDetectedListInputSchema)
     .output(type<RuntimeDetectedWorktreeListResult>()),
@@ -81,6 +93,9 @@ export const worktreeContract = {
   rm: withAccess(PROJECT_HOST_ACCESS, MOBILE)
     .input(WorktreeRemoveInputSchema)
     .output(type<RuntimeWorktreeRemoveResult>()),
+  restoreArchive: withAccess(PROJECT_HOST_ACCESS)
+    .input(WorktreeArchiveRestoreInputSchema)
+    .output(type<{ archive: RuntimeWorktreeArchive; revision: number }>()),
   forceDeleteBranch: withAccess(PROJECT_HOST_ACCESS, MOBILE)
     .input(WorktreeForceDeleteBranchInputSchema)
     .output(type<RuntimeWorktreeForceDeleteBranchResult>()),
@@ -115,6 +130,11 @@ export {
   WorktreeSetInputSchema,
   WorktreeSortOrderInputSchema
 } from './worktree-input.js'
+export {
+  WorktreeArchiveInputSchema,
+  WorktreeArchiveListInputSchema,
+  WorktreeArchiveRestoreInputSchema
+} from './worktree-archive.js'
 export type {
   WorktreeActivateInput,
   WorktreeCreateInput,
@@ -130,6 +150,12 @@ export type {
   WorktreeSetInput,
   WorktreeSortOrderInput
 } from './worktree-input.js'
+export type {
+  RuntimeWorktreeArchive,
+  WorktreeArchiveInput,
+  WorktreeArchiveListInput,
+  WorktreeArchiveRestoreInput
+} from './worktree-archive.js'
 export type {
   RuntimeDetectedWorktreeListResult,
   RuntimeWorktreeActivateResult,

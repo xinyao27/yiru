@@ -1,4 +1,4 @@
-import { RUNTIME_ORPC_RUNTIME_CAPABILITY } from '@yiru/runtime-protocol/capabilities'
+import { RUNTIME_ORPC_RUNTIME_CAPABILITY } from '@yiru/runtime-protocol/protocol-version'
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 
 import {

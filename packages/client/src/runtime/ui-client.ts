@@ -4,8 +4,8 @@ import type {
   RuntimeUISubscriptionEvent,
   UIUpdateInput
 } from '@yiru/runtime-protocol/contract'
-import { normalizeFeatureInteractions } from '~shared/feature-interactions'
-import type { GlobalSettings, PersistedUIState } from '~shared/types'
+import { normalizeFeatureInteractions } from '@yiru/runtime-protocol/workbench/feature-interactions'
+import type { GlobalSettings, PersistedUIState } from '@yiru/runtime-protocol/workbench/types'
 
 import { callRuntimeOrpc, createLocalRuntimeOrpcClient, isWebRuntimeClient } from './orpc-client'
 import { getActiveRuntimeTarget } from './rpc-client'

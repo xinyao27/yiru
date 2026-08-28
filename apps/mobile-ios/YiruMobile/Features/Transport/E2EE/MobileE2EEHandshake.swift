@@ -63,8 +63,6 @@ nonisolated struct MobileE2EEHandshake: Sendable {
     }
 
     func transcript() throws -> Data {
-        let helloRelayHostID = hello.context.relayHostId ?? ""
-        let readyRelayHostID = ready.context.relayHostId ?? ""
         let fields: [(String, Data)] = [
             ("domain", utf8(MobileE2EEWireContract.transcriptDomain)),
             ("mobile-to-desktop.type", utf8(hello.type)),
@@ -80,7 +78,6 @@ nonisolated struct MobileE2EEHandshake: Sendable {
             ("mobile-to-desktop.context.initiator", utf8(hello.context.initiator)),
             ("mobile-to-desktop.context.responder", utf8(hello.context.responder)),
             ("mobile-to-desktop.context.transport", utf8(hello.context.transport)),
-            ("mobile-to-desktop.context.relay-host-id", utf8(helloRelayHostID)),
             ("desktop-to-mobile.type", utf8(ready.type)),
             ("desktop-to-mobile.version", uint32(ready.v)),
             ("desktop-to-mobile.desktop-public-key", desktopPublicKey),
@@ -95,7 +92,6 @@ nonisolated struct MobileE2EEHandshake: Sendable {
             ("desktop-to-mobile.context.initiator", utf8(ready.context.initiator)),
             ("desktop-to-mobile.context.responder", utf8(ready.context.responder)),
             ("desktop-to-mobile.context.transport", utf8(ready.context.transport)),
-            ("desktop-to-mobile.context.relay-host-id", utf8(readyRelayHostID)),
         ]
         var output = Data()
         for (name, value) in fields {
@@ -112,8 +108,7 @@ nonisolated struct MobileE2EEHandshake: Sendable {
         protocolName: MobileE2EEWireContract.protocolName,
         initiator: MobileE2EEWireContract.initiator,
         responder: MobileE2EEWireContract.responder,
-        transport: MobileE2EEWireContract.directTransport,
-        relayHostId: nil
+        transport: MobileE2EEWireContract.directTransport
     )
 
     private static func validateReadyShape(_ data: Data) throws {

@@ -10,7 +10,7 @@ nonisolated enum SourceControlPhase: Sendable {
 }
 
 nonisolated struct SourceControlUnavailableError: LocalizedError, Sendable {
-    var errorDescription: String? { "Waiting for desktop…" }
+    var errorDescription: String? { "Waiting for daemon…" }
 }
 
 @Observable

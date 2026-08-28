@@ -1,13 +1,13 @@
+import { REMOTE_SERVER_UPDATE_CAPABILITY } from '@yiru/runtime-protocol/workbench/remote-server-update'
+import type { PublicKnownRuntimeEnvironment } from '@yiru/runtime-protocol/workbench/runtime-environments'
+import type { RuntimeStatus } from '@yiru/runtime-protocol/workbench/runtime-types'
+import type { UpdateCheckOptions } from '@yiru/runtime-protocol/workbench/types'
 import {
   compareAppVersions,
   isPerfPrereleaseAppVersion,
   isPrereleaseAppVersion,
   isValidAppVersion
-} from '~shared/app-version'
-import { REMOTE_SERVER_UPDATE_CAPABILITY } from '~shared/remote-server-update'
-import type { PublicKnownRuntimeEnvironment } from '~shared/runtime-environments'
-import type { RuntimeStatus } from '~shared/runtime-types'
-import type { UpdateCheckOptions } from '~shared/types'
+} from '~renderer/app-version'
 
 import { remoteServerUpdateErrorMessage } from './remote-server-update-errors'
 import {

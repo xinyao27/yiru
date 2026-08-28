@@ -12,6 +12,7 @@ extension AppModel {
         switch settings.authorizationStatus {
         case .authorized, .provisional, .ephemeral:
             NotificationPreference.save(true)
+            await dependencies.notificationCoordinator.refreshRemoteRegistration()
         case .denied:
             NotificationPreference.save(false)
         case .notDetermined:
@@ -23,6 +24,7 @@ extension AppModel {
 
     func finishNotificationOptIn() {
         isNotificationOptInPresented = false
+        Task { await dependencies.notificationCoordinator.refreshRemoteRegistration() }
     }
 
     func handleNotificationRoute(_ route: NotificationRoute) async {

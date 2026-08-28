@@ -1,11 +1,6 @@
+import { isRuntimePtyId } from '@yiru/runtime-protocol/terminal-identity/id'
+import { isWebTerminalSurfaceTabId } from '@yiru/runtime-protocol/workbench/terminal/surface-id'
 import type { AppState } from '~renderer/store/types'
-import { isWebTerminalSurfaceTabId } from '~shared/terminal/surface-id'
-
-import { parseRuntimeTerminalPtyId } from './terminal-stream'
-
-function isRuntimeTerminalPtyId(ptyId: string | null | undefined): boolean {
-  return typeof ptyId === 'string' && parseRuntimeTerminalPtyId(ptyId) !== null
-}
 
 export function isWebOnlyMirroredTerminalTab(
   state: Pick<AppState, 'terminalLayoutsByTabId'>,
@@ -22,5 +17,5 @@ export function isWebOnlyMirroredTerminalTab(
   // id has only remote/no PTYs, it is a mirror and must not be published back
   // as host state. Legacy leaked host tabs with local PTYs still publish so
   // existing sessions keep desktop/web parity.
-  return ptyIds.every(isRuntimeTerminalPtyId)
+  return ptyIds.every(isRuntimePtyId)
 }

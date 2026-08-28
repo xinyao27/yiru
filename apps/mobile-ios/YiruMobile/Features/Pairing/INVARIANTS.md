@@ -8,7 +8,6 @@
 - A host is persisted only after WebSocket, E2EE v2, transcript binding, and device-token
   authentication all succeed.
 - Device tokens live in a `ThisDeviceOnly` Keychain item. Host metadata never contains the token.
-- Re-pairing the same desktop public key preserves its host identity and display name.
-- Pairing authenticates the offer's direct endpoint. Relay metadata
-  is validated but is not persisted until its director/cell state machine and credential rotation
-  are ported together.
+- Re-pairing the same daemon public key preserves its host identity and display name.
+- Pairing authenticates the offer's direct endpoint. Legacy relay metadata is validated at the
+  input boundary but is never persisted or used for a connection.

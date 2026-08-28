@@ -17,9 +17,8 @@ export type BrowserPaneProps = {
 }
 
 /**
- * Why: the toolbar mirrors apps/desktop browser-pane.tsx — back, forward and
- * reload as ghost icon buttons, then a bordered address field carrying a globe.
- * Reload swaps to the loader while the page is busy, as it does in the app.
+ * Why: the toolbar makes the Chrome workspace context legible in the landing
+ * illustration. Reload swaps to the loader while the page is busy.
  *
  * The bug has to be visible here, because this is where a change gets verified:
  * before the fix the rows still answer the previous query.

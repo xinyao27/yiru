@@ -1,7 +1,8 @@
 import { ORPCError } from '@orpc/client'
+import type { ShellRuntimeEnvironmentOrpcStreamEvent } from '@yiru/runtime-protocol/contract'
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 import { STATUS_GET_CONTRACT } from '@yiru/runtime-protocol/status'
-import type { RuntimeStatus } from '~shared/runtime-types'
+import type { RuntimeStatus } from '@yiru/runtime-protocol/workbench/runtime-types'
 
 import type { RuntimeEnvironmentApi } from '../runtime/runtime-environment-api'
 import { revokeCurrentBrowserAccess } from './connect/grant-client'
@@ -124,7 +125,36 @@ export function getWebRuntimeEnvironmentApi(): RuntimeEnvironmentApi {
         signal: options?.signal,
         context: { onBinary: options?.onBinary }
       })
+    },
+    subscribeOrpcProcedure: async ({ selector, path, input }, options) => {
+      const client = await getClientForEnvironment(resolveEnvironment(selector)).getOrpcClient(
+        undefined,
+        options?.signal
+      )
+      const result = await resolveOrpcClientProcedure(client, path)(input, {
+        signal: options?.signal
+      })
+      if (!isAsyncIterable(result)) {
+        throw new Error('runtime_environment_orpc_stream_unavailable')
+      }
+      return wrapWebRuntimeOrpcStream(result)
     }
+  }
+}
+
+function isAsyncIterable(value: unknown): value is AsyncIterable<unknown> {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    typeof Reflect.get(value, Symbol.asyncIterator) === 'function'
+  )
+}
+
+async function* wrapWebRuntimeOrpcStream(
+  stream: AsyncIterable<unknown>
+): AsyncGenerator<ShellRuntimeEnvironmentOrpcStreamEvent> {
+  for await (const value of stream) {
+    yield { type: 'value', value }
   }
 }
 

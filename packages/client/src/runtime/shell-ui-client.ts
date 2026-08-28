@@ -1,8 +1,11 @@
 import type { ShellEvent } from '@yiru/runtime-protocol/contract'
-import type { ReadClipboardTextOptions } from '@yiru/workbench-model/ui'
-import { isKeybindingActionId, type KeybindingActionId } from '~shared/keybindings'
-import type { NativeFileDropPayload } from '~shared/native-file-drop'
-import type { RichMarkdownContextMenuCommandPayload } from '~shared/rich-markdown-context-menu'
+import type { ReadClipboardTextOptions } from '@yiru/runtime-protocol/model/ui'
+import {
+  isKeybindingActionId,
+  type KeybindingActionId
+} from '@yiru/runtime-protocol/workbench/keybindings'
+import type { NativeFileDropPayload } from '~renderer/native-file-drop'
+import type { RichMarkdownContextMenuCommandPayload } from '~renderer/rich-markdown-context-menu'
 
 import { callShellOrpc } from './orpc-client'
 import { subscribeShellEvent, subscribeShellEventResync } from './shell-events-client'
@@ -16,7 +19,7 @@ export type ShellUiApi = {
   onOpenCrashReport: (callback: () => void) => Unsubscribe
   onToggleLeftSidebar: (callback: () => void) => Unsubscribe
   onToggleRightSidebar: (callback: () => void) => Unsubscribe
-  onToggleWorktreePalette: (callback: () => void) => Unsubscribe
+  onToggleCommandPalette: (callback: () => void) => Unsubscribe
   onTerminalShortcutCaptured: (
     callback: (data: { actionId: KeybindingActionId }) => void
   ) => Unsubscribe
@@ -126,7 +129,7 @@ export const electronShellUiApi: ShellUiApi = {
   onOpenCrashReport: (callback) => subscribeType('uiOpenCrashReport', callback),
   onToggleLeftSidebar: (callback) => subscribeType('uiToggleLeftSidebar', callback),
   onToggleRightSidebar: (callback) => subscribeType('uiToggleRightSidebar', callback),
-  onToggleWorktreePalette: (callback) => subscribeType('uiToggleWorktreePalette', callback),
+  onToggleCommandPalette: (callback) => subscribeType('uiToggleCommandPalette', callback),
   onTerminalShortcutCaptured: (callback) =>
     subscribeShellEvent((event) => {
       if (event.type === 'uiTerminalShortcutCaptured' && isKeybindingActionId(event.actionId)) {

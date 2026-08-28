@@ -1,4 +1,4 @@
-import type { AgentStatusIpcPayload } from '@yiru/workbench-model/agent'
+import type { AgentStatusIpcPayload } from '@yiru/runtime-protocol/model/agent'
 
 export type PendingAgentStatusEvent<T> = {
   data: T

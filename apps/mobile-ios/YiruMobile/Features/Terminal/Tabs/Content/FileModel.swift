@@ -94,7 +94,7 @@ final class WorkspaceFileModel {
             || normalized.contains("disconnected")
             || normalized.contains("reconnect the ssh target")
         {
-            return "Unable to reach the desktop filesystem"
+            return "Unable to reach the daemon filesystem"
         }
         if normalized.contains("enoent") || normalized.contains("no such file")
             || normalized.contains("not found") || normalized.contains("does not exist")

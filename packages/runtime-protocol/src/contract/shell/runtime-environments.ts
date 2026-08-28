@@ -1,5 +1,8 @@
-import { type, type ContractRouter } from '@orpc/contract'
+import { eventIterator, type, type ContractRouter } from '@orpc/contract'
 
+import type { RuntimeRpcResponse } from '../../runtime-rpc-envelope.js'
+import type { PublicKnownRuntimeEnvironment } from '../../workbench/runtime-environments.js'
+import type { RuntimeStatus } from '../../workbench/runtime-types.js'
 import { withAccess, type RuntimeProcedureMeta } from '../access-meta.js'
 
 const SHELL_ENVIRONMENT_READ_ACCESS = {
@@ -13,18 +16,41 @@ const SHELL_ENVIRONMENT_WRITE_ACCESS = {
   principals: ['local']
 } as const
 
+export type ShellRuntimeEnvironmentOrpcStreamEvent =
+  | { type: 'value'; value: unknown }
+  | { type: 'binary'; bytes: Uint8Array<ArrayBufferLike> }
+
 export const shellRuntimeEnvironmentsContract = {
-  list: withAccess(SHELL_ENVIRONMENT_READ_ACCESS).output(type<unknown>()),
+  list: withAccess(SHELL_ENVIRONMENT_READ_ACCESS).output(type<PublicKnownRuntimeEnvironment[]>()),
   resolve: withAccess(SHELL_ENVIRONMENT_READ_ACCESS)
     .input(type<{ selector: string }>())
-    .output(type<unknown>()),
+    .output(type<PublicKnownRuntimeEnvironment>()),
   remove: withAccess(SHELL_ENVIRONMENT_WRITE_ACCESS)
     .input(type<{ selector: string }>())
-    .output(type<unknown>()),
+    .output(type<{ removed: PublicKnownRuntimeEnvironment }>()),
   disconnect: withAccess(SHELL_ENVIRONMENT_WRITE_ACCESS)
     .input(type<{ selector: string }>())
-    .output(type<unknown>()),
+    .output(type<{ disconnected: PublicKnownRuntimeEnvironment }>()),
   getStatus: withAccess(SHELL_ENVIRONMENT_READ_ACCESS)
     .input(type<{ selector: string; timeoutMs?: number }>())
-    .output(type<unknown>())
+    .output(type<RuntimeRpcResponse<RuntimeStatus>>()),
+  callOrpcProcedure: withAccess(SHELL_ENVIRONMENT_WRITE_ACCESS)
+    .input(
+      type<{
+        selector: string
+        path: readonly string[]
+        input: unknown
+        timeoutMs?: number
+      }>()
+    )
+    .output(type<unknown>()),
+  subscribeOrpcProcedure: withAccess(SHELL_ENVIRONMENT_WRITE_ACCESS)
+    .input(
+      type<{
+        selector: string
+        path: readonly string[]
+        input: unknown
+      }>()
+    )
+    .output(eventIterator(type<ShellRuntimeEnvironmentOrpcStreamEvent>()))
 } satisfies ContractRouter<RuntimeProcedureMeta>

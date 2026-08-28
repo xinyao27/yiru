@@ -40,7 +40,7 @@ struct TerminalQuickCommandSheet: View {
                     AppUnavailableState(
                         "Quick Commands Unavailable",
                         iconID: .remove,
-                        description: Text("Update the paired desktop to use Quick Commands.")
+                        description: Text("Update the paired daemon to use Quick Commands.")
                     )
                 case .failed:
                     AppUnavailableState("Quick Commands Unavailable", iconID: .wifiSlash) {

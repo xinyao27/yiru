@@ -19,8 +19,7 @@
                 endpoint: "wss://mac-studio.local:6768",
                 deviceToken: "fixture-device-token",
                 publicKeyB64: Data(repeating: 7, count: 32).base64EncodedString(),
-                scope: .mobile,
-                relay: nil
+                scope: .mobile
             )
             guard let data = try? JSONEncoder().encode(wire) else { return "" }
             return data.base64EncodedString()
@@ -39,8 +38,7 @@
                         deviceToken: "fixture-device-token",
                         publicKey: Data(repeating: 7, count: 32),
                         publicKeyBase64: "fixture-public-key",
-                        scope: .mobile,
-                        relay: nil
+                        scope: .mobile
                     ),
                     runtime: PairingFixtureRuntime(),
                     onPaired: { _ in },

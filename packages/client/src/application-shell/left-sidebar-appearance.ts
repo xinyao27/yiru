@@ -1,11 +1,11 @@
-import { HEX_COLOR_RE } from '~shared/color-validation'
+import { HEX_COLOR_RE } from '@yiru/runtime-protocol/workbench/color-validation'
 import {
   normalizeLeftSidebarTintColor,
   normalizeLeftSidebarTintOpacity
-} from '~shared/left-sidebar-appearance'
-import type { GlobalSettings } from '~shared/types'
+} from '@yiru/runtime-protocol/workbench/left-sidebar-appearance'
+import type { GlobalSettings } from '@yiru/runtime-protocol/workbench/types'
 
-import { resolveEffectiveTerminalAppearance } from '../lib/terminal-theme'
+import { resolveEffectiveTerminalAppearance } from '../terminal/theme'
 
 type LeftSidebarAppearanceSettings = Pick<
   GlobalSettings,

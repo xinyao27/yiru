@@ -3,9 +3,9 @@ import type {
   AiVaultListResult,
   AiVaultSubagentListArgs,
   AiVaultSubagentListResult
-} from '@yiru/workbench-model/agent'
-import { toRuntimeExecutionHostId } from '@yiru/workbench-model/workspace'
-import { useAppStore } from '~renderer/store'
+} from '@yiru/runtime-protocol/model/agent'
+import { toRuntimeExecutionHostId } from '@yiru/runtime-protocol/model/workspace'
+import { useAppStore } from '~renderer/store/state'
 
 import { callRuntimeOrpc, callShellOrpc, isWebRuntimeClient } from './orpc-client'
 import { getActiveRuntimeTarget } from './rpc-client'

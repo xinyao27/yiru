@@ -1,7 +1,7 @@
 # Architecture
 
 目标是在保持协议和业务行为一致的前提下，维护一个长期演进的原生客户端。
-组织原则与 Atat 相同：从功能名可以一次猜中代码位置，
+组织原则与 Yiru 仓库一致：从功能名可以一次猜中代码位置，
 一个小功能变更通常只触碰同一 feature 的一到三个文件。
 
 ## 目录
@@ -40,8 +40,8 @@ App ───────→ Features ───────→ DesignSystem
 - Feature 不能直接创建 URLSession、Keychain、通知中心或全局 singleton。
 - `Platform` 不拥有产品状态；它只把系统能力适配成 feature 定义的窄接口。
 - `DesignSystem` 不依赖 feature、transport 或 persistence。
-- 跨进程 wire contract 的 source of truth 仍是 `packages/runtime-protocol` 与
-  `packages/mobile-relay-protocol`。Swift wire model 应当从这些 source of truth 生成而非
+- 跨进程 wire contract 的 source of truth 是 `packages/runtime-protocol`。Swift wire model
+  应当从这个 source of truth 生成而非
   在多个 feature 手抄一套相似 JSON 结构；改动协议时必须同步维护
   `MobileWire.generated.swift`。
 
@@ -55,9 +55,9 @@ wire 类型。
 `RuntimeHostSession` 是每个 host 唯一的物理连接 owner，负责连接代际、heartbeat、退避和恢复；
 `RuntimeOrpcPeer` 是加密流唯一的 reader，并按 request ID 分发 unary response 与 event iterator；
 iterator 严格遵循锁定 oRPC 版本的 response、message/error/done 和 abort frame 生命周期。
-`RuntimeClient` 只维护 stable logical session 与值语义 snapshot，再把窄 capability protocol 提供给 feature。当前产品已
-退役第一方 Cloud Relay，因此原生端保留旧 pairing field 的边界校验，但不会重新引入已删除的
-provisioning、credential rotation 或 relay endpoint lifecycle。
+`RuntimeClient` 只维护 stable logical session 与值语义 snapshot，再把窄 capability protocol
+提供给 feature。当前产品已退役第一方 Cloud Relay，因此原生端只在输入边界校验旧 pairing
+field，不会重新引入已删除的 provisioning、credential rotation 或 relay endpoint lifecycle。
 
 ## 状态与并发
 
@@ -95,7 +95,7 @@ RuntimeTerminalMultiplexer actor (one per host)
 renderer-neutral `TerminalSurface`。默认使用 Core Text/Core Graphics renderer；只有性能数据
 证明有收益且视觉与能耗验收通过后才启用 Metal。
 
-Renderer 只接收有序 bytes、snapshot、resize 与输入回调。它不知道 WebSocket、relay、epoch
+Renderer 只接收有序 bytes、snapshot、resize 与输入回调。它不知道 WebSocket、network path、epoch
 或 ACK；只有 output 完成 parser feed 后 transport 才能推进 ACK。
 
 每个 host 的 terminal multiplexer 复用一条 bulk socket，并从 server epoch 接受

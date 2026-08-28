@@ -1,4 +1,20 @@
 extension RuntimeClient: NotificationRuntimeRepository {
+    func registerRemoteNotifications(
+        for hostID: String,
+        token: String?,
+        environment: String?
+    ) async throws {
+        let _: MobileNotificationRegisterPushResultWire = try await callRuntime(
+            hostID: hostID,
+            path: MobileNotificationsWireContract.registerPushPath,
+            input: MobileNotificationRegisterPushRequestWire(
+                environment: environment,
+                token: token
+            ),
+            output: MobileNotificationRegisterPushResultWire.self
+        )
+    }
+
     func notificationUpdates(for hostID: String) async throws
         -> AsyncThrowingStream<RuntimeNotificationEvent, Error>
     {

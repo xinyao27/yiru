@@ -167,6 +167,8 @@ private final class YiruTerminalView: TerminalView {
     var onQueryReply: (Data) -> Void = { _ in }
     private var modeAwareAccessory: TerminalAccessory?
     private var appearanceChangeHandler: ((YiruTerminalView) -> Void)?
+    private var alternateScreenScrollGesture: UIPanGestureRecognizer?
+    private var alternateScreenScrollRemainder: CGFloat = 0
 
     func observeAppearanceChanges(_ handler: @escaping (YiruTerminalView) -> Void) {
         appearanceChangeHandler = handler
@@ -179,6 +181,13 @@ private final class YiruTerminalView: TerminalView {
 
     func captureModeAwareAccessory() {
         modeAwareAccessory = inputAccessoryView as? TerminalAccessory
+        let gesture = UIPanGestureRecognizer(
+            target: self,
+            action: #selector(handleAlternateScreenScroll(_:))
+        )
+        addGestureRecognizer(gesture)
+        panGestureRecognizer.require(toFail: gesture)
+        alternateScreenScrollGesture = gesture
     }
 
     func sendAccessoryKey(_ key: TerminalAccessoryKey) {
@@ -241,7 +250,67 @@ private final class YiruTerminalView: TerminalView {
 
     override func mouseModeChanged(source _: Terminal) {
         // Why: SwiftTerm's mouse mode adds a second pan recognizer that wins over scrollback on iOS.
-        // Keep mouse-aware taps, but leave finger drags to UIScrollView so TUIs remain scrollable.
+        // Yiru keeps taps and routes alternate-screen drags through terminal input below.
+    }
+
+    override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        guard gestureRecognizer === alternateScreenScrollGesture else {
+            return super.gestureRecognizerShouldBegin(gestureRecognizer)
+        }
+        guard getTerminal().isCurrentBufferAlternate,
+            let panGesture = gestureRecognizer as? UIPanGestureRecognizer
+        else {
+            return false
+        }
+        let velocity = panGesture.velocity(in: self)
+        return abs(velocity.y) > abs(velocity.x)
+    }
+
+    @objc private func handleAlternateScreenScroll(_ gesture: UIPanGestureRecognizer) {
+        switch gesture.state {
+        case .began:
+            alternateScreenScrollRemainder = 0
+        case .changed:
+            alternateScreenScrollRemainder += gesture.translation(in: self).y
+            gesture.setTranslation(.zero, in: self)
+            let lineHeight = max(font.lineHeight, 1)
+            let lines = Int(alternateScreenScrollRemainder / lineHeight)
+            guard lines != 0 else { return }
+            alternateScreenScrollRemainder -= CGFloat(lines) * lineHeight
+            sendAlternateScreenScroll(lines: lines, location: gesture.location(in: self))
+        case .cancelled, .ended, .failed:
+            alternateScreenScrollRemainder = 0
+        case .possible:
+            break
+        @unknown default:
+            break
+        }
+    }
+
+    private func sendAlternateScreenScroll(lines: Int, location: CGPoint) {
+        let terminal = getTerminal()
+        if terminal.mouseMode == .off {
+            let selectorName = lines > 0 ? "up:" : "down:"
+            for _ in 0..<abs(lines) { sendModeAwareArrow(selectorName: selectorName) }
+            return
+        }
+        let columns = max(terminal.cols, 1)
+        let rows = max(terminal.rows, 1)
+        let cellWidth = max(bounds.width / CGFloat(columns), 1)
+        let cellHeight = max(bounds.height / CGFloat(rows), 1)
+        let column = max(0, min(columns - 1, Int(location.x / cellWidth)))
+        let row = max(0, min(rows - 1, Int(location.y / cellHeight)))
+        let button = lines > 0 ? 4 : 5
+        let buttonFlags = terminal.encodeButton(
+            button: button,
+            release: false,
+            shift: false,
+            meta: false,
+            control: false
+        )
+        for _ in 0..<abs(lines) {
+            terminal.sendEvent(buttonFlags: buttonFlags, x: column, y: row)
+        }
     }
 
     private func sendModeAwareArrow(selectorName: String) {

@@ -4,7 +4,7 @@ import type {
   TerminalManagementListResult,
   TerminalManagementRestartResult
 } from '@yiru/runtime-protocol/contract'
-import type { GlobalSettings } from '~shared/types'
+import type { GlobalSettings } from '@yiru/runtime-protocol/workbench/types'
 
 import { callRuntimeOrpc } from './orpc-client'
 import { getActiveRuntimeTarget } from './rpc-client'

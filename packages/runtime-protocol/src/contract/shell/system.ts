@@ -1,5 +1,19 @@
 import { type, type ContractRouter } from '@orpc/contract'
 
+import type { AppStarSource } from '../../workbench/gh-star-source.js'
+import type {
+  RuntimeSyncWindowGraph,
+  RuntimeSyncWindowGraphResult,
+  RuntimeTerminalDriverState
+} from '../../workbench/runtime-types.js'
+import type {
+  GitHubPRRefreshCandidate,
+  GitHubPRRefreshEnqueueResult,
+  GitHubPRRefreshReason,
+  GitHubViewer,
+  UpdateCheckOptions,
+  UpdateStatus
+} from '../../workbench/types.js'
 import { withAccess, type RuntimeProcedureMeta } from '../access-meta.js'
 
 const SHELL_SYSTEM_READ_ACCESS = {
@@ -13,8 +27,25 @@ const SHELL_SYSTEM_WRITE_ACCESS = {
   principals: ['local']
 } as const
 
+export type ShellAppIdentity = {
+  name: string
+  isDev: boolean
+  devLabel: string | null
+  devBranch: string | null
+  devWorktreeName: string | null
+  devRepoRoot: string | null
+  dockBadgeLabel: string | null
+}
+
+export type ShellTerminalFitOverride = {
+  ptyId: string
+  mode: 'mobile-fit' | 'remote-desktop-fit'
+  cols: number
+  rows: number
+}
+
 export const shellAppContract = {
-  getIdentity: withAccess(SHELL_SYSTEM_READ_ACCESS).output(type<unknown>()),
+  getIdentity: withAccess(SHELL_SYSTEM_READ_ACCESS).output(type<ShellAppIdentity>()),
   relaunch: withAccess(SHELL_SYSTEM_WRITE_ACCESS).output(type<void>()),
   restart: withAccess(SHELL_SYSTEM_WRITE_ACCESS).output(type<void>()),
   reload: withAccess(SHELL_SYSTEM_WRITE_ACCESS).output(type<void>()),
@@ -33,40 +64,48 @@ export const shellRepoHostContract = {
   pickFolders: withAccess(SHELL_SYSTEM_WRITE_ACCESS).output(type<string[]>()),
   pickDirectory: withAccess(SHELL_SYSTEM_WRITE_ACCESS).output(type<string | null>()),
   removeForHost: withAccess(SHELL_SYSTEM_WRITE_ACCESS)
-    .input(type<{ repoId: string; hostId: string }>())
-    .output(type<void>()),
+    .input(type<{ expectedRevision: number; repoId: string; hostId: string }>())
+    .output(type<{ removed: true; revision: number }>()),
   reorderForHost: withAccess(SHELL_SYSTEM_WRITE_ACCESS)
-    .input(type<{ orderedIds: string[]; hostId: string }>())
-    .output(type<{ status: 'applied' | 'rejected' }>()),
+    .input(type<{ expectedRevision: number; orderedIds: string[]; hostId: string }>())
+    .output(type<{ revision?: number; status: 'applied' | 'rejected' }>()),
   cloneAbort: withAccess(SHELL_SYSTEM_WRITE_ACCESS).output(type<void>()),
   getDefaultCreateProjectParent: withAccess(SHELL_SYSTEM_READ_ACCESS).output(type<string>())
 } satisfies ContractRouter<RuntimeProcedureMeta>
 
 export const shellRuntimeStateContract = {
   syncWindowGraph: withAccess(SHELL_SYSTEM_WRITE_ACCESS)
-    .input(type<unknown>())
-    .output(type<unknown>()),
-  getTerminalFitOverrides: withAccess(SHELL_SYSTEM_READ_ACCESS).output(type<unknown>()),
-  getTerminalDrivers: withAccess(SHELL_SYSTEM_READ_ACCESS).output(type<unknown>()),
-  getBrowserDrivers: withAccess(SHELL_SYSTEM_READ_ACCESS).output(type<unknown>()),
+    .input(type<RuntimeSyncWindowGraph>())
+    .output(type<RuntimeSyncWindowGraphResult>()),
+  getTerminalFitOverrides:
+    withAccess(SHELL_SYSTEM_READ_ACCESS).output(type<ShellTerminalFitOverride[]>()),
+  getTerminalDrivers:
+    withAccess(SHELL_SYSTEM_READ_ACCESS).output(
+      type<{ ptyId: string; driver: RuntimeTerminalDriverState }[]>()
+    ),
   restoreTerminalFit: withAccess(SHELL_SYSTEM_WRITE_ACCESS)
     .input(type<{ ptyId: string }>())
-    .output(type<{ restored: boolean }>()),
-  reclaimBrowserForDesktop: withAccess(SHELL_SYSTEM_WRITE_ACCESS)
-    .input(type<{ browserPageId: string }>())
-    .output(type<{ reclaimed: boolean }>())
+    .output(type<{ restored: boolean }>())
 } satisfies ContractRouter<RuntimeProcedureMeta>
 
 export const shellGitHubContract = {
-  viewer: withAccess(SHELL_SYSTEM_READ_ACCESS).output(type<unknown>()),
+  viewer: withAccess(SHELL_SYSTEM_READ_ACCESS).output(type<GitHubViewer | null>()),
   enqueuePRRefresh: withAccess(SHELL_SYSTEM_WRITE_ACCESS)
-    .input(type<unknown>())
-    .output(type<unknown>()),
+    .input(
+      type<{
+        candidate: GitHubPRRefreshCandidate
+        reason: GitHubPRRefreshReason
+        priority?: number
+      }>()
+    )
+    .output(type<GitHubPRRefreshEnqueueResult | false>()),
   reportVisiblePRRefreshCandidates: withAccess(SHELL_SYSTEM_WRITE_ACCESS)
-    .input(type<unknown>())
+    .input(type<{ candidates: GitHubPRRefreshCandidate[]; generation: number }>())
     .output(type<boolean>()),
   checkYiruStarred: withAccess(SHELL_SYSTEM_READ_ACCESS).output(type<boolean | null>()),
-  starYiru: withAccess(SHELL_SYSTEM_WRITE_ACCESS).input(type<unknown>()).output(type<boolean>())
+  starYiru: withAccess(SHELL_SYSTEM_WRITE_ACCESS)
+    .input(type<AppStarSource>())
+    .output(type<boolean>())
 } satisfies ContractRouter<RuntimeProcedureMeta>
 
 export const shellNotificationsContract = {
@@ -92,15 +131,20 @@ export const shellStarNagContract = {
   openWeb: withAccess(SHELL_SYSTEM_WRITE_ACCESS).output(type<void>()),
   starYiru: withAccess(SHELL_SYSTEM_WRITE_ACCESS).output(type<boolean>()),
   forceShow: withAccess(SHELL_SYSTEM_WRITE_ACCESS).output(type<void>()),
-  agentValueMoment: withAccess(SHELL_SYSTEM_WRITE_ACCESS).output(type<unknown>()),
+  agentValueMoment:
+    withAccess(SHELL_SYSTEM_WRITE_ACCESS).output(
+      type<{ status: 'ready'; mode: 'gh' | 'web' } | { status: 'skipped' }>()
+    ),
   showAgentValueMoment: withAccess(SHELL_SYSTEM_WRITE_ACCESS).output(type<void>()),
   onboardingCompleted: withAccess(SHELL_SYSTEM_WRITE_ACCESS).output(type<void>())
 } satisfies ContractRouter<RuntimeProcedureMeta>
 
 export const shellUpdaterContract = {
   getVersion: withAccess(SHELL_SYSTEM_READ_ACCESS).output(type<string>()),
-  getStatus: withAccess(SHELL_SYSTEM_READ_ACCESS).output(type<unknown>()),
-  check: withAccess(SHELL_SYSTEM_WRITE_ACCESS).input(type<unknown>()).output(type<void>()),
+  getStatus: withAccess(SHELL_SYSTEM_READ_ACCESS).output(type<UpdateStatus>()),
+  check: withAccess(SHELL_SYSTEM_WRITE_ACCESS)
+    .input(type<UpdateCheckOptions | undefined>())
+    .output(type<void>()),
   download: withAccess(SHELL_SYSTEM_WRITE_ACCESS).output(type<void>()),
   quitAndInstall: withAccess(SHELL_SYSTEM_WRITE_ACCESS).output(type<void>()),
   dismissNudge: withAccess(SHELL_SYSTEM_WRITE_ACCESS).output(type<void>())

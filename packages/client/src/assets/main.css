@@ -11,7 +11,7 @@
    pane-manager.css, terminal.css, pane-title.css) moved to side-effect
    imports at their owning lazy-loaded component/module so they ship in that
    feature's chunk instead of this eager first-paint stylesheet. */
-@import '../components/editor/markdown-body.css';
+@import '../editor/markdown-body.css';
 
 @font-face {
   font-family: 'Geist';

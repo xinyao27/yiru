@@ -1,4 +1,4 @@
-import type { RuntimeFileReadChunkResult } from '~shared/runtime-types'
+import type { RuntimeFileReadChunkResult } from '@yiru/runtime-protocol/workbench/runtime-types'
 
 import { callRuntimeOrpc, isRuntimeOrpcErrorCode } from '../orpc-client'
 import {

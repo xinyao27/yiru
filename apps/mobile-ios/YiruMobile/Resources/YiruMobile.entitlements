@@ -8,5 +8,9 @@
 	<array>
 		<string>group.com.xinyao27.yiru.mobile</string>
 	</array>
+	<key>keychain-access-groups</key>
+	<array>
+		<string>$(AppIdentifierPrefix)com.xinyao27.yiru.mobile.notifications</string>
+	</array>
 </dict>
 </plist>

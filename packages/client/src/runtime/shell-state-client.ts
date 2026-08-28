@@ -1,11 +1,14 @@
-import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
-import type { PRInfo, GlobalSettings, OnboardingState } from '~shared/types'
-import type { WorkspaceSessionPatch, WorkspaceSessionState } from '~shared/types'
+import type { ShellGitHubCache } from '@yiru/runtime-protocol/contract'
+import type { ExecutionHostId } from '@yiru/runtime-protocol/model/workspace'
+import type {
+  GlobalSettings,
+  OnboardingState,
+  WorkspaceSessionPatch,
+  WorkspaceSessionState
+} from '@yiru/runtime-protocol/workbench/types'
 
 import { getWebShellStateApis } from '../web/shell/state/system'
 import { callShellOrpc } from './orpc-client'
-
-type GitHubCache = { pr: Record<string, { data: PRInfo | null; fetchedAt: number }> }
 
 export type ShellSettingsApi = {
   get: () => Promise<GlobalSettings>
@@ -31,8 +34,8 @@ export type ShellOnboardingApi = {
 }
 
 export type ShellCacheApi = {
-  getGitHub: () => Promise<GitHubCache>
-  setGitHub: (args: { cache: GitHubCache }) => Promise<void>
+  getGitHub: () => Promise<ShellGitHubCache>
+  setGitHub: (args: { cache: ShellGitHubCache }) => Promise<void>
 }
 
 let settingsSnapshot: GlobalSettings | null = null
@@ -41,32 +44,22 @@ function isWebShellClient(): boolean {
   return (globalThis as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__ === true
 }
 
-function restoreShellDocument<T>(value: unknown): T {
-  // Why: runtime-protocol cannot import desktop-only shared document types.
-  // The owning shell validates/sanitizes these objects; this adapter restores
-  // their concrete client type after the typed oRPC transport succeeds.
-  return value as T
-}
-
 const electronSettingsApi: ShellSettingsApi = {
   get: async () => {
-    const settings = restoreShellDocument<GlobalSettings>(
-      await callShellOrpc((client) => client.shell.settings.get, undefined)
-    )
+    const settings = await callShellOrpc((client) => client.shell.settings.get, undefined)
     settingsSnapshot = settings
     return settings
   },
   getSnapshot: () => settingsSnapshot,
   set: async (updates) => {
-    const settings = restoreShellDocument<GlobalSettings>(
-      await callShellOrpc((client) => client.shell.settings.set, updates)
-    )
+    const settings = await callShellOrpc((client) => client.shell.settings.set, updates)
     settingsSnapshot = settings
     return settings
   },
   updatePRBotAuthorOverride: async (args) => {
-    const settings = restoreShellDocument<GlobalSettings>(
-      await callShellOrpc((client) => client.shell.settings.updatePRBotAuthorOverride, args)
+    const settings = await callShellOrpc(
+      (client) => client.shell.settings.updatePRBotAuthorOverride,
+      args
     )
     settingsSnapshot = settings
     return settings
@@ -78,9 +71,7 @@ const electronSessionApi: ShellSessionApi = {
     // Why: durable PTY ids can only be exchanged for runtime handles after the
     // persistent daemon has restored its terminal inventory.
     await callShellOrpc((client) => client.shell.app.awaitFirstWindowStartupServices, undefined)
-    return restoreShellDocument<WorkspaceSessionState>(
-      await callShellOrpc((client) => client.shell.session.get, { hostId })
-    )
+    return callShellOrpc((client) => client.shell.session.get, { hostId })
   },
   set: (session, hostId) =>
     callShellOrpc((client) => client.shell.session.set, { session, hostId }),
@@ -90,21 +81,12 @@ const electronSessionApi: ShellSessionApi = {
 }
 
 const electronOnboardingApi: ShellOnboardingApi = {
-  get: async () =>
-    restoreShellDocument<OnboardingState>(
-      await callShellOrpc((client) => client.shell.onboarding.get, undefined)
-    ),
-  update: async (updates) =>
-    restoreShellDocument<OnboardingState>(
-      await callShellOrpc((client) => client.shell.onboarding.update, updates)
-    )
+  get: () => callShellOrpc((client) => client.shell.onboarding.get, undefined),
+  update: (updates) => callShellOrpc((client) => client.shell.onboarding.update, updates)
 }
 
 const electronCacheApi: ShellCacheApi = {
-  getGitHub: async () =>
-    restoreShellDocument<GitHubCache>(
-      await callShellOrpc((client) => client.shell.cache.getGitHub, undefined)
-    ),
+  getGitHub: () => callShellOrpc((client) => client.shell.cache.getGitHub, undefined),
   setGitHub: (args) => callShellOrpc((client) => client.shell.cache.setGitHub, args)
 }
 

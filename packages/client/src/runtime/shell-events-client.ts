@@ -32,9 +32,11 @@ const shellEventFanOut = createRuntimeStreamFanOut<void, ShellSubscriptionEvent>
 
 function observeShellSubscriptionEvent(event: ShellSubscriptionEvent): void {
   if (event.type === 'ready') {
+    lastSeenSeq = event.seq
     return
   }
   if (event.type === 'resync') {
+    lastSeenSeq = event.seq
     for (const listener of Array.from(resyncListeners)) {
       listener()
     }

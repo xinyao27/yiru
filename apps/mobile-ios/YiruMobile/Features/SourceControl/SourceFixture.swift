@@ -104,7 +104,7 @@
                         added: 284
                     ),
                     entry(
-                        "packages/runtime-protocol/src/mobile-source-control-wire.ts",
+                        "packages/runtime-protocol/src/mobile-wire/source-control-wire.ts",
                         .added,
                         .staged,
                         added: 94

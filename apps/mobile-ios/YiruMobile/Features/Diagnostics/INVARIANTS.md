@@ -23,5 +23,5 @@
   scale; content rows remain ordinary settings surfaces.
 - Running indicators use the Settings-owned neutral loader style. Status glyphs use semantic
   Hugeicons IDs and the shared success/attention/muted colors; no default blue chrome.
-- Rows preserve the old Mobile 44-point minimum hit target, readable detail alignment, and light,
+- Rows preserve the 44-point minimum hit target, readable detail alignment, and light,
   dark, Dynamic Type, and VoiceOver labels.

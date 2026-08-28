@@ -1,19 +1,22 @@
-import { normalizeExecutionHostId, type ExecutionHostId } from '@yiru/workbench-model/workspace'
-import { z } from 'zod'
 import {
-  isKeybindingActionId,
+  normalizeExecutionHostId,
+  type ExecutionHostId
+} from '@yiru/runtime-protocol/model/workspace'
+import {
+  normalizeKeybindingActionId,
   normalizeKeybindingArrayForAction,
   type KeybindingOverrides
-} from '~shared/keybindings'
-import { normalizeOpenInApplications } from '~shared/open-in-applications'
-import { normalizeTerminalQuickCommands } from '~shared/terminal/quick-commands'
-import { isTuiAgent } from '~shared/tui-agent/config'
+} from '@yiru/runtime-protocol/workbench/keybindings'
+import { normalizeOpenInApplications } from '@yiru/runtime-protocol/workbench/open-in-applications'
+import { normalizeTerminalQuickCommands } from '@yiru/runtime-protocol/workbench/terminal/quick-commands'
+import { isTuiAgent } from '@yiru/runtime-protocol/workbench/tui-agent/config'
 import {
   normalizeTuiAgentArgsRecord,
   normalizeTuiAgentEnvRecord
-} from '~shared/tui-agent/launch-defaults'
-import { normalizeDisabledTuiAgents } from '~shared/tui-agent/selection'
-import type { GlobalSettings, HostSettingOverrides } from '~shared/types'
+} from '@yiru/runtime-protocol/workbench/tui-agent/launch-defaults'
+import { normalizeDisabledTuiAgents } from '@yiru/runtime-protocol/workbench/tui-agent/selection'
+import type { GlobalSettings, HostSettingOverrides } from '@yiru/runtime-protocol/workbench/types'
+import { z } from 'zod'
 
 const nullableString = z.string().nullable()
 const optionalNullableString = nullableString.optional()
@@ -163,15 +166,16 @@ const keybindingOverrides = z
   .record(z.string(), z.array(z.string()))
   .superRefine((value, context) => {
     for (const actionId of Object.keys(value)) {
-      if (!isKeybindingActionId(actionId)) {
+      if (!normalizeKeybindingActionId(actionId)) {
         context.addIssue({ code: 'custom' })
       }
     }
   })
   .transform((value, context) => {
     const result: KeybindingOverrides = {}
-    for (const [actionId, bindings] of Object.entries(value)) {
-      if (!isKeybindingActionId(actionId)) {
+    for (const [storedActionId, bindings] of Object.entries(value)) {
+      const actionId = normalizeKeybindingActionId(storedActionId)
+      if (!actionId) {
         continue
       }
       const normalized = normalizeKeybindingArrayForAction(actionId, bindings)

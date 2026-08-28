@@ -4,12 +4,12 @@ export {
   runtimeMobileSessionSyncKeysEqual
 } from './runtime-mobile-session-sync-key'
 export type { RuntimeMobileSessionSyncKey } from './runtime-mobile-session-sync-key'
-import { serializePaneTree } from '~renderer/components/terminal-pane/layout-serialization'
-import { warnTerminalLifecycleAnomaly } from '~renderer/components/terminal-pane/terminal-lifecycle-diagnostics'
-import { getSystemPrefersDark } from '~renderer/lib/terminal-theme'
+import type { RuntimeSyncWindowGraph } from '@yiru/runtime-protocol/workbench/runtime-types'
+import { isTerminalLeafId } from '@yiru/runtime-protocol/workbench/stable-pane-id'
 import type { AppState } from '~renderer/store/types'
-import type { RuntimeSyncWindowGraph } from '~shared/runtime-types'
-import { isTerminalLeafId } from '~shared/stable-pane-id'
+import { serializePaneTree } from '~renderer/terminal-pane/layout-serialization'
+import { warnTerminalLifecycleAnomaly } from '~renderer/terminal-pane/terminal-lifecycle-diagnostics'
+import { getSystemPrefersDark } from '~renderer/terminal/theme'
 
 import { resolveTerminalLayoutRoot } from './remote-terminal-layout-resolution'
 import { buildMobileSessionTabSnapshots } from './runtime-mobile-session-snapshot'

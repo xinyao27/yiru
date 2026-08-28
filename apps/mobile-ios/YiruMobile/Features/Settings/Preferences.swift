@@ -32,14 +32,14 @@ nonisolated enum TerminalLinkOpenMode: String, CaseIterable, Identifiable, Senda
 
     var title: LocalizedStringResource {
         switch self {
-        case .yiruBrowser: "Yiru browser on desktop"
+        case .yiruBrowser: "Yiru browser in Chrome"
         case .phoneBrowser: "Phone browser"
         }
     }
 
     var detail: LocalizedStringResource {
         switch self {
-        case .yiruBrowser: "Open in the streamed browser from your paired desktop."
+        case .yiruBrowser: "Open in the streamed browser from your paired daemon."
         case .phoneBrowser: "Open in Safari, Chrome, or another browser on this phone."
         }
     }

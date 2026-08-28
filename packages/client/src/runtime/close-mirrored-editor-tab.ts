@@ -1,11 +1,11 @@
+import type { Tab } from '@yiru/runtime-protocol/workbench/types'
 import {
   getRuntimeEnvironmentIdForWorktree,
   type WorktreeRuntimeOwnerState
-} from '~renderer/lib/worktree-runtime-owner'
-import type { Tab } from '~shared/types'
+} from '~renderer/worktree/runtime-owner'
 
-import { closeWebSessionTabCommand } from './web-session-commands'
-import { requestWebSessionTabsRefresh } from './web-session-tabs-refresh-requests'
+import { closeWebSessionTabCommand } from './web-session/commands'
+import { requestWebSessionTabsRefresh } from './web-session/tabs-refresh-requests'
 
 type MirroredEditorFile = {
   id: string

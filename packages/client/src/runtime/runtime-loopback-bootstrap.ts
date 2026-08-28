@@ -1,4 +1,4 @@
-import type { RuntimeConnectionBootstrap } from '~shared/preload/bootstrap-contract'
+import type { RuntimeConnectionBootstrap } from '~renderer/preload/bootstrap-contract'
 
 function getRuntimeConnectionBootstrap(): RuntimeConnectionBootstrap {
   const hostWindow = window as unknown as {

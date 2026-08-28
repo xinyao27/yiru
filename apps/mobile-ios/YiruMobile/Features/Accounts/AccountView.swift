@@ -107,7 +107,7 @@ struct AccountView: View {
                     }
                 )
             }
-            Text("Add or re-authenticate accounts from desktop Settings → Accounts.")
+            Text("Add or re-authenticate agent accounts on the daemon host.")
                 .font(.system(size: Theme.Typography.metadata))
                 .foregroundStyle(Theme.Colors.mutedForeground)
                 .lineSpacing(Theme.Spacing.extraSmall)

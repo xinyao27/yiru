@@ -64,7 +64,7 @@
             case .homeOnboarding: "First-run pairing guidance and primary action."
             case .activity: "Activity, token, value, provider, model, and project insights."
             case .pairingScan: "Camera access, scanner, paste-code fallback, and invalid codes."
-            case .pairingConfirm: "Desktop identity, endpoint, pairing progress, and failure."
+            case .pairingConfirm: "Daemon identity, endpoint, pairing progress, and failure."
             case .notificationOptIn: "One-time notification permission decision."
             case .settings: "Appearance, terminal, browser, notifications, and diagnostics."
             case .workspaceList: "Pinned, project, lineage, agent, file, and browser rows."
@@ -121,7 +121,7 @@
             case .session:
                 "Exercise the production session shell with deterministic terminal, file, and browser states."
             case .workspace:
-                "Inspect production data-heavy routes without pairing a desktop."
+                "Inspect production data-heavy routes without pairing a daemon."
             case .system:
                 nil
             }

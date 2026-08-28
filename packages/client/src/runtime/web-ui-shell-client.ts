@@ -1,7 +1,7 @@
 import {
   assertClipboardTextWriteWithinLimitWithYield,
   assertClipboardTextWithinLimitWithYield
-} from '@yiru/workbench-model/ui'
+} from '@yiru/runtime-protocol/model/ui'
 import { translate } from '~renderer/i18n/i18n'
 
 import type { ShellUiApi } from './shell-ui-client'
@@ -56,7 +56,7 @@ function createWebShellUIApi(): ShellUiApi {
     onOpenCrashReport: () => noopUnsubscribe,
     onToggleLeftSidebar: () => noopUnsubscribe,
     onToggleRightSidebar: () => noopUnsubscribe,
-    onToggleWorktreePalette: () => noopUnsubscribe,
+    onToggleCommandPalette: () => noopUnsubscribe,
     onTerminalShortcutCaptured: () => noopUnsubscribe,
     onOpenQuickOpen: () => noopUnsubscribe,
     onToggleQuickCommandsMenu: () => noopUnsubscribe,

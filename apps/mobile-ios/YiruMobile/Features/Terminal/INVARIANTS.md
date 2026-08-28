@@ -23,10 +23,10 @@
   capability probes, and tab mutations only run while the host connection snapshot is connected.
   A disconnected session keeps its last rendered content without recreating the runtime until
   reconnection.
-- Terminal chrome, action labels, icon geometry, accessory keys, spacing, and colors follow the old
-  Mobile implementation. Loaders and neutral actions never use the default blue tint.
-- The accessory bar keeps the legacy sequence: Control, the user-ordered Escape/Tab pair, display
-  mode, then the remaining visible keys and custom shortcuts. A fresh layout keeps every legacy
+- Terminal chrome, action labels, icon geometry, accessory keys, spacing, and colors follow the
+  current mobile design contract. Loaders and neutral actions never use the default blue tint.
+- The accessory bar keeps the fixed sequence: Control, the user-ordered Escape/Tab pair, display
+  mode, then the remaining visible keys and custom shortcuts. A fresh layout keeps every
   built-in key visible, including Backspace and Space; migrated layouts preserve the user's order.
 - Terminal input, multiplex feed, and emulator mutation stay serialized across their actor or main
   actor boundaries.

@@ -1,12 +1,12 @@
+import type { RuntimeCapability } from '@yiru/runtime-protocol/protocol-version'
+import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 import {
   RuntimeCapabilityAdvertisementSchema,
   RuntimeCapabilityCache,
-  type RuntimeCapability,
   type RuntimeCapabilityScope
-} from '@yiru/runtime-protocol/capabilities'
-import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
+} from '@yiru/runtime-protocol/runtime-capability-contract'
 import { STATUS_GET_CONTRACT } from '@yiru/runtime-protocol/status'
-import type { RuntimeMethodResult } from '~shared/runtime-method-contract'
+import type { RuntimeMethodResult } from '@yiru/runtime-protocol/workbench/runtime-method-contract'
 
 import { assertRuntimeStatusCompatible } from './protocol-compat'
 import { unwrapRuntimeRpcResult } from './rpc-response'

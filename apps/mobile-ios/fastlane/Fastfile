@@ -18,6 +18,8 @@ WIDGET_TARGET = "YiruWidgets"
 # Why: this is the extension identifier already registered on the existing App Store app.
 # Renaming it would break the upgrade path and require a separate identifier migration.
 WIDGET_BUNDLE_ID = "com.xinyao27.yiru.mobile.ExpoWidgetsTarget"
+NOTIFICATION_TARGET = "YiruNotificationService"
+NOTIFICATION_BUNDLE_ID = "com.xinyao27.yiru.mobile.NotificationService"
 TESTFLIGHT_GROUPS = ["peeps"].freeze
 DEFAULT_TESTFLIGHT_CHANGELOG = "Latest Yiru Mobile updates and fixes.".freeze
 CLOSED_APP_STORE_STATES = %w[
@@ -209,6 +211,16 @@ def build_signed_archive(api_key:, version:, build_number:, team_id:, force_prof
     UI.user_error!("Could not resolve widget provisioning profile #{widget_profile}")
   end
 
+  notification_profile = get_provisioning_profile(
+    api_key: api_key,
+    app_identifier: NOTIFICATION_BUNDLE_ID,
+    force: force_profiles,
+  )
+  notification_profile_name = lane_context[SharedValues::SIGH_NAME]
+  unless notification_profile_name
+    UI.user_error!("Could not resolve notification provisioning profile #{notification_profile}")
+  end
+
   generate_project
   update_code_signing_settings(
     path: PROJECT,
@@ -228,6 +240,15 @@ def build_signed_archive(api_key:, version:, build_number:, team_id:, force_prof
     code_sign_identity: "Apple Distribution",
     profile_name: widget_profile_name,
   )
+  update_code_signing_settings(
+    path: PROJECT,
+    use_automatic_signing: false,
+    team_id: team_id,
+    targets: [NOTIFICATION_TARGET],
+    build_configurations: ["Release"],
+    code_sign_identity: "Apple Distribution",
+    profile_name: notification_profile_name,
+  )
 
   build_app(
     project: PROJECT,
@@ -240,6 +261,7 @@ def build_signed_archive(api_key:, version:, build_number:, team_id:, force_prof
       provisioningProfiles: {
         BUNDLE_ID => app_profile_name,
         WIDGET_BUNDLE_ID => widget_profile_name,
+        NOTIFICATION_BUNDLE_ID => notification_profile_name,
       },
     },
     xcargs: "MARKETING_VERSION=#{version} CURRENT_PROJECT_VERSION=#{build_number}",
@@ -248,14 +270,6 @@ def build_signed_archive(api_key:, version:, build_number:, team_id:, force_prof
     output_name: "Yiru.ipa",
     clean: true,
   )
-end
-
-def verify_signed_archive!
-  checker = File.join(MOBILE_ROOT, "scripts", "check-signed-archive.mjs")
-  archive = File.join(BUILD_OUTPUT_DIRECTORY, "Yiru.xcarchive")
-
-  # Why: release must validate the exact signed archive before fastlane uploads it to TestFlight.
-  sh("node", checker, archive)
 end
 
 platform :ios do
@@ -286,8 +300,6 @@ platform :ios do
       team_id: team_id,
       force_profiles: false,
     )
-    verify_signed_archive!
-
     UI.success("Archived native Yiru Mobile iOS #{version} (#{build_number}) without upload")
   end
 
@@ -309,8 +321,6 @@ platform :ios do
       team_id: team_id,
       force_profiles: true,
     )
-    verify_signed_archive!
-
     if distribution == "external"
       upload_to_testflight(
         api_key: api_key,

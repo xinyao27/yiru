@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+// Why: one process must coordinate Xcode build, Simulator lifecycle, daemon startup, and E2EE
+// pairing so development cannot be expressed as an independent package.json command sequence.
 import { execFile, spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
@@ -13,21 +15,8 @@ const derivedDataPath = path.join(iosRoot, 'build', 'DevelopmentDerivedData')
 const appPath = path.join(derivedDataPath, 'Build', 'Products', 'Debug-iphonesimulator', 'Yiru.app')
 const bundleID = 'com.xinyao27.yiru.mobile'
 const conflictingDevelopmentBundleIDs = ['me.xinyao.yiru.mobile.ios']
-const defaultDevelopmentDesktopCLI = path.join(iosRoot, '..', 'desktop', 'scripts', 'yiru-dev.mjs')
-const defaultDevelopmentDesktopCLIEntry = path.join(
-  iosRoot,
-  '..',
-  'desktop',
-  'out',
-  'cli',
-  'index.js'
-)
-const developmentDesktopCLI =
-  process.env.YIRU_CLI ||
-  (existsSync(defaultDevelopmentDesktopCLI) &&
-  (Boolean(process.env.YIRU_DEV_CLI_ENTRY_PATH) || existsSync(defaultDevelopmentDesktopCLIEntry))
-    ? defaultDevelopmentDesktopCLI
-    : null)
+const defaultDevelopmentDaemonCLI = path.join(iosRoot, '..', 'daemon', 'dist', 'yiru')
+const developmentDaemonCLI = process.env.YIRU_CLI || defaultDevelopmentDaemonCLI
 const pairingTimeoutMs = 120_000
 const pairingRetryIntervalMs = 1_000
 
@@ -35,7 +24,7 @@ const options = parseOptions(process.argv.slice(2))
 const shouldAutoPair =
   process.platform === 'darwin' &&
   process.env.YIRU_MOBILE_AUTO_PAIR !== '0' &&
-  Boolean(developmentDesktopCLI)
+  existsSync(developmentDaemonCLI)
 
 function parseOptions(args) {
   const parsed = {
@@ -161,20 +150,21 @@ async function stopConflictingDevelopmentApps(device) {
 
 async function waitForDevelopmentPairing(device) {
   if (!shouldAutoPair) {
-    logStep('Desktop auto-pair disabled; launching with stored hosts')
+    logStep('Daemon auto-pair disabled; launching with stored hosts')
     return null
   }
 
-  logStep('Waiting for the development Desktop runtime')
+  await ensureDevelopmentDaemon()
+  logStep('Waiting for the development daemon')
   const startedAt = Date.now()
   let lastError = null
   while (Date.now() - startedAt < pairingTimeoutMs) {
     try {
       const { stdout } = await execFileAsync(
-        developmentDesktopCLI,
+        developmentDaemonCLI,
         [
           'mobile',
-          'development-pairing',
+          'pair',
           '--address',
           '127.0.0.1',
           '--device-name',
@@ -183,11 +173,11 @@ async function waitForDevelopmentPairing(device) {
         ],
         { cwd: path.resolve(iosRoot, '..', '..'), encoding: 'utf8', timeout: 5_000 }
       )
-      const pairingUrl = JSON.parse(stdout)?.result?.pairingUrl
+      const pairingUrl = JSON.parse(stdout)?.pairingUrl
       if (typeof pairingUrl !== 'string' || pairingUrl.length === 0) {
-        throw new Error('Development Desktop returned no pairing URL')
+        throw new Error('Development daemon returned no pairing URL')
       }
-      logStep('Development Desktop runtime is ready')
+      logStep('Development daemon is ready')
       return pairingUrl
     } catch (error) {
       lastError = error
@@ -195,7 +185,29 @@ async function waitForDevelopmentPairing(device) {
     }
   }
   const detail = lastError instanceof Error ? `: ${lastError.message}` : ''
-  throw new Error(`Timed out waiting for the development Desktop runtime${detail}`)
+  throw new Error(`Timed out waiting for the development daemon${detail}`)
+}
+
+async function ensureDevelopmentDaemon() {
+  try {
+    const { stdout } = await execFileAsync(developmentDaemonCLI, ['status', '--json'], {
+      cwd: path.resolve(iosRoot, '..', '..'),
+      encoding: 'utf8',
+      timeout: 5_000
+    })
+    if (JSON.parse(stdout)?.state === 'running') {
+      return
+    }
+  } catch {
+    // Why: an absent or stale daemon is the normal first-run path below.
+  }
+  const daemon = spawn(developmentDaemonCLI, ['daemon'], {
+    cwd: path.resolve(iosRoot, '..', '..'),
+    detached: true,
+    env: process.env,
+    stdio: 'ignore'
+  })
+  daemon.unref()
 }
 
 async function launch(device, pairingUrl) {

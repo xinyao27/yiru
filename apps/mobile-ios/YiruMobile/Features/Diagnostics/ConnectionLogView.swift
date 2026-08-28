@@ -46,7 +46,7 @@ struct ConnectionLogView: View {
                 AppUnavailableState(
                     "No paired hosts",
                     iconID: .deviceMobile,
-                    description: Text("Pair a desktop to view its connection events.")
+                    description: Text("Pair a daemon to view its connection events.")
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }

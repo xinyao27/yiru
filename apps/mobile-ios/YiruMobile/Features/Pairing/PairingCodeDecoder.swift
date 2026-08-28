@@ -1,12 +1,6 @@
 import Foundation
 
 nonisolated struct PairingCodeDecoder: Sendable {
-    private let now: @Sendable () -> Date
-
-    init(now: @escaping @Sendable () -> Date = Date.init) {
-        self.now = now
-    }
-
     func decode(_ input: String) throws -> PairingOffer {
         let trimmed = input.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { throw PairingCodeError.invalid }
@@ -76,16 +70,13 @@ nonisolated struct PairingCodeDecoder: Sendable {
         else {
             throw PairingCodeError.invalid
         }
-        let publicKey = try decodePublicKey(wire.publicKeyB64, requiresCanonical: wire.relay != nil)
-        let relay = try wire.relay.map(validateRelay)
-        guard relay == nil || wire.scope != .runtime else { throw PairingCodeError.invalid }
+        let publicKey = try decodePublicKey(wire.publicKeyB64)
         return PairingOffer(
             endpoint: wire.endpoint,
             deviceToken: wire.deviceToken,
             publicKey: publicKey,
             publicKeyBase64: wire.publicKeyB64,
-            scope: wire.scope.map(pairingScope),
-            relay: relay
+            scope: wire.scope.map(pairingScope)
         )
     }
 
@@ -98,64 +89,11 @@ nonisolated struct PairingCodeDecoder: Sendable {
         }
     }
 
-    private func validateRelay(_ wire: PairingRelayWire) throws -> PairingRelay {
-        let currentTime = now()
-        let expiry = Date(timeIntervalSince1970: TimeInterval(wire.inviteExpiresAt) / 1_000)
-        guard
-            wire.v == MobilePairingWireContract.relayVersion,
-            wire.e2eeFraming == MobilePairingWireContract.e2eeFraming,
-            wire.assignmentEpoch >= 0,
-            wire.assignmentEpoch <= 9_007_199_254_740_991,
-            wire.relayHostId.wholeMatch(of: /^[A-Za-z0-9_-]{16}$/) != nil,
-            wire.inviteToken.wholeMatch(of: /^[A-Za-z0-9_-]{43}$/) != nil,
-            expiry > currentTime,
-            expiry <= currentTime.addingTimeInterval(10 * 60),
-            let directorURL = canonicalHTTPSOrigin(wire.directorUrl),
-            let cellURL = canonicalHTTPSOrigin(wire.cellUrl)
-        else {
-            throw PairingCodeError.invalid
-        }
-        return PairingRelay(
-            directorURL: directorURL,
-            cellURL: cellURL,
-            assignmentEpoch: wire.assignmentEpoch,
-            relayHostID: wire.relayHostId,
-            inviteToken: wire.inviteToken,
-            inviteExpiresAt: expiry
-        )
-    }
-
-    private func decodePublicKey(_ value: String, requiresCanonical: Bool) throws -> Data {
+    private func decodePublicKey(_ value: String) throws -> Data {
         guard let bytes = Data(base64Encoded: value), bytes.count == 32 else {
             throw PairingCodeError.invalid
         }
-        if requiresCanonical, bytes.base64EncodedString() != value {
-            throw PairingCodeError.invalid
-        }
         return bytes
-    }
-
-    private func canonicalHTTPSOrigin(_ value: String) -> URL? {
-        guard value.lengthOfBytes(using: .utf8) <= 2_048,
-            let components = URLComponents(string: value),
-            components.scheme == "https",
-            components.user == nil,
-            components.password == nil,
-            components.query == nil,
-            components.fragment == nil,
-            components.path.isEmpty,
-            let host = components.host,
-            !host.isEmpty,
-            components.port != 443
-        else {
-            return nil
-        }
-        var canonical = URLComponents()
-        canonical.scheme = "https"
-        canonical.host = host
-        canonical.port = components.port
-        guard canonical.string == value else { return nil }
-        return canonical.url
     }
 
     private func validateJSONShape(_ data: Data) throws {
@@ -167,21 +105,8 @@ nonisolated struct PairingCodeDecoder: Sendable {
         try requireKeys(
             offer,
             required: ["v", "endpoint", "deviceToken", "publicKeyB64"],
-            optional: ["scope", "relay"]
+            optional: ["scope"]
         )
-        if let relay = offer["relay"] {
-            guard let relayObject = relay as? [String: Any] else {
-                throw PairingCodeError.invalid
-            }
-            try requireKeys(
-                relayObject,
-                required: [
-                    "v", "directorUrl", "cellUrl", "assignmentEpoch", "relayHostId",
-                    "inviteToken", "inviteExpiresAt", "e2eeFraming",
-                ],
-                optional: []
-            )
-        }
     }
 
     private func requireKeys(

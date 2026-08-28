@@ -1,6 +1,6 @@
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 import type { MachineBrowserReady } from '@yiru/runtime-protocol/web-connect'
-import type { RuntimeMethodContract } from '~shared/runtime-method-contract'
+import type { RuntimeMethodContract } from '@yiru/runtime-protocol/workbench/runtime-method-contract'
 
 import { publicKeyFromBase64 } from '../e2ee'
 import type { WebRuntimeOrpcClient, WebRuntimeOrpcConnection } from '../orpc-channel'

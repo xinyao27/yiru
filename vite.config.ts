@@ -3,15 +3,10 @@ import { resolve } from 'node:path'
 import { defineConfig } from 'vite-plus'
 
 const lintProfile = process.env.YIRU_LINT_PROFILE
-const desktopRoot = resolve(import.meta.dirname, 'apps/desktop')
 
 const yiruRootToolingConfig = defineConfig({
   staged: {
-    '*.{ts,tsx,js,jsx,mjs,mts,cts}': [
-      'vp lint',
-      'node scripts/run-vite-plus-lint-profile.mjs react-doctor',
-      'vp fmt --write'
-    ],
+    '*.{ts,tsx,js,jsx,mjs,mts,cts}': ['vp lint', 'vp fmt --write'],
     '*.{json,css}': ['vp fmt --write']
   },
   fmt: {
@@ -114,6 +109,9 @@ const yiruRootToolingConfig = defineConfig({
               'react/jsx-pascal-case': 'error',
               'react/no-object-type-as-default-prop': 'error',
               'react/self-closing-comp': 'error',
+              'react-doctor/no-adjust-state-on-prop-change': 'error',
+              'react-doctor/no-derived-state-effect': 'error',
+              'react-doctor/no-initialize-state': 'error',
               'typescript/array-type': 'error',
               'typescript/consistent-indexed-object-style': 'error',
               'typescript/consistent-type-assertions': 'error',
@@ -218,20 +216,16 @@ const yiruRootToolingConfig = defineConfig({
               {
                 name: 'vite-plus',
                 specifier: 'vite-plus/oxlint-plugin'
+              },
+              {
+                name: 'react-doctor',
+                specifier: 'oxlint-plugin-react-doctor'
               }
             ]
           },
-  define: {
-    YIRU_BUILD_IDENTITY: 'null',
-    YIRU_FEATURE_WALL_ENABLED: 'true',
-    YIRU_POSTHOG_WRITE_KEY: 'null'
-  },
   resolve: {
     alias: {
-      '~renderer': resolve(import.meta.dirname, 'packages/client/src'),
-      '~shared': resolve(import.meta.dirname, 'packages/shared/src'),
-      '~main': resolve(desktopRoot, 'src/main'),
-      '~preload': resolve(desktopRoot, 'src/preload')
+      '~renderer': resolve(import.meta.dirname, 'packages/client/src')
     }
   }
 })

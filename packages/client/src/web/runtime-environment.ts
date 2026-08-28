@@ -1,6 +1,6 @@
+import type { PublicKnownRuntimeEnvironment } from '@yiru/runtime-protocol/workbench/runtime-environments'
+import { createBrowserUuid } from '~renderer/browser/uuid'
 import { translate } from '~renderer/i18n/i18n'
-import { createBrowserUuid } from '~renderer/lib/browser-uuid'
-import type { PublicKnownRuntimeEnvironment } from '~shared/runtime-environments'
 
 import type { WebPairingOffer } from './pairing'
 

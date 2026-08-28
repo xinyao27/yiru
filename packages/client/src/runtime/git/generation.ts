@@ -2,15 +2,15 @@ import {
   GitGenerateCommitMessageInputSchema,
   GitGeneratePullRequestFieldsInputSchema
 } from '@yiru/runtime-protocol/contract'
-import type { HostedReviewProvider } from '@yiru/workbench-model/review'
-import { getRepoIdFromWorktreeId } from '@yiru/workbench-model/workspace'
+import type { HostedReviewProvider } from '@yiru/runtime-protocol/model/review'
+import { getRepoIdFromWorktreeId } from '@yiru/runtime-protocol/model/workspace'
 import type {
   CommitMessageAgentCapability,
   CommitMessageModelCapability
-} from '~shared/commit-message/agent-spec'
-import { getCommitMessageModelDiscoveryHostKeyForScope } from '~shared/commit-message/host-key'
-import type { ResolvedSourceControlAiGenerationParams } from '~shared/source-control/ai'
-import type { GlobalSettings } from '~shared/types'
+} from '@yiru/runtime-protocol/workbench/commit-message/agent-spec'
+import { getCommitMessageModelDiscoveryHostKeyForScope } from '@yiru/runtime-protocol/workbench/commit-message/host-key'
+import type { ResolvedSourceControlAiGenerationParams } from '@yiru/runtime-protocol/workbench/source-control/ai'
+import type { GlobalSettings } from '@yiru/runtime-protocol/workbench/types'
 
 import { callRuntimeOrpc } from '../orpc-client'
 import {

@@ -4,7 +4,7 @@ import {
   RUNTIME_LOOPBACK_ERROR_FRAME,
   RUNTIME_LOOPBACK_READY_FRAME,
   type RuntimeLoopbackTarget
-} from '~shared/runtime-loopback'
+} from '~renderer/runtime-loopback'
 
 import { createRuntimeRpcAbortError } from './abortable-runtime-environment-call'
 import { getRuntimeLoopbackCredentials } from './runtime-loopback-bootstrap'

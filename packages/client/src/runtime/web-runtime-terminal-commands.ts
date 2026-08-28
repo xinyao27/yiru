@@ -1,10 +1,11 @@
-import type { TerminalPaneSplitSource } from '~shared/feature-education-telemetry'
-import type { TerminalPaneLayoutNode } from '~shared/types'
+import { parseRuntimePtyId } from '@yiru/runtime-protocol/terminal-identity/id'
+import type { TerminalPaneSplitSource } from '@yiru/runtime-protocol/workbench/feature-education-telemetry'
+import type { TerminalPaneLayoutNode } from '@yiru/runtime-protocol/workbench/types'
 
-import { getRuntimeEnvironmentIdForWorktree } from '../lib/worktree-runtime-owner'
-import { useAppStore } from '../store'
+import { readProjectCatalogRuntimeState } from '../project-catalog/runtime-state'
+import { useAppStore } from '../store/state'
+import { getRuntimeEnvironmentIdForWorktree } from '../worktree/runtime-owner'
 import { callRuntimeOrpc } from './orpc-client'
-import { parseRuntimeTerminalPtyId } from './terminal-stream'
 import { isWebRuntimeSessionActive } from './web-runtime-session-environment'
 import { reserveWebRuntimeSplitMirrorTelemetry } from './web-runtime-split-telemetry'
 import { isWebTerminalSurfaceTabId, toHostSessionTabId } from './web-terminal-surface-id'
@@ -18,7 +19,7 @@ export function splitWebRuntimeTerminal(
   if (!ptyId) {
     return false
   }
-  const remote = parseRuntimeTerminalPtyId(ptyId)
+  const remote = parseRuntimePtyId(ptyId)
   const environmentId = remote?.environmentId?.trim()
   if (!remote || !environmentId || !isWebRuntimeSessionActive(environmentId)) {
     return false
@@ -42,7 +43,7 @@ export function closeWebRuntimeTerminal(ptyId: string | null | undefined): boole
   if (!ptyId) {
     return false
   }
-  const remote = parseRuntimeTerminalPtyId(ptyId)
+  const remote = parseRuntimePtyId(ptyId)
   const environmentId = remote?.environmentId?.trim()
   if (!remote || !environmentId || !isWebRuntimeSessionActive(environmentId)) {
     return false
@@ -65,7 +66,10 @@ export async function updateWebRuntimePaneLayout(args: {
   expandedLeafId: string | null
   titlesByLeafId?: Record<string, string>
 }): Promise<boolean> {
-  const environmentId = getRuntimeEnvironmentIdForWorktree(useAppStore.getState(), args.worktreeId)
+  const environmentId = getRuntimeEnvironmentIdForWorktree(
+    readProjectCatalogRuntimeState(),
+    args.worktreeId
+  )
   if (!environmentId || !isWebRuntimeSessionActive(environmentId)) {
     return false
   }
@@ -98,12 +102,15 @@ export function setWebRuntimeTabProps(args: {
   color?: string | null
   isPinned?: boolean
 }): boolean {
-  const environmentId = getRuntimeEnvironmentIdForWorktree(useAppStore.getState(), args.worktreeId)
+  const environmentId = getRuntimeEnvironmentIdForWorktree(
+    readProjectCatalogRuntimeState(),
+    args.worktreeId
+  )
   if (!environmentId || !isWebRuntimeSessionActive(environmentId)) {
     return false
   }
   const state = useAppStore.getState()
-  void import('./web-session-tabs-sync')
+  void import('./web-session/tabs-tracking')
     .then(({ resolveHostSessionTabIdForWebSessionTab }) => {
       const hostTabId =
         resolveHostSessionTabIdForWebSessionTab(state, {
@@ -131,7 +138,7 @@ export function clearWebRuntimeTerminalBuffer(ptyId: string | null | undefined):
   if (!ptyId) {
     return false
   }
-  const remote = parseRuntimeTerminalPtyId(ptyId)
+  const remote = parseRuntimePtyId(ptyId)
   const environmentId = remote?.environmentId?.trim()
   if (!remote || !environmentId || !isWebRuntimeSessionActive(environmentId)) {
     return false

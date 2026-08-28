@@ -162,7 +162,7 @@ private struct HomePrimaryAction: View {
             Spacer(minLength: 0)
             Button(action: createWorkspace) {
                 Label(
-                    snapshot.primaryConnectedSnapshot == nil ? "Pair desktop" : "New workspace",
+                    snapshot.primaryConnectedSnapshot == nil ? "Pair daemon" : "New workspace",
                     iconID: snapshot.primaryConnectedSnapshot == nil ? .monitor : .add
                 )
                 .padding(.horizontal, Theme.Spacing.large)

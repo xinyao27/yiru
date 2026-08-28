@@ -1,5 +1,8 @@
-import { getDefaultWorkspaceSession } from '~shared/constants'
-import type { BrowserHistoryEntry, WorkspaceSessionState } from '~shared/types'
+import { getDefaultWorkspaceSession } from '@yiru/runtime-protocol/workbench/constants'
+import type {
+  BrowserHistoryEntry,
+  WorkspaceSessionState
+} from '@yiru/runtime-protocol/workbench/types'
 
 import { isJsonRecord } from './storage/local-json'
 

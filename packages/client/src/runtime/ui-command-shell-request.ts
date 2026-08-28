@@ -2,17 +2,22 @@ import type {
   ShellServicesUICommandInput,
   ShellServicesUICommandOutput
 } from '@yiru/runtime-protocol/contract'
-import { runSleepWorktree } from '~renderer/components/sidebar/sleep-worktree-flow'
-import { closeTerminalTab } from '~renderer/components/terminal/tab-actions'
 import { CLOSE_TERMINAL_PANE_EVENT, SPLIT_TERMINAL_PANE_EVENT } from '~renderer/constants/terminal'
 import type { CloseTerminalPaneDetail, SplitTerminalPaneDetail } from '~renderer/constants/terminal'
-import { activateTabAndFocusPane } from '~renderer/lib/activate-tab-and-focus-pane'
-import { detectLanguage } from '~renderer/lib/language-detect'
-import { basename } from '~renderer/lib/path'
-import { activateAndRevealWorktree } from '~renderer/lib/worktree-activation'
-import { useAppStore } from '~renderer/store'
-import { guardPinnedTabClose, resolvePinnedTabLabel } from '~renderer/store/pinned-tab-close-guard'
+import { detectLanguage } from '~renderer/file-presentation/language-detect'
+import { basename } from '~renderer/path'
+import { readProjectCatalogSnapshot } from '~renderer/project-catalog/catalog-snapshot'
+import { runSleepWorktree } from '~renderer/sidebar/sleep-worktree-flow'
+import { useAppStore } from '~renderer/store/state'
 import type { AppState } from '~renderer/store/types'
+import { activateTabAndFocusPane } from '~renderer/tab-bar/activate-and-focus-pane'
+import {
+  guardPinnedTabClose,
+  resolvePinnedTabLabel
+} from '~renderer/tab-bar/state/pinned-close-guard'
+import { closeTerminalTab } from '~renderer/terminal/tab-actions'
+import { activateAndRevealKnownWorktree } from '~renderer/worktree/activation'
+import { refreshWorktreeCatalog } from '~renderer/worktree/catalog-refresh'
 
 import {
   activateTerminalInitiatedWorktree,
@@ -39,15 +44,19 @@ async function activateNotifiedWorktree(
     // an active remote environment receives its own activation event stream.
     return
   }
-  const state = useAppStore.getState()
-  const existedBeforeFetch = Boolean(state.getKnownWorktreeById(command.worktreeId))
-  await state.fetchWorktrees(command.repoId)
-  const existsAfterFetch = Boolean(useAppStore.getState().getKnownWorktreeById(command.worktreeId))
-  activateAndRevealWorktree(command.worktreeId, {
+  const existedBeforeFetch = Object.values(readProjectCatalogSnapshot().worktreesByRepo)
+    .flat()
+    .some((worktree) => worktree.id === command.worktreeId)
+  const refreshed = await refreshWorktreeCatalog({ kind: 'local' }, command.repoId)
+  const worktree = refreshed?.worktrees.find((candidate) => candidate.id === command.worktreeId)
+  if (!worktree) {
+    return
+  }
+  activateAndRevealKnownWorktree(worktree, {
     ...(command.setup ? { setup: command.setup } : {}),
     ...(command.startup ? { startup: command.startup } : {}),
     ...(command.defaultTabs ? { defaultTabs: command.defaultTabs } : {}),
-    ...(!existedBeforeFetch && existsAfterFetch ? { sidebarRevealBehavior: 'auto' } : {}),
+    ...(!existedBeforeFetch ? { sidebarRevealBehavior: 'auto' } : {}),
     notifyHostRuntime: false
   })
 }

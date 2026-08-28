@@ -1,8 +1,8 @@
-import type { HostedReviewProvider } from '@yiru/workbench-model/review'
+import type { HostedReviewProvider } from '@yiru/runtime-protocol/model/review'
 import {
   resolveHostedReviewCreationProvider,
   type HostedReviewCreationProvider
-} from '@yiru/workbench-model/review'
+} from '@yiru/runtime-protocol/model/review'
 import { translate } from '~renderer/i18n/i18n'
 
 export type SupportedHostedReviewCopyProvider = HostedReviewCreationProvider

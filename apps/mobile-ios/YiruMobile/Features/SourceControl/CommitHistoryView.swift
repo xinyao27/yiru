@@ -37,7 +37,7 @@ struct SourceHistoryView: View {
                 AppUnavailableState(
                     "History waiting",
                     iconID: .wifiSlash,
-                    description: Text("Waiting for desktop…")
+                    description: Text("Waiting for daemon…")
                 ) {
                     Button("Try again", iconID: .refresh) {
                         Task { await connectionRuntime.reconnect(hostID: hostID) }

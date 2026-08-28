@@ -11,9 +11,9 @@
   "rsc": false,
   "tsx": true,
   "aliases": {
-    "utils": "~renderer/lib/class-names",
-    "components": "~renderer/components",
-    "ui": "~renderer/components/ui",
+    "utils": "~renderer/ui/class-names",
+    "components": "~renderer",
+    "ui": "~renderer/ui",
     "lib": "~renderer/lib",
     "hooks": "~renderer/hooks"
   },

@@ -167,7 +167,7 @@ struct SourceControlView: View {
                 AppUnavailableState(
                     "Source control waiting",
                     iconID: .wifiSlash,
-                    description: Text("Waiting for desktop…")
+                    description: Text("Waiting for daemon…")
                 ) {
                     Button("Try again", iconID: .refresh) {
                         Task { await model.retry() }
@@ -219,7 +219,7 @@ struct SourceControlView: View {
             HStack(spacing: Theme.Spacing.small) {
                 YiruIcon(.wifiSlash, size: Theme.Control.inlineIcon)
                     .foregroundStyle(Theme.Colors.mutedForeground)
-                Text("Reconnecting to desktop…")
+                Text("Reconnecting to daemon…")
                     .font(.system(size: Theme.Typography.metadata))
                     .foregroundStyle(Theme.Colors.mutedForeground)
                 Spacer(minLength: Theme.Spacing.small)

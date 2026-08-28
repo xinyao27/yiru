@@ -1,6 +1,9 @@
-import { YIRU_GITHUB_STARGAZERS_URL } from '@yiru/workbench-model/product'
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { openHttpLink } from '~renderer/components/editor/http-link-routing'
+import { YIRU_GITHUB_STARGAZERS_URL } from '@yiru/runtime-protocol/model/product'
+import { isGitRepoKind } from '@yiru/runtime-protocol/workbench/repo-kind'
+import type { Repo } from '@yiru/runtime-protocol/workbench/types'
+import { useEffect, useRef, useState } from 'react'
+import { openHttpLink } from '~renderer/editor/http-link-routing'
+import { translate } from '~renderer/i18n/i18n'
 import {
   Warning as AlertTriangle,
   Star,
@@ -8,22 +11,20 @@ import {
   FolderPlus,
   GitMerge,
   X
-} from '~renderer/components/icons/hugeicons'
-import { Button } from '~renderer/components/ui/button'
-import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
-import { translate } from '~renderer/i18n/i18n'
+} from '~renderer/icons/hugeicons'
+import { useProjectCatalog } from '~renderer/project-catalog/provider'
+import { useMountedRef } from '~renderer/react/use-mounted-ref'
 import {
   checkShellYiruStarred,
   completeShellStarNag,
   starYiruFromShell
 } from '~renderer/runtime/github-shell-client'
-import { isGitRepoKind } from '~shared/repo-kind'
-import type { Repo } from '~shared/types'
+import { Button } from '~renderer/ui/button'
 
-import { cn } from '../lib/class-names'
 import { callRuntimeOrpc } from '../runtime/orpc-client'
 import { getActiveRuntimeTarget } from '../runtime/rpc-client'
-import { useAppStore } from '../store'
+import { useAppStore } from '../store/state'
+import { cn } from '../ui/class-names'
 import {
   dismissPreflightIssue,
   githubProjectKeys,
@@ -242,13 +243,13 @@ function PreflightBanner({
 }
 
 export default function Landing(): React.JSX.Element {
-  const repos = useAppStore((s) => s.repos)
+  const { repos } = useProjectCatalog()
   const openModal = useAppStore((s) => s.openModal)
 
   const createTargetLabel =
     repos.length > 0 && repos.every((repo) => isGitRepoKind(repo)) ? 'Worktree' : 'Workspace'
   const canCreateWorktree = repos.length > 0
-  const hasGitHubProject = useMemo(() => hasGitHubBackedProject(repos), [repos])
+  const hasGitHubProject = (() => hasGitHubBackedProject(repos))()
   const showGitHubSupportFooter = repos.length === 0 || hasGitHubProject
 
   const [preflightIssues, setPreflightIssues] = useState<PreflightIssue[]>([])

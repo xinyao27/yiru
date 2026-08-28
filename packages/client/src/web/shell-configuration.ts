@@ -3,7 +3,7 @@ import {
   DEFAULT_LOCAL_YIRU_PROFILE_ID,
   type FindYiruProfileProjectsByPathResult,
   type TransferYiruProfileProjectArgs
-} from '~shared/yiru-profiles'
+} from '@yiru/runtime-protocol/workbench/yiru-profiles'
 
 import { createWebKeybindingsApi } from './keybindings'
 

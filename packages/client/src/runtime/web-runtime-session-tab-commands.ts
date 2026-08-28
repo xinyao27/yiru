@@ -1,12 +1,12 @@
-import type { RuntimeMobileSessionTabMove } from '~shared/runtime-types'
+import type { RuntimeMobileSessionTabMove } from '@yiru/runtime-protocol/workbench/runtime-types'
 
-import { useAppStore } from '../store'
+import { useAppStore } from '../store/state'
 import { callRuntimeOrpc } from './orpc-client'
 import { resolveWebRuntimeSessionEnvironmentId } from './web-runtime-session-environment'
-import { recordWebSessionCloseIntent } from './web-session-close-intent'
-import { closeWebSessionTabCommand } from './web-session-commands'
-import { recordWebSessionReorderIntent } from './web-session-reorder-intent'
-import { requestWebSessionTabsRefresh } from './web-session-tabs-refresh-requests'
+import { recordWebSessionCloseIntent } from './web-session/close-intent'
+import { closeWebSessionTabCommand } from './web-session/commands'
+import { recordWebSessionReorderIntent } from './web-session/reorder-intent'
+import { requestWebSessionTabsRefresh } from './web-session/tabs-refresh-requests'
 import { isWebTerminalSurfaceTabId, toHostSessionTabId } from './web-terminal-surface-id'
 import { toRuntimeWorktreeSelector } from './worktree-selector'
 
@@ -66,7 +66,7 @@ export async function moveWebRuntimeSessionTab(
     recordWebSessionReorderIntent(args.worktreeId, args.targetGroupId, args.tabOrder, Date.now())
   }
   try {
-    const { resolveHostSessionTabIdForWebSessionTab } = await import('./web-session-tabs-sync')
+    const { resolveHostSessionTabIdForWebSessionTab } = await import('./web-session/tabs-tracking')
     const state = useAppStore.getState()
     const resolveHostBackedTabId = (tabId: string): string | null =>
       resolveHostSessionTabIdForWebSessionTab(state, {
@@ -129,7 +129,7 @@ async function callWebRuntimeSessionTabMethod(
     recordWebSessionCloseIntent(args.worktreeId, toHostSessionTabId(args.tabId), Date.now())
   }
   try {
-    const { resolveHostSessionTabIdForWebSessionTab } = await import('./web-session-tabs-sync')
+    const { resolveHostSessionTabIdForWebSessionTab } = await import('./web-session/tabs-tracking')
     const hostTabId =
       resolveHostSessionTabIdForWebSessionTab(useAppStore.getState(), {
         environmentId,

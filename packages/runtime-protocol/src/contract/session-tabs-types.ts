@@ -1,6 +1,5 @@
-import type { AgentStatusEntry, TuiAgent } from '@yiru/workbench-model/agent'
-
 import type { RuntimeMobileTerminalTheme } from '../mobile-runtime-types.js'
+import type { AgentStatusEntry, TuiAgent } from '../model/agent.js'
 import type { BrowserCertificateFailure, BrowserLoadError } from './browser/session-result.js'
 
 export type RuntimeTerminalPaneLayoutNode =

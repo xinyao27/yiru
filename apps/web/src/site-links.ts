@@ -1,26 +1,13 @@
-import {
-  YIRU_GITHUB_ISSUES_URL,
-  YIRU_GITHUB_LATEST_RELEASE_DOWNLOAD_URL,
-  YIRU_GITHUB_RELEASES_URL,
-  YIRU_GITHUB_REPOSITORY_URL,
-  YIRU_IOS_TESTFLIGHT_URL,
-  YIRU_WEB_APP_URL
-} from '@yiru/workbench-model/product'
+const GITHUB_REPOSITORY_URL = 'https://github.com/xinyao27/yiru'
 
-// Why: these URLs are canonical in @yiru/workbench-model — the desktop and
-// mobile apps open the very same constants. Retyping them here is how a site
-// ends up pointing somewhere the product no longer does.
+// Why: the landing page has no product-runtime dependency. Its public links stay
+// together here so retiring or adding a distribution channel is one edit.
 export const siteLinks = {
-  // Why: these artifact names are version-free so /releases/latest/download/<name> is a
-  // permalink to the current build — no metadata fetch, and one click instead of picking from
-  // 17 assets. Keep these names aligned with the release artifact names.
-  // Linux and Windows names live alongside these when they are offered.
-  downloadMac: `${YIRU_GITHUB_LATEST_RELEASE_DOWNLOAD_URL}/yiru-macos-arm64.dmg`,
-  downloadMacIntel: `${YIRU_GITHUB_LATEST_RELEASE_DOWNLOAD_URL}/yiru-macos-x64.dmg`,
-  github: YIRU_GITHUB_REPOSITORY_URL,
-  releases: YIRU_GITHUB_RELEASES_URL,
-  issues: YIRU_GITHUB_ISSUES_URL,
-  license: `${YIRU_GITHUB_REPOSITORY_URL}/blob/main/LICENSE`,
-  testflight: YIRU_IOS_TESTFLIGHT_URL,
-  webApp: YIRU_WEB_APP_URL
+  daemon: `${GITHUB_REPOSITORY_URL}/releases`,
+  extension: `${GITHUB_REPOSITORY_URL}/tree/main/apps/extension`,
+  github: GITHUB_REPOSITORY_URL,
+  releases: `${GITHUB_REPOSITORY_URL}/releases`,
+  issues: `${GITHUB_REPOSITORY_URL}/issues`,
+  license: `${GITHUB_REPOSITORY_URL}/blob/main/LICENSE`,
+  testflight: 'https://testflight.apple.com/join/67PVx1Se'
 } as const

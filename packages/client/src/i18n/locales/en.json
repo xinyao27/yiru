@@ -64,7 +64,7 @@
         "opencodeGoToggleDescription": "Show OpenCode Go token and cost usage for the active workspace.",
         "kimiToggleDescription": "Show Kimi subscription usage for the active workspace.",
         "minimaxToggleDescription": "Show MiniMax subscription usage for the active workspace.",
-        "sshToggleDescription": "Show configured SSH and Coworking hosts when any are available.",
+        "sshToggleDescription": "Show configured SSH and remote daemons when any are available.",
         "resourceUsageToggleDescription": "Show the Resource Manager. Click it for CPU, memory, sessions, daemon controls, and workspace disk scans.",
         "portsToggleDescription": "Show live workspace ports. Click it for workspace-scoped ports and external listeners.",
         "antigravityToggleDescription": "Show Antigravity subscription usage for the active workspace.",
@@ -207,7 +207,7 @@
         "e3bcd082ac": "Connect to Yiru",
         "runtimeHostName": "Runtime host",
         "invalidPairingInput": "Enter a valid Yiru pairing URL or pairing code.",
-        "mobileScopeRejected": "This connection has limited mobile access. Ask the host owner to authorize this client through Coworking for full web access.",
+        "mobileScopeRejected": "This connection has limited mobile access. Ask the host owner to authorize this client through remote daemon access for full web access.",
         "mixedContentRejected": "This HTTPS page cannot connect to a plain ws:// runtime host. Open the web client over HTTP or use a wss:// endpoint.",
         "grantExpired": "This pairing command expired. Refresh the page to create a new one.",
         "title": "Connect your computer",
@@ -367,7 +367,7 @@
           "3b57982bf6": "Git could not safely delete branch \"{{value0}}\" after deleting workspace \"{{value1}}\", so Yiru kept it to avoid losing local commits.",
           "81f13f48d2": "Git could not safely delete branch \"{{value0}}\" after deleting worktree \"{{value1}}\", so Yiru kept it to avoid losing local commits.",
           "runtimeScopeForbiddenTitle": "This connection has limited (mobile) access",
-          "runtimeScopeForbiddenDescription": "Workspaces are unavailable on a mobile-scope connection. Ask the host owner to authorize this client through Coworking for full workspace access."
+          "runtimeScopeForbiddenDescription": "Workspaces are unavailable on a mobile-scope connection. Ask the host owner to authorize this client through remote daemon access for full workspace access."
         },
         "repos": {
           "2975400634": "Update the runtime host to open non-Git folders.",
@@ -733,12 +733,12 @@
         "95a1886d94": "Control terminals and agents from your phone.",
         "1cd25673df": "Mobile",
         "40d80bad8a": "Beta",
-        "de0c2907a1": "Coworking Hosts",
+        "de0c2907a1": "Remote Daemons",
         "b351014180": "Yiru stats plus Claude, Codex, OpenCode token analytics and Grok subscription usage.",
         "d72a58b5b9": "Stats & Usage",
         "dcd0d9b74f": "Keyboard shortcuts for common actions.",
         "94295ebfb3": "Shortcuts",
-        "7682607591": "Native desktop notifications for agent and terminal events.",
+        "7682607591": "System notifications for agent and terminal events.",
         "2eece16ad1": "Notifications",
         "b11a5a48a2": "Theme, zoom, app and terminal appearance, sidebars, and status bar.",
         "93d88d20bf": "Appearance",
@@ -784,9 +784,7 @@
         "devSearchKeywordError": "error",
         "devSearchKeywordNotification": "notification",
         "projectHostsSummary": "{{value0}} hosts",
-        "33a5e1d597": "Connect GitHub, GitLab, and source-hosting services.",
-        "coworkingTitle": "Coworking",
-        "coworkingDescription": "Review and revoke persistent Coworking host authorizations."
+        "33a5e1d597": "Connect GitHub, GitLab, and source-hosting services."
       },
       "useAppMenuPaste": {
         "pasteTooLarge": "Paste is too large."
@@ -1530,12 +1528,12 @@
             "e8c4f2a91b": "Restore all terminals",
             "f2a8b9c1d3": "From your phone",
             "bc65bdf1a2": "Terminal fitted to Web",
-            "9d8ce04a71": "Use desktop size",
+            "9d8ce04a71": "Use workbench size",
             "e4af713b2c": "From Web",
-            "94fe1c7b6a": "Web is using this terminal at its window size. Switch to desktop size to fit it here, or collapse to keep watching.",
+            "94fe1c7b6a": "Another browser is using this terminal at its window size. Switch to this workbench size, or collapse to keep watching.",
             "c7e4a2b8f1": "Your phone is in control",
-            "d9f3c6e2a4": "Desktop keyboard is paused. Take back this terminal to type here, take back all terminals your phone controls, or collapse to keep watching.",
-            "a6b1d8f3e2": "Your phone session ended. Restore to desktop size for this terminal, or for all terminals your phone left at phone size."
+            "d9f3c6e2a4": "Workbench keyboard is paused. Take back this terminal to type here, take back all terminals your phone controls, or collapse to keep watching.",
+            "a6b1d8f3e2": "Your phone session ended. Restore this terminal to the workbench size, or restore every terminal your phone left at phone size."
           },
           "TerminalAgentSessionForkDialog": {
             "17fc841e59": "Copy context",
@@ -2027,7 +2025,7 @@
             "c0e972d726": "Cancel",
             "06741a2f3d": "Open MiniMax usage details",
             "3bbf140864": "MiniMax Usage",
-            "remoteServerLabel": "Coworking host",
+            "remoteServerLabel": "remote daemon",
             "antigravityUsage": "Antigravity Usage",
             "antigravityUsageDetails": "Open Antigravity usage details",
             "grokUsageAria": "Open Grok usage details",
@@ -2054,11 +2052,11 @@
           },
           "RemoteServerUpdateStatusSegment": {
             "updating": "Updating {{value0}}/{{value1}}",
-            "updatingTooltip": "Coworking host updates are in progress",
+            "updatingTooltip": "remote daemon updates are in progress",
             "failed": "{{value0}} host updates failed",
-            "failedTooltip": "Open Coworking host updates to review and retry",
+            "failedTooltip": "Open remote daemon updates to review and retry",
             "updated": "{{value0}} hosts updated",
-            "updatedTooltip": "Coworking host updates completed",
+            "updatedTooltip": "remote daemon updates completed",
             "failedOne": "1 host update failed",
             "updatedOne": "1 host updated"
           },
@@ -2247,17 +2245,6 @@
             "detailed": "Detailed",
             "compact": "Compact",
             "footerDetailAria": "Usage footer detail"
-          },
-          "CoworkingRemoteHosts": {
-            "connecting": "Connecting…",
-            "disconnected": "Disconnected",
-            "title": "Remote hosts",
-            "hostAccessDenied": "Remote host access was denied.",
-            "hostAccessCancelled": "Remote host access request was cancelled.",
-            "hostAdded": "{{value0}} is ready as a remote host.",
-            "hostAccessFailed": "Could not request remote host access.",
-            "requesting": "Waiting…",
-            "useAsHost": "Use as host"
           },
           "DesktopRuntimeStatus": {
             "cli": "Yiru CLI",
@@ -3061,9 +3048,6 @@
           "workspaceSection": "Workspace",
           "primaryDeleteDisabled": "Primary worktree — can't be deleted. Remove the project instead.",
           "deleteWorktree": "Delete Worktree",
-          "makeCoworkingPrivate": "Make private",
-          "makeCoworkingPublic": "Make public",
-          "coworkingPrivateFailed": "Could not make this worktree private.",
           "create": "Create",
           "newGroupName": "{{name}} group",
           "sleep": "Sleep",
@@ -3122,10 +3106,7 @@
           "groupDeleteFailedDesc": "Something went wrong while deleting the group. No projects were removed.",
           "failedNestWorkspace": "Failed to nest workspace",
           "sidebarRowMissing": "Target no longer exists",
-          "failedUnnestWorkspace": "Failed to unnest workspace",
-          "makeCoworkingProjectPrivate": "Make all worktrees private",
-          "makeCoworkingProjectPublic": "Make all worktrees public",
-          "coworkingProjectPrivateFailed": "Could not make these worktrees private."
+          "failedUnnestWorkspace": "Failed to unnest workspace"
         },
         "WorktreeOpenInMenu": {
           "1417fd8380": "Customize apps...",
@@ -3329,7 +3310,7 @@
           "1a2b3c4d5e": "Removed {{value0}}",
           "2b3c4d5e6f": "Failed to remove host",
           "3c4d5e6f7a": "Remove {{value0}}?",
-          "4d5e6f7a8b": "This opens Coworking Hosts settings where you can remove this host.",
+          "4d5e6f7a8b": "This opens Remote Daemons settings where you can remove this host.",
           "5e6f7a8b9c": "This removes the saved SSH host and its credentials from this computer. Remote files are not deleted.",
           "6f7a8b9c0d": "Cancel",
           "7a8b9c0d1e": "Open settings",
@@ -3426,32 +3407,6 @@
           "forget": "Remove from Yiru",
           "reconnectAndDelete": "Reconnect & Delete"
         },
-        "CoworkingDesktopRow": {
-          "connecting": "Connecting…",
-          "disconnected": "Disconnected",
-          "hostAccessDenied": "Remote host access was denied.",
-          "hostAccessCancelled": "Remote host access request was cancelled.",
-          "hostAdded": "{{value0}} is ready as a remote host.",
-          "hostAccessFailed": "Could not request remote host access.",
-          "requestingHostAccess": "Waiting…",
-          "useAsHost": "Use as host"
-        },
-        "CoworkingWorktreeRow": {
-          "collapse": "Collapse {{value0}}",
-          "expand": "Expand {{value0}}",
-          "loadingSessions": "Loading sessions…",
-          "ownerTitle": "{{value0}}'s {{value1}}",
-          "sessionsUnavailable": "Session list unavailable"
-        },
-        "CoworkingSidebarProjectedRow": {
-          "heading": "Coworking"
-        },
-        "CoworkingDesktopUsageHoverCard": {
-          "usage": "Usage"
-        },
-        "CoworkingRemoteWorktreesHeader": {
-          "title": "Remote"
-        },
         "WorktreeMetaDialog": {
           "382fd11a3e": "Edit Worktree Details",
           "65770ad0f0": "Edit the GitHub pull request link and notes for this workspace.",
@@ -3484,307 +3439,10 @@
         },
         "WorktreeCardTabs": {
           "openTabs": "Open tabs"
-        }
-      },
-      "coworking": {
-        "CoworkingAvailabilityStatusSegment": {
-          "title": "Coworking is unavailable",
-          "checkAgain": "Check again",
-          "checking": "Checking…",
-          "tailscaleUnavailable": "Tailscale could not be found on this desktop.",
-          "tailscaleNotRunning": "Tailscale is installed, but its service is not running.",
-          "tailscalePermissionDenied": "Yiru does not have permission to read Tailscale status.",
-          "tailscaleTimedOut": "Tailscale did not respond in time. Coworking will keep checking.",
-          "tailscaleUnsupportedOutput": "Tailscale returned status data that this Yiru version cannot read.",
-          "portUnavailable": "TCP port {{port}} is already in use. Close the conflicting process; Coworking will keep checking.",
-          "permissionDenied": "System permissions prevented Yiru from opening the Coworking Tailnet listener.",
-          "persistenceUnavailable": "Coworking could not safely load sharing settings, so sharing remains off.",
-          "unavailable": "Coworking could not start on this desktop.",
-          "starting": "Coworking is starting…",
-          "readyIdle": "Coworking ready · no one connected",
-          "peersConnected": "{{count}} peer(s) connected",
-          "pendingRequests": "{{count}} peer(s) waiting for your approval",
-          "sharedWorktrees": "{{count}} worktree(s) published to your tailnet.",
-          "noSharedWorktrees": "No worktrees are published. Peers cannot see anything yet.",
-          "hasControl": "Can edit",
-          "readOnly": "Read-only",
-          "windowsFirewallUnavailable": "Windows Firewall is blocking the Coworking listener on TCP port {{port}}.",
-          "repairFirewall": "Repair firewall rule",
-          "suspendedHostUnavailable": "Host offline",
-          "suspendedIncarnation": "Worktree replaced",
-          "suspendedOverlapping": "Overlapping share",
-          "suspendedUnknown": "Not served",
-          "sharingAs": "Sharing as {{node}}",
-          "remoteHostsAvailable": "{{count}} remote host(s) available"
         },
-        "CoworkingWindowsFirewallNotice": {
-          "repairSuccess": "Windows Firewall rule repaired.",
-          "title": "Coworking is blocked by Windows Firewall",
-          "readyTitle": "Restart Coworking",
-          "readyDescription": "The required rule is available now. Reapply it to restart Coworking in this app session.",
-          "inspectUnavailable": "The firewall rule could not be inspected. Recreate it with administrator approval.",
-          "ruleMissing": "The packaged Yiru app does not have the required Private-network rule.",
-          "ruleDetails": "Yiru.Coworking · TCP {{port}} · Private",
-          "waiting": "Waiting for Windows…",
-          "repair": "Repair firewall rule",
-          "reapply": "Reapply and restart",
-          "repairFailed": "Could not repair the Windows Firewall rule."
-        },
-        "CoworkingControlRequestDialog": {
-          "decisionFailed": "Could not send the control decision.",
-          "title": "Allow {{value0}} to control this worktree?",
-          "worktree": "Worktree: {{value0}} / {{value1}}",
-          "capabilities": "They will be able to create terminals, start enabled agents, send terminal input, modify files, run commands, and use your active agent accounts.",
-          "shellWarning": "Terminal commands are not confined to this worktree.",
-          "queued": "Queued control requests: {{value0}}.",
-          "deny": "Deny",
-          "allow": "Allow this connection"
-        },
-        "CoworkingOwnerControlGrants": {
-          "revokeFailed": "Could not revoke remote control.",
-          "heading": "Remote control",
-          "hasAccess": "{{value0}} has access",
-          "revoke": "Revoke"
-        },
-        "CoworkingSessionPane": {
-          "continueFailed": "Could not continue this session.",
-          "continueOutcomeUnknown": "Continuing this session may have succeeded on the owner’s desktop. Inspect the session list and terminal before continuing it again.",
-          "retryContinue": "Try again",
-          "retryAttach": "Reconnect terminal",
-          "startingAfterGrant": "Starting the agent on the owner’s desktop…",
-          "controlRequired": "Request control to continue this agent session on the owner’s desktop.",
-          "continuing": "Continuing the agent on the owner’s desktop…",
-          "attaching": "Connecting to the remote terminal…",
-          "attachFailed": "The agent started, but its terminal could not be connected.",
-          "continueAgent": "Continue agent",
-          "sessionEnded": "This agent session has ended.",
-          "controlRequiredAfterClose": "Request control to continue this agent session again.",
-          "terminalEnded": "This terminal session has ended.",
-          "terminalConnectionLost": "The remote terminal connection was lost."
-        },
-        "CoworkingTerminalPane": {
-          "connecting": "Connecting terminal…",
-          "closed": "Terminal closed",
-          "unavailable": "Terminal unavailable",
-          "outcomeUnknown": "This terminal action may have succeeded on the owner’s desktop. Inspect the terminal output before sending more input.",
-          "outcomeUnknownPersistent": "A terminal action may have succeeded. Inspect the output before resuming input.",
-          "resumeInput": "Resume input",
-          "inputBacklogFull": "Remote input is still catching up. Wait for it to appear before typing or pasting more."
-        },
-        "CoworkingWorktreeVisibilityDialog": {
-          "publishFailed": "Could not make this worktree public.",
-          "title": "Make {{value0}} public?",
-          "description": "People using Yiru on your Tailnet will be able to open this worktree.",
-          "historyWarning": "All existing sessions, transcripts, terminal scrollback, and future terminal output will be readable.",
-          "shellWarning": "Terminal history may include content produced outside this worktree.",
-          "cancel": "Cancel",
-          "confirm": "Make public",
-          "projectPublishFailed": "Could not make these worktrees public.",
-          "projectTitle": "Make every current worktree in {{value0}} public?",
-          "projectDescription": "This applies once to every worktree currently in the project. Future worktrees remain private.",
-          "projectHistoryWarning": "All sessions, transcripts, terminal scrollback, and future terminal output in those worktrees will be readable.",
-          "projectShellWarning": "Terminal history may include content produced outside those worktrees.",
-          "projectConfirm": "Make all public"
-        },
-        "CoworkingWorkspaceSurface": {
-          "requestFailed": "Could not request control.",
-          "controlGranted": "Control granted",
-          "disconnected": "Disconnected",
-          "readOnly": "Read-only",
-          "requestPending": "Request pending",
-          "requestControl": "Request control",
-          "tabs": {
-            "sessions": "Sessions",
-            "files": "Files",
-            "changes": "Changes"
-          },
-          "sessions": "Sessions",
-          "terminalDescription": "Terminal snapshots and realtime output appear here when the remote session is available.",
-          "selectSession": "Select a session to open its remote terminal.",
-          "fileBrowser": "Files",
-          "fileDescription": "Remote files stay on the owner’s execution host and open here through the Coworking workspace model.",
-          "changesAndGit": "Changes and Git",
-          "changesDescription": "Worktree status, diffs, history, branch, and upstream state appear here.",
-          "mutableMode": "This connection can use worktree mutation controls.",
-          "readOnlyMode": "This public worktree is read-only until its owner grants control.",
-          "noSessions": "This shared worktree has no Terminal or agent sessions yet."
-        },
-        "CoworkingFileActionDialog": {
-          "nameLabel": "Name",
-          "cancel": "Cancel",
-          "newFileTitle": "New file",
-          "newDirectoryTitle": "New directory",
-          "renameTitle": "Rename item",
-          "deleteTitle": "Delete item?",
-          "newFileDescription": "Create an empty file in the current remote folder.",
-          "newDirectoryDescription": "Create a directory in the current remote folder.",
-          "renameDescription": "Enter a new name for {{value0}}.",
-          "deleteDescription": "This permanently deletes {{value0}} from the owner’s worktree.",
-          "create": "Create",
-          "rename": "Rename",
-          "delete": "Delete"
-        },
-        "CoworkingFilePreview": {
-          "loading": "Loading file…",
-          "selectFile": "Select a file to inspect it.",
-          "reload": "Reload",
-          "workingDiff": "Working diff",
-          "stagedDiff": "Staged diff",
-          "content": "Content",
-          "rename": "Rename",
-          "delete": "Delete",
-          "saving": "Saving…",
-          "save": "Save",
-          "truncatedFile": "This is one chunk of the file. Editing is disabled to avoid replacing the full file with partial content.",
-          "editorLabel": "File content",
-          "loadingDiff": "Loading diff…",
-          "truncatedDiff": "This diff is truncated.",
-          "noDiff": "No diff for this file.",
-          "binaryDescription": "Binary preview · {{value0}} of {{value1}} bytes",
-          "binaryUnavailable": "Binary preview unavailable.",
-          "fileUnavailable": "This file is unavailable.",
-          "diffUnavailable": "This diff is unavailable.",
-          "previousChunk": "Previous chunk",
-          "nextChunk": "Next chunk",
-          "byteRange": "{{value0}}–{{value1}} / {{value2}} bytes",
-          "back": "Back to files",
-          "fileActions": "File actions",
-          "workingCompact": "Working",
-          "stagedCompact": "Staged"
-        },
-        "CoworkingFileTree": {
-          "up": "Up one directory",
-          "root": "Worktree root",
-          "refresh": "Refresh files",
-          "newFile": "New file",
-          "newDirectory": "New directory",
-          "loading": "Loading files…",
-          "empty": "This directory is empty.",
-          "truncated": "Only part of this directory is shown.",
-          "itemActions": "File actions",
-          "rename": "Rename",
-          "delete": "Delete",
-          "unavailable": "Files are unavailable.",
-          "retry": "Retry"
-        },
-        "CoworkingFilesPane": {
-          "listFailed": "Could not load files.",
-          "readFailed": "Could not read this file.",
-          "diffFailed": "Could not load this diff.",
-          "fileTooLarge": "This file is too large to save through Coworking.",
-          "saved": "File saved.",
-          "saveFailed": "Could not save this file.",
-          "invalidName": "Enter a single valid file name.",
-          "mutationFailed": "Could not change this file.",
-          "outcomeUnknown": "This file change may have succeeded on the owner’s worktree. Refresh and inspect the item before making another change.",
-          "outcomeUnknownPersistent": "The file change may have succeeded. Refresh and inspect the item before making another change."
-        },
-        "CoworkingGitDiffPane": {
-          "selectItem": "Select a change or commit to inspect its diff.",
-          "loading": "Loading diff…",
-          "noDiff": "No textual diff is available.",
-          "truncated": "This diff is truncated.",
-          "staged": "Staged",
-          "untracked": "Untracked",
-          "unstaged": "Unstaged",
-          "unavailable": "This diff is unavailable.",
-          "back": "Back"
-        },
-        "CoworkingGitPane": {
-          "refreshFailed": "Could not load Git state.",
-          "diffFailed": "Could not load this diff.",
-          "commitTooLong": "The commit message is too long.",
-          "committed": "Commit created.",
-          "mutationFailed": "Could not change this worktree.",
-          "outcomeUnknown": "This Git action may have succeeded on the owner’s worktree. Refresh and inspect Git state before making another change.",
-          "outcomeUnknownPersistent": "The Git action may have succeeded. Refresh and inspect Git state before making another change."
-        },
-        "CoworkingMutationOutcomeNotice": {
-          "title": "Result needs confirmation",
-          "dismiss": "Dismiss after checking"
-        },
-        "CoworkingGitSidebar": {
-          "detached": "Detached HEAD",
-          "refresh": "Refresh",
-          "changes": "Changes",
-          "history": "History",
-          "commitMessage": "Commit message",
-          "commitPlaceholder": "Commit message",
-          "commit": "Commit staged changes",
-          "loadingChanges": "Loading changes…",
-          "clean": "No worktree changes.",
-          "unstage": "Unstage",
-          "stage": "Stage",
-          "loadingHistory": "Loading history…",
-          "noHistory": "No commits found.",
-          "historyLimited": "Showing the latest commits.",
-          "noUpstream": "No upstream",
-          "upstream": "{{value0}} · ↑{{value1}} ↓{{value2}}",
-          "stateUnavailable": "Git state is unavailable.",
-          "changesLimited": "Only part of this status is shown."
-        },
-        "CoworkingAgentsPane": {
-          "publicSessions": "Public agents",
-          "noAgentSessions": "No public agent sessions in this worktree.",
-          "unknownAgent": "Agent"
-        },
-        "CoworkingChecksPane": {
-          "reviewChecks": "Review checks",
-          "refresh": "Refresh",
-          "loadFailed": "Could not load checks from the owner.",
-          "loading": "Loading checks…",
-          "noReview": "No hosted review was found for this branch.",
-          "unavailable": "Hosted review details are unavailable from the owner.",
-          "openReview": "Open review",
-          "checks": "Checks",
-          "detailsUnavailable": "Detailed checks could not be loaded.",
-          "detailsUnsupported": "Detailed checks are not available for this provider.",
-          "checksTruncated": "Showing a partial check list.",
-          "noChecks": "No checks were reported for this review.",
-          "passing": "Passing",
-          "failing": "Failing",
-          "pending": "Pending",
-          "neutral": "Neutral",
-          "queued": "Queued",
-          "inProgress": "In progress",
-          "succeeded": "Succeeded",
-          "failed": "Failed",
-          "cancelled": "Cancelled",
-          "timedOut": "Timed out",
-          "skipped": "Skipped",
-          "actionRequired": "Action required",
-          "hostedReview": "Hosted review",
-          "open": "Open",
-          "closed": "Closed",
-          "merged": "Merged",
-          "draft": "Draft"
-        },
-        "CoworkingSessionCreateMenu": {
-          "outcomeUnknown": "The terminal may already be running on the owner desktop. Creation was not retried.",
-          "createFailed": "Could not create the terminal.",
-          "noAgents": "No agents available",
-          "loadingAgents": "Loading owner agents…",
-          "agentsUnavailable": "Owner agents unavailable",
-          "disconnected": "Reconnect to create terminals.",
-          "controlPending": "Waiting for the owner to approve control.",
-          "controlRequired": "Request control to create terminals.",
-          "creating": "Creating terminal…"
-        },
-        "CoworkingHostAccessRequestDialog": {
-          "decisionFailed": "Could not send the host access decision.",
-          "nameRequired": "Name this authorized device before continuing.",
-          "title": "Authorize {{value0}} as a remote host client?",
-          "description": "This authorization lasts 90 days and is limited to this machine.",
-          "deviceName": "Authorized device name",
-          "readOnly": "Read only",
-          "readOnlyDescription": "Browse code and git history on this machine.",
-          "grantReadOnly": "Grant read only",
-          "fullAccess": "Full access",
-          "fullAccessDescription": "They will receive continuous shell access on this machine.",
-          "grantFullAccess": "Grant full access",
-          "revokeHelp": "You can revoke this authorization at any time in Settings → Coworking.",
-          "queued": "Queued host access requests: {{value0}}.",
-          "deny": "Deny"
+        "SidebarDisclosure": {
+          "collapse": "Collapse {{value0}}",
+          "expand": "Expand {{value0}}"
         }
       },
       "shared": {
@@ -3964,7 +3622,7 @@
           "7492fb3bba": "Paste it here and click Save.",
           "9fec52de4b": "How to copy the cookie",
           "4e32e030b2": "Stored locally. Yiru sends it only to platform.minimax.io for usage refreshes.",
-          "remoteServerFallback": "the Coworking host",
+          "remoteServerFallback": "the remote daemon",
           "loadAccountsFailed": "Could not load provider accounts.",
           "remoteScopeAccounts": "Showing accounts managed by {{value0}}. Add or re-authenticate accounts on that host.",
           "remoteScopeAuthContext": "Each account keeps its own sign-in context on {{value0}}.",
@@ -4479,8 +4137,8 @@
           "currentCount": "{{value0}} up to date",
           "manualCount": "{{value0}} manual",
           "offlineCount": "{{value0}} offline",
-          "title": "Coworking Hosts",
-          "description": "Check and update paired Coworking hosts from this client.",
+          "title": "Remote Daemons",
+          "description": "Check and update paired remote daemons from this client.",
           "updating": "Updating hosts…",
           "reviewServers": "Check for Host Updates",
           "serverCountOne": "1 paired host"
@@ -4490,11 +4148,11 @@
           "restartingHelp": "Waiting for the replacement host to reconnect on the new version.",
           "retry": "Retry",
           "update": "Update this host",
-          "title": "Update Coworking Hosts",
-          "description": "Review paired Coworking hosts and update supported installs from this Yiru client.",
+          "title": "Update Remote Daemons",
+          "description": "Review paired remote daemons and update supported installs from this Yiru client.",
           "restartWarning": "Updating restarts these hosts. {{value0}} live tabs and {{value1}} terminal panes may briefly disconnect.",
           "checking": "Checking paired hosts…",
-          "empty": "No paired Coworking hosts.",
+          "empty": "No paired remote daemons.",
           "updateAll": "Update all {{value0}} hosts",
           "noUpdates": "All hosts are up to date.",
           "downloadProgress": "{{value0}} download progress"
@@ -4941,7 +4599,7 @@
           "2a42dd8d6f": "Notification sound volume",
           "4aa5085cd7": "Custom:",
           "c258cb96dc": "Choose notification sound",
-          "2a2033c388": "Choose the alert Yiru plays when a desktop notification is delivered.",
+          "2a2033c388": "Choose the alert Yiru plays when a system notification is delivered.",
           "88686e6ca8": "Notification Sound",
           "b6fc369244": "A background terminal emits a bell character.",
           "591fe605b9": "Terminal Bell",
@@ -4952,7 +4610,7 @@
           "0fadad17ce": "Notification sound could not be played",
           "406feb0aa6": "Test notification was not delivered",
           "6fc3781729": "Notifications are disabled",
-          "4676a95bc3": "Check your desktop notification settings for Yiru.",
+          "4676a95bc3": "Check your system notification settings for Yiru.",
           "0cb93240b8": "System did not show the notification",
           "145227ca2b": "Open Settings",
           "d3d54e0915": "Test notification sent",
@@ -5349,11 +5007,11 @@
           "c8791efc45": "Status unavailable",
           "5120beaac6": "Checking…",
           "84b9b2be05": "Create a revocable access grant so a browser or another Yiru client can connect.",
-          "6e1280ca55": "Share this Coworking host",
-          "9a3758d983": "No saved Coworking hosts.",
-          "1826bd0608": "Saved Coworking Hosts",
+          "6e1280ca55": "Share this remote daemon",
+          "9a3758d983": "No saved remote daemons.",
+          "1826bd0608": "Saved Remote Daemons",
           "6ce4664003": "Refresh hosts",
-          "b07070ed3c": "No Coworking host connected",
+          "b07070ed3c": "No remote daemon connected",
           "78692becbd": "Local desktop",
           "64b6bea541": "Default host",
           "99ac81fb43": "Switched to {{value0}}.",
@@ -5365,8 +5023,8 @@
           "9f7665a01b": "Removing the active host first switches Yiru back to Local desktop. Existing host sessions are left alone.",
           "3595fd1948": "New Link",
           "54dee18f5c": "Hide Form",
-          "8cf8790697": "Saved Coworking hosts route this browser through a paired runtime.",
-          "f75ce1c7a5": "Local keeps today's desktop behavior. Saved Coworking hosts route supported client calls through the paired runtime.",
+          "8cf8790697": "Saved remote daemons route this browser through a paired runtime.",
+          "f75ce1c7a5": "Local keeps today's desktop behavior. Saved remote daemons route supported client calls through the paired runtime.",
           "d25f0688b1": "Remove",
           "4b5c6d7e8f": "No capabilities reported",
           "hostModelCapabilityUnknown": "Host model support: checking host capabilities",
@@ -5374,15 +5032,15 @@
           "hostModelCapabilityMissing": "Host model support: update host for {{value0}}",
           "hostModelCapabilityProjectSetup": "project setup",
           "hostModelCapabilityWorkspaceRunContext": "workspace run context",
-          "3f67e8078a": "Use this computer by default. Choose a saved Coworking host only when you want supported projects, files, terminals, provider checks, and browser/mobile handoff to run through that host.",
-          "2c85efb3e8": "Selecting a saved Coworking host makes this browser use that paired runtime as its default host.",
+          "3f67e8078a": "Use this computer by default. Choose a saved remote daemon only when you want supported projects, files, terminals, provider checks, and browser/mobile handoff to run through that host.",
+          "2c85efb3e8": "Selecting a saved remote daemon makes this browser use that paired runtime as its default host.",
           "serverConnected": "Connected",
           "serverChecking": "Checking…",
           "serverDisconnected": "Disconnected",
           "disconnectedServer": "Disconnected from {{value0}}.",
-          "connectToRemoteServers": "Coworking hosts",
-          "connectToRemoteServersHelp": "Connect, disconnect, or inspect hosts authorized through Coworking.",
-          "activeServerRowHelp": "Active Coworking host for host-routed projects, terminals, and provider checks.",
+          "connectToRemoteServers": "remote daemons",
+          "connectToRemoteServersHelp": "Connect, disconnect, or inspect hosts authorized through remote daemon access.",
+          "activeServerRowHelp": "Active remote daemon for host-routed projects, terminals, and provider checks.",
           "disconnect": "Disconnect",
           "connect": "Connect",
           "advanced": "Advanced",
@@ -5397,13 +5055,13 @@
           "versionUnavailable": "Yiru version unavailable",
           "updateServer": "Update",
           "switchLocalFailed": "Could not switch to Local desktop. Fix the issue and try again.",
-          "disconnectFailed": "Could not disconnect from this Coworking host. Fix the issue and try again.",
+          "disconnectFailed": "Could not disconnect from this remote daemon. Fix the issue and try again.",
           "removeFailed": "Failed to remove runtime environment.",
           "hostDisconnectFailed": "Failed to disconnect host.",
           "hostConnectFailed": "Failed to connect host.",
           "hostSwitchFailed": "Could not switch hosts. Fix the issue and try again.",
           "hostSwitchError": "Failed to switch hosts.",
-          "coworkingHostFallback": "Coworking host"
+          "remoteDaemonFallback": "Remote daemon"
         },
         "RuntimePairingGeneratedUrlRows": {
           "0495f68959": "Copy {{value0}}"
@@ -5422,7 +5080,7 @@
           "de6d5cff95": "This computer (",
           "de77eb1b65": "Connection address",
           "ff80904fc4": "Create a revocable access grant for browser or desktop clients.",
-          "f8500e134a": "Share this Coworking host",
+          "f8500e134a": "Share this remote daemon",
           "d6c081adf4": "Failed to copy URL.",
           "df0aa45a86": "Copied pairing URL.",
           "13704d635e": "Copied web client URL.",
@@ -5456,14 +5114,14 @@
           "65660d4548": "macOS Permissions",
           "c6c01ac209": "Control terminals and agents from your phone.",
           "c40dadaac8": "Mobile",
-          "b5ee17826b": "Manage hosts authorized through Coworking and choose the active runtime.",
-          "7686cb5c36": "Use Coworking-authorized hosts from this browser.",
-          "bd0181eeca": "Coworking Hosts",
+          "b5ee17826b": "Manage hosts authorized through remote daemon access and choose the active runtime.",
+          "7686cb5c36": "Use remote daemon access-authorized hosts from this browser.",
+          "bd0181eeca": "Remote Daemons",
           "8acf3f22e0": "Yiru stats plus Claude, Codex, OpenCode token analytics and Grok subscription usage.",
           "954a8f5aef": "Stats & Usage",
           "a737a4bb22": "Keyboard shortcuts for common actions.",
           "23bf7a1ad4": "Shortcuts",
-          "7210ac09c4": "Native desktop notifications for agent activity and terminal events.",
+          "7210ac09c4": "System notifications for agent activity and terminal events.",
           "9907545fa3": "Notifications",
           "6d1a27e193": "Theme, zoom, app and terminal appearance, sidebars, and status bar.",
           "2b4474780a": "Appearance",
@@ -5500,7 +5158,7 @@
           "43b68e10f0": "You have unsaved Git AI Author changes. Leaving will discard them.",
           "17bdee4ff1": "Discard unsaved Git AI Author changes?",
           "084d8fac5b": "Privacy & Security",
-          "23931df7e8": "Coworking",
+          "23931df7e8": "remote daemon access",
           "mobile_group": "Mobile",
           "8bd117d669": "Interface",
           "e1578cd4bc": "Workflows",
@@ -5510,9 +5168,7 @@
           "65358016ea": "Discard",
           "dev": "Dev Tools",
           "devDescription": "Dev-only tools for exercising UI states.",
-          "b07041697f": "Connect GitHub, GitLab, and source-hosting services.",
-          "coworkingTitle": "Coworking",
-          "coworkingDescription": "Review and revoke persistent Coworking host authorizations."
+          "b07041697f": "Connect GitHub, GitLab, and source-hosting services."
         },
         "SettingsFormControls": {
           "42a4d15a30": "No matching fonts.",
@@ -6864,7 +6520,7 @@
           "search": {
             "aa288005c3": "test",
             "ca8faa40d7": "notifications",
-            "4e30b1925e": "Trigger a sample desktop notification using the native delivery path.",
+            "4e30b1925e": "Trigger a sample system notification using the host delivery path.",
             "ef9b311346": "Send Test Notification",
             "ecdeff4993": "loudness",
             "d58b64dddf": "volume",
@@ -6880,7 +6536,7 @@
             "57e34a31cd": "wav",
             "5362074f19": "mp3",
             "6e08f78315": "audio",
-            "c718793e95": "Choose the built-in, system, or local audio file Yiru plays for desktop notifications.",
+            "c718793e95": "Choose the built-in, system, or local audio file Yiru plays for notifications.",
             "ea8cb8d9ce": "Notification Sound",
             "4ada6bfde9": "filtering",
             "fa60d8e4ab": "suppress",
@@ -6901,7 +6557,7 @@
             "adbc3a0fcf": "native",
             "72539aede4": "system",
             "51ae2183e1": "desktop",
-            "0534c76311": "Master switch for Yiru desktop notifications.",
+            "0534c76311": "Master switch for Yiru system notifications.",
             "4a210b2f72": "Enable Notifications"
           }
         },
@@ -7106,13 +6762,13 @@
               "09568ccc65": "server",
               "ebd5369acf": "environment",
               "d198440ce3": "runtime",
-              "baec27aa8f": "Use Coworking-authorized hosts from this browser.",
-              "3517fb2ec0": "Coworking Hosts",
+              "baec27aa8f": "Use remote daemon access-authorized hosts from this browser.",
+              "3517fb2ec0": "Remote Daemons",
               "c6e5a03aa0": "dev box",
               "f1575f1e09": "web client",
               "81444c4102": "pairing url",
               "104f4d7dbd": "pairing",
-              "4575341c77": "Manage hosts authorized through Coworking or choose the active runtime."
+              "4575341c77": "Manage hosts authorized through remote daemon access or choose the active runtime."
             }
           }
         },
@@ -7532,7 +7188,7 @@
         },
         "ProviderHostScopeControl": {
           "scope_label": "{{value0}}: {{value1}}",
-          "change_host": "Open Coworking Hosts"
+          "change_host": "Open Remote Daemons"
         },
         "computerUseSkillRuntime": {
           "thisDevice": "This device"
@@ -7548,25 +7204,25 @@
           "permissionsRequired": "{{value0}} permission{{value1}} required before agents can operate app windows."
         },
         "providerAccountScope": {
-          "remoteServer": "Coworking host: {{value0}}",
-          "remoteServerCredentials": "Credentials and account checks for this provider are owned by this Coworking host. Use Settings > Coworking Hosts > Advanced to edit another default runtime scope.",
+          "remoteServer": "remote daemon: {{value0}}",
+          "remoteServerCredentials": "Credentials and account checks for this provider are owned by this remote daemon. Use Settings > Remote Daemons > Advanced to edit another default runtime scope.",
           "localMac": "Local Mac",
-          "localCredentials": "Credentials and account checks for this provider are owned by this desktop client. Use Settings > Coworking Hosts > Advanced to edit host-owned credentials.",
-          "remoteServerRateLimit": "{{value0}} API budget is fetched from the CLI on this Coworking host. Use Settings > Coworking Hosts > Advanced to view another default runtime budget.",
-          "localRateLimit": "{{value0}} API budget is fetched from the CLI on this desktop client. Use Settings > Coworking Hosts > Advanced to view host-owned budgets."
+          "localCredentials": "Credentials and account checks for this provider are owned by this desktop client. Use Settings > Remote Daemons > Advanced to edit host-owned credentials.",
+          "remoteServerRateLimit": "{{value0}} API budget is fetched from the CLI on this remote daemon. Use Settings > Remote Daemons > Advanced to view another default runtime budget.",
+          "localRateLimit": "{{value0}} API budget is fetched from the CLI on this desktop client. Use Settings > Remote Daemons > Advanced to view host-owned budgets."
         },
         "settingOwnership": {
           "clientDefault": "Client default",
           "sourceControlAiDefaults": "Recipes, prompts, and hosted-review defaults are shared by this client; model choices and discovery stay scoped to the host where the agent runs.",
           "projectOnThisHost": "Project on this host",
           "repositorySourceControlAi": "These overrides apply to this project setup and inherit the client Source Control AI defaults until customized.",
-          "agentLaunchDefaults": "Default agent, command overrides, CLI arguments, and launch environment are client preferences. Coworking host launches still validate host availability at run time.",
+          "agentLaunchDefaults": "Default agent, command overrides, CLI arguments, and launch environment are client preferences. remote daemon launches still validate host availability at run time.",
           "clientDefaultProjectScopes": "Client default + project scopes",
           "terminalQuickCommands": "Commands are saved on this client, then scoped globally or to a project setup so they run from the selected terminal context.",
           "hostOverride": "Host override",
           "workspaceDirectory": "The client default is inherited until a host needs its own worktree directory.",
           "providerHost": "Provider host",
-          "providerAccounts": "Credentials and account checks belong to the local client or selected Coworking host that owns the provider integration."
+          "providerAccounts": "Credentials and account checks belong to the local client or selected remote daemon that owns the provider integration."
         },
         "RepositoryForkSyncSection": {
           "defaultBranch": "default branch",
@@ -7832,28 +7488,6 @@
           "gpt4oMiniDescription": "Cloud transcription with strong accuracy and low cost. Requires an OpenAI API key.",
           "gpt4oDescription": "Cloud transcription with higher accuracy. Requires an OpenAI API key.",
           "genericDescription": "Speech recognition model."
-        },
-        "CoworkingSettingsPane": {
-          "loadFailed": "Could not load authorized remote host clients.",
-          "alreadyRevoked": "This authorization was already revoked.",
-          "revoked": "Authorization revoked and active connections disconnected.",
-          "revokeFailed": "Could not revoke this authorization.",
-          "title": "Authorized remote host clients",
-          "description": "Like authorized_keys, these devices retain access until revoked or expired.",
-          "refresh": "Refresh",
-          "loading": "Loading…",
-          "empty": "No remote host clients have been authorized through Coworking.",
-          "fullAccess": "Full access",
-          "readOnly": "Read only",
-          "revokedState": "Revoked",
-          "expiredState": "Expired",
-          "identity": "{{value0}} · node {{value1}}",
-          "dates": "Paired {{value0}} · Last used {{value1}} · Expires {{value2}}",
-          "never": "Never",
-          "noExpiry": "Never",
-          "revoking": "Revoking…",
-          "revoke": "Revoke",
-          "searchTitle": "Authorized remote host clients"
         },
         "SettingsSetupGuidePane": {
           "restartOnboardingError": "Couldn't restart onboarding.",
@@ -9068,7 +8702,7 @@
           "3bede04483": "Send Test Notification",
           "dc897423e1": "Choose notification sound",
           "53aaffe49a": "Notification Sound",
-          "0fe570690c": "Pick the alert Yiru plays after a desktop notification is delivered.",
+          "0fe570690c": "Pick the alert Yiru plays after a system notification is delivered.",
           "0af746e41f": "Choose a sound",
           "8124d085a6": "Open Mac Settings",
           "aa36281b00": "Open System Settings and make sure Yiru is allowed to send notifications.",
@@ -10751,22 +10385,14 @@
                 "unpublishWorktree": "unpublish worktree",
                 "makePublic": "make worktree public",
                 "makePrivate": "make worktree private",
-                "coworkingWorktree": "coworking worktree",
-                "coworkingSettings": "coworking settings",
-                "openCoworkingSettings": "open coworking settings",
                 "remoteHostAccess": "remote host access",
                 "authorizedDevices": "authorized devices"
               },
               "publishOrUnpublishWorktree": "Publish / Unpublish Worktree",
-              "publishOrUnpublishWorktreeDescription": "Publish or unpublish the current worktree through Coworking.",
-              "coworkingVisibilityFailed": "Could not update Coworking visibility.",
-              "openCoworkingSettings": "Open Coworking Settings",
-              "openCoworkingSettingsDescription": "Manage Coworking-authorized remote host access."
+              "publishOrUnpublishWorktreeDescription": "Publish or unpublish the current worktree through remote daemon access."
             },
             "action": {
-              "context": {
-                "coworkingUnavailable": "Coworking is unavailable here."
-              }
+              "context": {}
             }
           },
           "palette": {

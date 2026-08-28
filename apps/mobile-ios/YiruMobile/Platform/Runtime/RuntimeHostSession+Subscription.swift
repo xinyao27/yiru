@@ -89,9 +89,9 @@ nonisolated enum RuntimeSessionError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .authenticationFailed: "The desktop authentication failed."
-        case .timeout: "The desktop request timed out."
-        case .closed: "The desktop connection closed."
+        case .authenticationFailed: "The daemon authentication failed."
+        case .timeout: "The daemon request timed out."
+        case .closed: "The daemon connection closed."
         }
     }
 }

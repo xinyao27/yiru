@@ -1,6 +1,6 @@
+import { projectHostSetupProjectionFromRepos } from '@yiru/runtime-protocol/workbench/project-host-setup-projection'
+import type { Repo } from '@yiru/runtime-protocol/workbench/types'
 import { translate } from '~renderer/i18n/i18n'
-import { projectHostSetupProjectionFromRepos } from '~shared/project-host-setup-projection'
-import type { Repo } from '~shared/types'
 
 export type PreflightIssue = {
   id: string

@@ -4,7 +4,7 @@
 - Root and nested directories load independently; a nested failure never blanks an already loaded tree.
 - Reconnect and refresh keep cached rows visible. Cold-load failures alone use the full-screen error state.
 - Directory RPCs and nested retries only run while the host connection snapshot is connected. A cold
-  disconnected route shows `Waiting for desktop…`; a loaded tree remains browsable until reconnection.
+  disconnected route shows the host-disconnected state; a loaded tree remains browsable until reconnection.
 - Worktree file and terminal-artifact previews use the same connection gate. Existing document content
   and dirty artifact drafts stay visible during a disconnect; retry/save waits for reconnection.
 - `.git` and `node_modules` never appear. Directories sort before files, then by localized name.

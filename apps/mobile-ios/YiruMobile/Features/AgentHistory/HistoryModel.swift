@@ -157,7 +157,7 @@ final class AgentHistoryModel {
 
     func resume(_ session: AgentHistorySession) async -> WorkspaceSummary? {
         guard isConnected else {
-            resumeMessage = "Waiting for desktop…"
+            resumeMessage = "Waiting for daemon…"
             return nil
         }
         guard resumingSessionID == nil else { return nil }

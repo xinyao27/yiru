@@ -1,6 +1,6 @@
-import { getDefaultCreateProjectParent } from '~renderer/components/sidebar/create-project-defaults'
 import { translate } from '~renderer/i18n/i18n'
 import type { ShellRepoHostApi } from '~renderer/runtime/shell-system-client'
+import { getDefaultCreateProjectParent } from '~renderer/sidebar/create-project-defaults'
 
 import { callWebRuntimeProcedure } from '../runtime-connection'
 

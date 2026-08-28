@@ -1,14 +1,11 @@
-import { copyFile, mkdir, readFile, rm, writeFile } from 'node:fs/promises'
+// Why: the router owns the document while Vite owns hashed asset URLs, so build-time rendering must
+// join both outputs after the client build; Vite's package task cannot express that data flow.
+import { mkdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 
 import { build } from 'vite'
 
-// Why: the router owns the document now (src/shell.tsx), so this writes real pages
-// rather than splicing a body into a Vite shell. What Vite still owns is the hashed
-// asset URLs, which only exist after the client build — so they are lifted out of the
-// document Vite emitted and injected into each rendered page.
-//
 // TanStack Start would do all of this, including a dev server that renders the same
 // way. Its dev plugin is broken on this repo's Vite 8 toolchain (TanStack/router#7614,
 // still open), so vite.config.ts carries a small middleware for dev and this script
@@ -17,8 +14,6 @@ const appDirectory = resolve(import.meta.dirname, '..')
 const bundleDirectory = resolve(appDirectory, '.prerender')
 const distDirectory = resolve(appDirectory, 'dist')
 const shellPath = resolve(distDirectory, 'index.html')
-const productShellPath = resolve(distDirectory, 'app.html')
-const productShellAssetPath = resolve(distDirectory, 'web-app-shell.txt')
 
 // Why: an exact marker, so a change to what the shell renders fails the build instead
 // of silently shipping a page whose stylesheet is nowhere near the top of head.
@@ -69,9 +64,6 @@ function extractAssetTags(shell) {
 }
 
 try {
-  // Why: app.html is canonicalized even for binding fetches; the .txt copy has
-  // an exact key and is exposed only after the Worker selects the app origin.
-  await copyFile(productShellPath, productShellAssetPath)
   const bundlePath = resolve(bundleDirectory, 'prerender-entry.js')
   const { renderRoute, routeMetas } = await import(pathToFileURL(bundlePath).href)
   const assets = extractAssetTags(await readFile(shellPath, 'utf8'))

@@ -4,4 +4,4 @@ export {
   toHostSessionTabId,
   toWebTerminalSurfaceTabId,
   WEB_TERMINAL_SURFACE_TAB_PREFIX
-} from '~shared/terminal/surface-id'
+} from '@yiru/runtime-protocol/workbench/terminal/surface-id'

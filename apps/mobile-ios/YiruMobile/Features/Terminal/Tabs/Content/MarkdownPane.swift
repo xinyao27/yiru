@@ -168,7 +168,7 @@ struct WorkspaceMarkdownPane: View {
 
     private var statusMessage: String? {
         if let saveError = model.saveError { return saveError }
-        if model.isStale { return String(localized: "Changed on desktop") }
+        if model.isStale { return String(localized: "Changed on the daemon host") }
         guard let reason = model.readOnlyReason else { return nil }
         switch reason {
         case .unsupportedPreview: return String(localized: "This preview is read only.")
@@ -179,9 +179,9 @@ struct WorkspaceMarkdownPane: View {
         case .fileTooLarge, .diskFileTooLarge:
             return String(localized: "File too large for mobile editing.")
         case .desktopUnavailable:
-            return String(localized: "Editing needs Yiru desktop running.")
+            return String(localized: "Editing needs the Yiru daemon running.")
         case .desktopHasUnsavedChanges:
-            return String(localized: "Desktop has unsaved changes. Showing disk content.")
+            return String(localized: "The daemon reports unsaved changes. Showing disk content.")
         }
     }
 }

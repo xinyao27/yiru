@@ -1,0 +1,128 @@
+name: Extension Package
+
+on:
+  pull_request:
+    paths:
+      - 'apps/extension/**'
+      - 'apps/daemon/**'
+      - 'packages/client/**'
+      - 'packages/runtime-protocol/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.github/workflows/extension-package.yml'
+  push:
+    branches:
+      - main
+    tags:
+      - 'extension-v*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: package.json
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build daemon and Web Store package
+        run: |
+          pnpm exec vp run @yiru/daemon#build
+          pnpm exec vp run @yiru/extension#package:web-store
+
+      - name: Upload review-ready extension package
+        uses: actions/upload-artifact@v7
+        with:
+          name: yiru-extension-web-store
+          path: |
+            apps/extension/release/*.zip
+            apps/extension/release/*.sha256
+          if-no-files-found: error
+          retention-days: 14
+
+  publish-web-store:
+    if: startsWith(github.ref, 'refs/tags/extension-v') && github.repository == 'xinyao27/yiru'
+    needs: package
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: chrome-web-store
+    env:
+      CWS_CLIENT_ID: ${{ secrets.CWS_CLIENT_ID }}
+      CWS_CLIENT_SECRET: ${{ secrets.CWS_CLIENT_SECRET }}
+      CWS_PUBLISHER_ID: ${{ secrets.CWS_PUBLISHER_ID }}
+      CWS_REFRESH_TOKEN: ${{ secrets.CWS_REFRESH_TOKEN }}
+      EXTENSION_ID: mfgmfiabfncmdekmikepemddejoeihbf
+    steps:
+      - name: Checkout tag
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Download extension package
+        uses: actions/download-artifact@v7
+        with:
+          name: yiru-extension-web-store
+          path: apps/extension/release
+
+      - name: Upload and submit Web Store revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(node -p "require('./apps/extension/package.json').version")"
+          if [ "$GITHUB_REF_NAME" != "extension-v${version}" ]; then
+            echo "Extension tag and package version must match." >&2
+            exit 1
+          fi
+          for name in CWS_CLIENT_ID CWS_CLIENT_SECRET CWS_PUBLISHER_ID CWS_REFRESH_TOKEN; do
+            if [ -z "${!name:-}" ]; then
+              echo "Chrome Web Store credential ${name} is unavailable." >&2
+              exit 1
+            fi
+          done
+          oauth_response="$(curl --fail-with-body --silent --show-error \
+            --data-urlencode "client_id=${CWS_CLIENT_ID}" \
+            --data-urlencode "client_secret=${CWS_CLIENT_SECRET}" \
+            --data-urlencode "refresh_token=${CWS_REFRESH_TOKEN}" \
+            --data-urlencode "grant_type=refresh_token" \
+            https://oauth2.googleapis.com/token)"
+          access_token="$(OAUTH_RESPONSE="$oauth_response" node -e \
+            "const value = JSON.parse(process.env.OAUTH_RESPONSE || '{}'); if (!value.access_token) process.exit(1); process.stdout.write(value.access_token)")"
+          echo "::add-mask::${access_token}"
+          item="publishers/${CWS_PUBLISHER_ID}/items/${EXTENSION_ID}"
+          archive="apps/extension/release/yiru-extension-${version}.zip"
+          curl --fail-with-body --silent --show-error \
+            -H "Authorization: Bearer ${access_token}" \
+            -H 'Content-Type: application/zip' \
+            -X POST -T "$archive" \
+            "https://chromewebstore.googleapis.com/upload/v2/${item}:upload"
+          curl --fail-with-body --silent --show-error \
+            -H "Authorization: Bearer ${access_token}" \
+            -H 'Content-Type: application/json' \
+            -X POST \
+            -d '{"publishType":"DEFAULT_PUBLISH"}' \
+            "https://chromewebstore.googleapis.com/v2/${item}:publish"

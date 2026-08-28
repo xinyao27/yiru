@@ -2,10 +2,10 @@ import type {
   RemoteServerUpdateInstallResult,
   RemoteServerUpdaterSnapshot,
   RemoteServerUpdateSupport
-} from '~shared/remote-server-update'
-import type { PublicKnownRuntimeEnvironment } from '~shared/runtime-environments'
-import type { RuntimeStatus } from '~shared/runtime-types'
-import type { UpdateCheckOptions } from '~shared/types'
+} from '@yiru/runtime-protocol/workbench/remote-server-update'
+import type { PublicKnownRuntimeEnvironment } from '@yiru/runtime-protocol/workbench/runtime-environments'
+import type { RuntimeStatus } from '@yiru/runtime-protocol/workbench/runtime-types'
+import type { UpdateCheckOptions } from '@yiru/runtime-protocol/workbench/types'
 
 export type RemoteServerUpdatePhase =
   | 'checking'

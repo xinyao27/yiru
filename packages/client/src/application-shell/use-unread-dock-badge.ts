@@ -1,6 +1,8 @@
 import { useEffect } from 'react'
+import { useProjectCatalog } from '~renderer/project-catalog/provider'
+import { projectCatalogRepoBuckets } from '~renderer/project-catalog/repo-buckets'
 import { shellClient } from '~renderer/runtime/shell-client'
-import { useAppStore } from '~renderer/store'
+import { useAppStore } from '~renderer/store/state'
 
 import { getUnreadBadgeCount } from './unread-badge-count'
 
@@ -15,13 +17,15 @@ export function clearUnreadDockBadgeCount(): void {
 }
 
 export function useUnreadDockBadge(): typeof clearUnreadDockBadgeCount {
-  const unreadCount = useAppStore((state) =>
-    getUnreadBadgeCount({
-      worktreesByRepo: state.worktreesByRepo,
-      tabsByWorktree: state.tabsByWorktree,
-      unreadTerminalTabs: state.unreadTerminalTabs
-    })
-  )
+  const catalog = useProjectCatalog()
+  const { worktreesByRepo } = projectCatalogRepoBuckets(catalog)
+  const tabsByWorktree = useAppStore((state) => state.tabsByWorktree)
+  const unreadTerminalTabs = useAppStore((state) => state.unreadTerminalTabs)
+  const unreadCount = getUnreadBadgeCount({
+    tabsByWorktree,
+    unreadTerminalTabs,
+    worktreesByRepo
+  })
 
   // oxlint-disable-next-line react-doctor/no-derived-state-effect -- Why: this syncs an external OS dock badge, not React render state.
   useEffect(() => {

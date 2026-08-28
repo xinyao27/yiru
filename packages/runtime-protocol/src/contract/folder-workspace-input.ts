@@ -19,6 +19,7 @@ const FolderWorkspaceLinkedReviewSchema = z
   .nullable()
 
 export const FolderWorkspaceCreateInputSchema = z.object({
+  expectedRevision: z.number().int().nonnegative(),
   projectGroupId: requiredString('Missing project group id'),
   name: OptionalString,
   folderPath: OptionalString.nullable().optional(),
@@ -29,6 +30,7 @@ export const FolderWorkspaceCreateInputSchema = z.object({
 })
 
 export const FolderWorkspaceUpdateInputSchema = z.object({
+  expectedRevision: z.number().int().nonnegative(),
   folderWorkspaceId: requiredString('Missing folder workspace id'),
   updates: z.object({
     name: OptionalString,
@@ -49,6 +51,7 @@ export const FolderWorkspaceUpdateInputSchema = z.object({
 })
 
 export const FolderWorkspaceSelectorInputSchema = z.object({
+  expectedRevision: z.number().int().nonnegative(),
   folderWorkspaceId: requiredString('Missing folder workspace id')
 })
 

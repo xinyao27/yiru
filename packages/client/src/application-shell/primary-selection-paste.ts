@@ -1,6 +1,6 @@
-import { yieldToEventLoop } from '@yiru/workbench-model/ui'
+import { yieldToEventLoop } from '@yiru/runtime-protocol/model/ui'
 
-import { isPrimarySelectionTextControl } from '../lib/primary-selection-capture'
+import { isPrimarySelectionTextControl } from '../clipboard/primary-selection-capture'
 import {
   TEXT_CONTROL_PASTE_CHUNK_MAX_BYTES,
   TEXT_CONTROL_PASTE_DIRECT_MAX_BYTES,
@@ -8,7 +8,7 @@ import {
   measureTextControlPasteByteLength,
   measureTextControlPasteByteLengthWithYield,
   pasteTextIntoTextControl
-} from '../lib/text-control-paste'
+} from '../keyboard-input/paste/write'
 
 export type EditablePrimarySelectionPasteTarget =
   | HTMLInputElement

@@ -1,13 +1,13 @@
 import { type, type ContractRouter } from '@orpc/contract'
+
+import type { RuntimeGitLocalBranches } from '../mobile-runtime-types.js'
 import type {
   GitBranchCompareResult,
   GitConflictOperation,
   GitHistoryResult,
   GitStatusResult,
   GitUpstreamStatus
-} from '@yiru/workbench-model/review'
-
-import type { RuntimeGitLocalBranches } from '../mobile-runtime-types.js'
+} from '../model/review.js'
 import { withAccess, type RuntimeProcedureMeta } from './access-meta.js'
 import * as generationInputs from './git-generation-inputs.js'
 import * as inputs from './git-inputs.js'

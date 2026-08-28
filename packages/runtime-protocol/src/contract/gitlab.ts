@@ -1,4 +1,5 @@
 import { type, type ContractRouter } from '@orpc/contract'
+
 import type {
   GetGitLabRateLimitResult,
   GitLabAssignableUser,
@@ -14,8 +15,7 @@ import type {
   GitLabWorkItemDetails,
   ListMergeRequestsResult,
   MRInfo
-} from '@yiru/workbench-model/review'
-
+} from '../model/review.js'
 import { withAccess, type RuntimeProcedureMeta } from './access-meta.js'
 import {
   GitLabAddMrCommentInputSchema,

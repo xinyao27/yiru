@@ -1,7 +1,7 @@
 import {
   YIRU_EDITOR_PREPARE_HOT_EXIT_EVENT,
   type EditorPrepareHotExitDetail
-} from '~shared/editor-save-events'
+} from '~renderer/editor-save-events'
 
 type ShellRestartPreparation = {
   startedEventName: string

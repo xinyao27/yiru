@@ -4,8 +4,8 @@ import {
   setPrimarySelectionEnabled,
   setPrimarySelectionText,
   shouldSuppressPrimarySelectionNativePaste
-} from '~renderer/lib/primary-selection'
-import { readCurrentPrimarySelectionText } from '~renderer/lib/primary-selection-capture'
+} from '~renderer/clipboard/primary-selection'
+import { readCurrentPrimarySelectionText } from '~renderer/clipboard/primary-selection-capture'
 
 import {
   findEditablePrimarySelectionPasteTarget,

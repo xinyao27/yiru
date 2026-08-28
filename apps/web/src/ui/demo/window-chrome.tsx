@@ -3,8 +3,8 @@ export type WindowChromeProps = {
   title: string
 }
 
-/** Why: real macOS light colours so the frame reads as the desktop app; they are
-    decorative only — never focusable, never interactive. */
+/** Why: real macOS light colours make the remote daemon window recognizable;
+    they are decorative only — never focusable, never interactive. */
 const lights = ['bg-[#ff5f57]', 'bg-[#febc2e]', 'bg-[#28c840]']
 
 export function WindowChrome({ title }: WindowChromeProps): React.JSX.Element {

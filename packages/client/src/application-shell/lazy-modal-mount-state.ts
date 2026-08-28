@@ -1,11 +1,4 @@
-const LAZY_MODAL_IDS = [
-  'quick-open',
-  'worktree-palette',
-  'workspace-cleanup',
-  'setup-guide',
-  'feature-wall',
-  'feature-tips'
-] as const
+const LAZY_MODAL_IDS = ['workspace-cleanup', 'setup-guide', 'feature-wall', 'feature-tips'] as const
 
 export type LazyModalId = (typeof LAZY_MODAL_IDS)[number]
 

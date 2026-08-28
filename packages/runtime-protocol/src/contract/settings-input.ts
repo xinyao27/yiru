@@ -1,4 +1,6 @@
-import { normalizePRBotAuthorOverrides } from '@yiru/workbench-model/review'
+import { z } from 'zod'
+
+import { normalizePRBotAuthorOverrides } from '../model/review.js'
 import {
   MAX_QUICK_COMMAND_AGENT_PROMPT_LENGTH,
   MAX_QUICK_COMMAND_ID_LENGTH,
@@ -8,9 +10,7 @@ import {
   normalizeTerminalQuickCommands,
   supportsTerminalAgentQuickCommand,
   type TerminalQuickCommand
-} from '@yiru/workbench-model/ui'
-import { z } from 'zod'
-
+} from '../model/ui.js'
 import {
   normalizeRuntimeDisabledTuiAgents,
   normalizeRuntimeTuiAgentArgsRecord,

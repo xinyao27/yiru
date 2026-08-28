@@ -5,7 +5,7 @@ export type RpcAccessScope = 'worktree' | 'project' | 'host'
 
 export type RpcAccessTier = 'read' | 'control' | 'host'
 
-export type RpcCallerClass = 'local' | 'mobile' | 'runtime' | 'coworking-host'
+export type RpcCallerClass = 'local' | 'mobile' | 'runtime'
 
 export type RpcAccess = {
   scope: RpcAccessScope
@@ -23,7 +23,7 @@ export const RuntimeProcedureMetaSchema = z.object({
   access: z.object({
     scope: z.enum(['worktree', 'project', 'host']),
     tier: z.enum(['read', 'control', 'host']),
-    principals: z.array(z.enum(['local', 'mobile', 'runtime', 'coworking-host'])).optional()
+    principals: z.array(z.enum(['local', 'mobile', 'runtime'])).optional()
   }),
   mobile: z.boolean(),
   legacyMethod: z.string().min(1).optional()

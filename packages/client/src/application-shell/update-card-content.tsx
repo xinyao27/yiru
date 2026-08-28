@@ -1,14 +1,14 @@
+import type { ChangelogData } from '@yiru/runtime-protocol/workbench/types'
 import type { JSX } from 'react'
-import { openHttpLink } from '~renderer/components/editor/http-link-routing'
-import { Check, Minus, WarningCircle as AlertCircle, X } from '~renderer/components/icons/hugeicons'
-import { LoadingIndicator } from '~renderer/components/loading-indicator'
-import { Button as UiButton } from '~renderer/components/ui/button'
+import { openHttpLink } from '~renderer/editor/http-link-routing'
 import { translate } from '~renderer/i18n/i18n'
-import { cn } from '~renderer/lib/class-names'
-import type { ChangelogData } from '~shared/types'
+import { Check, Minus, WarningCircle as AlertCircle, X } from '~renderer/icons/hugeicons'
+import { LoadingIndicator } from '~renderer/loading/indicator'
+import { Button as UiButton } from '~renderer/ui/button'
+import { cn } from '~renderer/ui/class-names'
 
-import { Button } from '../components/ui/button'
-import { Progress } from '../components/ui/progress'
+import { Button } from '../ui/button'
+import { Progress } from '../ui/progress'
 import { isAnimatedUpdateMedia, updateReleaseUrl } from './update-card-model'
 
 export function UpdateCardCompactContent(props: {

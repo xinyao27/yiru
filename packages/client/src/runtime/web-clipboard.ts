@@ -5,7 +5,7 @@ import {
   CLIPBOARD_IMAGE_TOO_LARGE_ERROR,
   assertClipboardImageByteLengthWithinLimit,
   assertClipboardImageDimensionsWithinLimit
-} from '~shared/clipboard-image'
+} from '@yiru/runtime-protocol/workbench/clipboard-image'
 
 import { callRuntimeOrpc, isRuntimeOrpcErrorCode } from './orpc-client'
 

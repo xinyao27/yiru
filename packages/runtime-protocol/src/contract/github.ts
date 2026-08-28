@@ -1,4 +1,5 @@
 import { eventIterator, type, type ContractRouter } from '@orpc/contract'
+
 import type {
   GitHubAssignableUser,
   GitHubPRRefreshEvent,
@@ -13,8 +14,7 @@ import type {
   PRComment,
   PRInfo,
   PRRefreshOutcome
-} from '@yiru/workbench-model/review'
-
+} from '../model/review.js'
 import { withAccess, type RuntimeProcedureMeta } from './access-meta.js'
 import {
   GitHubListWorkItemsInputSchema,

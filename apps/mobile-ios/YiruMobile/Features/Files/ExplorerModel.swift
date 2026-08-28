@@ -99,7 +99,7 @@ final class WorkspaceFileExplorerModel {
             pendingRetries.insert(row.relativePath)
             cache[row.relativePath] = WorkspaceDirectoryState(
                 entries: state?.entries ?? [],
-                error: String(localized: "Waiting for desktop…")
+                error: String(localized: "Waiting for daemon…")
             )
             await connectionRuntime.reconnect(hostID: hostID)
             return
@@ -126,7 +126,7 @@ final class WorkspaceFileExplorerModel {
                 let state = cache[relativePath] ?? WorkspaceDirectoryState(entries: [])
                 cache[relativePath] = WorkspaceDirectoryState(
                     entries: state.entries,
-                    error: String(localized: "Waiting for desktop…")
+                    error: String(localized: "Waiting for daemon…")
                 )
             }
             return
@@ -189,7 +189,7 @@ final class WorkspaceFileExplorerModel {
                 cache[relativePath] = WorkspaceDirectoryState(
                     entries: cache[relativePath]?.entries ?? [],
                     error: failure.isConnectionFailure
-                        ? String(localized: "Waiting for desktop…") : failure.message
+                        ? String(localized: "Waiting for daemon…") : failure.message
                 )
             }
         }

@@ -16,8 +16,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "paths": {
-      "~renderer/*": ["./src/*"],
-      "~shared/*": ["../shared/src/*"]
+      "~renderer/*": ["./src/*"]
     },
     "resolveJsonModule": true,
     "skipLibCheck": true,

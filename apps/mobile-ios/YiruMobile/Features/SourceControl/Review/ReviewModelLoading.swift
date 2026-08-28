@@ -75,7 +75,7 @@ extension SourceReviewModel {
             || orpc.serverMessage?.localizedCaseInsensitiveContains("not available to mobile")
                 == true
         return outdatedHost
-            ? String(localized: "Update Yiru desktop to review changes on mobile.")
+            ? String(localized: "Update the Yiru daemon to review changes on mobile.")
             : error.localizedDescription
     }
 

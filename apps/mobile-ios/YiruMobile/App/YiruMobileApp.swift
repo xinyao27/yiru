@@ -1,7 +1,9 @@
 import SwiftUI
+import UIKit
 
 @main
 struct YiruMobileApp: App {
+    @UIApplicationDelegateAdaptor(YiruApplicationDelegate.self) private var applicationDelegate
     @State private var model: AppModel
 
     init() {

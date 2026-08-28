@@ -30,12 +30,12 @@ nonisolated let troubleshootingIssues = [
         ]
     ),
     TroubleshootingIssue(
-        id: "desktop",
+        id: "daemon",
         glyph: .monitor,
-        title: "Desktop App Not Running",
+        title: "Yiru Daemon Not Running",
         steps: [
-            "Yiru must be open on your desktop to accept connections.",
-            "Try restarting Yiru — the companion server starts on launch.",
+            "The Yiru daemon must be running on the paired host to accept connections.",
+            "Run `yiru service install` or start `yiru daemon` in a terminal.",
             "After an update, you may need to re-pair via QR code.",
         ]
     ),
@@ -56,7 +56,7 @@ nonisolated let troubleshootingIssues = [
         steps: [
             "Host addresses like 100.x.x.x or *.ts.net connect through Tailscale — keep it on.",
             "iOS can silently wedge the tunnel: toggle Tailscale off and back on in its app.",
-            "Check the desktop is awake and shows as connected in your tailnet.",
+            "Check the daemon host is awake and shows as connected in your tailnet.",
             "Update the Tailscale app — recent releases fix reconnect bugs.",
         ]
     ),

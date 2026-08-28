@@ -56,9 +56,13 @@
 	<key>NSCameraUsageDescription</key>
 	<string>Allow Yiru to take photos and scan pairing codes.</string>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>Yiru connects to the desktop app on your local network.</string>
+	<string>Yiru connects directly to your daemon on the local network.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Allow Yiru to attach photos from your library to an agent or terminal session on your paired desktop.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 	<key>UILaunchScreen</key>
 	<dict/>
 	<key>UISupportedInterfaceOrientations</key>
@@ -75,5 +79,7 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>YiruKeychainAccessGroup</key>
+	<string>$(AppIdentifierPrefix)com.xinyao27.yiru.mobile.notifications</string>
 </dict>
 </plist>

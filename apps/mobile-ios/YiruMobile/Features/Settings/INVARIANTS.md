@@ -22,11 +22,11 @@
 
 ## Visual contract
 
-- Settings rows use the old Mobile 44-point rhythm, 16-point horizontal inset, semantic Hugeicons,
+- Settings rows use a 44-point rhythm, 16-point horizontal inset, semantic Hugeicons,
   and the standard header glyph metrics. Default foreground colors are preferred; special colors
   are reserved for attention/success states.
 - Loader previews render every available style with the Settings-selected neutral gray treatment;
   no page writes a hard-coded blue loader. Sheets use the shared fixed/page presentation policy,
-  including the old picker's hidden drag indicator where applicable.
+  including the picker's hidden drag indicator where applicable.
 - iOS 26 Liquid Glass is limited to interactive chrome. Settings content, dividers, and backgrounds
   do not receive decorative glass or gradients.

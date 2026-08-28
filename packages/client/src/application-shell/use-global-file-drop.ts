@@ -1,12 +1,14 @@
+import type { GlobalSettings } from '@yiru/runtime-protocol/workbench/types'
 import { useEffect } from 'react'
 import { toast } from 'sonner'
+import { detectLanguage } from '~renderer/file-presentation/language-detect'
 import { translate } from '~renderer/i18n/i18n'
-import { getConnectionId } from '~renderer/lib/connection-context'
-import { detectLanguage } from '~renderer/lib/language-detect'
-import { joinPath } from '~renderer/lib/path'
-import { isPathInsideWorktree, toWorktreeRelativePath } from '~renderer/lib/terminal-links'
-import { getRuntimeEnvironmentIdForWorktree } from '~renderer/lib/worktree-runtime-owner'
-import type { WorktreeRuntimeOwnerState } from '~renderer/lib/worktree-runtime-owner'
+import {
+  NATIVE_FILE_DROP_MAX_PATHS,
+  type NativeFileDropRejectedPayload
+} from '~renderer/native-file-drop'
+import { joinPath } from '~renderer/path'
+import { getConnectionId } from '~renderer/runtime/connection-context'
 import {
   importExternalPathsToRuntime,
   isRemoteRuntimeFileOperation,
@@ -15,12 +17,10 @@ import {
 } from '~renderer/runtime/file-client'
 import { shellClient } from '~renderer/runtime/shell-client'
 import { workspaceHostClient } from '~renderer/runtime/workspace-host-client'
-import { useAppStore } from '~renderer/store'
-import {
-  NATIVE_FILE_DROP_MAX_PATHS,
-  type NativeFileDropRejectedPayload
-} from '~shared/native-file-drop'
-import type { GlobalSettings } from '~shared/types'
+import { useAppStore } from '~renderer/store/state'
+import { isPathInsideWorktree, toWorktreeRelativePath } from '~renderer/terminal/links/provider'
+import { getRuntimeEnvironmentIdForWorktree } from '~renderer/worktree/runtime-owner'
+import type { WorktreeRuntimeOwnerState } from '~renderer/worktree/runtime-owner'
 
 export function getEditorFileDropSettingsForWorktree(
   store: WorktreeRuntimeOwnerState,

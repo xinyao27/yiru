@@ -2,8 +2,12 @@ import SwiftUI
 import UIKit
 
 struct NotificationSettingsView: View {
-    @State private var model = NotificationSettingsModel()
+    @State private var model: NotificationSettingsModel
     @Environment(\.scenePhase) private var scenePhase
+
+    init(coordinator: NotificationCoordinator? = nil) {
+        _model = State(initialValue: NotificationSettingsModel(coordinator: coordinator))
+    }
 
     var body: some View {
         VStack {

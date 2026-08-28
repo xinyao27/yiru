@@ -34,7 +34,7 @@ struct HostedReviewView: View {
                 AppUnavailableState(
                     "Pull request waiting",
                     iconID: .wifiSlash,
-                    description: Text("Waiting for desktop…")
+                    description: Text("Waiting for daemon…")
                 ) {
                     Button("Try again", iconID: .refresh) {
                         Task { await connectionRuntime.reconnect(hostID: hostID) }

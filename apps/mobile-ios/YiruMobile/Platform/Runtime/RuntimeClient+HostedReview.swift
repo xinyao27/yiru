@@ -138,11 +138,13 @@ extension RuntimeClient: HostedReviewRepository {
         baseRef: String?
     ) async throws {
         guard provider != .unsupported else { return }
+        let revision = try await workspaceMutationRevision(hostID: hostID, workspaceID: workspaceID)
         let _: MobileWorkspacePinResultWire = try await callRuntime(
             hostID: hostID,
             path: MobileRuntimeWireContract.worktreeSetPath,
             input: HostedReviewLinkRequest(
                 worktree: hostedReviewWorktreeSelector(workspaceID),
+                expectedRevision: revision,
                 provider: provider,
                 number: number,
                 baseRef: baseRef
@@ -245,12 +247,14 @@ nonisolated private struct MobileGitHubRepoRequestWire: Encodable, Sendable { le
 
 nonisolated private struct HostedReviewLinkRequest: Encodable, Sendable {
     let worktree: String
+    let expectedRevision: Int
     let provider: HostedReviewProvider
     let number: Int?
     let baseRef: String?
 
     enum CodingKeys: String, CodingKey {
         case worktree
+        case expectedRevision
         case linkedPR
         case linkedGitLabMR
         case linkedBitbucketPR
@@ -262,6 +266,7 @@ nonisolated private struct HostedReviewLinkRequest: Encodable, Sendable {
     func encode(to encoder: Encoder) throws {
         var values = encoder.container(keyedBy: CodingKeys.self)
         try values.encode(worktree, forKey: .worktree)
+        try values.encode(expectedRevision, forKey: .expectedRevision)
         try values.encodeIfPresent(baseRef, forKey: .baseRef)
         switch provider {
         case .github: try values.encode(number, forKey: .linkedPR)

@@ -2,9 +2,9 @@ import type { AgentStatusHostSnapshot } from '@yiru/runtime-protocol/contract'
 import type {
   AgentStatusIpcPayload,
   MigrationUnsupportedPtyEntry
-} from '@yiru/workbench-model/agent'
-import { isWebClientLocation } from '~renderer/lib/web-client-location'
-import { useAppStore } from '~renderer/store'
+} from '@yiru/runtime-protocol/model/agent'
+import { useAppStore } from '~renderer/store/state'
+import { isWebClientLocation } from '~renderer/web/client-location'
 
 import { createRuntimeOrpcClient, type RuntimeClientTarget } from './orpc-client'
 

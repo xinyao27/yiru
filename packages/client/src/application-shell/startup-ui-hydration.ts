@@ -4,8 +4,8 @@ import {
   DEFAULT_STATUS_BAR_ITEMS,
   DEFAULT_WORKSPACE_PANEL_TITLEBAR_PINNED_IDS,
   DEFAULT_WORKTREE_CARD_PROPERTIES
-} from '~shared/constants'
-import type { PersistedUIState } from '~shared/types'
+} from '@yiru/runtime-protocol/workbench/constants'
+import type { PersistedUIState } from '@yiru/runtime-protocol/workbench/types'
 
 export function hydratePersistedUIAfterStartupRead({
   persistedUI,

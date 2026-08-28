@@ -2,28 +2,26 @@
 tsconfig.*.tsbuildinfo
 
 # TypeScript emit artifacts next to sources (tsc produced these accidentally;
-# real source lives in .ts/.tsx). Hand-authored declaration files are
-# re-included below.
-apps/desktop/src/**/*.js
-apps/desktop/src/**/*.d.ts
-/apps/desktop/electron.vite.config.js
-/apps/desktop/electron.vite.config.d.ts
-!apps/desktop/src/main/types/hosted-git-info.d.ts
+# real source lives in .ts/.tsx). Generated platform bindings are re-included below.
+apps/daemon/src/**/*.js
+apps/daemon/src/**/*.d.ts
 !packages/client/src/env.d.ts
 !packages/client/src/mermaid.d.ts
-!apps/desktop/src/types/build-constants.d.ts
+!apps/apns-gateway/worker-configuration.d.ts
 
 # Dependencies
 node_modules/
 
 # Build output
 dist/
+.output/
+.wxt/
 .prerender/
 dist-electron/
 out/
 build/
 release/
-apps/desktop/native/**/.build/
+apps/daemon/native/**/.build/
 
 # pnpm
 .pnpm-store/
@@ -85,16 +83,9 @@ design-docs/
 # Durable docs must live in one of the allow-listed locations below.
 docs/**
 !docs/
-!docs/assets/
-!docs/assets/**
-!docs/readme/
-!docs/readme/**
 !docs/reference/
 !docs/reference/**
-# Keep generated React perf scan ledgers local; durable docs still use docs/reference.
-docs/reference/react-performance-audit.md
 !docs/style-guide.md
-!docs/mobile-terminal-shortcut-bar.md
 
 # Stably CLI (only docs/ are tracked)
 .stably/*

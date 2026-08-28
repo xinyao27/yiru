@@ -1,6 +1,7 @@
 type RuntimeStreamFanOutOptions<TClient, TEvent> = {
   resolveClient: () => Promise<TClient>
   open: (client: TClient, signal: AbortSignal) => Promise<AsyncIterable<TEvent>>
+  releaseClient?: (client: TClient) => void
   retryDelayMs?: (attempt: number) => number
   onConnectionStateChange?: (state: RuntimeStreamConnectionState) => void
 }
@@ -37,8 +38,9 @@ export function createRuntimeStreamFanOut<TClient, TEvent>(
     stopUpstream = () => controller.abort()
     setConnectionState('connecting')
     void (async () => {
+      let client: TClient | null = null
       try {
-        const client = await options.resolveClient()
+        client = await options.resolveClient()
         if (controller.signal.aborted) {
           return
         }
@@ -61,6 +63,9 @@ export function createRuntimeStreamFanOut<TClient, TEvent>(
         // Why: host streams are advisory invalidations. A dropped iterator
         // must not become an unhandled rejection during renderer teardown.
       } finally {
+        if (client !== null) {
+          options.releaseClient?.(client)
+        }
         if (generation === currentGeneration) {
           stopUpstream = null
           if (listeners.size > 0 && !controller.signal.aborted) {

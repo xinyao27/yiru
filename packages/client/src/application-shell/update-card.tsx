@@ -1,15 +1,15 @@
+import type { UpdateStatus } from '@yiru/runtime-protocol/workbench/types'
 import { useEffect, useRef, useState, type JSX } from 'react'
-import { X } from '~renderer/components/icons/hugeicons'
-import { usePrefersReducedMotion } from '~renderer/hooks/use-prefers-reduced-motion'
 import { translate } from '~renderer/i18n/i18n'
-import { cn } from '~renderer/lib/class-names'
+import { X } from '~renderer/icons/hugeicons'
+import { usePrefersReducedMotion } from '~renderer/react/use-prefers-reduced-motion'
 import { updateRendererSettings } from '~renderer/runtime/settings-client'
 import { shellClient } from '~renderer/runtime/shell-client'
-import type { UpdateStatus } from '~shared/types'
+import { cn } from '~renderer/ui/class-names'
 
-import { Button } from '../components/ui/button'
-import { Card } from '../components/ui/card'
-import { useAppStore } from '../store'
+import { useAppStore } from '../store/state'
+import { Button } from '../ui/button'
+import { Card } from '../ui/card'
 import { UpdateCardBody } from './update-card-body'
 import {
   isHttp2ProtocolError,

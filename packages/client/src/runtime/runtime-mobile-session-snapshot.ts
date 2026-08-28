@@ -1,12 +1,12 @@
-import { createBrowserUuid } from '~renderer/lib/browser-uuid'
-import { getSystemPrefersDark } from '~renderer/lib/terminal-theme'
-import type { AppState } from '~renderer/store/types'
 import type {
   RuntimeMobileSessionSnapshotTab,
   RuntimeMobileSessionTabGroup,
   RuntimeMobileSessionTabsSnapshot
-} from '~shared/runtime-types'
-import type { TabGroup } from '~shared/types'
+} from '@yiru/runtime-protocol/workbench/runtime-types'
+import type { TabGroup } from '@yiru/runtime-protocol/workbench/types'
+import { createBrowserUuid } from '~renderer/browser/uuid'
+import type { AppState } from '~renderer/store/types'
+import { getSystemPrefersDark } from '~renderer/terminal/theme'
 
 import { getBrowserTabsByWorktree } from './runtime-mobile-browser-state'
 import { buildMobileBrowserTab } from './runtime-mobile-browser-tab'

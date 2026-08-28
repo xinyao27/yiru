@@ -4,7 +4,7 @@ import type {
   RuntimeMobilePairingQRResult,
   RuntimeMobileRevokeDeviceResult
 } from '@yiru/runtime-protocol/contract'
-import type { GlobalSettings } from '~shared/types'
+import type { GlobalSettings } from '@yiru/runtime-protocol/workbench/types'
 
 import { callRuntimeOrpc } from './orpc-client'
 import { getActiveRuntimeTarget, type RuntimeClientTarget } from './rpc-client'

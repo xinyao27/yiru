@@ -1,16 +1,16 @@
-import { translate } from '~renderer/i18n/i18n'
 import {
   findKeybindingConflicts,
   formatKeybindingList,
   getKeybindingPlatform,
-  isKeybindingActionId,
+  normalizeKeybindingActionId,
   normalizeKeybindingArrayForAction,
   type KeybindingActionId,
   type KeybindingFileDiagnostic,
   type KeybindingFileSnapshot,
   type KeybindingOverrides,
   type KeybindingPlatform
-} from '~shared/keybindings'
+} from '@yiru/runtime-protocol/workbench/keybindings'
+import { translate } from '~renderer/i18n/i18n'
 
 import { isJsonRecord, readLocalJson, writeLocalJson } from './storage/local-json'
 
@@ -151,16 +151,17 @@ function normalizeOverrides(
     return {}
   }
   const overrides: KeybindingOverrides = {}
-  for (const [actionId, rawBindings] of Object.entries(value)) {
-    if (!isKeybindingActionId(actionId)) {
+  for (const [storedActionId, rawBindings] of Object.entries(value)) {
+    const actionId = normalizeKeybindingActionId(storedActionId)
+    if (!actionId) {
       diagnostics.push({
         severity: 'warning',
         section,
-        actionId,
+        actionId: storedActionId,
         message: translate(
           'auto.web.web.keybindings.unknownAction',
           'Unknown keybinding action "{{value0}}" was ignored.',
-          { value0: actionId }
+          { value0: storedActionId }
         )
       })
       continue

@@ -29,6 +29,7 @@ const localWorktreeClient: WorktreeWorkspaceApi = {
   create: (args) =>
     callRuntimeOrpc(LOCAL_TARGET, (client) => client.worktree.create, {
       repo: args.repoId,
+      expectedRevision: args.expectedRevision,
       name: args.name,
       baseBranch: args.baseBranch,
       compareBaseRef: args.compareBaseRef,
@@ -38,6 +39,7 @@ const localWorktreeClient: WorktreeWorkspaceApi = {
       linkedBitbucketPR: args.linkedBitbucketPR,
       linkedAzureDevOpsPR: args.linkedAzureDevOpsPR,
       linkedGiteaPR: args.linkedGiteaPR,
+      operationId: args.creationId,
       displayName: args.displayName,
       sparseCheckout: args.sparseCheckout,
       pushTarget: args.pushTarget,
@@ -62,8 +64,8 @@ const localWorktreeClient: WorktreeWorkspaceApi = {
       manualOrder: args.manualOrder
     }),
   onCreateProgress: (callback) =>
-    onLocalHostProgressEvent('worktreeCreateProgress', ({ creationId, phase }) =>
-      callback({ creationId, phase })
+    onLocalHostProgressEvent('worktreeCreateProgress', ({ type: _type, ...progress }) =>
+      callback(progress)
     ),
   prefetchCreateBase: async ({ repoId, baseBranch }) => {
     await callRuntimeOrpc(
@@ -83,8 +85,9 @@ const localWorktreeClient: WorktreeWorkspaceApi = {
       repo: repoId,
       ...input
     }),
-  remove: ({ worktreeId, force, skipArchive }) =>
+  remove: ({ expectedRevision, worktreeId, force, skipArchive }) =>
     callRuntimeOrpc(LOCAL_TARGET, (client) => client.worktree.rm, {
+      expectedRevision,
       worktree: toRuntimeWorktreeSelector(worktreeId),
       force,
       runHooks: skipArchive !== true
@@ -95,18 +98,17 @@ const localWorktreeClient: WorktreeWorkspaceApi = {
       branchName,
       expectedHead
     }),
-  updateMeta: async ({ worktreeId, updates }) => {
+  updateMeta: ({ expectedRevision, worktreeId, updates }) => {
     const rpcUpdates =
       Object.prototype.hasOwnProperty.call(updates, 'pushTarget') &&
       updates.pushTarget === undefined
         ? { ...updates, pushTarget: null }
         : updates
-    return (
-      await callRuntimeOrpc(LOCAL_TARGET, (client) => client.worktree.set, {
-        worktree: toRuntimeWorktreeSelector(worktreeId),
-        ...rpcUpdates
-      })
-    ).worktree
+    return callRuntimeOrpc(LOCAL_TARGET, (client) => client.worktree.set, {
+      expectedRevision,
+      worktree: toRuntimeWorktreeSelector(worktreeId),
+      ...rpcUpdates
+    })
   },
   listLineage: () =>
     callRuntimeOrpc(LOCAL_TARGET, (client) => client.worktree.lineageList, undefined),

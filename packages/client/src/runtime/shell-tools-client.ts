@@ -1,13 +1,18 @@
-import { translate } from '~renderer/i18n/i18n'
+import type { ShellHtmlToPdfInput, ShellHtmlToPdfResult } from '@yiru/runtime-protocol/contract'
 import type {
   DeveloperPermissionId,
   DeveloperPermissionRequestResult,
   DeveloperPermissionState
-} from '~shared/developer-permissions-types'
+} from '@yiru/runtime-protocol/workbench/developer-permissions-types'
 import type {
   LocalhostWorktreeLabelResult,
   LocalhostWorktreeLabelRoute
-} from '~shared/localhost-worktree-labels'
+} from '@yiru/runtime-protocol/workbench/localhost-worktree-labels'
+import type {
+  WindowsMobileFirewallRepairResult,
+  WindowsMobileFirewallStatus
+} from '@yiru/runtime-protocol/workbench/windows-mobile-firewall'
+import { translate } from '~renderer/i18n/i18n'
 
 import { callShellOrpc, isWebRuntimeClient } from './orpc-client'
 
@@ -17,21 +22,8 @@ export type ShellMiniMaxCredentialsApi = {
   clearCookie: () => Promise<{ configured: boolean }>
 }
 export type ShellMobileApi = {
-  getWindowsFirewallStatus: (args?: { address?: string }) => Promise<
-    | { supported: false }
-    | {
-        supported: true
-        port: number
-        ruleAllowed: boolean
-        blockingRuleDetected: boolean
-        privateFirewallEnabled: boolean
-        networkCategory: 'private' | 'public' | 'domain' | 'unknown'
-        inspectionAvailable: boolean
-      }
-  >
-  repairWindowsFirewall: () => Promise<
-    { ok: true } | { ok: false; reason: 'cancelled' | 'failed' | 'unsupported' }
-  >
+  getWindowsFirewallStatus: (args?: { address?: string }) => Promise<WindowsMobileFirewallStatus>
+  repairWindowsFirewall: () => Promise<WindowsMobileFirewallRepairResult>
   openWindowsNetworkSettings: () => Promise<boolean>
 }
 export type ShellDeveloperPermissionsApi = {
@@ -42,12 +34,7 @@ export type ShellLocalhostWorktreeLabelsApi = {
   register: (args: LocalhostWorktreeLabelRoute) => Promise<LocalhostWorktreeLabelResult>
 }
 export type ShellExportApi = {
-  htmlToPdf: (args: {
-    html: string
-    title: string
-  }) => Promise<
-    { success: true; filePath: string } | { success: false; cancelled?: boolean; error?: string }
-  >
+  htmlToPdf: (args: ShellHtmlToPdfInput) => Promise<ShellHtmlToPdfResult>
 }
 
 function restoreShellDocument<T>(value: unknown): T {
@@ -69,26 +56,17 @@ const electronMiniMaxCredentialsApi: ShellMiniMaxCredentialsApi = {
     )
 }
 const electronMobileApi: ShellMobileApi = {
-  getWindowsFirewallStatus: async (input) =>
-    restoreShellDocument(
-      await callShellOrpc((client) => client.shell.mobile.getWindowsFirewallStatus, input)
-    ),
-  repairWindowsFirewall: async () =>
-    restoreShellDocument(
-      await callShellOrpc((client) => client.shell.mobile.repairWindowsFirewall, undefined)
-    ),
+  getWindowsFirewallStatus: (input) =>
+    callShellOrpc((client) => client.shell.mobile.getWindowsFirewallStatus, input),
+  repairWindowsFirewall: () =>
+    callShellOrpc((client) => client.shell.mobile.repairWindowsFirewall, undefined),
   openWindowsNetworkSettings: () =>
     callShellOrpc((client) => client.shell.mobile.openWindowsNetworkSettings, undefined)
 }
 const electronDeveloperPermissionsApi: ShellDeveloperPermissionsApi = {
-  getStatus: async () =>
-    restoreShellDocument(
-      await callShellOrpc((client) => client.shell.developerPermissions.getStatus, undefined)
-    ),
-  request: async (input) =>
-    restoreShellDocument(
-      await callShellOrpc((client) => client.shell.developerPermissions.request, input)
-    )
+  getStatus: () =>
+    callShellOrpc((client) => client.shell.developerPermissions.getStatus, undefined),
+  request: (input) => callShellOrpc((client) => client.shell.developerPermissions.request, input)
 }
 const electronExportApi: ShellExportApi = {
   htmlToPdf: async (input) =>

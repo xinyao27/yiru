@@ -1,9 +1,9 @@
-import type { AppState } from '~renderer/store/types'
 import type {
   RuntimeMobileSessionFileTab,
   RuntimeMobileSessionMarkdownTab
-} from '~shared/runtime-types'
-import type { Tab } from '~shared/types'
+} from '@yiru/runtime-protocol/workbench/runtime-types'
+import type { Tab } from '@yiru/runtime-protocol/workbench/types'
+import type { AppState } from '~renderer/store/types'
 
 import { isUnifiedTabActiveInActiveGroup } from './runtime-mobile-tab-activity'
 

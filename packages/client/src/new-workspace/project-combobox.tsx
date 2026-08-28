@@ -1,0 +1,243 @@
+import React, { useState } from 'react'
+import { translate } from '~renderer/i18n/i18n'
+import {
+  Check,
+  FolderOpen,
+  FolderPlus,
+  CaretUpDown as ChevronsUpDown
+} from '~renderer/icons/hugeicons'
+import {
+  searchNewWorkspaceProjectOptions,
+  type NewWorkspaceProjectOption
+} from '~renderer/new-workspace-composer-card/new-workspace-project-options'
+import RepoBadgeLabel from '~renderer/repo/badge-label'
+import { Button } from '~renderer/ui/button'
+import { cn } from '~renderer/ui/class-names'
+import { Command, CommandEmpty, CommandInput, CommandItem, CommandList } from '~renderer/ui/command'
+import { Popover, PopoverContent, PopoverTrigger } from '~renderer/ui/popover'
+
+type ProjectComboboxProps = {
+  options: readonly NewWorkspaceProjectOption[]
+  value: string | null
+  onValueChange: (projectId: string) => void
+  onValueSelected?: (projectId: string) => void
+  onAddProject?: () => void
+  placeholder?: string
+  triggerClassName?: string
+  invalid?: boolean
+  describedBy?: string
+}
+
+export default function ProjectCombobox({
+  options,
+  value,
+  onValueChange,
+  onValueSelected,
+  onAddProject,
+  placeholder = 'Choose project',
+  triggerClassName,
+  invalid = false,
+  describedBy
+}: ProjectComboboxProps): React.JSX.Element {
+  const [open, setOpen] = useState(false)
+  const [query, setQuery] = useState('')
+  const [commandValue, setCommandValue] = useState('')
+  const inputRef = React.useRef<HTMLInputElement | null>(null)
+  const focusFrameRef = React.useRef<number | null>(null)
+  const selectedProject = (() => options.find((option) => option.id === value) ?? null)()
+  const filteredOptions = (() => searchNewWorkspaceProjectOptions(options, query))()
+
+  const cancelFocusFrame = (): void => {
+    if (focusFrameRef.current !== null) {
+      cancelAnimationFrame(focusFrameRef.current)
+      focusFrameRef.current = null
+    }
+  }
+
+  const setInputNode = (node: HTMLInputElement | null): void => {
+    if (node === null) {
+      cancelFocusFrame()
+    }
+    inputRef.current = node
+  }
+
+  const focusSearchInput = (): void => {
+    cancelFocusFrame()
+    focusFrameRef.current = requestAnimationFrame(() => {
+      focusFrameRef.current = null
+      inputRef.current?.focus()
+    })
+  }
+
+  const handleOpenChange = (nextOpen: boolean): void => {
+    setOpen(nextOpen)
+    if (nextOpen) {
+      setCommandValue(value ?? '')
+      return
+    }
+    cancelFocusFrame()
+    setQuery('')
+  }
+
+  const handleSelect = (projectId: string): void => {
+    onValueChange(projectId)
+    setOpen(false)
+    setQuery('')
+    onValueSelected?.(projectId)
+  }
+
+  const handleAddProject = (): void => {
+    setOpen(false)
+    setQuery('')
+    setCommandValue('')
+    onAddProject?.()
+  }
+
+  const handleTriggerKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>): void => {
+    if (open) {
+      return
+    }
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault()
+      setCommandValue(value ?? '')
+      setOpen(true)
+      return
+    }
+    if (event.metaKey || event.ctrlKey || event.altKey) {
+      return
+    }
+    if (event.key.length === 1 && /\S/.test(event.key)) {
+      event.preventDefault()
+      setCommandValue(value ?? '')
+      setQuery(event.key)
+      setOpen(true)
+    }
+  }
+
+  return (
+    <Popover open={open} onOpenChange={handleOpenChange}>
+      <PopoverTrigger
+        render={
+          <Button
+            type="button"
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            aria-invalid={invalid ? true : undefined}
+            aria-describedby={describedBy}
+            onKeyDown={handleTriggerKeyDown}
+            className={cn(
+              'h-8 min-w-[184px] justify-between px-3 text-xs font-normal',
+              triggerClassName
+            )}
+            data-project-combobox-root="true"
+          >
+            {selectedProject ? (
+              selectedProject.kind === 'project-group' ? (
+                <span className="flex min-w-0 items-center gap-1.5">
+                  <FolderOpen className="text-muted-foreground size-3.5 shrink-0" />
+                  <span className="truncate">{selectedProject.displayName}</span>
+                </span>
+              ) : (
+                <RepoBadgeLabel
+                  name={selectedProject.displayName}
+                  color={selectedProject.badgeColor}
+                  badgeClassName="size-1.5"
+                />
+              )
+            ) : (
+              <span className="text-muted-foreground">{placeholder}</span>
+            )}
+            <ChevronsUpDown className="size-3.5 opacity-50" />
+          </Button>
+        }
+      />
+      <PopoverContent
+        align="start"
+        className="w-[var(--radix-popover-trigger-width)] min-w-[18rem] p-0"
+        data-project-combobox-root="true"
+        initialFocus={() => {
+          // Suppress default focus (return false); focusSearchInput schedules
+          // the rAF focus onto the search box itself.
+          focusSearchInput()
+          return false
+        }}
+      >
+        <Command shouldFilter={false} value={commandValue} onValueChange={setCommandValue}>
+          <CommandInput
+            ref={setInputNode}
+            placeholder={translate(
+              'auto.components.new.workspace.ProjectCombobox.search',
+              'Search projects...'
+            )}
+            value={query}
+            onValueChange={setQuery}
+          />
+          <CommandList>
+            <CommandEmpty>
+              {translate(
+                'auto.components.new.workspace.ProjectCombobox.empty',
+                'No projects match your search.'
+              )}
+            </CommandEmpty>
+            {filteredOptions.map((option) => (
+              <CommandItem
+                key={option.id}
+                value={option.id}
+                onSelect={() => handleSelect(option.id)}
+                className="items-center gap-2 px-3 py-2"
+              >
+                <Check
+                  className={cn(
+                    'size-4 text-foreground',
+                    option.id === value ? 'opacity-100' : 'opacity-0'
+                  )}
+                />
+                <div className="min-w-0 flex-1">
+                  {option.kind === 'project-group' ? (
+                    <div className="flex min-w-0 items-center gap-1.5 text-sm">
+                      <FolderOpen className="text-muted-foreground size-3.5 shrink-0" />
+                      <span className="truncate">{option.displayName}</span>
+                    </div>
+                  ) : (
+                    <RepoBadgeLabel
+                      name={option.displayName}
+                      color={option.badgeColor}
+                      className="max-w-full"
+                    />
+                  )}
+                  <p className="text-muted-foreground mt-0.5 truncate text-[11px]">
+                    {option.detail}
+                  </p>
+                </div>
+              </CommandItem>
+            ))}
+          </CommandList>
+          {onAddProject ? (
+            // Why: pin this outside the scrollable results so adding a project
+            // stays reachable even when filtering produces an empty list.
+            <div className="border-border border-t">
+              <Button
+                type="button"
+                variant="ghost"
+                size="list-row"
+                onClick={handleAddProject}
+                onMouseDown={(event) => event.preventDefault()}
+                onMouseEnter={() => setCommandValue('')}
+                className="w-full justify-start font-normal"
+              >
+                <FolderPlus className="text-muted-foreground size-3.5" />
+                <span>
+                  {translate(
+                    'auto.components.new.workspace.ProjectCombobox.addProject',
+                    'Add a new project'
+                  )}
+                </span>
+              </Button>
+            </div>
+          ) : null}
+        </Command>
+      </PopoverContent>
+    </Popover>
+  )
+}

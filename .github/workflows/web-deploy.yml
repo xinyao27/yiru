@@ -6,13 +6,6 @@ on:
       - main
     paths:
       - 'apps/web/**'
-      # Why: the product entry bundles both packages from workspace source, so
-      # either package changing must publish a fresh web bundle.
-      - 'packages/client/**'
-      - 'packages/shared/**'
-      # Why: the landing page renders product URLs straight out of the shared
-      # workbench model, so a link change there must reach production too.
-      - 'packages/workbench-model/**'
       - 'package.json'
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
@@ -50,10 +43,6 @@ jobs:
       - name: Install dependencies
         run: vp install --frozen-lockfile
 
-      # Why: yiru-web imports @yiru/workbench-model from workspace source,
-      # which only resolves once that package has emitted its build output. Both
-      # tasks declare that through `dependsOn`, so the build order is no longer a
-      # step this workflow has to remember.
       - name: Typecheck
         run: vp run yiru-web#typecheck
 

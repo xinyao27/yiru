@@ -167,7 +167,7 @@ export type AccountsSnapshot = {
 }
 
 // Why: mirrors the desktop `GrokAccountStatus` shared type structurally —
-// this client-safe package cannot import apps/desktop's `~shared` types.
+// this client-safe package cannot import daemon implementation types.
 export type GrokAccountStatus = {
   signedIn: boolean
   email: string | null

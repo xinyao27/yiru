@@ -58,13 +58,13 @@ struct WorkspaceFileExplorerView: View {
         Group {
             switch model.phase {
             case .waiting:
-                stateView(title: "Waiting for desktop…", iconID: .wifiSlash, retry: true)
+                stateView(title: "Waiting for daemon…", iconID: .wifiSlash, retry: true)
             case .loading:
                 YiruLoader(size: Theme.Control.largeIcon)
             case .failed(let failure):
                 stateView(
                     title: failure.isConnectionFailure
-                        ? "Waiting for desktop…"
+                        ? "Waiting for daemon…"
                         : LocalizedStringResource(stringLiteral: failure.message),
                     iconID: failure.isConnectionFailure ? .wifiSlash : .warning,
                     retry: true,

@@ -36,12 +36,12 @@ const application = {
   '@type': 'SoftwareApplication',
   '@id': `${SITE_ORIGIN}/#app`,
   name: 'Yiru',
-  alternateName: 'Yiru AI agent editor IDE',
+  alternateName: 'Yiru coding agent workspace',
   description:
-    'An open-source AI agent editor IDE that runs Claude Code, Codex, and any CLI coding agent in isolated git worktrees across local, WSL, SSH, and relay-connected hosts.',
+    'An open-source Chrome workspace and Bun-native daemon for running coding agents in isolated git worktrees.',
   applicationCategory: 'DeveloperApplication',
-  applicationSubCategory: 'Integrated Development Environment',
-  operatingSystem: 'macOS, Windows, Linux, iOS',
+  applicationSubCategory: 'Development Tool',
+  operatingSystem: 'Chrome, macOS, Windows, Linux, iOS',
   url: `${SITE_ORIGIN}/`,
   image: `${SITE_ORIGIN}/og.jpg`,
   downloadUrl: 'https://github.com/xinyao27/yiru/releases/latest',
@@ -49,10 +49,11 @@ const application = {
   isAccessibleForFree: true,
   offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
   featureList: [
-    'Runs Claude Code, Codex, and any CLI coding agent',
+    'Chrome side panel and tab workspaces',
+    'Runs Claude Code, Codex, and terminal coding agents',
     'One isolated git worktree per agent session',
-    'Local, WSL, SSH, and relay-connected hosts',
-    'Review diffs and merge from an iOS companion app',
+    'Bun-native daemon for local, WSL, and remote hosts',
+    'Direct end-to-end encrypted iOS companion pairing',
     'Open source under the MIT license'
   ],
   publisher: { '@id': publisher['@id'] }

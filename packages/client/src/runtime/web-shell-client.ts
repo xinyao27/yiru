@@ -1,5 +1,5 @@
 import type { ShellServicesPathSelection } from '@yiru/runtime-protocol/contract'
-import type { ShellOpenLocalPathResult } from '~shared/shell-open-types'
+import type { ShellOpenLocalPathResult } from '@yiru/runtime-protocol/workbench/shell-open-types'
 
 import type { ShellPlatformApi } from './shell-platform-client'
 

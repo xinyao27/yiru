@@ -129,7 +129,7 @@ struct WorkspaceListContentView: View {
                     // first-load indicator out of the list layout so the toolbar, back action,
                     // and any cached/empty surface remain usable while Desktop is connecting.
                     YiruLoader(size: Theme.Control.regularIcon)
-                        .accessibilityLabel("Connecting to desktop")
+                        .accessibilityLabel("Connecting to daemon")
                         .allowsHitTesting(false)
                 }
             }

@@ -33,14 +33,14 @@
 // off), the notice never returns, because the cohort condition
 // (`optedIn === null`) clears in all three resolving paths.
 import { useState } from 'react'
-import { openHttpLink } from '~renderer/components/editor/http-link-routing'
-import { X } from '~renderer/components/icons/hugeicons'
-import { Button as UiButton } from '~renderer/components/ui/button'
-import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
+import { openHttpLink } from '~renderer/editor/http-link-routing'
 import { translate } from '~renderer/i18n/i18n'
+import { X } from '~renderer/icons/hugeicons'
+import { useMountedRef } from '~renderer/react/use-mounted-ref'
+import { Button as UiButton } from '~renderer/ui/button'
 
-import { Button } from '../components/ui/button'
-import { acknowledgeBanner, PRIVACY_URL, setOptIn as telemetrySetOptIn } from '../lib/telemetry'
+import { acknowledgeBanner, PRIVACY_URL, setOptIn as telemetrySetOptIn } from '../telemetry/client'
+import { Button } from '../ui/button'
 
 type FirstLaunchBannerProps = {
   onResolve: () => void

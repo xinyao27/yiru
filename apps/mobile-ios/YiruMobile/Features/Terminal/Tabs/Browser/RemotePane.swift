@@ -275,16 +275,16 @@ struct WorkspaceBrowserPane: View {
                 }
         } else if !connectionReady {
             Theme.Colors.background.opacity(0.82)
-                .overlay { Text("Waiting for desktop…").browserStateMessage() }
+                .overlay { Text("Waiting for daemon…").browserStateMessage() }
         } else if browserSupported == nil {
             Theme.Colors.background.opacity(0.82)
                 .overlay {
-                    Text("Checking desktop browser streaming support.").browserStateMessage()
+                    Text("Checking browser streaming support.").browserStateMessage()
                 }
         } else if browserSupported == false {
             Theme.Colors.background.opacity(0.82)
                 .overlay {
-                    Text("Browser streaming is unavailable on this desktop.").browserStateMessage()
+                    Text("Browser streaming is unavailable on this daemon.").browserStateMessage()
                 }
         } else {
             switch model.phase {

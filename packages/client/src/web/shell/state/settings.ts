@@ -1,10 +1,10 @@
+import type { GlobalSettings } from '@yiru/runtime-protocol/workbench/types'
 import {
   getRuntimeBackedWebSettings,
   readWebSettings,
   setWebSettings,
   updateWebPRBotAuthorOverride
 } from '~renderer/web/settings'
-import type { GlobalSettings } from '~shared/types'
 
 export const webShellSettingsApi = {
   get: (): Promise<GlobalSettings> => getRuntimeBackedWebSettings(),

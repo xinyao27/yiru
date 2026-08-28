@@ -1,5 +1,5 @@
+import type { GlobalSettings } from '@yiru/runtime-protocol/workbench/types'
 import { z } from 'zod'
-import type { GlobalSettings } from '~shared/types'
 
 import { createCollectionSettingSchemas } from './settings-collection-schema'
 import { createFeatureSettingSchemas } from './settings-feature-schema'

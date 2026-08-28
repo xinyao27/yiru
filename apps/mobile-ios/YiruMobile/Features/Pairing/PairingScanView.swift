@@ -32,7 +32,7 @@ struct PairingScanView: View {
             AppBackground()
             content
         }
-        .navigationTitle(Text("Pair with desktop"))
+        .navigationTitle(Text("Pair with daemon"))
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $isPastePresented) {
             pasteSheet
@@ -64,13 +64,13 @@ struct PairingScanView: View {
         case .checking:
             ProgressView("Checking camera access…")
         case .requestable:
-            // Why: the navigation title above already reads "Pair with desktop"; repeating
+            // Why: the navigation title above already reads "Pair with daemon"; repeating
             // it as the body heading duplicates the same text twice on one screen instead of
             // explaining what this step needs.
             unavailableContent(
                 title: "Camera access needed",
                 detail:
-                    "Scan the QR code from Yiru on your desktop, or paste the pairing code instead.",
+                    "Scan the QR code from Yiru in Chrome, or paste the pairing code instead.",
                 actionTitle: "Continue",
                 action: requestCameraAccess,
                 secondaryActionTitle: "Paste code instead",
@@ -90,7 +90,7 @@ struct PairingScanView: View {
         case .unsupported:
             unavailableContent(
                 title: "QR scanning is unavailable",
-                detail: "Paste the pairing code copied from Yiru on your desktop.",
+                detail: "Paste the pairing code copied from Yiru in Chrome.",
                 iconID: .qrCodeScan,
                 actionTitle: "Paste pairing code",
                 action: { isPastePresented = true }

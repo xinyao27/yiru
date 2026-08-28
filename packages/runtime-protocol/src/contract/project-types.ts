@@ -1,5 +1,4 @@
-import type { ExecutionHostId, RepoIcon, RepoKind } from '@yiru/workbench-model/workspace'
-
+import type { ExecutionHostId, RepoIcon, RepoKind } from '../model/workspace.js'
 import type {
   RuntimeGitRemoteIdentity,
   RuntimeRepo,
@@ -64,9 +63,12 @@ export type RuntimeProjectHostSetup = {
   updatedAt: number
 }
 
-export type RuntimeProjectListResult = { projects: RuntimeProject[] }
-export type RuntimeProjectResult = { project: RuntimeProject }
-export type RuntimeProjectHostSetupListResult = { setups: RuntimeProjectHostSetup[] }
+export type RuntimeProjectListResult = { projects: RuntimeProject[]; revision?: number }
+export type RuntimeProjectResult = { project: RuntimeProject; revision?: number }
+export type RuntimeProjectHostSetupListResult = {
+  setups: RuntimeProjectHostSetup[]
+  revision?: number
+}
 export type RuntimeProjectHostSetupResult = {
   project: RuntimeProject
   setup: RuntimeProjectHostSetup
@@ -83,13 +85,19 @@ export type RuntimeProjectHostSetupUpdateResult = {
 }
 export type RuntimeProjectHostSetupDeleteResult = RuntimeProjectHostSetupUpdateResult
 
-export type RuntimeProjectHostSetupResultEnvelope = { result: RuntimeProjectHostSetupResult }
+export type RuntimeProjectHostSetupResultEnvelope = {
+  result: RuntimeProjectHostSetupResult
+  revision?: number
+}
 export type RuntimeProjectHostSetupCreateResultEnvelope = {
   result: RuntimeProjectHostSetupCreateResult
+  revision?: number
 }
 export type RuntimeProjectHostSetupUpdateResultEnvelope = {
   result: RuntimeProjectHostSetupUpdateResult
+  revision?: number
 }
 export type RuntimeProjectHostSetupDeleteResultEnvelope = {
   result: RuntimeProjectHostSetupDeleteResult
+  revision?: number
 }

@@ -1,9 +1,9 @@
+import { normalizeAppIconId } from '@yiru/runtime-protocol/workbench/app-icon'
+import { normalizeLoaderStyle } from '@yiru/runtime-protocol/workbench/loader-style'
+import { isTuiAgent } from '@yiru/runtime-protocol/workbench/tui-agent/config'
+import type { GlobalSettings, OpenInTargetKey } from '@yiru/runtime-protocol/workbench/types'
+import { normalizeUiLanguage } from '@yiru/runtime-protocol/workbench/ui-language'
 import { z } from 'zod'
-import { normalizeAppIconId } from '~shared/app-icon'
-import { normalizeLoaderStyle } from '~shared/loader-style'
-import { isTuiAgent } from '~shared/tui-agent/config'
-import type { GlobalSettings, OpenInTargetKey } from '~shared/types'
-import { normalizeUiLanguage } from '~shared/ui-language'
 
 const finiteNumber = z.number().finite()
 const optionalBoolean = z.boolean().optional()

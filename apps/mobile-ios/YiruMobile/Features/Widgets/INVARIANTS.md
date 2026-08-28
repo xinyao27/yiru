@@ -22,7 +22,7 @@
 ## Visual and lifecycle contract
 
 - The three WidgetKit surfaces own their compact/medium/large layouts and container backgrounds;
-  they do not reuse mobile navigation chrome or load the desktop runtime.
+  they do not reuse mobile navigation chrome or open a daemon connection.
 - Widget colors are semantic to the widget surface and must remain legible in light/dark mode. The
   mobile app's neutral loader and Hugeicons rules apply to the producer and deep-link chrome, not
   to replacing WidgetKit's status color semantics.

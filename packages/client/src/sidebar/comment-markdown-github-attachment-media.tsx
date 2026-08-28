@@ -1,0 +1,129 @@
+import React from 'react'
+import { openHttpLink } from '~renderer/editor/http-link-routing'
+
+export function isGitHubUserAttachmentUrl(href: string | undefined): href is string {
+  if (!href) {
+    return false
+  }
+  try {
+    const url = new URL(href)
+    return (
+      url.protocol === 'https:' &&
+      url.hostname === 'github.com' &&
+      url.pathname.startsWith('/user-attachments/assets/')
+    )
+  } catch {
+    return false
+  }
+}
+
+function isBareAutolink(children: React.ReactNode, href: string): boolean {
+  const text = React.Children.toArray(children).join('').trim()
+  return text === href
+}
+
+function openAttachmentLink(event: React.MouseEvent<HTMLAnchorElement>, href: string): void {
+  event.preventDefault()
+  event.stopPropagation()
+  openHttpLink(href, { event })
+}
+
+export function isGitHubUserAttachmentVideoLink(
+  href: string | undefined,
+  children: React.ReactNode
+): href is string {
+  return isGitHubUserAttachmentUrl(href) && isBareAutolink(children, href)
+}
+
+// Shared fallback link for attachments that can't render inline (see the image
+// note below on why load failures drop to a session-scoped link).
+function AttachmentFallbackLink({
+  href,
+  children
+}: {
+  href: string
+  children: React.ReactNode
+}): React.ReactElement {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      className="text-primary hover:text-primary/80 focus-visible:text-primary/80 focus-visible:bg-accent break-all underline underline-offset-2 outline-none"
+      onClick={(event) => openAttachmentLink(event, href)}
+    >
+      {children}
+    </a>
+  )
+}
+
+export function GitHubUserAttachmentVideo({
+  href,
+  children
+}: {
+  href: string
+  children: React.ReactNode
+}): React.ReactElement {
+  const [failed, setFailed] = React.useState(false)
+
+  if (failed) {
+    return <AttachmentFallbackLink href={href}>{children}</AttachmentFallbackLink>
+  }
+
+  return (
+    <video
+      src={href}
+      controls
+      preload="metadata"
+      playsInline
+      className="bg-muted my-3 max-h-[28rem] max-w-full outline-none"
+      onClick={(e) => e.stopPropagation()}
+      onError={() => setFailed(true)}
+    >
+      <a
+        href={href}
+        target="_blank"
+        rel="noreferrer"
+        className="focus-visible:bg-accent outline-none"
+        onClick={(event) => openAttachmentLink(event, href)}
+      >
+        {children}
+      </a>
+    </video>
+  )
+}
+
+export function GitHubUserAttachmentImage({
+  src,
+  alt
+}: {
+  src: string
+  alt: string | undefined
+}): React.ReactElement {
+  const [failed, setFailed] = React.useState(false)
+  const label = alt?.trim() || src
+
+  // Why: private-repo attachment images can't load cross-origin without the
+  // user's GitHub session cookies, so wrap in a top-level link (opening the
+  // URL where that session exists) and drop to a text link on load error.
+  if (failed) {
+    return <AttachmentFallbackLink href={src}>{label}</AttachmentFallbackLink>
+  }
+
+  return (
+    <a
+      href={src}
+      target="_blank"
+      rel="noreferrer"
+      className="focus-visible:bg-accent inline-block max-w-full outline-none"
+      onClick={(event) => openAttachmentLink(event, src)}
+    >
+      <img
+        src={src}
+        alt={alt ?? ''}
+        className="my-3 max-h-96 max-w-full object-contain"
+        onError={() => setFailed(true)}
+      />
+    </a>
+  )
+}

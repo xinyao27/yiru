@@ -1,4 +1,5 @@
-import type { TuiAgent } from '@yiru/workbench-model/agent'
+import type { TuiAgent } from '../model/agent.js'
+import type { WorkspaceStatus } from '../model/workspace.js'
 
 export type RuntimeFolderWorkspaceLinkedReview = {
   provider: 'github' | 'gitlab'
@@ -22,7 +23,7 @@ export type RuntimeFolderWorkspace = {
   isPinned: boolean
   sortOrder: number
   manualOrder?: number
-  workspaceStatus?: string
+  workspaceStatus?: WorkspaceStatus
   createdWithAgent?: TuiAgent
   pendingFirstAgentMessageRename?: boolean
   firstAgentMessageRenameError?: string | null
@@ -39,14 +40,17 @@ export type RuntimeFolderWorkspacePathStatus = {
 
 export type RuntimeFolderWorkspaceListResult = {
   folderWorkspaces: RuntimeFolderWorkspace[]
+  revision?: number
 }
 export type RuntimeFolderWorkspaceResult = {
   folderWorkspace: RuntimeFolderWorkspace
+  revision?: number
 }
 export type RuntimeNullableFolderWorkspaceResult = {
   folderWorkspace: RuntimeFolderWorkspace | null
+  revision?: number
 }
-export type RuntimeFolderWorkspaceDeleteResult = { deleted: boolean }
+export type RuntimeFolderWorkspaceDeleteResult = { deleted: boolean; revision?: number }
 export type RuntimeFolderWorkspacePathStatusResult = {
   status: RuntimeFolderWorkspacePathStatus
 }

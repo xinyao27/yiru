@@ -1,4 +1,4 @@
-import { useAppStore } from '../store'
+import { useAppStore } from '../store/state'
 
 export function isWebRuntimeSessionActive(
   activeRuntimeEnvironmentId: string | null | undefined

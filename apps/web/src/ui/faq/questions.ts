@@ -9,15 +9,14 @@ export type FaqEntry = {
  * structured data that disagrees with the visible text as spam, so the wording
  * has to come from one place.
  *
- * Every claim here is checkable against the repository. Keep it that way: the
- * agent count comes from the TuiAgent union in @yiru/workbench-model, the review
- * platforms from HostedReviewCreationProvider, the licence from LICENSE.
+ * Every claim here is checkable against the current repository. Keep it that
+ * way: the daemon, extension, direct mobile protocol, and licence are the source.
  */
 export const faqEntries: readonly FaqEntry[] = [
   {
     question: 'What is an AI agent editor IDE?',
     answer:
-      'It is a workspace built around coding agents rather than around a text cursor. The editor still shows files and diffs, but the unit of work is an agent session: you give it a task, it works in its own checkout, and you review the result. Yiru adds the part a chat window cannot — somewhere for several of those sessions to run at once without colliding.'
+      'It is a workspace built around coding agents rather than around a text cursor. The unit of work is an agent session: you give it a task, it works in its own checkout, and you review the result. Yiru adds the part a chat window cannot — somewhere for several sessions to run at once without colliding.'
   },
   {
     question: 'Which coding agents does Yiru run?',
@@ -37,12 +36,12 @@ export const faqEntries: readonly FaqEntry[] = [
   {
     question: 'Can it work on a remote machine?',
     answer:
-      'Yes. A workspace can execute on your local machine, inside a WSL distribution, over SSH, or through a relay-connected host. Filesystem, git, terminal and search operations are routed to whichever host owns the worktree, so the code never has to live on the laptop.'
+      'Yes. Run the Bun daemon beside the repository, then connect Chrome over SSH port forwarding or a private network such as Tailscale. The same binary runs locally, inside WSL, and on remote macOS, Linux, or Windows hosts.'
   },
   {
     question: 'What can the mobile app do?',
     answer:
-      'The iOS and Android companions pair with the desktop app to watch sessions, take notifications, read the diff, send a follow-up instruction, and merge. It is for the part of the loop that happens away from the desk, not a second editor.'
+      'The iOS companion pairs directly with the daemon using end-to-end encryption. It can watch sessions, receive notifications, inspect changes, and send a follow-up instruction. It is for the part of the loop that happens away from the desk, not a second editor.'
   },
   {
     question: 'Does it review pull requests?',
@@ -52,6 +51,6 @@ export const faqEntries: readonly FaqEntry[] = [
   {
     question: 'Is Yiru free?',
     answer:
-      'Yes, and open source under the MIT licence. Desktop builds for macOS, Windows and Linux come from GitHub releases; the iOS app is in TestFlight and Android ships as an APK. You pay whoever provides your agents, not us.'
+      'Yes, and open source under the MIT licence. Bun daemon binaries for macOS, Windows, and Linux come from GitHub releases, the Chrome extension source lives in this repository, and the iOS companion is in TestFlight. You pay whoever provides your agents, not us.'
   }
 ]

@@ -2,7 +2,7 @@
 
 ## Identity and storage
 
-- A Host ID and desktop public key survive name and endpoint edits; editing never re-pairs.
+- A Host ID and pinned daemon public key survive name and endpoint edits; editing never re-pairs.
 - Name and endpoint are written in one metadata commit. A missing or concurrently removed Host
   fails instead of silently recreating a profile.
 - Removing a Host commits metadata first, records a durable credential cleanup intent, then deletes

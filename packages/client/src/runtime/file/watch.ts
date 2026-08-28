@@ -1,4 +1,4 @@
-import type { FsChangedPayload } from '~shared/types'
+import type { FsChangedPayload } from '@yiru/runtime-protocol/workbench/types'
 
 import { callRuntimeOrpc, createRuntimeOrpcClient, type RuntimeClientTarget } from '../orpc-client'
 import { getActiveRuntimeTarget } from '../rpc-client'

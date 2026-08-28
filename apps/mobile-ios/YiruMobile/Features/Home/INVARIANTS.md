@@ -19,7 +19,7 @@
 - Host removal clears host-scoped cached data, account subscriptions, recent-workspace state, and
   credentials through the repository. A failed removal keeps the host visible and reports an error.
 - Successful refreshes persist the native snapshot and update the App Group widget snapshot. Legacy
-  legacy values are read only by the migration layer before the live model starts.
+  values are read only by the migration layer before the live model starts.
 
 ## Lifecycle and visual contract
 

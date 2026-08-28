@@ -1,5 +1,6 @@
-import { useCallback, useRef, useState, type KeyboardEvent } from 'react'
-import type { UpdateStatus } from '~shared/types'
+import type { UpdateStatus } from '@yiru/runtime-protocol/workbench/types'
+import type { KeyboardEvent } from 'react'
+import { useRef, useState } from 'react'
 
 export function useUpdateCardMotion(options: {
   statusState: UpdateStatus['state']
@@ -17,7 +18,7 @@ export function useUpdateCardMotion(options: {
   const dismissTimer = useRef<number | null>(null)
   const collapseTimer = useRef<number | null>(null)
 
-  const clearTimers = useCallback(() => {
+  const clearTimers = () => {
     if (dismissTimer.current !== null) {
       window.clearTimeout(dismissTimer.current)
       dismissTimer.current = null
@@ -26,16 +27,13 @@ export function useUpdateCardMotion(options: {
       window.clearTimeout(collapseTimer.current)
       collapseTimer.current = null
     }
-  }, [])
+  }
 
-  const cardRootRef = useCallback(
-    (node: HTMLDivElement | null) => {
-      if (node === null) {
-        clearTimers()
-      }
-    },
-    [clearTimers]
-  )
+  const cardRootRef = (node: HTMLDivElement | null) => {
+    if (node === null) {
+      clearTimers()
+    }
+  }
 
   const dismissWithAnimation = (): void => {
     if (options.prefersReducedMotion) {

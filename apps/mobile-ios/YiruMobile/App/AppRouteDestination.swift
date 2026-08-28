@@ -48,7 +48,7 @@ struct AppRouteDestinationView: View {
         case .browserSettings:
             BrowserSettingsView(preferences: model.dependencies.settingsPreferences)
         case .notificationSettings:
-            NotificationSettingsView()
+            NotificationSettingsView(coordinator: model.dependencies.notificationCoordinator)
         case .connectionLog:
             ConnectionLogView(
                 hosts: model.dependencies.hostRepository,

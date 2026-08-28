@@ -11,9 +11,9 @@ import {
   RUNTIME_ORPC_REQUEST_ID_HEADER
 } from '@yiru/runtime-protocol/orpc-peer-frame'
 import {
-  isBrowserPaneUiRuntimeRpcParams,
+  isBrowserUiRuntimeRpcParams,
   YIRU_RUNTIME_RPC_BROWSER_UI_SOURCE
-} from '~shared/runtime-rpc-feature-interaction-source'
+} from '@yiru/runtime-protocol/workbench/runtime-rpc-feature-interaction-source'
 
 import { retainRuntimeOrpcBinaryRoute } from '../runtime/orpc-binary-side-channel'
 import type { WebRuntimeOrpcClient, WebRuntimeOrpcClientContext } from './legacy-orpc-link'
@@ -181,7 +181,7 @@ export function createWebRuntimeOrpcConnection(
     headers: (options, _path, input) => ({
       [RUNTIME_ORPC_REQUEST_ID_HEADER]: options.context[RUNTIME_ORPC_REQUEST_CONTEXT],
       [RUNTIME_ORPC_BINARY_SIDE_CHANNEL_HEADER]: '1',
-      ...(isBrowserPaneUiRuntimeRpcParams(input)
+      ...(isBrowserUiRuntimeRpcParams(input)
         ? {
             [RUNTIME_ORPC_FEATURE_INTERACTION_SOURCE_HEADER]: YIRU_RUNTIME_RPC_BROWSER_UI_SOURCE
           }

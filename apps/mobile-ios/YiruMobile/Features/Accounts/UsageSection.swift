@@ -210,7 +210,7 @@ struct AccountUsageSection: View {
     private var accountModeLabel: LocalizedStringResource {
         if section.activeAccountID != nil { return "Using managed account" }
         if section.provider.supportsSelection { return "Using system default" }
-        return "Using desktop credentials"
+        return "Using daemon-host credentials"
     }
 
     private func usageStatusLabel(_ usage: AccountProviderUsage?) -> LocalizedStringResource {

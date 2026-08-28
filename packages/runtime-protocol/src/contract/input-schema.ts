@@ -1,5 +1,6 @@
-import type { TuiAgent } from '@yiru/workbench-model/agent'
 import { z } from 'zod'
+
+import type { TuiAgent } from '../model/agent.js'
 
 export const OptionalFiniteNumber = z
   .unknown()

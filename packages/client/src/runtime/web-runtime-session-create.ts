@@ -1,17 +1,17 @@
-import type { SleepingAgentLaunchConfig } from '@yiru/workbench-model/agent'
-import type { StartupCommandDelivery } from '~shared/codex-startup-delivery'
-import type { RuntimeMobileSessionCreateTerminalResult } from '~shared/runtime-types'
-import type { TuiAgent } from '~shared/types'
+import type { SleepingAgentLaunchConfig } from '@yiru/runtime-protocol/model/agent'
+import type { StartupCommandDelivery } from '@yiru/runtime-protocol/workbench/codex-startup-delivery'
+import type { RuntimeMobileSessionCreateTerminalResult } from '@yiru/runtime-protocol/workbench/runtime-types'
+import type { TuiAgent } from '@yiru/runtime-protocol/workbench/types'
 
-import { deliverLaunchPromptToAgentTab } from '../lib/agent-launch-prompt-delivery'
-import { useAppStore } from '../store'
+import { deliverLaunchPromptToAgentTab } from '../agent/launch-prompt-delivery'
+import { useAppStore } from '../store/state'
 import type { AppState } from '../store/types'
 import { resolveWebRuntimeSessionEnvironmentId } from './web-runtime-session-environment'
 import {
   createWebSessionBrowserTabCommand,
   createWebSessionTerminalCommand
-} from './web-session-commands'
-import { requestWebSessionTabsRefresh } from './web-session-tabs-refresh-requests'
+} from './web-session/commands'
+import { requestWebSessionTabsRefresh } from './web-session/tabs-refresh-requests'
 import { toWebTerminalSurfaceTabId } from './web-terminal-surface-id'
 
 type CreateWebRuntimeSessionTerminalArgs = {

@@ -1,5 +1,8 @@
-import type { RuntimeFilePreviewResult, RuntimeFileReadResult } from '~shared/runtime-types'
-import type { DirEntry } from '~shared/types'
+import type {
+  RuntimeFilePreviewResult,
+  RuntimeFileReadResult
+} from '@yiru/runtime-protocol/workbench/runtime-types'
+import type { DirEntry } from '@yiru/runtime-protocol/workbench/types'
 
 import { callRuntimeOrpc, isRuntimeOrpcErrorCode } from '../orpc-client'
 import { getActiveRuntimeTarget } from '../rpc-client'

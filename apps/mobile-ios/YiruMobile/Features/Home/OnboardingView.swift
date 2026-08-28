@@ -7,17 +7,17 @@ struct HomeOnboardingView: View {
         ScrollView {
             LazyVStack(spacing: 0) {
                 VStack(spacing: Theme.Spacing.medium) {
-                    Text("Connect your desktop")
+                    Text("Connect to your daemon")
                         .font(.system(size: Theme.Typography.emphasis, weight: .semibold))
                     Text(
-                        "Pair with Yiru on your computer to check on your agents, jump into any terminal, and drive work from your phone."
+                        "Pair directly with the Yiru daemon to check on your agents, jump into any terminal, and drive work from your phone."
                     )
                     .font(.system(size: Theme.Typography.supporting))
                     .foregroundStyle(Theme.Colors.mutedForeground)
                     .multilineTextAlignment(.center)
                     .lineSpacing(Theme.Spacing.extraSmall)
 
-                    Button("Pair Desktop", action: showPairing)
+                    Button("Pair Daemon", action: showPairing)
                         .appProminentGlassButton()
                         .appButtonContext(.large)
                         .padding(.top, Theme.Spacing.large)
@@ -70,8 +70,8 @@ nonisolated private struct HomeOnboardingStep: Sendable {
 
 nonisolated private let homeOnboardingSteps = [
     HomeOnboardingStep(
-        title: "Open Yiru desktop",
-        detail: "Go to Settings → Mobile and generate a pairing QR code."
+        title: "Open Yiru in Chrome",
+        detail: "Open Yiru Mobile from the side panel and generate a pairing QR code."
     ),
     HomeOnboardingStep(
         title: "Scan the code",
@@ -79,6 +79,6 @@ nonisolated private let homeOnboardingSteps = [
     ),
     HomeOnboardingStep(
         title: "You're connected",
-        detail: "Your desktop will appear here. Everything is encrypted end-to-end."
+        detail: "Your daemon will appear here. Everything is encrypted end-to-end."
     ),
 ]

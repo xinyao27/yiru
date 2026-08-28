@@ -1,6 +1,6 @@
+import type { ChangelogData, UpdateStatus } from '@yiru/runtime-protocol/workbench/types'
 import type { JSX } from 'react'
 import { translate } from '~renderer/i18n/i18n'
-import type { ChangelogData, UpdateStatus } from '~shared/types'
 
 import {
   UpdateCardCompactContent,

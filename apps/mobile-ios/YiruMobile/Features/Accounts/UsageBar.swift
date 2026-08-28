@@ -105,7 +105,7 @@ nonisolated enum AccountUsageBarDensity: Sendable {
 
 nonisolated func accountResetLabel(until resetsAt: Date, now: Date) -> String {
     // Why: matches formatResetCountdown/formatResetDuration in
-    // packages/workbench-model/src/rate-limit-reset-format.ts — only a
+    // packages/runtime-protocol/src/model/rate-limit-reset-format.ts — only a
     // non-positive delta reads as "now"; a sub-minute positive delta still
     // floors to "0m" rather than being rounded up to "now".
     let secondsRemaining = resetsAt.timeIntervalSince(now)

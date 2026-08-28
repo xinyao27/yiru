@@ -1,7 +1,8 @@
 import type {
+  ExecutionHostId,
   PersistedTrustedYiruHooks,
   WorkspaceStatusDefinition
-} from '@yiru/workbench-model/workspace'
+} from '../model/workspace.js'
 
 export const RUNTIME_FEATURE_INTERACTION_IDS = [
   'workspace-agent-sessions',
@@ -44,7 +45,7 @@ export const RUNTIME_FEATURE_INTERACTION_IDS = [
   'workspace-cleanup'
 ] as const
 
-export const RUNTIME_FEATURE_TIP_IDS = ['yiru-cli', 'cmd-j-palette'] as const
+export const RUNTIME_FEATURE_TIP_IDS = ['yiru-cli', 'command-palette'] as const
 
 export type RuntimeFeatureInteractionId = (typeof RUNTIME_FEATURE_INTERACTION_IDS)[number]
 export type RuntimeFeatureTipId = (typeof RUNTIME_FEATURE_TIP_IDS)[number]
@@ -67,7 +68,7 @@ export type RuntimeWorkspaceTitlebarActionId =
   | RuntimeWorkspacePanelTabContentType
   | 'open-in'
   | 'commands'
-export type RuntimeWorkspaceHostScope = 'all' | 'local' | `runtime:${string}`
+export type RuntimeWorkspaceHostScope = 'all' | ExecutionHostId
 export type RuntimeVisibleWorkspaceHostIds = Exclude<RuntimeWorkspaceHostScope, 'all'>[] | null
 export type RuntimeWorkspaceHostOrder = Exclude<RuntimeWorkspaceHostScope, 'all'>[]
 export type RuntimeFeatureInteractionRecord = {

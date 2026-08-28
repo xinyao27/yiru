@@ -1,15 +1,15 @@
 import type { JSX } from 'react'
-import { openHttpLink } from '~renderer/components/editor/http-link-routing'
+import { openHttpLink } from '~renderer/editor/http-link-routing'
+import { translate } from '~renderer/i18n/i18n'
 import {
   WarningCircle as AlertCircle,
   Minus,
   Network,
   ArrowClockwise as RotateCw
-} from '~renderer/components/icons/hugeicons'
-import { LoadingIndicator } from '~renderer/components/loading-indicator'
-import { translate } from '~renderer/i18n/i18n'
+} from '~renderer/icons/hugeicons'
+import { LoadingIndicator } from '~renderer/loading/indicator'
 
-import { Button } from '../components/ui/button'
+import { Button } from '../ui/button'
 import type { UpdateErrorCardModel } from './update-card-model'
 
 export function UpdateCardErrorContent(

@@ -5,7 +5,7 @@ import {
   RUNTIME_ORPC_REQUEST_ID_HEADER
 } from '@yiru/runtime-protocol/orpc-peer-frame'
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
-import { DedicatedRemoteRuntimeOrpcPeer } from '@yiru/shared/remote-runtime/dedicated-orpc-peer'
+import { DedicatedRemoteRuntimeOrpcPeer } from '@yiru/runtime-protocol/workbench/remote-runtime/dedicated-orpc-peer'
 
 type TerminalMultiplexCallbacks = {
   onResponse: (response: RuntimeRpcResponse<unknown>) => void

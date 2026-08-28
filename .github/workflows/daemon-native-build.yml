@@ -1,0 +1,77 @@
+name: Daemon Native Builds
+
+on:
+  pull_request:
+    paths:
+      - 'apps/daemon/**'
+      - 'scripts/build-skill-resources.mjs'
+      - 'packages/runtime-protocol/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.github/workflows/daemon-native-build.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/daemon/**'
+      - 'packages/runtime-protocol/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.github/workflows/daemon-native-build.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native:
+    name: ${{ matrix.platform }} native runtime
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: Linux
+            runner: ubuntu-latest
+          - platform: macOS
+            runner: macos-26
+          - platform: Windows
+            runner: windows-2025
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: package.json
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck daemon
+        run: pnpm exec vp run @yiru/daemon#typecheck
+
+      - name: Build native Bun executable
+        run: pnpm exec vp run @yiru/daemon#build
+
+      - name: Build macOS computer-use helper
+        if: runner.os == 'macOS'
+        run: pnpm exec vp run @yiru/daemon#build:computer-macos -- --universal

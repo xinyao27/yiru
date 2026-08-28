@@ -3,10 +3,8 @@ import { useEffect, useRef } from 'react'
 import { MODE_DRAWS, resolvePreset } from 'thinking-orbs'
 import type { OrbState } from 'thinking-orbs'
 
-// Why: ported from apps/desktop thinking-orb-loader.tsx so the page shows the
-// same loader the product does. Trimmed to the animating path — the desktop
-// version also handles hover/focus recolouring for its static reduced-motion
-// frame, which a marketing page has no controls to need.
+// Why: the landing illustration uses the same activity vocabulary as the
+// extension. This keeps its reduced-motion frame aligned with the product.
 const ORB_PRESET_SIZE = 20
 const STATIC_FRAME_TIME_SECONDS = 0.6
 const MAX_DEVICE_PIXEL_RATIO = 2

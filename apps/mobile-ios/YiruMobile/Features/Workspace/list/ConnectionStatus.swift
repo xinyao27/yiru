@@ -17,7 +17,7 @@ struct WorkspaceAuthenticationBanner: View {
             VStack(alignment: .leading, spacing: Theme.Spacing.small) {
                 Text(
                     "Authentication failed — try reconnecting first; if it keeps failing, "
-                        + "re-pair from desktop."
+                        + "re-pair from the daemon."
                 )
                 .font(.system(size: Theme.Typography.metadata))
                 .foregroundStyle(Theme.Colors.attention)
@@ -93,16 +93,16 @@ struct WorkspaceProtocolBlockView: View {
     }
 
     private var title: LocalizedStringResource {
-        isMobileTooOld ? "Update Yiru Mobile" : "Update Yiru on your computer"
+        isMobileTooOld ? "Update Yiru Mobile" : "Update the Yiru daemon"
     }
 
     private var bodyText: LocalizedStringResource {
         if isMobileTooOld {
             return
-                "This desktop needs a newer Yiru Mobile app. Install the latest mobile build, then try this host again."
+                "This daemon needs a newer Yiru Mobile app. Install the latest mobile build, then try this host again."
         }
         return
-            "This paired desktop app is too old for your current Yiru Mobile app. Update Yiru on your computer, then try this host again."
+            "This paired daemon is too old for your current Yiru Mobile app. Update the daemon, then try this host again."
     }
 
     private var primaryActionTitle: LocalizedStringResource {

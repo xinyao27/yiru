@@ -1,5 +1,8 @@
+import type {
+  ClaudeRateLimitAccountsState,
+  CodexRateLimitAccountsState
+} from '@yiru/runtime-protocol/workbench/types'
 import { translate } from '~renderer/i18n/i18n'
-import type { ClaudeRateLimitAccountsState, CodexRateLimitAccountsState } from '~shared/types'
 
 import { callRuntimeOrpc, callShellOrpc, isWebRuntimeClient } from './orpc-client'
 

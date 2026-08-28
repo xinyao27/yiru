@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { toast } from 'sonner'
+import { handleAppMenuPasteRequest } from '~renderer/application-shell/menu-paste'
 import { translate } from '~renderer/i18n/i18n'
-import { handleAppMenuPasteRequest } from '~renderer/lib/app-menu-paste'
 import { shellClient } from '~renderer/runtime/shell-client'
 
 export function useAppMenuPaste(): void {

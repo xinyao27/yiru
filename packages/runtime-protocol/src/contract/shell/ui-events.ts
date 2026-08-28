@@ -45,7 +45,7 @@ export type ShellUiEvent =
   | { type: 'uiOpenCrashReport' }
   | { type: 'uiToggleLeftSidebar' }
   | { type: 'uiToggleRightSidebar' }
-  | { type: 'uiToggleWorktreePalette' }
+  | { type: 'uiToggleCommandPalette' }
   | { type: 'uiTerminalShortcutCaptured'; actionId: string }
   | { type: 'uiOpenQuickOpen' }
   | { type: 'uiToggleQuickCommandsMenu' }

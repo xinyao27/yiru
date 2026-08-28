@@ -24,7 +24,7 @@ Accounts 页面同时负责 provider 选择、用量快照和 reset countdown，
 ## Visual contract
 
 - 页面水平 16、顶部 8；provider 卡片间距 20；卡片圆角 16。
-- Provider mark 为旧 Mobile 同一品牌资源，画布 24、图标 15；不得用无关 SF Symbol 代替。
+- Provider mark 使用仓库内的品牌资源，画布 24、图标 15；不得用无关 SF Symbol 代替。
 - Provider 标题 16 semibold；account 标题 14 medium；supporting copy 12。
 - Detail usage bar 高 8；compact bar 高 6；60% 以下绿、60–79% 橙、80% 起红。
 - Toolbar action、Loader、账号 active check 使用中性色；不得出现默认系统蓝色 chrome。

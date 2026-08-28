@@ -1,4 +1,4 @@
-import type { RemoteServerUpdaterSnapshot } from '~shared/remote-server-update'
+import type { RemoteServerUpdaterSnapshot } from '@yiru/runtime-protocol/workbench/remote-server-update'
 
 type PollingTransport = {
   getUpdaterStatus: (environmentId: string) => Promise<RemoteServerUpdaterSnapshot>

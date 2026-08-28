@@ -1,383 +1,71 @@
-import { toRuntimeExecutionHostId, type ExecutionHostId } from '@yiru/workbench-model/workspace'
-/* eslint-disable max-lines */
-import {
-  Suspense,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-  useSyncExternalStore
-} from 'react'
-import { toast } from 'sonner'
+import type { UpdateStatus } from '@yiru/runtime-protocol/workbench/types'
+import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { useShallow } from 'zustand/react/shallow'
-import logo from '~renderer/assets/brand/yiru-wordmark.png?url'
-import {
-  DotsThree as MoreHorizontal,
-  SidebarSimple as PanelLeft,
-  ArrowLeft,
-  ArrowRight,
-  ArrowsIn as Minimize2,
-  WindowClose,
-  WindowMaximize,
-  WindowMinimize
-} from '~renderer/components/icons/hugeicons'
-import { LoadingIndicatorStyleProvider } from '~renderer/components/loading-indicator'
-import { useRateLimitResumeDetector } from '~renderer/components/rate-limit-resume/detector'
-import { useRateLimitResumeDispatch } from '~renderer/components/rate-limit-resume/use-rate-limit-resume-dispatch'
-import { useRateLimitResumeNotifications } from '~renderer/components/rate-limit-resume/use-rate-limit-resume-notifications'
-import { getRendererAppPlatform } from '~renderer/components/settings/renderer-app-platform'
-import { syncZoomCSSVar } from '~renderer/components/settings/ui-zoom'
-import { requestScrollToCurrentWorkspaceRevealAndRename } from '~renderer/components/sidebar/scroll-to-current-workspace-status'
-import { showTerminalShortcutCaptureNotification } from '~renderer/components/terminal-workspace/terminal-shortcut-capture-notification'
-import { Button } from '~renderer/components/ui/button'
-import { ButtonGroup } from '~renderer/components/ui/button-group'
-import { Toaster } from '~renderer/components/ui/sonner'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger
-} from '~renderer/components/ui/tooltip'
-import {
-  showWorkspaceSidebar,
-  toggleWorkspaceSidebar
-} from '~renderer/components/workspace-panel/show-sidebar'
-import {
-  SYNC_FIT_PANES_EVENT,
-  TOGGLE_TERMINAL_PANE_EXPAND_EVENT
-} from '~renderer/constants/terminal'
-import { translate } from '~renderer/i18n/i18n'
-import { cn } from '~renderer/lib/class-names'
-import {
-  isPairedWebClientWindow,
-  shouldRenderDesktopWindowChrome
-} from '~renderer/lib/desktop-window-chrome'
-import { lazyWithRetry as lazy } from '~renderer/lib/lazy-with-retry'
-import { readCliInstallStatus } from '~renderer/runtime/cli-install-client'
-import { runtimeEnvironmentsClient } from '~renderer/runtime/runtime-environments-client'
-import { shellClient } from '~renderer/runtime/shell-client'
-import { getRenderingHostSnapshot } from '~renderer/runtime/shell-platform-client'
-import { getRuntimeUIState, setRuntimeUIState } from '~renderer/runtime/ui-client'
-import {
-  canGoBackWorktreeHistory,
-  canGoForwardWorktreeHistory
-} from '~renderer/store/slices/worktree-nav-history'
-import {
-  keybindingMatchesAction,
-  type KeybindingActionId,
-  type KeybindingContext,
-  type PhysicalModifierToken
-} from '~shared/keybindings'
-import {
-  ModifierDoubleTapDetector,
-  toModifierDoubleTapEvent
-} from '~shared/modifier-double-tap-detector'
-import { supportsNativeSidebarMaterial } from '~shared/native-sidebar-material-support'
-import type { OnboardingState, UpdateStatus } from '~shared/types'
+import { SYNC_FIT_PANES_EVENT } from '~renderer/constants/terminal'
+import { LoadingIndicatorStyleProvider } from '~renderer/loading/indicator'
+import { useRateLimitResumeDetector } from '~renderer/rate-limit-resume/detector'
+import { useRateLimitResumeDispatch } from '~renderer/rate-limit-resume/use-rate-limit-resume-dispatch'
+import { useRateLimitResumeNotifications } from '~renderer/rate-limit-resume/use-rate-limit-resume-notifications'
+import { getWorkbenchLocation } from '~renderer/runtime/workbench-location'
+import { Toaster } from '~renderer/ui/sonner'
+import { TooltipProvider } from '~renderer/ui/tooltip'
 
-import { ConfirmationDialogProvider } from '../components/confirmation-dialog'
-import { CoworkingControlRequestDialog } from '../components/coworking/control-request-dialog'
-import { CoworkingHostAccessRequestDialog } from '../components/coworking/host-access-request-dialog'
-import { useCoworkingSharingBridge } from '../components/coworking/use-sharing-bridge'
-import { CrashReportDialog } from '../components/crash-report/dialog'
-import RetainedAgentsSyncGate from '../components/dashboard/retained-agents-sync-gate'
-import { applyDocumentTheme } from '../components/editor/document-theme'
-import { getSelectedTextForFileSearch } from '../components/editor/file-search-selection'
-import { MarkdownTemplatePicker } from '../components/editor/markdown-template-picker'
-import { useEditorExternalWatch } from '../components/editor/use-editor-external-watch'
+import RetainedAgentsSyncGate from '../dashboard/retained-agents-sync-gate'
+import { useEditorExternalWatch } from '../editor/use-editor-external-watch'
 import {
-  buildWorkspaceSessionPayload,
-  shouldPersistWorkspaceSession
-} from '../components/editor/workspace-session'
-import {
-  fetchWorkspaceSessionWithRuntimeHostOwners,
-  patchWorkspaceSessionByHost,
-  persistWorkspaceSessionByHost
-} from '../components/editor/workspace-session-host-persistence'
-import { RecoverableRenderErrorBoundary } from '../components/error-boundaries/recoverable-render-error-boundary'
-import {
-  getFeatureTipsAppOpenDecision,
-  isCliFeatureTipCompleted
-} from '../components/feature-tips/feature-tip-startup-gate'
-import {
-  trackCmdJPaletteFeatureTipShown,
-  trackYiruCliFeatureTipShown
-} from '../components/feature-tips/feature-tip-telemetry'
-import { shouldShowOnboarding } from '../components/onboarding/should-show-onboarding'
-import { onOnboardingReopened } from '../components/onboarding/show-onboarding-event'
-import { WorkspacePortScanner } from '../components/ports/workspace-port-scanner'
-import { installRendererCommandToasts } from '../components/renderer-command-toasts'
-import Sidebar from '../components/sidebar/panel'
-import { SkillFreshnessNudge } from '../components/skills/skill-freshness-nudge'
-import { StarNagCard } from '../components/star-nag-card'
-import { StarNagAgentValueMomentObserver } from '../components/star-nag/agent-value-moment-observer'
-import { StarNagToastHost } from '../components/star-nag/toast-host'
-import { CoworkingPresenceFooter } from '../components/status-bar/coworking-presence-footer'
-import { YiruRuntimeStatusOnlyFooter } from '../components/status-bar/runtime-status/segment'
-import RecentTabSwitcher from '../components/tab-bar/recent-tab-switcher'
-import PinnedTabCloseDialog from '../components/terminal-pane/pinned-tab-close-dialog'
-import { publishTerminalViewAttributesAtAppStart } from '../components/terminal-pane/terminal-appearance'
-import {
-  getSystemPrefersDarkSnapshot,
-  useSystemPrefersDark
-} from '../components/terminal-pane/use-system-prefers-dark'
+  getSidePanelPresenceSnapshot,
+  subscribeSidePanelPresence
+} from '../extension/side-panel/presence'
+import { useGitHubVisibilityRefresh } from '../github/use-visibility-refresh'
+import { shouldShowOnboarding } from '../onboarding/should-show-onboarding'
+import { WorkspacePortScanner } from '../ports/workspace-port-scanner'
+import { useProjectCatalog } from '../project-catalog/provider'
+import { isExtensionRenderer } from '../runtime/renderer-host'
+import { useWebSessionTabsSync } from '../runtime/web-session/session'
+import { SkillFreshnessNudge } from '../skills/skill-freshness-nudge'
+import { useAppStore } from '../store/state'
+import PinnedTabCloseDialog from '../terminal-pane/pinned-tab-close-dialog'
+import { useSystemPrefersDark } from '../terminal-pane/use-system-prefers-dark'
 import {
   hasRequestedBackgroundTerminalWorktreeMount,
   subscribeBackgroundTerminalWorktreeMountRequests
-} from '../components/terminal/background-terminal-worktree-mount'
-import { useThemeGradientStyleVariables } from '../components/theme-gradient/style-variables'
-import { dispatchWindowCloseRequest } from '../components/window-close-request-coordinator'
-import {
-  folderRelativePathToIncludeGlob,
-  selectedExplorerFolderRelativePath
-} from '../components/workspace-panel/file-explorer/file-search-include-pattern'
-import { useGitStatusPolling } from '../components/workspace-panel/use-git-status-polling'
-import { YiruProfileSwitcher } from '../components/yiru-profiles/yiru-profile-switcher'
-import { useShortcutLabel } from '../hooks/use-shortcut-label'
-import { isEditableTarget } from '../lib/editable-target'
-import { getSystemPrefersDark } from '../lib/terminal-theme'
-import { registerUpdaterBeforeUnloadBypass } from '../lib/updater-beforeunload'
-import { collectFolderWorkspaceKeysFromSession } from '../lib/workspace-session-hydration-keys'
-import {
-  canSkipRuntimeMobileSessionSyncKeyBuild,
-  getRuntimeMobileSessionSyncKey,
-  runtimeMobileSessionSyncKeysEqual,
-  scheduleRuntimeGraphSync,
-  setRuntimeGraphStoreStateGetter,
-  setRuntimeGraphSyncEnabled
-} from '../runtime/sync-runtime-graph'
-import { shutdownBufferCaptures } from '../runtime/terminal-shutdown-buffer-captures'
-import { useWebSessionTabsSync } from '../runtime/web-session-tabs-sync'
-import {
-  logRendererStartupDiagnostic,
-  timeRendererStartupStep,
-  timeRendererStartupSyncStep
-} from '../startup/diagnostics'
-import { useAppStore } from '../store'
-import { selectActiveTerminalChromeState } from '../store/active-terminal-chrome-selector'
+} from '../terminal/background-terminal-worktree-mount'
+import { selectActiveTerminalChromeState } from '../terminal/state/chrome-selector'
+import { useThemeGradientStyleVariables } from '../theme-gradient/style-variables'
+import { ConfirmationDialogProvider } from '../ui/confirmation-dialog'
+import { useGitStatusPolling } from '../workspace-panel/use-git-status-polling'
 import { AgentHibernationGate } from './agent-hibernation-gate'
-import { buildAppFontFamily } from './app-font-family'
-import { applyDocumentAppFont } from './document-app-font'
+import { installRendererCommandToasts } from './command-result-toasts'
 import { resolveMountedLazyModalIds, type LazyModalId } from './lazy-modal-mount-state'
 import { resolveLeftSidebarStyleVariables } from './left-sidebar-appearance'
-import NewWorkspaceComposerModal from './new-workspace-composer-modal'
-import { createSessionWriteSubscriber } from './session-write-subscriber'
-import {
-  getStartupErrorFallbackUI,
-  hydratePersistedUIAfterStartupRead
-} from './startup-ui-hydration'
-import { TelemetryFirstLaunchSurface } from './telemetry-first-launch-surface'
-import { resolveLeftTitlebarChromeLayout } from './titlebar-left-chrome'
-import { shouldShowWorktreeHistoryControls } from './titlebar-worktree-history-controls'
+import { resolveShellChromeLayout } from './shell-chrome-layout'
+import { ShellLateModals, ShellPrimaryModals } from './shell-modals'
+import { ShellMiddleOverlays, ShellStatusBar, ShellTrailingOverlays } from './shell-status-overlays'
+import { TitlebarLeftControls } from './titlebar-left-controls'
+import { TitlebarMainStrip, WorkspaceProfileSwitcher } from './titlebar-main-strip'
 import { useAppMenuPaste } from './use-app-menu-paste'
 import { useAutoAckViewedAgent } from './use-auto-ack-viewed-agent'
+import { useDocumentAppearance } from './use-document-appearance'
+import { useFeatureTips } from './use-feature-tips'
 import { useGlobalFileDrop } from './use-global-file-drop'
+import { useGlobalShortcuts } from './use-global-shortcuts'
 import { useIpcEvents } from './use-ipc-events'
 import { useLargeTextControlPaste } from './use-large-text-control-paste'
+import { usePersistedUi } from './use-persisted-ui'
 import { usePrimarySelectionPaste } from './use-primary-selection-paste'
 import { useRadixBodyPointerEventsRecovery } from './use-radix-body-pointer-events-recovery'
+import { useRuntimeGraphSync } from './use-runtime-graph-sync'
+import { useSessionPersistence } from './use-session-persistence'
+import { useStartupHydration } from './use-startup-hydration'
 import { useUnreadDockBadge } from './use-unread-dock-badge'
+import { hasCustomTitleBar, hasNativeSidebarMaterial } from './window-chrome-environment'
+import { WindowControls } from './window-controls'
+import { WorkspaceShellLayout } from './workspace-shell-layout'
 import { shouldShowWorktreeCreationSurface } from './worktree-creation-surface'
-import { ZoomOverlay } from './zoom-overlay'
 
 // Why: presentation must exist before any bootstrap action can publish a result,
 // and it must not disappear during React remounts.
 installRendererCommandToasts()
-
-// Why: agents alive during a hard kill (crash, forced update install) need a
-// reasonably fresh resume record on disk; one minute bounds the lost window
-// without measurable per-tick cost (the capture skips unchanged records).
-const SLEEPING_AGENT_RESUME_CAPTURE_INTERVAL_MS = 60_000
-
-const shortcutPlatform = getRendererAppPlatform()
-const isMac = shortcutPlatform === 'darwin'
-const isWebClient = isPairedWebClientWindow()
-const rendererOsRelease = typeof window === 'undefined' ? '' : getRenderingHostSnapshot().osRelease
-// Why: Electron exposes native sidebar material on macOS and supported Windows
-// builds. Paired web clients and other platforms keep the opaque surface.
-const hasNativeSidebarMaterial =
-  !isWebClient && supportsNativeSidebarMaterial(shortcutPlatform, rendererOsRelease ?? '')
-// Why: Windows and Linux both run with the native title bar removed (Windows
-// via titleBarStyle: 'hidden', Linux via frame: false), so the renderer draws
-// its own logo/menu anchor and min/max/close controls on both. Paired web
-// clients run in a browser tab, so they must not render desktop window chrome.
-const hasCustomTitleBar = shouldRenderDesktopWindowChrome({
-  platform: shortcutPlatform,
-  isWebClient
-})
-// Why: Electron drag regions swallow clicks even when a control is visibly above them.
-const TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME = '[-webkit-app-region:no-drag]'
-// Why: full-page titlebars continue the app canvas instead of introducing a
-// separate card-colored band above landing and other background surfaces.
-const TITLEBAR_CLASS_NAME =
-  'flex h-[var(--titlebar-height)] min-h-[var(--titlebar-height)] flex-row items-center bg-background select-none [-webkit-app-region:drag] [[data-regular-terminal-input-focused]_&]:[-webkit-app-region:no-drag]'
-// Why: the full-height header continues the standard app hairline through its search surface.
-const TITLEBAR_LEFT_CLASS_NAME =
-  'worktree-sidebar-theme border-border flex h-[var(--titlebar-height)] min-h-[var(--titlebar-height)] shrink-0 flex-row items-center overflow-hidden border-r border-b bg-sidebar select-none [-webkit-app-region:drag] [[data-regular-terminal-input-focused]_&]:[-webkit-app-region:no-drag]'
-const WINDOW_CONTROL_BUTTON_CLASS_NAME =
-  'h-[var(--titlebar-height)] w-[46px] bg-background text-muted-foreground transition-[background,color] duration-100 hover:bg-accent hover:text-foreground'
-
-async function listRuntimeSessionHostIdsForStartup(): Promise<ExecutionHostId[]> {
-  try {
-    return (await runtimeEnvironmentsClient.list()).map((environment) =>
-      toRuntimeExecutionHostId(environment.id)
-    )
-  } catch (err) {
-    console.warn('Failed to list runtime session hosts for startup:', err)
-    return []
-  }
-}
-
-function getKeybindingContext(target: EventTarget | null): KeybindingContext {
-  return target instanceof HTMLElement && target.classList.contains('xterm-helper-textarea')
-    ? 'terminal'
-    : 'app'
-}
-
-// Abstraction over a real KeyboardEvent and a synthetic double-tap gesture so a
-// single dispatch path serves both. KeybindingInput-compatible (key/code +
-// modifier flags) so it flows straight into keybindingMatchesAction.
-type ShortcutDispatchInput = {
-  key?: string
-  code?: string
-  altKey?: boolean
-  metaKey?: boolean
-  ctrlKey?: boolean
-  shiftKey?: boolean
-  doubleTapModifier?: PhysicalModifierToken
-  target: EventTarget | null
-  defaultPrevented: boolean
-  preventDefault: () => void
-}
-
-// Why: Windows ('hidden' titleBarStyle) and Linux (frame: false) both remove
-// the native OS title bar, so we render our own minimize/maximize/close
-// buttons. These use the shared Hugeicons adapter and stay inside the same
-// 46×36 hit area as the native title-bar affordances.
-function WindowControls(): React.JSX.Element {
-  const [maximized, setMaximized] = useState(false)
-  useEffect(() => {
-    // Why: window:maximize-changed only fires on transitions, so a window
-    // restored to a maximized state at startup would render the wrong icon
-    // until the user first clicks the button. Seed from main on mount.
-    let cancelled = false
-    void shellClient.ui.isMaximized().then((value) => {
-      if (!cancelled) {
-        setMaximized(value)
-      }
-    })
-    const unsubscribe = shellClient.ui.onMaximizeChanged(setMaximized)
-    return () => {
-      cancelled = true
-      unsubscribe()
-    }
-  }, [])
-  return (
-    <div
-      data-testid="window-controls"
-      className="fixed top-0 right-0 z-[9999] flex h-[var(--titlebar-height)] flex-row [-webkit-app-region:no-drag]"
-    >
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon-sm"
-        className={WINDOW_CONTROL_BUTTON_CLASS_NAME}
-        aria-label={translate('auto.App.bbb7f90669', 'Minimize')}
-        onClick={() => shellClient.ui.minimize()}
-      >
-        <WindowMinimize className="size-2.5" aria-hidden />
-      </Button>
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon-sm"
-        className={WINDOW_CONTROL_BUTTON_CLASS_NAME}
-        aria-label={
-          maximized
-            ? translate('auto.App.66f0a552e5', 'Restore')
-            : translate('auto.App.c9d6f98459', 'Maximize')
-        }
-        onClick={() => shellClient.ui.maximize()}
-      >
-        <WindowMaximize className="size-2.5" aria-hidden />
-      </Button>
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon-sm"
-        className={cn(
-          WINDOW_CONTROL_BUTTON_CLASS_NAME,
-          'hover:bg-destructive hover:text-white dark:hover:bg-destructive dark:hover:text-white'
-        )}
-        aria-label={translate('auto.App.e960d18540', 'Close')}
-        // Why: IPC to main so the BrowserWindow 'close' event fires, which
-        // sends 'window:close-requested' back to the renderer and keeps the
-        // terminal-running confirmation guard active. window.close() is
-        // unreliable in sandboxed renderers.
-        onClick={() => shellClient.ui.requestClose()}
-      >
-        <WindowClose className="size-2.5" aria-hidden />
-      </Button>
-    </div>
-  )
-}
-
-const Landing = lazy(() => import('./landing-page'))
-const HomePage = lazy(() => import('../components/home/page'))
-const WorktreeCreationPanel = lazy(() => import('../components/worktree-creation/panel'))
-const Settings = lazy(() => import('../components/settings/page'))
-const SkillsPage = lazy(() => import('../components/skills/page'))
-const WorkspaceSpacePage = lazy(() => import('../components/workspace-space/page'))
-const WorkspaceSidebar = lazy(() => import('../components/workspace-panel/sidebar'))
-const MobilePage = lazy(() => import('../components/mobile/page'))
-const QuickOpen = lazy(() => import('../components/quick-open'))
-const WorktreeJumpPalette = lazy(() => import('../components/worktree-jump-palette/panel'))
-const WorkspaceCleanupDialog = lazy(() => import('../components/workspace-cleanup/dialog'))
-const Terminal = lazy(() => import('../components/terminal-workspace/panel'))
-const CoworkingWorkspaceSurface = lazy(() => import('../components/coworking/workspace-surface'))
-const StatusBar = lazy(() =>
-  import('../components/status-bar/status-bar').then((module) => ({ default: module.StatusBar }))
-)
-const SetupGuideModal = lazy(() => import('../components/setup-guide/modal'))
-const FeatureWallModal = lazy(() => import('../components/feature-wall/modal'))
-const FeatureTipsModal = lazy(() => import('../components/feature-tips/modal'))
-const AddRepoDialog = lazy(() => import('../components/sidebar/add-repo/dialog'))
-const NonGitFolderDialog = lazy(() => import('../components/sidebar/non-git-folder-dialog'))
-const AddProjectFromFolderDialog = lazy(
-  () => import('../components/sidebar/add-project-from-folder-dialog')
-)
-const ProjectAddedDialog = lazy(() => import('../components/sidebar/project-added-dialog'))
-const DeleteWorktreeDialog = lazy(() => import('../components/sidebar/delete-worktree/dialog'))
-const UpdateCard = lazy(() =>
-  import('./update-card').then((module) => ({ default: module.UpdateCard }))
-)
-const RemoteServerUpdateDialog = lazy(
-  () => import('../components/settings/remote-server-update-dialog')
-)
-// Why: this dialog embeds a live terminal pane, so importing it eagerly drags
-// xterm and the whole pane-manager engine into the entry chunk — about 2.3MB
-// for a surface that only appears when a skill needs updating.
-const SkillFreshnessUpdateDialog = lazy(() =>
-  import('../components/skills/skill-freshness-update-dialog').then((module) => ({
-    default: module.SkillFreshnessUpdateDialog
-  }))
-)
-const ContextualTourOverlay = lazy(() =>
-  import('../components/contextual-tours/contextual-tour-overlay').then((module) => ({
-    default: module.ContextualTourOverlay
-  }))
-)
-const SetupGuideTelemetryObserver = lazy(() =>
-  import('../components/setup-guide/telemetry-observer').then((module) => ({
-    default: module.SetupGuideTelemetryObserver
-  }))
-)
-// Why: lazy so onboarding's step modules + assets aren't fetched for users
-// past first-launch. The gate `shouldShowOnboarding` lives in its own tiny
-// module so no eager import path pulls OnboardingFlow into the main chunk.
-const OnboardingFlow = lazy(() => import('../components/onboarding/flow'))
 
 function shouldMountUpdateCardForStatus(status: UpdateStatus): boolean {
   if (status.state === 'idle') {
@@ -390,71 +78,16 @@ function shouldMountUpdateCardForStatus(status: UpdateStatus): boolean {
 }
 
 function App(): React.JSX.Element {
+  const isExtensionHost = isExtensionRenderer()
+  const workbenchLocation = getWorkbenchLocation()
+  const projectSurface = workbenchLocation.kind === 'project' ? workbenchLocation : null
+  const projectCatalog = useProjectCatalog()
   const clearUnreadDockBadge = useUnreadDockBadge()
   useRadixBodyPointerEventsRecovery()
   useWebSessionTabsSync()
-  useCoworkingSharingBridge()
-  // Why: Zustand actions are referentially stable, but each individual
-  // useAppStore(s => s.someAction) still registers a subscription that React
-  // must check on every store mutation. Consolidating action refs into one
-  // useShallow subscription means one equality check instead of many.
-  const actions = useAppStore(
-    useShallow((s) => ({
-      toggleSidebar: s.toggleSidebar,
-      fetchRepos: s.fetchRepos,
-      fetchReposForAllHosts: s.fetchReposForAllHosts,
-      fetchProjectGroups: s.fetchProjectGroups,
-      fetchProjectGroupsForAllHosts: s.fetchProjectGroupsForAllHosts,
-      fetchFolderWorkspaces: s.fetchFolderWorkspaces,
-      fetchFolderWorkspacesForAllHosts: s.fetchFolderWorkspacesForAllHosts,
-      fetchAllWorktrees: s.fetchAllWorktrees,
-      fetchWorktreeLineage: s.fetchWorktreeLineage,
-      fetchYiruProfiles: s.fetchYiruProfiles,
-      fetchSettings: s.fetchSettings,
-      fetchKeybindings: s.fetchKeybindings,
-      initGitHubCache: s.initGitHubCache,
-      refreshAllGitHub: s.refreshAllGitHub,
-      reportVisibleGitHubPRRefreshCandidates: s.reportVisibleGitHubPRRefreshCandidates,
-      bumpGitHubPRVisibleRefreshGeneration: s.bumpGitHubPRVisibleRefreshGeneration,
-      hydrateWorkspaceSession: s.hydrateWorkspaceSession,
-      hydrateTabsSession: s.hydrateTabsSession,
-      hydrateEditorSession: s.hydrateEditorSession,
-      hydrateBrowserSession: s.hydrateBrowserSession,
-      fetchBrowserSessionProfiles: s.fetchBrowserSessionProfiles,
-      reconnectPersistedTerminals: s.reconnectPersistedTerminals,
-      setDeferredSshReconnectTargets: s.setDeferredSshReconnectTargets,
-      setSshConnectionState: s.setSshConnectionState,
-      hydratePersistedUI: s.hydratePersistedUI,
-      setHydrationSucceeded: s.setHydrationSucceeded,
-      openModal: s.openModal,
-      closeModal: s.closeModal,
-      markFeatureTipsSeen: s.markFeatureTipsSeen,
-      setContextualToursAutoEligible: s.setContextualToursAutoEligible,
-      setContextualToursOnboardingVisible: s.setContextualToursOnboardingVisible,
-      cancelContextualTour: s.cancelContextualTour,
-      openDiffNotesSendMenuForActiveWorktree: s.openDiffNotesSendMenuForActiveWorktree,
-      setActiveView: s.setActiveView,
-      updateSettings: s.updateSettings,
-      pruneLastVisitedTimestamps: s.pruneLastVisitedTimestamps,
-      seedActiveWorktreeLastVisitedIfMissing: s.seedActiveWorktreeLastVisitedIfMissing
-    }))
-  )
-
   const activeView = useAppStore((s) => s.activeView)
-  const activeCoworkingWorkspaceRoute = useAppStore((s) => s.activeCoworkingWorkspaceRoute)
-  const hasActiveCoworkingWorkspace =
-    activeView === 'terminal' && activeCoworkingWorkspaceRoute !== null
   const activeModal = useAppStore((s) => s.activeModal)
-  const featureTipsSeenIds = useAppStore((s) => s.featureTipsSeenIds)
-  const featureInteractions = useAppStore((s) => s.featureInteractions)
-  const contextualToursAutoEligible = useAppStore((s) => s.contextualToursAutoEligible)
-  const {
-    activeWorktreeId,
-    tabCount,
-    effectiveActiveTabId,
-    activeTabCanExpand,
-    effectiveActiveTabExpanded
-  } = useAppStore(useShallow(selectActiveTerminalChromeState))
+  const { activeWorktreeId } = useAppStore(useShallow(selectActiveTerminalChromeState))
   const activePendingCreationId = useAppStore((s) => s.activePendingCreationId)
   // Why: the creation surface owns the tab strip from the first pending frame.
   // Gating it on the delayed loader flag made the tab bar swap in mid-create.
@@ -476,9 +109,6 @@ function App(): React.JSX.Element {
   const keybindings = useAppStore((s) => s.keybindings)
   const updateStatus = useAppStore((s) => s.updateStatus)
   const activeContextualTourId = useAppStore((s) => s.activeContextualTourId)
-  const leftSidebarShortcutLabel = useShortcutLabel('sidebar.left.toggle')
-  const historyBackShortcutLabel = useShortcutLabel('worktree.history.back')
-  const historyForwardShortcutLabel = useShortcutLabel('worktree.history.forward')
   const statusBarVisible = useAppStore((s) => s.statusBarVisible)
   const hasMountedTerminalWorkbenchRef = useRef(false)
   if (activeWorktreeId !== null || backgroundTerminalMountRequested) {
@@ -494,33 +124,29 @@ function App(): React.JSX.Element {
   // Why: visible worktree creation owns its faux tab strip from start to finish;
   // the previous workspace must stay mounted for retention without rendering
   // real chrome.
-  const creationLayoutActive =
-    shouldShowWorktreeCreationSurface({
-      activeView,
-      activePendingCreationId,
-      hasActivePendingCreation: activePendingCreationExists
-    }) && !hasActiveCoworkingWorkspace
+  const creationLayoutActive = shouldShowWorktreeCreationSurface({
+    activeView,
+    activePendingCreationId,
+    hasActivePendingCreation: activePendingCreationExists
+  })
   const workspaceChromeActive =
-    activeView === 'terminal' &&
-    (activeWorktreeId !== null || hasActiveCoworkingWorkspace) &&
-    !creationLayoutActive
+    activeView === 'terminal' && activeWorktreeId !== null && !creationLayoutActive
   const terminalWorkbenchVisible =
-    activeView === 'terminal' &&
-    activeWorktreeId !== null &&
-    !hasActiveCoworkingWorkspace &&
-    !creationLayoutActive
-  const setAppRootNode = useCallback(
-    (node: HTMLDivElement | null): void => {
-      // Why: these best-effort App chrome cleanups share the App root lifetime.
-      if (!node) {
-        clearUnreadDockBadge()
-      }
-    },
-    [clearUnreadDockBadge]
-  )
+    activeView === 'terminal' && activeWorktreeId !== null && !creationLayoutActive
+  const setAppRootNode = (node: HTMLDivElement | null): void => {
+    // Why: these best-effort App chrome cleanups share the App root lifetime.
+    if (!node) {
+      clearUnreadDockBadge()
+    }
+  }
 
   const sidebarWidth = useAppStore((s) => s.sidebarWidth)
   const sidebarOpen = useAppStore((s) => s.sidebarOpen)
+  const extensionSidePanelOpen = useSyncExternalStore(
+    subscribeSidePanelPresence,
+    getSidePanelPresenceSnapshot,
+    getSidePanelPresenceSnapshot
+  )
   const groupBy = useAppStore((s) => s.groupBy)
   const sortBy = useAppStore((s) => s.sortBy)
   const projectOrderBy = useAppStore((s) => s.projectOrderBy)
@@ -553,27 +179,22 @@ function App(): React.JSX.Element {
   }, [settings, startupWindowBackgroundBlur])
   const windowBackgroundBlurEnabled =
     hasNativeSidebarMaterial && startupWindowBackgroundBlur === true
-  const leftSidebarVariables = useMemo(
-    () => resolveLeftSidebarStyleVariables(settings, systemPrefersDark, hasNativeSidebarMaterial),
-    [settings, systemPrefersDark]
-  )
+  const leftSidebarVariables = (() =>
+    resolveLeftSidebarStyleVariables(settings, systemPrefersDark, hasNativeSidebarMaterial))()
   const leftSidebarStyle = leftSidebarVariables as React.CSSProperties | undefined
   const themeGradientVariables = useThemeGradientStyleVariables(systemPrefersDark)
   usePrimarySelectionPaste()
   useAppMenuPaste()
   useLargeTextControlPaste()
-  const canGoBackWorktree = useAppStore(canGoBackWorktreeHistory)
-  const canGoForwardWorktree = useAppStore(canGoForwardWorktreeHistory)
   const titlebarLeftControlsRef = useRef<HTMLDivElement | null>(null)
   const [collapsedSidebarHeaderWidth, setCollapsedSidebarHeaderWidth] = useState(0)
   const [mountedLazyModalIds, setMountedLazyModalIds] = useState<Set<LazyModalId>>(() => new Set())
   const [shouldMountAddRepoDialog, setShouldMountAddRepoDialog] = useState(false)
-  const [onboarding, setOnboarding] = useState<OnboardingState | null>(null)
-  const [onboardingLoaded, setOnboardingLoaded] = useState(false)
-  const featureTipsPromptedThisSessionRef = useRef(false)
-  const featureTipsSuppressedByOnboardingThisSessionRef = useRef(false)
+  const { onboarding, onboardingLoaded, setOnboarding } = useStartupHydration(
+    projectCatalog.isPending,
+    projectCatalog.repos
+  )
   const unmountAddRepoDialogTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const [featureTipCliInstalled, setFeatureTipCliInstalled] = useState<boolean | null>(null)
   const shouldRenderOnboarding = onboarding !== null && shouldShowOnboarding(onboarding)
 
   useEffect(() => {
@@ -634,96 +255,35 @@ function App(): React.JSX.Element {
   useEditorExternalWatch()
   useGlobalFileDrop()
   useAutoAckViewedAgent()
-
-  useEffect(() => {
-    return onOnboardingReopened(setOnboarding)
-  }, [])
-
-  useEffect(() => {
-    // Why: `onboarding === null` is the startup loading state. Suppress
-    // contextual tours until the persisted onboarding state is known so a
-    // first-run user cannot have a tour marked seen before onboarding appears.
-    const suppressTours = !onboardingLoaded || shouldShowOnboarding(onboarding)
-    actions.setContextualToursOnboardingVisible(suppressTours)
-  }, [actions, onboarding, onboardingLoaded])
-
-  useEffect(() => {
-    if (!persistedUIReady || !onboardingLoaded || contextualToursAutoEligible !== null) {
-      return
-    }
-    // Why: this rollout is for users who are still in first-run onboarding.
-    // Existing profiles are locally classified once and never auto-toured.
-    actions.setContextualToursAutoEligible(shouldShowOnboarding(onboarding))
-  }, [actions, contextualToursAutoEligible, onboarding, onboardingLoaded, persistedUIReady])
-
-  useEffect(() => {
-    if (!persistedUIReady) {
-      return
-    }
-
-    let cancelled = false
-    void readCliInstallStatus()
-      .then((status) => {
-        if (cancelled) {
-          return
-        }
-        setFeatureTipCliInstalled(isCliFeatureTipCompleted(status))
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setFeatureTipCliInstalled(true)
-        }
-      })
-
-    return () => {
-      cancelled = true
-    }
-  }, [persistedUIReady])
-
-  useEffect(() => {
-    const featureTipsDecision = getFeatureTipsAppOpenDecision({
-      activeModal,
-      cliInstalled: featureTipCliInstalled,
-      featureTipsSeenIds,
-      featureInteractions,
-      onboarding,
-      persistedUIReady,
-      promptedThisSession: featureTipsPromptedThisSessionRef.current,
-      settings,
-      suppressedByOnboardingThisSession: featureTipsSuppressedByOnboardingThisSessionRef.current
-    })
-
-    if (featureTipsDecision.kind === 'suppress-for-onboarding') {
-      // Why: first-download users should finish onboarding without a second
-      // education modal appearing later in the same first-run session.
-      featureTipsSuppressedByOnboardingThisSessionRef.current = true
-      return
-    }
-
-    if (featureTipsDecision.kind !== 'open') {
-      return
-    }
-
-    featureTipsPromptedThisSessionRef.current = true
-    if (featureTipsDecision.tipId === 'yiru-cli') {
-      trackYiruCliFeatureTipShown('app_open')
-    } else if (featureTipsDecision.tipId === 'cmd-j-palette') {
-      trackCmdJPaletteFeatureTipShown('app_open')
-    }
-    // Why: once a tip is visible, app quit/crash should not make it reappear
-    // on the next launch just because the user never clicked a dismiss button.
-    actions.markFeatureTipsSeen([featureTipsDecision.tipId])
-    actions.openModal('feature-tips', { source: 'app_open', tipId: featureTipsDecision.tipId })
-  }, [
+  useRuntimeGraphSync(workspaceSessionReady)
+  useSessionPersistence()
+  usePersistedUi({
+    acknowledgedAgentsByPaneKey,
+    activeView,
+    filterRepoIds,
+    groupBy,
+    hideDefaultBranchWorkspace,
+    markdownTocPanelWidth,
+    persistedUIReady,
+    projectOrderBy,
+    rightSidebarExplorerView,
+    rightSidebarOpen,
+    rightSidebarTab,
+    rightSidebarWidth,
+    showDotfilesByWorktree,
+    showSleepingWorkspaces,
+    sidebarWidth,
+    sortBy
+  })
+  useDocumentAppearance(settings)
+  useGitHubVisibilityRefresh()
+  useFeatureTips({
     activeModal,
-    actions,
-    featureTipCliInstalled,
-    featureInteractions,
-    featureTipsSeenIds,
     onboarding,
+    onboardingLoaded,
     persistedUIReady,
     settings
-  ])
+  })
 
   // Why: sidebar open/close flips width instantaneously. useLayoutEffect
   // runs synchronously after React commits the DOM but before paint, so
@@ -734,976 +294,35 @@ function App(): React.JSX.Element {
   // already-fitted cols/rows.
   useLayoutEffect(() => {
     window.dispatchEvent(new CustomEvent(SYNC_FIT_PANES_EVENT))
-  }, [sidebarOpen])
+  }, [extensionSidePanelOpen, sidebarOpen])
 
-  // Fetch initial data + hydrate GitHub cache from disk
-  useEffect(() => {
-    let cancelled = false
-    // Why: AbortController must be declared outside the async block so the
-    // cleanup function can abort it. Under StrictMode the effect runs twice;
-    // without this, the first (unmounted) pass would keep spawning PTYs.
-    const abortController = new AbortController()
-
-    // Why (issue #1158): hydrate persisted UI immediately after ui.get()
-    // succeeds, before any later session step can throw. The UI writer is
-    // gated only on persistedUIReady, so falling back to defaults after a
-    // successful ui.get() would serialize those defaults back to disk.
-    let uiHydrated = false
-    // Why (issue #1158): track whether the success-path call to
-    // reconnectPersistedTerminals started so the catch path doesn't run it a
-    // second time. Reconnect mutates store state via per-tab set() blocks
-    // inside its loops (populating tabsByWorktree / ptyIdsByTabId); re-entering
-    // it on partially-mutated state would double-set ptyIds and drain pending*
-    // maps twice. If the success-path call started and threw mid-loop, those
-    // per-tab set() blocks may have populated tabsByWorktree / ptyIdsByTabId
-    // for some tabs but did NOT reach the tail set() that flips
-    // workspaceSessionReady — so we still need to force the flag true so the
-    // UI mounts.
-    let reconnectStarted = false
-    void (async () => {
-      const startupStartedAt = performance.now()
-      logRendererStartupDiagnostic('startup-chain-start')
-      try {
-        // Why: profile state only feeds the switcher and the add-project
-        // advisory — nothing in the hydration chain reads it synchronously,
-        // so it must not add a serial IPC round-trip before fetchSettings.
-        void actions.fetchYiruProfiles()
-        // Why: repo/worktree hydration routes through settings.activeRuntimeEnvironmentId.
-        // Load settings first so a persisted remote runtime does not boot against
-        // the local filesystem and then hydrate stale local workspace state.
-        await timeRendererStartupStep('fetch-settings', () => actions.fetchSettings())
-        // Why here: hidden-at-launch PTYs (background terminal reconnects,
-        // agent sessions) can query OSC 10/11 before any terminal pane mounts
-        // and main's responder is silent-until-first-push. Publish composed
-        // view attributes as soon as settings exist, before any spawn below.
-        publishTerminalViewAttributesAtAppStart(
-          useAppStore.getState().settings,
-          getSystemPrefersDark()
-        )
-        // Why: keybindings + onboarding are main-side reads with no dependency
-        // on the catalog/session steps below, so start them now and await them
-        // at their original positions — the round-trips overlap the local
-        // catalog scans instead of queuing after them. Browser session profiles
-        // are deliberately NOT started early: on a remote runtime they route
-        // through a runtime RPC that may not be connected this early, and a
-        // failed fetch clears the profile list. The floating .catch marks the
-        // rejection handled if an earlier awaited step throws first; each await
-        // still rethrows its own failure.
-        const keybindingsPromise = timeRendererStartupStep('fetch-keybindings', () =>
-          actions.fetchKeybindings()
-        )
-        keybindingsPromise.catch(() => {})
-        const onboardingPromise = timeRendererStartupStep('onboarding-get', () =>
-          shellClient.onboarding.get()
-        )
-        onboardingPromise.catch(() => {})
-        // Why: hydrate persisted UI immediately after ui.get() so first paint
-        // reflects saved view settings before the catalog scans below. ui.get()
-        // is awaited (not overlapped) because the hydrate must land before the
-        // local-first catalog/session steps run.
-        const persistedUI = await timeRendererStartupStep('ui-get', () =>
-          getRuntimeUIState(useAppStore.getState().settings)
-        )
-        uiHydrated = timeRendererStartupSyncStep('hydrate-persisted-ui', () =>
-          hydratePersistedUIAfterStartupRead({
-            persistedUI,
-            cancelled,
-            hydratePersistedUI: actions.hydratePersistedUI
-          })
-        )
-        const startupRuntimeHostIds = await timeRendererStartupStep(
-          'list-runtime-session-hosts',
-          listRuntimeSessionHostIdsForStartup
-        )
-        // Why: first paint needs local data and persisted view settings, but
-        // saved remote runtimes can spend the full connect timeout. Load only
-        // the local catalog here; remotes refresh after hydration below.
-        await timeRendererStartupStep('fetch-repos-local', () =>
-          actions.fetchReposForAllHosts({ remoteHosts: 'skip' })
-        )
-        await timeRendererStartupStep('fetch-project-groups-local', () =>
-          actions.fetchProjectGroupsForAllHosts({ remoteHosts: 'skip' })
-        )
-        await timeRendererStartupStep('fetch-folder-workspaces-local', () =>
-          actions.fetchFolderWorkspacesForAllHosts({ remoteHosts: 'skip' })
-        )
-        await timeRendererStartupStep('fetch-worktrees', () =>
-          actions.fetchAllWorktrees({ hydrationPurge: 'defer' })
-        )
-        // Why: runtime-owned worktree slices live in per-host partitions.
-        // Remote catalogs now load after first paint, so include saved runtime
-        // host ids from local settings to restore their persisted session slices
-        // without waiting on network reachability. Unreadable partitions skip.
-        const sessionRead = await timeRendererStartupStep('session-get', () =>
-          fetchWorkspaceSessionWithRuntimeHostOwners(
-            shellClient.session,
-            useAppStore.getState().repos,
-            startupRuntimeHostIds
-          )
-        )
-        await keybindingsPromise
-        if (!cancelled) {
-          const sessionHydrationOptions = {
-            additionalValidWorkspaceKeys: collectFolderWorkspaceKeysFromSession(sessionRead.session)
-          }
-          timeRendererStartupSyncStep('hydrate-session-stores', () => {
-            actions.hydrateWorkspaceSession(sessionRead.session, {
-              ...sessionHydrationOptions,
-              runtimeHostIdByWorkspaceSessionKey: sessionRead.runtimeHostIdByWorkspaceSessionKey
-            })
-            actions.hydrateTabsSession(sessionRead.session, sessionHydrationOptions)
-            actions.hydrateEditorSession(sessionRead.session, sessionHydrationOptions)
-            actions.hydrateBrowserSession(sessionRead.session, sessionHydrationOptions)
-          })
-          // Why: prune lastVisitedAtByWorktreeId entries whose worktrees
-          // no longer exist. Must run AFTER hydration — before this point,
-          // async repo loads may not have populated worktreesByRepo yet and
-          // pruning would delete timestamps for worktrees that are about to
-          // appear. Seed the restored active worktree's timestamp if missing
-          // so users upgrading from a pre-feature build don't see the active
-          // worktree sink in the empty-query list.
-          // See docs/cmd-j-empty-query-ordering.md.
-          timeRendererStartupSyncStep('visit-timestamp-prune', () => {
-            actions.pruneLastVisitedTimestamps()
-            actions.seedActiveWorktreeLastVisitedIfMissing()
-          })
-          await timeRendererStartupStep('fetch-browser-session-profiles', () =>
-            actions.fetchBrowserSessionProfiles()
-          )
-          const onboardingState = await onboardingPromise
-          if (!cancelled) {
-            setOnboarding(onboardingState)
-            setOnboardingLoaded(true)
-          }
-
-          // Why: main overlaps daemon/hook startup with renderer hydration for
-          // first paint, but restored terminals still need those services ready
-          // before they mount and spawn/reconnect PTYs.
-          await timeRendererStartupStep('first-window-services-await', () =>
-            shellClient.app.awaitFirstWindowStartupServices()
-          )
-          reconnectStarted = true
-          await timeRendererStartupStep('reconnect-terminals', () =>
-            actions.reconnectPersistedTerminals(abortController.signal)
-          )
-          syncZoomCSSVar()
-          // Why (issue #1158): unlock the debounced session writer only after
-          // hydration AND all dependent startup steps (SSH reconnect, terminal
-          // reconnect) completed without throwing. If this flag flipped earlier
-          // and a later step threw, the catch path's reconnectPersistedTerminals
-          // would flip workspaceSessionReady=true with the gate already open,
-          // and the writer would serialize a partially-mutated store back to
-          // disk — the exact data-loss mode this PR fixes.
-          actions.setHydrationSucceeded(true)
-          logRendererStartupDiagnostic('startup-hydration-done', {
-            durationMs: Math.round(performance.now() - startupStartedAt)
-          })
-          void (async () => {
-            try {
-              await timeRendererStartupStep('remote-catalog-refresh', async () => {
-                await actions.fetchReposForAllHosts()
-                await actions.fetchProjectGroupsForAllHosts()
-                await actions.fetchFolderWorkspacesForAllHosts()
-              })
-              if (!cancelled) {
-                await timeRendererStartupStep('remote-worktree-refresh', async () => {
-                  await actions.fetchAllWorktrees()
-                  await actions.fetchWorktreeLineage()
-                })
-              }
-            } catch (err) {
-              console.warn('Remote startup catalog refresh failed:', err)
-            }
-          })()
-        }
-      } catch (error) {
-        // Why (issue #1158): previously this catch called hydrateWorkspaceSession
-        // with empty defaults, which overwrote the in-memory tab map. The
-        // debounced session writer then serialized that empty state back to
-        // yiru-data.json, silently erasing the user's saved tabs. The fix is
-        // to leave in-memory state untouched and keep hydrationSucceeded
-        // false so the writer stays gated. We still ensure persistedUIReady and
-        // workspaceSessionReady flip so the UI can mount without a session.
-        const stepLabel = error instanceof Error && error.message ? error.message : String(error)
-        console.error(
-          '[startup] Workspace session hydration failed; leaving disk state untouched:',
-          stepLabel,
-          error
-        )
-        if (!cancelled) {
-          // Why (issue #1158): only hydrate UI with defaults if ui.get() never
-          // produced persisted data. If the real UI hydrate already ran and a
-          // later session step threw, defaults would flow through the debounced
-          // UI writer and clobber ui.json (sidebar width, sort, filters, etc.).
-          const fallbackUI = getStartupErrorFallbackUI(uiHydrated)
-          if (fallbackUI) {
-            actions.hydratePersistedUI(fallbackUI, 'startup')
-          }
-          // Why (issue #1158): surface a sticky, dismissible toast so the
-          // user knows they're in degraded "no-save" mode. Without this, every
-          // new tab/file/browse becomes silently ephemeral — `hydrationSucceeded`
-          // stays false for the rest of the process and the session writer is
-          // a no-op. The "Restart now" action calls app.relaunch (defined in
-          // src/main/shell/app.ts) so the user can recover with one click instead
-          // of having to find a quit/relaunch path themselves.
-          toast.error(translate('auto.App.12e77cf12b', 'Session restore failed'), {
-            description: translate(
-              'auto.App.0a9e810705',
-              "Changes won't be saved until restart. Your previous tabs are safe on disk."
-            ),
-            duration: Infinity,
-            dismissible: true,
-            action: {
-              label: translate('auto.App.caea5b51b9', 'Restart now'),
-              onClick: () => {
-                void shellClient.app.relaunch()
-              }
-            }
-          })
-          // Why: reconnectPersistedTerminals flips workspaceSessionReady so the
-          // UI mounts; auto-tab-creation becomes unblocked. hydrationSucceeded
-          // is intentionally NOT set — the session writer must stay a no-op
-          // until the user gets a clean restart, so we don't overwrite the
-          // on-disk file we failed to load.
-          if (!reconnectStarted) {
-            try {
-              await shellClient.app.awaitFirstWindowStartupServices()
-              await actions.reconnectPersistedTerminals(abortController.signal)
-            } catch (reconnectErr) {
-              console.error(
-                '[startup] reconnectPersistedTerminals failed in error path:',
-                reconnectErr
-              )
-              // Why (issue #1158): re-check !cancelled before mutating store
-              // state. The await above may have run while the effect was being
-              // torn down (StrictMode pass 1 cleanup) — in that case the
-              // second pass owns hydration and we must not stomp its work
-              // from a cancelled run.
-              if (!cancelled) {
-                // Why (issue #1158): this is already the recovery path from a
-                // failed hydration. If the recovery itself throws, the async IIFE
-                // rejects as an unhandled promise and workspaceSessionReady never
-                // flips — leaving the user staring at a blank window. Forcing the
-                // flag true lets the app shell mount with an empty session, which
-                // is strictly better than a non-functional UI.
-                //
-                // Also clear pendingReconnect* maps because reconnectPersistedTerminals
-                // normally drains them as part of its post-conditions
-                // (see terminals.ts post-loop cleanup). Bypassing that drain by
-                // flipping only the flag would leave stale reconnect data in
-                // memory — any later reader of pending* maps could trigger
-                // phantom reconnect attempts on PTYs that no longer exist.
-                useAppStore.setState({
-                  workspaceSessionReady: true,
-                  pendingReconnectWorktreeIds: [],
-                  pendingReconnectTabByWorktree: {},
-                  pendingReconnectPtyIdByTabId: {}
-                })
-              }
-            }
-          } else {
-            // Why (issue #1158): the success-path call to
-            // reconnectPersistedTerminals already started; its per-tab set()
-            // blocks may have populated tabsByWorktree / ptyIdsByTabId for
-            // some tabs but did NOT reach the tail set() that flips
-            // workspaceSessionReady (that runs after the loop completes).
-            // Don't re-run reconnect over partially-mutated state — doing so
-            // would double-set ptyIds and drain pending* maps twice. Force
-            // the flag true so the UI mounts. The same pending* clear applies
-            // here for the same reason as above.
-            useAppStore.setState({
-              workspaceSessionReady: true,
-              pendingReconnectWorktreeIds: [],
-              pendingReconnectTabByWorktree: {},
-              pendingReconnectPtyIdByTabId: {}
-            })
-          }
-        }
-      }
-      void actions.initGitHubCache()
-    })()
-
-    return () => {
-      cancelled = true
-      abortController.abort()
-    }
-  }, [actions])
-
-  useEffect(() => {
-    setRuntimeGraphStoreStateGetter(useAppStore.getState)
-    return () => {
-      setRuntimeGraphStoreStateGetter(null)
-    }
-  }, [])
-
-  useEffect(() => {
-    let previousKey = getRuntimeMobileSessionSyncKey(useAppStore.getState())
-    return useAppStore.subscribe((state, previousState) => {
-      // Why: this subscriber fires on every store mutation (PTY/agent-status
-      // ticks). Read the cached prefers-dark snapshot — kept fresh by the shared
-      // listener that useSystemPrefersDark() below already mounts — instead of
-      // allocating a throwaway MediaQueryList via matchMedia on every tick,
-      // before the skip-gate even runs.
-      const systemPrefersDark = getSystemPrefersDarkSnapshot()
-      // Why: skip the key build entirely when every input field is unchanged
-      // by reference. Mirrors every field used by
-      // getRuntimeMobileSessionSyncKey so this gate covers every "could the
-      // key have changed?" case.
-      if (
-        canSkipRuntimeMobileSessionSyncKeyBuild(
-          state,
-          previousState,
-          systemPrefersDark,
-          previousKey.systemPrefersDark
-        )
-      ) {
-        return
-      }
-      const nextKey = getRuntimeMobileSessionSyncKey(
-        state,
-        previousState,
-        previousKey,
-        systemPrefersDark
-      )
-      if (runtimeMobileSessionSyncKeysEqual(nextKey, previousKey)) {
-        return
-      }
-      previousKey = nextKey
-      scheduleRuntimeGraphSync()
-    })
-  }, [])
-
-  useEffect(() => registerUpdaterBeforeUnloadBypass(), [])
-
-  useEffect(() => {
-    setRuntimeGraphSyncEnabled(workspaceSessionReady)
-    return () => {
-      setRuntimeGraphSyncEnabled(false)
-    }
-  }, [workspaceSessionReady])
-
-  // Why: session persistence never drives JSX — it only writes to disk.
-  // Using a Zustand subscribe() outside React removes ~15 subscriptions from
-  // App's render cycle, eliminating re-renders on every tab/file/browser change.
-  useEffect(() => {
-    return createSessionWriteSubscriber({
-      store: useAppStore,
-      persist: ({ patch }) => {
-        const state = useAppStore.getState()
-        // Why: route each runtime host's worktree-scoped slice to its own
-        // partition; the returned promise is the local write so the
-        // remote-workspace upload chain below keeps its ordering.
-        void patchWorkspaceSessionByHost(shellClient.session, patch, state)
-      }
-    })
-  }, [])
-
-  // On shutdown, capture terminal scrollback buffers and flush to disk.
-  // Runs synchronously in beforeunload: capture → Zustand set → sendSync → flush.
-  useEffect(() => {
-    // Why: beforeunload fires twice during a manual quit — once from the
-    // synthetic dispatch in the onWindowCloseRequested handler (captures
-    // good data while TerminalPanes are still mounted), and again from the
-    // native window close triggered by confirmWindowClose(). Between these
-    // two firings, PTY exit events can arrive and unmount TerminalPanes,
-    // emptying shutdownBufferCaptures. The guard prevents the second call
-    // from overwriting the good session data with an empty snapshot.
-    let shutdownBuffersCaptured = false
-    const captureAndFlush = (): void => {
-      if (shutdownBuffersCaptured) {
-        return
-      }
-      if (!shouldPersistWorkspaceSession(useAppStore.getState())) {
-        return
-      }
-      for (const capture of shutdownBufferCaptures.values()) {
-        try {
-          capture({ includeLocalBuffers: false })
-        } catch {
-          // Don't let one pane's failure block the rest.
-        }
-      }
-      // Why: agent provider session ids live only in agentStatusByPaneKey,
-      // which is in-memory. Capture them into the persisted sleeping-session
-      // map so a daemon/session death while the app is closed can still
-      // cold-restore via the agent's resume command (#5232).
-      useAppStore.getState().captureAllSleepingAgentSessions('quit')
-      // Why: re-read state after capture() calls populated scrollback buffers
-      // into the store via Zustand setters. The earlier read is only for the
-      // gating flags and would miss those updates.
-      const freshState = useAppStore.getState()
-      void persistWorkspaceSessionByHost(
-        shellClient.session,
-        buildWorkspaceSessionPayload(freshState),
-        freshState
-      ).catch(() => {})
-      shutdownBuffersCaptured = true
-    }
-    window.addEventListener('beforeunload', captureAndFlush)
-    return () => window.removeEventListener('beforeunload', captureAndFlush)
-  }, [])
-
-  // Why: beforeunload never fires on a hard kill (crash, forced update
-  // install, TerminateProcess), so agents alive at that moment would leave no
-  // resume record. This periodic capture stores only agent session ids — not
-  // scrollback, see the no-periodic-scrollback note below — and the store
-  // action skips unchanged records, so idle ticks write nothing; real changes
-  // flow through the debounced session-write subscriber.
-  useEffect(() => {
-    const timer = window.setInterval(() => {
-      if (!shouldPersistWorkspaceSession(useAppStore.getState())) {
-        return
-      }
-      useAppStore.getState().captureAllSleepingAgentSessions('periodic')
-    }, SLEEPING_AGENT_RESUME_CAPTURE_INTERVAL_MS)
-    return () => window.clearInterval(timer)
-  }, [])
-
-  // Own the single window-close-request subscription at the always-mounted App
-  // root. Why: the rich confirmation flow lives in Terminal, which is not
-  // mounted on the no-workspace landing page (and is lazy-loaded elsewhere), so
-  // subscribing there left File → Exit / Ctrl+Q with no listener and the window
-  // never closed (#5144). dispatchWindowCloseRequest delegates to Terminal's
-  // handler when present, else confirms the close directly.
-  useEffect(() => {
-    return shellClient.ui.onWindowCloseRequested(dispatchWindowCloseRequest)
-  }, [])
-
-  // Why there is no periodic scrollback save: PR #461 added a 3-minute
-  // setInterval that re-serialized every mounted TerminalPane's scrollback
-  // so a crash wouldn't lose in-session output. With many panes of
-  // accumulated output, each tick blocked the renderer main thread for
-  // several seconds (serialize is synchronous and does a binary search on
-  // >512KB buffers), causing visible input lag across the whole app.
-  // The durable replacement is the out-of-process terminal daemon
-  // (PR #729), which preserves buffers across renderer crashes with no
-  // main-thread work. Non-daemon users lose in-session scrollback on an
-  // unexpected exit — an acceptable tradeoff vs. periodic UI stalls, and
-  // in line with how most terminal apps behave.
-
-  useEffect(() => {
-    if (!persistedUIReady) {
-      return
-    }
-
-    const timer = window.setTimeout(() => {
-      void setRuntimeUIState(useAppStore.getState().settings, {
-        sidebarWidth,
-        rightSidebarOpen,
-        rightSidebarTab,
-        rightSidebarExplorerView,
-        rightSidebarWidth,
-        markdownTocPanelWidth,
-        groupBy,
-        sortBy,
-        projectOrderBy,
-        showActiveOnly: false,
-        hideSleepingWorkspaces: !showSleepingWorkspaces,
-        showSleepingWorkspaces,
-        hideDefaultBranchWorkspace,
-        showDotfilesByWorktree,
-        filterRepoIds,
-        // Why: persist the active view so a reload restores transitions made by
-        // feature-specific actions that do not call setActiveView directly.
-        activeView,
-        // Why: rides the same debounced save so dashboard auto-acks (which fire
-        // on focus/visibility) and the in-memory ack cleanup paths in
-        // agent-status.ts (close/dismiss) both flow to disk through map
-        // identity changes. Without persisting, agent rows that survive
-        // restart come back bold even when the user had already visited them.
-        acknowledgedAgentsByPaneKey
-      })
-    }, 150)
-
-    return () => window.clearTimeout(timer)
-  }, [
-    persistedUIReady,
-    sidebarWidth,
-    rightSidebarOpen,
-    rightSidebarTab,
-    rightSidebarExplorerView,
-    rightSidebarWidth,
-    markdownTocPanelWidth,
-    groupBy,
-    sortBy,
-    projectOrderBy,
-    showSleepingWorkspaces,
-    hideDefaultBranchWorkspace,
-    showDotfilesByWorktree,
-    filterRepoIds,
+  const {
+    leftTitlebarChromeLayout,
+    navigationSidebarOpen,
+    settingsChromeOverlayActive,
+    settingsNativeSidebarMaterialActive,
+    showProfileSwitcherInTopRight,
+    showSidebar,
+    stackedPageOwnsTitlebar,
+    stackedSidebarOpen
+  } = resolveShellChromeLayout({
     activeView,
-    acknowledgedAgentsByPaneKey
-  ])
-
-  // Apply theme to document
-  useEffect(() => {
-    if (!settings) {
-      return
-    }
-
-    if (settings.theme === 'dark') {
-      applyDocumentTheme('dark')
-      return undefined
-    } else if (settings.theme === 'light') {
-      applyDocumentTheme('light')
-      return undefined
-    } else {
-      // system
-      const mq = window.matchMedia('(prefers-color-scheme: dark)')
-      applyDocumentTheme('system')
-      const handler = (): void => {
-        applyDocumentTheme('system')
-        // Why: system theme changes do not mutate the store, so mobile
-        // terminal colors need an explicit graph republish.
-        scheduleRuntimeGraphSync()
-      }
-      mq.addEventListener('change', handler)
-      return () => mq.removeEventListener('change', handler)
-    }
-  }, [settings])
-
-  useEffect(() => {
-    applyDocumentAppFont(buildAppFontFamily(settings?.appFontFamily))
-  }, [settings?.appFontFamily])
-
-  // Refresh GitHub data (PR/issue status) when window regains focus
-  useEffect(() => {
-    const handler = (): void => {
-      if (document.visibilityState === 'visible') {
-        actions.refreshAllGitHub()
-        actions.bumpGitHubPRVisibleRefreshGeneration()
-      } else {
-        actions.reportVisibleGitHubPRRefreshCandidates([], Date.now())
-      }
-    }
-    document.addEventListener('visibilitychange', handler)
-    return () => document.removeEventListener('visibilitychange', handler)
-  }, [actions])
-
-  const hasTabBar = tabCount >= 2
-  const showTitlebarExpandButton =
-    workspaceChromeActive &&
-    !hasActiveCoworkingWorkspace &&
-    !hasTabBar &&
-    effectiveActiveTabExpanded
-  // Why: Space is a full-page navigation surface, so it removes the worktree
-  // sidebar just like Settings does. Skills keeps it — it is reached from the
-  // sidebar nav and behaves like the other stacked pages.
-  const showSidebar = activeView !== 'settings' && activeView !== 'space'
-  const settingsChromeOverlayActive = activeView === 'settings'
-  const settingsNativeSidebarMaterialActive = activeView === 'settings' && hasNativeSidebarMaterial
-  // Why: Landing keep the full titlebar only when the sidebar is
-  // collapsed; with it open, mirror workspace view so titlebar-left sits flush
-  // above nav. Creation layout suppresses the full-width titlebar.
-  const stackedSidebarOpen =
-    !workspaceChromeActive && !creationLayoutActive && showSidebar && sidebarOpen
-  // Why: these pages already provide draggable top-row controls, so the shared
-  // stacked titlebar would only add an empty strip above their content.
-  const stackedPageOwnsTitlebar = activeView === 'mobile' || activeView === 'skills'
-  // Why: visible creation keeps only the top-left window chrome; workspace tabs
-  // chrome remains gated by workspaceChromeActive.
-  const leftTitlebarChromeLayout = resolveLeftTitlebarChromeLayout({
-    workspaceChromeActive,
-    stackedSidebarOpen,
     creationLayoutActive,
-    sidebarOpen
+    extensionSidePanelOpen,
+    hasNativeSidebarMaterial,
+    isExtensionHost,
+    sidebarOpen,
+    workspaceChromeActive
   })
-  const showProfileSwitcherInSidebarFooter = showSidebar && sidebarOpen
-  const showProfileSwitcherInTopRight = !showProfileSwitcherInSidebarFooter
 
-  const handleToggleExpand = (): void => {
-    if (!effectiveActiveTabId) {
-      return
-    }
-    window.dispatchEvent(
-      new CustomEvent(TOGGLE_TERMINAL_PANE_EXPAND_EVENT, {
-        detail: { tabId: effectiveActiveTabId }
-      })
-    )
-  }
-
-  const localWorkspaceChromeActive = workspaceChromeActive && !hasActiveCoworkingWorkspace
-  const globalShortcutStateRef = useRef({
+  useGlobalShortcuts({
     activeView,
     activeWorktreeId,
-    actions,
+    creationLayoutActive,
     keybindings,
     terminalShortcutPolicy: settings?.terminalShortcutPolicy,
-    workspaceChromeActive: localWorkspaceChromeActive,
-    creationLayoutActive
+    workspaceChromeActive
   })
-  // Why: window key listeners are global and long-lived; keep one registration
-  // while letting the handler read current shortcut state on each key event.
-  globalShortcutStateRef.current = {
-    activeView,
-    activeWorktreeId,
-    actions,
-    keybindings,
-    terminalShortcutPolicy: settings?.terminalShortcutPolicy,
-    workspaceChromeActive: localWorkspaceChromeActive,
-    creationLayoutActive
-  }
-
-  useEffect(() => {
-    const doubleTapDetector = new ModifierDoubleTapDetector()
-
-    const dispatchShortcutInput = (input: ShortcutDispatchInput): void => {
-      const {
-        activeView,
-        activeWorktreeId,
-        actions,
-        keybindings,
-        terminalShortcutPolicy,
-        workspaceChromeActive,
-        creationLayoutActive
-      } = globalShortcutStateRef.current
-
-      // Why: child-component handlers (e.g. terminal search Cmd+G / Cmd+Shift+G)
-      // register on the same window capture phase and fire first. If they already
-      // called preventDefault, this handler must not also act on the event —
-      // otherwise both actions execute (e.g. search navigation AND sidebar open).
-      if (input.defaultPrevented) {
-        return
-      }
-      // Why: the Settings recorder intentionally captures existing app
-      // shortcuts, so global handlers must not fire while its button has focus.
-      if (
-        input.target instanceof Element &&
-        input.target.closest('[data-shortcut-recorder-active]') !== null
-      ) {
-        return
-      }
-      const context = getKeybindingContext(input.target)
-
-      // Note: some app-level shortcuts are also intercepted via
-      // before-input-event in create-main-window.ts so they still work when a
-      // browser guest has focus. The renderer keeps matching handlers for
-      // local-focus cases and to preserve the same guards in one place.
-
-      const matchShortcut = (actionId: KeybindingActionId): boolean =>
-        keybindingMatchesAction(actionId, input, shortcutPlatform, keybindings, {
-          context,
-          terminalShortcutPolicy
-        })
-      const notifyTerminalCapture = (actionId: KeybindingActionId): void => {
-        if (context !== 'terminal' || (terminalShortcutPolicy ?? 'yiru-first') !== 'yiru-first') {
-          return
-        }
-        showTerminalShortcutCaptureNotification({
-          actionId,
-          platform: shortcutPlatform,
-          keybindings
-        })
-      }
-
-      const canOpenWorkspaceSidebar =
-        !creationLayoutActive &&
-        activeView === 'terminal' &&
-        activeWorktreeId !== null &&
-        workspaceChromeActive
-
-      const coworkingWorkspaceActive =
-        activeView === 'terminal' && useAppStore.getState().activeCoworkingWorkspaceRoute !== null
-
-      const toggleSearchSidebar = (query: string | null): void => {
-        toggleWorkspaceSidebar({
-          view: 'explorer',
-          explorerDestination: { view: 'search', ...(query ? { query } : {}) }
-        })
-      }
-
-      // Why: this command is intentionally assignable over editor/terminal
-      // focus; consume its chord only while unsent notes make the action valid.
-      if (matchShortcut('sourceControl.sendReviewNotes') && canOpenWorkspaceSidebar) {
-        if (actions.openDiffNotesSendMenuForActiveWorktree()) {
-          input.preventDefault()
-          notifyTerminalCapture('sourceControl.sendReviewNotes')
-          showWorkspaceSidebar({ view: 'source-control' })
-          return
-        }
-      }
-
-      if (matchShortcut('sidebar.search.toggle') && canOpenWorkspaceSidebar) {
-        // Why: when focus is inside the file explorer and a folder is selected,
-        // Cmd/Ctrl+Shift+F means "Find in Folder" — seed the include pattern
-        // with that folder instead of treating the chord as a text-search seed.
-        const selectedFolderRelativePath =
-          document.activeElement instanceof Element
-            ? selectedExplorerFolderRelativePath(document.activeElement)
-            : null
-        if (selectedFolderRelativePath !== null && activeWorktreeId) {
-          input.preventDefault()
-          notifyTerminalCapture('sidebar.search.toggle')
-          toggleWorkspaceSidebar({
-            view: 'explorer',
-            explorerDestination: {
-              view: 'search',
-              includePattern: folderRelativePathToIncludeGlob(selectedFolderRelativePath)
-            }
-          })
-          return
-        }
-
-        const selectedText = getSelectedTextForFileSearch()
-        if (selectedText) {
-          input.preventDefault()
-          notifyTerminalCapture('sidebar.search.toggle')
-          toggleSearchSidebar(selectedText)
-          return
-        }
-      }
-
-      // Why: keep this guard. TipTap's Cmd+B bold binding depends on the
-      // window-level handler *not* toggling the sidebar when focus lives in an
-      // editable surface. The main-process before-input-event already carves out
-      // Cmd+B for the markdown editor (see create-main-window.ts +
-      // docs/markdown-cmd-b-bold-design.md), but this renderer-side fallback
-      // still covers the blur→press IPC race and any non-carved editable surface.
-      if (isEditableTarget(input.target)) {
-        return
-      }
-
-      // Cmd/Ctrl+Alt+Arrow — worktree history back/forward. This stays before
-      // workspace-panel shortcuts because it is navigation, not tab creation.
-      if (matchShortcut('worktree.history.back') || matchShortcut('worktree.history.forward')) {
-        // Why: Back/Forward traverse mixed worktree + page visits, so the
-        // shortcut is active wherever the titlebar button cluster is (terminal
-        // or stack-backed pages). Still suppressed in Settings.
-        if (creationLayoutActive || !shouldShowWorktreeHistoryControls(activeView)) {
-          return
-        }
-        input.preventDefault()
-        const store = useAppStore.getState()
-        if (matchShortcut('worktree.history.back')) {
-          store.goBackWorktree()
-        } else {
-          store.goForwardWorktree()
-        }
-        return
-      }
-
-      // Cmd/Ctrl+B — toggle left sidebar
-      if (matchShortcut('sidebar.left.toggle')) {
-        input.preventDefault()
-        notifyTerminalCapture('sidebar.left.toggle')
-        actions.toggleSidebar()
-        return
-      }
-
-      // Toggle the "show sleeping workspaces" sidebar filter without opening the
-      // filters menu (issue #5209). When revealing them, open the left sidebar
-      // so the now-visible sleeping worktrees are actually reachable.
-      if (matchShortcut('sidebar.sleepingWorkspaces.toggle')) {
-        input.preventDefault()
-        notifyTerminalCapture('sidebar.sleepingWorkspaces.toggle')
-        const store = useAppStore.getState()
-        const nextShowSleeping = !store.showSleepingWorkspaces
-        store.setShowSleepingWorkspaces(nextShowSleeping)
-        if (nextShowSleeping) {
-          store.setSidebarOpen(true)
-        }
-        return
-      }
-
-      // Why: rename the active terminal tab. Cmd+R is free in the app/terminal
-      // focus zone because the browser pane owns its own Cmd+R reload and that
-      // focus never reaches this renderer-window handler. Only terminal tabs
-      // have an inline title editor, so other active tab types fall through.
-      if (workspaceChromeActive && matchShortcut('tab.rename')) {
-        const store = useAppStore.getState()
-        if (store.activeTabType === 'terminal' && store.activeTabId) {
-          input.preventDefault()
-          notifyTerminalCapture('tab.rename')
-          store.setRenamingTabId(store.activeTabId)
-          return
-        }
-      }
-
-      // Why: open the active worktree's inline title editor. Open/reveal it
-      // first so the card is mounted and visible even when sidebar filters or
-      // collapse state would otherwise hide it.
-      if (workspaceChromeActive && matchShortcut('workspace.rename') && activeWorktreeId) {
-        input.preventDefault()
-        notifyTerminalCapture('workspace.rename')
-        const store = useAppStore.getState()
-        store.setSidebarOpen(true)
-        requestScrollToCurrentWorkspaceRevealAndRename()
-        return
-      }
-
-      // Why: Cmd/Ctrl+N is handled via the main-process before-input-event
-      // allowlist (see window-shortcut-policy.ts / use-ipc-events.ts) so it works
-      // globally — including when focus lives inside the markdown rich editor
-      // (contentEditable) or a browser guest webContents, both of which bypass
-      // this renderer-side window keydown listener.
-
-      if (coworkingWorkspaceActive) {
-        const state = useAppStore.getState()
-        if (matchShortcut('sidebar.right.toggle')) {
-          input.preventDefault()
-          notifyTerminalCapture('sidebar.right.toggle')
-          state.showRightSidebarFiles()
-        } else if (matchShortcut('sidebar.explorer.toggle')) {
-          input.preventDefault()
-          notifyTerminalCapture('sidebar.explorer.toggle')
-          state.showRightSidebarFiles()
-        } else if (matchShortcut('sidebar.search.toggle')) {
-          input.preventDefault()
-          notifyTerminalCapture('sidebar.search.toggle')
-          state.showRightSidebarSearch()
-        } else if (matchShortcut('sidebar.sourceControl.toggle')) {
-          if (document.querySelector('[data-terminal-search-root]')) {
-            return
-          }
-          input.preventDefault()
-          notifyTerminalCapture('sidebar.sourceControl.toggle')
-          state.requestSourceControlPanelView('changes')
-          state.setRightSidebarTab('source-control')
-          state.setRightSidebarOpen(true)
-        } else if (matchShortcut('sidebar.checks.toggle')) {
-          input.preventDefault()
-          notifyTerminalCapture('sidebar.checks.toggle')
-          state.requestSourceControlPanelView('review')
-          state.setRightSidebarTab('source-control')
-          state.setRightSidebarOpen(true)
-        } else if (matchShortcut('sidebar.ports.toggle')) {
-          input.preventDefault()
-          notifyTerminalCapture('sidebar.ports.toggle')
-          state.setRightSidebarTab('ports')
-          state.setRightSidebarOpen(true)
-        }
-        return
-      }
-
-      if (!canOpenWorkspaceSidebar) {
-        return
-      }
-
-      if (matchShortcut('sidebar.right.toggle')) {
-        input.preventDefault()
-        notifyTerminalCapture('sidebar.right.toggle')
-        const store = useAppStore.getState()
-        store.setRightSidebarOpen(!store.rightSidebarOpen)
-        return
-      }
-
-      if (matchShortcut('sidebar.explorer.toggle')) {
-        input.preventDefault()
-        notifyTerminalCapture('sidebar.explorer.toggle')
-        toggleWorkspaceSidebar({
-          view: 'explorer',
-          explorerDestination: { view: 'files' }
-        })
-        return
-      }
-
-      if (matchShortcut('sidebar.search.toggle')) {
-        input.preventDefault()
-        notifyTerminalCapture('sidebar.search.toggle')
-        toggleSearchSidebar(null)
-        return
-      }
-
-      // Cmd/Ctrl+Shift+G — toggle Changes & Review in the workspace sidebar.
-      // Skip when terminal search is open — Cmd+Shift+G means "find previous"
-      // in that context (handled by keyboard-handlers.ts). Both listeners share
-      // the window capture phase and registration order can vary with React
-      // effect re-runs, so a DOM check is the reliable coordination mechanism.
-      if (matchShortcut('sidebar.sourceControl.toggle')) {
-        if (document.querySelector('[data-terminal-search-root]')) {
-          return
-        }
-        input.preventDefault()
-        notifyTerminalCapture('sidebar.sourceControl.toggle')
-        toggleWorkspaceSidebar({ view: 'source-control' })
-        return
-      }
-
-      if (matchShortcut('sidebar.checks.toggle')) {
-        input.preventDefault()
-        notifyTerminalCapture('sidebar.checks.toggle')
-        toggleWorkspaceSidebar({ view: 'source-control', sourceControlView: 'review' })
-        return
-      }
-
-      // Cmd+Shift+I — toggle the Ports workspace sidebar view (macOS only).
-      // Why: Ctrl+Shift+I is the built-in DevTools accelerator on Windows/Linux;
-      // intercepting it would break an essential developer tool.
-      if (matchShortcut('sidebar.ports.toggle')) {
-        input.preventDefault()
-        notifyTerminalCapture('sidebar.ports.toggle')
-        toggleWorkspaceSidebar({ view: 'ports' })
-      }
-    }
-
-    const onKeyDown = (e: KeyboardEvent): void => {
-      const detected = doubleTapDetector.process(
-        toModifierDoubleTapEvent({
-          type: 'keyDown',
-          code: e.code,
-          key: e.key,
-          shift: e.shiftKey,
-          control: e.ctrlKey,
-          alt: e.altKey,
-          meta: e.metaKey,
-          isAutoRepeat: e.repeat
-        }),
-        Date.now()
-      )
-      if (e.repeat) {
-        return
-      }
-      if (detected) {
-        // Synthetic input: no key/modifier flags, so only DoubleTap bindings match.
-        dispatchShortcutInput({
-          doubleTapModifier: detected.modifier,
-          target: e.target,
-          defaultPrevented: e.defaultPrevented,
-          preventDefault: () => e.preventDefault()
-        })
-        return
-      }
-      dispatchShortcutInput({
-        key: e.key,
-        code: e.code,
-        altKey: e.altKey,
-        metaKey: e.metaKey,
-        ctrlKey: e.ctrlKey,
-        shiftKey: e.shiftKey,
-        target: e.target,
-        defaultPrevented: e.defaultPrevented,
-        preventDefault: () => e.preventDefault()
-      })
-    }
-
-    const onKeyUp = (e: KeyboardEvent): void => {
-      doubleTapDetector.process(
-        toModifierDoubleTapEvent({
-          type: 'keyUp',
-          code: e.code,
-          key: e.key,
-          shift: e.shiftKey,
-          control: e.ctrlKey,
-          alt: e.altKey,
-          meta: e.metaKey
-        }),
-        Date.now()
-      )
-    }
-
-    // Why: a window blur mid-gesture must not leave the detector armed.
-    const onBlur = (): void => doubleTapDetector.reset()
-
-    window.addEventListener('keydown', onKeyDown, { capture: true })
-    window.addEventListener('keyup', onKeyUp, { capture: true })
-    window.addEventListener('blur', onBlur)
-    return () => {
-      window.removeEventListener('keydown', onKeyDown, { capture: true })
-      window.removeEventListener('keyup', onKeyUp, { capture: true })
-      window.removeEventListener('blur', onBlur)
-    }
-  }, [])
-
   useLayoutEffect(() => {
     const controls = titlebarLeftControlsRef.current
     if (!controls) {
@@ -1720,7 +339,7 @@ function App(): React.JSX.Element {
     })
     observer.observe(controls)
     return () => observer.disconnect()
-  }, [isFullScreen, showSidebar, leftTitlebarChromeLayout.isFloating, sidebarOpen])
+  }, [isFullScreen, showSidebar, leftTitlebarChromeLayout.isFloating, navigationSidebarOpen])
 
   const resolvedMountedLazyModalIds = resolveMountedLazyModalIds(activeModal, mountedLazyModalIds)
   if (resolvedMountedLazyModalIds !== mountedLazyModalIds) {
@@ -1729,221 +348,31 @@ function App(): React.JSX.Element {
     setMountedLazyModalIds(new Set(resolvedMountedLazyModalIds))
   }
 
-  const showWorktreeHistoryControls = shouldShowWorktreeHistoryControls(activeView)
-  // Why: the empty full-width titlebar has no adjacent panel seams to continue;
-  // keep its controls borderless while sidebar/tab chrome retains separators.
-  const titlebarControlVariant = leftTitlebarChromeLayout.shouldMount
-    ? 'outline-transparent'
-    : 'ghost'
-  const sidebarToggleControl = showSidebar ? (
-    <Tooltip>
-      <TooltipTrigger
-        render={
-          <Button
-            type="button"
-            variant={titlebarControlVariant}
-            size="icon-titlebar-wide"
-            className={cn(
-              TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME,
-              showWorktreeHistoryControls && !sidebarOpen && 'border-r-0'
-            )}
-            onClick={actions.toggleSidebar}
-            aria-label={translate('auto.App.e4b9e7dff7', 'Toggle sidebar')}
-          >
-            <PanelLeft />
-          </Button>
-        }
-      />
-      <TooltipContent side="bottom" sideOffset={6}>
-        {translate('auto.App.ce37cf5279', 'Toggle sidebar ({{value0}})', {
-          value0: leftSidebarShortcutLabel
-        })}
-      </TooltipContent>
-    </Tooltip>
-  ) : null
-
-  // Why: extracted so both the full-width titlebar (settings/landing) and
-  // the sidebar-width left header (workspace view) can share the same
-  // controls without duplicating the agent badge popover.
-  const titlebarLeftControls = (
-    // Why: measure the ENTIRE row (traffic-light pad + sidebar toggle + agent
-    // badge + back/forward group) so the sidebar-collapse spacer in
-    // TabGroupPanel reserves enough width to clear the full floating
-    // `titlebar-left`. Measuring only the inner control cluster left the
-    // back/forward arrows hanging over the first tab when the sidebar was
-    // collapsed (Cmd+B), producing a half-occluded, non-scrollable tab strip.
-    // Why: collapsed workspace mode floats inside a w-0 sidebar wrapper; w-max
-    // keeps the complete control cluster reachable above the tab strip.
-    <div
-      ref={titlebarLeftControlsRef}
-      className={cn(
-        'flex h-full shrink-0 items-center',
-        leftTitlebarChromeLayout.isFloating ? 'w-max' : 'w-full'
-      )}
-    >
-      {/* Why: macOS fullscreen has no traffic lights; keep this leading group only
-          when it still owns the standalone sidebar toggle. */}
-      {(!isMac || !isFullScreen || (showSidebar && !showWorktreeHistoryControls)) && (
-        <div className="flex h-full items-center">
-          {isMac && !isWebClient && !isFullScreen ? (
-            // Why: the 92px gutter leaves the native control cluster with matching 16px outer insets.
-            <div className="w-[calc(92px/var(--ui-zoom-factor,1))] shrink-0" />
-          ) : hasCustomTitleBar ? (
-            /* Why: on Windows/Linux the native title bar is removed, so we render
-               the Yiru logo as a non-interactive identity anchor and a ··· button
-               that pops up the application menu (the same menu revealed by Alt
-               on the default autoHideMenuBar). */
-            <>
-              <img
-                src={logo}
-                alt=""
-                aria-hidden
-                className="mr-1 ml-2.5 h-4 shrink-0 opacity-75 invert dark:invert-0"
-              />
-              <Tooltip>
-                <TooltipTrigger
-                  render={
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon-xs"
-                      className={cn('mr-2', TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME)}
-                      aria-label={translate('auto.App.8b0b8eb54f', 'Application menu')}
-                      onClick={() => shellClient.ui.popupMenu()}
-                    >
-                      <MoreHorizontal className="size-3.5" />
-                    </Button>
-                  }
-                />
-                <TooltipContent side="bottom" sideOffset={6}>
-                  {translate('auto.App.8b0b8eb54f', 'Application menu')}
-                </TooltipContent>
-              </Tooltip>
-            </>
-          ) : null}
-          {!showWorktreeHistoryControls ? sidebarToggleControl : null}
-        </div>
-      )}
-      {/* Why: Back/Forward traverse mixed worktree + page history, so the
-          cluster is shown wherever the history shortcut is live. Hidden in
-          Settings and non-stack page views. */}
-      {showWorktreeHistoryControls && (
-        // Why: the sidebar toggle stays at the leading edge while history stays
-        // beside the tab strip; collapsed chrome naturally joins both groups.
-        <div className={cn('flex h-full items-stretch', sidebarOpen && 'min-w-0 flex-1')}>
-          <ButtonGroup className="h-full">{sidebarToggleControl}</ButtonGroup>
-          <ButtonGroup className={cn('h-full', sidebarOpen && 'ml-auto')}>
-            <Tooltip>
-              <TooltipTrigger
-                render={
-                  <Button
-                    type="button"
-                    variant={titlebarControlVariant}
-                    size="icon-titlebar"
-                    className={cn(TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME, 'border-r-0')}
-                    onClick={() => useAppStore.getState().goBackWorktree()}
-                    disabled={!canGoBackWorktree}
-                    aria-label={translate('auto.App.064bd07810', 'Go back')}
-                  >
-                    <ArrowLeft />
-                  </Button>
-                }
-              />
-              <TooltipContent side="bottom" sideOffset={6}>
-                {translate('auto.App.fe21e8f6f5', 'Go back ({{value0}})', {
-                  value0: historyBackShortcutLabel
-                })}
-              </TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger
-                render={
-                  <Button
-                    type="button"
-                    variant={titlebarControlVariant}
-                    size="icon-titlebar"
-                    // Why: titlebar-left owns the right seam against the tab strip
-                    // in both open and floating chrome; a trailing control border
-                    // doubles that hairline (and looks faint when disabled).
-                    className={cn(TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME, 'border-r-0')}
-                    onClick={() => useAppStore.getState().goForwardWorktree()}
-                    disabled={!canGoForwardWorktree}
-                    aria-label={translate('auto.App.cf9099fe98', 'Go forward')}
-                  >
-                    <ArrowRight />
-                  </Button>
-                }
-              />
-              <TooltipContent side="bottom" sideOffset={6}>
-                {translate('auto.App.f7aa73e785', 'Go forward ({{value0}})', {
-                  value0: historyForwardShortcutLabel
-                })}
-              </TooltipContent>
-            </Tooltip>
-          </ButtonGroup>
-        </div>
-      )}
-    </div>
+  const titlebarLeftControls = isExtensionHost ? null : (
+    <TitlebarLeftControls
+      activeView={activeView}
+      controlsRef={titlebarLeftControlsRef}
+      isFullScreen={isFullScreen}
+      layout={leftTitlebarChromeLayout}
+      showSidebar={showSidebar}
+      sidebarOpen={navigationSidebarOpen}
+    />
   )
-
-  const titlebarMainStrip = (
-    <>
-      {creationLayoutActive ? null : (
-        <div
-          id="titlebar-tabs"
-          className={cn(
-            'flex flex-1 min-w-0 self-stretch',
-            !workspaceChromeActive ? 'invisible pointer-events-none' : ''
-          )}
-        />
-      )}
-      {showTitlebarExpandButton && (
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-xs"
-                className={cn(
-                  'bg-background text-muted-foreground mr-2',
-                  TITLEBAR_BUTTON_NO_DRAG_CLASS_NAME
-                )}
-                onClick={handleToggleExpand}
-                aria-label={translate('auto.App.c1cf0b0e4a', 'Collapse pane')}
-                disabled={!activeTabCanExpand}
-              >
-                <Minimize2 className="size-3.5" />
-              </Button>
-            }
-          />
-          <TooltipContent side="bottom" sideOffset={6}>
-            {translate('auto.App.c1cf0b0e4a', 'Collapse pane')}
-          </TooltipContent>
-        </Tooltip>
-      )}
-      {showProfileSwitcherInTopRight ? <YiruProfileSwitcher /> : null}
-      {/* Why: reserve space so content is not obscured by the
-      fixed-position window-controls overlay on Windows/Linux. */}
-      {hasCustomTitleBar && (
-        <div className="w-[var(--window-controls-width,0px)] shrink-0 [[data-regular-terminal-input-focused]_&]:[-webkit-app-region:no-drag]" />
-      )}
-    </>
+  const titlebarMainStrip = isExtensionHost ? null : (
+    <TitlebarMainStrip
+      creationLayoutActive={creationLayoutActive}
+      showProfileSwitcher={showProfileSwitcherInTopRight}
+      workspaceChromeActive={workspaceChromeActive}
+    />
   )
-  const workspaceProfileSwitcher =
-    showProfileSwitcherInTopRight &&
-    workspaceChromeActive &&
-    !hasActiveCoworkingWorkspace &&
-    leftTitlebarChromeLayout.shouldMount &&
-    !stackedSidebarOpen ? (
-      <div
-        // Why: keep the profile control clear of desktop window controls.
-        className="absolute top-0 right-[var(--window-controls-width)] z-10 flex h-[var(--titlebar-height)] items-center [-webkit-app-region:no-drag]"
-      >
-        <YiruProfileSwitcher />
-      </div>
-    ) : null
-
+  const workspaceProfileSwitcher = isExtensionHost ? null : (
+    <WorkspaceProfileSwitcher
+      layout={leftTitlebarChromeLayout}
+      showProfileSwitcher={showProfileSwitcherInTopRight}
+      stackedSidebarOpen={stackedSidebarOpen}
+      workspaceChromeActive={workspaceChromeActive}
+    />
+  )
   return (
     <LoadingIndicatorStyleProvider
       loaderStyle={settings?.loaderStyle}
@@ -1954,7 +383,9 @@ function App(): React.JSX.Element {
       style={
         {
           ...themeGradientVariables,
-          '--collapsed-sidebar-header-width': `${collapsedSidebarHeaderWidth}px`,
+          '--collapsed-sidebar-header-width': `${
+            !isExtensionHost && showSidebar ? collapsedSidebarHeaderWidth : 0
+          }px`,
           // Why: Settings renders its overlaid window controls and navigation in
           // sibling trees; one seam value keeps their left-column widths aligned.
           '--settings-sidebar-width': '280px',
@@ -1973,535 +404,55 @@ function App(): React.JSX.Element {
         <ConfirmationDialogProvider>
           <>
             <WorkspacePortScanner enabled={workspaceSessionReady} />
-            <CoworkingControlRequestDialog />
-            <CoworkingHostAccessRequestDialog />
             {/* Why: leaf-mounted retention sync keeps agent-status retention
             subscriptions from re-rendering the App tree. */}
             <RetainedAgentsSyncGate />
             <AgentHibernationGate />
             {/* Why: workspace activation is a hot path; including activeWorktreeId
             in reset keys remounts whole surfaces during wake. */}
-            <RecoverableRenderErrorBoundary
-              boundaryId="app.workspace-shell"
-              surface="workspace-shell"
-              resetKey={activeView}
-              title={translate('auto.App.df1d56bf87', 'The workspace shell hit an error.')}
-              description={translate(
-                'auto.App.8504ddf267',
-                'The app is still running. Retry the shell or use the menu to report the crash details.'
-              )}
-            >
-              <div className="flex min-h-0 flex-1 flex-row overflow-hidden">
-                {/* Why: keep the non-workspace titlebar and content in one
-              column so full-page routes retain a stable vertical frame. */}
-                <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-                  {/* Why: workspace moves window controls into its sidebar header;
-                Settings overlays them on its own full-height surfaces, while
-                other full-page routes keep the shared titlebar row. */}
-                  {!leftTitlebarChromeLayout.shouldMount ? (
-                    <div
-                      className={cn(
-                        TITLEBAR_CLASS_NAME,
-                        // Why: Settings owns both full-height surfaces; window chrome
-                        // overlays them instead of reserving a blank titlebar row.
-                        settingsChromeOverlayActive &&
-                          'absolute inset-x-0 top-0 z-20 border-b-0 bg-transparent'
-                      )}
-                    >
-                      <div
-                        className={cn(
-                          // Why: titlebar button sizes use h-full, so this wrapper must preserve
-                          // the row's explicit height instead of collapsing to the icon height.
-                          'mr-2 flex h-full shrink-0 items-center',
-                          settingsChromeOverlayActive && 'mr-0 w-[var(--settings-sidebar-width)]'
-                        )}
-                        // Why: controls over the Settings rail inherit its custom
-                        // foreground and interaction colors on every platform.
-                        style={settingsChromeOverlayActive ? leftSidebarStyle : undefined}
-                      >
-                        {titlebarLeftControls}
-                      </div>
-                      {titlebarMainStrip}
-                    </div>
-                  ) : null}
-                  <div className="flex min-h-0 flex-1 flex-row overflow-hidden">
-                    {showSidebar ? (
-                      leftTitlebarChromeLayout.shouldMount ? (
-                        /* Why: left column wraps the sidebar with a titlebar-height
-                     header above it. The header holds the same controls
-                     (traffic lights, sidebar toggle, agent badge)
-                     that the full-width titlebar held while the center and right
-                     columns keep their own top strips at the same 38px height.
-                     When the sidebar is collapsed, take this header out of flex
-                     layout so the terminal/editor reclaim the left edge instead of
-                     leaving behind a content-width blank strip. */
-                        <div
-                          className={cn(
-                            'flex min-h-0 flex-col shrink-0',
-                            sidebarOpen ? '' : 'relative w-0 overflow-visible'
-                          )}
-                        >
-                          <div
-                            data-testid="titlebar-left"
-                            // Why: collapsed controls float over the tab strip; suppress the bottom
-                            // seam while retaining the container-owned right edge.
-                            className={cn(
-                              TITLEBAR_LEFT_CLASS_NAME,
-                              leftTitlebarChromeLayout.isFloating &&
-                                'absolute left-0 top-0 z-10 w-max border-b-0 bg-transparent'
-                            )}
-                            style={{
-                              // Why: custom sidebar appearances are scoped to the sidebar
-                              // root, so mirror those variables onto the open header that
-                              // visually belongs to the same left-column panel.
-                              ...(sidebarOpen ? leftSidebarStyle : undefined),
-                              // Why: the Sidebar resize hook updates the sidebar DOM width
-                              // directly during drag and only persists to Zustand on
-                              // mouseup. In workspace view, size this header from the
-                              // wrapper's live width so it tracks those in-flight resizes
-                              // instead of leaving a stale-width gap until the drag ends.
-                              width: sidebarOpen ? '100%' : undefined
-                            }}
-                          >
-                            {titlebarLeftControls}
-                          </div>
-                          <div className="flex min-h-0 flex-1">
-                            {/* Why: the workspace-view wrapper adds a fixed 38px header
-                          above the sidebar. Without a flex-1/min-h-0 slot here,
-                          the sidebar falls back to its content height, so the
-                          worktree list loses its scroll viewport and the fixed
-                          bottom toolbar (including Add Project) gets pushed offscreen. */}
-                            <RecoverableRenderErrorBoundary
-                              boundaryId="sidebar.worktrees"
-                              surface="sidebar"
-                              resetKey={activeView}
-                              title={translate(
-                                'auto.App.1468601e7b',
-                                'The workspace list hit an error.'
-                              )}
-                              description={translate(
-                                'auto.App.bdc71dddc9',
-                                'The active workspace remains open. Retry the list or switch views.'
-                              )}
-                            >
-                              <Sidebar
-                                worktreeScrollOffsetRef={worktreeSidebarScrollOffsetRef}
-                                appearanceStyle={leftSidebarStyle}
-                              />
-                            </RecoverableRenderErrorBoundary>
-                          </div>
-                        </div>
-                      ) : (
-                        <RecoverableRenderErrorBoundary
-                          boundaryId="sidebar.worktrees"
-                          surface="sidebar"
-                          resetKey={activeView}
-                          title={translate(
-                            'auto.App.1468601e7b',
-                            'The workspace list hit an error.'
-                          )}
-                          description={translate(
-                            'auto.App.cba0fafda5',
-                            'The active page remains open. Retry the list or switch views.'
-                          )}
-                        >
-                          <Sidebar
-                            worktreeScrollOffsetRef={worktreeSidebarScrollOffsetRef}
-                            appearanceStyle={leftSidebarStyle}
-                          />
-                        </RecoverableRenderErrorBoundary>
-                      )
-                    ) : null}
-                    {/* Why: native sidebar material may continue through the top 36px
-                    without making the workspace body translucent; full-window blur
-                    still leaves the complete surface transparent. */}
-                    <div
-                      className={cn(
-                        'flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden',
-                        windowBackgroundBlurEnabled || settingsNativeSidebarMaterialActive
-                          ? 'bg-transparent'
-                          : workspaceChromeActive || creationLayoutActive
-                            ? 'workspace-native-material-frame'
-                            : 'bg-background'
-                      )}
-                    >
-                      {stackedSidebarOpen && !stackedPageOwnsTitlebar ? (
-                        <div className={TITLEBAR_CLASS_NAME}>{titlebarMainStrip}</div>
-                      ) : null}
-                      <div className="relative flex min-h-0 min-w-0 flex-1 overflow-hidden">
-                        {workspaceProfileSwitcher}
-                        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-                          {shouldMountTerminalWorkbench ? (
-                            <div
-                              className={
-                                !terminalWorkbenchVisible
-                                  ? 'hidden min-h-0 min-w-0 flex-1'
-                                  : 'flex min-h-0 min-w-0 flex-1'
-                              }
-                            >
-                              <Suspense fallback={null}>
-                                <RecoverableRenderErrorBoundary
-                                  boundaryId="terminal.workbench"
-                                  surface="terminal-workbench"
-                                  resetKey="terminal"
-                                  title={translate(
-                                    'auto.App.5a9519aef0',
-                                    'The workspace workbench hit an error.'
-                                  )}
-                                  description={translate(
-                                    'auto.App.98d4ea2823',
-                                    'Terminal, browser, or editor rendering failed in this workspace. Retry to remount it.'
-                                  )}
-                                >
-                                  <Terminal />
-                                </RecoverableRenderErrorBoundary>
-                              </Suspense>
-                            </div>
-                          ) : null}
-                          <Suspense fallback={null}>
-                            <RecoverableRenderErrorBoundary
-                              boundaryId={`page.${activeView}`}
-                              surface="page"
-                              resetKey={activeView}
-                              title={translate('auto.App.b7a714db1e', 'This page hit an error.')}
-                              description={translate(
-                                'auto.App.03a14f6b5b',
-                                'Retry the page or navigate to another Yiru surface.'
-                              )}
-                            >
-                              {activeView === 'settings' ? (
-                                <Settings sidebarAppearanceStyle={leftSidebarStyle} />
-                              ) : null}
-                              {activeView === 'home' ? <HomePage /> : null}
-                              {activeView === 'skills' ? <SkillsPage /> : null}
-                              {activeView === 'space' ? <WorkspaceSpacePage /> : null}
-                              {activeView === 'mobile' ? <MobilePage /> : null}
-                              {hasActiveCoworkingWorkspace ? <CoworkingWorkspaceSurface /> : null}
-                              {activeView === 'terminal' &&
-                              creationLayoutActive &&
-                              activePendingCreationId ? (
-                                <WorktreeCreationPanel
-                                  creationId={activePendingCreationId}
-                                  reserveCollapsedSidebarHeaderSpace={
-                                    leftTitlebarChromeLayout.isFloating
-                                  }
-                                />
-                              ) : null}
-                              {activeView === 'terminal' &&
-                              !activeWorktreeId &&
-                              !hasActiveCoworkingWorkspace &&
-                              !creationLayoutActive ? (
-                                <Landing />
-                              ) : null}
-                            </RecoverableRenderErrorBoundary>
-                          </Suspense>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                {localWorkspaceChromeActive && activeWorktreeId ? (
-                  <Suspense fallback={null}>
-                    <RecoverableRenderErrorBoundary
-                      boundaryId="workspace.sidebar"
-                      surface="right-sidebar"
-                      resetKey="workspace-sidebar"
-                      title={translate('auto.App.ed6b168d00', 'The right sidebar hit an error.')}
-                      description={translate(
-                        'auto.App.8d1e160ed1',
-                        'Retry the sidebar or switch tabs to reload this surface.'
-                      )}
-                    >
-                      <WorkspaceSidebar />
-                    </RecoverableRenderErrorBoundary>
-                  </Suspense>
-                ) : null}
-              </div>
-            </RecoverableRenderErrorBoundary>
-            {statusBarVisible && hasActiveCoworkingWorkspace ? <CoworkingPresenceFooter /> : null}
-            {statusBarVisible && !hasActiveCoworkingWorkspace ? (
-              <Suspense
-                fallback={
-                  // Why: Suspense must not flash an opaque footer while the real
-                  // status bar reveals supported native window material.
-                  <div className="border-border bg-background h-6 min-h-[24px] shrink-0 border-t [[data-native-sidebar-material=true]_&]:bg-transparent" />
-                }
-              >
-                <RecoverableRenderErrorBoundary
-                  boundaryId="overlay.status-bar"
-                  surface="overlay"
-                  resetKey={activeView}
-                  compact
-                  title={translate('auto.App.2e8ff36f94', 'The status bar hit an error.')}
-                  description={translate(
-                    'auto.App.8a023cea1f',
-                    'Retry the status bar to remount its controls.'
-                  )}
-                >
-                  <StatusBar />
-                </RecoverableRenderErrorBoundary>
-              </Suspense>
-            ) : null}
-            {!statusBarVisible ? <YiruRuntimeStatusOnlyFooter /> : null}
-            {/* Why: workspace creation is a core action; keeping it in the
-            entry bundle avoids stale/corrupt lazy chunks stranding users at Create. */}
-            {activeModal === 'new-workspace-composer' ? (
-              <RecoverableRenderErrorBoundary
-                boundaryId="modal.new-workspace-composer"
-                surface="modal"
-                resetKey
-                compact
-              >
-                <NewWorkspaceComposerModal />
-              </RecoverableRenderErrorBoundary>
-            ) : null}
-            <Suspense fallback={null}>
-              {shouldMountAddRepoDialog ? (
-                <RecoverableRenderErrorBoundary
-                  boundaryId="modal.add-repo"
-                  surface="modal"
-                  resetKey={activeModal === 'add-repo'}
-                  compact
-                >
-                  <AddRepoDialog />
-                </RecoverableRenderErrorBoundary>
-              ) : null}
-              {/* Why: Settings can start Add Project without mounting Sidebar,
-              so Add Project handoff dialogs must share the root host. */}
-              {activeModal === 'confirm-non-git-folder' ? (
-                <RecoverableRenderErrorBoundary
-                  boundaryId="modal.confirm-non-git-folder"
-                  surface="modal"
-                  resetKey
-                  compact
-                >
-                  <NonGitFolderDialog />
-                </RecoverableRenderErrorBoundary>
-              ) : null}
-              {activeModal === 'confirm-add-project-from-folder' ? (
-                <RecoverableRenderErrorBoundary
-                  boundaryId="modal.confirm-add-project-from-folder"
-                  surface="modal"
-                  resetKey
-                  compact
-                >
-                  <AddProjectFromFolderDialog />
-                </RecoverableRenderErrorBoundary>
-              ) : null}
-              {activeModal === 'project-added' ? (
-                <RecoverableRenderErrorBoundary
-                  boundaryId="modal.project-added"
-                  surface="modal"
-                  resetKey
-                  compact
-                >
-                  <ProjectAddedDialog />
-                </RecoverableRenderErrorBoundary>
-              ) : null}
-            </Suspense>
-            {/* Why: root overlays can render Radix <Tooltip>s; keep them inside
-            the shared provider so lazy surfaces mount safely from any entry point. */}
-            <Suspense fallback={null}>
-              {resolvedMountedLazyModalIds.has('workspace-cleanup') ? (
-                <RecoverableRenderErrorBoundary
-                  boundaryId="modal.workspace-cleanup"
-                  surface="modal"
-                  resetKey={activeModal === 'workspace-cleanup'}
-                  compact
-                >
-                  <WorkspaceCleanupDialog />
-                </RecoverableRenderErrorBoundary>
-              ) : null}
-            </Suspense>
-            <Suspense fallback={null}>
-              {resolvedMountedLazyModalIds.has('quick-open') ? (
-                <RecoverableRenderErrorBoundary
-                  boundaryId="modal.quick-open"
-                  surface="modal"
-                  resetKey={activeModal === 'quick-open'}
-                  compact
-                >
-                  <QuickOpen />
-                </RecoverableRenderErrorBoundary>
-              ) : null}
-              {resolvedMountedLazyModalIds.has('worktree-palette') ? (
-                <RecoverableRenderErrorBoundary
-                  boundaryId="modal.worktree-palette"
-                  surface="modal"
-                  resetKey={activeModal === 'worktree-palette'}
-                  compact
-                >
-                  <WorktreeJumpPalette />
-                </RecoverableRenderErrorBoundary>
-              ) : null}
-              {resolvedMountedLazyModalIds.has('setup-guide') ? (
-                <RecoverableRenderErrorBoundary
-                  boundaryId="modal.setup-guide"
-                  surface="modal"
-                  resetKey={activeModal === 'setup-guide'}
-                  compact
-                >
-                  <SetupGuideModal />
-                </RecoverableRenderErrorBoundary>
-              ) : null}
-              {resolvedMountedLazyModalIds.has('feature-wall') ? (
-                <RecoverableRenderErrorBoundary
-                  boundaryId="modal.feature-wall"
-                  surface="modal"
-                  resetKey={activeModal === 'feature-wall'}
-                  compact
-                >
-                  <FeatureWallModal />
-                </RecoverableRenderErrorBoundary>
-              ) : null}
-              {resolvedMountedLazyModalIds.has('feature-tips') ? (
-                <RecoverableRenderErrorBoundary
-                  boundaryId="modal.feature-tips"
-                  surface="modal"
-                  resetKey={activeModal === 'feature-tips'}
-                  compact
-                >
-                  <FeatureTipsModal />
-                </RecoverableRenderErrorBoundary>
-              ) : null}
-            </Suspense>
-            {shouldMountSetupGuideTelemetryObserver ? (
-              <Suspense fallback={null}>
-                <SetupGuideTelemetryObserver />
-              </Suspense>
-            ) : null}
-            {shouldMountContextualTourOverlay ? (
-              <Suspense fallback={null}>
-                <ContextualTourOverlay />
-              </Suspense>
-            ) : null}
-            {shouldMountUpdateCard ? (
-              <Suspense fallback={null}>
-                <RecoverableRenderErrorBoundary
-                  boundaryId="overlay.update-card"
-                  surface="overlay"
-                  resetKey={activeView}
-                  compact
-                >
-                  <UpdateCard />
-                </RecoverableRenderErrorBoundary>
-              </Suspense>
-            ) : null}
-            <RecoverableRenderErrorBoundary
-              boundaryId="overlay.star-nag"
-              surface="overlay"
-              resetKey={activeView}
-              compact
-            >
-              <StarNagCard />
-            </RecoverableRenderErrorBoundary>
-            <RecoverableRenderErrorBoundary
-              boundaryId="overlay.star-nag-toast"
-              surface="overlay"
-              resetKey={activeView}
-              compact
-            >
-              <StarNagToastHost />
-            </RecoverableRenderErrorBoundary>
-            <StarNagAgentValueMomentObserver />
-            {/* Why: the existing-user opt-in banner mounts at App root so it
-          renders once per renderer session, not per view. It gates
-          internally on the cohort markers populated by the migration,
-          so it only shows for users who installed before the telemetry
-          release and have not yet resolved consent. New users get no
-          first-launch surface — see telemetry-plan.md §First-launch
-          experience. */}
-            <RecoverableRenderErrorBoundary
-              boundaryId="overlay.telemetry-first-launch"
-              surface="overlay"
-              resetKey={settings?.telemetry?.optedIn ?? 'unknown'}
-              compact
-            >
-              <TelemetryFirstLaunchSurface />
-            </RecoverableRenderErrorBoundary>
-            <RecoverableRenderErrorBoundary
-              boundaryId="overlay.zoom"
-              surface="overlay"
-              resetKey={activeView}
-              compact
-            >
-              <ZoomOverlay />
-            </RecoverableRenderErrorBoundary>
-            <Suspense fallback={null}>
-              {activeModal === 'delete-worktree' ? (
-                <RecoverableRenderErrorBoundary
-                  boundaryId="modal.delete-worktree"
-                  surface="modal"
-                  resetKey
-                  compact
-                >
-                  <DeleteWorktreeDialog />
-                </RecoverableRenderErrorBoundary>
-              ) : null}
-            </Suspense>
-            <RecoverableRenderErrorBoundary
-              boundaryId="modal.markdown-template-picker"
-              surface="modal"
-              resetKey={activeModal}
-              compact
-            >
-              <MarkdownTemplatePicker />
-            </RecoverableRenderErrorBoundary>
-            <RecoverableRenderErrorBoundary
-              boundaryId="modal.crash-report"
-              surface="modal"
-              reportAsCrash={false}
-              resetKey={activeModal}
-              compact
-              title={translate('auto.App.722d03aa62', 'The crash report dialog hit an error.')}
-              description={translate(
-                'auto.App.acd66311dc',
-                'Use the Help menu after retrying if you still need diagnostics.'
-              )}
-            >
-              <CrashReportDialog />
-            </RecoverableRenderErrorBoundary>
-            {onboarding && shouldRenderOnboarding ? (
-              <Suspense fallback={null}>
-                <RecoverableRenderErrorBoundary
-                  boundaryId="modal.onboarding"
-                  surface="modal"
-                  title={translate('auto.App.f02d37278a', 'Onboarding hit an error.')}
-                  description={translate(
-                    'auto.App.221a95ba38',
-                    'Retry onboarding or close it and continue in the app.'
-                  )}
-                >
-                  <OnboardingFlow onboarding={onboarding} onOnboardingChange={setOnboarding} />
-                </RecoverableRenderErrorBoundary>
-              </Suspense>
-            ) : null}
-            <RecoverableRenderErrorBoundary
-              boundaryId="overlay.recent-tab-switcher"
-              surface="overlay"
-              resetKey={activeView}
-              compact
-            >
-              <RecentTabSwitcher />
-            </RecoverableRenderErrorBoundary>
-            <Suspense fallback={null}>
-              <RecoverableRenderErrorBoundary
-                boundaryId="overlay.skill-freshness-update-dialog"
-                surface="overlay"
-                compact
-              >
-                <SkillFreshnessUpdateDialog />
-              </RecoverableRenderErrorBoundary>
-            </Suspense>
-            <Suspense fallback={null}>
-              <RecoverableRenderErrorBoundary
-                boundaryId="overlay.remote-server-update-dialog"
-                surface="overlay"
-                compact
-              >
-                <RemoteServerUpdateDialog />
-              </RecoverableRenderErrorBoundary>
-            </Suspense>
+            <WorkspaceShellLayout
+              activePendingCreationId={activePendingCreationId}
+              activeView={activeView}
+              activeWorktreeId={activeWorktreeId}
+              appearanceStyle={leftSidebarStyle}
+              creationLayoutActive={creationLayoutActive}
+              layout={leftTitlebarChromeLayout}
+              projectId={projectSurface?.projectId}
+              settingsChromeOverlayActive={settingsChromeOverlayActive}
+              settingsNativeSidebarMaterialActive={settingsNativeSidebarMaterialActive}
+              shouldMountTerminalWorkbench={shouldMountTerminalWorkbench}
+              showSidebar={showSidebar}
+              sidebarOpen={navigationSidebarOpen}
+              stackedPageOwnsTitlebar={stackedPageOwnsTitlebar}
+              stackedSidebarOpen={stackedSidebarOpen}
+              terminalWorkbenchVisible={terminalWorkbenchVisible}
+              titlebarLeftControls={titlebarLeftControls}
+              titlebarMainStrip={titlebarMainStrip}
+              windowBackgroundBlurEnabled={windowBackgroundBlurEnabled}
+              workspaceChromeActive={workspaceChromeActive}
+              workspaceProfileSwitcher={workspaceProfileSwitcher}
+              worktreeScrollOffsetRef={worktreeSidebarScrollOffsetRef}
+            />
+            <ShellStatusBar activeView={activeView} isVisible={statusBarVisible} />
+            <ShellPrimaryModals
+              activeModal={activeModal}
+              mountedLazyModalIds={resolvedMountedLazyModalIds}
+              shouldMountAddRepoDialog={shouldMountAddRepoDialog}
+              shouldMountSetupGuideTelemetryObserver={shouldMountSetupGuideTelemetryObserver}
+            />
+            <ShellMiddleOverlays
+              activeView={activeView}
+              shouldMountContextualTourOverlay={shouldMountContextualTourOverlay}
+              shouldMountUpdateCard={shouldMountUpdateCard}
+              telemetryOptedIn={settings?.telemetry?.optedIn ?? undefined}
+            />
+            <ShellLateModals
+              activeModal={activeModal}
+              onboarding={onboarding}
+              setOnboarding={setOnboarding}
+              shouldRenderOnboarding={shouldRenderOnboarding}
+            />
+            <ShellTrailingOverlays activeView={activeView} />
           </>
         </ConfirmationDialogProvider>
       </TooltipProvider>

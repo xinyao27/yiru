@@ -1,5 +1,5 @@
 import type { MachineSigningKey } from '@yiru/runtime-protocol/web-connect'
-import type { DeviceScope } from '~shared/runtime-types'
+import type { DeviceScope } from '@yiru/runtime-protocol/workbench/runtime-types'
 
 const PAIRING_OFFER_VERSION = 2
 

@@ -229,7 +229,10 @@ actor KeychainHostRepository: HostRepository {
         let query = keychainQuery(hostID: hostID)
         let update = [kSecValueData as String: data]
         let updateStatus = SecItemUpdate(query as CFDictionary, update as CFDictionary)
-        if updateStatus == errSecSuccess { return }
+        if updateStatus == errSecSuccess {
+            try NotificationPushCredentialStore.save(deviceToken: token, hostID: hostID)
+            return
+        }
         guard updateStatus == errSecItemNotFound else {
             throw HostRepositoryError.keychainOperation("update token", updateStatus)
         }
@@ -239,6 +242,12 @@ actor KeychainHostRepository: HostRepository {
         let addStatus = SecItemAdd(item as CFDictionary, nil)
         guard addStatus == errSecSuccess else {
             throw HostRepositoryError.keychainOperation("add token", addStatus)
+        }
+        do {
+            try NotificationPushCredentialStore.save(deviceToken: token, hostID: hostID)
+        } catch {
+            SecItemDelete(query as CFDictionary)
+            throw error
         }
     }
 
@@ -257,6 +266,7 @@ actor KeychainHostRepository: HostRepository {
                 throw HostRepositoryError.keychain(legacyStatus)
             }
         }
+        try NotificationPushCredentialStore.remove(hostID: hostID)
     }
 
     private func pendingCredentialCleanupIDs() -> Set<String> {
@@ -391,11 +401,11 @@ nonisolated enum HostRepositoryError: Error, LocalizedError {
     var errorDescription: String? {
         switch self {
         case .hostNotFound:
-            "Saved desktop host was not found."
+            "Saved daemon host was not found."
         case .metadataUnreadable:
-            "Saved desktop metadata could not be read."
+            "Saved daemon metadata could not be read."
         case .invalidToken:
-            "The desktop returned an invalid pairing credential."
+            "The daemon returned an invalid pairing credential."
         case .keychain(let status):
             "Keychain operation failed (\(status))."
         case .keychainOperation(let operation, let status):

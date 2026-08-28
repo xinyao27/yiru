@@ -1,18 +1,18 @@
 import {
   applyPRBotAuthorOverride,
   normalizePRBotAuthorOverrides
-} from '@yiru/workbench-model/review'
-import { normalizeAutoRenameBranchFromWorkDefaultOn } from '~shared/auto-rename-branch-from-work-settings'
-import { getDefaultSettings } from '~shared/constants'
-import { normalizeTerminalCursorStyleDefault } from '~shared/terminal/cursor-style-settings'
-import { normalizeTerminalCustomThemes } from '~shared/terminal/custom-themes'
+} from '@yiru/runtime-protocol/model/review'
+import { normalizeAutoRenameBranchFromWorkDefaultOn } from '@yiru/runtime-protocol/workbench/auto-rename-branch-from-work-settings'
+import { getDefaultSettings } from '@yiru/runtime-protocol/workbench/constants'
+import { normalizeTerminalCursorStyleDefault } from '@yiru/runtime-protocol/workbench/terminal/cursor-style-settings'
+import { normalizeTerminalCustomThemes } from '@yiru/runtime-protocol/workbench/terminal/custom-themes'
 import {
   normalizeTuiAgentArgsRecord,
   normalizeTuiAgentEnvRecord
-} from '~shared/tui-agent/launch-defaults'
-import { normalizeDisabledTuiAgents } from '~shared/tui-agent/selection'
-import type { GlobalSettings } from '~shared/types'
-import { normalizeUiLanguage } from '~shared/ui-language'
+} from '@yiru/runtime-protocol/workbench/tui-agent/launch-defaults'
+import { normalizeDisabledTuiAgents } from '@yiru/runtime-protocol/workbench/tui-agent/selection'
+import type { GlobalSettings } from '@yiru/runtime-protocol/workbench/types'
+import { normalizeUiLanguage } from '@yiru/runtime-protocol/workbench/ui-language'
 
 import {
   callWebRuntimeProcedure,

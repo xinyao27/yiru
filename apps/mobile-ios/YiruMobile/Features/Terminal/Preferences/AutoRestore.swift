@@ -87,7 +87,7 @@ final class TerminalAutoRestoreModel {
             values = Dictionary(uniqueKeysWithValues: hosts.map { ($0.id, .loading) })
             loadFailure = nil
         } catch {
-            loadFailure = "Paired desktops could not be loaded."
+            loadFailure = "Paired daemons could not be loaded."
             return
         }
 

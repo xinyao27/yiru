@@ -2,12 +2,7 @@ import { oc, type, type ContractRouter } from '@orpc/contract'
 import { z } from 'zod'
 
 import type { RateLimitResumeSchedule } from './rate-limit-resume.js'
-import {
-  shellServicesBrowserContract,
-  type ShellServicesBrowserTabCloseOutput,
-  type ShellServicesBrowserTabCreateOutput,
-  type ShellServicesBrowserTabSetProfileOutput
-} from './shell-services-browser.js'
+import { shellServicesBrowserContract } from './shell-services-browser.js'
 import { shellServicesPlatformContract } from './shell-services-platform.js'
 import {
   shellServicesTerminalContract,
@@ -235,18 +230,6 @@ export type ShellServicesMobileMarkdownReadResult =
 
 export type ShellServicesMobileMarkdownSaveResult =
   | ({ ok: true } & ShellServicesMobileMarkdownSaveOutput)
-  | { ok: false; reason: ShellServicesUnavailableReason }
-
-export type ShellServicesBrowserTabCreateResult =
-  | ({ ok: true } & ShellServicesBrowserTabCreateOutput)
-  | { ok: false; reason: ShellServicesUnavailableReason }
-
-export type ShellServicesBrowserTabSetProfileResult =
-  | ({ ok: true } & ShellServicesBrowserTabSetProfileOutput)
-  | { ok: false; reason: ShellServicesUnavailableReason }
-
-export type ShellServicesBrowserTabCloseResult =
-  | ({ ok: true } & ShellServicesBrowserTabCloseOutput)
   | { ok: false; reason: ShellServicesUnavailableReason }
 
 export type ShellServicesRateLimitResumeDispatchResult =

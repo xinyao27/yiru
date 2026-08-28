@@ -1,6 +1,9 @@
-import type { WorkspaceSessionPatch, WorkspaceSessionState } from '~shared/types'
-import { normalizeBrowserHistoryEntries } from '~shared/workspace/session-browser-history'
-import { pruneLocalTerminalScrollbackBuffers } from '~shared/workspace/session-terminal-buffers'
+import type {
+  WorkspaceSessionPatch,
+  WorkspaceSessionState
+} from '@yiru/runtime-protocol/workbench/types'
+import { normalizeBrowserHistoryEntries } from '@yiru/runtime-protocol/workbench/workspace/session-browser-history'
+import { pruneLocalTerminalScrollbackBuffers } from '@yiru/runtime-protocol/workbench/workspace/session-terminal-buffers'
 
 import {
   buildActiveConnectionIdsAtShutdown,
@@ -11,10 +14,10 @@ import {
   buildSanitizedTerminalLayoutsByTabId,
   buildTerminalSessionData,
   type WorkspaceSessionSnapshot
-} from '../components/editor/workspace-session'
-import { buildLastVisitedAtByWorktreeId } from '../components/editor/workspace-session-focus-recency'
-import { buildSleepingAgentSessionData } from '../components/editor/workspace-session-sleeping-agents'
-import { buildPersistedUnifiedTabSessionData } from '../components/editor/workspace-session-unified-tabs'
+} from '../editor/workspace-session'
+import { buildLastVisitedAtByWorktreeId } from '../editor/workspace-session-focus-recency'
+import { buildSleepingAgentSessionData } from '../editor/workspace-session-sleeping-agents'
+import { buildPersistedUnifiedTabSessionData } from '../editor/workspace-session-unified-tabs'
 
 type SessionRelevantField = keyof WorkspaceSessionSnapshot
 

@@ -1,6 +1,9 @@
+import {
+  getDefaultOnboardingState,
+  ONBOARDING_FLOW_VERSION
+} from '@yiru/runtime-protocol/workbench/constants'
+import type { OnboardingState } from '@yiru/runtime-protocol/workbench/types'
 import { isJsonRecord, readLocalJson, writeLocalJson } from '~renderer/web/storage/local-json'
-import { getDefaultOnboardingState, ONBOARDING_FLOW_VERSION } from '~shared/constants'
-import type { OnboardingState } from '~shared/types'
 
 const ONBOARDING_STORAGE_KEY = 'yiru.web.onboarding.v1'
 

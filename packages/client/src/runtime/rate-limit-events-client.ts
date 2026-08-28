@@ -1,5 +1,5 @@
-import { useAppStore } from '~renderer/store'
-import type { RateLimitState } from '~shared/rate-limit-types'
+import type { RateLimitState } from '@yiru/runtime-protocol/workbench/rate-limit-types'
+import { useAppStore } from '~renderer/store/state'
 
 import { createRuntimeOrpcClient } from './orpc-client'
 import { getRateLimitsTarget } from './rate-limits-client'

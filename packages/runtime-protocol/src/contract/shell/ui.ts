@@ -1,6 +1,6 @@
 import { type, type ContractRouter } from '@orpc/contract'
-import type { ReadClipboardTextOptions } from '@yiru/workbench-model/ui'
 
+import type { ReadClipboardTextOptions } from '../../model/ui.js'
 import { withAccess, type RuntimeProcedureMeta } from '../access-meta.js'
 
 const SHELL_READ_ACCESS = {

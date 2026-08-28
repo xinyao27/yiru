@@ -1,4 +1,8 @@
-import type { MarkdownDocument, SearchOptions, SearchResult } from '~shared/types'
+import type {
+  MarkdownDocument,
+  SearchOptions,
+  SearchResult
+} from '@yiru/runtime-protocol/workbench/types'
 
 import {
   createEmptyRuntimeFileSearchResult,

@@ -1,4 +1,4 @@
-import type { RuntimeLoopbackTarget } from '~shared/runtime-loopback'
+import type { RuntimeLoopbackTarget } from '~renderer/runtime-loopback'
 
 import { createWebRuntimeOrpcConnection } from '../web/orpc-channel'
 import { WebShellServicesChannel } from '../web/shell-services-channel'

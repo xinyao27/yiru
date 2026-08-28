@@ -6,9 +6,7 @@ on:
       - main
     paths:
       - 'apps/mobile-ios/**'
-      - 'packages/mobile-relay-protocol/**'
       - 'packages/runtime-protocol/**'
-      - 'packages/workbench-model/**'
       - 'package.json'
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
@@ -53,4 +51,4 @@ jobs:
         run: xcodebuild -downloadComponent MetalToolchain
 
       - name: Verify iOS package
-        run: pnpm exec vp run yiru-mobile-ios#verify
+        run: pnpm exec vp run yiru-mobile-ios#check

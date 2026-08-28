@@ -13,7 +13,7 @@ struct TerminalConnectionStatusBanner: View {
                         connectionBannerLabel
                     }
                     .buttonStyle(.appPlain)
-                    .accessibilityLabel("Reconnect to desktop")
+                    .accessibilityLabel("Reconnect to daemon")
                 } else {
                     connectionBannerLabel
                 }

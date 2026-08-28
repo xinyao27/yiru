@@ -1,4 +1,4 @@
-import { RUNTIME_INBOUND_BINARY_STREAM_CAPABILITY } from '~shared/runtime-orpc-socket'
+import { RUNTIME_INBOUND_BINARY_STREAM_CAPABILITY } from '@yiru/runtime-protocol/workbench/runtime-orpc-socket'
 
 import {
   openWebTerminalMultiplexSubscription,

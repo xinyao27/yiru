@@ -1,10 +1,10 @@
-import type { RemoteOperationErrorOptions } from '~renderer/lib/source-control-remote-error'
 import type {
   LocalBaseRefRefreshResult,
   LocalBaseRefUpdateSuggestion,
   RemoveWorktreeResult,
   Worktree
-} from '~shared/types'
+} from '@yiru/runtime-protocol/workbench/types'
+import type { RemoteOperationErrorOptions } from '~renderer/source-control/remote-error'
 
 export type RendererCommandResult =
   | {

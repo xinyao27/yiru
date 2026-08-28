@@ -1,4 +1,4 @@
-import { normalizeRelativePath } from '~renderer/lib/path'
+import { normalizeRelativePath } from '~renderer/path'
 
 import { callRuntimeOrpc } from '../orpc-client'
 import { getActiveRuntimeTarget } from '../rpc-client'

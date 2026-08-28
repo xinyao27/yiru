@@ -372,9 +372,9 @@ nonisolated enum RuntimeOrpcError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidMessage:
-            String(localized: "Desktop returned an invalid response")
+            String(localized: "Daemon returned an invalid response")
         case .unexpectedResponse:
-            String(localized: "Desktop returned an unexpected response")
+            String(localized: "Daemon returned an unexpected response")
         case .server(let status, let code, let message):
             if let message = message?.trimmingCharacters(in: .whitespacesAndNewlines),
                 !message.isEmpty
@@ -383,12 +383,12 @@ nonisolated enum RuntimeOrpcError: LocalizedError {
             } else if let code = code?.trimmingCharacters(in: .whitespacesAndNewlines),
                 !code.isEmpty
             {
-                String(localized: "Desktop request failed: \(code)")
+                String(localized: "Daemon request failed: \(code)")
             } else {
-                String(localized: "Desktop request failed with status \(status)")
+                String(localized: "Daemon request failed with status \(status)")
             }
         case .closed:
-            String(localized: "The desktop connection closed")
+            String(localized: "The daemon connection closed")
         }
     }
 }

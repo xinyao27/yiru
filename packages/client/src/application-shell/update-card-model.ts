@@ -1,4 +1,4 @@
-import { YIRU_GITHUB_RELEASES_URL } from '@yiru/workbench-model/product'
+import { YIRU_GITHUB_RELEASES_URL } from '@yiru/runtime-protocol/model/product'
 
 export type UpdateErrorCardModel = {
   variant?: 'default' | 'http1Compatibility'

@@ -1,1 +1,0 @@
-export const MAX_BATCHED_WATCHER_EVENTS = 5_000

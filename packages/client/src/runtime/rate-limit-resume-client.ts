@@ -1,9 +1,9 @@
-import { useAppStore } from '~renderer/store'
 import type {
   CodexUsageLimitProbe,
   RateLimitHit,
   RateLimitResumeSchedule
-} from '~shared/rate-limit-resume/types'
+} from '@yiru/runtime-protocol/workbench/rate-limit-resume/types'
+import { useAppStore } from '~renderer/store/state'
 
 import { callRuntimeOrpc } from './orpc-client'
 import { getActiveRuntimeTarget } from './rpc-client'

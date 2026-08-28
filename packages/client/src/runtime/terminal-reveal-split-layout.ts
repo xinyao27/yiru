@@ -1,5 +1,8 @@
-import { collectLeafIdsInOrder } from '~renderer/components/terminal-pane/layout-serialization'
-import type { TerminalLayoutSnapshot, TerminalPaneLayoutNode } from '~shared/types'
+import type {
+  TerminalLayoutSnapshot,
+  TerminalPaneLayoutNode
+} from '@yiru/runtime-protocol/workbench/types'
+import { collectLeafIdsInOrder } from '~renderer/terminal-pane/layout-serialization'
 
 // Why: split out of terminal-reveal-shell-request.ts so that file (the
 // `shellServices.terminal.reveal` handler body) stays under the 300-line cap

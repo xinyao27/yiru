@@ -43,22 +43,17 @@ Yiru iOS 的设计语言由系统 Liquid Glass、中性纯色背景和清晰的�
 
 ## 功能保真合同
 
-原生实现的保真只约束**行为、能力与状态语义**，不约束已退役客户端的页面排布。功能基准是
-Desktop 客户端、runtime protocol 和各 feature 的 `INVARIANTS.md`：实现或改动任一页面
-前，先在这三者中确认它覆盖的每个能力、状态分支、图标语义与文案含义——这些必须在原生页面上
-全部保留，不能凭印象删减、合并或改变含义。旧版的信息密度、控件尺寸、分组方式和布局顺序**不再是必须复制的视觉
-基准**：当旧版布局本身存在问题（矛盾的重复入口、无分组的堆叠、对齐不一致、被截断的关键信
-息等），原生页面按自身的清晰度、一致性和 iOS 习惯重新设计排版、分组、层级与控件摆放，不
-必凭印象照搬旧版样式。只有 iOS 26 的系统导航、toolbar、sheet 和交互玻璃使用系统原生呈现，
-不能凭印象替换内容样式。下文的 Diff Code Surface 契约与图标语义映射不受本次调整影响，其具
-体数值已在本文件中写明，不再依赖已删除的旧树。
+原生实现的保真约束**行为、能力与状态语义**，不要求复制已退役客户端的页面排布。功能基准是
+runtime protocol 和各 feature 的 `INVARIANTS.md`：实现或改动页面前，确认它覆盖的能力、状态
+分支、图标语义与文案含义。历史客户端只提供迁移背景，不再是可引用的合同；需要保留的行为和
+视觉数值必须直接写在本文件或对应 feature 的 `INVARIANTS.md` 中。
 
 - 业务页面允许使用 feature-owned 固定视觉 metric，以便准确映射既有 token；同一 metric
   必须只有一个 owner，不能散落成互不一致的 magic number。
-- 旧版内容图标使用 Phosphor 时，原生端使用 Hugeicons Free 的语义等价图标；不在页面中
+- 内容图标使用 Hugeicons Free 的语义图标；不在页面中
   创建逐个图片资产，也不保留 Phosphor 或 SF Symbols 作为 UI 图标 provider。
 - Header action 继承 App 默认的中性前景强调色，不在页面局部设置颜色；普通内容图标和
-  Loader 使用 `mutedForeground`。蓝色 `primary` 只保留给旧版明确指定的主操作，不作为
+  Loader 使用 `mutedForeground`。蓝色 `primary` 只保留给明确的主操作，不作为
   App 的默认 tint，也不用于工作中状态。Liquid Glass 的全局 tint 使用
   `Theme.Colors.foreground`；`selection` 是表面状态色，不作为普通按钮文字 tint。
 - Glass 只改变控件表面，不改变图标尺寸或状态颜色的语义映射；页面自身的排版、分组与控件
@@ -67,14 +62,13 @@ Desktop 客户端、runtime protocol 和各 feature 的 `INVARIANTS.md`：实现
 ### Diff Code Surface
 
 Diff is an editor surface, not a tinted list. Review, source-control branch diffs, file tabs, and
-inline review comments use the old Mobile surface contract: the adaptive `editor-surface` background,
+inline review comments use the adaptive `editor-surface` background,
 20pt rows, a 20pt `+`/`-` prefix column, a 44pt right-aligned line-number column, and 8pt code
-insets. Additions and deletions use the old Mobile's light/dark semantic washes and git status
+insets. Additions and deletions use the defined light/dark semantic washes and git status
 colors; context lines stay on the editor surface. Paired deletion/addition lines retain the shared
 inline emphasis renderer, but no native page may substitute a desktop-only dark canvas, colored
-rail, or second syntax palette. Syntax colors follow the old Mobile editor tokens in both
-appearances. This contract intentionally keeps the Diff surface visually identical to the legacy
-Mobile while Liquid Glass remains limited to navigation and controls.
+rail, or second syntax palette. Syntax colors follow the editor tokens in both appearances while
+Liquid Glass remains limited to navigation and controls.
 
 ## 响应式布局合同
 
@@ -86,7 +80,7 @@ Terminal accessory 和 sheet 密度；只有有足够空间的 iPad 窗口才显
 重新写一套设备型号或 size class 条件。
 
 Workspace List 的第一组基准由 `Features/Workspace/list/Metrics.swift` 持有：文字
-17 / 15 / 13pt（对应旧版 `text-base` / `text-sm` / `text-xs`），项目图标 20pt，普通图标和工作区 Loader 16pt，紧凑图标 12pt，agent 状态
+17 / 15 / 13pt，项目图标 20pt，普通图标和工作区 Loader 16pt，紧凑图标 12pt，agent 状态
 10pt、内部方块 6pt，section / row 最小高度 44pt，open-tab 行高 24pt。工作区内容图标来自
 Hugeicons Free。普通 Repo fallback、分支、非 Agent tab、备注、折叠箭头和 Loader 使用
 `mutedForeground`；Agent mark 保留品牌色，未读 Bell 使用 `unread`，Pull Request 使用
@@ -100,13 +94,13 @@ Terminal 的基准由 `Features/Terminal/ChromeMetrics.swift` 持有：Tab Strip
 按钮是 36pt 中性实色圆形和 44pt 点击区，不使用会在 Terminal 边缘形成分隔阴影的 Glass。
 Tab Strip、Add Button 外层与 Terminal 使用同一个连续 `background`。Terminal 内容左右保留
 12pt。连接与恢复状态显示为不参与布局的顶部浮层，始终可以关闭，关闭提示不取消后台重连。
-Session 右上角 More 只承载老版的页面级导航：Terminal / Chat 视图切换、Quick commands、
+Session 右上角 More 只承载页面级导航：Terminal / Chat 视图切换、Quick commands、
 文件浏览、Source Control、Agent History 和 Checks，并按 capability 隐藏不可用项。Terminal
 尺寸切换、Rename、Clear 和 Close 属于当前 Terminal Tab 的长按菜单；尺寸切换同时保留底部
 快捷栏的直接按钮。两组 action 不能合并，`Terminal Settings` 不出现在任一 Session 菜单。
 底部快捷键栏常驻，
 其 native iOS 基准为 52pt 行高、6pt 间距、40pt 可视控件、44pt 点击区、14pt 等宽文字和
-18pt 模式图标；箭头和删除键沿用旧版 `↑ ↓ ← → ⌫` 字形。快捷键、toolbar、连接 Loader
+18pt 模式图标；箭头和删除键固定使用 `↑ ↓ ← → ⌫` 字形。快捷键、toolbar、连接 Loader
 与模式切换全部使用灰色，只有业务内容自身的 ANSI 色保留颜色。快捷键横向滚动区域保持
 透明并隐藏系统 Scroll Edge Effect，不能在底部区域上再形成矩形 material 或背景层。
 
@@ -139,7 +133,7 @@ Session 右上角 More 只承载老版的页面级导航：Terminal / Chat 视�
 
 ## 按钮尺寸合同
 
-按钮大小由使用场景决定，不能由页面临时挑选。32 / 36 / 44pt 是旧 Mobile 已有的可见尺寸；
+按钮大小由使用场景决定，不能由页面临时挑选。可见高度只使用 32 / 36 / 44pt；
 所有自定义按钮的实际点击区至少 44×44pt。文字按钮与图标按钮使用同一套场景语义。
 
 | 场景 | 可见高度 | 图标 | 点击区 | SwiftUI 用法 |
@@ -147,7 +141,7 @@ Session 右上角 More 只承载老版的页面级导航：Terminal / Chat 视�
 | navigation title、系统 toolbar、sheet confirmation | 系统决定 | icon-only 24pt | 系统保证 | 原生 placement；不加 `appButtonContext`，不套自定义 Glass |
 | 标准行内操作：filter、chip、row accessory、紧凑格式栏 | 32pt | 16pt | 44pt | `.appButtonContext(.inline)` |
 | 普通内容操作：retry、次要操作、panel 内成组操作 | 36pt | 18pt | 44pt | `.appButtonContext(.regular)` |
-| 大型操作：submit、底部主 CTA、旧版 custom sheet header、44pt mode selector | 44pt | 20pt | 44pt | `.appButtonContext(.large)` |
+| 大型操作：submit、底部主 CTA、custom sheet header、44pt mode selector | 44pt | 20pt | 44pt | `.appButtonContext(.large)` |
 | list row、menu item、navigation row | 行高至少 44pt | 随内容 metric | 整行 | 使用 `Button` / `Menu` 的 plain content row，不做 Glass pill |
 
 不需要系统视觉样式的 `Button` 统一使用 `.buttonStyle(.appPlain)`，不直接使用 `.plain`。
@@ -162,14 +156,14 @@ Session 右上角 More 只承载老版的页面级导航：Terminal / Chat 视�
 - `GlassIconButton` 必须传场景 `context`，不能直接写 frame。普通文字 `Button` 在
   `.buttonStyle(.glass)` 或 `.glassProminent` 后使用 `appButtonContext`。
 - 全宽通常用于 `.large` 的表单、footer 主 CTA，以及 Pairing 这类全屏安全确认；普通 retry
-  属于 `.regular`，不因为处于空状态而放大。全屏确认按旧版上下排列主次按钮。小型确认弹层
-  里并排的两个按钮沿用旧版 `.regular`。
+  属于 `.regular`，不因为处于空状态而放大。全屏确认上下排列主次按钮；小型确认弹层
+  里并排的两个按钮使用 `.regular`。
   `.inline` 和普通 `.regular` 不因容器变宽。
-- 已经位于 content section 内的空态保留旧 Mobile 的 section header 和正文密度：header
+- 已经位于 content section 内的空态保留 section header 和正文密度：header
   action 使用 `.inline`，不能改造成居中的 hero 图标、粗大标题和大型 CTA。只有进入独立表单
   后的最终提交按钮才可使用全宽 `.large`。
 - 业务专用控件可以由 feature 持有尺寸，但必须在 feature metric 中声明场景和 44pt 命中区，
-  例如 Terminal tab、快捷键和 Workspace row；不能在 view body 里散落 magic number。旧版
+  例如 Terminal tab、快捷键和 Workspace row；不能在 view body 里散落 magic number。
   Workspace lineage chip 是 24pt 可见高度、搜索清除圆是 24pt，二者继续使用 44pt 命中区；
   Terminal 快捷键则是 40pt 可见高度、44pt 命中区。
 
@@ -177,10 +171,10 @@ Session 右上角 More 只承载老版的页面级导航：Terminal / Chat 视�
 
 Loader 分为两类，不能用一套近似动画代替：
 
-- `working`、`searching`、`solving`、`listening`、`composing`、`shaping` 原样移植老
-  Mobile 使用的 `expo-thinking-orbs` 0.1.0，包括 20 / 64 两套 density、dot radius、speed、
+- `working`、`searching`、`solving`、`listening`、`composing`、`shaping` 使用
+  `expo-thinking-orbs` 0.1.0 的原生移植，包括 20 / 64 两套 density、dot radius、speed、
   depth、轨迹和 morph 参数。
-- `S1...S5`、`B1...B5`、`C1...C5`、`M1...M5` 原样移植老 Mobile 的
+- `S1...S5`、`B1...B5`、`C1...C5`、`M1...M5` 使用
   `orb-lattice`、`orb-lens`、`orb-ring`、`orb-morph` 几何、delay、duration、opacity 和 scale。
 
 用户选择的 Loader 样式用于所有不定进度状态，包括 10pt agent state、16pt Workspace working
@@ -188,7 +182,7 @@ status、18pt attachment upload、20pt Chat Working，以及页面请求、保�
 通过 `YiruProgressViewStyle` 把系统 `ProgressView` 接入同一个 Settings 环境值；页面不选择具体
 动画。可以量化的确定进度继续使用系统 linear progress，不能伪装成无限循环动画。
 
-所有 Loader 使用中性的 `foreground` 灰色（不使用蓝色；旧版 orb 的默认色就是该 token），
+所有 Loader 使用中性的 `foreground` 灰色，不使用蓝色，
 样式仍然完全由 Settings 驱动，也不套 Glass。Reduce Motion 下停在每种动画原有的确定帧。
 Appearance picker 必须直接渲染全部 26 个候选动画；Design System Catalog
 只用当前 Settings 选中的样式展示 10 / 16 / 18 / 20pt 场景尺寸，不能写死家族样例。
@@ -200,7 +194,7 @@ Appearance picker 必须直接渲染全部 26 个候选动画；Design System Ca
 - spacing 使用 4 / 8 / 12 / 16 / 20 / 24 / 32 的阶梯；
 - radius 只定义 content、control、floating surface 三种语义；
 - 新页面 typography 使用动态系统 text style；既有页面按上面的保真合同使用 feature-owned
-  metric，并在默认 Dynamic Type 下与旧版数值一致；
+  metric；
 - animation 使用系统 `.snappy` / `.smooth` token，并尊重 Reduce Motion；
 - opacity、glass spacing、minimum hit target 和页面边距不在 feature 内重复硬编码。
 
@@ -234,7 +228,7 @@ Source Control 的 hosted review 由 `HostedReviewPage`、`HostedReviewSection` 
 - 页面标题和首要操作进入 navigation/toolbar，由系统生成玻璃。
 - 内容页面的 navigation header 使用紧凑 inline 标题；对应 SwiftUI 页面必须显式使用
   `.navigationBarTitleDisplayMode(.inline)`，不能因为 SwiftUI 默认采用大标题而改变首屏密度。
-  Home 等旧版本来就在内容内显示标题的页面继续由内容持有标题。
+  Home 等本来就在内容内显示标题的页面继续由内容持有标题。
 - 浮动底部操作组使用 `GlassActionGroup`；同一操作不能同时出现在 toolbar 与浮层。
 - 产品空态和错误态使用 `AppUnavailableState`：28pt 中性 Hugeicon、regular body title、
   secondary subheadline 描述，以及 36pt `.regular` retry。系统 `ContentUnavailableView` 的小图标、

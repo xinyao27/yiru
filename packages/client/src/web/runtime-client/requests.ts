@@ -3,7 +3,7 @@ import type {
   RuntimeMethodContract,
   RuntimeMethodParams,
   RuntimeMethodResult
-} from '~shared/runtime-method-contract'
+} from '@yiru/runtime-protocol/workbench/runtime-method-contract'
 
 import type { WebRuntimeOrpcClient } from '../orpc-channel'
 import { WebRuntimeClientContract } from './contract'

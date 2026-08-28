@@ -3,8 +3,9 @@ import { isRuntimeSubscriptionReplayResponse } from '@yiru/runtime-protocol/subs
 import type {
   RuntimeClientEvent,
   RuntimeClientEventStreamMessage
-} from '~shared/runtime-client-events'
+} from '@yiru/runtime-protocol/workbench/runtime-client-events'
 
+import { hasBrowserHostRuntime } from './browser-host-runtime'
 import { createRuntimeOrpcClient, isWebRuntimeClient } from './orpc-client'
 import { runtimeEnvironmentsClient } from './runtime-environments-client'
 
@@ -25,7 +26,7 @@ export async function subscribeRuntimeClientEvents(
   // Why: the browser compatibility subscription skips capability negotiation,
   // while Electron's local shell transport already negotiates it. Web must use
   // the direct oRPC subscription after the legacy dispatcher retires this method.
-  if (isWebRuntimeClient()) {
+  if (isWebRuntimeClient() || hasBrowserHostRuntime()) {
     return subscribeRuntimeClientEventsViaOrpc(environmentId, onEvent, onError)
   }
   const handle = await runtimeEnvironmentsClient.subscribe(

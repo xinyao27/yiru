@@ -1,4 +1,4 @@
-import type { DirEntry } from '~shared/types'
+import type { DirEntry } from '@yiru/runtime-protocol/workbench/types'
 
 import { callRuntimeOrpc } from './orpc-client'
 

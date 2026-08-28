@@ -1,4 +1,7 @@
-import type { KeybindingActionId, KeybindingFileSnapshot } from '~shared/keybindings'
+import type {
+  KeybindingActionId,
+  KeybindingFileSnapshot
+} from '@yiru/runtime-protocol/workbench/keybindings'
 import type {
   CreateLocalYiruProfileArgs,
   CreateLocalYiruProfileResult,
@@ -9,7 +12,7 @@ import type {
   TransferYiruProfileProjectArgs,
   TransferYiruProfileProjectResult,
   YiruProfileListResult
-} from '~shared/yiru-profiles'
+} from '@yiru/runtime-protocol/workbench/yiru-profiles'
 
 import { getWebShellConfigurationApis } from '../web/shell-configuration'
 import { callShellOrpc } from './orpc-client'
@@ -40,66 +43,29 @@ export type ShellYiruProfilesApi = {
   ) => Promise<FindYiruProfileProjectsByPathResult>
 }
 
-function restoreShellConfiguration<T>(value: unknown): T {
-  // Why: these documents use desktop-only shared types that runtime-protocol
-  // cannot import; their owning services validate them before transport.
-  return value as T
-}
-
 const electronShellKeybindingsApi: ShellKeybindingsApi = {
-  get: async () =>
-    restoreShellConfiguration(
-      await callShellOrpc((client) => client.shell.keybindings.get, undefined)
-    ),
-  ensureFile: async () =>
-    restoreShellConfiguration(
-      await callShellOrpc((client) => client.shell.keybindings.ensureFile, undefined)
-    ),
-  setAction: async (args) =>
-    restoreShellConfiguration(
-      await callShellOrpc((client) => client.shell.keybindings.setAction, args)
-    ),
-  reload: async () =>
-    restoreShellConfiguration(
-      await callShellOrpc((client) => client.shell.keybindings.reload, undefined)
-    ),
-  openFile: async () =>
-    restoreShellConfiguration(
-      await callShellOrpc((client) => client.shell.keybindings.openFile, undefined)
-    ),
-  revealFile: async () =>
-    restoreShellConfiguration(
-      await callShellOrpc((client) => client.shell.keybindings.revealFile, undefined)
-    ),
+  get: () => callShellOrpc((client) => client.shell.keybindings.get, undefined),
+  ensureFile: () => callShellOrpc((client) => client.shell.keybindings.ensureFile, undefined),
+  setAction: (args) => callShellOrpc((client) => client.shell.keybindings.setAction, args),
+  reload: () => callShellOrpc((client) => client.shell.keybindings.reload, undefined),
+  openFile: () => callShellOrpc((client) => client.shell.keybindings.openFile, undefined),
+  revealFile: () => callShellOrpc((client) => client.shell.keybindings.revealFile, undefined),
   onChanged: (callback) =>
     subscribeShellEvent((event) => {
       if (event.type === 'keybindingsChanged') {
-        callback(restoreShellConfiguration<KeybindingFileSnapshot>(event.snapshot))
+        callback(event.snapshot)
       }
     })
 }
 
 const electronShellYiruProfilesApi: ShellYiruProfilesApi = {
-  list: async () =>
-    restoreShellConfiguration(
-      await callShellOrpc((client) => client.shell.yiruProfiles.list, undefined)
-    ),
-  createLocal: async (args) =>
-    restoreShellConfiguration(
-      await callShellOrpc((client) => client.shell.yiruProfiles.createLocal, args)
-    ),
-  switchProfile: async (args) =>
-    restoreShellConfiguration(
-      await callShellOrpc((client) => client.shell.yiruProfiles.switchProfile, args)
-    ),
-  transferProject: async (args) =>
-    restoreShellConfiguration(
-      await callShellOrpc((client) => client.shell.yiruProfiles.transferProject, args)
-    ),
-  findProjectProfiles: async (args) =>
-    restoreShellConfiguration(
-      await callShellOrpc((client) => client.shell.yiruProfiles.findProjectProfiles, args)
-    )
+  list: () => callShellOrpc((client) => client.shell.yiruProfiles.list, undefined),
+  createLocal: (args) => callShellOrpc((client) => client.shell.yiruProfiles.createLocal, args),
+  switchProfile: (args) => callShellOrpc((client) => client.shell.yiruProfiles.switchProfile, args),
+  transferProject: (args) =>
+    callShellOrpc((client) => client.shell.yiruProfiles.transferProject, args),
+  findProjectProfiles: (args) =>
+    callShellOrpc((client) => client.shell.yiruProfiles.findProjectProfiles, args)
 }
 
 const isWebClient = (globalThis as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__ === true

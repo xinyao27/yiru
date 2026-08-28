@@ -17,9 +17,15 @@ final class NotificationSettingsModel {
 
     @ObservationIgnored
     private let defaults: UserDefaults
+    @ObservationIgnored
+    private weak var coordinator: NotificationCoordinator?
 
-    init(defaults: UserDefaults = .standard) {
+    init(
+        defaults: UserDefaults = .standard,
+        coordinator: NotificationCoordinator? = nil
+    ) {
         self.defaults = defaults
+        self.coordinator = coordinator
     }
 
     func refresh() async {
@@ -27,6 +33,7 @@ final class NotificationSettingsModel {
         let settings = await UNUserNotificationCenter.current().notificationSettings()
         permission = permissionState(settings.authorizationStatus)
         isEnabled = NotificationPreference.isEnabled(defaults: defaults) && permission == .granted
+        await coordinator?.refreshRemoteRegistration()
     }
 
     func setEnabled(_ shouldEnable: Bool) async {
@@ -49,6 +56,7 @@ final class NotificationSettingsModel {
         let settings = await UNUserNotificationCenter.current().notificationSettings()
         permission = permissionState(settings.authorizationStatus)
         isEnabled = NotificationPreference.isEnabled(defaults: defaults) && permission == .granted
+        await coordinator?.refreshRemoteRegistration()
     }
 
     private func permissionState(_ status: UNAuthorizationStatus) -> NotificationPermission {

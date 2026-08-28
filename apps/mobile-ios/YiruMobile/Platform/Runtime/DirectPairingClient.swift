@@ -17,7 +17,7 @@ actor DirectPairingClient: PairingRuntime {
             group.addTask { try await self.authenticateAndSave(offer, log: log) }
             group.addTask {
                 try await Task.sleep(for: self.timeout)
-                await log(.error, "Pairing timed out", "The desktop did not respond in time.")
+                await log(.error, "Pairing timed out", "The daemon did not respond in time.")
                 throw PairingRuntimeError.timeout
             }
             guard let result = try await group.next() else {
@@ -43,7 +43,7 @@ actor DirectPairingClient: PairingRuntime {
                 }
             )
         } catch AuthenticatedRuntimeError.invalidEndpoint {
-            await log(.error, "Invalid desktop endpoint", offer.endpoint)
+            await log(.error, "Invalid daemon endpoint", offer.endpoint)
             throw PairingRuntimeError.invalidEndpoint
         } catch AuthenticatedRuntimeError.authenticationFailed {
             await log(.error, "Authentication failed", "Generate a new pairing code.")

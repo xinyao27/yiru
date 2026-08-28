@@ -1,3 +1,7 @@
+import { extensionShellExportApi } from '../extension/export'
+import { getExtensionHostNavigation } from '../extension/navigation'
+import { extensionShellNotificationsApi } from '../extension/notifications'
+import { isExtensionRenderer, usesBrowserUiRenderer } from './renderer-host'
 import { shellAccountsApi, type ShellAccountsApi } from './shell-accounts-client'
 import {
   shellKeybindingsApi,
@@ -58,6 +62,7 @@ import { electronShellUiApi, type ShellUiApi } from './shell-ui-client'
 import { shellWebConnectApi, type ShellWebConnectApi } from './shell-web-connect-client'
 import { getWebShellApi } from './web-shell-client'
 import { getWebShellUIApi } from './web-ui-shell-client'
+import { getWorkbenchLocation } from './workbench-location'
 
 type RendererShellClient = {
   accounts: ShellAccountsApi
@@ -92,6 +97,29 @@ function isWebShellClient(): boolean {
   return (globalThis as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__ === true
 }
 
+function getShellPlatformApi(): ShellPlatformApi {
+  if (isWebShellClient()) {
+    return getWebShellApi()
+  }
+  if (!isExtensionRenderer()) {
+    return electronShellPlatformApi
+  }
+  const browserShell = getWebShellApi()
+  return {
+    ...electronShellPlatformApi,
+    // Why: opening a web destination and selecting browser-readable image content belong to the
+    // extension renderer; absolute paths and OS launches remain daemon capabilities.
+    openUrl: async (url) => {
+      const location = getWorkbenchLocation()
+      await getExtensionHostNavigation().openExternalUrl({
+        url,
+        ...(location.kind === 'project' ? { projectId: location.projectId } : {})
+      })
+    },
+    pickRepoIconImage: browserShell.pickRepoIconImage
+  }
+}
+
 // Why: feature code targets one shell adapter. Desktop calls the fixed local
 // oRPC host; the web build supplies the same shape explicitly.
 export const shellClient: RendererShellClient = {
@@ -100,12 +128,16 @@ export const shellClient: RendererShellClient = {
   crashReports: shellCrashReportsApi,
   developerPermissions: shellDeveloperPermissionsApi,
   diagnostics: shellDiagnosticsApi,
-  export: shellExportApi,
+  get export() {
+    return isExtensionRenderer() ? extensionShellExportApi : shellExportApi
+  },
   feedback: shellFeedbackApi,
   repoHost: shellRepoHostApi,
   runtime: shellRuntimeStateApi,
   gh: shellGitHubApi,
-  notifications: shellNotificationsApi,
+  get notifications() {
+    return isExtensionRenderer() ? extensionShellNotificationsApi : shellNotificationsApi
+  },
   localhostWorktreeLabels: shellLocalhostWorktreeLabelsApi,
   minimaxCredentials: shellMiniMaxCredentialsApi,
   mobile: shellMobileApi,
@@ -114,10 +146,10 @@ export const shellClient: RendererShellClient = {
   telemetry: shellTelemetryApi,
   webConnect: shellWebConnectApi,
   get shell() {
-    return isWebShellClient() ? getWebShellApi() : electronShellPlatformApi
+    return getShellPlatformApi()
   },
   get ui() {
-    return isWebShellClient() ? getWebShellUIApi() : electronShellUiApi
+    return usesBrowserUiRenderer() ? getWebShellUIApi() : electronShellUiApi
   },
   settings: shellSettingsApi,
   session: shellSessionApi,

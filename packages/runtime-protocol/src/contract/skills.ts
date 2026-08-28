@@ -1,8 +1,8 @@
 import { type, type ContractRouter } from '@orpc/contract'
-import type { AgentType } from '@yiru/workbench-model/agent'
-import { parseExecutionHostId, type ExecutionHostId } from '@yiru/workbench-model/workspace'
 import { z } from 'zod'
 
+import type { AgentType } from '../model/agent.js'
+import { parseExecutionHostId, type ExecutionHostId } from '../model/workspace.js'
 import { withAccess, type RuntimeProcedureMeta } from './access-meta.js'
 import { skillManageContract } from './skill-manage.js'
 

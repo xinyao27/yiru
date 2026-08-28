@@ -1,0 +1,99 @@
+import type { SleepingAgentLaunchConfig } from '@yiru/runtime-protocol/model/agent'
+import type { SessionOptionValue } from '@yiru/runtime-protocol/workbench/agent/session-options'
+import type { StartupCommandDelivery } from '@yiru/runtime-protocol/workbench/codex-startup-delivery'
+import {
+  resolveTuiAgentLaunchArgs,
+  resolveTuiAgentLaunchEnv
+} from '@yiru/runtime-protocol/workbench/tui-agent/launch-defaults'
+import { isTuiAgentEnabled } from '@yiru/runtime-protocol/workbench/tui-agent/selection'
+import type {
+  GlobalSettings,
+  OnboardingState,
+  TuiAgent
+} from '@yiru/runtime-protocol/workbench/types'
+import type { AgentStartedTelemetry } from '~renderer/agent/started-telemetry'
+import { buildAgentStartupPlan } from '~renderer/agent/tui-startup'
+import { tuiAgentToAgentKind } from '~renderer/telemetry/client'
+
+export type OnboardingFolderAgentStartup = {
+  command: string
+  env?: Record<string, string>
+  launchConfig?: SleepingAgentLaunchConfig
+  launchAgent?: TuiAgent
+  startupCommandDelivery?: StartupCommandDelivery
+  sessionOptions?: Record<string, SessionOptionValue>
+  telemetry: AgentStartedTelemetry
+}
+
+function getClientPlatform(): NodeJS.Platform {
+  if (navigator.userAgent.includes('Windows')) {
+    return 'win32'
+  }
+  return navigator.userAgent.includes('Mac') ? 'darwin' : 'linux'
+}
+
+export function buildOnboardingFolderAgentStartup(
+  settings: GlobalSettings | null
+): OnboardingFolderAgentStartup | undefined {
+  const agent = settings?.defaultTuiAgent
+  if (
+    !settings ||
+    !agent ||
+    agent === 'blank' ||
+    !isTuiAgentEnabled(agent, settings.disabledTuiAgents)
+  ) {
+    return undefined
+  }
+
+  const startupPlan = buildAgentStartupPlan({
+    agent,
+    prompt: '',
+    cmdOverrides: settings.agentCmdOverrides ?? {},
+    agentArgs: resolveTuiAgentLaunchArgs(agent, settings.agentDefaultArgs),
+    agentEnv: resolveTuiAgentLaunchEnv(agent, settings.agentDefaultEnv),
+    platform: getClientPlatform(),
+    allowEmptyPromptLaunch: true
+  })
+  if (!startupPlan) {
+    return undefined
+  }
+
+  return {
+    command: startupPlan.launchCommand,
+    ...(startupPlan.env ? { env: startupPlan.env } : {}),
+    launchConfig: startupPlan.launchConfig,
+    launchAgent: agent,
+    ...(startupPlan.sessionOptions ? { sessionOptions: startupPlan.sessionOptions } : {}),
+    ...(startupPlan.startupCommandDelivery
+      ? { startupCommandDelivery: startupPlan.startupCommandDelivery }
+      : {}),
+    telemetry: {
+      agent_kind: tuiAgentToAgentKind(agent),
+      launch_source: 'onboarding',
+      request_kind: 'new'
+    }
+  }
+}
+
+export function shouldSeedFolderAgentAfterDismissedOnboarding(
+  onboarding: OnboardingState | null,
+  hasExistingProject: boolean
+): boolean {
+  return (
+    onboarding?.outcome === 'dismissed' &&
+    !hasExistingProject &&
+    !onboarding.checklist.addedRepo &&
+    !onboarding.checklist.addedFolder
+  )
+}
+
+export function buildDismissedOnboardingFolderAgentStartup(
+  settings: GlobalSettings | null,
+  onboarding: OnboardingState | null,
+  hasExistingProject: boolean
+): OnboardingFolderAgentStartup | undefined {
+  if (!shouldSeedFolderAgentAfterDismissedOnboarding(onboarding, hasExistingProject)) {
+    return undefined
+  }
+  return buildOnboardingFolderAgentStartup(settings)
+}

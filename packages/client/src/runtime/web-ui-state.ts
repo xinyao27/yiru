@@ -1,18 +1,21 @@
-import { getDefaultUIState } from '~shared/constants'
+import { getDefaultUIState } from '@yiru/runtime-protocol/workbench/constants'
 import {
   normalizeAgentActivityDisplayMode,
   normalizeWorkspacePanelTitlebarPinnedIds,
   normalizeWorktreeCardProperties
-} from '~shared/constants'
-import { normalizeContextualTourIds, type ContextualTourId } from '~shared/contextual-tours'
+} from '@yiru/runtime-protocol/workbench/constants'
+import {
+  normalizeContextualTourIds,
+  type ContextualTourId
+} from '@yiru/runtime-protocol/workbench/contextual-tours'
 import {
   normalizeFeatureInteractions,
   type FeatureInteractionId,
   type FeatureInteractionState
-} from '~shared/feature-interactions'
-import { normalizeStatusBarUsageMode } from '~shared/status-bar-usage-mode'
-import type { PersistedUIState } from '~shared/types'
-import { normalizeUsagePercentageDisplay } from '~shared/usage-percentage-display'
+} from '@yiru/runtime-protocol/workbench/feature-interactions'
+import { normalizeStatusBarUsageMode } from '@yiru/runtime-protocol/workbench/status-bar-usage-mode'
+import type { PersistedUIState } from '@yiru/runtime-protocol/workbench/types'
+import { normalizeUsagePercentageDisplay } from '@yiru/runtime-protocol/workbench/usage-percentage-display'
 
 const UI_STORAGE_KEY = 'yiru.web.ui.v1'
 const SETTINGS_STORAGE_KEY = 'yiru.web.settings.v1'

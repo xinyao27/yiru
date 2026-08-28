@@ -1,14 +1,10 @@
-import { DownloadMenu } from '../chrome/download-menu'
 import { siteLinks } from '../site-links'
 import { Demo } from './demo/demo'
 
-// Why: the architecture is a choice rather than a second download, because
-// browsers report "Intel Mac OS X" even on Apple Silicon — detecting it would
-// hand a lot of people the wrong build. Linux and Windows builds exist in the
-// release but are not offered here; the footer's Releases link reaches them.
-const macBuilds = [
-  { label: 'Apple Silicon', href: siteLinks.downloadMac },
-  { label: 'Intel', href: siteLinks.downloadMacIntel }
+const productLinks = [
+  { label: 'Bun daemon', href: siteLinks.daemon },
+  { label: 'Chrome extension', href: siteLinks.extension },
+  { label: 'iOS', href: siteLinks.testflight }
 ]
 
 export function Home(): React.JSX.Element {
@@ -20,36 +16,31 @@ export function Home(): React.JSX.Element {
       <h1 className="text-ink flex flex-col gap-3 pt-24 text-[26px] leading-[1.2] font-semibold">
         Yiru
         <span className="text-copy max-w-[620px] text-[16px] leading-[26px] font-normal">
-          The AI agent editor IDE — run coding agents anywhere your code lives.
+          Coding agents in Chrome, backed by a Bun-native daemon.
         </span>
       </h1>
 
       <p className="max-w-[620px]">
-        Yiru runs Claude Code, Codex, and any CLI agent in isolated git worktrees — on your Mac, a
-        WSL distro, or an SSH box. Review the evidence and merge from your desk or your phone.
+        Run Claude Code, Codex, and other terminal agents in isolated git worktrees. Navigate every
+        project from Chrome&apos;s side panel, work inside each tab, and follow the session from
+        iOS.
       </p>
 
       <div className="flex flex-col gap-3">
         <p className="max-w-[620px]">Use Yiru:</p>
         <div className="border-hairline rounded-card flex w-full items-center justify-between gap-3 border px-4 py-3">
           <div className="flex min-w-0 items-center gap-5 font-mono text-[14px]">
-            <a
-              href={siteLinks.webApp}
-              target="_blank"
-              rel="noreferrer"
-              className="text-ink hover:text-accent transition-colors"
-            >
-              Web App
-            </a>
-            <DownloadMenu label="macOS" options={macBuilds} />
-            <a
-              href={siteLinks.testflight}
-              target="_blank"
-              rel="noreferrer"
-              className="text-ink hover:text-accent transition-colors"
-            >
-              iOS
-            </a>
+            {productLinks.map((link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                target="_blank"
+                rel="noreferrer"
+                className="text-ink hover:text-accent transition-colors"
+              >
+                {link.label}
+              </a>
+            ))}
           </div>
           <a
             href={siteLinks.license}

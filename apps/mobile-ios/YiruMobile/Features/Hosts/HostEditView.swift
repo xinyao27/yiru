@@ -27,7 +27,7 @@ struct HostEditView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: Theme.Spacing.small) {
                 Text(
-                    "Change the display name or connection address. Address edits only switch where this phone connects — they do not re-pair. Use this when the same desktop is reachable at a different IP (for example home LAN vs Tailscale)."
+                    "Change the display name or connection address. Address edits only switch where this phone connects — they do not re-pair. Use this when the same daemon is reachable at a different IP (for example home LAN vs Tailscale)."
                 )
                 .font(.system(size: Theme.Typography.supporting))
                 .foregroundStyle(Theme.Colors.mutedForeground)

@@ -1,5 +1,6 @@
 import CryptoKit
 import Foundation
+import UIKit
 import UserNotifications
 
 @MainActor
@@ -29,6 +30,7 @@ final class NotificationCoordinator: NSObject, UNUserNotificationCenterDelegate 
 
     func install() {
         center.delegate = self
+        NotificationRemoteRegistration.shared.install(coordinator: self)
     }
 
     func start(
@@ -52,6 +54,34 @@ final class NotificationCoordinator: NSObject, UNUserNotificationCenterDelegate 
                 await self?.observe(hostID: hostID)
             }
         }
+        await refreshRemoteRegistration()
+    }
+
+    func receiveRemoteDeviceToken(_ token: String) {
+        guard token.count == 64, token.allSatisfy(\.isHexDigit) else { return }
+        defaults.set(token.lowercased(), forKey: NotificationPushRegistration.tokenKey)
+        Task { [weak self] in
+            await self?.synchronizeRemoteRegistration()
+        }
+    }
+
+    func refreshRemoteRegistration() async {
+        let settings = await center.notificationSettings()
+        let isAuthorized: Bool
+        switch settings.authorizationStatus {
+        case .authorized, .provisional, .ephemeral:
+            isAuthorized = true
+        case .denied, .notDetermined:
+            isAuthorized = false
+        @unknown default:
+            isAuthorized = false
+        }
+        if NotificationPreference.isEnabled(defaults: defaults) && isAuthorized {
+            UIApplication.shared.registerForRemoteNotifications()
+        } else {
+            UIApplication.shared.unregisterForRemoteNotifications()
+        }
+        await synchronizeRemoteRegistration()
     }
 
     func userNotificationCenter(
@@ -100,6 +130,7 @@ final class NotificationCoordinator: NSObject, UNUserNotificationCenterDelegate 
                     switch event {
                     case .ready(let nextSubscriptionID):
                         subscriptionID = nextSubscriptionID
+                        try await synchronizeRemoteRegistration(hostID: hostID)
                         readyCount += 1
                         let watermark = lastSequence(hostID: hostID)
                         if readyCount > 1 || watermark > 0 {
@@ -254,6 +285,26 @@ final class NotificationCoordinator: NSObject, UNUserNotificationCenterDelegate 
         }
     }
 
+    private func synchronizeRemoteRegistration() async {
+        guard let profiles = try? await hosts.hosts() else { return }
+        for profile in profiles {
+            try? await synchronizeRemoteRegistration(hostID: profile.id)
+        }
+    }
+
+    private func synchronizeRemoteRegistration(hostID: String) async throws {
+        let isEnabled = NotificationPreference.isEnabled(defaults: defaults)
+        let token =
+            isEnabled
+            ? defaults.string(forKey: NotificationPushRegistration.tokenKey)
+            : nil
+        try await runtime.registerRemoteNotifications(
+            for: hostID,
+            token: token,
+            environment: token == nil ? nil : NotificationPushRegistration.environment
+        )
+    }
+
     private func lastSequence(hostID: String) -> Int64 {
         let value = defaults.object(forKey: sequenceKey(hostID: hostID)) as? NSNumber
         return max(value?.int64Value ?? 0, 0)
@@ -274,6 +325,17 @@ final class NotificationCoordinator: NSObject, UNUserNotificationCenterDelegate 
             guard scheduled[key]?.isPending == false else { continue }
             scheduled.removeValue(forKey: key)
         }
+    }
+}
+
+private enum NotificationPushRegistration {
+    static let tokenKey = "yiru:apnsDeviceToken:v1"
+    static var environment: String {
+        #if DEBUG
+            "sandbox"
+        #else
+            "production"
+        #endif
     }
 }
 

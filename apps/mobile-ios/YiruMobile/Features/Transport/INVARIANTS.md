@@ -2,12 +2,12 @@
 
 ## Current product boundary
 
-- Desktop and mobile use authenticated direct `ws` / `wss` endpoints. The
-  first-party Cloud Relay implementation was retired on 2026-07-24; the native client must not
-  silently revive its deleted provisioning or credential lifecycle.
+- The daemon and mobile client use authenticated direct `ws` / `wss` endpoints. Yiru has no
+  first-party Cloud Relay; the native client must not revive its deleted provisioning or
+  credential lifecycle.
 - Pairing continues to validate legacy relay fields because old QR payloads can still reach the
   boundary, but no relay secret is persisted and no relay connection is attempted.
-- The desktop public key from the pairing offer remains pinned across every reconnect. A fresh
+- The daemon public key from the pairing offer remains pinned across every reconnect. A fresh
   ephemeral client key and nonce create a new E2EE session for every physical socket.
 
 ## Connection lifecycle
@@ -31,7 +31,7 @@
 - View cancellation removes its pending response waiter and is not displayed as an error. It does
   not tear down a healthy shared session used by another feature.
 - A transport failure invalidates the peer and starts reconnection. Unary calls are not replayed
-  automatically because a mutation may already have reached the desktop; each feature chooses
+  automatically because a mutation may already have reached the daemon; each feature chooses
   whether its operation is safe to retry.
 - The shared control connection requests a short-lived terminal bulk ticket. One host-scoped
   terminal multiplexer owns the authenticated binary socket, epoch, heartbeat, correlation IDs,

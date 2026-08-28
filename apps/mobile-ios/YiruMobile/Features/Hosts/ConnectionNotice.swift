@@ -43,7 +43,7 @@ struct HostConnectionNotice: View {
                 .foregroundStyle(Theme.Colors.foreground)
                 .appButtonContext(.inline)
                 .disabled(isRetrying)
-                .accessibilityLabel("Reconnect to desktop")
+                .accessibilityLabel("Reconnect to daemon")
             }
 
             Button(action: dismiss) {
@@ -89,11 +89,11 @@ struct HostConnectionNotice: View {
 
     private var statusTitle: LocalizedStringResource {
         switch snapshot.phase {
-        case .connecting: "Connecting to desktop"
+        case .connecting: "Connecting to daemon"
         case .reconnecting:
-            snapshot.isReconnectWarning ? "Can't connect to desktop" : "Reconnecting to desktop"
-        case .unreachable: "Desktop unavailable"
-        case .authenticationFailed: "Desktop authentication failed"
+            snapshot.isReconnectWarning ? "Can't connect to daemon" : "Reconnecting to daemon"
+        case .unreachable: "Daemon unavailable"
+        case .authenticationFailed: "Daemon authentication failed"
         case .idle, .connected: "Connected"
         }
     }

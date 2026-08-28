@@ -1,12 +1,15 @@
-import { z } from 'zod'
-import { isCustomAgentId } from '~shared/commit-message/agent-spec'
+import { isCustomAgentId } from '@yiru/runtime-protocol/workbench/commit-message/agent-spec'
 import {
   SOURCE_CONTROL_ACTION_IDS,
   SOURCE_CONTROL_TEXT_ACTION_IDS
-} from '~shared/source-control/ai-actions'
-import type { SourceControlAiSettings } from '~shared/source-control/ai-types'
-import { isTuiAgent } from '~shared/tui-agent/config'
-import type { CommitMessageAiSettings, GlobalSettings } from '~shared/types'
+} from '@yiru/runtime-protocol/workbench/source-control/ai-actions'
+import type { SourceControlAiSettings } from '@yiru/runtime-protocol/workbench/source-control/ai-types'
+import { isTuiAgent } from '@yiru/runtime-protocol/workbench/tui-agent/config'
+import type {
+  CommitMessageAiSettings,
+  GlobalSettings
+} from '@yiru/runtime-protocol/workbench/types'
+import { z } from 'zod'
 
 const finiteNumber = z.number().finite()
 

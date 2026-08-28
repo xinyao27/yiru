@@ -1,5 +1,4 @@
-import type { AgentTranscriptMessage, AgentType } from '@yiru/workbench-model/agent'
-
+import type { AgentTranscriptMessage, AgentType } from '../model/agent.js'
 import type { RuntimeJsonValue } from './json-value.js'
 import type { TerminalRead, TerminalState } from './terminal-results.js'
 

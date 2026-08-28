@@ -4,7 +4,7 @@ import type {
   ShellOpenLocalPathResult,
   ShellRenderingHost
 } from '@yiru/runtime-protocol/contract'
-import { parseRenderingHostBootstrap } from '~shared/rendering-host-bootstrap'
+import { parseRenderingHostBootstrap } from '~renderer/rendering-host-bootstrap'
 
 import { callShellOrpc, isWebRuntimeClient } from './orpc-client'
 

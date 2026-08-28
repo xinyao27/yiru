@@ -1,16 +1,16 @@
-import { useAppStore } from '~renderer/store'
 import type {
   SkillFreshnessInventory,
   SkillManageScope,
   SkillUpdateRun,
   SkillUpdateStartResult
-} from '~shared/skill-freshness'
+} from '@yiru/runtime-protocol/workbench/skill-freshness'
 import type {
   SkillDirectoryListing,
   SkillDiscoveryResult,
   SkillDiscoveryTarget,
   SkillFileReadResult
-} from '~shared/skills'
+} from '@yiru/runtime-protocol/workbench/skills'
+import { useAppStore } from '~renderer/store/state'
 
 import { callRuntimeOrpc, createRuntimeOrpcClient, type RuntimeClientTarget } from './orpc-client'
 import { getActiveRuntimeTarget } from './rpc-client'

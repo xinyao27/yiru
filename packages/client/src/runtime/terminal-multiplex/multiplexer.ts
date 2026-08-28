@@ -1,5 +1,5 @@
-import { TERMINAL_MULTIPLEX_RUNTIME_CAPABILITY } from '@yiru/runtime-protocol/capabilities'
 import type { TerminalShowResult } from '@yiru/runtime-protocol/contract'
+import { TERMINAL_MULTIPLEX_RUNTIME_CAPABILITY } from '@yiru/runtime-protocol/protocol-version'
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 import type { RuntimeStatusResult } from '@yiru/runtime-protocol/status'
 import type { TerminalMultiplexOpcode as TerminalMultiplexOpcodeValue } from '@yiru/runtime-protocol/terminal-multiplex/frame'

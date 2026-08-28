@@ -9,7 +9,7 @@ nonisolated enum TerminalDisplayMode: String, Equatable, Sendable {
         case .auto:
             "Phone Fit"
         case .desktop:
-            "Desktop Size"
+            "Host Size"
         }
     }
 
@@ -36,7 +36,7 @@ nonisolated enum TerminalDisplayMode: String, Equatable, Sendable {
         case .auto:
             "Switch to phone mode"
         case .desktop:
-            "Switch to desktop mode"
+            "Switch to host mode"
         }
     }
 }

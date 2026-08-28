@@ -1,5 +1,5 @@
-import type { TuiAgent } from '@yiru/workbench-model/agent'
-import type { GitBranchChangeEntry } from '@yiru/workbench-model/review'
+import type { TuiAgent } from '../model/agent.js'
+import type { GitBranchChangeEntry } from '../model/review.js'
 
 export type GitCommitCompareSummary = {
   commitOid: string

@@ -27,7 +27,7 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Why: the demo is a fixed-geometry mock of the desktop app. It has a hard
+/* Why: the demo is a fixed-geometry mock of a Yiru workspace. It has a hard
    min-content width — 343px as measured today, a 168px worktree rail plus 173px of
    pane content — and the narrowest phones are below that, so it is zoomed to fit
    rather than clipped or scrolled sideways. The demo is an illustration, so
@@ -77,7 +77,7 @@
   --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   /* Why: 2px is the whole radius budget. react-grab keeps its boxes at 0-2px,
-     and the desktop app is rectilinear — soft corners fight both. */
+     and the Yiru work surface is rectilinear — soft corners fight both. */
   --radius-chip: 2px;
   --radius-control: 2px;
   --radius-card: 2px;

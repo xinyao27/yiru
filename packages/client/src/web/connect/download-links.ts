@@ -1,7 +1,7 @@
 import {
   YIRU_GITHUB_LATEST_RELEASE_DOWNLOAD_URL,
   YIRU_GITHUB_RELEASES_URL
-} from '@yiru/workbench-model/product'
+} from '@yiru/runtime-protocol/model/product'
 
 // Why: these artifact names carry no version, so /releases/latest/download is a
 // permalink to the current build — one link, no release metadata fetch. The

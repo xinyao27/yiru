@@ -36,6 +36,7 @@ schemes:
     build:
       targets:
         YiruMobile: all
+        YiruNotificationService: all
         YiruWidgets: all
 
 targets:
@@ -49,6 +50,7 @@ targets:
           - '**/*.md'
           - 'Resources/agent-icons/**'
       - path: Shared/Widgets
+      - path: Shared/Notifications
       - path: YiruMobile/Resources/agent-icons
         type: folder
         buildPhase: resources
@@ -58,6 +60,7 @@ targets:
       - package: Textual
       - package: Hugeicons
       - target: YiruWidgets
+      - target: YiruNotificationService
     info:
       path: YiruMobile/Resources/Info.plist
       properties:
@@ -71,8 +74,11 @@ targets:
             CFBundleURLSchemes:
               - yiru
         ITSAppUsesNonExemptEncryption: false
+        UIBackgroundModes:
+          - remote-notification
+        YiruKeychainAccessGroup: $(AppIdentifierPrefix)com.xinyao27.yiru.mobile.notifications
         NSCameraUsageDescription: Allow Yiru to take photos and scan pairing codes.
-        NSLocalNetworkUsageDescription: Yiru connects to the desktop app on your local network.
+        NSLocalNetworkUsageDescription: Yiru connects directly to your daemon on the local network.
         NSPhotoLibraryUsageDescription: Allow Yiru to attach photos from your library to an agent or terminal session on your paired desktop.
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true
@@ -142,3 +148,33 @@ targets:
         TARGETED_DEVICE_FAMILY: '1,2'
     dependencies:
       - package: Hugeicons
+  YiruNotificationService:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: YiruNotificationService
+        type: syncedFolder
+      - path: Shared/Notifications
+    info:
+      path: YiruNotificationService/Resources/Info.plist
+      properties:
+        CFBundleDisplayName: Yiru Notification Service
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.usernotifications.service
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).NotificationService
+        YiruKeychainAccessGroup: $(AppIdentifierPrefix)com.xinyao27.yiru.mobile.notifications
+    settings:
+      base:
+        CODE_SIGN_ENTITLEMENTS: YiruNotificationService/Resources/YiruNotificationService.entitlements
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: 8H6Q2YA365
+        GENERATE_INFOPLIST_FILE: NO
+        PRODUCT_BUNDLE_IDENTIFIER: com.xinyao27.yiru.mobile.NotificationService
+        PRODUCT_NAME: YiruNotificationService
+        SKIP_INSTALL: YES
+        SUPPORTS_MACCATALYST: NO
+        SWIFT_DEFAULT_ACTOR_ISOLATION: nonisolated
+        SWIFT_EMIT_LOC_STRINGS: YES
+        TARGETED_DEVICE_FAMILY: '1,2'

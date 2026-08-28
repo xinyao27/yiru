@@ -41,7 +41,7 @@ struct WorkspaceFilePane: View {
             switch model.phase {
             case .waiting:
                 AppUnavailableState(
-                    "Waiting for desktop…",
+                    "Waiting for daemon…",
                     iconID: .wifiSlash,
                     description: Text("Reconnect to load this file.")
                 ) {

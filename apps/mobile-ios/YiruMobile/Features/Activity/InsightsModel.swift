@@ -165,7 +165,7 @@ final class ActivityInsightsModel {
             return true
         } catch {
             if summary == nil {
-                phase = .failed(String(localized: "Unable to read saved desktop hosts"))
+                phase = .failed(String(localized: "Unable to read saved daemon hosts"))
             }
             return false
         }

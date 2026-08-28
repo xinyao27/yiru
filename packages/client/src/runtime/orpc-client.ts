@@ -1,7 +1,8 @@
 import { ORPCError } from '@orpc/client'
-import { withBrowserPaneUiRuntimeRpcSource } from '~shared/runtime-rpc-feature-interaction-source'
+import { withBrowserUiRuntimeRpcSource } from '@yiru/runtime-protocol/workbench/runtime-rpc-feature-interaction-source'
 
 import { createRuntimeRpcAbortError } from './abortable-runtime-environment-call'
+import { hasBrowserHostRuntime, openConfiguredBrowserHostRuntime } from './browser-host-runtime'
 import { ensureRuntimeEnvironmentCompatible } from './environment-compatibility'
 import {
   retainRuntimeOrpcBinaryRoute,
@@ -113,6 +114,9 @@ export async function createRuntimeOrpcClient(
   if (target.kind === 'local') {
     return createLocalRuntimeOrpcClient()
   }
+  if (hasBrowserHostRuntime()) {
+    return createWebEnvironmentRuntimeOrpcClient(target, options)
+  }
   const environmentId = target.environmentId.trim()
   const environmentTarget = { kind: 'environment', environmentId } as const
   if (isWebRuntimeClient()) {
@@ -178,6 +182,9 @@ function resolveRuntimeOrpcProcedureByPath<TResult>(
 let pooledLocalConnection: Promise<RuntimeOrpcClientConnection> | null = null
 
 export function createLocalRuntimeOrpcClient(): Promise<RuntimeOrpcClientConnection> {
+  if (hasBrowserHostRuntime()) {
+    return openConfiguredBrowserHostRuntime()
+  }
   if (isWebRuntimeClient()) {
     return Promise.resolve(
       createWebEnvironmentRuntimeOrpcClient({ kind: 'environment', environmentId: 'active' }, {})
@@ -248,7 +255,7 @@ function featureInteractionInput<TInput>(
   }
   // Why: the feature-interaction marker adds metadata without changing a
   // procedure's declared input shape.
-  return withBrowserPaneUiRuntimeRpcSource(input) as TInput
+  return withBrowserUiRuntimeRpcSource(input) as TInput
 }
 
 function abortable<TResult>(promise: Promise<TResult>, signal?: AbortSignal): Promise<TResult> {

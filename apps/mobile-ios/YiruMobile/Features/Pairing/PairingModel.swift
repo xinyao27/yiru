@@ -36,11 +36,11 @@ final class PairingModel {
             return nil
         } catch PairingRuntimeError.timeout {
             phase = .failed(
-                "The desktop did not respond within 25 seconds. Check the connection and try again."
+                "The daemon did not respond within 25 seconds. Check the connection and try again."
             )
         } catch PairingRuntimeError.authenticationFailed {
             phase = .failed(
-                "The desktop rejected this pairing code. Generate a new code and try again.")
+                "The daemon rejected this pairing code. Generate a new code and try again.")
         } catch PairingRuntimeError.connectionFailed(let detail) {
             phase = .failed(
                 LocalizedStringResource(
@@ -60,7 +60,7 @@ final class PairingModel {
     private func pairingFailureMessage(_ detail: String) -> String {
         let trimmed = detail.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
-            return "Yiru could not establish a secure connection to this desktop."
+            return "Yiru could not establish a secure connection to this daemon."
         }
         return "Pairing failed: \(trimmed)"
     }

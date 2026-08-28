@@ -6,37 +6,38 @@ export const runtimeEnvironmentsClient: RuntimeEnvironmentApi = {
   list: async () =>
     isWebRuntimeClient()
       ? getWebRuntimeEnvironmentApi().list()
-      : restoreEnvironmentDocument(
-          await callShellOrpc((client) => client.shell.runtimeEnvironments.list, undefined)
-        ),
+      : callShellOrpc((client) => client.shell.runtimeEnvironments.list, undefined),
   resolve: async (input) =>
     isWebRuntimeClient()
       ? getWebRuntimeEnvironmentApi().resolve(input)
-      : restoreEnvironmentDocument(
-          await callShellOrpc((client) => client.shell.runtimeEnvironments.resolve, input)
-        ),
+      : callShellOrpc((client) => client.shell.runtimeEnvironments.resolve, input),
   remove: async (input) =>
     isWebRuntimeClient()
       ? getWebRuntimeEnvironmentApi().remove(input)
-      : restoreEnvironmentDocument(
-          await callShellOrpc((client) => client.shell.runtimeEnvironments.remove, input)
-        ),
+      : callShellOrpc((client) => client.shell.runtimeEnvironments.remove, input),
   disconnect: async (input) =>
     isWebRuntimeClient()
       ? getWebRuntimeEnvironmentApi().disconnect(input)
-      : restoreEnvironmentDocument(
-          await callShellOrpc((client) => client.shell.runtimeEnvironments.disconnect, input)
-        ),
+      : callShellOrpc((client) => client.shell.runtimeEnvironments.disconnect, input),
   getStatus: async (input) =>
     isWebRuntimeClient()
       ? getWebRuntimeEnvironmentApi().getStatus(input)
-      : restoreEnvironmentDocument(
-          await callShellOrpc((client) => client.shell.runtimeEnvironments.getStatus, input)
-        ),
+      : callShellOrpc((client) => client.shell.runtimeEnvironments.getStatus, input),
   call: (input) => requireWebEnvironmentApi().call(input),
   subscribe: (input, callbacks) => requireWebEnvironmentApi().subscribe(input, callbacks),
   callOrpcProcedure: (input, options) =>
-    requireWebEnvironmentApi().callOrpcProcedure(input, options)
+    isWebRuntimeClient()
+      ? getWebRuntimeEnvironmentApi().callOrpcProcedure(input, options)
+      : callShellOrpc((client) => client.shell.runtimeEnvironments.callOrpcProcedure, input, {
+          signal: options?.signal,
+          onBinary: options?.onBinary
+        }),
+  subscribeOrpcProcedure: (input, options) =>
+    isWebRuntimeClient()
+      ? getWebRuntimeEnvironmentApi().subscribeOrpcProcedure(input, options)
+      : callShellOrpc((client) => client.shell.runtimeEnvironments.subscribeOrpcProcedure, input, {
+          signal: options?.signal
+        })
 }
 
 function requireWebEnvironmentApi(): RuntimeEnvironmentApi {
@@ -44,8 +45,4 @@ function requireWebEnvironmentApi(): RuntimeEnvironmentApi {
     throw new Error('The legacy runtime environment gateway is unavailable in Electron.')
   }
   return getWebRuntimeEnvironmentApi()
-}
-
-function restoreEnvironmentDocument<TResult>(value: unknown): TResult {
-  return value as TResult
 }

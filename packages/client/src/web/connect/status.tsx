@@ -1,10 +1,10 @@
 import { createContext, useContext } from 'react'
 import type { ReactNode } from 'react'
+import { translate } from '~renderer/i18n/i18n'
 import {
   RuntimeStatusIndicator,
   type RuntimeStatusIndicatorProps
-} from '~renderer/components/status-bar/runtime-status/indicator'
-import { translate } from '~renderer/i18n/i18n'
+} from '~renderer/status-bar/runtime-status/indicator'
 
 import type { StoredWebRuntimeEnvironment } from '../runtime-environment'
 

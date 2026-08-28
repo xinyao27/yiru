@@ -68,11 +68,11 @@ struct PairingConfirmView: View {
 
     private var readyContent: some View {
         VStack(spacing: 0) {
-            Text("Pair with this desktop?")
+            Text("Pair with this daemon?")
                 .font(.system(size: Theme.Typography.emphasis, weight: .semibold))
                 .foregroundStyle(Theme.Colors.foreground)
                 .multilineTextAlignment(.center)
-            Text("You opened a pairing link from your desktop. Confirm to add it to your hosts.")
+            Text("You opened a pairing link from your daemon. Confirm to add it to your hosts.")
                 .font(.system(size: Theme.Typography.supporting))
                 .foregroundStyle(Theme.Colors.mutedForeground)
                 .multilineTextAlignment(.center)

@@ -8,7 +8,7 @@ import type {
   NotificationPermissionStatusResult,
   NotificationSoundDataResult,
   NotificationSoundResult
-} from '~shared/types'
+} from '@yiru/runtime-protocol/workbench/types'
 
 import { callShellOrpc } from './orpc-client'
 

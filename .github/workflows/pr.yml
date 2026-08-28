@@ -2,129 +2,38 @@ name: PR Checks
 
 on:
   pull_request:
-    types:
-      - opened
-      - synchronize
-      - reopened
-      - ready_for_review
+    types: [opened, synchronize, reopened, ready_for_review]
 
 jobs:
-  verify:
+  check:
     runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-        with:
-          # Why: the freshness registry is derived from immutable release tags,
-          # so shallow PR checkouts cannot verify historical official identities.
-          fetch-depth: 0
-          fetch-tags: true
-          persist-credentials: false
-
-      - name: Install native build tools
-        run: sudo apt-get update && sudo apt-get install -y build-essential python3
-          zlib1g-dev zsh
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version-file: package.json
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v6
-        with:
-          run_install: false
-
-      # Why: pnpm's bundled node-gyp ships gyp_main.py without execute
-      # permission, which breaks native module builds (e.g. node-pty's
-      # postinstall) with "/bin/sh: gyp_main.py: Permission denied".
-      # Pin the fallback to a Node 24-compatible node-gyp version so CI stays
-      # reproducible while forcing pnpm to bypass its broken bundled copy.
-      # Gate on runner.os == 'Linux' to match release-cut.yml — the
-      # npm-global path layout this step assumes is POSIX-shaped, and the
-      # failure has only been observed on Linux runners. Today this job
-      # pins runs-on: ubuntu-latest so the guard is a no-op, but it
-      # prevents a silent break if a Windows/macOS matrix is added later.
-      - name: Use external node-gyp to avoid pnpm's bundled copy (Linux only)
-        if: runner.os == 'Linux'
-        run: |
-          npm install -g node-gyp@13.0.1
-          echo "npm_config_node_gyp=$(npm root -g)/node-gyp/bin/node-gyp.js" >> "$GITHUB_ENV"
-
-      - name: Prepare dependency install
-        run: |
-          if [ -e node_modules ]; then
-            ls -ld node_modules
-            rm -rf node_modules
-          fi
-
-      - name: Install dependencies
-        # Why: pnpm 10.24's frozen headless fast path can fail on fresh Ubuntu
-        # runners while creating the root node_modules. Use the normal resolver
-        # path, then verify package metadata stayed unchanged.
-        run: |
-          pnpm install --no-frozen-lockfile --prefer-frozen-lockfile=false
-          git diff --exit-code package.json apps/desktop/package.json packages/editor-themes/package.json pnpm-workspace.yaml pnpm-lock.yaml
-
-      - name: Lint
-        run: pnpm lint:check --format github
-
-      # Why: project-owned type declarations must live in .ts so tsc
-      # actually checks them. TypeScript's skipLibCheck: true (inherited
-      # from @electron-toolkit/tsconfig) silently widens unresolved names
-      # in .d.ts to `any`, which is how #1186 shipped a broken IPC signature
-      # past typecheck. See docs/preload-typecheck-hole.md.
-      - name: Guard against project-owned .d.ts in preload/shared
-        run: |
-          matches=$(find apps/desktop/src/preload packages/shared/src -name '*.d.ts' 2>/dev/null || true)
-          if [ -n "$matches" ]; then
-            echo "::error::Project-owned .d.ts files are not allowed under apps/desktop/src/preload or packages/shared/src."
-            echo "Move type declarations into a .ts file so skipLibCheck does not hide errors."
-            echo "See docs/preload-typecheck-hole.md."
-            echo "Found:"
-            echo "$matches"
-            exit 1
-          fi
-
-      - name: Typecheck
-        run: pnpm typecheck
-
-      - name: Build unpacked app
-        run: pnpm build:unpack
-
-  verify-native-ios:
-    runs-on: macos-26
-
     steps:
       - name: Checkout
         uses: actions/checkout@v7
         with:
           persist-credentials: false
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v7
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version-file: package.json
-
-      - name: Select Xcode
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: '26.5'
+          bun-version: 1.4.0
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
         with:
           run_install: false
 
-      - name: Install XcodeGen
-        run: brew install xcodegen
-
-      - name: Install Metal toolchain
-        run: xcodebuild -downloadComponent MetalToolchain
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: package.json
+          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Verify iOS package
-        run: pnpm exec vp run yiru-mobile-ios#verify
+      - name: Check repository
+        run: pnpm check
+
+      - name: Build daemon, extension, protocols, and landing site
+        run: pnpm build

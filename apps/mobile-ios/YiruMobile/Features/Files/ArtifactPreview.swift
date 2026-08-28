@@ -93,7 +93,7 @@ final class TerminalArtifactPreviewModel {
     func save() async {
         guard isDirty, !isSaving else { return }
         guard isConnected else {
-            errorMessage = "Waiting for desktop…"
+            errorMessage = "Waiting for daemon…"
             return
         }
         isSaving = true
@@ -113,7 +113,7 @@ final class TerminalArtifactPreviewModel {
             isSaving = false
             return
         } catch TerminalArtifactError.changedOnHost {
-            errorMessage = "File changed on desktop. Reload before saving."
+            errorMessage = "File changed on the daemon host. Reload before saving."
         } catch {
             errorMessage = "Couldn't save file"
         }
@@ -164,7 +164,7 @@ struct TerminalArtifactPreviewView: View {
                 switch model.phase {
                 case .waiting:
                     AppUnavailableState(
-                        "Waiting for desktop…",
+                        "Waiting for daemon…",
                         iconID: .wifiSlash,
                         description: Text("Reconnect to load this file.")
                     ) {

@@ -1,6 +1,7 @@
+import type { ShellRuntimeEnvironmentOrpcStreamEvent } from '@yiru/runtime-protocol/contract'
 import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
-import type { PublicKnownRuntimeEnvironment } from '~shared/runtime-environments'
-import type { RuntimeStatus } from '~shared/runtime-types'
+import type { PublicKnownRuntimeEnvironment } from '@yiru/runtime-protocol/workbench/runtime-environments'
+import type { RuntimeStatus } from '@yiru/runtime-protocol/workbench/runtime-types'
 
 export type RuntimeEnvironmentSubscriptionHandle = {
   unsubscribe: () => void
@@ -45,4 +46,8 @@ export type RuntimeEnvironmentApi = {
       onBinary?: (bytes: Uint8Array<ArrayBufferLike>) => void
     }
   ) => Promise<unknown>
+  subscribeOrpcProcedure: (
+    args: { selector: string; path: readonly string[]; input: unknown },
+    options?: { signal?: AbortSignal }
+  ) => Promise<AsyncIterable<ShellRuntimeEnvironmentOrpcStreamEvent>>
 }

@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { MagnifyingGlass as Search } from '~renderer/components/icons/hugeicons'
-import { cn } from '~renderer/lib/class-names'
-import { ZOOM_LEVEL_CHANGED_EVENT } from '~renderer/lib/zoom-events'
-import type { ZoomLevelChangedEventDetail } from '~renderer/lib/zoom-events'
+import { ZOOM_LEVEL_CHANGED_EVENT } from '~renderer/application-shell/zoom-events'
+import type { ZoomLevelChangedEventDetail } from '~renderer/application-shell/zoom-events'
+import { MagnifyingGlass as Search } from '~renderer/icons/hugeicons'
+import { cn } from '~renderer/ui/class-names'
 
 // Why: the overlay must fully unmount after its fade-out completes so the
 // fixed-position container doesn't linger in the DOM and interfere with

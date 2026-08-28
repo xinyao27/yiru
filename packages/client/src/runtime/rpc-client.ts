@@ -4,9 +4,9 @@ import type {
   RuntimeMethodContract,
   RuntimeMethodParams,
   RuntimeMethodResult
-} from '~shared/runtime-method-contract'
-import { withBrowserPaneUiRuntimeRpcSource } from '~shared/runtime-rpc-feature-interaction-source'
-import type { GlobalSettings } from '~shared/types'
+} from '@yiru/runtime-protocol/workbench/runtime-method-contract'
+import { withBrowserUiRuntimeRpcSource } from '@yiru/runtime-protocol/workbench/runtime-rpc-feature-interaction-source'
+import type { GlobalSettings } from '@yiru/runtime-protocol/workbench/types'
 
 import {
   callAbortableRuntimeEnvironment,
@@ -101,7 +101,7 @@ export async function callRuntimeRpc<TResult>(
     throw createRuntimeRpcAbortError()
   }
   const nextParams = options.suppressFeatureInteraction
-    ? withBrowserPaneUiRuntimeRpcSource(params)
+    ? withBrowserUiRuntimeRpcSource(params)
     : params
   const response = options.signal
     ? await callAbortableRuntimeEnvironment(
