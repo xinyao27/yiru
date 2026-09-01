@@ -7,7 +7,6 @@ import { basename, normalizeRelativePath } from '~renderer/path'
 import { PIERRE_FILE_TREE_STYLE, PIERRE_FILE_TREE_UNSAFE_CSS } from '../pierre-file-tree-theme'
 import { usePierreFileTreeDragPayload } from '../use-pierre-file-tree-drag-payload'
 import { usePierreFileTreeFlash } from '../use-pierre-file-tree-flash'
-import { usePierreFileTreeNativeDrop } from '../use-pierre-file-tree-native-drop'
 import type { PierreFileExplorerTreeProps } from './pierre-file-explorer-tree-contract'
 import {
   buildPierreFileTreeData,
@@ -40,8 +39,6 @@ export function PierreFileExplorerTree({
   onInlineInputCancel,
   onMoveDrop,
   onDragSourceChange,
-  onNativeDragTargetChange,
-  onNativeDragExpandDirectory,
   ref,
   renderContextMenu
 }: PierreFileExplorerTreeProps): React.JSX.Element {
@@ -64,12 +61,6 @@ export function PierreFileExplorerTree({
     [...selectedPaths]
       .map((path) => treeData.canonicalPathByAbsolutePath.get(path))
       .filter((path): path is string => Boolean(path)))()
-  const nativeDropHandlers = usePierreFileTreeNativeDrop({
-    expandedPaths,
-    onNativeDragExpandDirectory,
-    onNativeDragTargetChange,
-    treeData
-  })
   const dragPayloadHandlers = usePierreFileTreeDragPayload({
     onDragSourceChange,
     selectedPaths,
@@ -316,8 +307,6 @@ export function PierreFileExplorerTree({
           onActivateFile(node)
         }
       }}
-      onDragOverCapture={nativeDropHandlers.onDragOverCapture}
-      onDragLeaveCapture={nativeDropHandlers.onDragLeaveCapture}
       onDragStart={dragPayloadHandlers.onDragStart}
       onDragEndCapture={dragPayloadHandlers.onDragEndCapture}
       onDoubleClickCapture={(event) => {

@@ -1,5 +1,4 @@
 import { useEffect } from 'react'
-import { usesBrowserUiRenderer } from '~renderer/runtime/renderer-host'
 
 import { isPtyLocked } from './pane-manager/mobile-driver-state'
 import { getFitOverrideForPty } from './pane-manager/mobile-fit-overrides'
@@ -21,7 +20,7 @@ export function useTerminalWebFit({
   paneTransportsRef
 }: TerminalWebFitInput): void {
   useEffect(() => {
-    if (!usesBrowserUiRenderer() || !isVisible || !isActive) {
+    if (!isVisible || !isActive) {
       return
     }
     const cleanups: (() => void)[] = []

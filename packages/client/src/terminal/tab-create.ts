@@ -1,7 +1,7 @@
 import {
-  createWebRuntimeSessionTerminal,
-  isWebRuntimeSessionActive
-} from '~renderer/runtime/web-runtime-session'
+  createRemoteRuntimeSessionTerminal,
+  isRemoteRuntimeSessionActive
+} from '~renderer/runtime/remote-runtime-session'
 import { useAppStore } from '~renderer/store/state'
 import { getRuntimeEnvironmentIdForWorktree } from '~renderer/worktree/runtime-owner'
 
@@ -17,11 +17,11 @@ export function createNewTerminalTab(
   }
   const state = useAppStore.getState()
   const runtimeEnvironmentId = getRuntimeEnvironmentIdForWorktree(state, activeWorktreeId)
-  if (isWebRuntimeSessionActive(runtimeEnvironmentId)) {
+  if (isRemoteRuntimeSessionActive(runtimeEnvironmentId)) {
     // Why: paired web clients receive host-owned terminal tabs through
     // session.tabs. Creating a local tab first races the host snapshot and can
     // leave stale remote handles in the web store.
-    void createWebRuntimeSessionTerminal({
+    void createRemoteRuntimeSessionTerminal({
       worktreeId: activeWorktreeId,
       environmentId: runtimeEnvironmentId,
       command: shellOverride,

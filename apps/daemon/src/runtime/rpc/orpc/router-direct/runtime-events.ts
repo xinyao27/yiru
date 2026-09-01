@@ -14,17 +14,10 @@ import { wireRuntimeStream } from '../registered-stream'
 // client, as opposed to a client asking about its own session (agent-session.ts)
 // or the host's current telemetry snapshot (host-telemetry.ts). Direct-wired
 // in its entirety (Phase 6 D-stage, 切片 73) with no legacy registration left:
-// Electron still reaches `clientEvents.subscribe`/`unsubscribe` through a
-// bare string-method channel with no oRPC negotiation, but `unsubscribe`
-// dropped its registration once `RpcDispatcher` gained a fallback into this
-// direct wiring for unary bare-envelope callers (docs/runtime-orpc-
-// migration.md Phase 6 slice 110), and `subscribe` (streaming) dropped
-// its own once slice 112 gave `RpcDispatcher` the streaming sibling of that
-// fallback (legacy-dispatch-fallback.ts's
-// `LEGACY_STREAMING_DISPATCH_FALLBACK_PROCEDURES`), which drains
-// methods/client-events.ts's `handleClientEventsSubscribe` through `emit` for
-// the same caller. `driverEvents`/`progressEvents` have no such caller and
-// were retired outright.
+// Legacy string-method callers reach `clientEvents.subscribe`/`unsubscribe`
+// through the dispatcher's compatibility fallback, while negotiated clients
+// use this direct oRPC wiring. `driverEvents` and `progressEvents` have only
+// negotiated callers.
 export const runtimeEventsRuntimeHandlers = {
   runtime: {
     clientEvents: {

@@ -170,7 +170,7 @@ export async function observeSkillPackage(
     } finally {
       await directoryHandle.close().catch(() => undefined)
     }
-    // Why: runtime Electron and the build's Node may carry different ICU data;
+    // Why: runtime and build toolchains may carry different ICU data;
     // identity order must match the generator without locale-sensitive collation.
     entries.sort((left, right) => compareCodeUnits(left.name, right.name))
     for (const entry of entries) {

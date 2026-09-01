@@ -19,28 +19,9 @@ export function createBunShellSystemHandlers(
 ) {
   return {
     app: {
-      getIdentity: runtimeImplementation.shell.app.getIdentity.handler(() => ({
-        devBranch: null,
-        devLabel: process.env.NODE_ENV === 'production' ? null : 'Dev',
-        devRepoRoot: null,
-        devWorktreeName: null,
-        dockBadgeLabel: null,
-        isDev: process.env.NODE_ENV !== 'production',
-        name: 'Yiru'
-      })),
-      relaunch: runtimeImplementation.shell.app.relaunch.handler(() => restartDaemon()),
       restart: runtimeImplementation.shell.app.restart.handler(() => restartDaemon()),
-      reload: runtimeImplementation.shell.app.reload.handler(() => undefined),
-      awaitFirstWindowStartupServices:
-        runtimeImplementation.shell.app.awaitFirstWindowStartupServices.handler(() => undefined),
       startupDiagnostic: runtimeImplementation.shell.app.startupDiagnostic.handler(({ input }) =>
         logRendererStartupMilestone(input.event, input.details)
-      ),
-      getKeyboardInputSourceId: runtimeImplementation.shell.app.getKeyboardInputSourceId.handler(
-        () => null
-      ),
-      setUnreadDockBadgeCount: runtimeImplementation.shell.app.setUnreadDockBadgeCount.handler(
-        () => undefined
       )
     },
     runtime: {

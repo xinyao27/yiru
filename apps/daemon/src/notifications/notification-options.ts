@@ -8,7 +8,7 @@ export type NotificationSoundId = NotificationSettings['customSoundId']
 // Why: shared by the runtime's job1 (decides whether the native Notification
 // should embed the OS default sound) and the preload's playSound path (which
 // only ever plays a *custom* sound file) — colocated with buildNotificationOptions
-// since both are pure settings→presentation decisions, not Electron calls.
+// since both are pure settings-to-presentation decisions without host effects.
 export function getEffectiveNotificationSoundId(
   settings: NotificationSettings
 ): NotificationSoundId {

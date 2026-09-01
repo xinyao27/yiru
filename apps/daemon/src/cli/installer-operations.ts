@@ -3,12 +3,7 @@ import { dirname } from 'node:path'
 
 import type { CliInstallStatus } from '@yiru/runtime-protocol/workbench/cli-install-types'
 
-import { buildAppImageCliWrapper } from './appimage-cli-wrapper'
-import {
-  isLinuxAppImage,
-  isWindowsPackagedBundledCommand,
-  type CliInstallContext
-} from './installer-context'
+import { isWindowsPackagedBundledCommand, type CliInstallContext } from './installer-context'
 import { buildWindowsForwarder } from './installer-launchers'
 import {
   isPermissionError,
@@ -29,8 +24,6 @@ export async function installCli(context: CliInstallContext): Promise<CliInstall
   }
   if (status.installMethod === 'symlink') {
     await installSymlink(context, status.commandPath, status.launcherPath, status.state)
-  } else if (isLinuxAppImage(context)) {
-    await installAppImageWrapper(status.commandPath, status.launcherPath)
   } else if (
     !isWindowsPackagedBundledCommand(
       context,
@@ -116,14 +109,6 @@ async function removeSymlink(context: CliInstallContext, commandPath: string): P
       `if [ -L ${quoteShell(commandPath)} ]; then rm ${quoteShell(commandPath)}; fi`
     )
   }
-}
-
-async function installAppImageWrapper(commandPath: string, appImagePath: string): Promise<void> {
-  await mkdir(dirname(commandPath), { recursive: true })
-  await writeFile(commandPath, buildAppImageCliWrapper(appImagePath), {
-    encoding: 'utf8',
-    mode: 0o755
-  })
 }
 
 async function ensureWindowsPathEntry(

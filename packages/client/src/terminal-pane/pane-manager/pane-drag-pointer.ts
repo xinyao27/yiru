@@ -52,8 +52,7 @@ export function beginPaneDragFromPointerDown(
           handle.releasePointerCapture(pointerId)
         }
       } catch {
-        // Best effort: Electron/Chromium can drop capture before our cleanup
-        // runs, but the terminal must never stay pointer-inert.
+        // Best effort: Chromium can drop capture before cleanup runs.
       }
     }
     if (!dragging) {
@@ -77,9 +76,8 @@ export function beginPaneDragFromPointerDown(
         }
       }
     } finally {
-      // Why: pointer capture can be lost crossing Electron webviews; always
-      // clear the drag overlay/input state so terminals do not stay inert.
-      callbacks.onDragActiveChange?.(false)
+      // Why: pointer capture can be lost during a cross-pane drag; always
+      // clear the overlay state.
       hideDropOverlay(state)
       state.dragSourcePaneId = null
       state.currentDropTarget = null
@@ -100,7 +98,6 @@ export function beginPaneDragFromPointerDown(
       dragging = true
       state.dragSourcePaneId = paneId
       callbacks.getRoot().classList.add('is-pane-dragging')
-      callbacks.onDragActiveChange?.(true)
       callbacks.getPanes().get(paneId)?.container.classList.add('is-drag-source')
       showDropOverlay(state)
     }

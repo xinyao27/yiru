@@ -2,11 +2,11 @@ import {
   toRuntimeExecutionHostId,
   type ExecutionHostId
 } from '@yiru/runtime-protocol/model/workspace'
+import type { PublicKnownRuntimeEnvironment } from '@yiru/runtime-protocol/workbench/runtime-environments'
 import type { OnboardingState, Repo } from '@yiru/runtime-protocol/workbench/types'
 import { collectFolderWorkspaceKeysFromSession } from '~renderer/workspace/session-hydration-keys'
 
 import { fetchWorkspaceSessionWithRuntimeHostOwners } from '../editor/workspace-session-host-persistence'
-import { runtimeEnvironmentsClient } from '../runtime/runtime-environments-client'
 import { shellClient } from '../runtime/shell-client'
 import { getRuntimeUIState } from '../runtime/ui-client'
 import { syncZoomCSSVar } from '../settings/ui-zoom'
@@ -30,6 +30,7 @@ export type StartupHydrationActions = Pick<
   | 'hydrateBrowserSession'
   | 'hydrateEditorSession'
   | 'hydratePersistedUI'
+  | 'hydrateRuntimeEnvironmentStatuses'
   | 'hydrateTabsSession'
   | 'hydrateWorkspaceSession'
   | 'pruneLastVisitedTimestamps'
@@ -48,18 +49,8 @@ type StartupHydrationInput = {
   attempt: StartupHydrationAttempt
   isCancelled: () => boolean
   repos: readonly Repo[]
+  runtimeEnvironments: readonly PublicKnownRuntimeEnvironment[]
   signal: AbortSignal
-}
-
-async function listRuntimeSessionHostIdsForStartup(): Promise<ExecutionHostId[]> {
-  try {
-    return (await runtimeEnvironmentsClient.list()).map((environment) =>
-      toRuntimeExecutionHostId(environment.id)
-    )
-  } catch (err) {
-    console.warn('Failed to list runtime session hosts for startup:', err)
-    return []
-  }
 }
 
 export async function hydrateStartupSession({
@@ -67,14 +58,12 @@ export async function hydrateStartupSession({
   attempt,
   isCancelled,
   repos,
+  runtimeEnvironments,
   signal
 }: StartupHydrationInput): Promise<OnboardingState | null> {
   const startupStartedAt = performance.now()
   logRendererStartupDiagnostic('startup-chain-start')
   void actions.fetchYiruProfiles()
-  await timeRendererStartupStep('fetch-settings', () => actions.fetchSettings())
-  publishTerminalViewAttributesAtAppStart(useAppStore.getState().settings, getSystemPrefersDark())
-
   const keybindingsPromise = timeRendererStartupStep('fetch-keybindings', () =>
     actions.fetchKeybindings()
   )
@@ -83,6 +72,15 @@ export async function hydrateStartupSession({
     shellClient.onboarding.get()
   )
   onboardingPromise.catch(() => {})
+  const startupRuntimeHostIds: ExecutionHostId[] = runtimeEnvironments.map((environment) =>
+    toRuntimeExecutionHostId(environment.id)
+  )
+  const sessionReadPromise = timeRendererStartupStep('session-get', () =>
+    fetchWorkspaceSessionWithRuntimeHostOwners(shellClient.session, repos, startupRuntimeHostIds)
+  )
+
+  await timeRendererStartupStep('fetch-settings', () => actions.fetchSettings())
+  publishTerminalViewAttributesAtAppStart(useAppStore.getState().settings, getSystemPrefersDark())
 
   const persistedUI = await timeRendererStartupStep('ui-get', () =>
     getRuntimeUIState(useAppStore.getState().settings)
@@ -94,13 +92,7 @@ export async function hydrateStartupSession({
       hydratePersistedUI: actions.hydratePersistedUI
     })
   )
-  const startupRuntimeHostIds = await timeRendererStartupStep(
-    'list-runtime-session-hosts',
-    listRuntimeSessionHostIdsForStartup
-  )
-  const sessionRead = await timeRendererStartupStep('session-get', () =>
-    fetchWorkspaceSessionWithRuntimeHostOwners(shellClient.session, repos, startupRuntimeHostIds)
-  )
+  const sessionRead = await sessionReadPromise
   await keybindingsPromise
   if (isCancelled()) {
     return null
@@ -128,9 +120,6 @@ export async function hydrateStartupSession({
     return null
   }
 
-  await timeRendererStartupStep('first-window-services-await', () =>
-    shellClient.app.awaitFirstWindowStartupServices()
-  )
   attempt.reconnectStarted = true
   await timeRendererStartupStep('reconnect-terminals', () =>
     actions.reconnectPersistedTerminals(signal)
@@ -138,6 +127,7 @@ export async function hydrateStartupSession({
   syncZoomCSSVar()
   actions.setHydrationSucceeded(true)
   actions.completeHydratedWorktreePurge()
+  void actions.hydrateRuntimeEnvironmentStatuses(runtimeEnvironments)
   logRendererStartupDiagnostic('startup-hydration-done', {
     durationMs: Math.round(performance.now() - startupStartedAt)
   })

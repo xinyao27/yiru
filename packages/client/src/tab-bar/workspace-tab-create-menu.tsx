@@ -39,7 +39,6 @@ export function WorkspaceTabCreateMenu({
         'my-auto ml-1 text-muted-foreground',
         disabled && 'cursor-not-allowed opacity-50 hover:bg-background hover:text-muted-foreground'
       )}
-      style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
       // Why: the shared accessible name keeps both local and remote create
       // affordances discoverable without coupling tests to their glyph.
       aria-label={label}

@@ -34,7 +34,7 @@ export function isNestedWorktreePath(parentPath: string, childPath: string): boo
   const parent = parentPath.replace(/[\\/]+$/, '').replace(/\\/g, '/')
   const child = childPath.replace(/\\/g, '/')
   // Why: Windows paths are case-insensitive and can arrive with mixed slash
-  // styles from git/Electron. Normalize before deciding whether to exclude a
+  // styles from git and the host shell. Normalize before deciding whether to exclude a
   // nested linked worktree from file scans.
   const comparableParent = windowsPath ? parent.toLowerCase() : parent
   const comparableChild = windowsPath ? child.toLowerCase() : child

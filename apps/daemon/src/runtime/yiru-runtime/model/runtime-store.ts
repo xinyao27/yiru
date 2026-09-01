@@ -84,7 +84,7 @@ export type RuntimeStore = {
   // the next access.
   updateSettings?: (
     updates: Partial<GlobalSettings>,
-    options?: { notifyListeners?: boolean; originWebContentsId?: number }
+    options?: { notifyListeners?: boolean; originClientId?: number }
   ) => GlobalSettings
 }
 

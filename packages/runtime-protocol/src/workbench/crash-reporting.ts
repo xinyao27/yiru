@@ -46,7 +46,6 @@ export type CrashReportRecord = {
   platform: NodeJS.Platform
   osRelease: string
   arch: string
-  electronVersion: string
   chromeVersion: string
   details: Record<string, CrashReportDetailValue>
   breadcrumbs?: CrashReportBreadcrumb[]
@@ -58,7 +57,6 @@ export type UncapturedCrashReportContext = {
   platform: NodeJS.Platform
   osRelease: string
   arch: string
-  electronVersion: string
   chromeVersion: string
 }
 
@@ -252,7 +250,6 @@ export function formatCrashReportText(
     `Exit code: ${report.exitCode ?? 'unknown'}`,
     `App version: ${report.appVersion}`,
     `Platform: ${report.platform} ${report.osRelease} ${report.arch}`,
-    `Electron: ${report.electronVersion}`,
     `Chrome: ${report.chromeVersion}`
   ]
 
@@ -303,7 +300,6 @@ export function formatUncapturedCrashReportText(
     'Exit code: unknown',
     `App version: ${context.appVersion}`,
     `Platform: ${context.platform} ${context.osRelease} ${context.arch}`,
-    `Electron: ${context.electronVersion}`,
     `Chrome: ${context.chromeVersion}`,
     '',
     'Details:',

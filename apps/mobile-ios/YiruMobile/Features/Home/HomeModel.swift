@@ -64,9 +64,16 @@ final class HomeModel {
         let snapshots = await connectionRuntime.connectionSnapshots(forHostIDs: hosts.map(\.id))
         for await snapshots in snapshots {
             guard !Task.isCancelled else { return }
+            let previouslyConnectedHostIDs = connectedHostIDs
             connections = snapshots
             reconcileAccountSubscriptions()
-            await refreshHostContent()
+            let newlyConnectedHostIDs = connectedHostIDs.subtracting(previouslyConnectedHostIDs)
+            if newlyConnectedHostIDs.isEmpty {
+                publish()
+                persistCurrentSnapshot()
+            } else {
+                await refreshHostContent(for: newlyConnectedHostIDs)
+            }
         }
     }
 
@@ -141,16 +148,20 @@ final class HomeModel {
         return loaded
     }
 
-    private func refreshHostContent() async {
-        let profiles = hosts
-        let liveHostIDs = Set(
-            profiles.compactMap { profile in
-                connections[profile.id]?.phase == .connected ? profile.id : nil
+    private var connectedHostIDs: Set<String> {
+        Set(
+            hosts.compactMap { host in
+                connections[host.id]?.phase == .connected ? host.id : nil
             }
         )
-        async let loadedWorkspaces = loadWorkspaces(for: liveHostIDs)
+    }
+
+    private func refreshHostContent(for requestedHostIDs: Set<String>? = nil) async {
+        let profiles = hosts
+        let hostIDs = requestedHostIDs.map { connectedHostIDs.intersection($0) } ?? connectedHostIDs
+        async let loadedWorkspaces = loadWorkspaces(for: hostIDs)
         async let loadedAccounts = withTaskGroup(of: (String, AccountsSnapshot?).self) { group in
-            for host in profiles where liveHostIDs.contains(host.id) {
+            for host in profiles where hostIDs.contains(host.id) {
                 group.addTask { [accountsRepository] in
                     (host.id, try? await accountsRepository.accounts(for: host.id))
                 }
@@ -166,7 +177,7 @@ final class HomeModel {
                 rawValue: UserDefaults.standard.string(forKey: "yiru:home-usage-range:v1") ?? ""
             ) ?? .thirtyDays
         async let loadedStats = withTaskGroup(of: (String, ActivityStatsSummary?).self) { group in
-            for host in profiles where liveHostIDs.contains(host.id) {
+            for host in profiles where hostIDs.contains(host.id) {
                 group.addTask { [activityRepository] in
                     let summary = try? await activityRepository.activityStats(
                         for: host.id,
@@ -232,11 +243,6 @@ final class HomeModel {
     }
 
     private func reconcileAccountSubscriptions() {
-        let connectedHostIDs = Set(
-            hosts.compactMap { host in
-                connections[host.id]?.phase == .connected ? host.id : nil
-            }
-        )
         for (hostID, task) in accountSubscriptionTasks where !connectedHostIDs.contains(hostID) {
             task.cancel()
             accountSubscriptionTasks.removeValue(forKey: hostID)

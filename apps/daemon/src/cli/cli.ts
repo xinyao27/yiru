@@ -49,7 +49,7 @@ async function hydrateLocalShellPathForCli(force = false): Promise<void> {
     return
   }
   // Why: CLI registration must match `which yiru` in the user's terminal, not
-  // the sparse PATH a GUI-launched Electron process inherited from launchd.
+  // the sparse PATH a service process inherited from launchd.
   const hydration = await hydrateShellPath(force ? { force: true } : undefined)
   if (hydration.ok) {
     mergePathSegments(hydration.segments)

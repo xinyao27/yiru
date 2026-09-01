@@ -14,7 +14,6 @@ import { clearFileExplorerUndoHistory } from './undo-redo'
 import { useFileExplorerAutoReveal } from './use-auto-reveal'
 import { useFileExplorerDragDrop } from './use-drag-drop'
 import { useFileExplorerHandlers } from './use-handlers'
-import { useFileExplorerImport } from './use-import'
 import { useFileExplorerInlineInput } from './use-inline-input'
 import { useFileExplorerKeys } from './use-keys'
 import { useFileExplorerReveal } from './use-reveal'
@@ -134,17 +133,8 @@ export function useFileExplorerInteractions(
     refreshDir: tree.refreshDir,
     refreshTree: tree.refreshTree,
     inlineInput: inline.inlineInput,
-    dragSourcePath: dragDrop.dragSourcePath,
-    isNativeDragOver: dragDrop.isNativeDragOver
+    dragSourcePath: dragDrop.dragSourcePath
   })
-  useFileExplorerImport({
-    worktreePath: owner.visibleFilesWorktreePath,
-    activeWorktreeId: owner.activeWorktreeId,
-    refreshDir: tree.refreshDir,
-    clearNativeDragState: dragDrop.clearNativeDragState,
-    setSelectedPath: selection.setSingleSelectedPath
-  })
-
   const explorerScrollController = (() => ({
     scrollToIndex: (index: number, options: { align: 'center' | 'auto' }) => {
       const node = tree.rowProjection.getRowAtIndex(index)

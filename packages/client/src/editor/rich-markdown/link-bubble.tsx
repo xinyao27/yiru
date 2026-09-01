@@ -289,10 +289,7 @@ export function RichMarkdownLinkBubble({
   const bubble = (
     <div
       ref={bubbleRef}
-      // Why: `rich-markdown-link-bubble` stays a stable hook for the
-      // `-webkit-app-region: no-drag` Electron property in
-      // rich-markdown-content.css — there is no Tailwind utility for it.
-      className="rich-markdown-link-bubble bg-popover text-popover-foreground fixed z-[60] flex items-center gap-0.5 border border-[color-mix(in_srgb,var(--border)_76%,transparent)] px-1.5 py-1"
+      className="bg-popover text-popover-foreground fixed z-[60] flex items-center gap-0.5 border border-[color-mix(in_srgb,var(--border)_76%,transparent)] px-1.5 py-1"
       data-rich-markdown-link-bubble=""
       data-rich-markdown-link-bubble-owner={ownerId}
       style={positionStyle}

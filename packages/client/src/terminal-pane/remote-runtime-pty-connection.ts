@@ -2,8 +2,8 @@ import { encodeRuntimePtyId, parseRuntimePtyId } from '@yiru/runtime-protocol/te
 import type { RuntimeTerminalCreate } from '@yiru/runtime-protocol/workbench/runtime-types'
 import { translate } from '~renderer/i18n/i18n'
 import type { RuntimeClientTarget } from '~renderer/runtime/orpc-client'
+import { isRemoteTerminalSurfaceTabId } from '~renderer/runtime/remote-terminal-surface-id'
 import { runtimeTerminalErrorMessage } from '~renderer/runtime/terminal-stream'
-import { isWebTerminalSurfaceTabId } from '~renderer/runtime/web-terminal-surface-id'
 import { toRuntimeTerminalWorktreeSelector } from '~renderer/runtime/worktree-selector'
 import { useAppStore } from '~renderer/store/state'
 
@@ -48,7 +48,7 @@ export class RemoteRuntimePtyConnection {
       return
     }
     try {
-      if (isWebTerminalSurfaceTabId(this.options.tabId ?? '')) {
+      if (isRemoteTerminalSurfaceTabId(this.options.tabId ?? '')) {
         return await this.attachHostSessionMirror(options)
       }
       return await this.createTerminal(options)

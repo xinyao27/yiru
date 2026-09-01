@@ -49,14 +49,8 @@ function FileExplorerTreeContent({
           dragDrop.isRootDragOver &&
             view.explorerView === 'files' &&
             !(dragDrop.dragSourcePath && dirname(dragDrop.dragSourcePath) === owner.worktreePath) &&
-            'bg-border',
-          dragDrop.isNativeDragOver &&
-            view.explorerView === 'files' &&
-            !dragDrop.nativeDropTargetDir &&
             'bg-border'
         )}
-        data-native-file-drop-target={view.isFilesViewActive ? 'file-explorer' : undefined}
-        data-native-file-drop-dir={owner.visibleFilesWorktreePath ?? undefined}
         onDragOver={dragDrop.rootDragHandlers.onDragOver}
         onDragEnter={dragDrop.rootDragHandlers.onDragEnter}
         onDragLeave={dragDrop.rootDragHandlers.onDragLeave}
@@ -105,12 +99,6 @@ function FileExplorerTreeContent({
             onInlineInputCancel={inline.dismissInlineInput}
             onMoveDrop={dragDrop.handleMoveDrop}
             onDragSourceChange={dragDrop.setDragSourcePath}
-            onNativeDragTargetChange={dragDrop.setNativeDropTargetDir}
-            onNativeDragExpandDirectory={
-              view.hasNameFilter
-                ? actions.handleExpandNameFilterDir
-                : dragDrop.handleNativeDragExpandDir
-            }
             renderContextMenu={(node, context, isExpanded) => {
               const normalizedRelativePath = normalizeRelativePath(node.relativePath)
               const nodeStatus = node.isDirectory
@@ -173,12 +161,6 @@ function FileExplorerTreeContent({
                     view.hasNameFilter
                       ? actions.handleExpandNameFilterDir
                       : dragDrop.handleDragExpandDir
-                  }
-                  onNativeDragTargetChange={dragDrop.setNativeDropTargetDir}
-                  onNativeDragExpandDir={
-                    view.hasNameFilter
-                      ? actions.handleExpandNameFilterDir
-                      : dragDrop.handleNativeDragExpandDir
                   }
                   menuOnly
                   menuPoint={{ x: context.anchorRect.x, y: context.anchorRect.y }}

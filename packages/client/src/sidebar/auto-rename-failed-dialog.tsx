@@ -87,7 +87,7 @@ export function AutoRenameFailedDialog({
 
   const handleCopy = async () => {
     try {
-      // Why: Electron's clipboard IPC, not navigator.clipboard, which fails
+      // Why: use the shared clipboard capability, because navigator.clipboard can fail
       // silently inside Radix dialogs — and an inline icon swap (no toast),
       // matching the app's other inline copy buttons.
       await shellClient.ui.writeClipboardText(detailText)

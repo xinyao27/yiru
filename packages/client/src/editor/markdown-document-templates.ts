@@ -138,7 +138,7 @@ export async function listMarkdownDocumentTemplates(
   const rootPath = joinPath(worktreePath, MARKDOWN_TEMPLATE_ROOT)
 
   // Why: missing template directories are the normal case. Probe quietly first
-  // so Electron does not log an IPC handler error for an optional feature.
+  // so the runtime does not log a capability error for an optional feature.
   if (!(await runtimePathExists(context, rootPath))) {
     return []
   }

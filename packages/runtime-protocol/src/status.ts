@@ -15,8 +15,6 @@ export type RuntimeHostPlatformName =
 
 export type RuntimeGraphStatus = 'ready' | 'reloading' | 'unavailable'
 
-export type RuntimeDesktopWindowStatus = 'available' | 'openable' | 'initializing' | 'blocked'
-
 export type RuntimeDeviceScope = 'mobile' | 'runtime'
 
 export type RuntimeRemoteUpdateSupport = {
@@ -44,7 +42,6 @@ export type RuntimeStatusResult = {
   rendererGraphEpoch: number
   graphStatus: RuntimeGraphStatus
   authoritativeWindowId: number | null
-  desktopWindowStatus?: RuntimeDesktopWindowStatus
   liveTabCount: number
   liveLeafCount: number
   runtimeProtocolVersion?: number

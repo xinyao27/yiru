@@ -14,7 +14,7 @@ import {
   refreshProjectCatalogWorktrees
 } from '~renderer/project-catalog/refresh'
 import { useMountedRef } from '~renderer/react/use-mounted-ref'
-import { extractIpcErrorMessage } from '~renderer/runtime/ipc-error'
+import { extractRuntimeErrorMessage } from '~renderer/runtime/error-message'
 import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
 import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
 import { workspaceHostClient } from '~renderer/runtime/workspace-host-client'
@@ -197,7 +197,7 @@ export function useCreateRepo(
       ) {
         return
       }
-      setCreateError(extractIpcErrorMessage(err, String(err)))
+      setCreateError(extractRuntimeErrorMessage(err, String(err)))
     } finally {
       // Why: only clear the loading state if this invocation is still current;
       // a superseded create must not flip the flag back off for a new flow.

@@ -415,7 +415,7 @@ function normalizeAgentStatusObject(parsed: unknown): ParsedAgentStatusPayload |
 
 /**
  * Normalize an already-structured agent status object (e.g. arriving via IPC
- * where the payload has already been deserialized by Electron). Skips the
+ * where the payload has already been deserialized by the transport). Skips the
  * JSON.stringify → JSON.parse round-trip that `parseAgentStatusPayload`
  * requires, which matters because hook events can fire many times per second
  * during a tool-use run.

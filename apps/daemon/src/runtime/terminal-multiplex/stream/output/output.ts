@@ -8,6 +8,10 @@ import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
 
 import { splitTerminalMultiplexOutput, type TerminalMultiplexPendingOutput } from './chunks'
 import { TerminalMultiplexOutputFlow } from './flow-control'
+import {
+  createTerminalMultiplexStallMonitor,
+  type TerminalMultiplexStallMonitor
+} from './stall-monitor'
 
 const OUTPUT_TARGET_BYTES = 32 * 1024
 const OUTPUT_FLUSH_MS = 2
@@ -39,12 +43,19 @@ export class TerminalMultiplexStreamOutput {
   private isSnapshotting = true
   private drainedCallback: (() => void) | null = null
   private flushTimer: ReturnType<typeof setTimeout> | null = null
-  private stallTimer: ReturnType<typeof setInterval>
+  private readonly stallMonitor: TerminalMultiplexStallMonitor
 
   constructor(options: TerminalMultiplexOutputOptions) {
     this.options = options
-    this.stallTimer = setInterval(() => this.checkStall(), 500)
-    this.stallTimer.unref?.()
+    this.stallMonitor = createTerminalMultiplexStallMonitor({
+      hasInFlightOutput: () => this.flow.inFlightBytes > 0,
+      isStalled: () => this.flow.isStalled(),
+      onStall: () => {
+        this.options.telemetry.noteAckStall()
+        this.publishedCreditBytes = 0
+        this.options.recover('ack-stall')
+      }
+    })
   }
 
   get hasInFlightOutput(): boolean {
@@ -64,10 +75,6 @@ export class TerminalMultiplexStreamOutput {
 
   get deliveryGated(): boolean {
     return this.isGated
-  }
-
-  refreshPressure(): void {
-    this.updateProducerPressure()
   }
 
   whenDrained(callback: () => void): void {
@@ -94,7 +101,7 @@ export class TerminalMultiplexStreamOutput {
       this.options.recover('pending-cap')
       return
     }
-    this.updateProducerPressure()
+    this.refreshPressure()
     if (this.pendingBytes >= OUTPUT_TARGET_BYTES) {
       this.flush()
     } else if (!this.flushTimer) {
@@ -120,6 +127,11 @@ export class TerminalMultiplexStreamOutput {
     if (update.windowChanged) {
       this.options.sendAdaptiveCredit(update.windowBytes)
     }
+    if (this.flow.inFlightBytes === 0) {
+      this.stallMonitor.clear()
+    } else {
+      this.stallMonitor.schedule()
+    }
     this.flush()
     this.publishDrained()
     return true
@@ -134,7 +146,7 @@ export class TerminalMultiplexStreamOutput {
       this.pending.splice(0)
       this.pendingBytes = 0
     }
-    this.updateProducerPressure()
+    this.refreshPressure()
     if (!gated) {
       this.flush()
     }
@@ -148,6 +160,7 @@ export class TerminalMultiplexStreamOutput {
     this.isSnapshotting = false
     this.options.noteConnectionAck(this.flow.inFlightBytes)
     this.flow.rebase(coverageEndSeq)
+    this.stallMonitor.clear()
     this.discardCovered(coverageEndSeq)
     this.flush()
   }
@@ -161,7 +174,7 @@ export class TerminalMultiplexStreamOutput {
     if (this.flushTimer) {
       clearTimeout(this.flushTimer)
     }
-    clearInterval(this.stallTimer)
+    this.stallMonitor.clear()
     this.options.runtime.reportTerminalMultiplexPressure(
       this.options.ptyId,
       this.options.streamKey,
@@ -201,10 +214,11 @@ export class TerminalMultiplexStreamOutput {
         break
       }
       this.flow.noteSent(aggregate.startSeq, aggregate.endSeq)
+      this.stallMonitor.schedule()
       this.options.noteConnectionSent(aggregate.payload.byteLength)
       turns += 1
     }
-    this.updateProducerPressure()
+    this.refreshPressure()
     if (this.pending.length > 0 && turns > 0) {
       queueMicrotask(() => this.flush())
     } else if (transportBlocked && !this.flushTimer) {
@@ -269,7 +283,7 @@ export class TerminalMultiplexStreamOutput {
     this.pendingBytes = retained.reduce((total, chunk) => total + chunk.payload.byteLength, 0)
   }
 
-  private updateProducerPressure(): void {
+  refreshPressure(): void {
     const unsentCapBytes = this.unsentCapBytes()
     this.flow.noteSocketQueue(this.options.connectionQueueBytes())
     const flow = this.flow.telemetry
@@ -292,14 +306,6 @@ export class TerminalMultiplexStreamOutput {
         pendingRatio: this.pendingBytes / unsentCapBytes
       }
     )
-  }
-
-  private checkStall(): void {
-    if (this.flow.isStalled()) {
-      this.options.telemetry.noteAckStall()
-      this.publishedCreditBytes = 0
-      this.options.recover('ack-stall')
-    }
   }
 
   private unsentCapBytes(): number {

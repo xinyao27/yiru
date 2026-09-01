@@ -231,7 +231,7 @@ export async function gitStreamStdout(
   })
 }
 
-// Why: sync git calls run on the Electron main thread. Local git is normally
+// Why: sync git calls block the daemon event loop. Local git is normally
 // fast, but a repo on a dead network drive / cloud-placeholder path can hang
 // git on filesystem timeouts for minutes with no timeout set — the leading
 // explanation for issue #7225's 127s "Not Responding" freeze. Callers needing

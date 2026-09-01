@@ -3,9 +3,8 @@
 // produces it after the shared listener parses an HTTP POST) and by
 // `src/main/agent-hooks/server.ts` (which ingests it via `ingestRemote`).
 //
-// Lives in `shared/` because the relay deliberately has no Electron dependency
-// (cf. `src/relay/protocol.ts` header). `agent-hook-types.ts` is reserved for
-// the renderer-bound IPC + installer contract; this module is the wire envelope
+// Lives here because the relay deliberately has no daemon dependency.
+// `agent-hook-types.ts` is reserved for the client + installer contract; this module is the wire envelope
 // between Yiru's main process and the remote relay.
 //
 // Per the design doc:
@@ -29,8 +28,8 @@ import type { ParsedAgentStatusPayload } from '@yiru/runtime-protocol/model/agen
 // (`/hook/<source>`); the relay equally must tag each forwarded notification
 // with the same value so Yiru can attribute the event back to the right CLI.
 // Promoted from `src/main/agent-hooks/server.ts` so the relay can import it
-// without dragging Electron in (the shared listener module is the only place
-// that consumes it from the relay side).
+// without importing the daemon host (the shared listener module is the only
+// place that consumes it from the relay side).
 export type { AgentHookSource }
 
 /** Env marker used by the remote relay. It is a transport/location marker, not

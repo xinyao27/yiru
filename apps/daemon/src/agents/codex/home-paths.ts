@@ -46,7 +46,7 @@ export function getYiruUserDataPath(): string {
   if (process.env.YIRU_USER_DATA_PATH) {
     return process.env.YIRU_USER_DATA_PATH
   }
-  // Why: CLI hook commands import this module outside Electron. Mirror the CLI
+  // Why: CLI hook commands import this module outside the daemon. Mirror the CLI
   // runtime metadata path so offline hook status/on/off uses the same userData.
   if (process.platform === 'darwin') {
     return join(homedir(), 'Library', 'Application Support', 'yiru')

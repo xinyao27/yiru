@@ -166,13 +166,7 @@ await build({
           'src/terminal-multiplex/stream-records.ts'
         ),
         'terminal-query-reply': resolve(import.meta.dirname, 'src/terminal-query-reply.ts'),
-        updater: resolve(import.meta.dirname, 'src/updater.ts'),
-        'web-connect/contracts': resolve(import.meta.dirname, 'src/web-connect/contracts.ts'),
-        'web-connect/signing-messages': resolve(
-          import.meta.dirname,
-          'src/web-connect/signing-messages.ts'
-        ),
-        'web-connect/relay-frames': resolve(import.meta.dirname, 'src/web-connect/relay-frames.ts')
+        updater: resolve(import.meta.dirname, 'src/updater.ts')
       },
       output: {
         format: 'es',
@@ -194,7 +188,7 @@ await build({
     },
     rollupOptions: {
       // Why: oRPC is ESM-only. The runtime-protocol package still supports
-      // CommonJS CLI and Electron consumers, so this one entry owns a bundled
+      // CommonJS CLI and daemon consumers, so this one entry owns a bundled
       // compatibility artifact instead of emitting an unloadable require().
       external: [/^@yiru\//]
     }

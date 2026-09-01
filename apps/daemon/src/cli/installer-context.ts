@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs'
 import { homedir } from 'node:os'
-import { dirname, join } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
 
 import type { CliInstallMethod } from '@yiru/runtime-protocol/workbench/cli-install-types'
 import { getYiruCliCommandNameForPlatform } from '@yiru/runtime-protocol/workbench/yiru-cli-command-name'
@@ -31,8 +31,6 @@ export type CliInstallerOptions = {
   privilegedRunner?: (command: string) => Promise<void>
   userPathReader?: () => Promise<string | null>
   userPathWriter?: (value: string) => Promise<void>
-  /** Why: AppImage reports its stable outer path while resources use an ephemeral mount. */
-  appImagePath?: string | null
 }
 
 export type CliInstallContext = {
@@ -50,7 +48,6 @@ export type CliInstallContext = {
   privilegedRunner: (command: string) => Promise<void>
   userPathReader: () => Promise<string | null>
   userPathWriter: (value: string) => Promise<void>
-  appImagePath: string | null
   commandName: string
 }
 
@@ -88,16 +85,8 @@ export function createCliInstallContext(options: CliInstallerOptions = {}): CliI
     privilegedRunner: options.privilegedRunner ?? runMacPrivilegedCommand,
     userPathReader: options.userPathReader ?? readWindowsUserPath,
     userPathWriter: options.userPathWriter ?? writeWindowsUserPath,
-    appImagePath:
-      platform === 'linux' && isPackaged
-        ? (options.appImagePath ?? process.env.APPIMAGE ?? null)
-        : null,
     commandName: !isPackaged && !commandPathOverride ? DEV_COMMAND_NAME : PRODUCTION_COMMAND_NAME
   }
-}
-
-export function isLinuxAppImage(context: CliInstallContext): boolean {
-  return context.platform === 'linux' && Boolean(context.appImagePath)
 }
 
 export function isWindowsPackagedBundledCommand(
@@ -121,7 +110,7 @@ export function resolveInstallSpec(context: CliInstallContext): InstallSpec | nu
     return null
   }
   if (context.platform === 'darwin' || context.platform === 'linux') {
-    return { commandPath, installMethod: isLinuxAppImage(context) ? 'wrapper' : 'symlink' }
+    return { commandPath, installMethod: 'symlink' }
   }
   return context.platform === 'win32' ? { commandPath, installMethod: 'wrapper' } : null
 }
@@ -162,9 +151,6 @@ export async function resolveLauncherPath(context: CliInstallContext): Promise<s
   if (!['darwin', 'linux', 'win32'].includes(context.platform)) {
     return null
   }
-  if (isLinuxAppImage(context)) {
-    return context.appImagePath && existsSync(context.appImagePath) ? context.appImagePath : null
-  }
   if (context.isPackaged) {
     const bundledPath = getBundledLauncherPath(context.platform, context.resourcesPath)
     return bundledPath && existsSync(bundledPath) ? bundledPath : null
@@ -173,7 +159,7 @@ export async function resolveLauncherPath(context: CliInstallContext): Promise<s
     platform: context.platform,
     userDataPath: context.userDataPath,
     execPath: context.execPathValue,
-    cliEntryPath: join(context.appPathValue, 'out', 'cli', 'index.js'),
+    cliEntryPath: resolve(process.argv[1]?.trim() || context.execPathValue),
     commandName: context.commandName
   })
 }

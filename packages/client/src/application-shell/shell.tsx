@@ -1,4 +1,3 @@
-import type { UpdateStatus } from '@yiru/runtime-protocol/workbench/types'
 import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 import { SYNC_FIT_PANES_EVENT } from '~renderer/constants/terminal'
@@ -6,7 +5,6 @@ import { LoadingIndicatorStyleProvider } from '~renderer/loading/indicator'
 import { useRateLimitResumeDetector } from '~renderer/rate-limit-resume/detector'
 import { useRateLimitResumeDispatch } from '~renderer/rate-limit-resume/use-rate-limit-resume-dispatch'
 import { useRateLimitResumeNotifications } from '~renderer/rate-limit-resume/use-rate-limit-resume-notifications'
-import { getWorkbenchLocation } from '~renderer/runtime/workbench-location'
 import { Toaster } from '~renderer/ui/sonner'
 import { TooltipProvider } from '~renderer/ui/tooltip'
 
@@ -20,8 +18,7 @@ import { useGitHubVisibilityRefresh } from '../github/use-visibility-refresh'
 import { shouldShowOnboarding } from '../onboarding/should-show-onboarding'
 import { WorkspacePortScanner } from '../ports/workspace-port-scanner'
 import { useProjectCatalog } from '../project-catalog/provider'
-import { isExtensionRenderer } from '../runtime/renderer-host'
-import { useWebSessionTabsSync } from '../runtime/web-session/session'
+import { useRemoteSessionTabsSync } from '../runtime/remote-session/session'
 import { SkillFreshnessNudge } from '../skills/skill-freshness-nudge'
 import { useAppStore } from '../store/state'
 import PinnedTabCloseDialog from '../terminal-pane/pinned-tab-close-dialog'
@@ -37,17 +34,11 @@ import { useGitStatusPolling } from '../workspace-panel/use-git-status-polling'
 import { AgentHibernationGate } from './agent-hibernation-gate'
 import { installRendererCommandToasts } from './command-result-toasts'
 import { resolveMountedLazyModalIds, type LazyModalId } from './lazy-modal-mount-state'
-import { resolveLeftSidebarStyleVariables } from './left-sidebar-appearance'
-import { resolveShellChromeLayout } from './shell-chrome-layout'
 import { ShellLateModals, ShellPrimaryModals } from './shell-modals'
 import { ShellMiddleOverlays, ShellStatusBar, ShellTrailingOverlays } from './shell-status-overlays'
-import { TitlebarLeftControls } from './titlebar-left-controls'
-import { TitlebarMainStrip, WorkspaceProfileSwitcher } from './titlebar-main-strip'
-import { useAppMenuPaste } from './use-app-menu-paste'
 import { useAutoAckViewedAgent } from './use-auto-ack-viewed-agent'
 import { useDocumentAppearance } from './use-document-appearance'
 import { useFeatureTips } from './use-feature-tips'
-import { useGlobalFileDrop } from './use-global-file-drop'
 import { useGlobalShortcuts } from './use-global-shortcuts'
 import { useIpcEvents } from './use-ipc-events'
 import { useLargeTextControlPaste } from './use-large-text-control-paste'
@@ -57,9 +48,6 @@ import { useRadixBodyPointerEventsRecovery } from './use-radix-body-pointer-even
 import { useRuntimeGraphSync } from './use-runtime-graph-sync'
 import { useSessionPersistence } from './use-session-persistence'
 import { useStartupHydration } from './use-startup-hydration'
-import { useUnreadDockBadge } from './use-unread-dock-badge'
-import { hasCustomTitleBar, hasNativeSidebarMaterial } from './window-chrome-environment'
-import { WindowControls } from './window-controls'
 import { WorkspaceShellLayout } from './workspace-shell-layout'
 import { shouldShowWorktreeCreationSurface } from './worktree-creation-surface'
 
@@ -67,24 +55,10 @@ import { shouldShowWorktreeCreationSurface } from './worktree-creation-surface'
 // and it must not disappear during React remounts.
 installRendererCommandToasts()
 
-function shouldMountUpdateCardForStatus(status: UpdateStatus): boolean {
-  if (status.state === 'idle') {
-    return false
-  }
-  if (status.state === 'checking' || status.state === 'not-available') {
-    return status.userInitiated === true
-  }
-  return true
-}
-
 function App(): React.JSX.Element {
-  const isExtensionHost = isExtensionRenderer()
-  const workbenchLocation = getWorkbenchLocation()
-  const projectSurface = workbenchLocation.kind === 'project' ? workbenchLocation : null
   const projectCatalog = useProjectCatalog()
-  const clearUnreadDockBadge = useUnreadDockBadge()
   useRadixBodyPointerEventsRecovery()
-  useWebSessionTabsSync()
+  useRemoteSessionTabsSync()
   const activeView = useAppStore((s) => s.activeView)
   const activeModal = useAppStore((s) => s.activeModal)
   const { activeWorktreeId } = useAppStore(useShallow(selectActiveTerminalChromeState))
@@ -99,7 +73,6 @@ function App(): React.JSX.Element {
   // Why: App swaps the sidebar between workspace and landing layouts when the
   // active workspace is slept/deleted. Keep virtualized scroll memory above
   // that remount so the left workspace list doesn't restart at scrollTop 0.
-  const worktreeSidebarScrollOffsetRef = useRef(0)
   const workspaceSessionReady = useAppStore((s) => s.workspaceSessionReady)
   const backgroundTerminalMountRequested = useSyncExternalStore(
     subscribeBackgroundTerminalWorktreeMountRequests,
@@ -107,7 +80,6 @@ function App(): React.JSX.Element {
     hasRequestedBackgroundTerminalWorktreeMount
   )
   const keybindings = useAppStore((s) => s.keybindings)
-  const updateStatus = useAppStore((s) => s.updateStatus)
   const activeContextualTourId = useAppStore((s) => s.activeContextualTourId)
   const statusBarVisible = useAppStore((s) => s.statusBarVisible)
   const hasMountedTerminalWorkbenchRef = useRef(false)
@@ -133,15 +105,7 @@ function App(): React.JSX.Element {
     activeView === 'terminal' && activeWorktreeId !== null && !creationLayoutActive
   const terminalWorkbenchVisible =
     activeView === 'terminal' && activeWorktreeId !== null && !creationLayoutActive
-  const setAppRootNode = (node: HTMLDivElement | null): void => {
-    // Why: these best-effort App chrome cleanups share the App root lifetime.
-    if (!node) {
-      clearUnreadDockBadge()
-    }
-  }
-
   const sidebarWidth = useAppStore((s) => s.sidebarWidth)
-  const sidebarOpen = useAppStore((s) => s.sidebarOpen)
   const extensionSidePanelOpen = useSyncExternalStore(
     subscribeSidePanelPresence,
     getSidePanelPresenceSnapshot,
@@ -158,41 +122,22 @@ function App(): React.JSX.Element {
   const persistedUIReady = useAppStore((s) => s.persistedUIReady)
   const shouldMountContextualTourOverlay = activeContextualTourId !== null
   const shouldMountSetupGuideTelemetryObserver = persistedUIReady
-  const shouldMountUpdateCard = shouldMountUpdateCardForStatus(updateStatus)
   const rightSidebarWidth = useAppStore((s) => s.rightSidebarWidth)
   const markdownTocPanelWidth = useAppStore((s) => s.markdownTocPanelWidth)
   const rightSidebarOpen = useAppStore((s) => s.rightSidebarOpen)
   const rightSidebarTab = useAppStore((s) => s.rightSidebarTab)
   const rightSidebarExplorerView = useAppStore((s) => s.rightSidebarExplorerView)
-  const isFullScreen = useAppStore((s) => s.isFullScreen)
   const settings = useAppStore((s) => s.settings)
   const systemPrefersDark = useSystemPrefersDark()
-  const [startupWindowBackgroundBlur, setStartupWindowBackgroundBlur] = useState<boolean | null>(
-    null
-  )
-  useEffect(() => {
-    if (settings !== null && startupWindowBackgroundBlur === null) {
-      // Why: BrowserWindow material is fixed at creation, so renderer opacity
-      // must keep using the first hydrated value until the requested restart.
-      setStartupWindowBackgroundBlur(settings.windowBackgroundBlur === true)
-    }
-  }, [settings, startupWindowBackgroundBlur])
-  const windowBackgroundBlurEnabled =
-    hasNativeSidebarMaterial && startupWindowBackgroundBlur === true
-  const leftSidebarVariables = (() =>
-    resolveLeftSidebarStyleVariables(settings, systemPrefersDark, hasNativeSidebarMaterial))()
-  const leftSidebarStyle = leftSidebarVariables as React.CSSProperties | undefined
   const themeGradientVariables = useThemeGradientStyleVariables(systemPrefersDark)
   usePrimarySelectionPaste()
-  useAppMenuPaste()
   useLargeTextControlPaste()
-  const titlebarLeftControlsRef = useRef<HTMLDivElement | null>(null)
-  const [collapsedSidebarHeaderWidth, setCollapsedSidebarHeaderWidth] = useState(0)
   const [mountedLazyModalIds, setMountedLazyModalIds] = useState<Set<LazyModalId>>(() => new Set())
   const [shouldMountAddRepoDialog, setShouldMountAddRepoDialog] = useState(false)
   const { onboarding, onboardingLoaded, setOnboarding } = useStartupHydration(
     projectCatalog.isPending,
-    projectCatalog.repos
+    projectCatalog.repos,
+    projectCatalog.runtimeEnvironments
   )
   const unmountAddRepoDialogTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const shouldRenderOnboarding = onboarding !== null && shouldShowOnboarding(onboarding)
@@ -253,7 +198,6 @@ function App(): React.JSX.Element {
   // clean models from a single always-on file-change subscription instead
   // of tying reloads to the Explorer UI lifecycle.
   useEditorExternalWatch()
-  useGlobalFileDrop()
   useAutoAckViewedAgent()
   useRuntimeGraphSync(workspaceSessionReady)
   useSessionPersistence()
@@ -294,26 +238,9 @@ function App(): React.JSX.Element {
   // already-fitted cols/rows.
   useLayoutEffect(() => {
     window.dispatchEvent(new CustomEvent(SYNC_FIT_PANES_EVENT))
-  }, [extensionSidePanelOpen, sidebarOpen])
+  }, [extensionSidePanelOpen])
 
-  const {
-    leftTitlebarChromeLayout,
-    navigationSidebarOpen,
-    settingsChromeOverlayActive,
-    settingsNativeSidebarMaterialActive,
-    showProfileSwitcherInTopRight,
-    showSidebar,
-    stackedPageOwnsTitlebar,
-    stackedSidebarOpen
-  } = resolveShellChromeLayout({
-    activeView,
-    creationLayoutActive,
-    extensionSidePanelOpen,
-    hasNativeSidebarMaterial,
-    isExtensionHost,
-    sidebarOpen,
-    workspaceChromeActive
-  })
+  const showSidebar = !extensionSidePanelOpen
 
   useGlobalShortcuts({
     activeView,
@@ -323,24 +250,6 @@ function App(): React.JSX.Element {
     terminalShortcutPolicy: settings?.terminalShortcutPolicy,
     workspaceChromeActive
   })
-  useLayoutEffect(() => {
-    const controls = titlebarLeftControlsRef.current
-    if (!controls) {
-      return
-    }
-
-    const updateWidth = (): void => {
-      setCollapsedSidebarHeaderWidth(controls.getBoundingClientRect().width)
-    }
-
-    updateWidth()
-    const observer = new ResizeObserver(() => {
-      updateWidth()
-    })
-    observer.observe(controls)
-    return () => observer.disconnect()
-  }, [isFullScreen, showSidebar, leftTitlebarChromeLayout.isFloating, navigationSidebarOpen])
-
   const resolvedMountedLazyModalIds = resolveMountedLazyModalIds(activeModal, mountedLazyModalIds)
   if (resolvedMountedLazyModalIds !== mountedLazyModalIds) {
     // Why: lazy-load these modals only after first use, then keep them mounted
@@ -348,55 +257,15 @@ function App(): React.JSX.Element {
     setMountedLazyModalIds(new Set(resolvedMountedLazyModalIds))
   }
 
-  const titlebarLeftControls = isExtensionHost ? null : (
-    <TitlebarLeftControls
-      activeView={activeView}
-      controlsRef={titlebarLeftControlsRef}
-      isFullScreen={isFullScreen}
-      layout={leftTitlebarChromeLayout}
-      showSidebar={showSidebar}
-      sidebarOpen={navigationSidebarOpen}
-    />
-  )
-  const titlebarMainStrip = isExtensionHost ? null : (
-    <TitlebarMainStrip
-      creationLayoutActive={creationLayoutActive}
-      showProfileSwitcher={showProfileSwitcherInTopRight}
-      workspaceChromeActive={workspaceChromeActive}
-    />
-  )
-  const workspaceProfileSwitcher = isExtensionHost ? null : (
-    <WorkspaceProfileSwitcher
-      layout={leftTitlebarChromeLayout}
-      showProfileSwitcher={showProfileSwitcherInTopRight}
-      stackedSidebarOpen={stackedSidebarOpen}
-      workspaceChromeActive={workspaceChromeActive}
-    />
-  )
   return (
     <LoadingIndicatorStyleProvider
       loaderStyle={settings?.loaderStyle}
-      ref={setAppRootNode}
       className="flex h-dvh w-screen flex-col overflow-hidden"
-      data-native-sidebar-material={hasNativeSidebarMaterial ? 'true' : undefined}
       data-theme-gradient={themeGradientVariables ? 'on' : undefined}
       style={
         {
           ...themeGradientVariables,
-          '--collapsed-sidebar-header-width': `${
-            !isExtensionHost && showSidebar ? collapsedSidebarHeaderWidth : 0
-          }px`,
-          // Why: Settings renders its overlaid window controls and navigation in
-          // sibling trees; one seam value keeps their left-column widths aligned.
-          '--settings-sidebar-width': '280px',
-          // Why: consumed by anything that needs to avoid the fixed-position
-          // window-controls overlay on Windows/Linux (floating sidebar toggle,
-          // right sidebar header, etc.) without hardcoding 138px in multiple
-          // places.
-          '--window-controls-width': hasCustomTitleBar ? '138px' : '0px',
-          // Why: consumed by the side-position activity bar to push icons below
-          // the fixed-position window-controls overlay on Windows/Linux.
-          '--window-controls-height': hasCustomTitleBar ? 'var(--titlebar-height)' : '0px'
+          '--settings-sidebar-width': '280px'
         } as React.CSSProperties
       }
     >
@@ -414,24 +283,11 @@ function App(): React.JSX.Element {
               activePendingCreationId={activePendingCreationId}
               activeView={activeView}
               activeWorktreeId={activeWorktreeId}
-              appearanceStyle={leftSidebarStyle}
               creationLayoutActive={creationLayoutActive}
-              layout={leftTitlebarChromeLayout}
-              projectId={projectSurface?.projectId}
-              settingsChromeOverlayActive={settingsChromeOverlayActive}
-              settingsNativeSidebarMaterialActive={settingsNativeSidebarMaterialActive}
               shouldMountTerminalWorkbench={shouldMountTerminalWorkbench}
               showSidebar={showSidebar}
-              sidebarOpen={navigationSidebarOpen}
-              stackedPageOwnsTitlebar={stackedPageOwnsTitlebar}
-              stackedSidebarOpen={stackedSidebarOpen}
               terminalWorkbenchVisible={terminalWorkbenchVisible}
-              titlebarLeftControls={titlebarLeftControls}
-              titlebarMainStrip={titlebarMainStrip}
-              windowBackgroundBlurEnabled={windowBackgroundBlurEnabled}
               workspaceChromeActive={workspaceChromeActive}
-              workspaceProfileSwitcher={workspaceProfileSwitcher}
-              worktreeScrollOffsetRef={worktreeSidebarScrollOffsetRef}
             />
             <ShellStatusBar activeView={activeView} isVisible={statusBarVisible} />
             <ShellPrimaryModals
@@ -443,7 +299,6 @@ function App(): React.JSX.Element {
             <ShellMiddleOverlays
               activeView={activeView}
               shouldMountContextualTourOverlay={shouldMountContextualTourOverlay}
-              shouldMountUpdateCard={shouldMountUpdateCard}
               telemetryOptedIn={settings?.telemetry?.optedIn ?? undefined}
             />
             <ShellLateModals
@@ -463,11 +318,6 @@ function App(): React.JSX.Element {
       />
       <SkillFreshnessNudge />
       <PinnedTabCloseDialog />
-      {/* Why: rendered last so it sits after all -webkit-app-region:drag elements
-          in DOM order. Electron's hit-test for drag regions is DOM-order-based and
-          ignores z-index — placing WindowControls earlier caused the drag region to
-          win, making the buttons unclickable. */}
-      {hasCustomTitleBar && <WindowControls />}
     </LoadingIndicatorStyleProvider>
   )
 }

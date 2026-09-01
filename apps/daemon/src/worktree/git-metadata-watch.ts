@@ -1,7 +1,7 @@
 import { stat } from 'node:fs/promises'
 import { join } from 'node:path'
 
-import { subscribeViaWatcherProcess } from '../filesystem/parcel-watcher-process'
+import { watchFileExplorerWithBun } from '../runtime/host/bun-file-watcher'
 import type { WorktreeBaseWatchTarget } from './base-directory-event-filter'
 import type { WorktreeBasePollEvent, WorktreeBaseSubscription } from './base-directory-poller'
 import { PRIMARY_CHECKOUT_METADATA_FILES, startGitCommonPolling } from './git-metadata-polling'
@@ -16,10 +16,6 @@ import { PRIMARY_CHECKOUT_METADATA_FILES, startGitCommonPolling } from './git-me
 // included). Other platforms: dir-listing poll (no fseventsd to protect, and
 // on Windows an open directory handle on `worktrees/` could interfere with
 // `git worktree prune` removing it).
-// The native stream is hosted in the crash-isolated watcher child, never the
-// Electron main process: watcher.node teardown races heap-corrupt the hosting
-// process when unsubscribe overlaps in-flight callbacks (issue #8732), and
-// root deletion via `git worktree prune` makes that overlap routine here.
 
 // Why: branch switches and commits made in the primary checkout rewrite these
 // top-level files (linked-worktree equivalents live under `worktrees/`).
@@ -156,11 +152,9 @@ async function startGitCommonNarrowWatch(
     }
     let errored = false
     let active = true
-    // Why: parcel tears its native stream down when the watched root is
-    // deleted (e.g. `git worktree prune` removing an empty worktrees dir) —
-    // sometimes surfaced as an error, sometimes as a delete event for the
-    // root. Either way: notify, drop the dead stream, and let the existence
-    // poll re-arm when a future worktree add recreates the dir.
+    // Why: the native stream ends when `git worktree prune` removes an empty
+    // worktrees directory. Notify, drop it, and re-arm once a future add
+    // recreates the directory.
     const teardownAndRearm = (): void => {
       active = false
       errored = true
@@ -172,43 +166,39 @@ async function startGitCommonNarrowWatch(
       armExistencePoll()
     }
     try {
-      const sub = await subscribeViaWatcherProcess(
+      const unsubscribe = watchFileExplorerWithBun(
         worktreesDir,
-        (error, events) => {
+        (events) => {
           if (disposed || !active) {
-            return
-          }
-          if (error) {
-            onEvents([{ type: 'update', path: worktreesDir }])
-            teardownAndRearm()
             return
           }
           if (events.length > 0) {
             const rootGone = events.some(
-              (event) => event.type === 'delete' && event.path === worktreesDir
+              (event) => event.kind === 'delete' && event.absolutePath === worktreesDir
             )
-            onEvents(events.map((event) => ({ type: event.type, path: event.path })))
+            onEvents(
+              events.map((event) => ({
+                path: event.absolutePath,
+                type: event.kind === 'create' || event.kind === 'delete' ? event.kind : 'update'
+              }))
+            )
             if (rootGone) {
               teardownAndRearm()
             }
           }
         },
-        {},
-        {
-          // Why: a watcher-child crash drops events during the automatic
-          // resubscribe gap; report a structural change so worktrees re-sync.
-          onInterruption: () => {
-            if (!disposed && active) {
-              onEvents([{ type: 'update', path: worktreesDir }])
-            }
+        () => {
+          if (!disposed && active) {
+            onEvents([{ type: 'update', path: worktreesDir }])
+            teardownAndRearm()
           }
         }
       )
       if (disposed || errored) {
-        void sub.unsubscribe().catch(() => {})
+        void unsubscribe().catch(() => {})
         return !errored
       }
-      subscription = { unsubscribe: () => sub.unsubscribe() }
+      subscription = { unsubscribe }
       return true
     } catch {
       return false

@@ -210,7 +210,7 @@ export function shouldSuppressTerminalModifierKeyboardEvent(event: XtermBypassEv
 
 /**
  * Decide whether a chord should bypass xterm's key handlers so the native
- * browser pipeline (Chromium `copy` event, Electron menu accelerators) or
+ * browser pipeline (including Chromium clipboard events) or
  * layout-aware text event can handle it instead of the kitty CSI-u encoder.
  */
 export function shouldBypassXtermKeyboardEvent(
@@ -247,9 +247,8 @@ export function shouldBypassXtermKeyboardEvent(
   }
 
   if (isMac) {
-    // Why: window-level handlers already consume other Cmd chords before xterm
-    // sees them in Electron. Web clients still need paste to bubble to
-    // Chromium's native paste event instead of xterm's Kitty encoder.
+    // Why: paste must bubble to Chromium's native event instead of xterm's
+    // Kitty encoder.
     return (
       matchesClipboardBinding('Mod+C', event, 'darwin') ||
       matchesClipboardBinding('Mod+V', event, 'darwin')

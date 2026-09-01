@@ -55,7 +55,7 @@ export const getRuntimeEnvironmentsSearchEntry = createLocalizedCatalog(
   })
 )
 
-export const getWebRuntimeEnvironmentsSearchEntry = createLocalizedCatalog(
+export const getRemoteRuntimeEnvironmentsSearchEntry = createLocalizedCatalog(
   (): SettingsSearchEntry => ({
     title: translate(
       'auto.components.settings.runtime.environments.search.3517fb2ec0',

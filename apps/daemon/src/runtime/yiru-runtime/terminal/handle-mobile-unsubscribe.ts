@@ -114,7 +114,7 @@ export abstract class RuntimeTerminalHandleMobileUnsubscribe extends RuntimeTerm
             rows: restoreRows
           })
         }, autoRestoreMs)
-        // Why: a delayed mobile restore should not keep Electron main alive
+        // Why: a delayed mobile restore should not keep the daemon alive
         // after the last window/runtime transport has otherwise shut down.
         if (typeof timer.unref === 'function') {
           timer.unref()

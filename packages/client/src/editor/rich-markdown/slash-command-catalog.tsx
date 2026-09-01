@@ -287,8 +287,7 @@ export const slashCommands: SlashCommand[] = [
         'Insert an image from your computer.'
       )
     },
-    // Why: window.prompt() is not supported in Electron's renderer process,
-    // so image URL input is handled by an inline input bar in RichMarkdownEditor.
+    // Why: image input is handled by the editor's dedicated picker.
     run: (editor) => {
       editor.chain().focus().run()
     }

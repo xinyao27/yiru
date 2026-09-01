@@ -100,7 +100,7 @@ export function isRecentTabSwitcherCommitRelease(input: WindowShortcutInput): bo
     return true
   }
   const control = input.control ?? input.ctrlKey
-  // Why: some Electron surfaces report the final Ctrl+Tab release as Tab
+  // Why: some browser surfaces report the final Ctrl+Tab release as Tab
   // keyup after Control is already up, so commit instead of stranding the UI.
   return isTabKey(input) && control === false
 }
@@ -204,9 +204,8 @@ export function resolveWindowShortcutAction(
   }
 
   // Why: Cmd/Ctrl+N opens the new-workspace composer. Routed through the
-  // main process so it reaches the renderer even when focus lives inside
-  // a contentEditable surface (markdown rich editor) or a browser guest
-  // webContents, both of which bypass the renderer's window-level keydown.
+  // shared shortcut router so it reaches the workbench even when focus lives
+  // inside a contentEditable surface or embedded browser content.
   // Shift is accepted for compatibility with the former Create-from shortcut;
   // the unified composer now exposes source switching inside the name field.
   if (actionMatches('workspace.create', input, platform, keybindings, options)) {

@@ -1,23 +1,11 @@
 import { toast } from 'sonner'
 import { basename, dirname, joinPath } from '~renderer/path'
 import { getConnectionId } from '~renderer/runtime/connection-context'
+import { extractRuntimeErrorMessage } from '~renderer/runtime/error-message'
 import { copyRuntimePath, runtimePathExists } from '~renderer/runtime/file-client'
 
 import { getRightSidebarWorktreeRuntimeSettings } from './file-explorer/runtime-owner'
 import type { TreeNode } from './file-explorer/types'
-
-/**
- * Electron's ipcRenderer.invoke wraps errors as:
- *   "Error invoking remote method 'channel': Error: actual message"
- * Strip the wrapper so users see only the meaningful part.
- */
-function extractIpcErrorMessage(err: unknown, fallback: string): string {
-  if (!(err instanceof Error)) {
-    return fallback
-  }
-  const match = err.message.match(/Error invoking remote method '[^']*': (?:Error: )?(.+)/)
-  return match ? match[1] : err.message
-}
 
 type UseFileDuplicateParams = {
   activeWorktreeId: string | null
@@ -82,7 +70,7 @@ export function useFileDuplicate({
             retries += 1
             continue
           }
-          toast.error(extractIpcErrorMessage(err, `Failed to duplicate '${name}'.`))
+          toast.error(extractRuntimeErrorMessage(err, `Failed to duplicate '${name}'.`))
           return
         }
       }

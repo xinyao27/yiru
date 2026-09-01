@@ -2,9 +2,9 @@ import type { Tab, TabGroup } from '@yiru/runtime-protocol/workbench/types'
 import { useProjectCatalogRuntimeState } from '~renderer/project-catalog/runtime-state'
 import { browserWorkspaceHasRemoteOwner } from '~renderer/runtime/remote-browser-tab-ownership'
 import {
-  closeWebRuntimeSessionTab,
-  isWebRuntimeSessionActive
-} from '~renderer/runtime/web-runtime-session'
+  closeRemoteRuntimeSessionTab,
+  isRemoteRuntimeSessionActive
+} from '~renderer/runtime/remote-runtime-session'
 import { useAppStore } from '~renderer/store/state'
 import { getRuntimeEnvironmentIdForWorktree } from '~renderer/worktree/runtime-owner'
 
@@ -72,10 +72,10 @@ export function useWorkspaceCloseCommands({
     // Why: a pageless host mirror has no remote-owned page record, but still
     // needs the host close. A genuine client-local browser always has pages.
     const shouldCloseOnHost =
-      isWebRuntimeSessionActive(environmentId) &&
+      isRemoteRuntimeSessionActive(environmentId) &&
       (browserWorkspaceHasRemoteOwner(state, item.entityId, environmentId) || !hasLocalPages)
     if (shouldCloseOnHost) {
-      void closeWebRuntimeSessionTab({
+      void closeRemoteRuntimeSessionTab({
         worktreeId,
         tabId: item.id,
         environmentId
@@ -111,7 +111,7 @@ export function useWorkspaceCloseCommands({
         continue
       }
       const environmentId = getRuntimeEnvironmentIdForWorktree(projectRuntimeState, worktreeId)
-      if (item.contentType === 'terminal' && isWebRuntimeSessionActive(environmentId)) {
+      if (item.contentType === 'terminal' && isRemoteRuntimeSessionActive(environmentId)) {
         // Why: paired-host bulk close revokes local resume and hook authority
         // before the host removes its canonical tab.
         closeTerminalTab(item.entityId)

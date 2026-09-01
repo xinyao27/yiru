@@ -80,10 +80,11 @@ struct ActivityInsightsView: View {
         .task {
             await model.observe()
         }
-        .task {
+        .task(id: scenePhase) {
+            guard scenePhase == .active else { return }
             while !Task.isCancelled {
                 try? await Task.sleep(for: .seconds(60))
-                guard !Task.isCancelled else { return }
+                guard !Task.isCancelled, scenePhase == .active else { return }
                 await model.refresh()
             }
         }
@@ -274,25 +275,6 @@ struct ActivityInsightsView: View {
     }
 
     private var weekdayRhythm: [ActivityWeekdayPoint] {
-        var totals = Array(repeating: 0.0, count: 7)
-        let formatter = DateFormatter()
-        formatter.calendar = Calendar(identifier: .gregorian)
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.dateFormat = "yyyy-MM-dd"
-        for point in model.summary?.daily ?? [] {
-            guard let date = formatter.date(from: point.day) else { continue }
-            let weekday = Calendar.current.component(.weekday, from: date) - 1
-            totals[weekday] += activityMetricValue(model.metric, daily: point)
-        }
-        let symbols = Calendar.current.veryShortWeekdaySymbols
-        return totals.enumerated().map { index, value in
-            ActivityWeekdayPoint(label: symbols[index], value: value)
-        }
+        activityWeekdayRhythm(model.summary?.daily ?? [], metric: model.metric)
     }
-}
-
-nonisolated private struct ActivityWeekdayPoint: Identifiable, Sendable {
-    let label: String
-    let value: Double
-    var id: String { label }
 }

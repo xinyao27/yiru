@@ -58,10 +58,7 @@ function DropdownMenuContent({
             'z-[70] max-h-(--available-height) min-w-[11rem] overflow-x-hidden overflow-y-auto p-1 scrollbar-sleek',
             className
           )}
-          // Why: Electron's -webkit-app-region: drag on the titlebar captures
-          // clicks at the OS level regardless of z-index. Without no-drag,
-          // dropdown menus that visually overlap the titlebar are unclickable.
-          style={{ ...style, WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+          style={style}
           {...props}
         />
       </DropdownMenuPrimitive.Positioner>
@@ -89,9 +86,7 @@ function DropdownMenuItem({
       data-inset={inset}
       data-variant={variant}
       className={cn(menuItemClass, 'px-2 data-[inset]:pl-7', className)}
-      // Why: menu rows can overlap Electron titlebar drag regions; marking the
-      // popup alone does not reliably keep native hit-testing from dragging.
-      style={{ ...style, WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+      style={style}
       {...props}
     />
   )
@@ -237,9 +232,7 @@ function DropdownMenuSubContent({
             'z-[70] min-w-[11rem] overflow-hidden p-1',
             className
           )}
-          // Why: same no-drag fix as DropdownMenuContent — titlebar drag region
-          // would otherwise capture clicks when submenu overlaps it.
-          style={{ ...style, WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+          style={style}
           {...props}
         />
       </DropdownMenuPrimitive.Positioner>

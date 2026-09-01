@@ -287,7 +287,7 @@ export function TabBarQuickCommandsButton({
                   titlebarIndex != null ? String(titlebarIndex) : undefined
                 }
                 className={cn(
-                  'relative [-webkit-app-region:no-drag]',
+                  'relative',
                   pinDraggable && 'cursor-grab active:cursor-grabbing',
                   getDropIndicatorClasses(dropIndicator)
                 )}

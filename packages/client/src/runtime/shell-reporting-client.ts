@@ -16,9 +16,8 @@ import type {
   FeedbackSubmitResult
 } from '@yiru/runtime-protocol/workbench/support-report'
 import type { TelemetryConsentState } from '@yiru/runtime-protocol/workbench/telemetry-consent-types'
-import { translate } from '~renderer/i18n/i18n'
 
-import { callShellOrpc, isWebRuntimeClient } from './orpc-client'
+import { callShellOrpc } from './orpc-client'
 
 export type ShellFeedbackApi = {
   submit: (args: FeedbackSubmitArgs) => Promise<FeedbackSubmitResult>
@@ -55,11 +54,11 @@ function restoreShellDocument<T>(value: unknown): T {
   return value as T
 }
 
-const electronFeedbackApi: ShellFeedbackApi = {
+export const shellFeedbackApi: ShellFeedbackApi = {
   submit: (input) => callShellOrpc((client) => client.shell.feedback.submit, input)
 }
 
-const electronCrashReportsApi: ShellCrashReportsApi = {
+export const shellCrashReportsApi: ShellCrashReportsApi = {
   getLatestPending: () =>
     callShellOrpc((client) => client.shell.crashReports.getLatestPending, undefined),
   getLatestReport: () =>
@@ -77,7 +76,7 @@ const electronCrashReportsApi: ShellCrashReportsApi = {
     callShellOrpc((client) => client.shell.crashReports.copyLatestDiagnostics, input)
 }
 
-const electronDiagnosticsApi: ShellDiagnosticsApi = {
+export const shellDiagnosticsApi: ShellDiagnosticsApi = {
   getStatus: () => callShellOrpc((client) => client.shell.diagnostics.getStatus, undefined),
   collectBundle: (lookbackMinutes) =>
     callShellOrpc((client) => client.shell.diagnostics.collectBundle, { lookbackMinutes }),
@@ -93,7 +92,7 @@ const electronDiagnosticsApi: ShellDiagnosticsApi = {
     callShellOrpc((client) => client.shell.diagnostics.uploadBundle, { bundleSubmissionId })
 }
 
-const electronTelemetryApi: ShellTelemetryApi = {
+export const shellTelemetryApi: ShellTelemetryApi = {
   track: (name, props) => callShellOrpc((client) => client.shell.telemetry.track, { name, props }),
   setOptIn: (optedIn) => callShellOrpc((client) => client.shell.telemetry.setOptIn, { optedIn }),
   getConsentState: async () =>
@@ -103,65 +102,3 @@ const electronTelemetryApi: ShellTelemetryApi = {
   acknowledgeBanner: () =>
     callShellOrpc((client) => client.shell.telemetry.acknowledgeBanner, undefined)
 }
-
-const webFeedbackApi: ShellFeedbackApi = {
-  submit: () =>
-    Promise.resolve({
-      ok: false,
-      status: null,
-      error: translate(
-        'auto.web.webShell.feedbackUnavailable',
-        'Feedback is unavailable in the web client.'
-      )
-    })
-}
-
-const webCrashReportsApi: ShellCrashReportsApi = {
-  getLatestPending: () => Promise.resolve(null),
-  getLatestReport: () => Promise.resolve(null),
-  dismiss: () => Promise.resolve(null),
-  recordRendererError: () => Promise.resolve({ ok: true, report: null, deduped: true }),
-  recordBreadcrumb: () => {},
-  submit: () =>
-    Promise.resolve({
-      ok: false,
-      status: null,
-      error: translate('auto.web.runtime.shellBoundary.unavailable', 'Unavailable on web.'),
-      report: null
-    }),
-  copyLatestDiagnostics: () =>
-    Promise.resolve({
-      ok: false,
-      error: translate('auto.web.runtime.shellBoundary.unavailable', 'Unavailable on web.')
-    })
-}
-
-const diagnosticsUnavailableOnWeb = (): Error =>
-  new Error(translate('auto.web.runtime.shellBoundary.unavailable', 'Unavailable on web.'))
-
-const webDiagnosticsApi: ShellDiagnosticsApi = {
-  getStatus: () =>
-    Promise.resolve({
-      localFileEnabled: false,
-      bundleEnabled: false,
-      traceFilePath: '',
-      traceFamilySize: 0
-    }),
-  collectBundle: () => Promise.reject(diagnosticsUnavailableOnWeb()),
-  openBundlePreview: () => Promise.reject(diagnosticsUnavailableOnWeb()),
-  discardBundlePreview: () => Promise.resolve(),
-  uploadBundle: () => Promise.reject(diagnosticsUnavailableOnWeb())
-}
-
-const webTelemetryApi: ShellTelemetryApi = {
-  track: () => Promise.resolve(),
-  setOptIn: () => Promise.resolve(),
-  getConsentState: () => Promise.resolve({ effective: 'disabled', reason: 'user_opt_out' }),
-  acknowledgeBanner: () => Promise.resolve()
-}
-
-const isWeb = isWebRuntimeClient()
-export const shellFeedbackApi = isWeb ? webFeedbackApi : electronFeedbackApi
-export const shellCrashReportsApi = isWeb ? webCrashReportsApi : electronCrashReportsApi
-export const shellDiagnosticsApi = isWeb ? webDiagnosticsApi : electronDiagnosticsApi
-export const shellTelemetryApi = isWeb ? webTelemetryApi : electronTelemetryApi

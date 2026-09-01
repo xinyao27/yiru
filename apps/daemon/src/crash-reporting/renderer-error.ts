@@ -136,7 +136,6 @@ export async function recordRendererError(
     platform: process.platform,
     osRelease: release(),
     arch: arch(),
-    electronVersion: 'not-applicable',
     chromeVersion: args.chromeVersion ?? 'unknown',
     details: {
       ...(args.kind === 'react-error-boundary'

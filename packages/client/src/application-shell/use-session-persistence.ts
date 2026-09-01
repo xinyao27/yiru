@@ -13,7 +13,6 @@ import { shutdownBufferCaptures } from '../runtime/terminal-shutdown-buffer-capt
 import { useAppStore } from '../store/state'
 import { registerUpdaterBeforeUnloadBypass } from '../updates/before-unload'
 import { createSessionWriteSubscriber } from './session-write-subscriber'
-import { dispatchWindowCloseRequest } from './window-close'
 
 const SLEEPING_AGENT_RESUME_CAPTURE_INTERVAL_MS = 60_000
 
@@ -68,6 +67,4 @@ export function useSessionPersistence(): void {
     }, SLEEPING_AGENT_RESUME_CAPTURE_INTERVAL_MS)
     return () => window.clearInterval(timer)
   }, [])
-
-  useEffect(() => shellClient.ui.onWindowCloseRequested(dispatchWindowCloseRequest), [])
 }

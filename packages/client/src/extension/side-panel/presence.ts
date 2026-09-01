@@ -39,16 +39,34 @@ export function publishSidePanelPresence(): () => void {
   const channel = new BroadcastChannel(SIDE_PANEL_PRESENCE_CHANNEL)
   const instanceId = crypto.randomUUID()
   let hasPublishedOpen = false
+  let heartbeat: number | null = null
 
   const publish = (state: 'closed' | 'open'): void => {
     channel.postMessage({ instanceId, kind: 'presence', state, windowId })
     hasPublishedOpen = state === 'open'
   }
-  const publishVisibility = (): void => {
-    const nextState = document.visibilityState === 'hidden' ? 'closed' : 'open'
-    if (nextState === 'open' || hasPublishedOpen) {
-      publish(nextState)
+  const stopHeartbeat = (): void => {
+    if (heartbeat !== null) {
+      window.clearInterval(heartbeat)
+      heartbeat = null
     }
+  }
+  const startHeartbeat = (): void => {
+    if (heartbeat !== null || document.visibilityState === 'hidden') {
+      return
+    }
+    heartbeat = window.setInterval(() => publish('open'), SIDE_PANEL_HEARTBEAT_INTERVAL_MS)
+  }
+  const publishVisibility = (): void => {
+    if (document.visibilityState === 'hidden') {
+      stopHeartbeat()
+      if (hasPublishedOpen) {
+        publish('closed')
+      }
+      return
+    }
+    publish('open')
+    startHeartbeat()
   }
   const handleMessage = (event: MessageEvent<unknown>): void => {
     const message = parsePresenceMessage(event.data)
@@ -56,20 +74,18 @@ export function publishSidePanelPresence(): () => void {
       publishVisibility()
     }
   }
-  const handlePageHide = (): void => publish('closed')
+  const handlePageHide = (): void => {
+    stopHeartbeat()
+    publish('closed')
+  }
 
   channel.addEventListener('message', handleMessage)
   document.addEventListener('visibilitychange', publishVisibility)
   window.addEventListener('pagehide', handlePageHide)
   publishVisibility()
-  const heartbeat = window.setInterval(() => {
-    if (document.visibilityState !== 'hidden') {
-      publish('open')
-    }
-  }, SIDE_PANEL_HEARTBEAT_INTERVAL_MS)
 
   return () => {
-    window.clearInterval(heartbeat)
+    stopHeartbeat()
     document.removeEventListener('visibilitychange', publishVisibility)
     window.removeEventListener('pagehide', handlePageHide)
     channel.removeEventListener('message', handleMessage)

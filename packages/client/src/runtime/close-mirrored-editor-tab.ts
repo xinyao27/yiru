@@ -4,8 +4,8 @@ import {
   type WorktreeRuntimeOwnerState
 } from '~renderer/worktree/runtime-owner'
 
-import { closeWebSessionTabCommand } from './web-session/commands'
-import { requestWebSessionTabsRefresh } from './web-session/tabs-refresh-requests'
+import { closeRemoteSessionTabCommand } from './remote-session/commands'
+import { requestRemoteSessionTabsRefresh } from './remote-session/tabs-refresh-requests'
 
 type MirroredEditorFile = {
   id: string
@@ -47,13 +47,13 @@ export function notifyHostOfMirroredEditorClose(
   if (!unifiedTab) {
     return false
   }
-  void closeWebSessionTabCommand({
+  void closeRemoteSessionTabCommand({
     worktreeId,
     tabId: unifiedTab.id,
     environmentId: runtimeEnvironmentId
   }).then(async (result) => {
     if (result.status === 'completed') {
-      await requestWebSessionTabsRefresh({
+      await requestRemoteSessionTabsRefresh({
         environmentId: runtimeEnvironmentId,
         worktreeId
       })

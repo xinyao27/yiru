@@ -6,7 +6,6 @@ import { BrowserContextPrivacySetting } from '~renderer/extension/context/privac
 import { translate } from '~renderer/i18n/i18n'
 import { ShieldCheck } from '~renderer/icons/hugeicons'
 import { useMountedRef } from '~renderer/react/use-mounted-ref'
-import { isExtensionRenderer } from '~renderer/runtime/renderer-host'
 import { useAppStore } from '~renderer/store/state'
 import {
   PRIVACY_URL,
@@ -95,7 +94,7 @@ export function PrivacyPane({ settings }: PrivacyPaneProps): React.JSX.Element {
 
   return (
     <div className="space-y-4">
-      {isExtensionRenderer() ? <BrowserContextPrivacySetting /> : null}
+      <BrowserContextPrivacySetting />
       <div className="flex items-center justify-between gap-4 py-2">
         <div className="space-y-0.5">
           <div className="flex items-center gap-2">

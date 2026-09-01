@@ -1,8 +1,8 @@
 import { createRuntimeOrpcClient, type RuntimeClientTarget } from './orpc-client'
 
 // Why: a thin `for await` consumer scoped to one runtime target gives local
-// and paired environments the same advertised-url feed without an Electron-only
-// BrowserWindow broadcast alongside the runtime event stream.
+// and paired environments the same advertised-url feed through the runtime
+// event stream.
 export function subscribeWorkspacePortAdvertisedUrlChanges(
   target: RuntimeClientTarget,
   onChanged: (event: { worktreeId: string; port: number }) => void

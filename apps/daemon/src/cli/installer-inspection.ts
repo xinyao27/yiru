@@ -7,7 +7,6 @@ import type {
 } from '@yiru/runtime-protocol/workbench/cli-install-types'
 import { getYiruCliCommandNameForPlatform } from '@yiru/runtime-protocol/workbench/yiru-cli-command-name'
 
-import { buildAppImageCliWrapper } from './appimage-cli-wrapper'
 import { isWindowsPackagedBundledCommand, type CliInstallContext } from './installer-context'
 import { buildWindowsForwarder, extractManagedUnixLauncherTarget } from './installer-launchers'
 import { isMissingError, isPathInsideOrEqual, samePathEntry } from './installer-path'
@@ -40,54 +39,6 @@ export function buildCliInstallStatus(
     currentTarget: args.currentTarget,
     unsupportedReason: null,
     detail: args.detail
-  }
-}
-
-export async function inspectAppImageWrapper(
-  context: CliInstallContext,
-  commandPath: string,
-  appImagePath: string
-): Promise<CliInstallStatus> {
-  try {
-    const stats = await lstat(commandPath)
-    if (!stats.isFile()) {
-      return buildCliInstallStatus(context, {
-        commandPath,
-        launcherPath: appImagePath,
-        installMethod: 'wrapper',
-        supported: true,
-        state: 'conflict',
-        currentTarget: null,
-        detail: `${commandPath} exists but is not a Yiru launcher script.`
-      })
-    }
-    const currentContent = await readFile(commandPath, 'utf8')
-    const expectedContent = buildAppImageCliWrapper(appImagePath)
-    const isInstalled = currentContent === expectedContent
-    return buildCliInstallStatus(context, {
-      commandPath,
-      launcherPath: appImagePath,
-      installMethod: 'wrapper',
-      supported: true,
-      state: isInstalled ? 'installed' : 'stale',
-      currentTarget: appImagePath,
-      detail: isInstalled
-        ? `Registered at ${commandPath}.`
-        : `${commandPath} points to a different launcher.`
-    })
-  } catch (error) {
-    if (!isMissingError(error)) {
-      throw error
-    }
-    return buildCliInstallStatus(context, {
-      commandPath,
-      launcherPath: appImagePath,
-      installMethod: 'wrapper',
-      supported: true,
-      state: 'not_installed',
-      currentTarget: null,
-      detail: `Register ${commandPath} to use Yiru from the terminal.`
-    })
   }
 }
 

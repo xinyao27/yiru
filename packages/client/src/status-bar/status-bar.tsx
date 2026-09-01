@@ -23,7 +23,6 @@ import { RemoteServerUpdateStatusSegment } from './remote-server-update-status-s
 import { ResourceUsageStatusSegment } from './resource-usage-status-segment'
 import { YiruRuntimeStatusSegment } from './runtime-status/segment'
 import { SkillUpdateStatusSegment } from './skill-update-status-segment'
-import { UpdateStatusSegment } from './update-status-segment'
 import { getUsageProviderAccountsSectionId } from './usage-provider-settings-target'
 import { UsageRosterPanel } from './usage-roster-panel'
 
@@ -213,7 +212,6 @@ export function StatusBar(): React.JSX.Element | null {
         <div className="flex h-full shrink-0 items-center gap-0.5">
           <SkillUpdateStatusSegment />
           <RemoteServerUpdateStatusSegment iconOnly />
-          <UpdateStatusSegment compact iconOnly />
           <Suspense fallback={null}>
             {statusBarItems.includes('resource-usage') ? (
               <ResourceUsageStatusSegment compact iconOnly />

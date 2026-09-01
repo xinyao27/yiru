@@ -335,7 +335,7 @@ export default function IpynbViewer({
         .map((previousCell) => previousCell.source)
         .join('\n\n')
       // Why: a worktree owned by a paired runtime environment has no Python
-      // interpreter reachable from this Electron process — run the cell where
+      // interpreter reachable from this browser process — run the cell where
       // the notebook file actually lives instead of defaulting to local. The
       // dropped `connectionId` (formerly sent only on the local branch) only
       // ever fails the call closed with "local files only" — Repo.connectionId

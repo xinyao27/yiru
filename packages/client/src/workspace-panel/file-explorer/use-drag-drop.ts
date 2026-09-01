@@ -2,7 +2,6 @@ import type { RefObject } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { useEventCallback } from '~renderer/react/use-event-callback'
-import { useAppStore } from '~renderer/store/state'
 import {
   getWorkspaceFileDragRejectionMessage,
   readWorkspaceFileDragPaths,
@@ -31,10 +30,6 @@ type UseFileExplorerDragDropResult = {
   dragSourcePath: string | null
   setDragSourcePath: (path: string | null) => void
   isRootDragOver: boolean
-  isNativeDragOver: boolean
-  nativeDropTargetDir: string | null
-  setNativeDropTargetDir: (dir: string | null) => void
-  handleNativeDragExpandDir: (dirPath: string) => void
   stopDragEdgeScroll: () => void
   rootDragHandlers: {
     onDragOver: (event: React.DragEvent) => void
@@ -42,7 +37,6 @@ type UseFileExplorerDragDropResult = {
     onDragLeave: (event: React.DragEvent) => void
     onDrop: (event: React.DragEvent) => void
   }
-  clearNativeDragState: () => void
 }
 
 export function useFileExplorerDragDrop({
@@ -57,9 +51,6 @@ export function useFileExplorerDragDrop({
   const rootDragCounterRef = useRef(0)
   const [dropTargetDir, setDropTargetDir] = useState<string | null>(null)
   const [dragSourcePath, setDragSourcePath] = useState<string | null>(null)
-  const [isNativeDragOver, setIsNativeDragOver] = useState(false)
-  const nativeRootDragCounterRef = useRef(0)
-  const [nativeDropTargetDir, setNativeDropTargetDir] = useState<string | null>(null)
   const { recordDragClientY, stopDragEdgeScroll } = useFileExplorerDragEdgeScroll(scrollRef)
   const clearDropTarget = () => setDropTargetDir(null)
   const handleMoveDrop = useFileExplorerPathMove({
@@ -71,12 +62,9 @@ export function useFileExplorerDragDrop({
 
   const clearDragState = () => {
     rootDragCounterRef.current = 0
-    nativeRootDragCounterRef.current = 0
     setIsRootDragOver(false)
     setDropTargetDir(null)
     setDragSourcePath(null)
-    setIsNativeDragOver(false)
-    setNativeDropTargetDir(null)
   }
   const stopAndClearDragState = useEventCallback(() => {
     clearDragState()
@@ -85,7 +73,6 @@ export function useFileExplorerDragDrop({
 
   useEffect(() => {
     const handleGlobalDragFinish = (): void => {
-      // Why: the Electron adapter consumes native drops before React sees them.
       stopAndClearDragState()
     }
     document.addEventListener('drop', handleGlobalDragFinish, true)
@@ -99,35 +86,23 @@ export function useFileExplorerDragDrop({
     }
   }, [stopAndClearDragState, stopDragEdgeScroll])
 
-  const clearNativeDragState = () => {
-    // Why: adapter-consumed drops must still stop the edge-scroll loop.
-    stopAndClearDragState()
-  }
-
   const handleRootDragOver = (event: React.DragEvent) => {
     const isInternal = event.dataTransfer.types.includes(WORKSPACE_FILE_PATH_MIME)
-    const isNative = event.dataTransfer.types.includes('Files')
-    if (!isInternal && !isNative) {
+    if (!isInternal) {
       return
     }
     event.preventDefault()
-    event.dataTransfer.dropEffect = isInternal ? 'move' : 'copy'
+    event.dataTransfer.dropEffect = 'move'
     recordDragClientY(event.clientY)
   }
   const handleRootDragEnter = (event: React.DragEvent) => {
     const isInternal = event.dataTransfer.types.includes(WORKSPACE_FILE_PATH_MIME)
-    const isNative = !isInternal && event.dataTransfer.types.includes('Files')
-    if (!isInternal && !isNative) {
+    if (!isInternal) {
       return
     }
     event.preventDefault()
-    if (isInternal) {
-      rootDragCounterRef.current += 1
-      setIsRootDragOver(true)
-    } else {
-      nativeRootDragCounterRef.current += 1
-      setIsNativeDragOver(true)
-    }
+    rootDragCounterRef.current += 1
+    setIsRootDragOver(true)
   }
   const handleRootDragLeave = () => {
     rootDragCounterRef.current -= 1
@@ -135,23 +110,19 @@ export function useFileExplorerDragDrop({
       rootDragCounterRef.current = 0
       setIsRootDragOver(false)
     }
-    nativeRootDragCounterRef.current -= 1
-    if (nativeRootDragCounterRef.current <= 0) {
-      nativeRootDragCounterRef.current = 0
-      setIsNativeDragOver(false)
-    }
-    if (rootDragCounterRef.current === 0 && nativeRootDragCounterRef.current === 0) {
+    if (rootDragCounterRef.current === 0) {
       stopDragEdgeScroll()
     }
   }
   const handleRootDrop = (event: React.DragEvent) => {
+    if (!event.dataTransfer.types.includes(WORKSPACE_FILE_PATH_MIME)) {
+      return
+    }
     event.preventDefault()
     stopDragEdgeScroll()
     rootDragCounterRef.current = 0
     setIsRootDragOver(false)
     setDropTargetDir(null)
-    // Why: native imports arrive through preload IPC, not this handler.
-    clearNativeDragState()
     if (!worktreePath) {
       return
     }
@@ -178,22 +149,6 @@ export function useFileExplorerDragDrop({
       toggleDir(activeWorktreeId, dirPath)
     }
   }
-  const handleNativeDragExpandDir = (dirPath: string) => {
-    if (!activeWorktreeId) {
-      return
-    }
-    // Why: delayed native expansion must never collapse a folder expanded meanwhile.
-    useAppStore.setState((state) => {
-      const current = state.expandedDirs[activeWorktreeId] ?? new Set<string>()
-      if (current.has(dirPath)) {
-        return state
-      }
-      const next = new Set(current)
-      next.add(dirPath)
-      return { expandedDirs: { ...state.expandedDirs, [activeWorktreeId]: next } }
-    })
-  }
-
   // Why: the interaction surface consumes drag and drop as one capability
   // group rather than coupling to the hook's internal state.
   return (() => ({
@@ -204,12 +159,7 @@ export function useFileExplorerDragDrop({
     dragSourcePath,
     setDragSourcePath,
     isRootDragOver,
-    isNativeDragOver,
-    nativeDropTargetDir,
-    setNativeDropTargetDir,
-    handleNativeDragExpandDir,
     stopDragEdgeScroll,
-    rootDragHandlers,
-    clearNativeDragState
+    rootDragHandlers
   }))()
 }

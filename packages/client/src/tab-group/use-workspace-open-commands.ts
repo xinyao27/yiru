@@ -4,9 +4,9 @@ import { openMobileEmulatorTab } from '~renderer/emulator-pane/open-tab'
 import { useProjectCatalogRuntimeState } from '~renderer/project-catalog/runtime-state'
 import { browserWorkspaceHasRemoteOwner } from '~renderer/runtime/remote-browser-tab-ownership'
 import {
-  createWebRuntimeSessionBrowserTab,
-  createWebRuntimeSessionTerminal
-} from '~renderer/runtime/web-runtime-session'
+  createRemoteRuntimeSessionBrowserTab,
+  createRemoteRuntimeSessionTerminal
+} from '~renderer/runtime/remote-runtime-session'
 import { useAppStore } from '~renderer/store/state'
 import { focusTerminalTabSurface } from '~renderer/tab-bar/focus-terminal-surface'
 import { getRuntimeEnvironmentIdForWorktree } from '~renderer/worktree/runtime-owner'
@@ -71,7 +71,7 @@ export function useWorkspaceOpenCommands({
       const environmentId = getRuntimeEnvironmentIdForWorktree(projectRuntimeState, worktreeId)
       if (
         browserWorkspaceHasRemoteOwner(state, source.id, environmentId) &&
-        (await createWebRuntimeSessionBrowserTab({
+        (await createRemoteRuntimeSessionBrowserTab({
           worktreeId,
           environmentId,
           url: source.url,
@@ -90,7 +90,7 @@ export function useWorkspaceOpenCommands({
   const newTerminalWithShell = (shellOverride: string) => {
     void (async () => {
       if (
-        await createWebRuntimeSessionTerminal({
+        await createRemoteRuntimeSessionTerminal({
           worktreeId,
           environmentId: getRuntimeEnvironmentIdForWorktree(projectRuntimeState, worktreeId),
           targetGroupId: groupId,

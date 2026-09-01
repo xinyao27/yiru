@@ -166,18 +166,15 @@ export type RuntimePersistedUIState = {
   workspacePanelTitlebarPinnedIds?: RuntimeWorkspaceTitlebarActionId[]
   usagePercentageDisplay?: 'used' | 'remaining'
   statusBarUsageMode?: 'verbose' | 'compact'
-  dismissedUpdateVersion: string | null
   lastUpdateCheckAt: number | null
   pendingUpdateNudgeId?: string | null
   dismissedUpdateNudgeId?: string | null
   notificationPermissionRequested?: boolean
-  updateReassuranceSeen?: boolean
   acknowledgedAgentsByPaneKey?: Record<string, number>
   setupGuideSidebarDismissed?: boolean
   setupGuideBrowserMilestoneMigrated?: boolean
   setupGuideBrowserMilestoneLegacyComplete?: boolean
   browserImportHintHidden?: boolean
-  trayMinimizeNoticeShown?: boolean
   mobileEmulatorTabIntroDismissed?: boolean
   mobileEmulatorAgentSetupDismissed?: boolean
   projectOrderManualDefaultNoticeDismissed?: boolean
@@ -187,8 +184,6 @@ export type RuntimePersistedUIState = {
   browserDefaultSearchEngine?: 'google' | 'duckduckgo' | 'bing' | 'kagi' | null
   browserDefaultZoomLevel?: number
   browserKagiSessionLink?: string | null
-  windowBounds?: { x: number; y: number; width: number; height: number } | null
-  windowMaximized?: boolean
   _sortBySmartMigrated?: boolean
   _inlineAgentsDefaultedForExperiment?: boolean
   _inlineAgentsDefaultedForAllUsers?: boolean

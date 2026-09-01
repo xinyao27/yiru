@@ -45,7 +45,7 @@
 }
 
 /* xterm.css sets position:absolute;top:0 on .xterm-helpers but omits left,
-   leaving left:auto. In Electron's Blink, left:auto can resolve to a non-zero
+   leaving left:auto. In Blink, left:auto can resolve to a non-zero
    value and offset the IME candidate window away from the cursor. Anchoring it
    explicitly to 0 matches the intended layout and fixes the IME position. */
 .pane-manager-root .xterm .xterm-helpers {

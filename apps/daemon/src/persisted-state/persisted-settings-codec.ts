@@ -1,5 +1,4 @@
 import { normalizePRBotAuthorOverrides } from '@yiru/runtime-protocol/model/review'
-import { normalizeAppIconId } from '@yiru/runtime-protocol/workbench/app-icon'
 import { normalizeAutoRenameBranchFromWorkDefaultOn } from '@yiru/runtime-protocol/workbench/auto-rename-branch-from-work-settings'
 import { getDefaultSettings } from '@yiru/runtime-protocol/workbench/constants'
 import { normalizeLoaderStyle } from '@yiru/runtime-protocol/workbench/loader-style'
@@ -29,6 +28,7 @@ export type PersistedSettingsDecodeResult = {
 }
 
 type RetiredGlobalSettings = Partial<GlobalSettings> & {
+  appIcon?: unknown
   terminalScrollbackBytes?: unknown
   experimentalNewWorktreeCardStyle?: unknown
   compactWorktreeCards?: unknown
@@ -41,6 +41,8 @@ type RetiredGlobalSettings = Partial<GlobalSettings> & {
   floatingTerminalEnabled?: unknown
   floatingTerminalTriggerLocation?: unknown
   floatingTerminalTrustedCwds?: unknown
+  minimizeToTrayOnClose?: unknown
+  showMenuBarIcon?: unknown
 }
 
 // Why: settings use object-spread merges, so retired disk keys must be
@@ -49,6 +51,7 @@ export function stripRetiredGlobalSettings(
   value: RetiredGlobalSettings | undefined
 ): Partial<GlobalSettings> {
   const {
+    appIcon: _appIcon,
     terminalScrollbackBytes: _scrollbackBytes,
     experimentalNewWorktreeCardStyle: _newCardStyle,
     compactWorktreeCards: _compactCards,
@@ -61,8 +64,11 @@ export function stripRetiredGlobalSettings(
     floatingTerminalEnabled: _floatingTerminalEnabled,
     floatingTerminalTriggerLocation: _floatingTerminalTriggerLocation,
     floatingTerminalTrustedCwds: _floatingTerminalTrustedCwds,
+    minimizeToTrayOnClose: _minimizeToTrayOnClose,
+    showMenuBarIcon: _showMenuBarIcon,
     ...settings
   } = value ?? {}
+  void _appIcon
   void _scrollbackBytes
   void _newCardStyle
   void _compactCards
@@ -75,6 +81,8 @@ export function stripRetiredGlobalSettings(
   void _floatingTerminalEnabled
   void _floatingTerminalTriggerLocation
   void _floatingTerminalTrustedCwds
+  void _minimizeToTrayOnClose
+  void _showMenuBarIcon
   return settings
 }
 
@@ -125,11 +133,8 @@ export function decodePersistedSettings(
       ...agents.settings,
       ...autoRenameBranchFromWork,
       localWindowsRuntimeDefault,
-      minimizeToTrayOnClose: raw.minimizeToTrayOnClose === true,
-      showMenuBarIcon: raw.showMenuBarIcon !== false,
       showPinnedWorktreesInGroups: raw.showPinnedWorktreesInGroups === true,
       uiLanguage: normalizeUiLanguage(raw.uiLanguage),
-      appIcon: normalizeAppIconId(raw.appIcon),
       loaderStyle: normalizeLoaderStyle(raw.loaderStyle),
       openInApplications: normalizeOpenInApplications(raw.openInApplications, {
         seedDefaults: true

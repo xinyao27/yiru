@@ -1,6 +1,5 @@
 import { normalizeRuntimePathForComparison } from '@yiru/runtime-protocol/model/platform'
 import { normalizePRBotAuthorOverrides } from '@yiru/runtime-protocol/model/review'
-import { normalizeAppIconId } from '@yiru/runtime-protocol/workbench/app-icon'
 import { normalizeTerminalShortcutPolicy } from '@yiru/runtime-protocol/workbench/keybindings'
 import { normalizeLoaderStyle } from '@yiru/runtime-protocol/workbench/loader-style'
 import { normalizeOpenInApplications } from '@yiru/runtime-protocol/workbench/open-in-applications'
@@ -97,12 +96,6 @@ function normalizeSettingsUpdate(
   updates: Partial<GlobalSettings>
 ): Partial<GlobalSettings> {
   const normalized = stripRetiredGlobalSettings(updates)
-  if ('minimizeToTrayOnClose' in updates) {
-    normalized.minimizeToTrayOnClose = updates.minimizeToTrayOnClose === true
-  }
-  if ('showMenuBarIcon' in updates) {
-    normalized.showMenuBarIcon = updates.showMenuBarIcon === true
-  }
   if ('showPinnedWorktreesInGroups' in updates) {
     normalized.showPinnedWorktreesInGroups = updates.showPinnedWorktreesInGroups === true
   }
@@ -149,9 +142,6 @@ function normalizeSettingsUpdate(
     normalized.sourceControlGroupOrder = normalizeSourceControlGroupOrder(
       updates.sourceControlGroupOrder
     )
-  }
-  if ('appIcon' in updates) {
-    normalized.appIcon = normalizeAppIconId(updates.appIcon)
   }
   if ('loaderStyle' in updates) {
     normalized.loaderStyle = normalizeLoaderStyle(updates.loaderStyle)

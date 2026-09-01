@@ -242,12 +242,8 @@ export function NewWorkspaceComposerCard({
     <div
       ref={setComposerNode}
       data-workspace-composer-root="true"
-      // Why: the Electron file-drop adapter classifies native OS drops by the
-      // nearest marker in the composedPath. Tagging
-      // the composer root makes drops anywhere on the card route to the
-      // composer attachment handler instead of falling back to the default
-      // editor-open behavior.
-      data-native-file-drop-target="composer"
+      // Why: the root marker routes drops anywhere on the card to the composer
+      // attachment handler.
       onDragEnter={dragHandlers.onDragEnter}
       onDragLeave={dragHandlers.onDragLeave}
       className={cn(

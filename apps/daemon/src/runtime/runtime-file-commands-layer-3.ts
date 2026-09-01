@@ -10,10 +10,7 @@ import type { DirEntry, FsChangeEvent } from '@yiru/runtime-protocol/workbench/t
 
 import { resolveAuthorizedPath } from '../filesystem/auth'
 import { beginWatcherInstall } from '../filesystem/watcher-removal-gate'
-import {
-  closeFileExplorerWatcherInWatcherProcess,
-  watchFileExplorerInWatcherProcess
-} from './file-watcher-host'
+import { closeFileExplorerWatchers, watchFileExplorer } from './file-watcher-host'
 import { RuntimeFileCommandsLayer2 } from './runtime-file-commands-layer-2'
 import {
   MOBILE_FILE_READ_MAX_BYTES,
@@ -26,7 +23,6 @@ import {
   runtimeWatcherReleaseKey,
   registerRuntimeFileWatcherRelease
 } from './runtime-file-watcher-registry'
-import { watchWindowsRuntimeFileExplorer } from './runtime-file-windows-watcher'
 import {
   readLocalTerminalArtifactFileFromHandle,
   readLocalTerminalArtifactPreviewFromHandle,
@@ -201,18 +197,7 @@ export abstract class RuntimeFileCommandsLayer3 extends RuntimeFileCommandsLayer
         if (!rootStats.isDirectory()) {
           throw new Error('not_a_directory')
         }
-        if (process.platform === 'win32') {
-          const close = watchWindowsRuntimeFileExplorer(rootPath, callback, onTerminalError)
-          return { unsubscribe: close, rootPaths: [target.path, rootPath] }
-        }
-        // Why: the forked watcher keeps the blocking crawl and native faults out
-        // of the main/`serve` process (issues #5308 and #8212).
-        const dispose = await watchFileExplorerInWatcherProcess(
-          rootPath,
-          callback,
-          onTerminalError,
-          signal
-        )
+        const dispose = watchFileExplorer(rootPath, callback, onTerminalError, signal)
         return { unsubscribe: dispose, rootPaths: [target.path, rootPath] }
       } finally {
         finishInstall()
@@ -234,10 +219,8 @@ export abstract class RuntimeFileCommandsLayer3 extends RuntimeFileCommandsLayer
     if (leases) {
       await Promise.all(Array.from(leases, (lease) => lease.suspend()))
     }
-    // Why: setup can fail before registerRuntimeFileWatcherRelease publishes
-    // its callback, while the host still retains an unkillable child owner.
     const resolvedRootPath = await resolveAuthorizedPath(rootPath, this.host.requireStore())
-    await closeFileExplorerWatcherInWatcherProcess(resolvedRootPath)
+    closeFileExplorerWatchers(resolvedRootPath)
   }
 
   async restoreFileExplorerWatchersAfterFailedRemoval(rootPath: string): Promise<void> {

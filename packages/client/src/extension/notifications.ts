@@ -1,5 +1,5 @@
 import type { ShellNotificationsApi } from '../runtime/shell-notifications-client'
-import { electronShellNotificationsApi } from '../runtime/shell-notifications-client'
+import { daemonShellNotificationsApi } from '../runtime/shell-notifications-client'
 import { getExtensionBrowserCapabilities } from './browser-capabilities'
 
 export const extensionShellNotificationsApi: ShellNotificationsApi = {
@@ -11,5 +11,5 @@ export const extensionShellNotificationsApi: ShellNotificationsApi = {
   probeDelivery: (options) => getExtensionBrowserCapabilities().probeNotificationDelivery(options),
   // Why: custom sounds can reference absolute daemon-host paths, so bytes still cross the
   // authenticated shell transport and playback remains in the browser renderer.
-  playSound: electronShellNotificationsApi.playSound
+  playSound: daemonShellNotificationsApi.playSound
 }

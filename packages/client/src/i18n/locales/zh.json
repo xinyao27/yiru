@@ -2,14 +2,7 @@
   "app": {
     "recoverableError": {
       "rootTitle": "Yiru 遇到渲染器错误。",
-      "rootDescription": "应用 shell 无法完成渲染。重试以重新挂载，如果错误仍然存在，请重新启动 Yiru。",
-      "webTitle": "Yiru Web 遇到渲染器错误。",
-      "webDescription": "重试 Web 客户端或重新连接到配对的运行时。",
-      "loadLoopTitle": "Yiru 反复加载失败",
-      "loadLoopMessage": "应用窗口多次崩溃，已停止自动重新加载。",
-      "loadLoopDetail": "Yiru 连续尝试恢复 {{value0}} 次均未成功。这通常是显卡驱动或安装问题。可以重新加载再试一次，或退出后重新启动 Yiru。",
-      "reload": "重新加载",
-      "quit": "退出"
+      "rootDescription": "应用 shell 无法完成渲染。重试以重新挂载，如果错误仍然存在，请重新启动 Yiru。"
     }
   },
   "settings": {
@@ -34,10 +27,6 @@
         "antigravityToggleDescription": "显示当前工作区的 Antigravity 订阅使用量。",
         "grokToggleDescription": "通过 Grok CLI 登录后显示 Grok 订阅额度使用量。",
         "cursorToggleDescription": "显示 Cursor Agent 报告的 Cursor 套餐用量。"
-      },
-      "menuBarIcon": {
-        "title": "显示菜单栏图标",
-        "description": "在 macOS 菜单栏中保留 Yiru 快捷方式和活动指示器。"
       },
       "loader": {
         "title": "加载动画",
@@ -70,41 +59,6 @@
         "orbM5": "M5 · 发散"
       }
     }
-  },
-  "menu": {
-    "checkForUpdates": "检查更新...",
-    "settings": "设置",
-    "exploreYiru": "探索 Yiru",
-    "gettingStarted": "Yiru 入门",
-    "reportCrash": "发送错误报告...",
-    "file": "文件",
-    "exit": "退出",
-    "edit": "编辑",
-    "appearance": "外观",
-    "toggleLeftSidebar": "显示/隐藏左侧边栏",
-    "openExplorerTab": "打开资源管理器标签页",
-    "showStatusBar": "显示状态栏",
-    "showMobileButton": "显示 Yiru 手机端按钮",
-    "showTitlebarAppName": "显示标题栏应用名称",
-    "view": "查看",
-    "reload": "重新加载",
-    "forceReload": "强制重新加载",
-    "resetSize": "重置尺寸",
-    "zoomIn": "放大",
-    "zoomOut": "缩小",
-    "openWorktreePalette": "打开工作树面板",
-    "window": "窗口",
-    "help": "帮助",
-    "paste": "粘贴"
-  },
-  "tray": {
-    "openYiru": "打开 Yiru",
-    "quit": "退出",
-    "minimizeNotice": {
-      "body": "Yiru 仍在系统托盘中运行"
-    },
-    "activityWaiting": "Yiru - 活动等待中",
-    "activityWaitingSuffix": "活动等待中"
   },
   "worktreeJumpPalette": {
     "matchLabel": {
@@ -159,99 +113,6 @@
       "ce37cf5279": "切换侧边栏 ({{value0}})",
       "e4b9e7dff7": "切换侧边栏"
     },
-    "web": {
-      "WebConnect": {
-        "b411ec0069": "连接",
-        "2cf9e5a294": "清除已保存的主机",
-        "4a4c017be1": "端点：",
-        "27393856e4": "yiru://pair?code=...",
-        "7a566540de": "配对 URL 或代码",
-        "cb4d287238": "主机名称",
-        "3affe7de3a": "粘贴来自该浏览器可以访问的运行时主机的配对 URL。",
-        "e3bcd082ac": "连接到 Yiru",
-        "runtimeHostName": "Runtime host",
-        "invalidPairingInput": "Enter a valid Yiru pairing URL or pairing code.",
-        "mobileScopeRejected": "此连接仅有受限的移动端访问权限。请让主机所有者通过 远程 daemon 授权此客户端，以使用完整 Web 应用。",
-        "mixedContentRejected": "This HTTPS page cannot connect to a plain ws:// runtime host. Open the web client over HTTP or use a wss:// endpoint.",
-        "grantExpired": "This pairing command expired. Refresh the page to create a new one.",
-        "title": "Connect your computer",
-        "description": "No account is required. This browser and your computer create their own private identities, then pair directly.",
-        "installTitle": "Install Yiru",
-        "installDescription": "Download Yiru on the computer you want to use, then install it as usual.",
-        "downloadMacArm64": "macOS · Apple silicon (.dmg)",
-        "downloadMacX64": "macOS · Intel (.dmg)",
-        "downloadLinuxX64": "Linux · x64 (.AppImage)",
-        "downloadLinuxArm64": "Linux · arm64 (.AppImage)",
-        "allDownloads": "All downloads — .deb, .rpm, and Windows",
-        "pairTitle": "Pair this browser",
-        "pairAppDescription": "If Yiru is already running on that computer, let it pair itself.",
-        "pairOpenApp": "Open Yiru and pair",
-        "pairDescription": "Or run this single-use command on that computer. It expires after 10 minutes.",
-        "verifyTitle": "Check the code before confirming",
-        "verifyDescription": "Yiru on {{machine}} must show this same code:",
-        "pairedTitle": "{{machine}} is paired",
-        "pairedDescription": "Keep the terminal command running to use this computer in the Web app. Ctrl+C takes it offline.",
-        "securityNote": "The private browser key cannot be exported. Clearing this site’s browser data removes access and requires pairing again.",
-        "copyCommand": "Copy command",
-        "creatingGrant": "Creating a secure pairing command…"
-      },
-      "webShell": {
-        "aiVaultUnavailableForHost": "此执行主机不支持 Agent 会话历史记录。",
-        "feedbackUnavailable": "Feedback is unavailable in the web client.",
-        "exportHtmlToPdfUnavailable": "Exporting to PDF is unavailable in the web client."
-      },
-      "runtime": {
-        "shellBoundary": {
-          "unavailable": "无法在网络上使用。"
-        }
-      },
-      "web": {
-        "keybindings": {
-          "conflictingShortcuts": "冲突的自定义快捷键被忽略：{{value0}}。",
-          "invalidObject": "{{value0}} 必须是一个对象。",
-          "invalidPlatforms": "platform 必须是具有 darwin、linux 或 win32 部分的对象。",
-          "invalidShortcut": "“{{value0}}”的快捷方式被忽略：{{value1}}",
-          "invalidShortcutList": "“{{value0}}”的快捷方式被忽略：使用字符串数组。",
-          "unknownAction": "未知的键绑定操作“{{value0}}”被忽略。",
-          "unknownPlatform": "未知平台“{{value0}}”被忽略。"
-        },
-        "shell": {
-          "repoHostUnavailable": "在网络客户端中不可用。"
-        },
-        "runtime": {
-          "environment": {
-            "07f788de83": "WebSocket"
-          }
-        }
-      },
-      "WebRuntimeConnectionPage": {
-        "checkingTitle": "正在连接 {{machine}}",
-        "offlineTitle": "{{machine}} 已离线",
-        "checkingDescription": "Yiru 正在检查已保存的私密连接，然后打开你的项目。",
-        "offlineDescription": "请在该电脑上启动 Yiru 或其 connect 命令。运行时可用后，此页面会自动重新连接。",
-        "checkingStatus": "正在检查运行时状态…",
-        "savedPairing": "配对信息仍保存在此浏览器中，无需运行新的配对命令。",
-        "retry": "重试",
-        "pairAnother": "配对另一台电脑"
-      },
-      "WebRuntimeStatus": {
-        "title": "Yiru CLI 连接",
-        "notPaired": "未配对",
-        "notPairedLabel": "尚未配对 Yiru CLI",
-        "notPairedDescription": "配对一台电脑，通过其 Yiru CLI 处理 Web 端工作。",
-        "computer": "电脑",
-        "checking": "检查中",
-        "checkingLabel": "正在检查 {{machine}} 上的 Yiru CLI",
-        "checkingDescription": "正在检查已保存的私密连接，然后打开你的项目。",
-        "connected": "已连接",
-        "connectedLabel": "已连接 {{machine}} 上的 Yiru CLI",
-        "connectedDescription": "Web 请求将通过 {{machine}} 上的 Yiru CLI 处理。",
-        "offline": "已离线",
-        "offlineLabel": "{{machine}} 上的 Yiru CLI 已离线",
-        "offlineDescription": "请在 {{machine}} 上启动 Yiru 或其 connect 命令，之后会自动重新连接。",
-        "footer": "Yiru CLI 状态"
-      }
-    },
     "runtime": {
       "remoteServerUpdateErrors": {
         "manualRequired": "必须通过服务管理器手动更新此主机。",
@@ -267,9 +128,6 @@
       },
       "orpcCallbackStream": {
         "streamFailed": "Runtime stream failed."
-      },
-      "webUiShellClient": {
-        "selectionClipboardUnavailable": "Selection clipboard is unavailable in the web client."
       }
     },
     "store": {
@@ -658,15 +516,6 @@
         "setupAgentStartupPolicySaveFailed": "保存设置启动行为失败",
         "5f3d2c8a1b": "解析 MR 基础分支失败"
       },
-      "useGlobalFileDrop": {
-        "38c9f034ff": "无法上传删除的文件。",
-        "d720e2f855": "部分已删除的文件无法上传。",
-        "245faa95b9": "没有可用于放置的文件的远程工作区路径。",
-        "nativeDropTooManyPathsDescription": "每次最多拖放 {{value0}} 个文件。",
-        "nativeDropTooManyPaths": "拖放包含过多文件。",
-        "nativeDropPathsTooLargeDescription": "请减少文件数量或使用更短的路径列表。",
-        "nativeDropPathsTooLarge": "拖放的路径列表过大。"
-      },
       "useIpcEvents": {
         "0e3cf53060": "未找到浏览器选项卡 {{value0}}",
         "2f6637fe6c": "浏览器选项卡 {{value0}} 已固定",
@@ -749,9 +598,6 @@
         "devSearchKeywordNotification": "notification",
         "projectHostsSummary": "{{value0}} 个主机",
         "33a5e1d597": "Connect GitHub, GitLab, and source-hosting services."
-      },
-      "useAppMenuPaste": {
-        "pasteTooLarge": "粘贴内容过大。"
       },
       "useLargeTextControlPaste": {
         "pasteTooLarge": "粘贴内容过大。"
@@ -978,8 +824,6 @@
       "Terminal": {
         "73768427cf": "关闭",
         "f82e9f02df": "取消",
-        "7958465754": "有正在运行的进程的本地终端。还是关窗吧？",
-        "2fa9c69ff3": "关闭窗口？",
         "cd51e28d8b": "保存",
         "0037b21794": "不保存",
         "21295c6b8c": "未保存的更改",
@@ -1000,42 +844,6 @@
         "42e466b9f1": "正则表达式",
         "90c61387d9": "区分大小写",
         "e07012f26e": "搜索..."
-      },
-      "UpdateCard": {
-        "68b235d264": "重启即可更新",
-        "6714206e5a": "Yiru v{{value0}} 已下载。准备好后请重新启动。",
-        "93794ea932": "Yiru v{{value0}} 正在下载。",
-        "8acbdd3961": "最小化到状态栏",
-        "17412483da": "准备安装",
-        "47126bcf57": "手动下载",
-        "3553a8672f": "最后一个错误",
-        "90559b14e3": "这将在重启后启用进程级 Electron 网络开关。适用于拒绝 HTTP/2 更新下载的企业 VPN 或代理。",
-        "6e45bfa2e0": "正在下载...",
-        "558842597d": "下载更新",
-        "f58b5c57a6": "新的：",
-        "ec8fe71cfc": "更新",
-        "44324ef542": "发行说明",
-        "fdd4a364fa": "会话不会被中断。",
-        "05ad78a6d1": "Yiru v{{value0}} 已准备就绪。",
-        "318d3b4bc7": "关闭更新",
-        "9abc59f814": "可用更新",
-        "aad383aecc": "阅读完整的发行说明",
-        "ccd8b0a793": "自您上次更新以来还有更多内容",
-        "b1d867f4fb": "更新期间您的终端会话不会中断。",
-        "09a55c39b5": "正在安装...",
-        "ea2a41adbe": "您使用的是最新版本。",
-        "ba5ffc949c": "正在检查更新...",
-        "2c2d3e03ca": "重试",
-        "4cf109845a": "更新错误",
-        "6b0085010d": "重新检查",
-        "48565a32bc": "重试下载",
-        "933c6fdf5b": "启用并重新启动",
-        "1339b82cee": "HTTP/2 下载被阻止",
-        "7274ef6e59": "关闭提示",
-        "a726967bd3": "关闭",
-        "d5253b54af": "错误",
-        "7ffc08506e": "查看",
-        "522df222b9": "旋转器"
       },
       "WorktreeJumpPalette": {
         "ac037cfac2": "选择",
@@ -3583,7 +3391,6 @@
           "40b29e0bf3": "重新启动",
           "87a2cb2ac8": "Yiru 在启动时应用此网络模式。",
           "89958d7edf": "需要重新启动",
-          "b3ad629640": "仅当企业 VPN 或代理因 HTTP/2 协议错误而中断更新下载时使用。重启后会影响所有 Electron 网络。",
           "6627e75c92": "解释 HTTP/1.1 兼容性",
           "e9506d3377": "HTTP/1.1 兼容性",
           "8b7a8df299": "支持故障排除的低级解决方法。",
@@ -3662,25 +3469,14 @@
           "codexSessionSourceInfo": "关于导入 Codex 历史记录",
           "codexSessionSourceTooltip": "Yiru 在隔离的主目录中运行 Codex。将此项指向您现有的 Codex 主目录以导入会话历史记录。留空则使用 ~/.codex。"
         },
-        "AppIconSelector": {
-          "d5a112dc9b": "下一个图标",
-          "415fa76f64": "选定的应用程序图标",
-          "5f5142a62a": "上一个图标"
-        },
         "AppearancePane": {
           "3057983501": "未分配",
-          "0cd9b8228f": "选择 Dock 和窗口切换器中显示的应用程序图标。",
-          "ca1590d42f": "应用程序图标",
           "61d842eca0": "在侧边栏中显示 Yiru 手机端 快捷方式。它仍然可以从工具箱中获取。",
           "9da1020447": "显示 Yiru 手机端按钮",
           "5db6ba961f": "在左侧边栏顶部显示 Yiru 手机端按钮。",
           "dc29f3cc0d": "侧边栏",
           "ea943d0db0": "选择窗口底部显示的指示器。您还可以右键单击状态栏进行相同的切换。",
           "3e4175e5c6": "状态栏",
-          "2df8f79aa5": "在标题栏中显示 Yiru。",
-          "9868f39007": "标题栏应用程序名称",
-          "4de76f6902": "控制应用程序标题栏中显示的内容。",
-          "6a272ca553": "标题栏",
           "e9f2ca5582": "关闭以隐藏文件资源管理器中与 .gitignore 匹配的文件。",
           "0fafabcf35": "显示 Git 忽略的文件",
           "75f07ab60c": "在文件资源管理器中显示与 .gitignore 匹配的文件。",
@@ -3707,9 +3503,6 @@
             "tintOpacity": "色调强度",
             "tintOpacityDescription": "控制色调混入边栏的强度。"
           },
-          "872af9556e": "系统托盘",
-          "2edf606c46": "关闭时最小化到托盘",
-          "b707773a0d": "启用后，关闭窗口会让 Yiru 继续在系统托盘中运行，而不是退出。",
           "interfaceDefaultFont": "默认字体",
           "terminalDefaultFont": "默认字体",
           "interfaceTitle": "界面",
@@ -4535,16 +4328,6 @@
           "76e02467b8": "更改自定义文件",
           "d3756cf5bc": "已禁用"
         },
-        "OpenAiTranscriptionKeyDialog": {
-          "fa83512e48": "保存密钥",
-          "07b26f2742": "清除键",
-          "d246b2bdb3": "本地运行时密钥使用 Electron 加密存储（如果可用）存储在 ~/.yiru 中。",
-          "c3380e4ca5": "sk-...",
-          "2f797018f0": "API 密钥已配置",
-          "16015322f9": "API密钥",
-          "07ed3e512e": "仅当选择 OpenAI 语音模型时，音频才会发送到 OpenAI。",
-          "439e91879e": "OpenAI 转录"
-        },
         "OpenAiTranscriptionSettingsRow": {
           "85c589cd61": "添加API密钥",
           "ae2df8f511": "断开 OpenAI API 密钥",
@@ -4978,42 +4761,6 @@
         "RuntimePairingGeneratedUrlRows": {
           "0495f68959": "复制 {{value0}}"
         },
-        "RuntimePairingUrlGenerator": {
-          "849825e829": "将此配对 URL 粘贴到另一个 Yiru 客户端中。",
-          "2e5c4e3c93": "与另一个 Yiru 客户端配对",
-          "f7cafdc9f3": "浏览器链接在此版本中不可用。配对 URL 仍然适用于 Yiru 客户端。",
-          "6b9ca3e69b": "在浏览器中打开",
-          "1ca2e5194d": "从可以到达所选地址的浏览器使用此 URL。",
-          "8de0f84fff": "生成访问链接",
-          "279e0dcb57": "127.0.0.1 仅适用于此计算机。使用 LAN、Tailscale 或其他设备的自定义地址。",
-          "45cf476df3": "主机、主机:端口或 wss://主机/路径",
-          "4531ea3158": "自定义地址",
-          "360c548cf3": "刷新连接地址",
-          "de6d5cff95": "这台电脑（",
-          "de77eb1b65": "连接地址",
-          "ff80904fc4": "为浏览器或桌面客户端创建可撤销的访问授权。",
-          "f8500e134a": "分享此 远程 daemon",
-          "d6c081adf4": "复制 URL 失败。",
-          "df0aa45a86": "复制的配对 URL。",
-          "13704d635e": "复制的 Web 客户端 URL。",
-          "e8d83f2b0f": "无法撤销共享访问。",
-          "9f8e037c4a": "共享访问权限已撤销。",
-          "d797f516b1": "共享访问权限已被撤销。",
-          "2ed55c841a": "无法生成配对 URL。",
-          "11d5248e62": "生成的配对 URL。",
-          "6dd594a507": "生成的 Web 客户端 URL。",
-          "2752126f3e": "运行时配对不可用。",
-          "95b8be4cea": "刷新网络接口失败。",
-          "1b4e0bbcc5": "无法加载共享访问授权。",
-          "b91e36a986": "网络",
-          "custom-option": "{{address}}（自定义）",
-          "add-custom": "添加自定义地址…",
-          "custom-title": "自定义连接地址",
-          "custom-description": "公布其他设备可以访问的地址：LAN 或 Tailscale 主机，或完整的 ws(s):// URL。",
-          "custom-hint": "请输入主机、host:port 或 ws(s):// URL。",
-          "custom-cancel": "取消",
-          "custom-use": "使用地址"
-        },
         "Settings": {
           "3bf149e873": "项目设置 > {{value0}}",
           "075341c763": "仍在形成的新功能。尝试一下。",
@@ -5417,15 +5164,9 @@
           "1afcc1d973": "垂直内边距",
           "25e2f8e8e1": "终端网格周围的水平填充（以像素为单位）。",
           "36b8402015": "水平填充",
-          "53ce336e15": "重新启动 Yiru 以应用窗口模糊更改。",
-          "c65bb9ce63": "需要重新启动",
-          "97950bb087": "将背景模糊应用到终端窗口。需要重新启动。",
-          "2b82242f43": "窗口模糊",
           "809f37738d": "控制终端背景的透明度。 1 是完全不透明，0 是完全透明。",
           "ea7b1a158e": "背景不透明度",
           "03acb60aa0": "控制终端背景的透明度。",
-          "00eaa6b881": "窗口外观和背景设置。",
-          "b96ba13ed1": "窗户",
           "42e01a6055": "ANSI 亮白色",
           "16948119cb": "亮白",
           "1601140f03": "ANSI 亮青色",
@@ -5627,7 +5368,6 @@
             "4d44352eea": "网络",
             "2b4d26d11e": "联网",
             "e04e9db503": "高级",
-            "585f56fae0": "当 HTTP/2 在代理后面失败时，使用 HTTP/1.1 进行 Electron 网络。",
             "11eea3da72": "HTTP/1.1 兼容性"
           }
         },
@@ -5691,15 +5431,6 @@
         },
         "appearance": {
           "search": {
-            "468448bba4": "水彩",
-            "f586abfa35": "蓝色",
-            "651f35b2c6": "切换器",
-            "e5bc35d59e": "窗户",
-            "d18b54ca90": "码头",
-            "1f2880a9d5": "yiru",
-            "2cfb3420c0": "应用程序图标",
-            "e80c2af428": "选择 Dock 和窗口切换器中显示的应用程序图标。",
-            "2b313598c6": "应用程序图标",
             "839fb1e3ed": "工具箱",
             "ac79fe4a04": "显示",
             "648eeada79": "隐藏",
@@ -5709,14 +5440,6 @@
             "74618577c7": "移动端",
             "682293cadf": "在左侧边栏顶部显示 Yiru 手机端按钮。",
             "1de96ec8a6": "显示 Yiru 手机端按钮",
-            "4c920ab2d1": "日程",
-            "2ee4810f38": "GitHub",
-            "a895d0f938": "品牌",
-            "51f957ce39": "姓名",
-            "36e006efc1": "应用程序",
-            "bed343b03e": "标题栏",
-            "18b4c4c30b": "在标题栏中显示 Yiru。",
-            "fdd31b00d0": "标题栏应用程序名称",
             "c1bca1885a": "文件浏览器",
             "9f2df826ac": "被忽略",
             "08c86bf58e": "吉蒂诺尔",
@@ -5801,8 +5524,6 @@
               "title": "左侧边栏外观",
               "description": "让左侧边栏匹配终端、保持默认，或使用色调。"
             },
-            "9a115966d3": "关闭时最小化到托盘",
-            "4d5b9427b5": "启用后，关闭窗口会让 Yiru 继续在系统托盘中运行，而不是退出。",
             "antigravityUsageTitle": "Antigravity 使用量",
             "antigravityUsageDescription": "在状态栏中显示 Antigravity 订阅使用量。",
             "antigravityKeyword": "antigravity",
@@ -6677,7 +6398,6 @@
               "baec27aa8f": "在此浏览器中使用通过 远程 daemon 授权的主机。",
               "3517fb2ec0": "远程 daemon",
               "c6e5a03aa0": "开发盒",
-              "f1575f1e09": "网络客户端",
               "81444c4102": "配对网址",
               "104f4d7dbd": "配对",
               "4575341c77": "管理通过 远程 daemon 授权的主机或选择活动运行时。"
@@ -6759,13 +6479,6 @@
             "692c4ad032": "垂直内边距",
             "75691e4911": "终端网格周围的水平填充（以像素为单位）。",
             "b4f182f24d": "水平填充",
-            "6c2f9f05c8": "活力",
-            "4f7f8f28ca": "透明度",
-            "f6dd9ff606": "背景",
-            "71eb45e293": "模糊",
-            "0838b3717b": "窗户",
-            "bc2054657a": "将背景模糊应用到终端窗口。需要重新启动。",
-            "72d0482137": "窗口模糊",
             "7db59c4738": "阿尔法",
             "46d99ef4bb": "不透明度",
             "4c643695aa": "控制终端背景的透明度。",
@@ -8338,10 +8051,6 @@
           },
           "useFileExplorerHandlers": {
             "32cd9fd991": "无法打开符号链接目标"
-          },
-          "useFileExplorerImport": {
-            "25919b2050": "跳过 {{value0}} {{value1}}。",
-            "132fd0e1e9": "无法导入 {{value0}} {{value1}}。"
           },
           "useFileExplorerKeys": {
             "8adb953095": "操作失败"
@@ -11069,18 +10778,6 @@
           "91b5c8d7e6": "GitLab"
         }
       }
-    },
-    "statusBar": {
-      "webConnect": {
-        "verifyTitle": "Confirm this browser",
-        "verifyDescription": "The web page must show this same code before you approve it.",
-        "confirm": "Codes match",
-        "cancel": "Cancel",
-        "openConnected": "Open in browser",
-        "connectBrowser": "Connect a browser",
-        "onlineDescription": "This computer is reachable from the Web app while Yiru stays open.",
-        "offlineDescription": "Opens the Web app and pairs it with this computer — no command needed."
-      }
     }
   },
   "components": {
@@ -11286,7 +10983,6 @@
     "shutdownFailed": "Runtime host 关闭失败",
     "unknownOption": "未知的 runtime host 选项：{{option}}",
     "userDataPathRequired": "`--user-data-path` 需要一个路径",
-    "webClient": "Runtime web client",
     "pairedDeviceUnauthorized": "已配对设备不再有权访问",
     "mobileWebSocketUnavailable": "Mobile WebSocket transport is unavailable",
     "terminalMultiplexDedicatedConnection": "Terminal multiplex requires its own connection",
@@ -11310,11 +11006,5 @@
       "send": "发送",
       "cancel": "取消"
     }
-  },
-  "webConnect": {
-    "pairingTitle": "将此浏览器连接到 Yiru？",
-    "pairingDetail": "网页上必须显示相同的验证码：\n\n{{code}}\n\n如果不一致，请取消。",
-    "confirmPairing": "验证码一致，连接",
-    "cancelPairing": "取消"
   }
 }

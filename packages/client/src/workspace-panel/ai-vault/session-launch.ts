@@ -1,9 +1,9 @@
 import type { AiVaultAgent } from '@yiru/runtime-protocol/model/agent'
 import type { SleepingAgentLaunchConfig } from '@yiru/runtime-protocol/model/agent'
 import {
-  createWebRuntimeSessionTerminal,
-  isWebRuntimeSessionActive
-} from '~renderer/runtime/web-runtime-session'
+  createRemoteRuntimeSessionTerminal,
+  isRemoteRuntimeSessionActive
+} from '~renderer/runtime/remote-runtime-session'
 import { useAppStore } from '~renderer/store/state'
 import { reconcileTabOrder } from '~renderer/tab-bar/reconcile-order'
 import type { TabSplitDirection } from '~renderer/tab-bar/split-direction'
@@ -27,8 +27,8 @@ export function launchAiVaultSessionInNewTab(args: {
   const store = useAppStore.getState()
   let targetGroupId = args.targetGroupId
   const runtimeEnvironmentId = getRuntimeEnvironmentIdForWorktree(store, args.worktreeId)
-  if (isWebRuntimeSessionActive(runtimeEnvironmentId)) {
-    const runtimeLaunch = createWebRuntimeSessionTerminal({
+  if (isRemoteRuntimeSessionActive(runtimeEnvironmentId)) {
+    const runtimeLaunch = createRemoteRuntimeSessionTerminal({
       worktreeId: args.worktreeId,
       environmentId: runtimeEnvironmentId,
       ...(targetGroupId ? { targetGroupId } : {}),

@@ -12,7 +12,7 @@ import { toast } from 'sonner'
 import { seedCommandCodeSubmittedPromptStatus } from '~renderer/agent/command-code-status-seed'
 import { getAgentLaunchPlatformForRepo } from '~renderer/agent/launch-platform'
 import { deliverLaunchPromptToAgentTab } from '~renderer/agent/launch-prompt-delivery'
-import { launchAgentInWebHostTab } from '~renderer/agent/launch-web-host-tab'
+import { launchAgentInRemoteHostTab } from '~renderer/agent/launch-remote-host-tab'
 import {
   buildAgentDraftLaunchPlan,
   buildAgentStartupPlan,
@@ -21,7 +21,7 @@ import {
 import { translate } from '~renderer/i18n/i18n'
 import { CLIENT_PLATFORM } from '~renderer/new-workspace/workspace-creation'
 import { getLocalProjectExecutionRuntimeContext } from '~renderer/preflight/context'
-import { isWebRuntimeSessionActive } from '~renderer/runtime/web-runtime-session'
+import { isRemoteRuntimeSessionActive } from '~renderer/runtime/remote-runtime-session'
 import { useAppStore } from '~renderer/store/state'
 import { reconcileTabOrder } from '~renderer/tab-bar/reconcile-order'
 import { track, tuiAgentToAgentKind } from '~renderer/telemetry/client'
@@ -204,8 +204,8 @@ export function launchAgentInNewTab(args: LaunchAgentInNewTabArgs): LaunchAgentI
   }
 
   const runtimeEnvironmentId = getRuntimeEnvironmentIdForWorktree(store, worktreeId)
-  if (isWebRuntimeSessionActive(runtimeEnvironmentId)) {
-    const webHostDelivery = launchAgentInWebHostTab({
+  if (isRemoteRuntimeSessionActive(runtimeEnvironmentId)) {
+    const remoteHostDelivery = launchAgentInRemoteHostTab({
       agent,
       worktreeId,
       environmentId: runtimeEnvironmentId,
@@ -229,7 +229,7 @@ export function launchAgentInNewTab(args: LaunchAgentInNewTabArgs): LaunchAgentI
       startupPlan,
       pasteDraftAfterLaunch: pasteDraftAfterLaunch !== null,
       ...(pasteDraftAfterLaunch !== null && promptDelivery === 'submit-after-ready'
-        ? { promptDeliveryResult: webHostDelivery }
+        ? { promptDeliveryResult: remoteHostDelivery }
         : {})
     }
   }

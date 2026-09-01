@@ -194,10 +194,8 @@ export default function SortableTab({
     return () => window.removeEventListener(CLOSE_ALL_CONTEXT_MENUS_EVENT, closeMenu)
   }, [])
 
-  // Why: Electron <webview> elements run in a separate process, so clicking
-  // inside one never dispatches a pointerdown on the renderer document, and
-  // Base UI's outside-click detection misses it. Listening for window blur
-  // catches the moment focus leaves the renderer (including into a webview).
+  // Why: focus can leave the document without an outside pointer event, so
+  // window blur also dismisses the menu.
   useEffect(() => {
     if (!menuOpen) {
       return

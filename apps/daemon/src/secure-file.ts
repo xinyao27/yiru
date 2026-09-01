@@ -234,7 +234,7 @@ function bestEffortRestrictWindowsPath(targetPath: string, isDirectory: boolean)
   if (!currentUserSid) {
     return
   }
-  // Why: execFile (async) is used instead of execFileSync to avoid blocking the Electron main
+  // Why: execFile avoids blocking the daemon event loop.
   // thread. PowerShell cold-start is ~1–1.5 s; spawning it synchronously on every read-path
   // call saturated the main thread in v1.4.52+ where the env-store is read ~2×/s by the
   // remote-runtime tab-sync loop (#4901 regression). The restriction is best-effort

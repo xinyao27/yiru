@@ -563,33 +563,6 @@
       "import": "./dist/esm/updater.mjs",
       "require": "./dist/updater.js",
       "default": "./dist/updater.js"
-    },
-    "./web-connect": {
-      "types": "./src/web-connect/contracts.ts",
-      "react-native": "./src/web-connect/contracts.ts",
-      "browser": "./src/web-connect/contracts.ts",
-      "development": "./src/web-connect/contracts.ts",
-      "import": "./dist/esm/web-connect/contracts.mjs",
-      "require": "./dist/web-connect/contracts.js",
-      "default": "./dist/web-connect/contracts.js"
-    },
-    "./web-connect/relay-frames": {
-      "types": "./src/web-connect/relay-frames.ts",
-      "react-native": "./src/web-connect/relay-frames.ts",
-      "browser": "./src/web-connect/relay-frames.ts",
-      "development": "./src/web-connect/relay-frames.ts",
-      "import": "./dist/esm/web-connect/relay-frames.mjs",
-      "require": "./dist/web-connect/relay-frames.js",
-      "default": "./dist/web-connect/relay-frames.js"
-    },
-    "./web-connect/signing-messages": {
-      "types": "./src/web-connect/signing-messages.ts",
-      "react-native": "./src/web-connect/signing-messages.ts",
-      "browser": "./src/web-connect/signing-messages.ts",
-      "development": "./src/web-connect/signing-messages.ts",
-      "import": "./dist/esm/web-connect/signing-messages.mjs",
-      "require": "./dist/web-connect/signing-messages.js",
-      "default": "./dist/web-connect/signing-messages.js"
     }
   },
   "scripts": {

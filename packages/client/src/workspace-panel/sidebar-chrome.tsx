@@ -47,11 +47,7 @@ export function WorkspaceSidebarToggleButton({
             type="button"
             variant="titlebar-segment"
             size="icon-titlebar-wide"
-            className={
-              mergeTrailingEdge
-                ? 'border-r-0 [-webkit-app-region:no-drag]'
-                : '[-webkit-app-region:no-drag]'
-            }
+            className={mergeTrailingEdge ? 'border-r-0' : undefined}
             onClick={onToggle}
             aria-label={accessibleLabel}
           >
@@ -86,5 +82,5 @@ export function WorkspaceSidebarChromeSpacer(): React.JSX.Element {
     () => workspaceSidebarChromeWidth,
     () => 0
   )
-  return <div className="h-full shrink-0 [-webkit-app-region:no-drag]" style={{ width }} />
+  return <div className="h-full shrink-0" style={{ width }} />
 }

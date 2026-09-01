@@ -113,7 +113,7 @@ function ContextMenuSubContent({
           )}
           // Why: submenu content must portal out of the scrollable parent menu so
           // overflow clipping does not hide the cascade on click/hover.
-          style={{ ...style, WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+          style={style}
           {...props}
         />
       </ContextMenuPrimitive.Positioner>
@@ -150,9 +150,7 @@ function ContextMenuContent({
             'z-[70] max-h-(--available-height) min-w-[11rem] overflow-x-hidden overflow-y-auto p-1 scrollbar-sleek',
             className
           )}
-          // Why: same no-drag fix as DropdownMenuContent — titlebar drag regions
-          // capture clicks at the OS level when menus overlap them.
-          style={{ ...style, WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+          style={style}
           {...props}
         />
       </ContextMenuPrimitive.Positioner>

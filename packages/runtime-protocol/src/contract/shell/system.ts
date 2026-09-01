@@ -27,16 +27,6 @@ const SHELL_SYSTEM_WRITE_ACCESS = {
   principals: ['local']
 } as const
 
-export type ShellAppIdentity = {
-  name: string
-  isDev: boolean
-  devLabel: string | null
-  devBranch: string | null
-  devWorktreeName: string | null
-  devRepoRoot: string | null
-  dockBadgeLabel: string | null
-}
-
 export type ShellTerminalFitOverride = {
   ptyId: string
   mode: 'mobile-fit' | 'remote-desktop-fit'
@@ -45,17 +35,9 @@ export type ShellTerminalFitOverride = {
 }
 
 export const shellAppContract = {
-  getIdentity: withAccess(SHELL_SYSTEM_READ_ACCESS).output(type<ShellAppIdentity>()),
-  relaunch: withAccess(SHELL_SYSTEM_WRITE_ACCESS).output(type<void>()),
   restart: withAccess(SHELL_SYSTEM_WRITE_ACCESS).output(type<void>()),
-  reload: withAccess(SHELL_SYSTEM_WRITE_ACCESS).output(type<void>()),
-  awaitFirstWindowStartupServices: withAccess(SHELL_SYSTEM_READ_ACCESS).output(type<void>()),
   startupDiagnostic: withAccess(SHELL_SYSTEM_WRITE_ACCESS)
     .input(type<{ event: string; details?: Record<string, unknown> }>())
-    .output(type<void>()),
-  getKeyboardInputSourceId: withAccess(SHELL_SYSTEM_READ_ACCESS).output(type<string | null>()),
-  setUnreadDockBadgeCount: withAccess(SHELL_SYSTEM_WRITE_ACCESS)
-    .input(type<{ count: number }>())
     .output(type<void>())
 } satisfies ContractRouter<RuntimeProcedureMeta>
 
@@ -146,6 +128,5 @@ export const shellUpdaterContract = {
     .input(type<UpdateCheckOptions | undefined>())
     .output(type<void>()),
   download: withAccess(SHELL_SYSTEM_WRITE_ACCESS).output(type<void>()),
-  quitAndInstall: withAccess(SHELL_SYSTEM_WRITE_ACCESS).output(type<void>()),
-  dismissNudge: withAccess(SHELL_SYSTEM_WRITE_ACCESS).output(type<void>())
+  quitAndInstall: withAccess(SHELL_SYSTEM_WRITE_ACCESS).output(type<void>())
 } satisfies ContractRouter<RuntimeProcedureMeta>

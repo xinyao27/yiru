@@ -2,14 +2,12 @@ import { keybindingMatchesAction } from '@yiru/runtime-protocol/workbench/keybin
 import { useEffect, useRef } from 'react'
 import type React from 'react'
 import { toast } from 'sonner'
-import { APP_MENU_PASTE_EVENT } from '~renderer/application-shell/menu-paste'
 import { translate } from '~renderer/i18n/i18n'
 import { isEditableTarget } from '~renderer/keyboard-input/editable-target'
 import { getShortcutPlatform } from '~renderer/keyboard-input/shortcut-platform'
 import { joinPath } from '~renderer/path'
 import { useAppStore } from '~renderer/store/state'
 
-import { pasteFileExplorerClipboard } from './clipboard'
 import { applyFileExplorerNavigation, type SelectionMode } from './keyboard-navigation'
 import { handleFileExplorerOperationShortcut } from './keyboard-operations'
 import type { InlineInput } from './row'
@@ -300,27 +298,9 @@ export function useFileExplorerKeys(opts: {
       }
     }
 
-    // Why: Electron's CmdOrCtrl+V menu accelerator sends this owned paste event
-    // instead of a keydown, so the focused explorer must claim it explicitly.
-    const onAppMenuPaste = (event: Event): void => {
-      if (rightSidebarExplorerView !== 'files' || inlineInputRef.current || !focusInExplorer()) {
-        return
-      }
-      event.preventDefault()
-      pasteFileExplorerClipboard({
-        activeWorktreeId: activeWorktreeIdRef.current,
-        destinationNode: findFocusedNode(),
-        refreshDir: refreshDirRef.current,
-        setSelectedPaths: setSelectedPathsRef.current,
-        worktreePath: worktreePathRef.current
-      })
-    }
-
     window.addEventListener('keydown', onKeyDown, { capture: true })
-    window.addEventListener(APP_MENU_PASTE_EVENT, onAppMenuPaste)
     return () => {
       window.removeEventListener('keydown', onKeyDown, { capture: true })
-      window.removeEventListener(APP_MENU_PASTE_EVENT, onAppMenuPaste)
     }
   }, [keybindings, opts.containerRef, opts.nativeTreeNavigation, rightSidebarExplorerView])
 }

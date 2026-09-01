@@ -21,8 +21,8 @@ export function SidePanelNavigation({ presentation }: SidePanelNavigationProps):
       return
     }
     hasHydratedRef.current = true
-    void hydrateSidePanelNavigation(projectCatalog.repos)
-  }, [projectCatalog.isPending, projectCatalog.repos])
+    void hydrateSidePanelNavigation(projectCatalog.repos, projectCatalog.runtimeEnvironments)
+  }, [projectCatalog.isPending, projectCatalog.repos, projectCatalog.runtimeEnvironments])
 
   return (
     <Sidebar

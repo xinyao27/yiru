@@ -58,19 +58,11 @@ export default function WorktreeCreationPanel({
       {/* Faux tab strip: mirrors the real tab row (height, border, bg) so the
           create reads as a workspace tab. Carries only the worktree name + a
           cancel control — the live status lives in the body below. */}
-      <div className="border-border bg-background flex h-[var(--titlebar-height)] shrink-0 items-stretch border-b [[data-native-sidebar-material=true]_&]:bg-transparent">
+      <div className="border-border bg-background flex h-[var(--titlebar-height)] shrink-0 items-stretch border-b">
         {reserveCollapsedSidebarHeaderSpace ? (
           // Why: collapsed sidebar chrome floats above this strip, so reserve
           // the same measured width real tabs use to keep title/cancel clear.
-          <div
-            className="shrink-0"
-            style={
-              {
-                width: 'var(--collapsed-sidebar-header-width)',
-                WebkitAppRegion: 'no-drag'
-              } as React.CSSProperties
-            }
-          />
+          <div className="shrink-0" style={{ width: 'var(--collapsed-sidebar-header-width)' }} />
         ) : null}
         <div className="border-border flex h-full max-w-[240px] min-w-32 items-center gap-2 border-x border-t px-3 text-xs">
           {isError ? (

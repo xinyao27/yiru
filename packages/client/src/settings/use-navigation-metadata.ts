@@ -4,7 +4,6 @@ import { translate } from '~renderer/i18n/i18n'
 import { useUiLocale } from '~renderer/i18n/use-ui-locale'
 import { SlidersHorizontal } from '~renderer/icons/hugeicons'
 import { useProjectCatalog } from '~renderer/project-catalog/provider'
-import { isExtensionRenderer, usesNativeWindowRenderer } from '~renderer/runtime/renderer-host'
 import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
 import type { SettingsNavSection } from '~renderer/settings/navigation-types'
 import { useAppStore } from '~renderer/store/state'
@@ -13,35 +12,25 @@ import {
   getWindowsTerminalCapabilityOwnerKey,
   useWindowsTerminalCapabilities
 } from '~renderer/terminal/windows/capabilities'
-import { isWebClientLocation } from '~renderer/web/client-location'
 
 import { buildNavigationCoreSections } from './navigation-core-sections'
 import { buildNavigationWorkflowSections } from './navigation-workflow-sections'
 import { buildSettingsProjectList } from './project-list'
 import { getRepositoryPaneSearchEntries } from './repository/search'
 
-export { isWebClientLocation } from '~renderer/web/client-location'
-
 export function buildSettingsNavigationMetadata({
   isMac,
   isWindows,
   isWindowsTerminalHost = isWindows,
-  isWebClient,
-  showBrowserContextSettings = false,
-  usesNativeWindow,
   isDev = import.meta.env.DEV,
   repos
 }: {
   isMac: boolean
   isWindows: boolean
   isWindowsTerminalHost?: boolean
-  isWebClient: boolean
-  showBrowserContextSettings?: boolean
-  usesNativeWindow: boolean
   isDev?: boolean
   repos: readonly Repo[]
 }): SettingsNavSection[] {
-  const showDaemonBackedSettings = !isWebClient
   const reposById = new Map<string, Repo>()
   for (const repo of repos) {
     if (!reposById.has(repo.id)) {
@@ -53,21 +42,13 @@ export function buildSettingsNavigationMetadata({
     // Why: this order mirrors SETTINGS_NAV_GROUPS so Settings and Command Palette read
     // top-to-bottom in the same grouped order.
     ...buildNavigationCoreSections({
-      isMac,
-      isWindows,
-      isWindowsTerminalHost,
-      showDaemonBackedSettings,
-      showNativeWindowSettings: usesNativeWindow
+      isWindowsTerminalHost
     }),
     ...buildNavigationWorkflowSections({
       isDev,
       isMac,
-      isWebClient,
       isWindows,
-      isWindowsTerminalHost,
-      showDaemonBackedSettings,
-      showBrowserContextSettings,
-      showNativeWindowSettings: usesNativeWindow
+      isWindowsTerminalHost
     }),
     // Why: one nav row per project, not per repo row — a project set up on
     // multiple hosts collapses to a single entry derived from repos alone.
@@ -103,13 +84,12 @@ export function useSettingsNavigationMetadata(): SettingsNavSection[] {
   const settings = useAppStore((state) => state.settings)
   const isMac = isMacUserAgent()
   const isWindows = isWindowsUserAgent()
-  const isWebClient = isWebClientLocation()
   const windowsTerminalCapabilityOwnerKey = getWindowsTerminalCapabilityOwnerKey(
     settings?.activeRuntimeEnvironmentId
   )
   const runtimeTarget = getActiveRuntimeTarget(settings)
   const windowsTerminalCapabilities = useWindowsTerminalCapabilities(
-    isWindows || isWebClient || runtimeTarget.kind === 'environment',
+    isWindows || runtimeTarget.kind === 'environment',
     false,
     windowsTerminalCapabilityOwnerKey,
     runtimeTarget
@@ -121,9 +101,6 @@ export function useSettingsNavigationMetadata(): SettingsNavSection[] {
       isMac,
       isWindows,
       isWindowsTerminalHost,
-      isWebClient,
-      showBrowserContextSettings: isExtensionRenderer(),
-      usesNativeWindow: usesNativeWindowRenderer(),
       isDev: import.meta.env.DEV,
       repos
     }))()

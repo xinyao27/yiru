@@ -7,17 +7,9 @@ import {
 
 export type TerminalInputFocusSync = (focused: boolean) => void
 export type RefocusScheduler = TerminalImeInputContextRefocusScheduler
-export const REGULAR_TERMINAL_INPUT_FOCUSED_ATTRIBUTE = 'data-regular-terminal-input-focused'
 
 export function isXtermHelperTextarea(target: EventTarget | null): target is HTMLElement {
   return target instanceof HTMLElement && target.classList.contains('xterm-helper-textarea')
-}
-
-export function setRegularTerminalInputFocusAttribute(focused: boolean): void {
-  if (typeof document === 'undefined') {
-    return
-  }
-  document.documentElement.toggleAttribute(REGULAR_TERMINAL_INPUT_FOCUSED_ATTRIBUTE, focused)
 }
 
 export function getPaneOwnedActiveHelperTextarea(
@@ -128,8 +120,8 @@ export function resyncTerminalFocusForWindowFocus(args: {
     return true
   }
 
-  // Why: macOS app reactivation leaves a stale NSTextInputContext on the
-  // still-focused helper (electron#32307/#34952); non-mac returns false inside.
+  // Why: macOS app reactivation can leave a stale NSTextInputContext on the
+  // still-focused helper; non-mac returns false inside.
   refreshTerminalImeInputContext(reclaimedHelper, {
     isMac: args.isMac,
     scheduleRefocus: args.scheduleRefocus

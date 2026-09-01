@@ -1,6 +1,6 @@
 /**
  * Shared, pure Quick Open (Cmd/Ctrl+P) file-listing filter policy used by both
- * the local main process and the SSH relay. No IO, no Electron, no WSL, no
+ * the local daemon and the SSH relay. No IO, WSL, or host-specific behavior
  * auth — callers own process execution and transport-specific path translation.
  *
  * Why this module exists (design doc: docs/design/share-quick-open-file-listing.md):

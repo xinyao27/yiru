@@ -59,7 +59,6 @@ export function readPersistedUi(value: PersistedUi): PersistedUi {
     workspaceStatuses: normalizeWorkspaceStatuses(value?.workspaceStatuses),
     usagePercentageDisplay: normalizeUsagePercentageDisplay(value?.usagePercentageDisplay),
     statusBarUsageMode: normalizeStatusBarUsageMode(value?.statusBarUsageMode),
-    trayMinimizeNoticeShown: value?.trayMinimizeNoticeShown === true,
     markdownTocPanelWidth: clampMarkdownTocPanelWidth(value?.markdownTocPanelWidth),
     visibleWorkspaceHostIds: normalizeVisibleExecutionHostIds(value?.visibleWorkspaceHostIds),
     workspaceHostOrder: normalizeExecutionHostOrder(value?.workspaceHostOrder),

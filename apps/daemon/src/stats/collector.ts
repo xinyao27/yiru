@@ -18,7 +18,7 @@ const MAX_COUNTED_PRS = 2_000
 // (a few per session) and not latency-sensitive for the UI.
 const DEBOUNCE_MS = 5_000
 
-// Why: same timing constraint as persistence.ts — the Electron composition
+// Why: same timing constraint as persistence.ts — the runtime composition
 // root installs a provider before app.setName changes its userData path, while
 // the standalone host installs its provider before constructing this service.
 let _statsFile: string | null = null
@@ -143,7 +143,7 @@ export class StatsCollector {
   /**
    * Idempotent shutdown — closes out live agents and writes to disk.
    *
-   * Why idempotent: Electron's before-quit can fire multiple times — the
+   * Why idempotent: shutdown signals can fire multiple times — the
    * updater handler calls event.preventDefault() to defer macOS installs.
    * We close live agents and write, but do NOT clear in-memory state so
    * a second flush() after resumed activity works correctly.

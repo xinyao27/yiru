@@ -25,8 +25,7 @@ export function createNodeRuntimeHostPathsProvider(
   const inferredResourcesPath = inferResourcesPath(bundleDirectory)
   const resourcesPath = process.env.YIRU_RESOURCES_PATH?.trim() || inferredResourcesPath
   const appPath =
-    process.env.YIRU_APP_PATH?.trim() ||
-    (resourcesPath ? join(resourcesPath, 'app.asar') : resolve(bundleDirectory, '..', '..'))
+    process.env.YIRU_APP_PATH?.trim() || resourcesPath || resolve(bundleDirectory, '..', '..')
   return {
     appPath: () => appPath,
     downloadsPath: () => join(homedir(), 'Downloads'),

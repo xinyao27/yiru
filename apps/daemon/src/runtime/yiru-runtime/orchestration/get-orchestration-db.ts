@@ -107,14 +107,14 @@ export abstract class RuntimeOrchestrationGetOrchestrationDb extends RuntimeCore
   }
 
   getStatus(): RuntimeStatus {
-    const hasRenderer = Boolean(this.getAvailableAuthoritativeWindow())
+    const hasWorkbench = this.hasAvailableWorkbench()
     const capabilities: RuntimeCapability[] = RUNTIME_CAPABILITIES.filter(
       (capability) =>
         !this.disabledCapabilities.has(capability) &&
-        (capability !== 'browser.screencast.v1' || hasRenderer)
+        (capability !== 'browser.screencast.v1' || hasWorkbench)
     )
     if (
-      hasRenderer &&
+      hasWorkbench &&
       !this.disabledCapabilities.has(EXTERNAL_EDITOR_REMOTE_SSH_RUNTIME_CAPABILITY)
     ) {
       // Why: opening VS Code is a desktop-host side effect unavailable to headless serve.
@@ -126,13 +126,12 @@ export abstract class RuntimeOrchestrationGetOrchestrationDb extends RuntimeCore
       rendererGraphEpoch: graph.rendererGraphEpoch,
       graphStatus: graph.graphStatus,
       authoritativeWindowId: graph.authoritativeWindowId,
-      desktopWindowStatus: hasRenderer ? 'available' : this.getDesktopWindowStatusFn(),
       liveTabCount: graph.liveTabCount,
       liveLeafCount: graph.liveLeafCount,
       runtimeProtocolVersion: RUNTIME_PROTOCOL_VERSION,
       minCompatibleRuntimeClientVersion: MIN_COMPATIBLE_RUNTIME_CLIENT_VERSION,
-      // Why: headless yiru serve cannot create/stream BrowserViews, so clients
-      // must not treat browser panes as supported just because runtime RPC is up.
+      // Why: headless yiru serve has no browser workbench, so clients must not
+      // treat browser capabilities as supported just because runtime RPC is up.
       capabilities,
       hostPlatform: process.platform,
       terminalWindowsShell: this.store?.getSettings?.().terminalWindowsShell ?? null,

@@ -51,7 +51,7 @@ const pooledClients = new Map<string, Promise<PooledOrpcEnvironmentClient>>()
 
 // Why: the unchanged main-to-remote E2EE tunnel hands back plain oRPC wire
 // frames. Its internal adapter satisfies the oRPC MessagePort-like interface;
-// this is not an Electron renderer transport and never leaves main.
+// this is an internal daemon transport and never leaves the process.
 class RuntimeOrpcTunnelPort {
   private readonly messageListeners = new Set<(event: { data: unknown }) => void>()
   private readonly closeListeners = new Set<() => void>()

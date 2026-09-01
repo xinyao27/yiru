@@ -153,8 +153,8 @@ export async function fetchViaOAuth(
     : AbortSignal.timeout(API_TIMEOUT_MS)
 
   try {
-    // Why: Electron injects its configured Chromium network stack for proxy and
-    // certificate behavior; the pure Node runtime host uses its native fetch.
+    // Why: the daemon uses its native fetch implementation for proxy and
+    // certificate behavior.
     const res = await fetchHttp(OAUTH_USAGE_URL, {
       headers: {
         Authorization: `Bearer ${token}`,

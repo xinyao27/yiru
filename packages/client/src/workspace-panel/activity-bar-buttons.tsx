@@ -14,8 +14,6 @@ import {
 } from '~renderer/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/ui/tooltip'
 
-import { RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME } from './right-sidebar-titlebar-drag-regions'
-
 export type ActivityBarItem = {
   id: ActiveRightSidebarTab
   icon: React.ComponentType<{
@@ -61,7 +59,7 @@ export function TopActivityOverflowMenu({
             type="button"
             variant="titlebar-segment"
             size="icon-titlebar-wide"
-            className={cn('relative', RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME)}
+            className="relative"
             aria-label={translate(
               'auto.components.right.sidebar.activity.bar.buttons.1fd284e931',
               'More sidebar tabs'
@@ -129,7 +127,6 @@ export function ActivityBarButton({
             size={isTop ? 'icon-titlebar-wide' : 'icon-lg'}
             className={cn(
               'relative',
-              RIGHT_SIDEBAR_HEADER_NO_DRAG_CLASS_NAME,
               isTop && mergeLeadingEdge && 'border-l-0',
               !isTop && 'w-10 h-10',
               !isTop &&

@@ -24,7 +24,7 @@ export abstract class AgentHookServerBase {
   protected onPaneStatusCleared: PaneStatusClearListener | null = null
   protected statusChangeListeners = new Set<StatusChangeListener>()
   // Why: directory that holds the on-disk endpoint file. Set via start()'s
-  // `userDataPath` option so the listener stays independent of Electron.
+  // `userDataPath` option so the listener stays independent of host startup.
   protected endpointDir: string | null = null
   protected endpointFilePathCache: string | null = null
   protected endpointFileWritten = false

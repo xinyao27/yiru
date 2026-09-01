@@ -17,7 +17,6 @@ dist/
 .output/
 .wxt/
 .prerender/
-dist-electron/
 out/
 build/
 release/

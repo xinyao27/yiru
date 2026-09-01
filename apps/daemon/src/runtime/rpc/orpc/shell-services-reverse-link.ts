@@ -93,7 +93,7 @@ export function getConnectedWebShellServicesClient(): ShellServicesClient | null
 
 // Why: these renderer-state commands preserve the old notifier's
 // fire-and-forget semantics. Registry lookup still happens by opaque shell
-// connection id, so runtime capability code never retains WebContents.
+// connection id, so runtime capability code never retains a browser page.
 export function dispatchShellUICommand(
   shellConnectionId: ShellServicesConnectionId | undefined,
   input: ShellServicesUICommandInput

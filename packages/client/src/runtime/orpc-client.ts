@@ -2,7 +2,7 @@ import { ORPCError } from '@orpc/client'
 import { withBrowserUiRuntimeRpcSource } from '@yiru/runtime-protocol/workbench/runtime-rpc-feature-interaction-source'
 
 import { createRuntimeRpcAbortError } from './abortable-runtime-environment-call'
-import { hasBrowserHostRuntime, openConfiguredBrowserHostRuntime } from './browser-host-runtime'
+import { openConfiguredBrowserHostRuntime } from './browser-host-runtime'
 import { ensureRuntimeEnvironmentCompatible } from './environment-compatibility'
 import {
   retainRuntimeOrpcBinaryRoute,
@@ -13,8 +13,7 @@ import type {
   RuntimeOrpcClientConnection,
   RuntimeOrpcClientContext
 } from './orpc-connection'
-import { openRuntimeLoopbackOrpcConnection } from './orpc-loopback-client'
-import { createWebEnvironmentRuntimeOrpcClient } from './orpc-web-environment-client'
+import { createEnvironmentRuntimeOrpcClient } from './orpc-environment-client'
 import { RuntimeRpcCallError } from './rpc-response'
 
 const DEFAULT_ENVIRONMENT_TIMEOUT_MS = 15_000
@@ -98,9 +97,6 @@ export function callShellOrpc<TInput, TResult>(
   input: TInput,
   options: RuntimeOrpcCallOptions = {}
 ): Promise<TResult> {
-  if (isWebRuntimeClient()) {
-    return Promise.reject(new ORPCError('unavailable_on_host', { status: 501 }))
-  }
   return callRuntimeOrpc({ kind: 'local' }, selectProcedure, input, options)
 }
 
@@ -114,34 +110,10 @@ export async function createRuntimeOrpcClient(
   if (target.kind === 'local') {
     return createLocalRuntimeOrpcClient()
   }
-  if (hasBrowserHostRuntime()) {
-    return createWebEnvironmentRuntimeOrpcClient(target, options)
-  }
   const environmentId = target.environmentId.trim()
   const environmentTarget = { kind: 'environment', environmentId } as const
-  if (isWebRuntimeClient()) {
-    // Why: the web renderer has no Electron preload credentials,
-    // so it cannot reuse `acquireEnvironmentRuntimeOrpcClient` below — but it
-    // does not need to. `WebRuntimeClient` already terminates an encrypted
-    // oRPC peer for the paired host (falling back to its own legacy JSON-RPC
-    // wrapper when that host doesn't advertise oRPC support); dispatching
-    // through it inherits that negotiation instead of going straight to the
-    // legacy dispatcher unconditionally.
-    await abortable(ensureRuntimeEnvironmentCompatible(environmentId, options), options.signal)
-    return createWebEnvironmentRuntimeOrpcClient(environmentTarget, options)
-  }
-  return openRuntimeLoopbackOrpcConnection(
-    {
-      kind: 'environment',
-      environmentId,
-      timeoutMs: options.timeoutMs ?? DEFAULT_ENVIRONMENT_TIMEOUT_MS
-    },
-    options
-  )
-}
-
-export function isWebRuntimeClient(): boolean {
-  return (globalThis as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__ === true
+  await abortable(ensureRuntimeEnvironmentCompatible(environmentId, options), options.signal)
+  return createEnvironmentRuntimeOrpcClient(environmentTarget, options)
 }
 
 // Why: a few call sites (e.g. the remote terminal pty transport) still address
@@ -174,44 +146,8 @@ function resolveRuntimeOrpcProcedureByPath<TResult>(
   return node as RuntimeOrpcProcedure<unknown, TResult>
 }
 
-// Why: the local target is one long-lived loopback peer for the renderer's
-// lifetime. Opening a socket per call made main
-// stand up a fresh oRPC handler for every request — at startup that churn spiked
-// the renderer past 3 GB and tripped V8's heap limit. Callers still get a
-// connection whose `close()` is a no-op, so ownership semantics are unchanged.
-let pooledLocalConnection: Promise<RuntimeOrpcClientConnection> | null = null
-
 export function createLocalRuntimeOrpcClient(): Promise<RuntimeOrpcClientConnection> {
-  if (hasBrowserHostRuntime()) {
-    return openConfiguredBrowserHostRuntime()
-  }
-  if (isWebRuntimeClient()) {
-    return Promise.resolve(
-      createWebEnvironmentRuntimeOrpcClient({ kind: 'environment', environmentId: 'active' }, {})
-    )
-  }
-  const existing = pooledLocalConnection
-  if (existing) {
-    return existing
-  }
-  let pending: Promise<RuntimeOrpcClientConnection>
-  pending = openRuntimeLoopbackOrpcConnection(
-    { kind: 'local' },
-    {
-      onClose: () => {
-        if (pooledLocalConnection === pending) {
-          pooledLocalConnection = null
-        }
-      }
-    }
-  ).then((opened) => ({ client: opened.client, transport: opened.transport, close: () => {} }))
-  pooledLocalConnection = pending
-  void pending.catch(() => {
-    if (pooledLocalConnection === pending) {
-      pooledLocalConnection = null
-    }
-  })
-  return pending
+  return openConfiguredBrowserHostRuntime()
 }
 
 function createRuntimeOrpcCallSignal(

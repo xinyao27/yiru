@@ -51,7 +51,7 @@ const WSL_CANONICALIZE_TIMEOUT_MS = 5000
 const WSL_PATH_MISSING_OUTPUT = '__YIRU_WSL_PATH_MISSING__'
 
 // Why: `readlink -f` over wsl.exe stalls up to the timeout on a cold or wedged
-// distro. Running it synchronously on the Electron main process froze the UI on
+// distro. Running it synchronously on the daemon event loop stalled all clients on
 // every Codex WSL launch, so resolve it off-thread and cache the latest result.
 const canonicalWslPathCache = new Map<string, string>()
 const inFlightWslCanonicalizations = new Map<string, Set<WslCanonicalPathSettled>>()
@@ -81,7 +81,7 @@ function scheduleWslLinuxPathCanonicalization(
   inFlightWslCanonicalizations.set(key, nextListeners)
   const drivePath = /^[A-Za-z]:[/\\]/.test(windowsPath)
   // Why: wslpath reads each distro's automount root, so a custom root such as
-  // /windows is discovered without synchronously starting WSL on Electron main.
+  // /windows is discovered without synchronously starting WSL on the daemon event loop.
   const args = drivePath
     ? [
         '-d',

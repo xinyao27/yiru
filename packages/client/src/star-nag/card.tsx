@@ -6,9 +6,7 @@ import { Star, ArrowSquareOut as ExternalLink, X } from '~renderer/icons/hugeico
 import { useEventCallback } from '~renderer/react/use-event-callback'
 import { useMountedRef } from '~renderer/react/use-mounted-ref'
 import { shellClient } from '~renderer/runtime/shell-client'
-import { cn } from '~renderer/ui/class-names'
 
-import { useAppStore } from '../store/state'
 import { Button } from '../ui/button'
 import { Card } from '../ui/card'
 
@@ -17,7 +15,7 @@ type StarNagMode = 'gh' | 'web'
 /**
  * Persistent "star Yiru on GitHub" notification card.
  *
- * Rendered at the bottom-right of the app (alongside UpdateCard). It is
+ * Rendered at the bottom-right of the app. It is
  * intentionally non-auto-dismissing: the user must either click Star, defer,
  * confirm an existing star, or close the card. Nonterminal exits set a
  * persisted cooldown in the main process.
@@ -30,12 +28,6 @@ export function StarNagCard(): React.JSX.Element | null {
   const [busy, setBusy] = useState(false)
   const [mode, setMode] = useState<StarNagMode>('gh')
   const mountedRef = useMountedRef()
-  // Why: UpdateCard lives at the same bottom-right slot. When it is visible
-  // (any non-idle / non-not-available state), stack the star-nag card above
-  // it instead of overlapping — we must not cover a pending update prompt
-  // because that's a higher-priority action.
-  const updateStatus = useAppStore((s) => s.updateStatus)
-  const updateCardVisible = updateStatus.state !== 'idle' && updateStatus.state !== 'not-available'
 
   useEffect(() => {
     const unsubscribeShow = shellClient.starNag.onShow((payload) => {
@@ -152,15 +144,7 @@ export function StarNagCard(): React.JSX.Element | null {
   }
 
   return (
-    <div
-      // Why: when UpdateCard is up, it occupies bottom-10. Raise the star-nag
-      // card above it so both are visible — the update action stays on top
-      // visually (it's the higher-priority one) and the star-nag sits above.
-      className={cn(
-        'fixed right-4 z-40 w-[360px] max-w-[calc(100vw-32px)] max-[480px]:left-4 max-[480px]:right-4 max-[480px]:w-auto',
-        updateCardVisible ? 'bottom-[220px]' : 'bottom-10'
-      )}
-    >
+    <div className="fixed right-4 bottom-10 z-40 w-[360px] max-w-[calc(100vw-32px)] max-[480px]:right-4 max-[480px]:left-4 max-[480px]:w-auto">
       <Card className="gap-0 py-0" role="complementary" aria-labelledby="star-nag-heading">
         <div className="flex flex-col gap-2.5 p-3.5">
           <div className="flex items-start justify-between gap-2">

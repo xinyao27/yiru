@@ -3,18 +3,13 @@ import { basename, dirname, join } from 'node:path'
 import type { CliInstallStatus } from '@yiru/runtime-protocol/workbench/cli-install-types'
 
 import {
-  isLinuxAppImage,
   isWindowsPackagedBundledCommand,
   resolveInstallSpec,
   resolveLauncherPath,
   type CliInstallContext,
   type InstallSpec
 } from './installer-context'
-import {
-  inspectAppImageWrapper,
-  inspectSymlink,
-  inspectWindowsWrapper
-} from './installer-inspection'
+import { inspectSymlink, inspectWindowsWrapper } from './installer-inspection'
 import {
   isExecutableFile,
   samePathEntry,
@@ -42,12 +37,9 @@ export async function getCliInstallStatus(context: CliInstallContext): Promise<C
   }
   const launcherPath = await resolveLauncherPath(context)
   if (!launcherPath) {
-    const detail =
-      isLinuxAppImage(context) && context.appImagePath
-        ? `The AppImage file at ${context.appImagePath} is missing. Move it back or re-run CLI registration from the current AppImage location.`
-        : context.isPackaged
-          ? 'The bundled CLI launcher is missing from this Yiru build.'
-          : 'Development mode uses a generated launcher for validation only.'
+    const detail = context.isPackaged
+      ? 'The bundled CLI launcher is missing from this Yiru build.'
+      : 'Development mode uses a generated launcher for validation only.'
     return {
       platform: context.platform,
       commandName: context.commandName,
@@ -67,9 +59,7 @@ export async function getCliInstallStatus(context: CliInstallContext): Promise<C
   const baseStatus =
     spec.installMethod === 'symlink'
       ? await inspectSymlink(context, spec.commandPath, launcherPath)
-      : isLinuxAppImage(context)
-        ? await inspectAppImageWrapper(context, spec.commandPath, launcherPath)
-        : await inspectWindowsWrapper(context, spec.commandPath, launcherPath)
+      : await inspectWindowsWrapper(context, spec.commandPath, launcherPath)
   const pathDirectory = dirname(spec.commandPath)
   return withPathInfo(
     context,

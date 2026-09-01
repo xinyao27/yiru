@@ -80,7 +80,7 @@ export function useTabDragGesture(worktreeId: string, enabled: boolean): TabDrag
       cleanupTimer = window.setTimeout(() => {
         cleanupTimer = null
         if (isTabDragActiveRef.current) {
-          // Why: Electron/dnd-kit can miss drag end/cancel and leave later
+          // Why: Chromium/dnd-kit can miss drag end/cancel and leave later
           // clicks looking like drag releases.
           clearDragStateRef.current()
         }

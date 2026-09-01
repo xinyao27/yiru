@@ -12,7 +12,9 @@ const yiruRootToolingConfig = defineConfig({
   fmt: {
     // Why: Markdown includes generated skill guides whose formatting is part of
     // their authored content; toolchain migration must not rewrite that prose.
-    ignorePatterns: ['**/*.md', '**/build'],
+    // worker-configuration.d.ts must stay byte-identical to `wrangler types`
+    // output because the APNs gateway CI gate diffs the regenerated file.
+    ignorePatterns: ['**/*.md', '**/build', '**/worker-configuration.d.ts'],
     singleQuote: true,
     semi: false,
     printWidth: 100,

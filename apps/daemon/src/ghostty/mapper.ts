@@ -5,7 +5,7 @@ import type {
   GhosttyImportPreview
 } from '@yiru/runtime-protocol/workbench/types'
 
-import { parsePaddingValue, parseStrictInt } from './numeric-config-values'
+import { parsePaddingValue } from './numeric-config-values'
 
 const PALETTE_INDEX_MAP: Record<number, keyof TerminalColorOverrides> = {
   0: 'black',
@@ -132,14 +132,6 @@ export function mapGhosttyToYiru(
         return null
       }
       return { colorOverrides: overrides }
-    },
-
-    'background-blur-radius': (v) => {
-      const num = parseStrictInt(v)
-      if (num === null || num < 0) {
-        return null
-      }
-      return { key: 'windowBackgroundBlur', value: num > 0 }
     },
 
     'split-divider-color': (v) => {
@@ -298,18 +290,6 @@ export function mapGhosttyToYiru(
     if (result === null) {
       unsupportedKeys.push(key)
       continue
-    }
-
-    // Why: Yiru's windowBackgroundBlur is a boolean; the numeric radius is lost.
-    // Only note the drop when blur is actually being turned on — a `0` cleanly
-    // maps to `false` and there is no radius to lose.
-    if (
-      key === 'background-blur-radius' &&
-      !Array.isArray(result) &&
-      'key' in result &&
-      result.value === true
-    ) {
-      unsupportedKeys.push('background-blur-radius (radius value not preserved)')
     }
 
     if (Array.isArray(result)) {

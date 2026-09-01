@@ -36,7 +36,7 @@ type ShellServicesTerminalSplitSource =
 // Why: these commands mutate renderer-owned navigation, tab, and sleeping-agent
 // state after the runtime has already completed its authoritative operation.
 // They travel on the reverse link so the runtime retains only an opaque shell
-// connection id, never a BrowserWindow/WebContents callback closure.
+// connection id, never a browser-page callback closure.
 export type ShellServicesUICommandInput =
   | {
       type: 'activateWorktree'

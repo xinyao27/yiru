@@ -1,3 +1,4 @@
+import type { PublicKnownRuntimeEnvironment } from '@yiru/runtime-protocol/workbench/runtime-environments'
 import type { OnboardingState, Repo } from '@yiru/runtime-protocol/workbench/types'
 import { useEffect, useRef, useState } from 'react'
 
@@ -14,10 +15,13 @@ type StartupHydrationState = {
 
 export function useStartupHydration(
   isProjectCatalogPending: boolean,
-  repos: readonly Repo[]
+  repos: readonly Repo[],
+  runtimeEnvironments: readonly PublicKnownRuntimeEnvironment[]
 ): StartupHydrationState {
   const reposRef = useRef(repos)
   reposRef.current = repos
+  const runtimeEnvironmentsRef = useRef(runtimeEnvironments)
+  runtimeEnvironmentsRef.current = runtimeEnvironments
   const [onboarding, setOnboarding] = useState<OnboardingState | null>(null)
   const [onboardingLoaded, setOnboardingLoaded] = useState(false)
 
@@ -42,6 +46,7 @@ export function useStartupHydration(
           attempt,
           isCancelled,
           repos: reposRef.current,
+          runtimeEnvironments: runtimeEnvironmentsRef.current,
           signal: abortController.signal
         })
         if (!cancelled && restoredOnboarding !== null) {

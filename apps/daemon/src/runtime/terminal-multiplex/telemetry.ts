@@ -8,12 +8,30 @@ import { startSpan } from '~main/observability/tracer'
 const SAMPLE_INTERVAL_MS = 15_000
 
 let cumulativeGcPauseMs = 0
-const gcObserver = new PerformanceObserver((entries) => {
-  for (const entry of entries.getEntries()) {
-    cumulativeGcPauseMs += entry.duration
+let gcObserver: PerformanceObserver | null = null
+let gcObserverConsumers = 0
+
+function acquireGcObserver(): void {
+  gcObserverConsumers += 1
+  if (gcObserver) {
+    return
   }
-})
-gcObserver.observe({ entryTypes: ['gc'] })
+  gcObserver = new PerformanceObserver((entries) => {
+    for (const entry of entries.getEntries()) {
+      cumulativeGcPauseMs += entry.duration
+    }
+  })
+  gcObserver.observe({ entryTypes: ['gc'] })
+}
+
+function releaseGcObserver(): void {
+  gcObserverConsumers = Math.max(0, gcObserverConsumers - 1)
+  if (gcObserverConsumers > 0) {
+    return
+  }
+  gcObserver?.disconnect()
+  gcObserver = null
+}
 
 type FlowSample = {
   creditBytes: number
@@ -44,9 +62,11 @@ export class TerminalMultiplexTelemetry {
   private readonly opcodeBytes = new Map<string, number>()
   private readonly timer: ReturnType<typeof setInterval>
   private lastGcPauseMs = cumulativeGcPauseMs
+  private isClosed = false
 
   constructor(lane: string) {
     this.lane = lane
+    acquireGcObserver()
     this.timer = setInterval(() => this.flush('interval'), SAMPLE_INTERVAL_MS)
     this.timer.unref?.()
   }
@@ -73,12 +93,17 @@ export class TerminalMultiplexTelemetry {
   }
 
   close(): void {
+    if (this.isClosed) {
+      return
+    }
+    this.isClosed = true
     clearInterval(this.timer)
     this.flush('close')
     for (const stream of this.streams.values()) {
       stream.close()
     }
     this.streams.clear()
+    releaseGcObserver()
   }
 
   private flush(reason: 'interval' | 'close'): void {

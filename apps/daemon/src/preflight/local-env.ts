@@ -16,7 +16,7 @@ export function buildLocalPreflightEnv(): Record<string, string> | undefined {
   }
   const env = stringOnlyProcessEnv(process.env)
   // Why: newly installed CLIs update persisted Windows Path, but the running
-  // Electron process keeps its old environment until we merge it explicitly.
+  // daemon keeps its old environment until we merge it explicitly.
   mergePersistedWindowsPath(env)
   return env
 }

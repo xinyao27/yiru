@@ -260,7 +260,7 @@ export default function AiVaultSessionDropLayer({
       if (!event.dataTransfer || !hasAiVaultSessionDragData(event.dataTransfer)) {
         return
       }
-      // Electron sometimes accepts dragover on the overlay but skips React's
+      // Chromium sometimes accepts dragover on the overlay but skips React's
       // delegated drop handler; capture keeps the visible target and action in sync.
       if (handleSessionDrop(event.dataTransfer, { x: event.clientX, y: event.clientY })) {
         event.preventDefault()

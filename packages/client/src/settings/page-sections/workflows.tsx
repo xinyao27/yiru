@@ -35,7 +35,6 @@ type WorkflowSectionsProps = {
   setScrollbackMode: (mode: 'preset' | 'custom') => void
   settings: GlobalSettings
   settingsSearchQuery: string
-  showDaemonBackedSettings: boolean
   sourceControlAiPromptDiscardSignal: number
   systemPrefersDark: boolean
   terminalFontSuggestions: string[]
@@ -63,7 +62,6 @@ export function WorkflowSections({
   setScrollbackMode,
   settings,
   settingsSearchQuery,
-  showDaemonBackedSettings,
   sourceControlAiPromptDiscardSignal,
   systemPrefersDark,
   terminalFontSuggestions,
@@ -74,20 +72,18 @@ export function WorkflowSections({
 }: WorkflowSectionsProps): React.JSX.Element {
   return (
     <>
-      {showDaemonBackedSettings ? (
-        <SettingsSection
-          id="mobile"
-          title={translate('auto.components.settings.Settings.c40dadaac8', 'Mobile')}
-          badge="Beta"
-          description={translate(
-            'auto.components.settings.Settings.c6c01ac209',
-            'Control terminals and agents from your phone.'
-          )}
-          searchEntries={getSearchEntries('mobile')}
-        >
-          {isMounted('mobile') ? <MobileSettingsPane /> : null}
-        </SettingsSection>
-      ) : null}
+      <SettingsSection
+        id="mobile"
+        title={translate('auto.components.settings.Settings.c40dadaac8', 'Mobile')}
+        badge="Beta"
+        description={translate(
+          'auto.components.settings.Settings.c6c01ac209',
+          'Control terminals and agents from your phone.'
+        )}
+        searchEntries={getSearchEntries('mobile')}
+      >
+        {isMounted('mobile') ? <MobileSettingsPane /> : null}
+      </SettingsSection>
 
       <SettingsSection
         id="git"
@@ -167,21 +163,19 @@ export function WorkflowSections({
         ) : null}
       </SettingsSection>
 
-      {showDaemonBackedSettings ? (
-        <SettingsSection
-          id="mobile-emulator"
-          title={translate('auto.components.settings.Settings.f75daf1002', 'Mobile Emulator')}
-          description={translate(
-            'auto.components.settings.Settings.01f9d36292',
-            'Configure mobile emulator support for Yiru and coding agents.'
-          )}
-          searchEntries={getSearchEntries('mobile-emulator')}
-        >
-          {isMounted('mobile-emulator') ? (
-            <MobileEmulatorSettingsPane settings={settings} updateSettings={updateSettings} />
-          ) : null}
-        </SettingsSection>
-      ) : null}
+      <SettingsSection
+        id="mobile-emulator"
+        title={translate('auto.components.settings.Settings.f75daf1002', 'Mobile Emulator')}
+        description={translate(
+          'auto.components.settings.Settings.01f9d36292',
+          'Configure mobile emulator support for Yiru and coding agents.'
+        )}
+        searchEntries={getSearchEntries('mobile-emulator')}
+      >
+        {isMounted('mobile-emulator') ? (
+          <MobileEmulatorSettingsPane settings={settings} updateSettings={updateSettings} />
+        ) : null}
+      </SettingsSection>
 
       <SettingsSection
         id="appearance"
@@ -207,21 +201,19 @@ export function WorkflowSections({
         ) : null}
       </SettingsSection>
 
-      {showDaemonBackedSettings ? (
-        <SettingsSection
-          id="notifications"
-          title={translate('auto.components.settings.Settings.9907545fa3', 'Notifications')}
-          description={translate(
-            'auto.components.settings.Settings.7210ac09c4',
-            'System notifications for agent activity and terminal events.'
-          )}
-          searchEntries={getSearchEntries('notifications')}
-        >
-          {isMounted('notifications') ? (
-            <NotificationsPane settings={settings} updateSettings={updateSettings} />
-          ) : null}
-        </SettingsSection>
-      ) : null}
+      <SettingsSection
+        id="notifications"
+        title={translate('auto.components.settings.Settings.9907545fa3', 'Notifications')}
+        description={translate(
+          'auto.components.settings.Settings.7210ac09c4',
+          'System notifications for agent activity and terminal events.'
+        )}
+        searchEntries={getSearchEntries('notifications')}
+      >
+        {isMounted('notifications') ? (
+          <NotificationsPane settings={settings} updateSettings={updateSettings} />
+        ) : null}
+      </SettingsSection>
     </>
   )
 }

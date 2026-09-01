@@ -54,26 +54,6 @@ const getTerminalWindowSearchCatalog = createLocalizedCatalog(() => [
     ]
   },
   {
-    title: translate('auto.components.settings.terminal.search.72d0482137', 'Window Blur'),
-    description: translate(
-      'auto.components.settings.terminal.search.bc2054657a',
-      'Apply background blur to the terminal window. Requires restart.'
-    ),
-    keywords: [
-      ...translateSearchKeyword('auto.components.settings.terminal.search.0838b3717b', 'window'),
-      ...translateSearchKeyword('auto.components.settings.terminal.search.71eb45e293', 'blur'),
-      ...translateSearchKeyword(
-        'auto.components.settings.terminal.search.f6dd9ff606',
-        'background'
-      ),
-      ...translateSearchKeyword(
-        'auto.components.settings.terminal.search.4f7f8f28ca',
-        'transparency'
-      ),
-      ...translateSearchKeyword('auto.components.settings.terminal.search.6c2f9f05c8', 'vibrancy')
-    ]
-  },
-  {
     title: translate('auto.components.settings.terminal.search.b4f182f24d', 'Horizontal Padding'),
     description: translate(
       'auto.components.settings.terminal.search.75691e4911',
@@ -134,19 +114,8 @@ const getTerminalWindowSearchCatalog = createLocalizedCatalog(() => [
   }
 ])
 
-type TerminalWindowSearchOptions = {
-  showNativeWindowSettings?: boolean
-}
-
-export function getTerminalWindowSearchEntries(
-  options: TerminalWindowSearchOptions = {}
-): SettingsSearchEntry[] {
-  const entries = getTerminalWindowSearchCatalog()
-  // Why: Window Blur is the only entry in this catalog backed by native
-  // window creation; browser hosts keep every terminal-renderer setting.
-  return options.showNativeWindowSettings === false
-    ? entries.filter((_, entryIndex) => entryIndex !== 1)
-    : entries
+export function getTerminalWindowSearchEntries(): SettingsSearchEntry[] {
+  return getTerminalWindowSearchCatalog()
 }
 
 export const getTerminalSetupScriptSearchEntries = createLocalizedCatalog(() => [

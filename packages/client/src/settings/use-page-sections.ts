@@ -17,7 +17,6 @@ import { useSettingsNavigationMetadata } from './use-navigation-metadata'
 export function usePageSections(args: {
   hasUnsavedSourceControlAiPromptChanges: boolean
   query: string
-  showDaemonBackedSettings: boolean
 }) {
   const baseSections = useSettingsNavigationMetadata()
   const activeSkillRuntime = useActiveProjectSkillRuntime()
@@ -26,7 +25,6 @@ export function usePageSections(args: {
     sourceKinds: GLOBAL_AGENT_SKILL_SOURCE_KINDS
   })
   const computerUseSkill = useInstalledAgentSkill(COMPUTER_USE_SKILL_NAME, {
-    enabled: args.showDaemonBackedSettings,
     discoveryTarget: activeSkillRuntime.discoveryTarget,
     sourceKinds: GLOBAL_AGENT_SKILL_SOURCE_KINDS
   })
@@ -43,17 +41,15 @@ export function usePageSections(args: {
       })
     ]
   ])
-  if (args.showDaemonBackedSettings) {
-    installStatusBySectionId.set(
-      'computer-use',
-      getSkillNavInstallStatus({
-        name: COMPUTER_USE_SKILL_NAME,
-        installed: computerUseSkill.installed,
-        loading: computerUseSkill.loading,
-        inventory: applicableInventory
-      })
-    )
-  }
+  installStatusBySectionId.set(
+    'computer-use',
+    getSkillNavInstallStatus({
+      name: COMPUTER_USE_SKILL_NAME,
+      installed: computerUseSkill.installed,
+      loading: computerUseSkill.loading,
+      inventory: applicableInventory
+    })
+  )
 
   const sections = baseSections.map((section) => {
     const installStatus = installStatusBySectionId.get(section.id)

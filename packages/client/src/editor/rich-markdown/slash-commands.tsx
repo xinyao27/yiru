@@ -14,8 +14,7 @@ export type {
 
 /**
  * Executes a slash command by first deleting the typed slash text, then
- * delegating to the command's run method. Image is special-cased because
- * window.prompt() is not supported in Electron's renderer process.
+ * delegating to the command's run method. Image insertion uses the local picker.
  */
 export function runSlashCommand(
   editor: Editor,
@@ -25,8 +24,7 @@ export function runSlashCommand(
   onEmojiCommand?: () => void
 ): void {
   editor.chain().focus().deleteRange({ from: slashMenu.from, to: slashMenu.to }).run()
-  // Why: image insertion cannot rely on window.prompt() in Electron, so this
-  // command is rerouted into the editor's local image picker flow.
+  // Why: image insertion belongs to the editor's local picker flow.
   if (command.id === 'image' && onImageCommand) {
     onImageCommand()
     return

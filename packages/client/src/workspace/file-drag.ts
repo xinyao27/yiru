@@ -1,13 +1,9 @@
 import { normalizeRuntimePathForComparison } from '@yiru/runtime-protocol/model/platform'
 import { measureClipboardTextByteLength } from '@yiru/runtime-protocol/model/ui'
-import {
-  NATIVE_FILE_DROP_MAX_PATH_BYTES,
-  NATIVE_FILE_DROP_MAX_PATHS,
-  validateNativeFileDropPaths
-} from '~renderer/native-file-drop'
-
 export const WORKSPACE_FILE_PATH_MIME = 'text/x-yiru-file-path'
 export const WORKSPACE_FILE_PATHS_MIME = 'text/x-yiru-file-paths'
+const WORKSPACE_FILE_DRAG_MAX_PATHS = 256
+const WORKSPACE_FILE_DRAG_MAX_PATH_BYTES = 256 * 1024
 
 export type WorkspaceFileDragRejectionReason = 'paths-too-large' | 'too-many-paths'
 
@@ -19,6 +15,27 @@ export type WorkspaceFileDragPathsReadResult =
       reason: WorkspaceFileDragRejectionReason
       status: 'rejected'
     }
+
+function validateWorkspaceFileDragPaths(
+  paths: readonly string[],
+  options: { maxPathBytes: number; maxPaths: number }
+): WorkspaceFileDragPathsReadResult {
+  const pathCount = paths.length
+  if (pathCount > options.maxPaths) {
+    return { byteLength: 0, pathCount, reason: 'too-many-paths', status: 'rejected' }
+  }
+  let byteLength = 0
+  for (const path of paths) {
+    const measurement = measureClipboardTextByteLength(path, {
+      stopAfterBytes: options.maxPathBytes - byteLength
+    })
+    byteLength += measurement.byteLength
+    if (byteLength > options.maxPathBytes) {
+      return { byteLength, pathCount, reason: 'paths-too-large', status: 'rejected' }
+    }
+  }
+  return { byteLength, pathCount, paths: [...paths], status: 'accepted' }
+}
 
 type NormalizedWorkspaceFilePath = {
   normalizedPath: string
@@ -129,8 +146,8 @@ export function readWorkspaceFileDragPaths(
     maxPaths?: number
   } = {}
 ): WorkspaceFileDragPathsReadResult {
-  const maxPathBytes = options.maxPathBytes ?? NATIVE_FILE_DROP_MAX_PATH_BYTES
-  const maxPaths = options.maxPaths ?? NATIVE_FILE_DROP_MAX_PATHS
+  const maxPathBytes = options.maxPathBytes ?? WORKSPACE_FILE_DRAG_MAX_PATH_BYTES
+  const maxPaths = options.maxPaths ?? WORKSPACE_FILE_DRAG_MAX_PATHS
   const multiPathData = dataTransfer.getData(WORKSPACE_FILE_PATHS_MIME)
   const data = multiPathData || dataTransfer.getData(WORKSPACE_FILE_PATH_MIME)
   if (!data) {
@@ -158,7 +175,7 @@ export function readWorkspaceFileDragPaths(
   }
 
   const decodedPaths = decodedPathResult.paths
-  const validation = validateNativeFileDropPaths(decodedPaths, { maxPathBytes, maxPaths })
+  const validation = validateWorkspaceFileDragPaths(decodedPaths, { maxPathBytes, maxPaths })
   if (validation.status === 'rejected') {
     return {
       byteLength: validation.byteLength,

@@ -1,11 +1,11 @@
 import { translate } from '~renderer/i18n/i18n'
 import { callRuntimeOrpcByPath, type RuntimeClientTarget } from '~renderer/runtime/orpc-client'
+import { isRemoteTerminalSurfaceTabId } from '~renderer/runtime/remote-terminal-surface-id'
 import {
   REMOTE_TERMINAL_SNAPSHOT_TOO_LARGE,
   type RemoteRuntimeMultiplexedTerminal
 } from '~renderer/runtime/terminal-multiplex/multiplexer'
 import { runtimeTerminalErrorMessage } from '~renderer/runtime/terminal-stream'
-import { isWebTerminalSurfaceTabId } from '~renderer/runtime/web-terminal-surface-id'
 
 import type { PtyTransport, RuntimePtyTransportOptions } from './pty/transport-types'
 
@@ -301,7 +301,7 @@ export class RemoteRuntimePtyState {
     }
     if (isRemoteTerminalGoneMessage(message)) {
       this.retire()
-      if (!isWebTerminalSurfaceTabId(this.tabId ?? '')) {
+      if (!isRemoteTerminalSurfaceTabId(this.tabId ?? '')) {
         this.callbacksValue.onError?.(remoteTerminalGoneMessage())
       }
       return

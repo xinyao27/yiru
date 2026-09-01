@@ -80,7 +80,7 @@ Install the mobile app, then pair it directly with the daemon.
 
 ## Develop locally
 
-Yiru is a pnpm monorepo. Development requires Bun 1.4, Node.js 24, and pnpm 11.22.0.
+Yiru is a pnpm monorepo. Development requires Bun 1.4, Node.js 24, and pnpm 12.1.0.
 
 ```bash
 pnpm install
@@ -106,10 +106,13 @@ Any package task is reachable from the repository root with `vp run <package>#<t
 vp run @yiru/daemon#build:release  # Compile the daemon target matrix
 vp run @yiru/extension#build       # Build the unpacked Chrome extension
 vp run yiru-mobile-ios#build       # Build the native iOS companion
-vp run yiru-web#deploy             # Build and deploy the landing page
 ```
 
 See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for repository conventions, platform setup, and contribution guidance.
+
+Releases use one guarded local command and GitHub Actions for signing and publication. See the
+[release runbook](docs/reference/releasing.md) for credential setup, preparation, deployment, and
+retry commands.
 
 ## Support and privacy
 

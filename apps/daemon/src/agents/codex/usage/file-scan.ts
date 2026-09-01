@@ -201,7 +201,7 @@ async function scanCodexUsageFilesWithIndex(args: {
     })
     parsedByPath.set(filePath, processed)
 
-    // Why: Codex session history can grow large, and scans run on the Electron
+    // Why: Codex session history can grow large, and scans run on the daemon
     // main process. Yield regularly so opening Settings does not stall while
     // a background refresh walks old JSONL files.
     if ((index + 1) % YIELD_EVERY_FILES === 0) {

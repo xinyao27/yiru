@@ -1,7 +1,8 @@
 import {
   mountExtensionClient,
   mountExtensionConnecting,
-  mountExtensionUnavailable
+  mountExtensionUnavailable,
+  preloadExtensionClient
 } from '@yiru/client/extension-bootstrap'
 
 import {
@@ -15,18 +16,25 @@ import { requestRuntimeLoopbackAccess } from './bootstrap/loopback-access'
 
 export async function mountExtensionSurface(surface: 'side-panel' | 'workspace'): Promise<void> {
   Reflect.set(globalThis, '__YIRU_EXTENSION_SURFACE__', surface)
-  const browserWindowId = await chrome.windows.getCurrent().then(
+  const browserWindowIdPromise = chrome.windows.getCurrent().then(
     (browserWindow) => browserWindow.id ?? null,
     () => null
   )
-  if (browserWindowId !== null) {
-    // Why: the source-only client cannot read Chrome globals. Supplying the exact
-    // window fact lets its two extension surfaces coordinate without guessing.
-    Reflect.set(globalThis, '__YIRU_BROWSER_WINDOW_ID__', browserWindowId)
-  }
   const unmountConnecting = mountExtensionConnecting()
+  // Why: start parsing the full client while Native Messaging starts the daemon. Keeping it out
+  // of the synchronous entry chunk gets the connecting surface on screen first without moving
+  // this work behind the connection round trip.
+  preloadExtensionClient()
   try {
-    const response: unknown = await chrome.runtime.sendMessage({ type: 'bootstrap' })
+    const [browserWindowId, response]: [number | null, unknown] = await Promise.all([
+      browserWindowIdPromise,
+      chrome.runtime.sendMessage({ type: 'bootstrap' })
+    ])
+    if (browserWindowId !== null) {
+      // Why: the source-only client cannot read Chrome globals. Supplying the exact
+      // window fact lets its two extension surfaces coordinate without guessing.
+      Reflect.set(globalThis, '__YIRU_BROWSER_WINDOW_ID__', browserWindowId)
+    }
     if (!isExtensionBootstrapResponse(response) || !response.ok) {
       unmountConnecting()
       mountExtensionUnavailable(classifyUnavailableResponse(response))

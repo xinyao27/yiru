@@ -1,7 +1,6 @@
 import { normalizeRuntimePathForComparison } from '@yiru/runtime-protocol/model/platform'
 import type { GitWorktreeInfo, Worktree } from '@yiru/runtime-protocol/workbench/types'
 
-import { isWatcherProcessFailure } from '../filesystem/parcel-watcher-process-failure'
 import type { Store } from '../persistence/store'
 import type { RuntimeFileWatcherLease } from './runtime-file-foundation'
 import {
@@ -45,7 +44,6 @@ export function registerRuntimeFileWatcherRelease(
   )
   let currentUnsubscribe: (() => Promise<void>) | null = unsubscribe
   let releasePromise: Promise<void> | null = null
-  let physicalExitPromise: Promise<void> | null = null
   let resumePromise: Promise<void> | null = null
   let stopPromise: Promise<void> | null = null
   let logicallyStopped = false
@@ -75,26 +73,8 @@ export function registerRuntimeFileWatcherRelease(
         }
         releasePromise = null
       },
-      (error: unknown) => {
-        if (isWatcherProcessFailure(error) && error.physicalExit) {
-          const physicalExit = error.physicalExit.then(() => {
-            if (currentUnsubscribe === release) {
-              currentUnsubscribe = null
-            }
-            releasePromise = null
-            if (physicalExitPromise === physicalExit) {
-              physicalExitPromise = null
-            }
-            if (logicallyStopped) {
-              removeLease()
-            }
-          })
-          physicalExitPromise = physicalExit
-        } else {
-          // Why: a synchronous close failure retains the native owner so a
-          // later removal or logical unsubscribe can retry the same handle.
-          releasePromise = null
-        }
+      () => {
+        releasePromise = null
       }
     )
     return attempt
@@ -102,16 +82,13 @@ export function registerRuntimeFileWatcherRelease(
   const lease: RuntimeFileWatcherLease = {
     suspend,
     resume: () => {
-      if (logicallyStopped || (currentUnsubscribe && !physicalExitPromise)) {
+      if (logicallyStopped || currentUnsubscribe) {
         return Promise.resolve()
       }
       if (resumePromise) {
-        return physicalExitPromise ? Promise.resolve() : resumePromise
+        return resumePromise
       }
-      // Why: a timed-out child still owns native handles until its physical
-      // exit; restoration must join that owner before starting a replacement.
-      const resumesAfterPhysicalExit = physicalExitPromise !== null
-      const attempt = Promise.resolve(physicalExitPromise ?? releasePromise)
+      const attempt = Promise.resolve(releasePromise)
         .then(async () => {
           if (logicallyStopped) {
             return
@@ -132,10 +109,6 @@ export function registerRuntimeFileWatcherRelease(
           resumePromise = null
         })
       resumePromise = attempt
-      if (resumesAfterPhysicalExit) {
-        void attempt.catch(() => {})
-        return Promise.resolve()
-      }
       return attempt
     },
     forget: () => {
@@ -153,12 +126,11 @@ export function registerRuntimeFileWatcherRelease(
       return stopPromise
     }
     logicallyStopped = true
-    const release =
-      resumePromise && !physicalExitPromise
-        ? Promise.resolve(resumePromise)
-            .catch(() => undefined)
-            .then(suspend)
-        : suspend()
+    const release = resumePromise
+      ? Promise.resolve(resumePromise)
+          .catch(() => undefined)
+          .then(suspend)
+      : suspend()
     const attempt = release.then(removeLease).catch((error: unknown) => {
       stopPromise = null
       throw error

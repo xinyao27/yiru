@@ -5,17 +5,17 @@ import { basename, extname, join } from 'node:path'
 import { createFilesystemService } from '~main/filesystem/filesystem'
 import type { NativePathServices } from '~main/filesystem/native-path-services'
 import type { Store } from '~main/persistence/store'
-import type { RuntimeRendererTarget } from '~main/runtime/host/renderer-target'
+import type { RuntimeClientTarget } from '~main/runtime/host/client-target'
 import { runtimeImplementation } from '~main/runtime/rpc/orpc/access-middleware'
 
 import { getRuntimeHostPathsProvider } from '../paths-provider'
 
-const rendererTarget: RuntimeRendererTarget = {
+const clientTarget: RuntimeClientTarget = {
   id: 0,
   getType: () => 'extension',
   isDestroyed: () => false,
-  once: () => rendererTarget,
-  removeListener: () => rendererTarget,
+  once: () => clientTarget,
+  removeListener: () => clientTarget,
   send: () => {}
 }
 
@@ -28,10 +28,10 @@ export function createBunShellFileHandlers(store: Store) {
         files.readChunk(input)
       ),
       saveDownload: runtimeImplementation.shell.files.saveDownload.handler(({ input }) =>
-        files.saveDownload(rendererTarget, input)
+        files.saveDownload(clientTarget, input)
       ),
       startDownload: runtimeImplementation.shell.files.startDownload.handler(({ input }) =>
-        files.startDownload(rendererTarget, input)
+        files.startDownload(clientTarget, input)
       ),
       appendDownloadChunk: runtimeImplementation.shell.files.appendDownloadChunk.handler(
         ({ input }) => files.appendDownloadChunk(input)
@@ -43,21 +43,21 @@ export function createBunShellFileHandlers(store: Store) {
         files.cancelDownload(input)
       ),
       startFolderDownload: runtimeImplementation.shell.files.startFolderDownload.handler(
-        ({ input }) => files.startFolderDownload(rendererTarget, input)
+        ({ input }) => files.startFolderDownload(clientTarget, input)
       ),
       createFolderDownloadDirectory:
         runtimeImplementation.shell.files.createFolderDownloadDirectory.handler(({ input }) =>
-          files.createFolderDownloadDirectory(rendererTarget, input)
+          files.createFolderDownloadDirectory(clientTarget, input)
         ),
       appendFolderDownloadFileChunk:
         runtimeImplementation.shell.files.appendFolderDownloadFileChunk.handler(({ input }) =>
-          files.appendFolderDownloadFileChunk(rendererTarget, input)
+          files.appendFolderDownloadFileChunk(clientTarget, input)
         ),
       finishFolderDownload: runtimeImplementation.shell.files.finishFolderDownload.handler(
-        ({ input }) => files.finishFolderDownload(rendererTarget, input)
+        ({ input }) => files.finishFolderDownload(clientTarget, input)
       ),
       cancelFolderDownload: runtimeImplementation.shell.files.cancelFolderDownload.handler(
-        ({ input }) => files.cancelFolderDownload(rendererTarget, input)
+        ({ input }) => files.cancelFolderDownload(clientTarget, input)
       ),
       write: runtimeImplementation.shell.files.write.handler(({ input }) => files.write(input)),
       createFile: runtimeImplementation.shell.files.createFile.handler(({ input }) =>

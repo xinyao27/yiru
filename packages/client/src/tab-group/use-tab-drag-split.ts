@@ -9,7 +9,7 @@ import type {
 import type { RefObject } from 'react'
 import { useAppStore } from '~renderer/store/state'
 
-import { mirrorWebRuntimeTabMove } from '../tab-bar/web-runtime-tab-move-mirror'
+import { mirrorRemoteRuntimeTabMove } from '../tab-bar/remote-runtime-tab-move-mirror'
 import { resolveActivePaneColumnSplitTarget } from './panel-split-target'
 export {
   canDropTabIntoPaneBody,
@@ -86,7 +86,7 @@ export function useTabDragSplit({
       })
       if (moved) {
         shouldRestorePreDragActivation = false
-        mirrorWebRuntimeTabMove({
+        mirrorRemoteRuntimeTabMove({
           kind: 'split',
           worktreeId,
           tabId: activeData.unifiedTabId,
@@ -137,7 +137,7 @@ export function useTabDragSplit({
           const nextOrder = targetGroup.tabOrder.filter((id) => id !== activeData.unifiedTabId)
           nextOrder.splice(nextIndex, 0, activeData.unifiedTabId)
           reorderUnifiedTabs(overData.groupId, nextOrder)
-          mirrorWebRuntimeTabMove({
+          mirrorRemoteRuntimeTabMove({
             kind: 'reorder',
             worktreeId,
             tabId: activeData.unifiedTabId,
@@ -153,7 +153,7 @@ export function useTabDragSplit({
         })
         if (moved) {
           shouldRestorePreDragActivation = false
-          mirrorWebRuntimeTabMove({
+          mirrorRemoteRuntimeTabMove({
             kind: 'move-to-group',
             worktreeId,
             tabId: activeData.unifiedTabId,
@@ -177,7 +177,7 @@ export function useTabDragSplit({
       const moved = dropUnifiedTab(activeData.unifiedTabId, { groupId: overData.groupId })
       if (moved) {
         shouldRestorePreDragActivation = false
-        mirrorWebRuntimeTabMove({
+        mirrorRemoteRuntimeTabMove({
           kind: 'move-to-group',
           worktreeId,
           tabId: activeData.unifiedTabId,

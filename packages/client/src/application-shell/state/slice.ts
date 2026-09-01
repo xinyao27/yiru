@@ -167,11 +167,6 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
 
   updateStatus: { state: 'idle' },
   ...createUIUpdateActions(set, get),
-  updateChangelog: null,
-  updateUserInitiatedCycle: false,
-  dismissedUpdateVersion: null,
-  updateCardCollapsed: false,
-  updateReassuranceSeen: false,
   isFullScreen: false,
   browserDefaultUrl: null,
   browserDefaultSearchEngine: null,

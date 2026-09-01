@@ -9,7 +9,7 @@
  *
  * The only defensible default is the one that varies per layout. This
  * module fingerprints the active layout from Chromium's
- * navigator.keyboard.getLayoutMap() (ships in Chrome 69+, so every Electron
+ * navigator.keyboard.getLayoutMap() (ships in Chrome 69+, so supported Chrome
  * we could run). We match Ghostty's taxonomy: US / US-International map to
  * `true`; everything else — including Dvorak, Colemak, UK, every
  * international layout — maps to `false`.

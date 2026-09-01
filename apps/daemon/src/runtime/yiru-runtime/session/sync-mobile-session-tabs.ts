@@ -152,20 +152,20 @@ export abstract class RuntimeSessionSyncMobileSessionTabs extends RuntimeTermina
     if (tab.type !== 'terminal') {
       return false
     }
-    // Why: a genuinely-headless host (no attached window at all) has no live
+    // Why: a genuinely-headless host (no connected workbench) has no live
     // graph to check against, so the whole-snapshot "headless" origin is the
     // only signal available and every one of its terminals is preserved.
-    // Once a window IS attached, that origin stops being trustworthy: a
+    // Once a workbench is connected, that origin stops being trustworthy: a
     // worktree's mobile snapshot can be seeded once, on first activation, from
     // the *persisted* (possibly stale/closed) workspace session — see
     // hydrateHeadlessMobileSessionTabsFromWorkspaceSession — and every tab it
     // produced is stamped with the same 'headless-hydrated:' epoch forever
     // after. Falling back to that stamp here would keep resurrecting closed
     // tabs on every later live-renderer merge (#duplicate-mobile-tabs). With a
-    // window attached, require either genuine serve/ssh ownership or current
-    // membership in the live renderer graph, matching
+    // workbench connected, require either genuine serve/ssh ownership or current
+    // membership in the live workbench graph, matching
     // isRuntimeOwnedHeadlessMobileTab's same discriminator.
-    if (!this.getAvailableAuthoritativeWindow()) {
+    if (!this.hasAvailableWorkbench()) {
       return this.isHeadlessMobileSessionPublication(snapshot.publicationEpoch)
     }
     return this.hasServeOwnedPtyBinding(tab) || this.terminalSessions.hasGraphTab(tab.parentTabId)

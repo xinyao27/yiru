@@ -1,5 +1,4 @@
 import { useEffect } from 'react'
-import { shellClient } from '~renderer/runtime/shell-client'
 import type { PaneManager } from '~renderer/terminal-pane/pane-manager/pane-manager'
 
 import { recordTerminalFreezeBreadcrumb } from './terminal-freeze-breadcrumbs'
@@ -90,29 +89,16 @@ export function useTerminalWindowWakeRecovery({
         recoverVisibleWake(true, 'visibilitychange')
       }
     }
-    // Why: Linux has no window-occlusion tracking, so visibilitychange never
-    // fires around system suspend; the main process broadcasts OS resume.
-    const onSystemResumed = (): void => {
-      if (typeof document === 'undefined' || document.visibilityState === 'visible') {
-        recoverVisibleWake(true, 'system-resumed')
-      }
-    }
     window.addEventListener('focus', onFocus)
     if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
       document.addEventListener('visibilitychange', onVisibilityChange)
     }
-    // Why: a focus-preserving display wake fires neither focus nor
-    // visibilitychange, so main relays powerMonitor resume over IPC. Genuine
-    // wake clears the WebGL glyph atlas (clearGlyphAtlases=true via
-    // onSystemResumed) — the latch-clearing recovery — unlike plain refocus.
-    const unsubscribeSystemResumed = shellClient.ui.onSystemResumed(onSystemResumed)
     return () => {
       cancelScheduledWakeRecovery()
       window.removeEventListener('focus', onFocus)
       if (typeof document !== 'undefined' && typeof document.removeEventListener === 'function') {
         document.removeEventListener('visibilitychange', onVisibilityChange)
       }
-      unsubscribeSystemResumed()
     }
   }, [isActiveRef, isVisible, isVisibleRef, managerRef])
 }

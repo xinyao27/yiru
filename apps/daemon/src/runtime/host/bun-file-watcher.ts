@@ -15,10 +15,6 @@ type BunRootWatcher = {
 
 const rootWatchers = new Map<string, Set<BunRootWatcher>>()
 
-export function isBunFileWatcherAvailable(): boolean {
-  return typeof Reflect.get(process.versions, 'bun') === 'string'
-}
-
 export function closeBunFileExplorerWatchers(rootPath: string): void {
   for (const watcher of rootWatchers.get(rootPath) ?? []) {
     watcher.close()
@@ -91,8 +87,8 @@ export function watchFileExplorerWithBun(
   const owner: BunRootWatcher = { close }
 
   try {
-    // Why: Bun's native recursive fs.watch removes the Electron-only child-entry dependency
-    // while retaining an OS-backed watcher on macOS, Linux, and Windows.
+    // Why: Bun's recursive fs.watch retains an OS-backed watcher on macOS,
+    // Linux, and Windows without maintaining a second watcher runtime.
     nativeWatcher = watch(rootPath, { recursive: true }, (eventType, fileName) => {
       if (isClosed) {
         return

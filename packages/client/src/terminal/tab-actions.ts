@@ -1,10 +1,10 @@
 import { TOGGLE_TERMINAL_PANE_EXPAND_EVENT } from '~renderer/constants/terminal'
 import {
-  closeWebRuntimeSessionTab,
-  isWebRuntimeSessionActive,
+  closeRemoteRuntimeSessionTab,
+  isRemoteRuntimeSessionActive,
   toHostSessionTabId
-} from '~renderer/runtime/web-runtime-session'
-import { resolveHostSessionTabIdForWebSessionTab } from '~renderer/runtime/web-session/tabs-tracking'
+} from '~renderer/runtime/remote-runtime-session'
+import { resolveHostSessionTabIdForRemoteSessionTab } from '~renderer/runtime/remote-session/tabs-tracking'
 import { useAppStore } from '~renderer/store/state'
 import {
   guardPinnedTabClose,
@@ -89,18 +89,18 @@ export function closeTerminalTab(
   }
 
   const runtimeEnvironmentId = getRuntimeEnvironmentIdForWorktree(state, owningWorktreeId)
-  if (runtimeEnvironmentId && isWebRuntimeSessionActive(runtimeEnvironmentId)) {
+  if (runtimeEnvironmentId && isRemoteRuntimeSessionActive(runtimeEnvironmentId)) {
     // Why: a remote-owned worktree's tabs are host-authoritative, so the close
     // MUST reach the host or its next snapshot re-adds the tab (the "close then
     // snaps back" bug). When the local→host map has no entry, decode the id
     // itself (toHostSessionTabId is a no-op for non-mirrored host ids like plain
     // UUIDs) — mirroring what activate/move do. The old
-    // `isWebTerminalSurfaceTabId ? id : null` gate returned null for plain-UUID
+    // `isRemoteTerminalSurfaceTabId ? id : null` gate returned null for plain-UUID
     // host tabs, so close silently fell back to a local-only prune and the host's
     // next snapshot re-added the tab. A truly local id the host doesn't know is
     // harmless: the host close no-ops and the local prune still stands.
     const hostBackedTabId =
-      resolveHostSessionTabIdForWebSessionTab(state, {
+      resolveHostSessionTabIdForRemoteSessionTab(state, {
         environmentId: runtimeEnvironmentId,
         worktreeId: owningWorktreeId,
         tabId: terminalTabId
@@ -120,7 +120,7 @@ export function closeTerminalTab(
         ? { precomputedRetirementPlan: options.precomputedRetirementPlan }
         : {})
     })
-    void closeWebRuntimeSessionTab({
+    void closeRemoteRuntimeSessionTab({
       worktreeId: owningWorktreeId,
       tabId: hostBackedTabId,
       environmentId: runtimeEnvironmentId

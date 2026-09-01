@@ -22,6 +22,5 @@ export const SETTING_LABELS: Partial<Record<keyof GlobalSettings, string>> = {
   terminalPaddingY: 'Padding Y',
   terminalDividerColorDark: 'Divider Color (Dark)',
   terminalDividerColorLight: 'Divider Color (Light)',
-  terminalInactivePaneOpacity: 'Inactive Pane Opacity',
-  windowBackgroundBlur: 'Window Background Blur'
+  terminalInactivePaneOpacity: 'Inactive Pane Opacity'
 }

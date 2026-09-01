@@ -57,7 +57,6 @@ export function getStartupErrorFallbackUI(uiHydrated: boolean): PersistedUIState
     statusBarItems: [...DEFAULT_STATUS_BAR_ITEMS],
     statusBarVisible: true,
     workspacePanelTitlebarPinnedIds: [...DEFAULT_WORKSPACE_PANEL_TITLEBAR_PINNED_IDS],
-    dismissedUpdateVersion: null,
     lastUpdateCheckAt: null
   }
 }

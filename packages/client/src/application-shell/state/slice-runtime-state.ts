@@ -1,8 +1,4 @@
-import type {
-  ChangelogData,
-  PersistedUIState,
-  UpdateStatus
-} from '@yiru/runtime-protocol/workbench/types'
+import type { PersistedUIState, UpdateStatus } from '@yiru/runtime-protocol/workbench/types'
 import type { WorkspacePortScanResult } from '@yiru/runtime-protocol/workbench/workspace/ports'
 
 import type { PendingSidebarRowReveal, PendingSidebarWorktreeReveal } from './slice'
@@ -54,23 +50,6 @@ export type UIRuntimeState = {
   hydratePersistedUI: (ui: PersistedUIState, source?: 'startup' | 'sync') => void
   updateStatus: UpdateStatus
   setUpdateStatus: (status: UpdateStatus) => void
-  // Why: cached changelog from the last 'available' status so the card still has
-  // rich content (title/media/description) during downloading, error, and downloaded
-  // states. Cleared on idle/checking/not-available to prevent stale leakage.
-  updateChangelog: ChangelogData | null
-  // Why: UpdateCard is lazy-loaded, so it may miss the transient
-  // checking/userInitiated status. Keep manual-check intent in the store until
-  // the resulting available/error/not-available state can consume it.
-  updateUserInitiatedCycle: boolean
-  dismissedUpdateVersion: string | null
-  dismissUpdate: (versionOverride?: string) => void
-  clearDismissedUpdateVersion: () => void
-  // Why: ephemeral and renderer-only — never persisted and never crosses IPC.
-  // Resets every session and on every phase transition (see setUpdateStatus).
-  updateCardCollapsed: boolean
-  setUpdateCardCollapsed: (collapsed: boolean) => void
-  updateReassuranceSeen: boolean
-  markUpdateReassuranceSeen: () => void
   isFullScreen: boolean
   setIsFullScreen: (v: boolean) => void
   /** URL opened when a new browser tab is created. Null = blank tab (default). */

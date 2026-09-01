@@ -24,7 +24,6 @@ type SharedRuntimeFileWatch = {
   start: Promise<void>
   unsubscribe: (() => void) | null
   remoteSubscriptionId: string | null
-  keepStreamUntilReady: boolean
   closed: boolean
 }
 
@@ -87,7 +86,6 @@ function createSharedRuntimeFileWatch(
     start: Promise.resolve(),
     unsubscribe: null,
     remoteSubscriptionId: null,
-    keepStreamUntilReady: isWebRuntimeFileWatchSharedSocket(),
     closed: false
   }
   // Why: editor reloads and Explorer can watch the same remote worktree. Keep
@@ -127,9 +125,7 @@ async function startSharedRuntimeFileWatch(
     if (shared.closed || sharedRuntimeFileWatches.get(key) !== shared) {
       shared.unsubscribe()
       shared.unsubscribe = null
-      if (!shared.keepStreamUntilReady) {
-        unwatchSharedRuntimeFileWatch(shared)
-      }
+      unwatchSharedRuntimeFileWatch(shared)
       return
     }
     void consumeSharedRuntimeFileWatch(key, shared, worktreePath, stream).finally(() => {
@@ -159,9 +155,7 @@ async function consumeSharedRuntimeFileWatch(
         if (shared.closed) {
           shared.unsubscribe?.()
           shared.unsubscribe = null
-          if (!shared.keepStreamUntilReady) {
-            unwatchSharedRuntimeFileWatch(shared)
-          }
+          unwatchSharedRuntimeFileWatch(shared)
         }
       } else if (event.type === 'changed') {
         for (const listener of Array.from(shared.listeners)) {
@@ -218,20 +212,9 @@ function closeSharedRuntimeFileWatch(key: string, shared: SharedRuntimeFileWatch
   }
   shared.closed = true
   sharedRuntimeFileWatches.delete(key)
-  if (shared.keepStreamUntilReady) {
-    // Why: WebRuntimeClient owns shared-socket cleanup, including late-ready
-    // files.unwatch after cancellation.
-    shared.unsubscribe?.()
-    shared.unsubscribe = null
-    return
-  }
   shared.unsubscribe?.()
   shared.unsubscribe = null
   unwatchSharedRuntimeFileWatch(shared)
-}
-
-function isWebRuntimeFileWatchSharedSocket(): boolean {
-  return Boolean((globalThis as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__)
 }
 
 function unwatchSharedRuntimeFileWatch(shared: SharedRuntimeFileWatch): void {

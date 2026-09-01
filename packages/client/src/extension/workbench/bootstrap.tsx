@@ -15,8 +15,6 @@ import { I18nProvider } from '../../i18n/provider'
 import { HugeiconsIconContextProvider } from '../../icons/context-provider'
 import { ProjectCatalogProvider } from '../../project-catalog/provider'
 import { startShellEventStream } from '../../runtime/shell-events-client'
-import { hydrateShellSettings } from '../../runtime/shell-state-client'
-import { hydrateShellUi } from '../../runtime/shell-ui-client'
 import { getWorkbenchLocation, navigateWorkbench } from '../../runtime/workbench-location'
 import { configureSidebarHostNavigation } from '../../sidebar/host-navigation'
 import { openCommandPalette } from '../command-palette/open'
@@ -63,7 +61,6 @@ export function mountExtensionWorkbench(bootstrap: ExtensionRuntimeBootstrap): v
       })
     }
   })
-  const shellUiHydration = hydrateShellUi()
   installRendererCrashDiagnostics()
   applyDocumentTheme('system', { disableTransitions: false })
 
@@ -77,8 +74,6 @@ export function mountExtensionWorkbench(bootstrap: ExtensionRuntimeBootstrap): v
     }
   })
 
-  void hydrateShellSettings().catch(() => {})
-  void shellUiHydration
   createRoot(rootElement).render(
     <StrictMode>
       <CSPProvider disableStyleElements>

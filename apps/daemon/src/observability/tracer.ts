@@ -10,7 +10,7 @@
 // Concurrency model: in-process span tree maintained via Node's
 // `AsyncLocalStorage`, so a child span created inside an `await` chain
 // inherits its caller's parent without explicit threading. The tree itself
-// is single-threaded — Electron's main process is one v8 isolate, no
+// is single-threaded — the daemon runs one JavaScript isolate, no
 // worker_threads in this layer — so plain in-memory state is enough.
 //
 // All spans hand off through `redactSpan()` before serialization. The

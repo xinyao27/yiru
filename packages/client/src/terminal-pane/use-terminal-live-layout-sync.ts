@@ -1,6 +1,5 @@
 import type { TerminalLayoutSnapshot } from '@yiru/runtime-protocol/workbench/types'
 import { useEffect } from 'react'
-import { usesBrowserUiRenderer } from '~renderer/runtime/renderer-host'
 
 import type { PaneManager } from './pane-manager/pane-manager'
 import {
@@ -29,7 +28,7 @@ export function useTerminalLiveLayoutSync({
       !manager ||
       !restoredLayout.root ||
       !isHostAuthoritativeLayout({
-        isBrowserRenderer: usesBrowserUiRenderer(),
+        isBrowserRenderer: true,
         ptyIdsByLeafId: restoredLayout.ptyIdsByLeafId
       })
     ) {

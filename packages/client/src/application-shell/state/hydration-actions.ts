@@ -172,8 +172,6 @@ export function createUIHydrationActions(
           ),
           usagePercentageDisplay: normalizeUsagePercentageDisplay(ui.usagePercentageDisplay),
           statusBarUsageMode: normalizeStatusBarUsageMode(ui.statusBarUsageMode),
-          dismissedUpdateVersion: ui.dismissedUpdateVersion ?? null,
-          updateReassuranceSeen: ui.updateReassuranceSeen ?? false,
           browserDefaultUrl: ui.browserDefaultUrl ?? null,
           browserDefaultSearchEngine: ui.browserDefaultSearchEngine ?? null,
           browserDefaultZoomLevel: normalizeBrowserPageZoomLevel(ui.browserDefaultZoomLevel),

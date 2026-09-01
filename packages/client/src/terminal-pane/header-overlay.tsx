@@ -130,7 +130,6 @@ export default function TerminalPaneHeaderOverlay({
           <ContextMenuTrigger
             key={`pane-title-${pane.leafId}`}
             className="pane-title-bar"
-            data-native-file-drop-target="terminal"
             data-terminal-tab-id={tabId}
             data-pane-prevent-terminal-focus=""
             {...(isActivePane ? { 'data-active-pane': '' } : {})}

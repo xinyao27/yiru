@@ -113,9 +113,8 @@ export function useTabCreateRuntime(props: TabBarProps) {
     connectionId
   )
   const runtimeTarget = (() => getActiveRuntimeTarget({ activeRuntimeEnvironmentId }))()
-  const isWebClient = (globalThis as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__ === true
   const capabilities = useWindowsTerminalCapabilities(
-    isWindows || Boolean(activeRuntimeEnvironmentId) || isWebClient || Boolean(connectionId),
+    isWindows || Boolean(activeRuntimeEnvironmentId) || Boolean(connectionId),
     false,
     capabilityOwnerKey,
     runtimeTarget,

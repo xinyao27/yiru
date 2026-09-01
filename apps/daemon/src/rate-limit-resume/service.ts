@@ -131,7 +131,7 @@ export class RateLimitResumeService {
       }
       // A dispatch with no window/shell link stays scheduled and retries on
       // the next tick — fire-and-forget matches the pre-reverse-link
-      // behavior, where a `webContents.send` into an unmounted listener also
+      // behavior, where a send into an unmounted listener also
       // silently went nowhere.
       void this.sendDispatch(schedule)
     }

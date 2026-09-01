@@ -3,7 +3,6 @@ import { holdPtyResizesForPaneSubtrees } from './pane-pty-resize-hold'
 export type DividerCallbacks = {
   refitPanesUnder: (el: HTMLElement) => void
   onLayoutChanged?: () => void
-  onDragActiveChange?: (active: boolean) => void
 }
 
 type DividerFlexFrameScheduler = {
@@ -151,7 +150,6 @@ export function attachDividerDrag(
 
     releasePointerCaptureIfHeld(pointerId)
     divider.classList.remove('is-dragging')
-    callbacks.onDragActiveChange?.(false)
 
     const shouldRefit = didMove || commitLayout
     if (shouldRefit && prevEl) {
@@ -201,7 +199,6 @@ export function attachDividerDrag(
     divider.classList.add('is-dragging')
     dragging = true
     didMove = false
-    callbacks.onDragActiveChange?.(true)
     addWindowListeners()
 
     startPos = isVertical ? e.clientX : e.clientY

@@ -43,7 +43,7 @@ export abstract class RuntimeSessionToMobileSessionTabsResult extends RuntimeSes
           ...tab,
           title: liveTab.title || tab.title,
           url: liveTab.url || tab.url,
-          // Why: bridge "active" means active BrowserView/webContents, not
+          // Why: bridge "active" means active browser surface, not
           // active Yiru tab. Preserve the renderer's app-level session focus.
           isActive: tab.isActive
         })

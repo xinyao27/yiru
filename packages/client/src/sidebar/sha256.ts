@@ -1,6 +1,6 @@
 // Why: the LAN web client runs in non-secure browser contexts where
 // crypto.subtle is undefined, but hook-trust hashes must stay byte-identical to
-// the crypto.subtle SHA-256 hashes stored on Electron/HTTPS — otherwise the
+// the crypto.subtle SHA-256 hashes stored in secure browser contexts — otherwise the
 // shared trust store mismatches and re-prompts. tweetnacl only offers SHA-512,
 // so this is a self-contained SHA-256 for the fallback path.
 

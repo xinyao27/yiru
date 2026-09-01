@@ -17,7 +17,7 @@ export function clampMemoryMetric(value: unknown): number {
   return typeof value === 'number' && Number.isFinite(value) ? Math.max(0, value) : 0
 }
 
-function electronMetricMemoryBytes(
+function processMetricMemoryBytes(
   processMetric: RuntimeHostProcessMetric,
   processIndex: ProcessIndex
 ): number {
@@ -37,7 +37,7 @@ export function bucketHostProcessMetrics(
   const other = { cpu: 0, memory: 0 }
   for (const processMetric of metrics) {
     const cpu = clampMemoryMetric(processMetric.cpu?.percentCPUUsage)
-    const memory = electronMetricMemoryBytes(processMetric, processIndex)
+    const memory = processMetricMemoryBytes(processMetric, processIndex)
     const type = (typeof processMetric.type === 'string' ? processMetric.type : '').toLowerCase()
     const target =
       type === 'browser' ? main : type === 'renderer' || type === 'tab' ? renderer : other

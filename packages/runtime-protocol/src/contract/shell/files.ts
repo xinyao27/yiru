@@ -26,9 +26,8 @@ const SHELL_HOST_ACCESS = {
   principals: ['local']
 } as const
 
-// Why: shell procedures describe the OS host rendering this window. A mobile
-// owner controls a runtime host but does not own this Electron renderer surface,
-// so every leaf deliberately keeps the default `mobile: false` access metadata.
+// Why: shell procedures describe the OS host serving the current Chrome client.
+// iOS does not own that surface, so every leaf keeps local-only access metadata.
 export const shellFilesContract = {
   read: withAccess(SHELL_READ_ACCESS)
     .input(type<ShellFileReadInput>())

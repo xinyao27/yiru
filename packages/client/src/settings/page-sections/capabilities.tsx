@@ -20,7 +20,6 @@ type CapabilitySectionsProps = {
   isMounted: (sectionId: string) => boolean
   onRequestFontSuggestions: () => void
   settings: GlobalSettings
-  showDaemonBackedSettings: boolean
   updateSettings: SettingsSlice['updateSettings']
   wslAvailable: boolean
   wslCapabilitiesLoading: boolean
@@ -35,7 +34,6 @@ export function CapabilitySections({
   isMounted,
   onRequestFontSuggestions,
   settings,
-  showDaemonBackedSettings,
   updateSettings,
   wslAvailable,
   wslCapabilitiesLoading,
@@ -100,19 +98,17 @@ export function CapabilitySections({
         {isMounted('orchestration') ? <OrchestrationPane /> : null}
       </SettingsSection>
 
-      {showDaemonBackedSettings ? (
-        <SettingsSection
-          id="computer-use"
-          title={translate('auto.components.settings.Settings.c9841721cb', 'Computer Use')}
-          description={translate(
-            'auto.components.settings.Settings.7118953f14',
-            'Enable agents to control any app on your computer.'
-          )}
-          searchEntries={getSearchEntries('computer-use')}
-        >
-          {isMounted('computer-use') ? <ComputerUsePane /> : null}
-        </SettingsSection>
-      ) : null}
+      <SettingsSection
+        id="computer-use"
+        title={translate('auto.components.settings.Settings.c9841721cb', 'Computer Use')}
+        description={translate(
+          'auto.components.settings.Settings.7118953f14',
+          'Enable agents to control any app on your computer.'
+        )}
+        searchEntries={getSearchEntries('computer-use')}
+      >
+        {isMounted('computer-use') ? <ComputerUsePane /> : null}
+      </SettingsSection>
 
       <SettingsSection
         id="setup-guide"

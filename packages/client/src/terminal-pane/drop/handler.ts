@@ -6,11 +6,9 @@ import { useAppStore } from '~renderer/store/state'
 import { readWorkspaceFileDragPaths } from '~renderer/workspace/file-drag'
 import { getRuntimeEnvironmentIdForWorktree } from '~renderer/worktree/runtime-owner'
 
+import type { PaneManager } from '../pane-manager/pane-manager'
+import type { PtyTransport } from '../pty/transport-types'
 import { recordTerminalUserInputForLeaf } from '../terminal-input-activity'
-import {
-  handleNativeTerminalFileDrop as handleTerminalFileDrop,
-  type NativeTerminalFileDropArgs
-} from '../terminal-native-file-drop'
 import { getTerminalInternalFileDropRejectionMessage } from './internal-rejection-message'
 import { resolveInternalTerminalDropPane } from './pane-resolution'
 import { writeTerminalDropPathsToCapturedTarget } from './path-writer'
@@ -21,9 +19,12 @@ import { showTerminalDropWriteFailure } from './write-failure'
 import type { TerminalDropWriteFailureReason } from './write-failure'
 import { isWorktreeUsingLocalWslRuntime, toLocalWslDropPath } from './wsl-path'
 
-export { handleTerminalFileDrop }
-
-type InternalArgs = Omit<NativeTerminalFileDropArgs, 'data'> & {
+type InternalArgs = {
+  manager: PaneManager
+  paneTransports: Map<number, PtyTransport>
+  worktreeId: string
+  tabId: string
+  cwd?: string
   dataTransfer: Pick<DataTransfer, 'getData'>
   dropTarget?: EventTarget | null
 }

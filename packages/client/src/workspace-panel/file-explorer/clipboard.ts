@@ -2,13 +2,13 @@ import { toast } from 'sonner'
 import { requestEditorSaveQuiesce } from '~renderer/editor/autosave'
 import { translate } from '~renderer/i18n/i18n'
 import { dirname } from '~renderer/path'
+import { extractRuntimeErrorMessage } from '~renderer/runtime/error-message'
 import {
   copyRuntimePath,
   deleteRuntimePath,
   renameRuntimePath,
   type RuntimeFileOperationArgs
 } from '~renderer/runtime/file-client'
-import { extractIpcErrorMessage } from '~renderer/runtime/ipc-error'
 import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store/state'
 
@@ -273,7 +273,7 @@ export function pasteFileExplorerClipboard(args: {
     }
   })().catch((error: unknown) => {
     toast.error(
-      extractIpcErrorMessage(
+      extractRuntimeErrorMessage(
         error,
         translate(
           'auto.components.right.sidebar.fileExplorerClipboard.failed',

@@ -211,7 +211,7 @@ async function preparePullRequestBranch(
   return {
     comparisonBase,
     // Why: Generate must be read-only. Rebasing the live worktree can rewrite
-    // files under the running dev app and trigger a full Electron/Vite reload.
+    // files under the running development checkout.
     branchChanged: false
   }
 }

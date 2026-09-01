@@ -29,10 +29,7 @@ const MIN_OVERLAY_FIT_WIDTH_PX = 48
 const MIN_OVERLAY_FIT_HEIGHT_PX = 24
 
 function shouldUseCssAnchorPositioning(): boolean {
-  return (
-    HAS_CSS_ANCHOR_POSITIONING &&
-    (globalThis as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__ !== true
-  )
+  return HAS_CSS_ANCHOR_POSITIONING
 }
 
 type MeasuredFallbackRect = {

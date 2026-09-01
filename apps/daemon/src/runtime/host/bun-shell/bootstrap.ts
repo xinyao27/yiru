@@ -33,7 +33,7 @@ export function initializeBunShellServices(options: {
   initializeShellGitHubService(
     {
       // Why: all extension pages share one logical daemon shell owner; connection cleanup is
-      // handled by the runtime subscription layer rather than Electron webContents events.
+      // handled by the runtime subscription layer rather than page lifecycle events.
       getLiveRendererIds: () => new Set([0]),
       onRendererDestroyed: () => undefined
     },

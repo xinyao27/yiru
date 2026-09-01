@@ -17,27 +17,23 @@ const DevToolsPane = import.meta.env.DEV
   : null
 
 type SystemSectionsProps = {
-  allowLocalRuntime: boolean
   getSearchEntries: (sectionId: string) => SettingsSearchEntry[]
   hiddenExperimentalUnlocked: boolean
   isFocusedShortcutsPane: boolean
   isMac: boolean
   isMounted: (sectionId: string) => boolean
   settings: GlobalSettings
-  showDaemonBackedSettings: boolean
   switchRuntimeEnvironment: SettingsSlice['switchRuntimeEnvironment']
   updateSettings: SettingsSlice['updateSettings']
 }
 
 export function SystemSections({
-  allowLocalRuntime,
   getSearchEntries,
   hiddenExperimentalUnlocked,
   isFocusedShortcutsPane,
   isMac,
   isMounted,
   settings,
-  showDaemonBackedSettings,
   switchRuntimeEnvironment,
   updateSettings
 }: SystemSectionsProps): React.JSX.Element {
@@ -75,12 +71,11 @@ export function SystemSections({
           <RuntimeEnvironmentsPane
             settings={settings}
             switchRuntimeEnvironment={switchRuntimeEnvironment}
-            allowLocalRuntime={allowLocalRuntime}
           />
         ) : null}
       </SettingsSection>
 
-      {showDaemonBackedSettings && isMac ? (
+      {isMac ? (
         <SettingsSection
           id="developer-permissions"
           title={translate('auto.components.settings.Settings.65660d4548', 'macOS Permissions')}
@@ -106,23 +101,21 @@ export function SystemSections({
         {isMounted('privacy') ? <PrivacyPane settings={settings} /> : null}
       </SettingsSection>
 
-      {showDaemonBackedSettings ? (
-        <SettingsSection
-          id="advanced"
-          title={translate('auto.components.settings.Settings.1c87f8d024', 'Advanced')}
-          description={translate(
-            'auto.components.settings.Settings.499c1cd7f9',
-            'Low-level compatibility settings for troubleshooting.'
-          )}
-          searchEntries={getSearchEntries('advanced')}
-        >
-          {isMounted('advanced') ? (
-            <AdvancedPane settings={settings} updateSettings={updateSettings} />
-          ) : null}
-        </SettingsSection>
-      ) : null}
+      <SettingsSection
+        id="advanced"
+        title={translate('auto.components.settings.Settings.1c87f8d024', 'Advanced')}
+        description={translate(
+          'auto.components.settings.Settings.499c1cd7f9',
+          'Low-level compatibility settings for troubleshooting.'
+        )}
+        searchEntries={getSearchEntries('advanced')}
+      >
+        {isMounted('advanced') ? (
+          <AdvancedPane settings={settings} updateSettings={updateSettings} />
+        ) : null}
+      </SettingsSection>
 
-      {showDaemonBackedSettings && import.meta.env.DEV ? (
+      {import.meta.env.DEV ? (
         <SettingsSection
           id="dev"
           title={translate('auto.components.settings.Settings.dev', 'Dev Tools')}

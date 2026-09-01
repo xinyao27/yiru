@@ -6,7 +6,7 @@ import type {
 } from '@yiru/runtime-protocol/workbench/types'
 
 import { queueHookCommandsForFirstWorktreeTab } from '../agent/hook-command-delivery'
-import { isWebRuntimeSessionActive } from '../runtime/web-runtime-session'
+import { isRemoteRuntimeSessionActive } from '../runtime/remote-runtime-session'
 import { useAppStore } from '../store/state'
 import { shouldAutoCreateInitialTerminal } from '../terminal/initial-terminal'
 import type { WorktreeActivationStore, WorktreeStartupPayload } from './activation-types'
@@ -32,7 +32,7 @@ export function ensureWorktreeHasInitialTerminal(
 
   // Why: paired clients mirror host tabs asynchronously. Setup fallback must
   // target an existing mirror or wait for the first one, never spawn locally.
-  if (isWebRuntimeSessionActive(getRuntimeEnvironmentIdForWorktree(ownerState, worktreeId))) {
+  if (isRemoteRuntimeSessionActive(getRuntimeEnvironmentIdForWorktree(ownerState, worktreeId))) {
     const existingTerminalTabId = store.tabsByWorktree[worktreeId]?.[0]?.id
     if (existingTerminalTabId && setup) {
       queueWorktreeSetupCommands(

@@ -7,7 +7,7 @@ import { translate } from '~renderer/i18n/i18n'
 import { readProjectCatalogMutationRevision } from '~renderer/project-catalog/catalog-snapshot'
 import { refreshAfterProjectCatalogMutation } from '~renderer/project-catalog/mutation-refresh'
 import { projectCatalogTargetForRepo } from '~renderer/project-catalog/query'
-import { extractIpcErrorMessage } from '~renderer/runtime/ipc-error'
+import { extractRuntimeErrorMessage } from '~renderer/runtime/error-message'
 import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
 import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
 import { workspaceHostClient } from '~renderer/runtime/workspace-host-client'
@@ -163,7 +163,7 @@ export function useAddRepoCloneFlow({
       if (gen !== cloneGenRef.current || requestHostToken !== hostTokenRef.current) {
         return
       }
-      const message = extractIpcErrorMessage(err, String(err))
+      const message = extractRuntimeErrorMessage(err, String(err))
       setCloneError(message)
     } finally {
       if (gen === cloneGenRef.current && requestHostToken === hostTokenRef.current) {

@@ -26,19 +26,11 @@ import { YiruLogoSettingsIcon } from '~renderer/settings/yiru-logo-settings-icon
 import { getAppearancePaneSearchEntries } from './appearance/search'
 
 type NavigationCoreSectionsParams = {
-  isMac: boolean
-  isWindows: boolean
   isWindowsTerminalHost: boolean
-  showDaemonBackedSettings: boolean
-  showNativeWindowSettings: boolean
 }
 
 export function buildNavigationCoreSections({
-  isMac,
-  isWindows,
-  isWindowsTerminalHost,
-  showDaemonBackedSettings,
-  showNativeWindowSettings
+  isWindowsTerminalHost
 }: NavigationCoreSectionsParams): SettingsNavSection[] {
   return [
     {
@@ -49,32 +41,20 @@ export function buildNavigationCoreSections({
         'Theme, zoom, app and terminal appearance, sidebars, and status bar.'
       ),
       icon: Palette,
-      searchEntries: getAppearancePaneSearchEntries({
-        showNativeWindowSettings,
-        showWarpImport: showDaemonBackedSettings,
-        showSystemTray: showNativeWindowSettings && isWindows,
-        showMenuBarIcon: showNativeWindowSettings && isMac
-      }),
+      searchEntries: getAppearancePaneSearchEntries(),
       group: 'interface'
     },
-    ...(showDaemonBackedSettings
-      ? [
-          {
-            id: 'notifications',
-            title: translate(
-              'auto.hooks.useSettingsNavigationMetadata.2eece16ad1',
-              'Notifications'
-            ),
-            description: translate(
-              'auto.hooks.useSettingsNavigationMetadata.7682607591',
-              'System notifications for agent and terminal events.'
-            ),
-            icon: Bell,
-            searchEntries: getNotificationsPaneSearchEntries(),
-            group: 'interface'
-          }
-        ]
-      : []),
+    {
+      id: 'notifications',
+      title: translate('auto.hooks.useSettingsNavigationMetadata.2eece16ad1', 'Notifications'),
+      description: translate(
+        'auto.hooks.useSettingsNavigationMetadata.7682607591',
+        'System notifications for agent and terminal events.'
+      ),
+      icon: Bell,
+      searchEntries: getNotificationsPaneSearchEntries(),
+      group: 'interface'
+    },
     {
       id: 'shortcuts',
       title: translate('auto.hooks.useSettingsNavigationMetadata.94295ebfb3', 'Shortcuts'),
@@ -123,21 +103,17 @@ export function buildNavigationCoreSections({
       searchEntries: getOrchestrationPaneSearchEntries(),
       group: 'capabilities'
     },
-    ...(showDaemonBackedSettings
-      ? [
-          {
-            id: 'computer-use',
-            title: translate('auto.hooks.useSettingsNavigationMetadata.b35e92364b', 'Computer Use'),
-            description: translate(
-              'auto.hooks.useSettingsNavigationMetadata.0059bd17f3',
-              'Enable agents to control any app on your computer.'
-            ),
-            icon: MousePointerClick,
-            searchEntries: getComputerUsePaneSearchEntries(),
-            group: 'capabilities'
-          }
-        ]
-      : []),
+    {
+      id: 'computer-use',
+      title: translate('auto.hooks.useSettingsNavigationMetadata.b35e92364b', 'Computer Use'),
+      description: translate(
+        'auto.hooks.useSettingsNavigationMetadata.0059bd17f3',
+        'Enable agents to control any app on your computer.'
+      ),
+      icon: MousePointerClick,
+      searchEntries: getComputerUsePaneSearchEntries(),
+      group: 'capabilities'
+    },
     {
       id: 'setup-guide',
       title: translate(
@@ -193,20 +169,16 @@ export function buildNavigationCoreSections({
       searchEntries: getIntegrationsPaneSearchEntries(),
       group: 'setup'
     },
-    ...(showDaemonBackedSettings
-      ? [
-          {
-            id: 'mobile',
-            title: translate('auto.hooks.useSettingsNavigationMetadata.1cd25673df', 'Mobile'),
-            description: translate(
-              'auto.hooks.useSettingsNavigationMetadata.95a1886d94',
-              'Control terminals and agents from your phone.'
-            ),
-            icon: Smartphone,
-            searchEntries: getMobileSettingsPaneSearchEntries(),
-            group: 'setup'
-          }
-        ]
-      : [])
+    {
+      id: 'mobile',
+      title: translate('auto.hooks.useSettingsNavigationMetadata.1cd25673df', 'Mobile'),
+      description: translate(
+        'auto.hooks.useSettingsNavigationMetadata.95a1886d94',
+        'Control terminals and agents from your phone.'
+      ),
+      icon: Smartphone,
+      searchEntries: getMobileSettingsPaneSearchEntries(),
+      group: 'setup'
+    }
   ]
 }

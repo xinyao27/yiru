@@ -25,10 +25,8 @@ export const createMemorySlice: StateCreator<AppState, [], [], MemorySlice> = (s
         try {
           // Why: this segment reports the active runtime's own resource use —
           // switching the active environment must show that host's memory,
-          // not the machine running the Electron shell. `diagnostics.memory`
-          // covers both targets identically (same `collectMemorySnapshot`
-          // call the desktop IPC handler used to make), so there is no
-          // local-vs-remote branch left to preserve.
+          // not the machine displaying the Chrome client. `diagnostics.memory`
+          // covers both targets through the same runtime method.
           const target = getActiveRuntimeTarget(get().settings)
           const snapshot = await callRuntimeOrpc(
             target,

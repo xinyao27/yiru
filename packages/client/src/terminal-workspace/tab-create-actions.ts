@@ -6,10 +6,10 @@ import { openMobileEmulatorTab } from '~renderer/emulator-pane/open-tab'
 import { translate } from '~renderer/i18n/i18n'
 import { browserWorkspaceHasRemoteOwner } from '~renderer/runtime/remote-browser-tab-ownership'
 import {
-  createWebRuntimeSessionBrowserTab,
-  createWebRuntimeSessionTerminal,
-  isWebRuntimeSessionActive
-} from '~renderer/runtime/web-runtime-session'
+  createRemoteRuntimeSessionBrowserTab,
+  createRemoteRuntimeSessionTerminal,
+  isRemoteRuntimeSessionActive
+} from '~renderer/runtime/remote-runtime-session'
 import { useAppStore } from '~renderer/store/state'
 import { focusTerminalTabSurface } from '~renderer/tab-bar/focus-terminal-surface'
 
@@ -27,7 +27,7 @@ type TabCreateActions = {
 }
 
 // Why: every "new tab" entry point (keyboard shortcut, tab-bar "+", agent
-// launch menu) needs the same active-group resolution and web-runtime-session
+// launch menu) needs the same active-group resolution and remote-runtime-session
 // routing, so they share one hook rather than re-deriving targetGroupId in
 // each caller.
 export function useTabCreateActions(): TabCreateActions {
@@ -52,8 +52,8 @@ export function useTabCreateActions(): TabCreateActions {
       useAppStore.getState().activeGroupIdByWorktree[activeWorktreeId] ??
       useAppStore.getState().groupsByWorktree[activeWorktreeId]?.[0]?.id
     const runtimeEnvironmentId = getActiveWorktreeRuntimeEnvironmentId(activeWorktreeId)
-    if (isWebRuntimeSessionActive(runtimeEnvironmentId)) {
-      void createWebRuntimeSessionTerminal({
+    if (isRemoteRuntimeSessionActive(runtimeEnvironmentId)) {
+      void createRemoteRuntimeSessionTerminal({
         worktreeId: activeWorktreeId,
         environmentId: runtimeEnvironmentId,
         targetGroupId,
@@ -149,8 +149,8 @@ export function useTabCreateActions(): TabCreateActions {
     }
     const defaultUrl = useAppStore.getState().browserDefaultUrl ?? 'about:blank'
     const runtimeEnvironmentId = getActiveWorktreeRuntimeEnvironmentId(activeWorktreeId)
-    if (isWebRuntimeSessionActive(runtimeEnvironmentId)) {
-      void createWebRuntimeSessionBrowserTab({
+    if (isRemoteRuntimeSessionActive(runtimeEnvironmentId)) {
+      void createRemoteRuntimeSessionBrowserTab({
         worktreeId: activeWorktreeId,
         environmentId: runtimeEnvironmentId,
         url: defaultUrl
@@ -179,10 +179,10 @@ export function useTabCreateActions(): TabCreateActions {
     }
     const runtimeEnvironmentId = getActiveWorktreeRuntimeEnvironmentId(activeWorktreeId)
     if (
-      isWebRuntimeSessionActive(runtimeEnvironmentId) &&
+      isRemoteRuntimeSessionActive(runtimeEnvironmentId) &&
       browserWorkspaceHasRemoteOwner(state, source.id, runtimeEnvironmentId)
     ) {
-      void createWebRuntimeSessionBrowserTab({
+      void createRemoteRuntimeSessionBrowserTab({
         worktreeId: activeWorktreeId,
         environmentId: runtimeEnvironmentId,
         url: source.url,

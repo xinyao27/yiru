@@ -4,8 +4,8 @@ import {
   type CloseTerminalPaneDetail,
   type SplitTerminalPaneDetail
 } from '../constants/terminal'
+import { consumePendingRemoteRuntimeSplitMirrorTelemetry } from '../runtime/remote-runtime-session'
 import { scheduleRuntimeGraphSync } from '../runtime/sync-runtime-graph'
-import { consumePendingWebRuntimeSplitMirrorTelemetry } from '../runtime/web-runtime-session'
 import { closeTerminalTab } from '../terminal/tab-actions'
 import type { PtyConnectionDeps } from './pty/connection-types'
 import {
@@ -64,7 +64,7 @@ export function installTerminalPaneCommandEvents({
     }
     const createdPane = manager.splitPane(sourcePaneId, detail.direction, splitOptions)
     const telemetrySuppressed = createdPane
-      ? consumePendingWebRuntimeSplitMirrorTelemetry(detail.sourcePtyId, detail.direction)
+      ? consumePendingRemoteRuntimeSplitMirrorTelemetry(detail.sourcePtyId, detail.direction)
       : false
     recordRuntimeCreatedTerminalPaneSplit(createdPane, {
       source: detail.telemetrySource ?? 'command',

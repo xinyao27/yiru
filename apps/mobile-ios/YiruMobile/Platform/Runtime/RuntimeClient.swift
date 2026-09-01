@@ -237,6 +237,7 @@ actor RuntimeClient: ConnectionDiagnosticsRepository, HomeRuntime, HostConnectio
     }
 
     private func record(_ snapshot: RuntimeConnectionSnapshot) {
+        guard snapshots[snapshot.hostID] != snapshot else { return }
         Task { await connectionLogStore.record(snapshot) }
         snapshots[snapshot.hostID] = snapshot
         for subscription in snapshotSubscriptions.values

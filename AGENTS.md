@@ -43,7 +43,6 @@ apps/
   extension/    WXT-managed Chrome MV3 host: background, side panel, DevTools, browser bootstrap
   mobile-ios/   native SwiftUI app, widgets, and notification service extension
   apns-gateway/ stateless Cloudflare Worker forwarding opaque encrypted pushes to APNs
-  web/          marketing landing only
 packages/
   client/       source-only browser workbench UI consumed through declared exports
   runtime-protocol/

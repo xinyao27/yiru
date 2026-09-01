@@ -1,4 +1,3 @@
-import { normalizeAppIconId } from '@yiru/runtime-protocol/workbench/app-icon'
 import type { GlobalSettings } from '@yiru/runtime-protocol/workbench/types'
 import type React from 'react'
 import { useLayoutEffect, useState } from 'react'
@@ -10,29 +9,21 @@ import {
   SidebarSimple as PanelLeft,
   TerminalWindow as TerminalSquare
 } from '~renderer/icons/hugeicons'
-import { usesNativeWindowRenderer } from '~renderer/runtime/renderer-host'
 import { useAppStore } from '~renderer/store/state'
-import { isWebClientLocation } from '~renderer/web/client-location'
 
-import { AppIconSelector } from '../app-icon-selector'
-import { getRendererAppPlatform } from '../renderer-app-platform'
 import { matchesSettingsSearch, normalizeSettingsSearchQuery } from '../search'
-import { SearchableSetting } from '../searchable-setting'
 import { TerminalAppearanceSection } from '../terminal/appearance-section'
 import { getTerminalAppearanceSearchEntries } from '../terminal/search'
 import type { UseGhosttyImportReturn } from '../use-ghostty-import'
 import type { UseWarpThemeImportReturn } from '../use-warp-theme-import'
 import { AppearanceInterfaceSection } from './interface-section'
 import {
-  getAppIconEntries,
   getAppearancePaneSearchEntries,
   getLanguageEntries,
   getLayoutEntries,
   getLoaderStyleEntries,
-  getMenuBarIconEntries,
   getSidebarEntries,
   getStatusBarEntries,
-  getSystemTrayEntries,
   getThemeEntries,
   getTypographyEntries,
   getZoomEntries
@@ -86,11 +77,6 @@ export function AppearancePane({
     (state) => state.clearAppearanceAccordionDeepLink
   )
   const isSearching = normalizeSettingsSearchQuery(searchQuery).length > 0
-  const isWebClient = isWebClientLocation()
-  const usesNativeWindow = usesNativeWindowRenderer()
-  const isDesktopWindows = getRendererAppPlatform() === 'win32' && usesNativeWindow
-  const isDesktopMac = getRendererAppPlatform() === 'darwin' && usesNativeWindow
-
   const [manuallyOpenSection, setManuallyOpenSection] = useState<AppearanceSectionKey | null>(
     'interface'
   )
@@ -122,12 +108,7 @@ export function AppearancePane({
     'auto.components.settings.AppearancePane.terminalTitle',
     'Terminal'
   )
-  const windowSidebarTitle = translate(
-    usesNativeWindow
-      ? 'auto.components.settings.AppearancePane.windowSidebarTitle'
-      : 'settings.appearance.sidebarLayoutTitle',
-    usesNativeWindow ? 'Window & Sidebar' : 'Sidebar & Layout'
-  )
+  const windowSidebarTitle = translate('settings.appearance.sidebarLayoutTitle', 'Sidebar & Layout')
   const windowSidebarSummary = translate(
     'auto.components.settings.AppearancePane.windowSidebarSummary',
     'Sidebar, status bar, and file explorer'
@@ -140,16 +121,11 @@ export function AppearancePane({
     ...getLoaderStyleEntries(),
     ...getZoomEntries(),
     ...getTypographyEntries(),
-    ...(SHOW_UI_LANGUAGE_SETTING ? getLanguageEntries() : []),
-    ...getSystemTrayEntries({ showSystemTray: isDesktopWindows }),
-    ...getMenuBarIconEntries({ showMenuBarIcon: isDesktopMac })
+    ...(SHOW_UI_LANGUAGE_SETTING ? getLanguageEntries() : [])
   ]
   const terminalSearchEntries = [
     { title: terminalTitle },
-    ...getTerminalAppearanceSearchEntries({
-      showNativeWindowSettings: usesNativeWindow,
-      showWarpImport: !isWebClient
-    })
+    ...getTerminalAppearanceSearchEntries({ showWarpImport: true })
   ]
   const windowSearchEntries = [
     {
@@ -182,8 +158,6 @@ export function AppearancePane({
     title: windowSidebarTitle,
     description: windowSidebarSummary
   })
-  const appIconMatches = usesNativeWindow && matchesSettingsSearch(searchQuery, getAppIconEntries())
-
   // While searching, force-open every section that contains a match so its
   // controls (including advanced ones) are revealed; otherwise the accordion
   // shows exactly one manually-chosen section.
@@ -230,8 +204,6 @@ export function AppearancePane({
             applyTheme={applyTheme}
             fontSuggestions={fontSuggestions}
             onRequestFontSuggestions={onRequestFontSuggestions}
-            isDesktopMac={isDesktopMac}
-            isDesktopWindows={isDesktopWindows}
             forceVisiblePrimary={interfaceLabelMatches}
           />
         </AppearanceSection>
@@ -279,7 +251,6 @@ export function AppearancePane({
             onRequestFontSuggestions={onRequestFontSuggestions}
             ghostty={ghostty}
             warpThemes={warpThemes}
-            showNativeWindowSettings={usesNativeWindow}
             forceVisiblePrimary={terminalLabelMatches}
           />
         </AppearanceSection>
@@ -300,29 +271,6 @@ export function AppearancePane({
             forceVisiblePrimary={windowLabelMatches}
           />
         </AppearanceSection>
-      ) : null}
-
-      {/* App icon stays at the bottom of Appearance as a small easter egg,
-          matching production — not buried inside Interface advanced. */}
-      {appIconMatches ? (
-        <SearchableSetting
-          title={translate('auto.components.settings.AppearancePane.ca1590d42f', 'App Icon')}
-          description={translate(
-            'auto.components.settings.AppearancePane.0cd9b8228f',
-            'Choose the app icon shown in the Dock and window switcher.'
-          )}
-          keywords={getAppIconEntries().flatMap((entry) => [
-            entry.title,
-            entry.description ?? '',
-            ...(entry.keywords ?? [])
-          ])}
-          className="max-w-none px-1 pt-2"
-        >
-          <AppIconSelector
-            value={normalizeAppIconId(settings.appIcon)}
-            onChange={(appIcon) => updateSettings({ appIcon })}
-          />
-        </SearchableSetting>
       ) : null}
     </div>
   )

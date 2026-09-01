@@ -1,8 +1,8 @@
 import { killAllProcessesForWorktree } from '~main/runtime/worktree-teardown'
 
-import { RuntimeWindowAuthoritativeWindow } from '../window/authoritative-window'
+import { RuntimeWorkbenchAvailability } from '../workbench/availability'
 
-export abstract class RuntimeCompositionStopPtysForDestructiveWorktreeRemoval extends RuntimeWindowAuthoritativeWindow {
+export abstract class RuntimeCompositionStopPtysForDestructiveWorktreeRemoval extends RuntimeWorkbenchAvailability {
   protected async stopPtysForDestructiveWorktreeRemoval(
     worktreeId: string,
     connectionId?: string

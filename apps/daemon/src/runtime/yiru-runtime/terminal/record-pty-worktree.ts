@@ -135,7 +135,7 @@ export abstract class RuntimeTerminalRecordPtyWorktree extends RuntimeWorktreePr
       return null
     }
     // Why: daemon-backed PTY session IDs are prefixed with the worktree ID so
-    // mobile summaries survive renderer graph gaps and Electron reloads.
+    // mobile summaries survive client graph gaps and browser reloads.
     return this.recordPtyWorktree(ptyId, inferredWorktreeId)
   }
 

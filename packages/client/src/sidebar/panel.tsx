@@ -1,7 +1,5 @@
 import React from 'react'
 import { lazyWithRetry } from '~renderer/application-shell/lazy-with-retry'
-import { FolderPlus } from '~renderer/icons/hugeicons'
-import { LoadingIndicator } from '~renderer/loading/indicator'
 import { useProjectCatalog } from '~renderer/project-catalog/provider'
 import { useAppStore } from '~renderer/store/state'
 import { cn } from '~renderer/ui/class-names'
@@ -12,7 +10,6 @@ import SidebarHeader from './header'
 import SidebarNav from './nav'
 import SetupScriptPromptCard from './setup-script-prompt-card'
 import SidebarToolbar from './toolbar'
-import { useSidebarProjectDrop } from './use-sidebar-project-drop'
 import WorktreeList from './worktree-list'
 
 const WorktreeMetaDialog = lazyWithRetry(() => import('./worktree-meta-dialog'))
@@ -21,10 +18,8 @@ const YiruYamlTrustDialog = lazyWithRetry(() => import('./yiru-yaml-trust-dialog
 
 const MIN_WIDTH = 240
 const MAX_WIDTH = 500
-// Why: straddle the content seam and extend through the sibling titlebar so the
-// visible sidebar has one uninterrupted drag target; the header is a drag region.
 export const WORKTREE_SIDEBAR_RESIZE_HANDLE_CLASS_NAME =
-  'group absolute -top-[var(--titlebar-height)] bottom-0 z-10 flex w-3 cursor-col-resize items-stretch justify-center [-webkit-app-region:no-drag]'
+  'group absolute -top-[var(--titlebar-height)] bottom-0 z-10 flex w-3 cursor-col-resize items-stretch justify-center'
 export const WORKTREE_SIDEBAR_RESIZE_HANDLE_LINE_CLASS_NAME =
   'h-full w-px bg-transparent transition-colors group-hover:bg-ring/50 group-active:bg-ring'
 
@@ -50,7 +45,6 @@ function Sidebar({
   const setSidebarWidth = useAppStore((s) => s.setSidebarWidth)
   const activeModal = useAppStore((s) => s.activeModal)
   const projectCatalog = useProjectCatalog()
-  const { nativeDropTarget, dropHandlers, affordance } = useSidebarProjectDrop()
   const isBrowserNavigationSurface = surface === 'navigation'
   const isEmbeddedNavigationSurface = surface === 'embedded-navigation'
   const isNavigationSurface = isBrowserNavigationSurface || isEmbeddedNavigationSurface
@@ -71,7 +65,6 @@ function Sidebar({
     <TooltipProvider>
       <div
         ref={containerRef}
-        data-native-file-drop-target={isOpen ? nativeDropTarget : undefined}
         // Why: the outer seam matches the standard hairlines used by adjacent app panels.
         className={cn(
           'worktree-sidebar-theme bg-sidebar scrollbar-sleek-parent relative flex min-h-0 flex-shrink-0 flex-col',
@@ -81,7 +74,6 @@ function Sidebar({
             (placement === 'left' ? 'border-border border-r' : 'border-border border-l')
         )}
         style={{ ...appearanceStyle, width: isBrowserNavigationSurface ? '100%' : renderedWidth }}
-        {...dropHandlers}
       >
         {/* Why: clip sidebar content without clipping the handle's titlebar extension. */}
         <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
@@ -108,23 +100,6 @@ function Sidebar({
               {!isProjectWorkspaceSurface ? <SidebarToolbar /> : null}
             </>
           )}
-
-          {isOpen && affordance.visible ? (
-            <div
-              className={cn(
-                'pointer-events-none absolute inset-2 z-20 flex flex-col items-center justify-center gap-1.5 border bg-sidebar-accent px-4 text-center text-sidebar-accent-foreground',
-                affordance.tone === 'blocked' ? 'border-destructive/70' : 'border-sidebar-ring/70'
-              )}
-            >
-              {affordance.tone === 'busy' ? (
-                <LoadingIndicator className="text-muted-foreground size-5" />
-              ) : (
-                <FolderPlus className="text-muted-foreground size-5" />
-              )}
-              <div className="text-sm font-medium">{affordance.label}</div>
-              <div className="text-muted-foreground text-xs">{affordance.description}</div>
-            </div>
-          ) : null}
         </div>
 
         {/* Resize handle */}

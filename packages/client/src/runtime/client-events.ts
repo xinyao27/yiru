@@ -1,13 +1,6 @@
-import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
-import { isRuntimeSubscriptionReplayResponse } from '@yiru/runtime-protocol/subscription-replay'
-import type {
-  RuntimeClientEvent,
-  RuntimeClientEventStreamMessage
-} from '@yiru/runtime-protocol/workbench/runtime-client-events'
+import type { RuntimeClientEvent } from '@yiru/runtime-protocol/workbench/runtime-client-events'
 
-import { hasBrowserHostRuntime } from './browser-host-runtime'
-import { createRuntimeOrpcClient, isWebRuntimeClient } from './orpc-client'
-import { runtimeEnvironmentsClient } from './runtime-environments-client'
+import { createRuntimeOrpcClient } from './orpc-client'
 
 export type RuntimeClientEventSubscription = {
   unsubscribe: () => void
@@ -16,42 +9,11 @@ export type RuntimeClientEventSubscription = {
 export async function subscribeRuntimeClientEvents(
   environmentId: string,
   onEvent: (event: RuntimeClientEvent) => void,
-  onError: (error: unknown) => void = console.warn,
-  // Why: client events emitted while the shared-control transport was down are
-  // lost, not queued. The replay tag on the first post-reconnect response is
-  // the renderer's only signal that mirrored event-derived state (e.g. the
-  // per-environment SSH bucket) may have missed transitions and must resync.
-  onReplayedAfterReconnect?: () => void
+  onError: (error: unknown) => void = console.warn
 ): Promise<RuntimeClientEventSubscription> {
-  // Why: the browser compatibility subscription skips capability negotiation,
-  // while Electron's local shell transport already negotiates it. Web must use
-  // the direct oRPC subscription after the legacy dispatcher retires this method.
-  if (isWebRuntimeClient() || hasBrowserHostRuntime()) {
-    return subscribeRuntimeClientEventsViaOrpc(environmentId, onEvent, onError)
-  }
-  const handle = await runtimeEnvironmentsClient.subscribe(
-    {
-      selector: environmentId,
-      method: 'runtime.clientEvents.subscribe',
-      timeoutMs: 15_000
-    },
-    {
-      onResponse: (response) => {
-        handleRuntimeClientEventResponse(response, onEvent, onError, onReplayedAfterReconnect)
-      },
-      onError
-    }
-  )
-  return { unsubscribe: handle.unsubscribe }
+  return subscribeRuntimeClientEventsViaOrpc(environmentId, onEvent, onError)
 }
 
-// Why: a replayed-after-reconnect signal never applies here — that tag is only
-// ever set by Electron's shared-control connection reconnect logic (see
-// `shared-control-state.ts`), which this real oRPC event iterator does not go
-// through — so there is no `onReplayedAfterReconnect` callback to invoke. A
-// mid-stream drop ends the iterator without retrying, matching this method's
-// existing behavior on web before this change (it is not in the small set of
-// methods `WebRuntimeClient` replays after a reconnect).
 async function subscribeRuntimeClientEventsViaOrpc(
   environmentId: string,
   onEvent: (event: RuntimeClientEvent) => void,
@@ -94,31 +56,7 @@ async function subscribeRuntimeClientEventsViaOrpc(
   }
 }
 
-function handleRuntimeClientEventResponse(
-  response: RuntimeRpcResponse<unknown>,
-  onEvent: (event: RuntimeClientEvent) => void,
-  onError: (error: unknown) => void,
-  onReplayedAfterReconnect?: () => void
-): void {
-  if (response.ok === false) {
-    onError(response.error)
-    return
-  }
-  if (isRuntimeSubscriptionReplayResponse(response)) {
-    onReplayedAfterReconnect?.()
-  }
-  const message = response.result as RuntimeClientEventStreamMessage
-  if (message.type === 'ready' || message.type === 'end') {
-    return
-  }
-  if (isRuntimeClientEvent(message)) {
-    onEvent(message)
-  }
-}
-
-function isRuntimeClientEvent(
-  message: RuntimeClientEventStreamMessage
-): message is RuntimeClientEvent {
+function isRuntimeClientEvent(message: RuntimeClientEvent): message is RuntimeClientEvent {
   return (
     message.type === 'reposChanged' ||
     message.type === 'worktreesChanged' ||

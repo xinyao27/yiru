@@ -37,7 +37,6 @@ exec /usr/bin/open "$@"
 export type ServeSimExecutable = {
   command: string
   baseArgs: string[]
-  usesElectronAsNode: boolean
 }
 
 function ensureMacOpenShim(): string | null {
@@ -57,10 +56,8 @@ function ensureMacOpenShim(): string | null {
   }
 }
 
-function getServeSimEnv(executable: ServeSimExecutable): NodeJS.ProcessEnv {
-  const env: NodeJS.ProcessEnv = executable.usesElectronAsNode
-    ? { ...process.env, ELECTRON_RUN_AS_NODE: '1' }
-    : { ...process.env }
+function getServeSimEnv(): NodeJS.ProcessEnv {
+  const env: NodeJS.ProcessEnv = { ...process.env }
   const openShimDir = ensureMacOpenShim()
   if (openShimDir) {
     // Why: serve-sim needs Simulator.app attached for display/rotation, but Yiru embeds the stream.
@@ -111,12 +108,11 @@ export function resolveServeSimExecutable(): ServeSimExecutable {
       if (materializedDir) {
         return {
           command: process.execPath,
-          baseArgs: [join(materializedDir, 'dist', 'serve-sim.js')],
-          usesElectronAsNode: true
+          baseArgs: [join(materializedDir, 'dist', 'serve-sim.js')]
         }
       }
     }
-    return { command: process.execPath, baseArgs: [bundled], usesElectronAsNode: true }
+    return { command: process.execPath, baseArgs: [bundled] }
   }
 
   const nodeModulesEntry = join(
@@ -135,10 +131,10 @@ export function resolveServeSimExecutable(): ServeSimExecutable {
         chmodSync(helperBin, 0o755)
       }
     }
-    return { command: process.execPath, baseArgs: [nodeModulesEntry], usesElectronAsNode: true }
+    return { command: process.execPath, baseArgs: [nodeModulesEntry] }
   }
 
-  return { command: 'serve-sim', baseArgs: [], usesElectronAsNode: false }
+  return { command: 'serve-sim', baseArgs: [] }
 }
 
 export function parseServeSimCommandArgs(input: string): string[] {
@@ -204,7 +200,7 @@ export async function execServeSimCommand(
     execFile(
       executable.command,
       [...executable.baseArgs, ...finalArgs],
-      { timeout, maxBuffer: 10 * 1024 * 1024, env: getServeSimEnv(executable) },
+      { timeout, maxBuffer: 10 * 1024 * 1024, env: getServeSimEnv() },
       (error, stdout, stderr) => {
         if (error) {
           const message =

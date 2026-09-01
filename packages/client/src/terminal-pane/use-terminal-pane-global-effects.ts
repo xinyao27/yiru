@@ -6,11 +6,9 @@ import {
   type FocusTerminalPaneDetail,
   type PasteTerminalTextDetail
 } from '~renderer/constants/terminal'
-import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store/state'
 import type { PaneManager } from '~renderer/terminal-pane/pane-manager/pane-manager'
 
-import { handleTerminalFileDrop } from './drop/handler'
 import { handleFocusTerminalPaneDetail } from './focus-terminal-pane-event'
 import type { PtyTransport } from './pty/transport-types'
 import { surfaceStaleAgentRow } from './stale-agent-row'
@@ -220,41 +218,4 @@ export function useTerminalPaneGlobalEffects({
     window.addEventListener(PASTE_TERMINAL_TEXT_EVENT, onPasteText)
     return () => window.removeEventListener(PASTE_TERMINAL_TEXT_EVENT, onPasteText)
   }, [tabId, managerRef, paneTransportsRef])
-
-  // Why: visible but unfocused split-group terminals can still receive native
-  // OS drops. Route tab-id-aware payloads to the dropped pane, while legacy
-  // payloads without a tab id keep the old active-terminal-only behavior.
-  useEffect(() => {
-    if (!isActive && !isVisible) {
-      return
-    }
-    return shellClient.ui.onFileDrop((data) => {
-      if (data.target !== 'terminal') {
-        return
-      }
-      if (data.tabId) {
-        if (data.tabId !== tabId) {
-          return
-        }
-      } else if (!isActive) {
-        return
-      }
-      const manager = managerRef.current
-      if (!manager) {
-        return
-      }
-      const wtId = worktreeIdRef.current
-      if (!wtId) {
-        return
-      }
-      void handleTerminalFileDrop({
-        manager,
-        paneTransports: paneTransportsRef.current,
-        worktreeId: wtId,
-        tabId,
-        cwd: cwdRef.current,
-        data
-      })
-    })
-  }, [isActive, isVisible, managerRef, paneTransportsRef, tabId])
 }

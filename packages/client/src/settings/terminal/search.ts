@@ -62,7 +62,6 @@ export {
 } from './window-setup-search'
 
 type TerminalAppearanceSearchOptions = {
-  showNativeWindowSettings?: boolean
   showWarpImport?: boolean
 }
 
@@ -76,9 +75,7 @@ export function getTerminalAppearanceSearchEntries(
     ...getTerminalThemeTargetSearchEntries(),
     ...getTerminalDarkThemeSearchEntries(),
     ...getTerminalLightThemeSearchEntries(),
-    ...getTerminalWindowSearchEntries({
-      showNativeWindowSettings: options.showNativeWindowSettings
-    }),
+    ...getTerminalWindowSearchEntries(),
     ...getTerminalGhosttyImportSearchEntries(),
     ...((options.showWarpImport ?? true)
       ? [...getTerminalWarpImportSearchEntries(), ...getTerminalYamlImportSearchEntries()]

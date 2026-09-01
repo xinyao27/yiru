@@ -80,13 +80,22 @@ export function stripReservedPersistedUiState(
   const {
     featureInteractionTelemetryBuckets: _reserved,
     _worktreeCardModeDefaulted: _retiredCardMarker,
+    trayMinimizeNoticeShown: _retiredTrayNotice,
+    windowBounds: _retiredWindowBounds,
+    windowMaximized: _retiredWindowMaximized,
     ...ui
   } = value as Partial<PersistedState['ui']> & {
     featureInteractionTelemetryBuckets?: unknown
     _worktreeCardModeDefaulted?: unknown
+    trayMinimizeNoticeShown?: unknown
+    windowBounds?: unknown
+    windowMaximized?: unknown
   }
   void _reserved
   void _retiredCardMarker
+  void _retiredTrayNotice
+  void _retiredWindowBounds
+  void _retiredWindowMaximized
   return ui
 }
 

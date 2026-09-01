@@ -74,7 +74,7 @@ export {
 
 // Why: callers in install/remove need to match not just the exact current
 // managed command, but also stale entries pointing at old script paths — e.g.
-// from a previous dev build with a different Electron userData dir, or a
+// from a previous dev build with a different userData directory, or a
 // parallel dev/prod install. Matching by the managed script's file name
 // (under any `agent-hooks/` directory) lets a fresh install sweep those
 // without touching unrelated user-authored hooks.

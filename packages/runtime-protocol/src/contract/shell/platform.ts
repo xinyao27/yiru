@@ -49,9 +49,8 @@ const SHELL_HOST_ACCESS = {
   principals: ['local']
 } as const
 
-// Why: these leaves operate on the OS host rendering this Electron window,
-// never the selected runtime target. Mobile therefore remains excluded by
-// the default `mobile: false` access metadata.
+// Why: these leaves operate on the OS host serving the Chrome client, never
+// the selected runtime target. iOS remains excluded by local-only metadata.
 export const shellPlatformContract = {
   renderingHost: withAccess(SHELL_READ_ACCESS).output(type<ShellRenderingHost>()),
   openPath: withAccess(SHELL_HOST_ACCESS).input(type<{ path: string }>()).output(type<void>()),

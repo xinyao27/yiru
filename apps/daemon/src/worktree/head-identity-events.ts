@@ -1,7 +1,7 @@
 import type { WorktreeHeadIdentity } from '@yiru/runtime-protocol/workbench/types'
 
 // Why: head identities are refreshed deep inside the base-directory watcher,
-// which holds an optional BrowserWindow but no runtime handle. Threading a
+// which has no runtime handle. Threading a
 // runtime reference through the watcher/host-diff call chain for a
 // fire-and-forget notification would touch every layer between them, so the
 // runtime installs a publisher here at startup instead — the same shape as

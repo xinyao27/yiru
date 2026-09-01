@@ -3,7 +3,7 @@ import type { FileHandle } from 'node:fs/promises'
 import { open, rename, rm, stat, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 
-import type { RuntimeRendererTarget } from '~main/runtime/host/renderer-target'
+import type { RuntimeClientTarget } from '~main/runtime/host/client-target'
 
 import { sanitizeLocalDownloadFilename } from '../local-download-filename'
 import { isENOENT } from './auth'
@@ -124,7 +124,7 @@ export function createFileDownloadService(nativePathServices: NativePathServices
 
   return {
     saveDownload: async (
-      sender: RuntimeRendererTarget,
+      sender: RuntimeClientTarget,
       args: { suggestedName?: string; content?: string; encoding?: 'utf8' | 'base64' }
     ): Promise<DownloadFileResult> => {
       const suggestedName = sanitizeLocalDownloadFilename(
@@ -154,7 +154,7 @@ export function createFileDownloadService(nativePathServices: NativePathServices
     },
 
     startDownload: async (
-      sender: RuntimeRendererTarget,
+      sender: RuntimeClientTarget,
       args: { suggestedName?: string }
     ): Promise<StartDownloadResult> => {
       const suggestedName = sanitizeLocalDownloadFilename(

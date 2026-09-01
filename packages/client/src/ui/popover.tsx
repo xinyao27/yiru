@@ -159,15 +159,7 @@ function PopoverContent({
             className
           )}
           ref={setContentRef}
-          // Why: Electron's -webkit-app-region: drag on the titlebar captures
-          // clicks at the OS level regardless of z-index. Without no-drag,
-          // popovers that visually overlap the titlebar are unclickable.
-          style={
-            {
-              ...style,
-              WebkitAppRegion: 'no-drag'
-            } as React.CSSProperties
-          }
+          style={style}
           onWheel={handleWheel}
           {...props}
         />

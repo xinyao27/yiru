@@ -14,7 +14,6 @@ import {
   DialogHeader,
   DialogTitle
 } from '~renderer/ui/dialog'
-import { isWebClientLocation } from '~renderer/web/client-location'
 
 type AgentSettingsDialogProps = {
   open: boolean
@@ -32,9 +31,8 @@ export default function AgentSettingsDialog({
   const capabilitiesOwnerKey = getWindowsTerminalCapabilityOwnerKey(runtimeEnvironmentId)
   const isWindowsRenderer =
     typeof navigator !== 'undefined' && navigator.userAgent.includes('Windows')
-  const isWebClient = isWebClientLocation()
   const windowsTerminalCapabilities = useWindowsTerminalCapabilities(
-    open && (isWindowsRenderer || isWebClient || runtimeTarget.kind === 'environment'),
+    open && (isWindowsRenderer || runtimeTarget.kind === 'environment'),
     false,
     capabilitiesOwnerKey,
     runtimeTarget

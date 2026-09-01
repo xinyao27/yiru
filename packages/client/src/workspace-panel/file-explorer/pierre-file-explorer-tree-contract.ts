@@ -29,8 +29,6 @@ export type PierreFileExplorerTreeProps = {
   onInlineInputCancel: () => void
   onMoveDrop: (sourcePath: string, destinationDirectory: string) => void
   onDragSourceChange: (path: string | null) => void
-  onNativeDragTargetChange: (directoryPath: string | null) => void
-  onNativeDragExpandDirectory: (directoryPath: string) => void
   renderContextMenu: (
     node: TreeNode,
     context: ContextMenuOpenContext,

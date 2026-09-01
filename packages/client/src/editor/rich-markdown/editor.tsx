@@ -9,7 +9,6 @@ import { selectWorktreeDiffComments } from '~renderer/diff-comments/worktree-sel
 // those rules stay real CSS here instead of the app's eager main.css.
 import './content.css'
 import { useEventCallback } from '~renderer/react/use-event-callback'
-import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store/state'
 
 import { registerPendingEditorFlush } from '../pending-flush'
@@ -17,10 +16,6 @@ import { useEditorScrollRestore } from '../use-editor-scroll-restore'
 import { useLinkBubble } from '../use-link-bubble'
 import { useLocalImagePick } from '../use-local-image-pick'
 import { useModifierHeld } from '../use-modifier-held'
-import {
-  isRichMarkdownContextCommandTarget,
-  runRichMarkdownContextCommand
-} from './context-command-routing'
 import { RichMarkdownEditorSurface } from './editor-surface'
 import type { LinkBubbleState } from './link-bubble'
 import {
@@ -208,7 +203,6 @@ export default function RichMarkdownEditor({
       clearTransientReviewState()
       cancelAutoFocusRef.current?.()
       cancelAutoFocusRef.current = null
-      shellClient.ui.setMarkdownEditorFocused(false)
     }
     rootRef.current = node
   }
@@ -332,22 +326,6 @@ export default function RichMarkdownEditor({
     runtimeEnvironmentId,
     htmlSuperscriptLinkContext
   })
-
-  useEffect(() => {
-    return shellClient.ui.onRichMarkdownContextCommand((payload) => {
-      const ed = editorRef.current
-      if (!ed || !isRichMarkdownContextCommandTarget(payload, rootRef.current)) {
-        return
-      }
-
-      runRichMarkdownContextCommand({
-        command: payload.command,
-        editor: ed,
-        toggleLink: toggleLinkFromToolbar,
-        pickImage: handleLocalImagePick
-      })
-    })
-  }, [handleLocalImagePick, toggleLinkFromToolbar])
 
   const { openSearch, searchState, searchActions } = useRichMarkdownSearch({
     editor,

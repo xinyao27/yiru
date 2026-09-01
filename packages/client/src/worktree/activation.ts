@@ -3,12 +3,11 @@ import { parseWorkspaceKey } from '@yiru/runtime-protocol/workbench/workspace/sc
 
 import { readProjectCatalogRuntimeState } from '../project-catalog/runtime-state'
 import {
-  activateWebRuntimeSessionWorktree,
-  isWebRuntimeSessionActive
-} from '../runtime/web-runtime-session'
+  activateRemoteRuntimeSessionWorktree,
+  isRemoteRuntimeSessionActive
+} from '../runtime/remote-runtime-session'
 import { useAppStore } from '../store/state'
 import { resumeSleepingAgentSessionsForWorktree } from '../terminal-workspace/resume-sleeping-agent-session'
-import { ensureWebRuntimeWorktreeTerminalAfterWake } from '../web/runtime-worktree-wake'
 import { activateAndRevealFolderWorkspace } from '../workspace/activation'
 import type { ActivateAndRevealResult, ActivateWorktreeOptions } from './activation-types'
 import { buildCreatedAgentReopenStartup } from './agent-startup'
@@ -18,7 +17,6 @@ import { setWorktreeNavActivator } from './state/nav-history'
 
 export type { AgentStartedTelemetry } from '../agent/started-telemetry'
 export { activateAndRevealFolderWorkspace } from '../workspace/activation'
-export { ensureWebRuntimeWorktreeTerminalAfterWake } from '../web/runtime-worktree-wake'
 export { ensureWorktreeHasInitialTerminal } from './initial-terminal'
 export type { ActivateAndRevealResult, WorktreeStartupPayload } from './activation-types'
 
@@ -84,9 +82,6 @@ export function activateAndRevealKnownWorktree(
     useAppStore.getState().queueTabInitialCwd(primaryTabId, options.initialCwd)
   }
   revealActivatedWorktree(worktreeId, worktree.repoId, options)
-  if (options?.notifyHostRuntime !== false) {
-    ensureWebRuntimeWorktreeTerminalAfterWake(worktreeId)
-  }
   return { primaryTabId }
 }
 
@@ -99,13 +94,13 @@ function notifyHostRuntimeOfWorktreeActivation(
     return
   }
   const environmentId = getRuntimeEnvironmentIdForWorktree(runtimeState, worktreeId)
-  if (!isWebRuntimeSessionActive(environmentId)) {
+  if (!isRemoteRuntimeSessionActive(environmentId)) {
     return
   }
-  void activateWebRuntimeSessionWorktree({
+  void activateRemoteRuntimeSessionWorktree({
     worktreeId,
     environmentId,
-    notifyDesktop: (globalThis as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__ !== true
+    notifyDesktop: true
   })
 }
 

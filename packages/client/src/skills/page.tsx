@@ -142,8 +142,8 @@ export default function SkillsPage(): React.JSX.Element {
 
   return (
     <main className="bg-background text-foreground relative flex h-full min-h-0 flex-col">
-      <header className="flex shrink-0 items-center justify-between py-2.5 pr-[calc(1.25rem+var(--window-controls-width,0px))] pl-2 [-webkit-app-region:drag]">
-        <div className="flex items-center gap-2 [-webkit-app-region:no-drag]">
+      <header className="flex shrink-0 items-center justify-between py-2.5 pr-5 pl-2">
+        <div className="flex items-center gap-2">
           <Tooltip>
             <TooltipTrigger
               render={
@@ -170,7 +170,7 @@ export default function SkillsPage(): React.JSX.Element {
             {translate('auto.components.skills.SkillsPage.f43ad6edf3', 'Skills')}
           </h1>
         </div>
-        <div className="flex items-center gap-2 [-webkit-app-region:no-drag]">
+        <div className="flex items-center gap-2">
           <Tooltip>
             <TooltipTrigger
               render={

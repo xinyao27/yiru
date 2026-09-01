@@ -1,4 +1,3 @@
-import { isWatcherProcessFailure } from '~main/filesystem/parcel-watcher-process-failure'
 import type { YiruRuntimeService } from '~main/runtime/yiru-runtime'
 import type { RuntimeFileCommands } from '~main/runtime/yiru-runtime-files'
 
@@ -64,26 +63,17 @@ export async function runFileWatchStream(args: {
             eventBatcher.dispose()
           }
         }
-        try {
-          if (!unwatch && setupPromise) {
-            try {
-              unwatch = await setupPromise
-            } catch (error) {
-              if (!setupAbortController.signal.aborted) {
-                throw error
-              }
+        if (!unwatch && setupPromise) {
+          try {
+            unwatch = await setupPromise
+          } catch (error) {
+            if (!setupAbortController.signal.aborted) {
+              throw error
             }
           }
+        }
+        try {
           await unwatch?.()
-        } catch (error) {
-          if (isWatcherProcessFailure(error) && error.physicalExit) {
-            args.runtime.retrySubscriptionCleanupAfter(
-              args.subscriptionId,
-              cleanup,
-              error.physicalExit
-            )
-          }
-          throw error
         } finally {
           if (!setupFailed && !endEmitted) {
             endEmitted = true
@@ -113,8 +103,8 @@ export async function runFileWatchStream(args: {
     }
 
     args.signal?.addEventListener('abort', handleAbort, { once: true })
-    // Why: paired clients must be able to cancel while native setup is
-    // waiting indefinitely for global child capacity, before ready exists.
+    // Why: paired clients must be able to cancel while native setup is still
+    // opening the recursive watcher, before ready exists.
     args.runtime.registerSubscriptionCleanup(args.subscriptionId, cleanup, args.connectionId)
     args.emit({ type: 'starting', subscriptionId: args.subscriptionId })
     setupPromise = args.fileCommands.watchFileExplorer(

@@ -24,8 +24,8 @@ import { joinPath } from '~renderer/path'
 import { useEventCallback } from '~renderer/react/use-event-callback'
 import { useMountedRef } from '~renderer/react/use-mounted-ref'
 import { getRuntimeEnvironmentIdForRepo } from '~renderer/repo/runtime-owner'
+import { extractRuntimeErrorMessage } from '~renderer/runtime/error-message'
 import { writeRuntimeFile, type RuntimeFileOperationArgs } from '~renderer/runtime/file-client'
-import { extractIpcErrorMessage } from '~renderer/runtime/ipc-error'
 import { shellClient } from '~renderer/runtime/shell-client'
 import { useWorktreesForRepo } from '~renderer/store/selectors'
 import { useAppStore } from '~renderer/store/state'
@@ -145,7 +145,7 @@ export function McpConfigSection({ repo }: McpConfigSectionProps): React.JSX.Ele
       if (mountedRef.current) {
         setConfigs(missingInspections)
         setInspectionUnavailableMessage(
-          extractIpcErrorMessage(error, 'Unable to inspect MCP configs.')
+          extractRuntimeErrorMessage(error, 'Unable to inspect MCP configs.')
         )
       }
     } finally {
@@ -229,7 +229,7 @@ export function McpConfigSection({ repo }: McpConfigSectionProps): React.JSX.Ele
         }
       )
     } catch (error) {
-      toast.error(extractIpcErrorMessage(error, 'Failed to create MCP config.'))
+      toast.error(extractRuntimeErrorMessage(error, 'Failed to create MCP config.'))
     }
   }
 

@@ -20,9 +20,9 @@ import {
   TerminalWindow
 } from '~renderer/icons/hugeicons'
 import {
-  activateWebRuntimeSessionTab,
-  isWebRuntimeSessionActive
-} from '~renderer/runtime/web-runtime-session'
+  activateRemoteRuntimeSessionTab,
+  isRemoteRuntimeSessionActive
+} from '~renderer/runtime/remote-runtime-session'
 import { useAppStore } from '~renderer/store/state'
 import { activateTabAndFocusPane } from '~renderer/tab-bar/activate-and-focus-pane'
 import { focusTerminalTabSurface } from '~renderer/tab-bar/focus-terminal-surface'
@@ -75,8 +75,8 @@ function activateSidebarTab(tab: Tab): void {
 
   switch (currentTab.contentType) {
     case 'terminal':
-      if (isWebRuntimeSessionActive(runtimeEnvironmentId)) {
-        void activateWebRuntimeSessionTab({
+      if (isRemoteRuntimeSessionActive(runtimeEnvironmentId)) {
+        void activateRemoteRuntimeSessionTab({
           worktreeId: tab.worktreeId,
           tabId: currentTab.entityId,
           environmentId: runtimeEnvironmentId
@@ -87,8 +87,8 @@ function activateSidebarTab(tab: Tab): void {
       focusTerminalTabSurface(currentTab.entityId)
       return
     case 'browser':
-      if (isWebRuntimeSessionActive(runtimeEnvironmentId)) {
-        void activateWebRuntimeSessionTab({
+      if (isRemoteRuntimeSessionActive(runtimeEnvironmentId)) {
+        void activateRemoteRuntimeSessionTab({
           worktreeId: tab.worktreeId,
           tabId: currentTab.id,
           environmentId: runtimeEnvironmentId

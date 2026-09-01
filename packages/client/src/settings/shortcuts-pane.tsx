@@ -8,10 +8,9 @@ import {
   type KeybindingActionId,
   type KeybindingInput
 } from '@yiru/runtime-protocol/workbench/keybindings'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { translate } from '~renderer/i18n/i18n'
 import { useMountedRef } from '~renderer/react/use-mounted-ref'
-import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store/state'
 
 import { SettingsSubsectionHeader } from './form-controls'
@@ -83,14 +82,6 @@ export function ShortcutsPane(): React.JSX.Element {
   )
   const [shortcutQuery, setShortcutQuery] = useState('')
   const [shortcutFilter, setShortcutFilter] = useState<ShortcutFilter>('all')
-
-  // Why: tell the main process to suspend global shortcut dispatch while any row
-  // is recording, so the captured chord lands in the editor instead of firing.
-  // One source of truth here avoids races between per-row recorder effects.
-  useEffect(() => {
-    shellClient.ui.setShortcutRecorderFocused(recordingActionId !== null)
-    return () => shellClient.ui.setShortcutRecorderFocused(false)
-  }, [recordingActionId])
 
   const groups = (() => groupDefinitions(disabledTuiAgents))()
   const ignoredConflictActionIds = (() => disabledAgentTabActionIds(disabledTuiAgents))()

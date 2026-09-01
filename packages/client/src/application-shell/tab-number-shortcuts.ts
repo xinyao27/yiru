@@ -1,8 +1,8 @@
 import type { Tab } from '@yiru/runtime-protocol/workbench/types'
 import {
-  activateWebRuntimeSessionTab,
-  isWebRuntimeSessionActive
-} from '~renderer/runtime/web-runtime-session'
+  activateRemoteRuntimeSessionTab,
+  isRemoteRuntimeSessionActive
+} from '~renderer/runtime/remote-runtime-session'
 import { useAppStore } from '~renderer/store/state'
 import type { AppState } from '~renderer/store/types'
 import { focusTerminalTabSurface } from '~renderer/tab-bar/focus-terminal-surface'
@@ -67,8 +67,8 @@ export function activateTabNumberShortcut(index: number): boolean {
   store.activateTab(target.id)
 
   if (target.contentType === 'terminal') {
-    if (isWebRuntimeSessionActive(runtimeEnvironmentId)) {
-      void activateWebRuntimeSessionTab({
+    if (isRemoteRuntimeSessionActive(runtimeEnvironmentId)) {
+      void activateRemoteRuntimeSessionTab({
         worktreeId,
         tabId: target.entityId,
         environmentId: runtimeEnvironmentId
@@ -81,8 +81,8 @@ export function activateTabNumberShortcut(index: number): boolean {
   }
 
   if (target.contentType === 'browser') {
-    if (isWebRuntimeSessionActive(runtimeEnvironmentId)) {
-      void activateWebRuntimeSessionTab({
+    if (isRemoteRuntimeSessionActive(runtimeEnvironmentId)) {
+      void activateRemoteRuntimeSessionTab({
         worktreeId,
         tabId: target.id,
         environmentId: runtimeEnvironmentId

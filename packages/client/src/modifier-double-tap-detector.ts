@@ -75,7 +75,7 @@ function otherModifierHeld(event: ModifierKeyEventLike, modifier: PhysicalModifi
   return false
 }
 
-// Normalizes a platform key event (DOM or Electron) into the detector input.
+// Normalizes a DOM or host key event into the detector input.
 export function toModifierDoubleTapEvent(event: ModifierKeyEventLike): ModifierDoubleTapEvent {
   const modifier = modifierFromKeyEvent(event.code, event.key)
   return {

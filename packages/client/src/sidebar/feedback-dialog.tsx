@@ -106,11 +106,8 @@ export function SidebarFeedbackDialog({
     setIsSubmitting(true)
     try {
       const identity = getSubmitIdentity(viewer, submitAnonymously)
-      // Why: submission is proxied through the main process via IPC because
-      // the packaged Mac build loads the renderer from file://, which makes
-      // cross-origin fetch() fail CORS preflight. Electron's net module in
-      // the main process has no CORS restrictions and works uniformly in dev
-      // and prod.
+      // Why: submission goes through the daemon so authentication and network
+      // behavior stay consistent across Chrome clients.
       const result = await shellClient.feedback.submit({
         feedback: trimmed,
         submitAnonymously,

@@ -1,6 +1,6 @@
 import type { StateCreator } from 'zustand'
+import { setRemoteSessionTabPropsCommand } from '~renderer/runtime/remote-session/commands'
 import { scheduleRuntimeGraphSync } from '~renderer/runtime/sync-runtime-graph'
-import { setWebSessionTabPropsCommand } from '~renderer/runtime/web-session/commands'
 import { getRuntimeEnvironmentIdForWorktree } from '~renderer/worktree/runtime-owner'
 
 import type { AppState } from '../../store/types'
@@ -126,7 +126,7 @@ export function createTerminalUnreadActions(
           ? getRuntimeEnvironmentIdForWorktree(state, owningWorktreeId)
           : null
         if (owningWorktreeId && environmentId) {
-          setWebSessionTabPropsCommand({
+          setRemoteSessionTabPropsCommand({
             environmentId,
             worktreeId: owningWorktreeId,
             tabId: item.id,

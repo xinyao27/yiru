@@ -22,8 +22,8 @@ export function DiffCodeViewEditProvider({
     new Editor<DiffCodeViewAnnotation>({
       ...options,
       historyMaxEntries: DIFF_CODE_VIEW_HISTORY_MAX_ENTRIES,
-      // Why: Pierre's docs call this out for Electron — the DOM clipboard is
-      // unreliable in the renderer, so route through the main process.
+      // Why: route clipboard reads through the shared browser capability so
+      // permission and size handling stays consistent.
       clipboard: { readText: () => shellClient.ui.readClipboardText() }
     })
   return <EditProvider createEditor={createEditor}>{children}</EditProvider>

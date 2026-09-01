@@ -53,9 +53,6 @@ export type PaneManagerOptions = {
   onPaneClosed?: (paneId: number, closedPane?: ClosedPaneInfo) => void
   onActivePaneChange?: (pane: ManagedPane) => void
   onLayoutChanged?: () => void
-  /** Why: Electron webviews can steal pointer streams from renderer-owned
-   *  pane drags unless callers temporarily put them in pointer passthrough. */
-  onPaneDragActiveChange?: (active: boolean) => void
   resolveExternalPaneDropTarget?: PaneExternalDropResolver
   onExternalPaneDrop?: PaneExternalDropHandler
   terminalOptions?: (paneId: number) => Partial<ITerminalOptions>

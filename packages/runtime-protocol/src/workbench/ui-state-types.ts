@@ -138,7 +138,6 @@ export type PersistedUIState = {
   usagePercentageDisplay?: UsagePercentageDisplay
   /** Why: usage roster density follows the user across native, web, and SSH runtimes. */
   statusBarUsageMode?: StatusBarUsageMode
-  dismissedUpdateVersion: string | null
   lastUpdateCheckAt: number | null
   pendingUpdateNudgeId?: string | null
   dismissedUpdateNudgeId?: string | null
@@ -146,9 +145,6 @@ export type PersistedUIState = {
    *  permission dialog via a startup notification. Prevents re-firing on
    *  every launch. */
   notificationPermissionRequested?: boolean
-  /** Once the user has seen the "your sessions won't be interrupted"
-   *  reassurance card, we never show it again. */
-  updateReassuranceSeen?: boolean
   /** Per-paneKey "user has visited this row" timestamps, used by the inline
    *  agents list to mute rows the user has already seen. Persisted because
    *  agent rows themselves now survive restart; without persisting acks too,
@@ -170,9 +166,6 @@ export type PersistedUIState = {
   /** User-dismissed browser import hint in the browser toolbar. Import remains
    *  available from Settings > Browser and the toolbar overflow menu. */
   browserImportHintHidden?: boolean
-  /** Why: Windows-only. Set once after the window first hides to the system
-   *  tray, so the "Yiru is still running" notification shows only on first use. */
-  trayMinimizeNoticeShown?: boolean
   /** User dismissed the first-run Mobile Emulator intro (Keep, Hide, or close).
    *  Reversible only by re-enabling the feature in Settings. */
   mobileEmulatorTabIntroDismissed?: boolean
@@ -193,15 +186,10 @@ export type PersistedUIState = {
    *  Phase 3 will expand this to a full BrowserSessionProfile per workspace. */
   browserDefaultUrl?: string | null
   browserDefaultSearchEngine?: 'google' | 'duckduckgo' | 'bing' | 'kagi' | null
-  /** Electron browser zoom level applied when a new local browser tab is created. */
+  /** Chromium zoom level applied when a new local browser tab is created. */
   browserDefaultZoomLevel?: number
   /** Optional Kagi private-session link used only when Kagi is the search engine. */
   browserKagiSessionLink?: string | null
-  /** Saved window bounds so the app restores to the user's last position/size
-   *  instead of maximizing on every launch. */
-  windowBounds?: { x: number; y: number; width: number; height: number } | null
-  /** Whether the window was maximized when it was last closed. */
-  windowMaximized?: boolean
   /** One-shot migration flag: 'recent' used to mean the weighted smart sort
    *  (v1→v2 rename). When this flag is absent and sortBy is 'recent', the
    *  main-process load() migrates it to 'smart' and sets this flag so the

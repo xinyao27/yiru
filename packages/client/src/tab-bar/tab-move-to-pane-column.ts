@@ -1,7 +1,7 @@
 import { useAppStore } from '~renderer/store/state'
 import type { TabSplitDirection } from '~renderer/tab-bar/split-direction'
 
-import { mirrorWebRuntimeTabMove } from './web-runtime-tab-move-mirror'
+import { mirrorRemoteRuntimeTabMove } from './remote-runtime-tab-move-mirror'
 
 type TabMovePaneColumnState = Pick<
   ReturnType<typeof useAppStore.getState>,
@@ -54,7 +54,7 @@ export function moveTabToNewPaneColumn(args: {
     splitDirection: args.direction
   })
   if (moved) {
-    mirrorWebRuntimeTabMove({
+    mirrorRemoteRuntimeTabMove({
       kind: 'split',
       worktreeId,
       tabId: args.unifiedTabId,

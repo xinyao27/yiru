@@ -107,7 +107,7 @@ export const createRecentlyClosedTabsSlice: StateCreator<
     // session. A raw local createTab here would leave an
     // unbacked phantom tab that races the next host snapshot, so skip local
     // reopen for those worktrees — the cross-type dispatcher falls through to
-    // browser/editor. Imported directly instead of via web-runtime-session to
+    // browser/editor. Imported directly instead of via remote-runtime-session to
     // avoid a store slice ↔ store-index import cycle. Remote terminal reopen is
     // deferred (see PR notes); local + SSH worktrees are the covered surface.
     if (getExplicitRuntimeEnvironmentIdForWorktree(get(), worktreeId)?.trim()) {

@@ -2,7 +2,7 @@ import type {
   RuntimeMobileSessionTerminalClientTab,
   RuntimeMobileSessionTabsResult
 } from '@yiru/runtime-protocol/workbench/runtime-types'
-import { toHostSessionTabId } from '~renderer/runtime/web-terminal-surface-id'
+import { toHostSessionTabId } from '~renderer/runtime/remote-terminal-surface-id'
 import { toRuntimeWorktreeSelector } from '~renderer/runtime/worktree-selector'
 
 import type { RuntimePtyTransportOptions } from './pty/transport-types'

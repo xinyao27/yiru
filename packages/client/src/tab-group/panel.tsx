@@ -33,7 +33,6 @@ export default function TabGroupPanel({
   suppressLeftBorder = false,
   suppressRightBorder = false,
   suppressBottomBorder = false,
-  reserveWindowControlsSpace,
   reserveCollapsedSidebarHeaderSpace,
   isTabDragActive = false,
   hoveredTabInsertion = null
@@ -48,7 +47,6 @@ export default function TabGroupPanel({
   suppressLeftBorder?: boolean
   suppressRightBorder?: boolean
   suppressBottomBorder?: boolean
-  reserveWindowControlsSpace: boolean
   reserveCollapsedSidebarHeaderSpace: boolean
   isTabDragActive?: boolean
   hoveredTabInsertion?: HoveredTabInsertion | null
@@ -223,7 +221,6 @@ export default function TabGroupPanel({
                         variant="titlebar-segment"
                         size="icon-titlebar-wide"
                         seam="merge-next"
-                        className="[-webkit-app-region:no-drag]"
                         aria-label={translate(
                           'auto.components.tab.group.TabGroupPanel.closePaneColumn',
                           'Close split pane'
@@ -253,7 +250,6 @@ export default function TabGroupPanel({
       }
       trailingActionsConnected
       reserveCollapsedSidebarHeaderSpace={reserveCollapsedSidebarHeaderSpace}
-      reserveWindowControlsSpace={reserveWindowControlsSpace}
       rootClassName={splitFrameClassName}
       rootProps={{
         onPointerDown: commands.focusGroup,

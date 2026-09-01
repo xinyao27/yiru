@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { translate } from '~renderer/i18n/i18n'
 import { Minus, Plus, ArrowCounterClockwise as RotateCcw } from '~renderer/icons/hugeicons'
 import { shellClient } from '~renderer/runtime/shell-client'
@@ -11,12 +11,6 @@ import { ZOOM_STEP, ZOOM_MIN, ZOOM_MAX, zoomLevelToPercent } from './constants'
 
 export function UIZoomControl(): React.JSX.Element {
   const [zoomLevel, setZoomLevel] = useState(() => shellClient.ui.getZoomLevel())
-
-  useEffect(() => {
-    return shellClient.ui.onTerminalZoom(() => {
-      setZoomLevel(shellClient.ui.getZoomLevel())
-    })
-  }, [])
 
   const applyZoom = (level: number) => {
     const clamped = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, level))

@@ -143,10 +143,8 @@ export function WorkspaceSidebarFrame({
         <div
           ref={collapsedChromeRef}
           className={cn(
-            'fixed top-0 z-20 h-[var(--titlebar-height)] [-webkit-app-region:no-drag]',
-            placement === 'left'
-              ? 'left-[var(--window-controls-width,0px)]'
-              : 'right-[var(--window-controls-width,0px)]'
+            'fixed top-0 z-20 h-[var(--titlebar-height)]',
+            placement === 'left' ? 'left-0' : 'right-0'
           )}
         >
           {/* Why: collapsed chrome keeps the panel destinations reachable; selecting
@@ -178,15 +176,12 @@ export function WorkspaceSidebarFrame({
                 render={
                   <div
                     className={cn(
-                      'border-border flex h-[var(--titlebar-height)] min-h-[var(--titlebar-height)] items-center border-b [-webkit-app-region:drag]',
-                      placement === 'left'
-                        ? 'pl-[var(--window-controls-width,0px)]'
-                        : 'pr-[var(--window-controls-width,0px)]'
+                      'border-border flex h-[var(--titlebar-height)] min-h-[var(--titlebar-height)] items-center border-b'
                     )}
                   >
                     <div
                       ref={activityStripRef}
-                      className="flex h-full min-w-0 flex-1 items-center overflow-hidden [-webkit-app-region:no-drag]"
+                      className="flex h-full min-w-0 flex-1 items-center overflow-hidden"
                     >
                       <TopActivityItems
                         activeView={activeView}
@@ -194,9 +189,7 @@ export function WorkspaceSidebarFrame({
                         onSelectView={onSelectView}
                       />
                     </div>
-                    <div className="h-full shrink-0 [-webkit-app-region:no-drag]">
-                      {sidebarToggle}
-                    </div>
+                    <div className="h-full shrink-0">{sidebarToggle}</div>
                   </div>
                 }
               />
@@ -208,16 +201,13 @@ export function WorkspaceSidebarFrame({
           ) : (
             <div
               className={cn(
-                'border-border flex h-[var(--titlebar-height)] min-h-[var(--titlebar-height)] items-center justify-between border-b [-webkit-app-region:drag]',
-                placement === 'left'
-                  ? 'pl-[max(12px,var(--window-controls-width,0px))]'
-                  : 'pr-[max(0px,calc(var(--window-controls-width,0px)-40px))] pl-3'
+                'border-border flex h-[var(--titlebar-height)] min-h-[var(--titlebar-height)] items-center justify-between border-b px-3'
               )}
             >
               <span className="text-foreground truncate text-[11px] font-semibold tracking-wider uppercase">
                 {activeTitle}
               </span>
-              <div className="h-full [-webkit-app-region:no-drag]">{sidebarToggle}</div>
+              <div className="h-full">{sidebarToggle}</div>
             </div>
           )}
 

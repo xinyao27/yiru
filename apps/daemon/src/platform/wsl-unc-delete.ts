@@ -6,8 +6,8 @@ import { parseWslPath } from './wsl'
  * addressed from Windows via a \\wsl.localhost\<distro>\... (or legacy
  * \\wsl$\...) UNC path.
  *
- * Why: Electron's shell.trashItem() cannot move a WSL UNC item to a Recycle
- * Bin — the WSL virtual volume has none — so it throws and the delete fails
+ * Why: a WSL UNC item cannot move to a Windows Recycle Bin because the WSL
+ * virtual volume has none, so the normal trash path fails
  * (issue #6415). For these paths we run `rm` inside the distro via wsl.exe,
  * which performs a true delete on the Linux fs and honors Linux permissions.
  *

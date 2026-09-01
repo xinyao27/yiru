@@ -1,6 +1,5 @@
 import type { AgentStatusIpcPayload } from '@yiru/runtime-protocol/model/agent'
 import type { RuntimeCapability } from '@yiru/runtime-protocol/protocol-version'
-import type { RuntimeDesktopWindowStatus } from '@yiru/runtime-protocol/workbench/runtime-types'
 import type { RuntimeSyncedTab } from '@yiru/runtime-protocol/workbench/runtime-types'
 import type {
   WarpThemeImportPreview,
@@ -13,7 +12,6 @@ import { configureAiVaultSessionSources } from '~main/ai-vault/cached-session-li
 import type { AiVaultSessionRuntimeTarget } from '~main/ai-vault/session/root-configuration'
 import type { RuntimeHostProcessMetricsProvider } from '~main/memory/collector'
 import type { Store } from '~main/persistence/store'
-import type { RuntimeWindowTarget } from '~main/runtime/host/renderer-target'
 import { AgentDetector } from '~main/stats/agent-detector'
 import type { StatsCollector } from '~main/stats/collector'
 import type { ProviderUsageStores } from '~main/stats/summary'
@@ -62,10 +60,6 @@ export abstract class RuntimeComposition extends RuntimeStateAcquireFileWatcherR
 
   protected readonly buildAgentHookPtyEnv: (() => Record<string, string>) | null
 
-  protected readonly getDesktopWindowStatusFn: () => RuntimeDesktopWindowStatus
-
-  protected readonly getWindowByIdFn: (windowId: number) => RuntimeWindowTarget | null
-
   protected readonly getHostProcessMetricsFn: RuntimeHostProcessMetricsProvider | undefined
 
   protected readonly disabledCapabilities: ReadonlySet<RuntimeCapability>
@@ -102,15 +96,13 @@ export abstract class RuntimeComposition extends RuntimeStateAcquireFileWatcherR
         target: AiVaultSessionRuntimeTarget
       ) => Promise<readonly string[]>
       buildAgentHookPtyEnv?: () => Record<string, string>
-      getDesktopWindowStatus?: () => RuntimeDesktopWindowStatus
-      getWindowById?: (windowId: number) => RuntimeWindowTarget | null
       getHostProcessMetrics?: RuntimeHostProcessMetricsProvider
       disabledCapabilities?: readonly RuntimeCapability[]
       // Why: Ghostty/Warp import preview need the full local `Store` (this
       // runtime's own `getSettings()` projection omits most of the settings
       // fields they diff against) plus, for Warp's `chooseFile`/`chooseFolder`
-      // sources, an Electron dialog — both are shell-owned capabilities the
-      // headless-safe runtime cannot reach on its own.
+      // sources and an interactive file picker — both are client-owned
+      // capabilities the daemon cannot reach on its own.
       previewGhosttyImportForClient?: () => Promise<GhosttyImportPreview>
       previewWarpThemeImportForClient?: (
         source: WarpThemeImportSource
@@ -160,8 +152,6 @@ export abstract class RuntimeComposition extends RuntimeStateAcquireFileWatcherR
     this.onPtyStopped = deps?.onPtyStopped ?? null
     this.onTerminalAgentStatus = deps?.onTerminalAgentStatus ?? null
     this.buildAgentHookPtyEnv = deps?.buildAgentHookPtyEnv ?? null
-    this.getDesktopWindowStatusFn = deps?.getDesktopWindowStatus ?? (() => 'openable')
-    this.getWindowByIdFn = deps?.getWindowById ?? (() => null)
     this.getHostProcessMetricsFn = deps?.getHostProcessMetrics
     this.disabledCapabilities = new Set(deps?.disabledCapabilities)
     this.previewGhosttyImportForClientFn = deps?.previewGhosttyImportForClient ?? null

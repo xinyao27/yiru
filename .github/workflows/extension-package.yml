@@ -7,6 +7,8 @@ on:
       - 'apps/daemon/**'
       - 'packages/client/**'
       - 'packages/runtime-protocol/**'
+      - 'scripts/build-skill-resources.mjs'
+      - 'skills/**'
       - 'package.json'
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
@@ -16,6 +18,17 @@ on:
       - main
     tags:
       - 'extension-v*'
+    paths:
+      - 'apps/extension/**'
+      - 'apps/daemon/**'
+      - 'packages/client/**'
+      - 'packages/runtime-protocol/**'
+      - 'scripts/build-skill-resources.mjs'
+      - 'skills/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.github/workflows/extension-package.yml'
   workflow_dispatch:
 
 permissions:

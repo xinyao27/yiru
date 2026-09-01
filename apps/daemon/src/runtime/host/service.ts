@@ -95,7 +95,7 @@ export function createNodeRuntimeHostService({
   initStatsPath()
   initializeObservability()
   // Why: runtime credentials and daemon state stay at the installation root,
-  // while workbench state follows the same active profile file as Electron.
+  // while workbench state follows the active profile file.
   const store = new Store({ dataFile: profileDataFile })
   const stats = new StatsCollector()
   const runtime = new YiruRuntimeService(store, stats, {
@@ -104,8 +104,6 @@ export function createNodeRuntimeHostService({
     // that the host publishes through agentStatus.events.
     getAgentStatusSnapshot: () =>
       agentHookServer.getStatusSnapshot().filter((entry) => entry.providerSessionOnly !== true),
-    getDesktopWindowStatus: () => 'blocked',
-    getWindowById: () => null,
     disabledCapabilities: [
       ...terminalMultiplexDisabledCapabilities(),
       ...RUNTIME_CAPABILITIES.filter(
@@ -118,7 +116,7 @@ export function createNodeRuntimeHostService({
     previewWarpThemeImportForClient: (source) => previewWarpThemeImport(store, source),
     // Why: a relay or `serve` host answers mobile's stats reads on its own, so it
     // owns the same attributed-usage stores the windowed app wires. Cursor's
-    // metered spend stays desktop-only — that probe needs Electron's net stack.
+    // metered spend is unavailable here because its former transport no longer exists.
     providerUsageStores: {
       claude: new ClaudeUsageStore(store),
       codex: new CodexUsageStore(store),

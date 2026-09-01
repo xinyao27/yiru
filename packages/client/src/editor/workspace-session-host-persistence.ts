@@ -283,16 +283,17 @@ export async function fetchWorkspaceSessionWithRuntimeHostOwners(
   repos: readonly Pick<Repo, 'connectionId' | 'executionHostId'>[],
   additionalRuntimeHostIds: readonly ExecutionHostId[] = []
 ): Promise<WorkspaceSessionHostRead> {
-  const slices: HostSessionSlices = {
-    [LOCAL_EXECUTION_HOST_ID]: await exchangePersistedWorkspaceSessionTerminalIds(await api.get())
-  }
   // Why: startup can know saved runtime session hosts before their repo
   // catalogs hydrate, so include those partitions in the first read.
   const runtimeHostIds = new Set<ExecutionHostId>([
     ...listKnownRuntimeHostIds(repos),
     ...additionalRuntimeHostIds
   ])
-  await Promise.all(
+  const slices: HostSessionSlices = {}
+  const localRead = api
+    .get()
+    .then((session) => exchangePersistedWorkspaceSessionTerminalIds(session))
+  const remoteReads = Promise.all(
     [...runtimeHostIds].map(async (hostId) => {
       try {
         slices[hostId] = await exchangePersistedWorkspaceSessionTerminalIds(
@@ -304,6 +305,8 @@ export async function fetchWorkspaceSessionWithRuntimeHostOwners(
       }
     })
   )
+  slices[LOCAL_EXECUTION_HOST_ID] = await localRead
+  await remoteReads
   return {
     session: mergeWorkspaceSessionsFromHosts(slices),
     runtimeHostIdByWorkspaceSessionKey: buildRuntimeHostIdByWorkspaceSessionKey(slices)

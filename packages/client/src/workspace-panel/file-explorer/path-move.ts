@@ -2,20 +2,13 @@ import { toast } from 'sonner'
 import { requestEditorSaveQuiesce } from '~renderer/editor/autosave'
 import { basename, dirname, joinPath } from '~renderer/path'
 import { getConnectionId } from '~renderer/runtime/connection-context'
+import { extractRuntimeErrorMessage } from '~renderer/runtime/error-message'
 import { renameRuntimePath } from '~renderer/runtime/file-client'
 import { useAppStore } from '~renderer/store/state'
 
 import { remapOpenEditorTabsForPathChange } from '../remap-open-editor-tabs-for-path-change'
 import { getRightSidebarWorktreeRuntimeSettings } from './runtime-owner'
 import { commitFileExplorerOp } from './undo-redo'
-
-function extractIpcErrorMessage(error: unknown, fallback: string): string {
-  if (!(error instanceof Error)) {
-    return fallback
-  }
-  const match = error.message.match(/Error invoking remote method '[^']*': (?:Error: )?(.+)/)
-  return match ? match[1] : error.message
-}
 
 export function useFileExplorerPathMove({
   worktreePath,
@@ -86,7 +79,7 @@ export function useFileExplorerPathMove({
           }
         })
       } catch (error) {
-        toast.error(extractIpcErrorMessage(error, `Failed to move '${fileName}'.`))
+        toast.error(extractRuntimeErrorMessage(error, `Failed to move '${fileName}'.`))
         return
       }
       await Promise.all([refreshDir(sourceDir), refreshDir(destDir)])

@@ -2,12 +2,12 @@ import type { Editor } from '@tiptap/react'
 import { toast } from 'sonner'
 import { saveLocalClipboardImageAsTempFile } from '~renderer/runtime/clipboard-client'
 import { getConnectionId } from '~renderer/runtime/connection-context'
+import { extractRuntimeErrorMessage } from '~renderer/runtime/error-message'
 import { settingsForRuntimeOwner } from '~renderer/runtime/rpc-client'
 import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store/state'
 
 import { insertRichMarkdownImageFromPath } from './image-insert'
-import { extractIpcErrorMessage } from './ipc-error-message'
 
 export type RichMarkdownImagePasteArgs = {
   editor: Editor | null
@@ -58,7 +58,7 @@ export function handleRichMarkdownImagePaste({
       })
     })
     .catch((err) => {
-      toast.error(extractIpcErrorMessage(err, 'Failed to insert image.'))
+      toast.error(extractRuntimeErrorMessage(err, 'Failed to insert image.'))
     })
 
   return true

@@ -126,9 +126,9 @@ async function openRuntimeBrowserLink(
   runtimeEnvironmentId: string
 ): Promise<void> {
   try {
-    const { createWebRuntimeSessionBrowserTab } =
-      await import('~renderer/runtime/web-runtime-session')
-    const opened = await createWebRuntimeSessionBrowserTab({
+    const { createRemoteRuntimeSessionBrowserTab } =
+      await import('~renderer/runtime/remote-runtime-session')
+    const opened = await createRemoteRuntimeSessionBrowserTab({
       worktreeId,
       environmentId: runtimeEnvironmentId,
       url

@@ -58,7 +58,7 @@ export async function recoverStartupSession({
     action: {
       label: translate('auto.App.caea5b51b9', 'Restart now'),
       onClick: () => {
-        void shellClient.app.relaunch()
+        void shellClient.app.restart()
       }
     }
   })
@@ -68,7 +68,6 @@ export async function recoverStartupSession({
     return
   }
   try {
-    await shellClient.app.awaitFirstWindowStartupServices()
     await actions.reconnectPersistedTerminals(signal)
   } catch (reconnectError) {
     console.error('[startup] reconnectPersistedTerminals failed in error path:', reconnectError)

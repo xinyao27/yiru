@@ -40,9 +40,15 @@ export function startRemoteRuntimeSocketLiveness(args: {
     if (stopped) {
       return
     }
-    if (now() - lastActivityAt > livenessTimeoutMs) {
+    const idleMs = now() - lastActivityAt
+    if (idleMs > livenessTimeoutMs) {
       stop()
       args.onDead()
+      return
+    }
+    // Why: authenticated inbound traffic is stronger liveness evidence than a control-frame
+    // round trip. Avoid ping/pong traffic on busy tunnels while retaining the same idle timeout.
+    if (idleMs < pingIntervalMs) {
       return
     }
     try {

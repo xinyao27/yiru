@@ -1,21 +1,21 @@
 import { TOGGLE_TERMINAL_PANE_EXPAND_EVENT } from '~renderer/constants/terminal'
 import { browserWorkspaceHasRemoteOwner } from '~renderer/runtime/remote-browser-tab-ownership'
 import {
-  activateWebRuntimeSessionTab,
-  closeWebRuntimeSessionTab,
-  isWebRuntimeSessionActive
-} from '~renderer/runtime/web-runtime-session'
+  activateRemoteRuntimeSessionTab,
+  closeRemoteRuntimeSessionTab,
+  isRemoteRuntimeSessionActive
+} from '~renderer/runtime/remote-runtime-session'
 import { useAppStore } from '~renderer/store/state'
 
 import { shouldDeferParkedPtyExitTabClose } from '../terminal-pane/terminal-parked-tab-watchers'
 import { closeTerminalTab } from '../terminal/tab-actions'
 import { closeUnifiedTabsById } from './bulk-close-tabs'
+import type { QueueEditorCloseRequests } from './editor-close-queue'
 import {
   getActiveWorktreeRuntimeEnvironmentId,
   isPinnedEditorFileTab,
   isPinnedVisibleTab
 } from './tab-model-lookup'
-import type { QueueEditorCloseRequests } from './window-close-guard'
 
 type TabCloseActions = {
   handleCloseTab: (tabId: string) => void
@@ -30,7 +30,7 @@ type TabCloseActions = {
 }
 
 // Why: closing, activating, and bulk-closing tabs of mixed content types
-// (terminal / editor / browser) all need the same web-runtime-session
+// (terminal / editor / browser) all need the same remote-runtime-session
 // routing and unified-tab pinned-state checks, so they share one hook.
 export function useTabCloseActions(
   queueEditorCloseRequests: QueueEditorCloseRequests
@@ -64,10 +64,10 @@ export function useTabCloseActions(
     }
     const runtimeEnvironmentId = getActiveWorktreeRuntimeEnvironmentId(owningWorktreeId)
     if (
-      isWebRuntimeSessionActive(runtimeEnvironmentId) &&
+      isRemoteRuntimeSessionActive(runtimeEnvironmentId) &&
       browserWorkspaceHasRemoteOwner(state, tabId, runtimeEnvironmentId)
     ) {
-      void closeWebRuntimeSessionTab({
+      void closeRemoteRuntimeSessionTab({
         worktreeId: owningWorktreeId,
         tabId,
         environmentId: runtimeEnvironmentId
@@ -181,8 +181,8 @@ export function useTabCloseActions(
 
   const handleActivateTab = (tabId: string) => {
     const runtimeEnvironmentId = getActiveWorktreeRuntimeEnvironmentId(activeWorktreeId)
-    if (activeWorktreeId && isWebRuntimeSessionActive(runtimeEnvironmentId)) {
-      void activateWebRuntimeSessionTab({
+    if (activeWorktreeId && isRemoteRuntimeSessionActive(runtimeEnvironmentId)) {
+      void activateRemoteRuntimeSessionTab({
         worktreeId: activeWorktreeId,
         tabId,
         environmentId: runtimeEnvironmentId
@@ -208,10 +208,10 @@ export function useTabCloseActions(
     const runtimeEnvironmentId = getActiveWorktreeRuntimeEnvironmentId(activeWorktreeId)
     if (
       activeWorktreeId &&
-      isWebRuntimeSessionActive(runtimeEnvironmentId) &&
+      isRemoteRuntimeSessionActive(runtimeEnvironmentId) &&
       browserWorkspaceHasRemoteOwner(state, tabId, runtimeEnvironmentId)
     ) {
-      void activateWebRuntimeSessionTab({
+      void activateRemoteRuntimeSessionTab({
         worktreeId: activeWorktreeId,
         tabId,
         environmentId: runtimeEnvironmentId

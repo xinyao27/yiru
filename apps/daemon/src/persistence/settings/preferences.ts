@@ -24,20 +24,20 @@ export class SettingsSlice extends PersistenceSlice {
     listener: (
       updates: Partial<GlobalSettings>,
       settings: GlobalSettings,
-      originWebContentsId?: number
+      originClientId?: number
     ) => void
   ): () => void {
     return this.notifications.onSettingsChanged(listener)
   }
 
-  // Why: desktop and mobile write one UI view-state and both need immediate updates.
+  // Why: Chrome and iOS write one UI view-state and both need immediate updates.
   onUIChanged(listener: (ui: PersistedState['ui']) => void): () => void {
     return this.notifications.onUiChanged(listener)
   }
 
   updateSettings(
     updates: Partial<GlobalSettings>,
-    options: { notifyListeners?: boolean; originWebContentsId?: number } = {}
+    options: { notifyListeners?: boolean; originClientId?: number } = {}
   ): GlobalSettings {
     const mutation = applyPersistedSettingsUpdate(this.state.settings, updates)
     this.state.settings = mutation.settings
@@ -45,7 +45,7 @@ export class SettingsSlice extends PersistenceSlice {
     this.notifications.publishSettingsMutation(
       mutation,
       options.notifyListeners === true,
-      options.originWebContentsId
+      options.originClientId
     )
     return mutation.settings
   }

@@ -61,7 +61,7 @@ export abstract class RuntimeCoreEmitNestedRepoScanProgressEvent extends Runtime
   }
 
   // Why: driver ownership is pushed to the shell over IPC. Paired clients hold
-  // no WebContents, so the same transition is republished for the runtime
+  // no browser page, so the same transition is republished for the runtime
   // subscription to fan out.
 
   protected emitDriverEvent(event: RuntimeDriverEvent): void {
@@ -78,7 +78,7 @@ export abstract class RuntimeCoreEmitNestedRepoScanProgressEvent extends Runtime
   }
 
   // Why: the browser manager already pushes these to the focused window's
-  // WebContents. Paired web/mobile clients have no WebContents, so the same
+  // browser page. Paired clients have no local page, so the same
   // payload is republished here for the runtime subscription to fan out.
 
   emitBrowserGuestEvent(event: RuntimeBrowserGuestEvent): void {
@@ -109,7 +109,7 @@ export abstract class RuntimeCoreEmitNestedRepoScanProgressEvent extends Runtime
   }
 
   // Why: the base-directory watcher's metadata-file head diff has no
-  // BrowserWindow to push through once decoupled from shell lifetime — it
+  // browser window to push through once decoupled from shell lifetime — it
   // reaches this via the injected publisher in worktree/head-identity-events.ts
   // (same shape as notifyWorktreesChangedForRemoteClients), so paired web/mobile
   // clients see external head moves the same way the desktop IPC push does.

@@ -4,6 +4,9 @@ on:
   push:
     tags:
       - 'v*'
+  # Why: tag-triggered releases must be retryable after a transient signing, registry,
+  # or GitHub outage without deleting and recreating an immutable release tag.
+  workflow_dispatch:
 
 permissions:
   attestations: write
@@ -39,7 +42,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       # Why: TCC grants bind to the signed helper identity, so release helpers must keep the
-      # Developer ID identity that replaces the former Desktop app's computer-use sidecar.
+      # Developer ID identity used to sign the standalone computer-use sidecar.
       - name: Import Developer ID certificate
         env:
           MAC_CERTS: ${{ secrets.MAC_CERTS }}
@@ -112,8 +115,6 @@ jobs:
     if: github.repository == 'xinyao27/yiru'
     needs: macos-helper
     runs-on: ubuntu-latest
-    env:
-      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
     steps:
       - name: Checkout tag
         uses: actions/checkout@v7
@@ -183,5 +184,15 @@ jobs:
           subject-path: apps/daemon/dist/yiru-bun-*
 
       - name: Publish npm and bunx installer
-        if: env.NODE_AUTH_TOKEN != ''
-        run: pnpm --filter @yiru/cli publish --no-git-checks --access public
+        working-directory: packages/cli
+        env:
+          # Why: the token bootstraps the package's first release. Once @yiru/cli exists,
+          # npm trusted publishing uses this job's OIDC identity and the token can be removed.
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          if npm view "@yiru/cli@${version}" version >/dev/null 2>&1; then
+            echo "@yiru/cli@${version} is already published"
+          else
+            npm publish --access public
+          fi

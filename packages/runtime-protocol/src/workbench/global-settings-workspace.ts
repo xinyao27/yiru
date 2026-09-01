@@ -1,6 +1,5 @@
 import type { ExecutionHostId } from '@yiru/runtime-protocol/model/workspace'
 
-import type { AppIconId } from './app-icon'
 import type { LoaderStyle } from './loader-style'
 import type { HostSettingOverrides, LeftSidebarAppearanceMode } from './settings-foundation-types'
 import type { YiruWorkspaceLayout } from './settings-model'
@@ -33,7 +32,6 @@ export type GlobalWorkspaceSettings = {
   leftSidebarTintColor?: string
   leftSidebarTintOpacity?: number
   uiLanguage: UiLanguage
-  appIcon: AppIconId
   /** Optional only for profiles persisted before loader selection was introduced. */
   loaderStyle?: LoaderStyle
   appFontFamily: string

@@ -35,8 +35,8 @@ export abstract class RuntimeSessionMoveMobileSessionTab extends RuntimeSessionN
       throw new Error('target_group_not_found')
     }
 
-    // Why: web clients address terminal surfaces as tab::leaf, while desktop
-    // tab grouping is owned by the outer terminal tab id.
+    // Why: clients address terminal surfaces as tab::leaf, while workbench tab
+    // grouping is owned by the outer terminal tab id.
     if (move.kind === 'reorder') {
       const tabOrder = this.normalizeMobileSessionTabOrder(snapshot, targetGroup, move.tabOrder)
       if (!tabOrder.includes(hostTabId)) {
@@ -78,10 +78,10 @@ export abstract class RuntimeSessionMoveMobileSessionTab extends RuntimeSessionN
     const explicitWorktreeId = this.getValidatedExplicitWorktreeIdSelector(worktreeSelector)
     const worktreeId =
       explicitWorktreeId ?? (await this.resolveWorktreeSelector(worktreeSelector)).id
-    // Why: when a renderer is authoritative (desktop host reached via shared
-    // control), it owns pane geometry and republishes it — a headless write here
+    // Why: when a connected workbench is authoritative, it owns pane geometry
+    // and republishes it — a headless write here
     // would be overwritten and could fight the renderer. Persist only headlessly.
-    if (this.getAvailableAuthoritativeWindow()) {
+    if (this.hasAvailableWorkbench()) {
       return { updated: true }
     }
     // Why: resolve to the host tab id (older/raw-id clients) so the persisted
@@ -111,9 +111,9 @@ export abstract class RuntimeSessionMoveMobileSessionTab extends RuntimeSessionN
     const explicitWorktreeId = this.getValidatedExplicitWorktreeIdSelector(worktreeSelector)
     const worktreeId =
       explicitWorktreeId ?? (await this.resolveWorktreeSelector(worktreeSelector)).id
-    // Why: a renderer-authoritative host owns + republishes tab props, so a
+    // Why: an authoritative workbench owns + republishes tab props, so a
     // headless write would be overwritten. Persist only when headless.
-    if (this.getAvailableAuthoritativeWindow()) {
+    if (this.hasAvailableWorkbench()) {
       return { updated: true }
     }
     const snapshot = this.mobileSessionTabsByWorktree.get(worktreeId)

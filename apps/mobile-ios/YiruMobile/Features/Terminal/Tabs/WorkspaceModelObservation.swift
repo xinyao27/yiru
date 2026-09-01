@@ -74,6 +74,12 @@ extension TerminalWorkspaceModel {
                 return
             }
             guard isConnected else { continue }
+            // Why: the subscription is authoritative in steady state. Polling exists only to
+            // recover host-side handles for pending tabs, so healthy workspaces should issue no
+            // fallback RPCs while the stream is live.
+            guard tabs.contains(where: \.isPendingTerminal) || pendingActiveTabID != nil else {
+                continue
+            }
             await refresh(shouldReplaceFailure: false)
             await activatePendingSelectionIfNeeded()
         }

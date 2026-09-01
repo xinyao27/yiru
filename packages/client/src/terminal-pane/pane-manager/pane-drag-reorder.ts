@@ -43,7 +43,6 @@ export type DragReorderCallbacks = {
   refitPanesUnder: (el: HTMLElement) => void
   requestPaneReparentFrame?: (callback: FrameRequestCallback) => void
   onLayoutChanged?: () => void
-  onDragActiveChange?: (active: boolean) => void
   resolveExternalDropTarget?: PaneExternalDropResolver
   onExternalPaneDrop?: PaneExternalDropHandler
 }

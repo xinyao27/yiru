@@ -1,12 +1,12 @@
 import { isRuntimePtyId } from '@yiru/runtime-protocol/terminal-identity/id'
-import { isWebTerminalSurfaceTabId } from '@yiru/runtime-protocol/workbench/terminal/surface-id'
+import { isRemoteTerminalSurfaceTabId } from '@yiru/runtime-protocol/workbench/terminal/surface-id'
 import type { AppState } from '~renderer/store/types'
 
 export function isWebOnlyMirroredTerminalTab(
   state: Pick<AppState, 'terminalLayoutsByTabId'>,
   tab: Pick<NonNullable<AppState['tabsByWorktree'][string]>[number], 'id' | 'ptyId'>
 ): boolean {
-  if (!isWebTerminalSurfaceTabId(tab.id)) {
+  if (!isRemoteTerminalSurfaceTabId(tab.id)) {
     return false
   }
   const layoutPtyIds = Object.values(state.terminalLayoutsByTabId[tab.id]?.ptyIdsByLeafId ?? {})

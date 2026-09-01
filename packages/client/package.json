@@ -12,8 +12,6 @@
     "./extension-devtools": "./src/extension/devtools/bootstrap.tsx",
     "./extension-install": "./src/extension/install/bootstrap.tsx",
     "./extension-settings": "./src/extension/settings/bootstrap.tsx",
-    "./web-index.html": "./src/web-index.html",
-    "./web-bootstrap": "./src/web/bootstrap.ts",
     "./styles": "./src/assets/main.css",
     "./paraglide/messages": {
       "types": "./generated/paraglide/messages.d.ts",
@@ -131,7 +129,7 @@
     "vite": ">=7"
   },
   "packageManager": "pnpm@11.22.0",
-  "//": "Why: Electron and browser consumers bundle this TS/TSX source directly; wildcard exports cannot model TSX plus CSS, fonts, and ?url assets, so the supported host entrypoints stay explicit and there is deliberately no dist build.",
+  "//": "Why: the Chrome extension bundles this TS/TSX source directly; wildcard exports cannot model TSX plus CSS, fonts, and ?url assets, so the supported host entrypoints stay explicit and there is deliberately no dist build.",
   "reactDoctor": {
     "rules": {
       "react-doctor/js-combine-iterations": "off"

@@ -174,7 +174,7 @@ export function collectDescendantRows(
     const pid = queue[nextIndex]
     for (const child of childrenByPpid.get(pid) ?? []) {
       // Why: ps is not an atomic snapshot. PID reuse can produce duplicate or
-      // cyclic-looking rows, which must not hang the Electron main thread.
+      // cyclic-looking rows, which must not hang the daemon event loop.
       if (visited.has(child.pid)) {
         continue
       }

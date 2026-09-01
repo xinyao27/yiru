@@ -1,8 +1,8 @@
 import { browserWorkspaceHasRemoteOwner } from '~renderer/runtime/remote-browser-tab-ownership'
 import {
-  closeWebRuntimeSessionTab,
-  isWebRuntimeSessionActive
-} from '~renderer/runtime/web-runtime-session'
+  closeRemoteRuntimeSessionTab,
+  isRemoteRuntimeSessionActive
+} from '~renderer/runtime/remote-runtime-session'
 
 import { closeTerminalTab } from '../terminal/tab-actions'
 import {
@@ -20,7 +20,7 @@ type BulkCloseTabsArgs = {
 }
 
 // Why: "close others" and "close to the right" route each id through the
-// identical pinned-skip / web-runtime-session / local terminal-editor-browser
+// identical pinned-skip / remote-runtime-session / local terminal-editor-browser
 // close decision — only the id list differs — so they share this pure
 // function instead of duplicating the routing logic per caller.
 export function closeUnifiedTabsById({
@@ -41,7 +41,7 @@ export function closeUnifiedTabsById({
     }
     const runtimeEnvironmentId = getActiveWorktreeRuntimeEnvironmentId(worktreeId)
     if (
-      isWebRuntimeSessionActive(runtimeEnvironmentId) &&
+      isRemoteRuntimeSessionActive(runtimeEnvironmentId) &&
       (unifiedTab?.contentType === 'terminal' ||
         (unifiedTab?.contentType === 'browser' &&
           browserWorkspaceHasRemoteOwner(state, unifiedTab.entityId, runtimeEnvironmentId)))
@@ -51,7 +51,7 @@ export function closeUnifiedTabsById({
         // authority as well as removing the host-owned session tab.
         closeTerminalTab(unifiedTab.entityId)
       } else {
-        void closeWebRuntimeSessionTab({
+        void closeRemoteRuntimeSessionTab({
           worktreeId,
           tabId: unifiedTab.id,
           environmentId: runtimeEnvironmentId

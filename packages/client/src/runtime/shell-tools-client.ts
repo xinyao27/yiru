@@ -12,9 +12,8 @@ import type {
   WindowsMobileFirewallRepairResult,
   WindowsMobileFirewallStatus
 } from '@yiru/runtime-protocol/workbench/windows-mobile-firewall'
-import { translate } from '~renderer/i18n/i18n'
 
-import { callShellOrpc, isWebRuntimeClient } from './orpc-client'
+import { callShellOrpc } from './orpc-client'
 
 export type ShellMiniMaxCredentialsApi = {
   getStatus: () => Promise<{ configured: boolean }>
@@ -41,7 +40,7 @@ function restoreShellDocument<T>(value: unknown): T {
   return value as T
 }
 
-const electronMiniMaxCredentialsApi: ShellMiniMaxCredentialsApi = {
+export const shellMiniMaxCredentialsApi: ShellMiniMaxCredentialsApi = {
   getStatus: async () =>
     restoreShellDocument(
       await callShellOrpc((client) => client.shell.minimaxCredentials.getStatus, undefined)
@@ -55,7 +54,7 @@ const electronMiniMaxCredentialsApi: ShellMiniMaxCredentialsApi = {
       await callShellOrpc((client) => client.shell.minimaxCredentials.clearCookie, undefined)
     )
 }
-const electronMobileApi: ShellMobileApi = {
+export const shellMobileApi: ShellMobileApi = {
   getWindowsFirewallStatus: (input) =>
     callShellOrpc((client) => client.shell.mobile.getWindowsFirewallStatus, input),
   repairWindowsFirewall: () =>
@@ -63,59 +62,18 @@ const electronMobileApi: ShellMobileApi = {
   openWindowsNetworkSettings: () =>
     callShellOrpc((client) => client.shell.mobile.openWindowsNetworkSettings, undefined)
 }
-const electronDeveloperPermissionsApi: ShellDeveloperPermissionsApi = {
+export const shellDeveloperPermissionsApi: ShellDeveloperPermissionsApi = {
   getStatus: () =>
     callShellOrpc((client) => client.shell.developerPermissions.getStatus, undefined),
   request: (input) => callShellOrpc((client) => client.shell.developerPermissions.request, input)
 }
-const electronExportApi: ShellExportApi = {
+export const shellExportApi: ShellExportApi = {
   htmlToPdf: async (input) =>
     restoreShellDocument(await callShellOrpc((client) => client.shell.export.htmlToPdf, input))
 }
-const electronLocalhostWorktreeLabelsApi: ShellLocalhostWorktreeLabelsApi = {
+export const shellLocalhostWorktreeLabelsApi: ShellLocalhostWorktreeLabelsApi = {
   register: async (input) =>
     restoreShellDocument(
       await callShellOrpc((client) => client.shell.localhostWorktreeLabels.register, input)
     )
 }
-const unavailableOnWeb = (): Error =>
-  new Error(translate('auto.web.runtime.shellBoundary.unavailable', 'Unavailable on web.'))
-const webMiniMaxCredentialsApi: ShellMiniMaxCredentialsApi = {
-  getStatus: () => Promise.resolve({ configured: false }),
-  saveCookie: () => Promise.reject(unavailableOnWeb()),
-  clearCookie: () => Promise.resolve({ configured: false })
-}
-const webMobileApi: ShellMobileApi = {
-  getWindowsFirewallStatus: () => Promise.resolve({ supported: false }),
-  repairWindowsFirewall: () => Promise.resolve({ ok: false, reason: 'unsupported' }),
-  openWindowsNetworkSettings: () => Promise.resolve(false)
-}
-const webDeveloperPermissionsApi: ShellDeveloperPermissionsApi = {
-  getStatus: () => Promise.resolve([]),
-  request: ({ id }) => Promise.resolve({ id, status: 'unsupported', openedSystemSettings: false })
-}
-const webExportApi: ShellExportApi = {
-  htmlToPdf: () =>
-    Promise.resolve({
-      success: false,
-      error: translate(
-        'auto.web.webShell.exportHtmlToPdfUnavailable',
-        'Exporting to PDF is unavailable in the web client.'
-      )
-    })
-}
-const webLocalhostWorktreeLabelsApi: ShellLocalhostWorktreeLabelsApi = {
-  register: () => Promise.reject(unavailableOnWeb())
-}
-const isWeb = isWebRuntimeClient()
-export const shellMiniMaxCredentialsApi = isWeb
-  ? webMiniMaxCredentialsApi
-  : electronMiniMaxCredentialsApi
-export const shellMobileApi = isWeb ? webMobileApi : electronMobileApi
-export const shellDeveloperPermissionsApi = isWeb
-  ? webDeveloperPermissionsApi
-  : electronDeveloperPermissionsApi
-export const shellExportApi = isWeb ? webExportApi : electronExportApi
-export const shellLocalhostWorktreeLabelsApi = isWeb
-  ? webLocalhostWorktreeLabelsApi
-  : electronLocalhostWorktreeLabelsApi

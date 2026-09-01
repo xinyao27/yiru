@@ -15,13 +15,13 @@ export function attachNodeRuntimeHostEventSources(
   const detachAgentStatus = attachAgentStatusSource(runtime)
 
   // Why: host settings RPCs notify this same Store; bridge those real mutations
-  // directly because Electron's IPC registration is absent in the Node process.
+  // directly because browser-host registration is outside the daemon process.
   const unsubscribeSettings = store.onSettingsChanged((updates) => {
     runtime.emitSettingsChangedEvent({ type: 'changed', updates })
   })
 
   // Why: host UI RPCs persist into this Store too, so its change notification
-  // is the authoritative source even when no BrowserWindow exists.
+  // is the authoritative source even when no browser client is connected.
   const unsubscribeUI = store.onUIChanged((ui) => {
     runtime.emitUIChangedEvent({ type: 'changed', ui })
   })

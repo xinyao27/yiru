@@ -1,20 +1,20 @@
 import type { RPCLinkOptions } from '@orpc/client/websocket'
 
-import { WebShellServicesChannel } from '../../web/shell-services-channel'
+import { ExtensionShellServicesChannel } from './shell-services-channel'
 
 type RpcWebSocket = RPCLinkOptions<Record<never, never>>['websocket']
 
 export class ExtensionSocketMultiplexer {
   private isClosed = false
   private readonly rpcPeer: ExtensionRpcSocket
-  private readonly shellServices: WebShellServicesChannel
+  private readonly shellServices: ExtensionShellServicesChannel
   private readonly socket: WebSocket
 
   constructor(socket: WebSocket) {
     this.socket = socket
     this.socket.binaryType = 'arraybuffer'
     this.rpcPeer = new ExtensionRpcSocket(socket)
-    this.shellServices = new WebShellServicesChannel(
+    this.shellServices = new ExtensionShellServicesChannel(
       (payload) => this.send(payload),
       (payload) => this.send(payload),
       () => socket.close(1011, 'Shell services failed')

@@ -3,7 +3,7 @@ import { delimiter } from 'node:path'
 
 import type { ShellHydrationFailureReason } from '@yiru/runtime-protocol/workbench/types'
 
-// Why: GUI-launched Electron on macOS/Linux inherits a minimal PATH from launchd
+// Why: launchd and service managers provide a minimal PATH on macOS/Linux
 // that does not include dirs appended by the user's shell rc files (~/.zshrc,
 // ~/.bashrc). Tools installed into ~/.opencode/bin, ~/.cargo/bin, pyenv/volta
 // shims, and countless other user-local locations end up invisible to our
@@ -11,9 +11,7 @@ import type { ShellHydrationFailureReason } from '@yiru/runtime-protocol/workben
 //
 // Rather than play whack-a-mole adding every agent's install dir to a hardcoded
 // list, we spawn the user's login shell once per app session and read the PATH
-// it would export. This matches the behavior of every popular Electron app that
-// handles this problem (Hyper, VS Code, Cursor, etc. via shell-env/fix-path) —
-// we implement it inline to avoid adding a dependency.
+// it would export. We implement this inline to avoid adding a dependency.
 
 const DELIMITER = '__YIRU_SHELL_PATH__'
 const SPAWN_TIMEOUT_MS = 5000

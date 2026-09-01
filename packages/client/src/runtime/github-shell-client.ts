@@ -15,7 +15,7 @@ type LocalGitHubPRRefreshRequest = {
 }
 
 // Why: these operations belong to the window shell, not a selectable runtime
-// host. The PR coordinator keys visibility by Electron renderer id, while the
+// host. The PR coordinator keys visibility by browser client id, while the
 // identity/star calls intentionally use this installation's own `gh` session.
 export function getShellGitHubViewer(): Promise<GitHubViewer | null> {
   return shellClient.gh.viewer()

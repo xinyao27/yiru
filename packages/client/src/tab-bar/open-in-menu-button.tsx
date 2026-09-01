@@ -95,7 +95,7 @@ export function TabBarOpenInMenuButton({
     <div
       data-workspace-titlebar-slot={titlebarIndex != null ? String(titlebarIndex) : undefined}
       className={cn(
-        'relative flex h-full items-stretch border border-y-0 border-border [-webkit-app-region:no-drag] dark:border-input',
+        'relative flex h-full items-stretch border border-y-0 border-border dark:border-input',
         pinDraggable && 'cursor-grab active:cursor-grabbing',
         getDropIndicatorClasses(dropIndicator)
       )}

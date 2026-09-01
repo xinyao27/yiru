@@ -1,4 +1,3 @@
-import { DEFAULT_APP_ICON_ID } from './app-icon'
 import {
   DEFAULT_LEFT_SIDEBAR_TINT_COLOR,
   DEFAULT_LEFT_SIDEBAR_TINT_OPACITY
@@ -70,7 +69,6 @@ export function getDefaultSettings(homedir: string): GlobalSettings {
     leftSidebarTintColor: DEFAULT_LEFT_SIDEBAR_TINT_COLOR,
     leftSidebarTintOpacity: DEFAULT_LEFT_SIDEBAR_TINT_OPACITY,
     uiLanguage: UI_LANGUAGE_SYSTEM,
-    appIcon: DEFAULT_APP_ICON_ID,
     loaderStyle: DEFAULT_LOADER_STYLE,
     appFontFamily: DEFAULT_APP_FONT_FAMILY,
     systemTypographyDefaultsMigrated: true,
@@ -117,9 +115,6 @@ export function getDefaultSettings(homedir: string): GlobalSettings {
     terminalMouseHideWhileTyping: false,
     terminalQuickCommands: getDefaultTerminalQuickCommands(),
     terminalFocusFollowsMouse: false,
-    windowBackgroundBlur: false,
-    minimizeToTrayOnClose: false,
-    showMenuBarIcon: true,
     showPinnedWorktreesInGroups: false,
     terminalClipboardOnSelect: false,
     terminalAllowOsc52Clipboard: false,
@@ -128,7 +123,6 @@ export function getDefaultSettings(homedir: string): GlobalSettings {
     terminalScrollbackRows: DESKTOP_TERMINAL_SCROLLBACK_ROWS_DEFAULT,
     httpProxyUrl: '',
     httpProxyBypassRules: '',
-    electronHttp1CompatibilityMode: false,
     localhostWorktreeLabelsEnabled: false,
     openInApplications: [...DEFAULT_OPEN_IN_APPLICATIONS],
     lastOpenInTargetKey: 'application:vscode',

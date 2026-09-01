@@ -22,7 +22,7 @@ export abstract class RuntimeSessionHydrateHeadlessMobileSessionTabsFromWorkspac
     // Why: report which worktrees were reconciled in place so callers don't
     // reconcile them a second time (see notifyMobileSessionTabsChanged).
     const reconciledWorktreeIds = new Set<string>()
-    if (this.getAvailableAuthoritativeWindow() && options.allowAttachedWindow !== true) {
+    if (this.hasAvailableWorkbench() && options.allowAttachedWindow !== true) {
       return reconciledWorktreeIds
     }
     const session = this.store?.getWorkspaceSession?.()
@@ -54,14 +54,14 @@ export abstract class RuntimeSessionHydrateHeadlessMobileSessionTabsFromWorkspac
         reconciledWorktreeIds.add(entryWorktreeId)
         continue
       }
-      // Why: with a window attached, the live renderer graph is authoritative.
+      // Why: with a workbench connected, its live graph is authoritative.
       // The persisted (disk) session can lag a closed tab — it is written on a
       // debounce, not synchronously on every close — so seeding straight from
       // it here would publish stale/closed tabs to mobile. Once seeded they
       // used to be preserved forever by shouldPreserveHeadlessMobileSessionTab
       // regardless of liveness; that hole is now closed there too, but not
       // publishing them in the first place avoids even the one-sync flash.
-      const hasAttachedWindow = Boolean(this.getAvailableAuthoritativeWindow())
+      const hasAttachedWindow = this.hasAvailableWorkbench()
       const terminalTabs = this.buildHeadlessMobileSessionTerminalTabs(
         entryWorktreeId,
         persistedTabs

@@ -6,9 +6,6 @@ import { focusTerminalTabSurface } from '~renderer/tab-bar/focus-terminal-surfac
 
 import { subscribeAgentStatusState } from './ipc-events/agent-status'
 import { subscribeMobileTerminalState } from './ipc-events/mobile-terminal-state'
-import { subscribeRuntimeUiStateEvents } from './ipc-events/runtime-ui-state'
-import { subscribeShellNavigationEvents } from './ipc-events/shell-navigation'
-import { subscribeShellTabEvents } from './ipc-events/shell-tabs'
 import { subscribeWorkspaceEvents } from './ipc-events/workspaces'
 
 export { resolveZoomTarget } from './resolve-zoom-target'
@@ -66,9 +63,6 @@ export function useIpcEvents(): void {
   useEffect(() => {
     const unsubs: (() => void)[] = []
     unsubs.push(subscribeWorkspaceEvents(queryClient))
-    unsubs.push(subscribeShellNavigationEvents())
-    unsubs.push(subscribeShellTabEvents())
-    unsubs.push(subscribeRuntimeUiStateEvents())
     unsubs.push(subscribeAgentStatusState())
     unsubs.push(subscribeMobileTerminalState())
     return () => {

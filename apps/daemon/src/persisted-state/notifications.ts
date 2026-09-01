@@ -5,7 +5,7 @@ import type { PersistedSettingsMutation } from './persisted-settings-mutations'
 export type PersistedSettingsChangeListener = (
   updates: Partial<GlobalSettings>,
   settings: GlobalSettings,
-  originWebContentsId?: number
+  originClientId?: number
 ) => void
 
 export type PersistedUiChangeListener = (ui: PersistedState['ui']) => void
@@ -24,13 +24,13 @@ export class PersistedStateNotifications {
   publishSettingsMutation(
     mutation: PersistedSettingsMutation,
     notifyListeners: boolean,
-    originWebContentsId?: number
+    originClientId?: number
   ): void {
     if (!notifyListeners || Object.keys(mutation.changedUpdates).length === 0) {
       return
     }
     for (const listener of this.settingsListeners) {
-      listener(mutation.changedUpdates, mutation.settings, originWebContentsId)
+      listener(mutation.changedUpdates, mutation.settings, originClientId)
     }
   }
 

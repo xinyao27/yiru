@@ -4,7 +4,7 @@ import {
 } from './browser-capabilities'
 import type { ExtensionPage, ExtensionWorkspaceTarget } from './navigation'
 import { configureExtensionHostNavigation } from './navigation'
-import { configureExtensionRuntime, type ExtensionRuntimeBootstrap } from './runtime/session'
+import type { configureExtensionRuntime, ExtensionRuntimeBootstrap } from './runtime/session'
 import {
   mountExtensionConnecting,
   mountExtensionUnavailable,
@@ -13,6 +13,29 @@ import {
 } from './unavailable'
 
 type ExtensionSurface = 'side-panel' | 'workspace'
+
+type RuntimeSessionModule = {
+  configureExtensionRuntime: typeof configureExtensionRuntime
+}
+type RuntimeSessionLoad = { module: RuntimeSessionModule; ok: true } | { error: unknown; ok: false }
+
+let runtimeSessionLoad: Promise<RuntimeSessionLoad> | null = null
+
+export function preloadExtensionClient(): void {
+  runtimeSessionLoad ??= import('./runtime/session').then(
+    (module): RuntimeSessionLoad => ({ module, ok: true }),
+    (error: unknown): RuntimeSessionLoad => ({ error, ok: false })
+  )
+}
+
+async function loadRuntimeSession(): Promise<RuntimeSessionModule> {
+  preloadExtensionClient()
+  const loaded = await runtimeSessionLoad
+  if (!loaded?.ok) {
+    throw loaded?.error ?? new Error('extension_runtime_session_load_failed')
+  }
+  return loaded.module
+}
 
 export type ExtensionClientOptions = {
   browserCapabilities: ExtensionBrowserCapabilities
@@ -29,7 +52,6 @@ export async function mountExtensionClient(
   options: ExtensionClientOptions
 ): Promise<void> {
   Reflect.set(globalThis, '__YIRU_EXTENSION_CLIENT__', true)
-  configureExtensionRuntime(bootstrap)
   configureExtensionBrowserCapabilities(options.browserCapabilities)
   configureExtensionHostNavigation({
     openExternalUrl: options.openExternalUrl,
@@ -39,11 +61,19 @@ export async function mountExtensionClient(
     readActivePageUrl: options.readActivePageUrl
   })
   if (options.surface === 'workspace') {
-    const { mountExtensionWorkbench } = await import('./workbench/bootstrap')
+    const [runtimeSession, { mountExtensionWorkbench }] = await Promise.all([
+      loadRuntimeSession(),
+      import('./workbench/bootstrap')
+    ])
+    runtimeSession.configureExtensionRuntime(bootstrap)
     mountExtensionWorkbench(bootstrap)
     return
   }
-  const { mountExtensionSidePanel } = await import('./side-panel/bootstrap')
+  const [runtimeSession, { mountExtensionSidePanel }] = await Promise.all([
+    loadRuntimeSession(),
+    import('./side-panel/bootstrap')
+  ])
+  runtimeSession.configureExtensionRuntime(bootstrap)
   mountExtensionSidePanel(bootstrap)
 }
 

@@ -14,7 +14,6 @@ import type {
   YiruProfileListResult
 } from '@yiru/runtime-protocol/workbench/yiru-profiles'
 
-import { getWebShellConfigurationApis } from '../web/shell-configuration'
 import { callShellOrpc } from './orpc-client'
 import { subscribeShellEvent } from './shell-events-client'
 
@@ -43,7 +42,7 @@ export type ShellYiruProfilesApi = {
   ) => Promise<FindYiruProfileProjectsByPathResult>
 }
 
-const electronShellKeybindingsApi: ShellKeybindingsApi = {
+export const shellKeybindingsApi: ShellKeybindingsApi = {
   get: () => callShellOrpc((client) => client.shell.keybindings.get, undefined),
   ensureFile: () => callShellOrpc((client) => client.shell.keybindings.ensureFile, undefined),
   setAction: (args) => callShellOrpc((client) => client.shell.keybindings.setAction, args),
@@ -58,7 +57,7 @@ const electronShellKeybindingsApi: ShellKeybindingsApi = {
     })
 }
 
-const electronShellYiruProfilesApi: ShellYiruProfilesApi = {
+export const shellYiruProfilesApi: ShellYiruProfilesApi = {
   list: () => callShellOrpc((client) => client.shell.yiruProfiles.list, undefined),
   createLocal: (args) => callShellOrpc((client) => client.shell.yiruProfiles.createLocal, args),
   switchProfile: (args) => callShellOrpc((client) => client.shell.yiruProfiles.switchProfile, args),
@@ -67,11 +66,3 @@ const electronShellYiruProfilesApi: ShellYiruProfilesApi = {
   findProjectProfiles: (args) =>
     callShellOrpc((client) => client.shell.yiruProfiles.findProjectProfiles, args)
 }
-
-const isWebClient = (globalThis as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__ === true
-const webApis = isWebClient ? getWebShellConfigurationApis() : null
-
-export const shellKeybindingsApi: ShellKeybindingsApi =
-  webApis?.keybindings ?? electronShellKeybindingsApi
-export const shellYiruProfilesApi: ShellYiruProfilesApi =
-  webApis?.yiruProfiles ?? electronShellYiruProfilesApi

@@ -56,7 +56,7 @@ const POSTHOG_HOST = 'https://us.i.posthog.com'
 // Eligible-to-transmit only if the CI release pipeline injected BOTH the
 // build-identity constant and a write key. One without the other is treated
 // as a pipeline misconfiguration and fails closed. Contributor / `pnpm dev`
-// / third-party rebuilds get literal `null` from electron-vite's `define`,
+// / third-party rebuilds get literal `null` from Bun's compile-time `define`,
 // so `IS_OFFICIAL_BUILD` evaluates `false` at module load. There is no
 // runtime env-var fallback.
 //

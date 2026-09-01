@@ -230,7 +230,7 @@
   }
 
   /* Why: native checkbox rendering has poor contrast against the dark
-     preview background (the default Electron/WebKit look is a faded gray on
+     preview background (the default WebKit look is a faded gray on
      gray). Render our own checkbox using theme tokens so both the unchecked
      border and the checked fill remain legible in light and dark themes,
      matching the rich editor's task list. */

@@ -86,8 +86,7 @@ export function createBunShellUpdaterHandlers(
       download: runtimeImplementation.shell.updater.download.handler(() => updater.download()),
       quitAndInstall: runtimeImplementation.shell.updater.quitAndInstall.handler(() =>
         updater.quitAndInstall()
-      ),
-      dismissNudge: runtimeImplementation.shell.updater.dismissNudge.handler(() => undefined)
+      )
     }
   }
 }

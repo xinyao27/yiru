@@ -1,13 +1,11 @@
 import { useEffect } from 'react'
 
-import { shellClient } from '../runtime/shell-client'
 import { refreshTerminalImeInputContext } from './ime/input-context-refresh'
 import {
   isXtermHelperTextarea,
   releaseTerminalFocusForOutsidePointerDown,
   releaseTerminalFocusForWindowBlur,
-  resyncTerminalFocusForWindowFocus,
-  setRegularTerminalInputFocusAttribute
+  resyncTerminalFocusForWindowFocus
 } from './regular-terminal-focus-ownership'
 
 export function useRegularTerminalFocus(
@@ -18,16 +16,12 @@ export function useRegularTerminalFocus(
     if (!container) {
       return
     }
-    let ownsFocus = false
     let releasedHelperOnWindowBlur: HTMLElement | null = null
     let refreshingImeInputContext = false
     const syncFocused = (focused: boolean): void => {
-      ownsFocus = focused
       if (focused) {
         releasedHelperOnWindowBlur = null
       }
-      setRegularTerminalInputFocusAttribute(focused)
-      shellClient.ui.setTerminalInputFocused?.(focused)
     }
     const onFocusIn = (event: FocusEvent): void => {
       if (!isXtermHelperTextarea(event.target)) {
@@ -97,9 +91,6 @@ export function useRegularTerminalFocus(
       document.removeEventListener('pointerdown', onPointerDown, true)
       window.removeEventListener('blur', onWindowBlur)
       window.removeEventListener('focus', onWindowFocus)
-      if (ownsFocus) {
-        syncFocused(false)
-      }
     }
   }, [containerRef])
 }

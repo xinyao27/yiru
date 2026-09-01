@@ -1,10 +1,8 @@
 import type { ProjectHostSetup, Repo } from '@yiru/runtime-protocol/workbench/types'
-import type { CSSProperties } from 'react'
 import { applyDocumentTheme } from '~renderer/editor/document-theme'
 import { translate } from '~renderer/i18n/i18n'
 import { useProjectCatalog } from '~renderer/project-catalog/provider'
 import { getRepoHostIdentity } from '~renderer/repo/state/host-identity'
-import { isExtensionRenderer } from '~renderer/runtime/renderer-host'
 import { getActiveRuntimeTarget } from '~renderer/runtime/rpc-client'
 import { useAppStore } from '~renderer/store/state'
 import { isMacUserAgent, isWindowsUserAgent } from '~renderer/terminal-pane/pane-interactions'
@@ -31,7 +29,6 @@ import {
 import { ActiveSettingsSectionProvider } from './section'
 import { SettingsSidebar } from './sidebar'
 import { useFontSuggestions } from './use-font-suggestions'
-import { isWebClientLocation } from './use-navigation-metadata'
 import { usePageNavigation } from './use-page-navigation'
 import { usePageSections } from './use-page-sections'
 import { useProjectHooks } from './use-project-hooks'
@@ -41,16 +38,9 @@ import { useSourceControlPromptGuard } from './use-source-control-prompt-guard'
 const SHELL_WIDTH_CLASS = '[--settings-shell-max-width:1040px]'
 const EXTENSION_SIDEBAR_BACKDROP_CLASS =
   'worktree-sidebar-theme bg-sidebar pointer-events-none absolute inset-y-0 left-0 w-[max(var(--settings-sidebar-width),calc((100%_-_var(--settings-shell-max-width))/2_+_var(--settings-sidebar-width)))]'
-// Why: native material must not flash through the opaque Settings canvas during entry.
-const SETTINGS_SHELL_ANIMATION_CLASS_NAME =
-  "animate-[settings-shell-enter_180ms_ease-out] [[data-native-sidebar-material='true']_&]:animate-none"
+const SETTINGS_SHELL_ANIMATION_CLASS_NAME = 'animate-[settings-shell-enter_180ms_ease-out]'
 
-type SettingsProps = {
-  sidebarAppearanceStyle?: CSSProperties
-}
-
-function Settings({ sidebarAppearanceStyle }: SettingsProps): React.JSX.Element {
-  const isExtensionHost = isExtensionRenderer()
+function Settings(): React.JSX.Element {
   const settings = useAppStore((s) => s.settings)
   const keybindings = useAppStore((s) => s.keybindings)
   const updateSettings = useAppStore((s) => s.updateSettings)
@@ -83,8 +73,6 @@ function Settings({ sidebarAppearanceStyle }: SettingsProps): React.JSX.Element 
   const systemPrefersDark = useSystemPrefersDark()
   const isWindows = isWindowsUserAgent()
   const isMac = isMacUserAgent()
-  const isWebClient = isWebClientLocation()
-  const showDaemonBackedSettings = !isWebClient
   // Why: the Terminal settings section shares one search index with the
   // sidebar. We trim platform-only entries on other platforms so search never
   // reveals controls that the renderer will intentionally hide.
@@ -107,8 +95,7 @@ function Settings({ sidebarAppearanceStyle }: SettingsProps): React.JSX.Element 
     visibleSections: visibleNavSections
   } = usePageSections({
     hasUnsavedSourceControlAiPromptChanges,
-    query: settingsSearchQuery,
-    showDaemonBackedSettings
+    query: settingsSearchQuery
   })
   const {
     activeSectionId,
@@ -148,7 +135,7 @@ function Settings({ sidebarAppearanceStyle }: SettingsProps): React.JSX.Element 
   )
   const shouldLoadWindowsTerminalCapabilities =
     hasActiveRuntimeEnvironment ||
-    ((isWindows || isWebClient) &&
+    (isWindows &&
       (neededSectionIds.has('terminal') ||
         neededSectionIds.has('general') ||
         neededSectionIds.has('accounts') ||
@@ -194,29 +181,20 @@ function Settings({ sidebarAppearanceStyle }: SettingsProps): React.JSX.Element 
       <div
         ref={setSettingsRootNode}
         className={cn(
-          'relative flex min-h-0 min-w-0 w-full flex-1 justify-center overflow-hidden bg-background [[data-native-sidebar-material=true]_&]:bg-transparent',
+          'relative flex min-h-0 min-w-0 w-full flex-1 justify-center overflow-hidden bg-background',
           SHELL_WIDTH_CLASS,
           SETTINGS_SHELL_ANIMATION_CLASS_NAME
         )}
       >
-        {isExtensionHost ? (
-          <div
-            aria-hidden
-            className={EXTENSION_SIDEBAR_BACKDROP_CLASS}
-            style={sidebarAppearanceStyle}
-          />
-        ) : null}
+        <div aria-hidden className={EXTENSION_SIDEBAR_BACKDROP_CLASS} />
         <div
           aria-hidden
           className="bg-background pointer-events-none absolute inset-y-0 right-0 left-[max(var(--settings-sidebar-width),calc((100%_-_var(--settings-shell-max-width))/2_+_var(--settings-sidebar-width)))]"
         />
         <div className="relative z-10 flex min-h-0 w-full max-w-[var(--settings-shell-max-width)] overflow-hidden">
-          {/* Why: preserve the final split surfaces while settings load so native
-              sidebar material never flashes to an opaque full-window canvas. */}
           <div
             aria-hidden
             className="worktree-sidebar-theme border-sidebar-border bg-sidebar w-[var(--settings-sidebar-width)] shrink-0 border-r"
-            style={sidebarAppearanceStyle}
           />
           <div className="bg-background text-muted-foreground flex min-w-0 flex-1 items-center justify-center">
             {translate('auto.components.settings.Settings.c7ad095d96', 'Loading settings...')}
@@ -252,25 +230,18 @@ function Settings({ sidebarAppearanceStyle }: SettingsProps): React.JSX.Element 
     <div
       ref={setSettingsRootNode}
       className={cn(
-        'relative flex min-h-0 min-w-0 w-full flex-1 overflow-hidden bg-background [[data-native-sidebar-material=true]_&]:bg-transparent',
+        'relative flex min-h-0 min-w-0 w-full flex-1 overflow-hidden bg-background',
         SHELL_WIDTH_CLASS,
         SETTINGS_SHELL_ANIMATION_CLASS_NAME
       )}
     >
-      {isExtensionHost ? (
-        <div
-          aria-hidden
-          className={EXTENSION_SIDEBAR_BACKDROP_CLASS}
-          style={sidebarAppearanceStyle}
-        />
-      ) : null}
+      <div aria-hidden className={EXTENSION_SIDEBAR_BACKDROP_CLASS} />
       <div
         aria-hidden
         className="bg-background pointer-events-none absolute inset-y-0 right-0 left-[max(var(--settings-sidebar-width),calc((100%_-_var(--settings-shell-max-width))/2_+_var(--settings-sidebar-width)))]"
       />
       <div className="absolute inset-y-0 left-[max(0px,calc((100%_-_var(--settings-shell-max-width))/2))] z-20 flex min-h-0 w-[var(--settings-sidebar-width)]">
         <SettingsSidebar
-          appearanceStyle={sidebarAppearanceStyle}
           activeSectionId={activeSectionId}
           generalGroups={generalNavGroups}
           repoSections={repoNavSections}
@@ -280,7 +251,7 @@ function Settings({ sidebarAppearanceStyle }: SettingsProps): React.JSX.Element 
           onBack={closeSettingsPageWithPromptGuard}
           onSearchChange={setSettingsSearchQuery}
           onSelectSection={scrollToSection}
-          reserveWindowChrome={!isExtensionHost}
+          reserveWindowChrome={false}
         />
       </div>
       <ScrollArea
@@ -321,7 +292,6 @@ function Settings({ sidebarAppearanceStyle }: SettingsProps): React.JSX.Element 
                       isMounted={isSectionMounted}
                       onRequestFontSuggestions={requestFontSuggestions}
                       settings={settings}
-                      showDaemonBackedSettings={showDaemonBackedSettings}
                       updateSettings={updateSettings}
                       wslAvailable={windowsTerminalCapabilities.wslAvailable}
                       wslCapabilitiesLoading={windowsTerminalCapabilities.isLoading}
@@ -349,7 +319,6 @@ function Settings({ sidebarAppearanceStyle }: SettingsProps): React.JSX.Element 
                       setScrollbackMode={setScrollbackMode}
                       settings={settings}
                       settingsSearchQuery={settingsSearchQuery}
-                      showDaemonBackedSettings={showDaemonBackedSettings}
                       sourceControlAiPromptDiscardSignal={sourceControlAiPromptDiscardSignal}
                       systemPrefersDark={systemPrefersDark}
                       terminalFontSuggestions={terminalFontSuggestions}
@@ -360,14 +329,12 @@ function Settings({ sidebarAppearanceStyle }: SettingsProps): React.JSX.Element 
                     />
 
                     <SystemSections
-                      allowLocalRuntime={!isWebClient}
                       getSearchEntries={getSectionSearchEntries}
                       hiddenExperimentalUnlocked={hiddenExperimentalUnlocked}
                       isFocusedShortcutsPane={isFocusedShortcutsPane}
                       isMac={isMac}
                       isMounted={isSectionMounted}
                       settings={settings}
-                      showDaemonBackedSettings={showDaemonBackedSettings}
                       switchRuntimeEnvironment={switchRuntimeEnvironment}
                       updateSettings={updateSettings}
                     />

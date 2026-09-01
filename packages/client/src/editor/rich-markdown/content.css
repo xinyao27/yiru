@@ -2,8 +2,8 @@
    Tiptap/ProseMirror renders markdown content into DOM it generates and
    decorates itself (headings, lists, tables, task-list checkboxes, syntax
    highlighting spans, search/doc-link decorations), so none of it has a JSX
-   node to carry a Tailwind className. These rules — plus a couple of
-   cross-component seams and one Electron-only property — are the pieces
+   node to carry a Tailwind className. These rules and a couple of
+   cross-component seams are the pieces
    that stay CSS per docs/style-guide.md; every other rule that used to live
    in this feature's stylesheet is now a Tailwind className at its call site.
    Shared by the full rich editor and the GitHub markdown composer, which
@@ -22,12 +22,6 @@
    ProseMirror content root instead of an effect that pokes inline styles. */
 .rich-markdown-editor-shell.has-rich-markdown-review-notes .rich-markdown-editor {
   padding-right: clamp(252px, 28%, 308px);
-}
-
-/* Why: Electron's drag-region is a vendor CSS property with no Tailwind
-   utility; the rest of this bubble's chrome is Tailwind on the JSX node. */
-.rich-markdown-link-bubble {
-  -webkit-app-region: no-drag;
 }
 
 /* Why: `.yiru-diff-comment-add-btn` is unlayered CSS owned by the diff-comments

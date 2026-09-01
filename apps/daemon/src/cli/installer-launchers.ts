@@ -68,20 +68,16 @@ function buildUnixDevLauncher(
 ): string {
   return `#!/usr/bin/env bash
 set -euo pipefail
-ELECTRON=${quoteShell(execPathValue)}
-CLI=${quoteShell(cliEntryPath)}
+RUNTIME=${quoteShell(execPathValue)}
+ENTRY=${quoteShell(cliEntryPath)}
 export YIRU_USER_DATA_PATH=${quoteShell(userDataPath)}
 export YIRU_CLI_COMMAND=${quoteShell(commandName)}
 export YIRU_CLI_ENVIRONMENT=development
-if [ -z "\${YIRU_APP_EXECUTABLE:-}" ]; then
-  export YIRU_APP_EXECUTABLE="$ELECTRON"
-  export YIRU_APP_EXECUTABLE_NEEDS_APP_ROOT=1
-fi
 export YIRU_NODE_OPTIONS="\${NODE_OPTIONS-}"
 export YIRU_NODE_REPL_EXTERNAL_MODULE="\${NODE_REPL_EXTERNAL_MODULE-}"
 unset NODE_OPTIONS
 unset NODE_REPL_EXTERNAL_MODULE
-ELECTRON_RUN_AS_NODE=1 "$ELECTRON" "$CLI" "$@"
+"$RUNTIME" "$ENTRY" "$@"
 `
 }
 
@@ -92,21 +88,16 @@ function buildWindowsDevLauncher(
 ): string {
   return `@echo off
 setlocal
-set "ELECTRON=${escapeWindowsBatchValue(execPathValue)}"
-set "CLI=${escapeWindowsBatchValue(cliEntryPath)}"
+set "RUNTIME=${escapeWindowsBatchValue(execPathValue)}"
+set "ENTRY=${escapeWindowsBatchValue(cliEntryPath)}"
 set "YIRU_USER_DATA_PATH=${escapeWindowsBatchValue(userDataPath)}"
 set "YIRU_CLI_COMMAND=${getYiruCliCommandNameForPlatform('win32', 'development')}"
 set "YIRU_CLI_ENVIRONMENT=development"
-if not defined YIRU_APP_EXECUTABLE (
-  set "YIRU_APP_EXECUTABLE=%ELECTRON%"
-  set "YIRU_APP_EXECUTABLE_NEEDS_APP_ROOT=1"
-)
 set "YIRU_NODE_OPTIONS=%NODE_OPTIONS%"
 set "YIRU_NODE_REPL_EXTERNAL_MODULE=%NODE_REPL_EXTERNAL_MODULE%"
 set NODE_OPTIONS=
 set NODE_REPL_EXTERNAL_MODULE=
-set ELECTRON_RUN_AS_NODE=1
-"%ELECTRON%" "%CLI%" %*
+"%RUNTIME%" "%ENTRY%" %*
 `
 }
 
@@ -120,24 +111,22 @@ set "YIRU_LAUNCHER=${escapeWindowsBatchValue(launcherPath)}"
 
 export function extractManagedUnixLauncherTarget(content: string): string | null {
   if (
-    !content.includes('ELECTRON_RUN_AS_NODE=1') ||
+    !content.includes('YIRU_CLI_ENVIRONMENT=development') ||
     !content.includes('YIRU_NODE_OPTIONS') ||
     !content.includes('NODE_REPL_EXTERNAL_MODULE')
   ) {
     return null
   }
 
-  const cliPath = extractShellAssignment(content, 'CLI')
-  if (!cliPath) {
+  const entryPath = extractShellAssignment(content, 'ENTRY')
+  if (!entryPath) {
     return null
   }
 
   // Why: older dev installs wrote a generated shell launcher directly to
-  // /usr/local/bin/yiru. Treat only Yiru's compiled CLI entrypoints as managed;
-  // arbitrary user scripts that happen to launch Electron must stay conflicts.
-  return /(?:^|[/\\])(?:out|app\.asar\.unpacked[/\\]out)[/\\]cli[/\\]index\.js$/.test(cliPath)
-    ? cliPath
-    : null
+  // /usr/local/bin/yiru. Treat only Yiru's daemon source entry as managed;
+  // arbitrary user scripts must remain conflicts.
+  return /(?:^|[/\\])apps[/\\]daemon[/\\]src[/\\]entry\.ts$/.test(entryPath) ? entryPath : null
 }
 
 function extractShellAssignment(content: string, name: string): string | null {

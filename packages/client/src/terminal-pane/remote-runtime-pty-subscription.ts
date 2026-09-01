@@ -1,7 +1,7 @@
 import { encodeRuntimePtyId } from '@yiru/runtime-protocol/terminal-identity/id'
+import { isRemoteTerminalSurfaceTabId } from '~renderer/runtime/remote-terminal-surface-id'
 import { getRuntimeTerminalMultiplexer } from '~renderer/runtime/terminal-multiplex/registry'
 import { publishRendererTerminalSideEffects } from '~renderer/runtime/terminal-side-effect-client'
-import { isWebTerminalSurfaceTabId } from '~renderer/runtime/web-terminal-surface-id'
 import { setDriverForPty } from '~renderer/terminal-pane/pane-manager/mobile-driver-state'
 import { setFitOverride } from '~renderer/terminal-pane/pane-manager/mobile-fit-overrides'
 
@@ -218,7 +218,7 @@ export class RemoteRuntimePtySubscription {
   }
 
   private async resubscribe(previousHandle: string): Promise<void> {
-    if (this.tabId && isWebTerminalSurfaceTabId(this.tabId)) {
+    if (this.tabId && isRemoteTerminalSurfaceTabId(this.tabId)) {
       const nextHandle = await this.hostSession.listHandle(this.tabId)
       if (this.state.destroyed || !this.state.connected || this.state.handle !== previousHandle) {
         return

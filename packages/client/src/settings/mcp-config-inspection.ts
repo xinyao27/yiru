@@ -7,12 +7,12 @@ import {
   type McpConfigDirectoryEntry
 } from '~renderer/mcp-config'
 import { joinPath } from '~renderer/path'
+import { extractRuntimeErrorMessage } from '~renderer/runtime/error-message'
 import {
   readRuntimeDirectory,
   readRuntimeFileContent,
   type RuntimeFileOperationArgs
 } from '~renderer/runtime/file-client'
-import { extractIpcErrorMessage } from '~renderer/runtime/ipc-error'
 
 import type { LoadedMcpConfigInspection } from './mcp-config-file-row'
 
@@ -47,7 +47,7 @@ export async function loadMcpConfigInspections(
       } catch (error) {
         unreadableParentDirMessages.set(
           relativeDir,
-          extractIpcErrorMessage(error, `Unable to inspect ${relativeDir}.`)
+          extractRuntimeErrorMessage(error, `Unable to inspect ${relativeDir}.`)
         )
       }
     })
@@ -97,7 +97,7 @@ export async function loadMcpConfigInspections(
           exists: false,
           status: 'invalid',
           absolutePath,
-          readError: extractIpcErrorMessage(error, 'Unable to read config file.')
+          readError: extractRuntimeErrorMessage(error, 'Unable to read config file.')
         }
       }
     })

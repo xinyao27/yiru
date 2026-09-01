@@ -1,8 +1,8 @@
 import { makePaneKey } from '@yiru/runtime-protocol/workbench/stable-pane-id'
 import { useState } from 'react'
 
+import { closeRemoteRuntimeTerminal } from '../runtime/remote-runtime-session'
 import { inspectRuntimeTerminalProcess } from '../runtime/terminal-inspection'
-import { closeWebRuntimeTerminal } from '../runtime/web-runtime-session'
 import { useAppStore } from '../store/state'
 import { isUnifiedTabPinned } from '../tab-bar/state/pinned-close-guard'
 import type { CloseTerminalDialogCopyKind } from './close-terminal-dialog'
@@ -47,7 +47,7 @@ export function useTerminalPaneClose({
       return
     }
     const ptyId = paneTransportsRef.current.get(paneId)?.getPtyId() ?? null
-    closeWebRuntimeTerminal(ptyId)
+    closeRemoteRuntimeTerminal(ptyId)
     clearSessionRestoredBannerForPane(paneId)
     const leafId = manager.getLeafId(paneId)
     if (leafId) {

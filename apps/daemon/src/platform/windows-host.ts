@@ -17,14 +17,14 @@ function execFileWithoutBlocking(
 }
 
 /**
- * Full path to icacls.exe. Electron's main process may have a stripped PATH
+ * Full path to icacls.exe. A service process may have a stripped PATH
  * that excludes System32, causing bare `icacls` to throw ENOENT.
  */
 export function getIcaclsExePath(): string {
   return `${process.env.SystemRoot ?? 'C:\\Windows'}\\System32\\icacls.exe`
 }
 
-/** Absolute path because service-launched Electron can omit System32 from PATH. */
+/** Absolute path because service-launched processes can omit System32 from PATH. */
 export function getWhoamiExePath(): string {
   return `${process.env.SystemRoot ?? 'C:\\Windows'}\\System32\\whoami.exe`
 }
@@ -187,8 +187,8 @@ export async function grantDirAclAsync(dirPath: string): Promise<void> {
   if (!identity) {
     return
   }
-  // Why: crash recovery runs on Electron's main thread; an asynchronous
-  // icacls child keeps its worst-case timeout from freezing every window.
+  // Why: crash recovery runs on the daemon event loop; an asynchronous
+  // icacls child keeps its worst-case timeout from blocking all clients.
   await execFileWithoutBlocking(
     getIcaclsExePath(),
     [dirPath, '/grant:r', `${identity}:(OI)(CI)(F)`],

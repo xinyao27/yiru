@@ -1,4 +1,4 @@
-import { isWebTerminalSurfaceTabId } from '~renderer/runtime/web-terminal-surface-id'
+import { isRemoteTerminalSurfaceTabId } from '~renderer/runtime/remote-terminal-surface-id'
 
 import type { ColdRestoreAgentResumeStartup } from './cold-restore-agent-startup'
 import { getPendingFreshSpawn, type FreshSpawnOptions } from './fresh-spawn'
@@ -89,7 +89,7 @@ export function startPtySession(options: SessionStartOptions): void {
         return
       }
       if (!spawnedPtyId) {
-        if (!isWebTerminalSurfaceTabId(options.tabId)) {
+        if (!isRemoteTerminalSurfaceTabId(options.tabId)) {
           console.warn(
             `Pending PTY spawn for tab ${options.tabId} resolved without a PTY id, retrying fresh spawn`
           )

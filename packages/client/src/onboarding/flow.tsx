@@ -186,11 +186,6 @@ export default function OnboardingFlow({
           requestSkipConfirmation('button')
         }}
       >
-        <div
-          className="absolute inset-x-0 top-0 h-8"
-          style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
-        />
-
         <section
           ref={flow.setLifecycleRootRef}
           role="dialog"

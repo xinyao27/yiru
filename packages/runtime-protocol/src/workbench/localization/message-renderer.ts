@@ -16,6 +16,21 @@ type CompiledMessageLookup = {
   variables: TranslationVariables
 }
 
+function readCatalogMessage(messages: object, key: string): unknown {
+  const direct = Reflect.get(messages, key)
+  if (direct !== undefined) {
+    return direct
+  }
+  let current: unknown = messages
+  for (const segment of key.split('.')) {
+    if (typeof current !== 'object' || current === null) {
+      return undefined
+    }
+    current = Reflect.get(current, segment)
+  }
+  return current
+}
+
 function resolveI18nextSuffixLookup(
   key: string,
   variables: TranslationVariables | undefined
@@ -67,14 +82,17 @@ export function renderCompiledMessage(
   locale: SupportedUiLocale,
   variables?: TranslationVariables
 ): string {
-  let message = Reflect.get(messages, key)
+  let message = readCatalogMessage(messages, key)
   let messageVariables = variables
-  if (typeof message !== 'function') {
+  if (typeof message !== 'function' && typeof message !== 'string') {
     const lookup = resolveI18nextSuffixLookup(key, variables)
     if (lookup) {
-      message = Reflect.get(messages, lookup.key)
+      message = readCatalogMessage(messages, lookup.key)
       messageVariables = lookup.variables
     }
+  }
+  if (typeof message === 'string') {
+    return interpolateFallback(message, messageVariables)
   }
   if (typeof message !== 'function') {
     return interpolateFallback(fallback, variables)

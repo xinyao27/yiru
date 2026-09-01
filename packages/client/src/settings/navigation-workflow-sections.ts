@@ -21,22 +21,15 @@ import { getMobileEmulatorSearchEntries } from '~renderer/settings/mobile/emulat
 import type { SettingsNavSection } from '~renderer/settings/navigation-types'
 import { getPrivacyPaneSearchEntries } from '~renderer/settings/privacy-search'
 import { getQuickCommandsPaneSearchEntries } from '~renderer/settings/quick-commands-search'
-import {
-  getRuntimeEnvironmentsSearchEntry,
-  getWebRuntimeEnvironmentsSearchEntry
-} from '~renderer/settings/runtime-environments-search'
+import { getRuntimeEnvironmentsSearchEntry } from '~renderer/settings/runtime-environments-search'
 
 import { getTerminalPaneSearchEntries } from './terminal/search'
 
 type NavigationWorkflowSectionsParams = {
   isDev: boolean
   isMac: boolean
-  isWebClient: boolean
   isWindows: boolean
   isWindowsTerminalHost: boolean
-  showDaemonBackedSettings: boolean
-  showBrowserContextSettings: boolean
-  showNativeWindowSettings: boolean
 }
 
 function getDevToolsPaneSearchEntries(): SettingsNavSection['searchEntries'] {
@@ -67,21 +60,15 @@ function getDevToolsPaneSearchEntries(): SettingsNavSection['searchEntries'] {
 export function buildNavigationWorkflowSections({
   isDev,
   isMac,
-  isWebClient,
   isWindows,
-  isWindowsTerminalHost,
-  showDaemonBackedSettings,
-  showBrowserContextSettings,
-  showNativeWindowSettings
+  isWindowsTerminalHost
 }: NavigationWorkflowSectionsParams): SettingsNavSection[] {
   const terminalPaneSearchEntries = getTerminalPaneSearchEntries({
     isWindows,
     isWindowsTerminalHost,
     isMac
   })
-  const runtimeEnvironmentsSearchEntry = isWebClient
-    ? getWebRuntimeEnvironmentsSearchEntry()
-    : getRuntimeEnvironmentsSearchEntry()
+  const runtimeEnvironmentsSearchEntry = getRuntimeEnvironmentsSearchEntry()
 
   return [
     {
@@ -126,24 +113,17 @@ export function buildNavigationWorkflowSections({
       searchEntries: getQuickCommandsPaneSearchEntries(),
       group: 'workflows'
     },
-    ...(showDaemonBackedSettings
-      ? [
-          {
-            id: 'mobile-emulator',
-            title: translate(
-              'auto.hooks.useSettingsNavigationMetadata.1e761cff2b',
-              'Mobile Emulator'
-            ),
-            description: translate(
-              'auto.hooks.useSettingsNavigationMetadata.3d65d3f1b9',
-              'Configure mobile emulator support for Yiru and coding agents.'
-            ),
-            icon: TabletSmartphone,
-            searchEntries: getMobileEmulatorSearchEntries(),
-            group: 'workflows'
-          }
-        ]
-      : []),
+    {
+      id: 'mobile-emulator',
+      title: translate('auto.hooks.useSettingsNavigationMetadata.1e761cff2b', 'Mobile Emulator'),
+      description: translate(
+        'auto.hooks.useSettingsNavigationMetadata.3d65d3f1b9',
+        'Configure mobile emulator support for Yiru and coding agents.'
+      ),
+      icon: TabletSmartphone,
+      searchEntries: getMobileEmulatorSearchEntries(),
+      group: 'workflows'
+    },
     {
       id: 'runtime-environments',
       title: translate(
@@ -158,7 +138,7 @@ export function buildNavigationWorkflowSections({
       searchEntries: [runtimeEnvironmentsSearchEntry],
       group: 'workflows'
     },
-    ...(showDaemonBackedSettings && isMac
+    ...(isMac
       ? [
           {
             id: 'developer-permissions',
@@ -188,30 +168,22 @@ export function buildNavigationWorkflowSections({
       ),
       icon: Lock,
       searchEntries: getPrivacyPaneSearchEntries({
-        includeBrowserContext: showBrowserContextSettings
+        includeBrowserContext: true
       }),
       group: 'security'
     },
-    ...(showDaemonBackedSettings
-      ? [
-          {
-            id: 'advanced',
-            title: translate('auto.hooks.useSettingsNavigationMetadata.580a04cd81', 'Advanced'),
-            description: translate(
-              'auto.hooks.useSettingsNavigationMetadata.e338c507c1',
-              'Low-level compatibility settings for troubleshooting.'
-            ),
-            icon: Wrench,
-            searchEntries: getAdvancedPaneSearchEntries({
-              includeElectronCompatibility: showNativeWindowSettings
-            }),
-            group: 'advanced'
-          }
-        ]
-      : []),
-    // Why: dev tooling must not be reachable from packaged/web builds even if
-    // this pure metadata builder is called manually with isDev=true.
-    ...(showDaemonBackedSettings && import.meta.env.DEV && isDev
+    {
+      id: 'advanced',
+      title: translate('auto.hooks.useSettingsNavigationMetadata.580a04cd81', 'Advanced'),
+      description: translate(
+        'auto.hooks.useSettingsNavigationMetadata.e338c507c1',
+        'Low-level compatibility settings for troubleshooting.'
+      ),
+      icon: Wrench,
+      searchEntries: getAdvancedPaneSearchEntries(),
+      group: 'advanced'
+    },
+    ...(import.meta.env.DEV && isDev
       ? [
           {
             id: 'dev',

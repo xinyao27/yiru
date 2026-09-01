@@ -182,7 +182,7 @@ export function useTerminalWorkspaceKeyboardShortcuts({
       // Cmd/Ctrl+W - close active editor tab, browser tab, or terminal pane.
       // Terminal pane/tab close is handled by the pane-level keyboard handler
       // in keyboard-handlers.ts so it can close individual split panes and
-      // show a confirmation dialog. We still preventDefault here so Electron
+      // show a confirmation dialog. We still preventDefault here so the browser
       // doesn't close the window as its default Cmd+W action.
       if (!e.repeat && matchShortcut('tab.close')) {
         const state = useAppStore.getState()

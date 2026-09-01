@@ -1,5 +1,4 @@
 import { createPortal } from 'react-dom'
-import { usesBrowserUiRenderer } from '~renderer/runtime/renderer-host'
 
 import { MobileDriverOverlay } from './mobile-driver-overlay'
 import { shouldShowMobileDriverOverlay } from './mobile-driver-overlay-visibility'
@@ -25,7 +24,6 @@ export function TerminalDriverPortals({
   restoreAllTerminalFits,
   restorePaneTerminalFit
 }: TerminalDriverPortalsProps): React.JSX.Element {
-  const isBrowserRenderer = usesBrowserUiRenderer()
   return (
     <>
       {panes.map((pane) => {
@@ -36,7 +34,7 @@ export function TerminalDriverPortals({
         }
         const driver = getDriverForPty(ptyId)
         const fitMode = getFitOverrideForPty(ptyId)?.mode ?? null
-        if (!shouldShowMobileDriverOverlay(driver.kind, fitMode, isBrowserRenderer)) {
+        if (!shouldShowMobileDriverOverlay(driver.kind, fitMode, true)) {
           return null
         }
         return createPortal(

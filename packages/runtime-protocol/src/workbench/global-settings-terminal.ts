@@ -57,14 +57,6 @@ export type GlobalTerminalSettings = {
   terminalWordSeparator?: string
   terminalCursorOpacity?: number
   terminalQuickCommands?: TerminalQuickCommand[]
-  windowBackgroundBlur?: boolean
-  /** Why: Windows-only. When on, the close (X) button hides the window to the
-   *  system tray instead of quitting Yiru; off keeps the default quit-on-close.
-   *  The tray icon itself is always present on Windows regardless of this flag. */
-  minimizeToTrayOnClose?: boolean
-  /** Why: macOS keeps Yiru running after its last window closes, so this
-   *  controls the additive menu-bar entry without changing Dock behavior. */
-  showMenuBarIcon?: boolean
   /** Pinned workspaces default to one sidebar location; this opt-in also shows natural groups. */
   showPinnedWorktreesInGroups?: boolean
   /** Why: Windows terminals conventionally use right-click as a paste gesture,
@@ -119,14 +111,11 @@ export type GlobalTerminalSettings = {
    *  usable without the setup output crowding the initial pane. */
   setupScriptLaunchMode: SetupScriptLaunchMode
   terminalScrollbackRows: number
-  /** Optional app-level proxy for Electron networking and locally spawned PTYs.
+  /** Optional app-level proxy for daemon networking and locally spawned PTYs.
    *  Empty preserves system proxy settings plus inherited proxy env behavior. */
   httpProxyUrl?: string
   /** Optional semicolon/comma/newline-separated bypass rules for httpProxyUrl. */
   httpProxyBypassRules?: string
-  /** Why: corporate TLS-intercepting proxies can break Electron HTTP/2 downloads;
-   *  this opt-in compatibility mode applies Chromium's process-wide HTTP/1.1 switch. */
-  electronHttp1CompatibilityMode?: boolean
   /** Why: worktree-scoped localhost hostnames make same-app tabs distinguishable
    *  in external browsers. Opt-in (default off): serving the app under a different
    *  host can break dev apps that bind cookies/sessions to localhost. */

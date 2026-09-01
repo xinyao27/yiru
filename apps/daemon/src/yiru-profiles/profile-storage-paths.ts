@@ -14,7 +14,7 @@ export const LEGACY_BACKUP_COUNT = 5
 let profileUserDataPath: string | null = null
 
 export function initYiruProfilePaths(): void {
-  // Why: both Electron and the Node runtime install their process-specific
+  // Why: both browser and daemon hosts install their process-specific
   // provider before profile startup, so profile resolution remains portable.
   profileUserDataPath = getRuntimeHostPathsProvider().userDataPath()
 }

@@ -34,9 +34,11 @@ export type RuntimeStatusSlice = {
   retainRuntimeEnvironmentStatuses: (environmentIds: Iterable<string>) => void
   /** Probes one saved runtime and records the latest reachable/unreachable state. */
   refreshRuntimeEnvironmentStatus: (environmentId: string, timeoutMs?: number) => Promise<boolean>
-  /** Best-effort: list saved environments and probe each so the sidebar shows
+  /** Best-effort: probe saved environments so the sidebar shows
    * live health at boot, before the settings pane is ever opened. */
-  hydrateRuntimeEnvironmentStatuses: () => Promise<void>
+  hydrateRuntimeEnvironmentStatuses: (
+    environments: readonly PublicKnownRuntimeEnvironment[]
+  ) => Promise<void>
 }
 
 export const createRuntimeStatusSlice: StateCreator<AppState, [], [], RuntimeStatusSlice> = (
@@ -147,15 +149,8 @@ export const createRuntimeStatusSlice: StateCreator<AppState, [], [], RuntimeSta
     }
   },
 
-  hydrateRuntimeEnvironmentStatuses: async () => {
-    let environments: PublicKnownRuntimeEnvironment[]
-    try {
-      environments = await runtimeEnvironmentsClient.list()
-    } catch (err) {
-      console.error('Failed to list runtime environments for status hydration:', err)
-      return
-    }
-    get().setRuntimeEnvironments(environments)
+  hydrateRuntimeEnvironmentStatuses: async (environments) => {
+    get().setRuntimeEnvironments([...environments])
     // Why: fire-and-forget per env; one unreachable server must not block the
     // others, and a failure records a null status rather than nothing.
     await Promise.allSettled(

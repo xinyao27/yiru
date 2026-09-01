@@ -1,9 +1,9 @@
 import type { Editor } from '@tiptap/react'
 import { toast } from 'sonner'
+import { extractRuntimeErrorMessage } from '~renderer/runtime/error-message'
 import { shellClient } from '~renderer/runtime/shell-client'
 
 import { insertRichMarkdownImageFromPath } from './rich-markdown/image-insert'
-import { extractIpcErrorMessage } from './rich-markdown/ipc-error-message'
 
 export function useLocalImagePick(
   editor: Editor | null,
@@ -37,7 +37,7 @@ export function useLocalImagePick(
           !candidate.isDestroyed && candidate.view.dom === targetDom && targetDom.isConnected
       })
     } catch (err) {
-      toast.error(extractIpcErrorMessage(err, 'Failed to insert image.'))
+      toast.error(extractRuntimeErrorMessage(err, 'Failed to insert image.'))
     }
   }
 }

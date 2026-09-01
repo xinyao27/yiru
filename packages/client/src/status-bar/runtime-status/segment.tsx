@@ -1,15 +1,9 @@
 import { translate } from '~renderer/i18n/i18n'
-import { WebRuntimeStatusSegment } from '~renderer/web/connect/status'
 
-import { DesktopRuntimeStatusSegment } from './desktop-segment'
+import { RuntimeStatusSegment } from './runtime-segment'
 
-export function YiruRuntimeStatusSegment(): React.JSX.Element {
-  return (
-    <>
-      <DesktopRuntimeStatusSegment />
-      <WebRuntimeStatusSegment />
-    </>
-  )
+export function YiruRuntimeStatusSegment(): React.JSX.Element | null {
+  return <RuntimeStatusSegment />
 }
 
 export function YiruRuntimeStatusOnlyFooter(): React.JSX.Element {

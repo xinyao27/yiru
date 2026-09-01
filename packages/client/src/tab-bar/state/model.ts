@@ -1,5 +1,5 @@
 import type { Tab, TabGroupLayoutNode, TerminalTab } from '@yiru/runtime-protocol/workbench/types'
-import { setWebSessionTabPropsCommand } from '~renderer/runtime/web-session/commands'
+import { setRemoteSessionTabPropsCommand } from '~renderer/runtime/remote-session/commands'
 import { getRuntimeEnvironmentIdForWorktree } from '~renderer/worktree/runtime-owner'
 
 import type { AppState } from '../../store/types'
@@ -38,7 +38,7 @@ export function mirrorTabPinnedToHost(state: AppState, tabId: string, isPinned: 
   if (!found || found.tab.contentType !== 'terminal' || !environmentId) {
     return
   }
-  setWebSessionTabPropsCommand({
+  setRemoteSessionTabPropsCommand({
     environmentId,
     worktreeId: found.worktreeId,
     tabId,

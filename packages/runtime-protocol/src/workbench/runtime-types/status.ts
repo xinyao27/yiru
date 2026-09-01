@@ -8,10 +8,8 @@ import type { RuntimeMobileSessionTabsSnapshot } from './mobile-session'
 
 export type RuntimeGraphStatus = 'ready' | 'reloading' | 'unavailable'
 
-export type RuntimeDesktopWindowStatus = 'available' | 'openable' | 'initializing' | 'blocked'
-
-// Why: headless serve still owns one runtime graph, but zero can never collide
-// with Electron BrowserWindow ids and can be transferred safely on promotion.
+// Why: headless serve still owns one runtime graph, but zero cannot collide
+// with a browser window id and can be transferred safely on promotion.
 export const HEADLESS_RUNTIME_WINDOW_ID = 0
 
 // Why: the access scope a paired device token grants. Lives in shared so
@@ -32,7 +30,6 @@ export type RuntimeStatus = {
   rendererGraphEpoch: number
   graphStatus: RuntimeGraphStatus
   authoritativeWindowId: number | null
-  desktopWindowStatus?: RuntimeDesktopWindowStatus
   liveTabCount: number
   liveLeafCount: number
   // Why: optional so clients can read both new and pre-contract runtimes.
@@ -66,7 +63,6 @@ export type CliStatusResult = {
   app: {
     running: boolean
     pid: number | null
-    desktopWindowStatus?: RuntimeDesktopWindowStatus
   }
   runtime: {
     state: CliRuntimeState

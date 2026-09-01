@@ -11,20 +11,13 @@ import {
 import { useShortcutKeyComboDetails } from '~renderer/keyboard-input/use-shortcut-label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~renderer/ui/select'
 
-import {
-  FontAutocomplete,
-  SettingsRow,
-  SettingsSegmentedControl,
-  SettingsSwitchRow
-} from '../form-controls'
+import { FontAutocomplete, SettingsRow, SettingsSegmentedControl } from '../form-controls'
 import { LoaderStyleSetting } from '../loader-style-setting'
 import { SearchableSetting } from '../searchable-setting'
 import { UIZoomControl } from '../ui-zoom-control'
 import {
   getLanguageEntries,
   getLoaderStyleEntries,
-  getMenuBarIconEntries,
-  getSystemTrayEntries,
   getThemeEntries,
   getTypographyEntries,
   getZoomEntries
@@ -36,8 +29,6 @@ type AppearanceInterfaceSectionProps = {
   updateSettings: (updates: Partial<GlobalSettings>) => void
   applyTheme: (theme: 'system' | 'dark' | 'light') => void
   fontSuggestions: string[]
-  isDesktopMac: boolean
-  isDesktopWindows: boolean
   onRequestFontSuggestions?: () => void
   forceVisiblePrimary?: boolean
 }
@@ -47,8 +38,6 @@ export function AppearanceInterfaceSection({
   updateSettings,
   applyTheme,
   fontSuggestions,
-  isDesktopMac,
-  isDesktopWindows,
   onRequestFontSuggestions,
   forceVisiblePrimary = false
 }: AppearanceInterfaceSectionProps): React.JSX.Element {
@@ -56,8 +45,6 @@ export function AppearanceInterfaceSection({
   const zoomOutKeyCombos = useShortcutKeyComboDetails('zoom.out')
   const languageEntry = getLanguageEntries()[0]
   const loaderStyleEntry = getLoaderStyleEntries()[0]
-  const menuBarIconEntry = getMenuBarIconEntries({ showMenuBarIcon: true })[0]
-  const systemTrayEntry = getSystemTrayEntries({ showSystemTray: true })[0]
   const themeEntry = getThemeEntries()[0]
   const themeLabel = translate('auto.components.settings.AppearancePane.932ff1fbff', 'Theme')
   const typographyEntry = getTypographyEntries()[0]
@@ -188,54 +175,6 @@ export function AppearanceInterfaceSection({
                 </SelectContent>
               </Select>
             }
-          />
-        </SearchableSetting>
-      ) : null}
-
-      {isDesktopWindows ? (
-        <SearchableSetting
-          title={translate(
-            'auto.components.settings.AppearancePane.2edf606c46',
-            'Minimize to Tray on Close'
-          )}
-          description={systemTrayEntry?.description}
-          keywords={systemTrayEntry?.keywords ?? ['tray', 'minimize', 'close']}
-        >
-          <SettingsSwitchRow
-            label={translate(
-              'auto.components.settings.AppearancePane.2edf606c46',
-              'Minimize to Tray on Close'
-            )}
-            // Why: platform constraint + "close keeps Yiru running" consequence are
-            // both non-obvious from the label alone.
-            description={translate(
-              'auto.components.settings.AppearancePane.b707773a0d',
-              'When enabled, closing the window keeps Yiru running in the system tray instead of quitting.'
-            )}
-            checked={settings.minimizeToTrayOnClose === true}
-            onChange={() =>
-              updateSettings({ minimizeToTrayOnClose: !settings.minimizeToTrayOnClose })
-            }
-          />
-        </SearchableSetting>
-      ) : null}
-
-      {isDesktopMac ? (
-        <SearchableSetting
-          title={translate('settings.appearance.menuBarIcon.title', 'Show Menu Bar Icon')}
-          description={menuBarIconEntry?.description}
-          keywords={menuBarIconEntry?.keywords ?? ['menu bar', 'status item', 'activity']}
-        >
-          <SettingsSwitchRow
-            label={translate('settings.appearance.menuBarIcon.title', 'Show Menu Bar Icon')}
-            // Why: this opt-out removes only the status item; macOS Dock
-            // activation and the close-keeps-running lifecycle stay intact.
-            description={translate(
-              'settings.appearance.menuBarIcon.description',
-              'Keep an Yiru shortcut and activity indicator in the macOS menu bar.'
-            )}
-            checked={settings.showMenuBarIcon !== false}
-            onChange={() => updateSettings({ showMenuBarIcon: settings.showMenuBarIcon === false })}
           />
         </SearchableSetting>
       ) : null}

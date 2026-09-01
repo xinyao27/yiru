@@ -1,6 +1,6 @@
 import type { StateCreator } from 'zustand'
-import { createWebSessionTerminalCommand } from '~renderer/runtime/web-session/commands'
-import { requestWebSessionTabsRefresh } from '~renderer/runtime/web-session/tabs-refresh-requests'
+import { createRemoteSessionTerminalCommand } from '~renderer/runtime/remote-session/commands'
+import { requestRemoteSessionTabsRefresh } from '~renderer/runtime/remote-session/tabs-refresh-requests'
 import { focusTerminalTabSurface } from '~renderer/tab-bar/focus-terminal-surface'
 import { getRuntimeEnvironmentIdForWorktree } from '~renderer/worktree/runtime-owner'
 
@@ -20,7 +20,7 @@ export function createTerminalOpenActions(
       }
       const runtimeEnvironmentId = getRuntimeEnvironmentIdForWorktree(state, worktreeId)
       if (runtimeEnvironmentId) {
-        const result = await createWebSessionTerminalCommand({
+        const result = await createRemoteSessionTerminalCommand({
           worktreeId,
           environmentId: runtimeEnvironmentId,
           targetGroupId: groupId,
@@ -32,7 +32,7 @@ export function createTerminalOpenActions(
             result.error instanceof Error ? result.error.message : String(result.error)
           )
         } else {
-          await requestWebSessionTabsRefresh({
+          await requestRemoteSessionTabsRefresh({
             environmentId: runtimeEnvironmentId,
             worktreeId
           })

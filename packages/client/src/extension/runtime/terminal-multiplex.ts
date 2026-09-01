@@ -9,13 +9,13 @@ import type {
   BrowserHostTerminalMultiplexHandle,
   BrowserHostTerminalMultiplexOptions
 } from '~renderer/runtime/browser-host-runtime'
-import {
-  openWebTerminalMultiplexSubscription,
-  type WebTerminalMultiplexSubscription
-} from '~renderer/web/terminal-multiplex-subscription'
 
 import type { ExtensionRuntimeBootstrap } from './session'
 import { extensionRuntimeSocketUrl, waitForExtensionRuntimeSocket } from './socket-endpoint'
+import {
+  openExtensionTerminalMultiplexSubscription,
+  type ExtensionTerminalMultiplexSubscription
+} from './terminal-multiplex-subscription'
 
 export async function openExtensionTerminalMultiplex(
   bootstrap: ExtensionRuntimeBootstrap,
@@ -25,7 +25,7 @@ export async function openExtensionTerminalMultiplex(
   socket.binaryType = 'arraybuffer'
   await waitForExtensionRuntimeSocket(socket)
   const requestId = crypto.randomUUID()
-  let subscription: WebTerminalMultiplexSubscription | null = null
+  let subscription: ExtensionTerminalMultiplexSubscription | null = null
   let intentionallyClosed = false
   const handleMessage = (event: MessageEvent<unknown>): void => {
     if (typeof event.data === 'string') {
@@ -57,7 +57,7 @@ export async function openExtensionTerminalMultiplex(
     },
     { once: true }
   )
-  subscription = await openWebTerminalMultiplexSubscription({
+  subscription = await openExtensionTerminalMultiplexSubscription({
     callbacks: {
       onBinary: options.onBinary,
       onClose: options.onClose,

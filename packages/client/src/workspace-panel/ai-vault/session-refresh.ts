@@ -3,7 +3,6 @@ import type { ExecutionHostScope } from '@yiru/runtime-protocol/model/workspace'
 import { useEffect, useRef, useState } from 'react'
 import { useEventCallback } from '~renderer/react/use-event-callback'
 import { listAiVaultSessions } from '~renderer/runtime/ai-vault-client'
-import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store/state'
 
 const SESSION_LIMIT = 500
@@ -184,10 +183,8 @@ export function useAiVaultSessionRefresh(
     }
   }, [refresh, requestForcedRescan, scanScopeKey])
 
-  // Sessions started while the app was backgrounded should appear when the
-  // user returns, so refocus also bypasses the scan cache (throttled). OS
-  // refocus arrives via the main process — renderer DOM focus events don't
-  // fire on macOS app activation; visibilitychange covers minimize-restore.
+  // Sessions started while the browser was backgrounded should appear when the
+  // user returns, so visibility restoration bypasses the scan cache (throttled).
   useEffect(() => {
     const onRefocus = (): void => {
       if (document.visibilityState !== 'visible') {
@@ -195,10 +192,8 @@ export function useAiVaultSessionRefresh(
       }
       requestForcedRescan()
     }
-    const unsubscribeWindowFocus = shellClient.ui.onWindowFocused(onRefocus)
     document.addEventListener('visibilitychange', onRefocus)
     return () => {
-      unsubscribeWindowFocus()
       document.removeEventListener('visibilitychange', onRefocus)
     }
   }, [requestForcedRescan])

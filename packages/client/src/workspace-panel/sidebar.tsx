@@ -1,7 +1,6 @@
 import type { ActiveRightSidebarTab } from '@yiru/runtime-protocol/workbench/types'
 import { useEffect } from 'react'
 import { useShortcutLabel } from '~renderer/keyboard-input/use-shortcut-label'
-import { isExtensionRenderer } from '~renderer/runtime/renderer-host'
 import { useAppStore } from '~renderer/store/state'
 import { normalizeRightSidebarRoute } from '~renderer/workspace-panel/right-sidebar-route'
 
@@ -25,7 +24,7 @@ function WorkspaceSidebarInner(): React.JSX.Element | null {
   const setActiveView = useAppStore((state) => state.setRightSidebarTab)
   const setActivityBarPosition = useAppStore((state) => state.setActivityBarPosition)
   const { items } = useRightSidebarActivityItems(activeWorktreeId)
-  const placement = isExtensionRenderer() ? 'left' : 'right'
+  const placement = 'left'
   const normalizedView = normalizeRightSidebarRoute(activeView).rightSidebarTab
   const effectiveView = items.some((item) => item.id === normalizedView)
     ? normalizedView

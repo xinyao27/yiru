@@ -47,7 +47,7 @@ const nodeRuntimeHostHandlers = {
   clipboard: clientSurfaceRuntimeHandlers.clipboard,
   // Why: host RPC mutations notify the same Store bridged by host/event-sources.ts.
   settings: clientSurfaceRuntimeHandlers.settings,
-  // Why: host UI mutations publish from that Store without requiring a BrowserWindow.
+  // Why: host UI mutations publish from that Store without requiring a connected client.
   ui: clientSurfaceRuntimeHandlers.ui,
   ...computerUseRuntimeHandlers,
   emulator: emulatorRuntimeHandlers.emulator,

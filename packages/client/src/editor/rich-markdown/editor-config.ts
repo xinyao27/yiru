@@ -1,7 +1,6 @@
 import type { Editor, UseEditorOptions } from '@tiptap/react'
 import type { DiffComment } from '@yiru/runtime-protocol/workbench/types'
 import type { MutableRefObject, Dispatch, SetStateAction } from 'react'
-import { shellClient } from '~renderer/runtime/shell-client'
 
 import { encodeRawMarkdownHtmlForRichEditor } from '../raw-markdown-html'
 import { autoFocusRichEditor } from './auto-focus'
@@ -195,11 +194,7 @@ export function createRichMarkdownEditorConfig(params: EditorConfigParams): UseE
         })
       }
     },
-    onFocus: () => {
-      shellClient.ui.setMarkdownEditorFocused(true)
-    },
     onBlur: () => {
-      shellClient.ui.setMarkdownEditorFocused(false)
       clearAnnotationTarget()
     },
     onCreate: ({ editor: nextEditor }) => {

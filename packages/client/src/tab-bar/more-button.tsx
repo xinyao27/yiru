@@ -75,7 +75,7 @@ export function TabBarMoreButton({
                   data-workspace-titlebar-drop="more"
                   aria-label={label}
                   className={cn(
-                    'relative text-muted-foreground [-webkit-app-region:no-drag]',
+                    'relative text-muted-foreground',
                     panelTitlebar
                       ? getTitlebarMoreDropIndicatorClasses({
                           dropTarget: panelTitlebar.dropTarget,

@@ -25,6 +25,8 @@
     "check": "vp check --fix && vp run typecheck",
     "lint": "vp lint --fix",
     "fmt": "vp fmt",
+    "release": "node scripts/release.mjs",
+    "release:setup": "bash scripts/release-setup.sh",
     "up": "taze major -Ir",
     "prepare": "vp config"
   },
@@ -41,5 +43,5 @@
   "engines": {
     "node": "24"
   },
-  "packageManager": "pnpm@11.22.0"
+  "packageManager": "pnpm@12.1.0"
 }

@@ -196,18 +196,15 @@ export const UIUpdateInputSchema = z
     workspacePanelTitlebarPinnedIds: WorkspaceTitlebarPinnedIdsSchema.optional(),
     usagePercentageDisplay: z.enum(['used', 'remaining']).optional(),
     statusBarUsageMode: z.enum(['verbose', 'compact']).optional(),
-    dismissedUpdateVersion: NullableStringSchema.optional(),
     lastUpdateCheckAt: z.number().finite().nullable().optional(),
     pendingUpdateNudgeId: NullableStringSchema.optional(),
     dismissedUpdateNudgeId: NullableStringSchema.optional(),
     notificationPermissionRequested: z.boolean().optional(),
-    updateReassuranceSeen: z.boolean().optional(),
     acknowledgedAgentsByPaneKey: z.record(z.string(), z.number().finite()).optional(),
     setupGuideSidebarDismissed: z.boolean().optional(),
     setupGuideBrowserMilestoneMigrated: z.boolean().optional(),
     setupGuideBrowserMilestoneLegacyComplete: z.boolean().optional(),
     browserImportHintHidden: z.boolean().optional(),
-    trayMinimizeNoticeShown: z.boolean().optional(),
     mobileEmulatorTabIntroDismissed: z.boolean().optional(),
     mobileEmulatorAgentSetupDismissed: z.boolean().optional(),
     browserDefaultUrl: NullableStringSchema.optional(),
@@ -217,16 +214,6 @@ export const UIUpdateInputSchema = z
       .optional(),
     browserDefaultZoomLevel: z.number().finite().optional(),
     browserKagiSessionLink: NullableStringSchema.optional(),
-    windowBounds: z
-      .object({
-        x: z.number().finite(),
-        y: z.number().finite(),
-        width: z.number().finite(),
-        height: z.number().finite()
-      })
-      .nullable()
-      .optional(),
-    windowMaximized: z.boolean().optional(),
     _sortBySmartMigrated: z.boolean().optional(),
     _inlineAgentsDefaultedForExperiment: z.boolean().optional(),
     _inlineAgentsDefaultedForAllUsers: z.boolean().optional(),

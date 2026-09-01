@@ -31,8 +31,8 @@ export function isGitRepo(path: string): boolean {
   }
 
   // Why: `git rev-parse` can fail to produce a clean answer for reasons
-  // unrelated to repo-ness — a transient spawn failure or git-shim hiccup in
-  // the packaged app, resource pressure in the Electron main process, or a
+  // unrelated to repo-ness — a transient spawn failure, git-shim hiccup, or
+  // resource pressure in the daemon, or a
   // repo whose config errors out. Treating every such failure as "not a repo"
   // silently downgrades a real repository to a plain folder (worktrees, SCM,
   // PRs all disappear) and is the regression behind the spurious "Open as

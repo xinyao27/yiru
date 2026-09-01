@@ -3,7 +3,7 @@ import { mkdir, open, rm, stat } from 'node:fs/promises'
 import type { FileHandle } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 
-import type { RuntimeRendererTarget } from '~main/runtime/host/renderer-target'
+import type { RuntimeClientTarget } from '~main/runtime/host/client-target'
 
 import { sanitizeLocalDownloadFilename } from '../local-download-filename'
 import { promoteLocalDownloadedFolder } from '../local-downloaded-folder-promotion'
@@ -16,7 +16,7 @@ type DownloadedFolderSession = {
   senderId: number
   cleanupTimer: ReturnType<typeof setTimeout>
   activeFile: { key: string; handle: FileHandle; position: number } | null
-  sender: RuntimeRendererTarget
+  sender: RuntimeClientTarget
   onSenderDestroyed: () => void
 }
 
@@ -86,7 +86,7 @@ async function cleanupTransferDirectory(dirPath: string): Promise<void> {
   }
 }
 
-function senderId(sender: RuntimeRendererTarget): number {
+function senderId(sender: RuntimeClientTarget): number {
   return typeof sender.id === 'number' ? sender.id : Number.NaN
 }
 
@@ -154,10 +154,7 @@ export function createDownloadedFolderSessionService(nativePathServices: NativeP
   }
 
   return {
-    startFolderDownload: async (
-      sender: RuntimeRendererTarget,
-      args: { suggestedName?: string }
-    ) => {
+    startFolderDownload: async (sender: RuntimeClientTarget, args: { suggestedName?: string }) => {
       const suggestedName = sanitizeLocalDownloadFilename(
         validateRequiredString(args?.suggestedName, 'suggestedName')
       )
@@ -196,7 +193,7 @@ export function createDownloadedFolderSessionService(nativePathServices: NativeP
     },
 
     createFolderDownloadDirectory: async (
-      sender: RuntimeRendererTarget,
+      sender: RuntimeClientTarget,
       args: { transferId?: string; pathSegments?: unknown }
     ) => {
       const transferId = validateRequiredString(args?.transferId, 'transferId')
@@ -211,7 +208,7 @@ export function createDownloadedFolderSessionService(nativePathServices: NativeP
     },
 
     appendFolderDownloadFileChunk: async (
-      sender: RuntimeRendererTarget,
+      sender: RuntimeClientTarget,
       args: {
         transferId?: string
         pathSegments?: unknown
@@ -251,7 +248,7 @@ export function createDownloadedFolderSessionService(nativePathServices: NativeP
       return { ok: true as const }
     },
 
-    finishFolderDownload: async (sender: RuntimeRendererTarget, args: { transferId?: string }) => {
+    finishFolderDownload: async (sender: RuntimeClientTarget, args: { transferId?: string }) => {
       const transferId = validateRequiredString(args?.transferId, 'transferId')
       const owned = requireOwnedSession(sessions, transferId, senderId(sender))
       if (owned.activeFile) {
@@ -269,7 +266,7 @@ export function createDownloadedFolderSessionService(nativePathServices: NativeP
       }
     },
 
-    cancelFolderDownload: async (sender: RuntimeRendererTarget, args: { transferId?: string }) => {
+    cancelFolderDownload: async (sender: RuntimeClientTarget, args: { transferId?: string }) => {
       const transferId = validateRequiredString(args?.transferId, 'transferId')
       requireOwnedSession(sessions, transferId, senderId(sender))
       await closeSession(transferId, true)

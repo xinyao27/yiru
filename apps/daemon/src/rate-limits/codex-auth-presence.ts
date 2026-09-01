@@ -68,7 +68,7 @@ export async function probeCodexAuthPresence(
   const signal = options.signal ? AbortSignal.any([options.signal, timeoutSignal]) : timeoutSignal
   try {
     // Why: managed WSL homes are UNC paths. A synchronous stat can park
-    // Electron main while Windows wakes or reconnects the distro; the race
+    // daemon event loop while Windows wakes or reconnects the distro; the race
     // also keeps a disconnected distro from serializing all later refreshes.
     const authPresence = await getAuthPresenceProbe(authPath).wait(signal)
     if (authPresence !== 'absent' || !parseWslUncPath(home)) {

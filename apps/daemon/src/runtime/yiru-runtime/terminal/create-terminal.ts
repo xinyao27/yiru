@@ -32,19 +32,18 @@ export abstract class RuntimeTerminalCreateTerminal extends RuntimeTerminalRenam
   ): Promise<RuntimeTerminalCreate> {
     const presentation = resolveTerminalPresentation(opts)
     const requiresRendererFocus = opts.presentation === 'focused' || opts.focus === true
-    const availableAuthoritativeWindow = this.getAvailableAuthoritativeWindow()
+    const hasAvailableWorkbench = this.hasAvailableWorkbench()
     // Why: pre-diff createTerminal fell back to the renderer's active worktree
     // when no selector was provided. The new background-spawn branch hard-
     // requires a resolvable selector, so route the no-selector case through
     // the renderer IPC path to preserve that behavior.
-    const rendererWindow = opts.rendererBacked === true ? availableAuthoritativeWindow : null
     const shouldCreateInBackground =
       worktreeSelector !== undefined &&
       ((!requiresRendererFocus && opts.rendererBacked !== true) ||
         // Why: `yiru serve` exposes the local runtime without a renderer
         // window. Renderer-backed Codex terminals are preferred for the app,
         // but headless CLI users still need a usable terminal handle.
-        (opts.rendererBacked === true && rendererWindow === null))
+        (opts.rendererBacked === true && !hasAvailableWorkbench))
 
     if (shouldCreateInBackground) {
       if (!this.ptyController?.spawn) {
@@ -166,7 +165,7 @@ export abstract class RuntimeTerminalCreateTerminal extends RuntimeTerminalRenam
         // the live daemon or SSH PTY instead of replacing it with a fresh one.
         // Re-check freshly: the entry-time snapshot can go stale across the
         // awaits above if the authoritative window is destroyed mid-spawn.
-        ...(launchOpts.persistHostSessionBinding || this.getAvailableAuthoritativeWindow() === null
+        ...(launchOpts.persistHostSessionBinding || !this.hasAvailableWorkbench()
           ? { persistHostSessionBinding: true }
           : {})
       })

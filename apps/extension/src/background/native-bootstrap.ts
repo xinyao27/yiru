@@ -8,7 +8,30 @@ export type NativeBootstrapResult = {
   runtimeId: string
 }
 
+let nativeBootstrapInFlight: Promise<NativeBootstrapResult> | null = null
+
 export function requestNativeBootstrap(): Promise<NativeBootstrapResult> {
+  if (nativeBootstrapInFlight) {
+    return nativeBootstrapInFlight
+  }
+  const request = requestNativeBootstrapOnce()
+  nativeBootstrapInFlight = request
+  void request.then(
+    () => {
+      if (nativeBootstrapInFlight === request) {
+        nativeBootstrapInFlight = null
+      }
+    },
+    () => {
+      if (nativeBootstrapInFlight === request) {
+        nativeBootstrapInFlight = null
+      }
+    }
+  )
+  return request
+}
+
+function requestNativeBootstrapOnce(): Promise<NativeBootstrapResult> {
   return new Promise((resolve, reject) => {
     const port = chrome.runtime.connectNative(NATIVE_HOST_NAME)
     let settled = false

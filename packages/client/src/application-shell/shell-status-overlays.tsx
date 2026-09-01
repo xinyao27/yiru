@@ -26,10 +26,6 @@ const SkillFreshnessUpdateDialog = lazy(() =>
 const StatusBar = lazy(() =>
   import('../status-bar/status-bar').then((module) => ({ default: module.StatusBar }))
 )
-const UpdateCard = lazy(() =>
-  import('./update-card').then((module) => ({ default: module.UpdateCard }))
-)
-
 type ShellStatusBarProps = {
   activeView: AppState['activeView']
   isVisible: boolean
@@ -41,9 +37,7 @@ export function ShellStatusBar({ activeView, isVisible }: ShellStatusBarProps): 
   }
   return (
     <Suspense
-      fallback={
-        <div className="border-border bg-background h-6 min-h-[24px] shrink-0 border-t [[data-native-sidebar-material=true]_&]:bg-transparent" />
-      }
+      fallback={<div className="border-border bg-background h-6 min-h-[24px] shrink-0 border-t" />}
     >
       <RecoverableRenderErrorBoundary
         boundaryId="overlay.status-bar"
@@ -65,14 +59,12 @@ export function ShellStatusBar({ activeView, isVisible }: ShellStatusBarProps): 
 type ShellMiddleOverlaysProps = {
   activeView: AppState['activeView']
   shouldMountContextualTourOverlay: boolean
-  shouldMountUpdateCard: boolean
   telemetryOptedIn: boolean | undefined
 }
 
 export function ShellMiddleOverlays({
   activeView,
   shouldMountContextualTourOverlay,
-  shouldMountUpdateCard,
   telemetryOptedIn
 }: ShellMiddleOverlaysProps): React.JSX.Element {
   return (
@@ -80,18 +72,6 @@ export function ShellMiddleOverlays({
       {shouldMountContextualTourOverlay ? (
         <Suspense fallback={null}>
           <ContextualTourOverlay />
-        </Suspense>
-      ) : null}
-      {shouldMountUpdateCard ? (
-        <Suspense fallback={null}>
-          <RecoverableRenderErrorBoundary
-            boundaryId="overlay.update-card"
-            surface="overlay"
-            resetKey={activeView}
-            compact
-          >
-            <UpdateCard />
-          </RecoverableRenderErrorBoundary>
         </Suspense>
       ) : null}
       <RecoverableRenderErrorBoundary

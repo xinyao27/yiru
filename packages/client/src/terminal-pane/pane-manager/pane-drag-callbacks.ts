@@ -24,7 +24,6 @@ export function createPaneDragCallbacks(args: {
     refitPanesUnder: (element) => refitPanesUnder(element, args.panes),
     requestPaneReparentFrame: args.requestPaneReparentFrame,
     onLayoutChanged: args.managerOptions.onLayoutChanged,
-    onDragActiveChange: args.managerOptions.onPaneDragActiveChange,
     resolveExternalDropTarget: args.managerOptions.resolveExternalPaneDropTarget,
     onExternalPaneDrop: args.managerOptions.onExternalPaneDrop
   }

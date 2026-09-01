@@ -3,9 +3,9 @@ import { TOGGLE_TERMINAL_PANE_EXPAND_EVENT } from '~renderer/constants/terminal'
 import { useProjectCatalogRuntimeState } from '~renderer/project-catalog/runtime-state'
 import { browserWorkspaceHasRemoteOwner } from '~renderer/runtime/remote-browser-tab-ownership'
 import {
-  activateWebRuntimeSessionTab,
-  isWebRuntimeSessionActive
-} from '~renderer/runtime/web-runtime-session'
+  activateRemoteRuntimeSessionTab,
+  isRemoteRuntimeSessionActive
+} from '~renderer/runtime/remote-runtime-session'
 import { useAppStore } from '~renderer/store/state'
 import { focusTerminalTabSurface } from '~renderer/tab-bar/focus-terminal-surface'
 import { getRuntimeEnvironmentIdForWorktree } from '~renderer/worktree/runtime-owner'
@@ -43,8 +43,8 @@ export function useWorkspaceActivationCommands({
     focusGroup(worktreeId, groupId)
     activateTab(item.id)
     const environmentId = getRuntimeEnvironmentIdForWorktree(projectRuntimeState, worktreeId)
-    if (isWebRuntimeSessionActive(environmentId)) {
-      void activateWebRuntimeSessionTab({ worktreeId, tabId: terminalId, environmentId })
+    if (isRemoteRuntimeSessionActive(environmentId)) {
+      void activateRemoteRuntimeSessionTab({ worktreeId, tabId: terminalId, environmentId })
     }
     setActiveTab(terminalId)
     setActiveTabType('terminal')
@@ -94,10 +94,10 @@ export function useWorkspaceActivationCommands({
     activateTab(item.id)
     const environmentId = getRuntimeEnvironmentIdForWorktree(projectRuntimeState, worktreeId)
     if (
-      isWebRuntimeSessionActive(environmentId) &&
+      isRemoteRuntimeSessionActive(environmentId) &&
       browserWorkspaceHasRemoteOwner(useAppStore.getState(), browserTabId, environmentId)
     ) {
-      void activateWebRuntimeSessionTab({ worktreeId, tabId: item.id, environmentId })
+      void activateRemoteRuntimeSessionTab({ worktreeId, tabId: item.id, environmentId })
     }
     setActiveBrowserTab(browserTabId)
     setActiveTabType('browser')

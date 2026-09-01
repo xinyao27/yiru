@@ -130,8 +130,8 @@ export async function refreshClaudeOauthCredentials(
   try {
     // Why: the `claude` CLI posts grant_type=refresh_token as
     // application/x-www-form-urlencoded with the public client id. The injected
-    // transport preserves Electron's configured Chromium network stack while the
-    // runtime host uses Node fetch without importing Electron.
+    // transport preserves the shell connection's network behavior while the
+    // runtime host uses native fetch.
     const res = await fetchHttp(OAUTH_TOKEN_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },

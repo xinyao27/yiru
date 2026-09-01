@@ -27,13 +27,6 @@ export function shouldFocusMobileDriverAction(
     return isFocusLike(focusScope) && focusScope.contains?.(active) === true
   }
 
-  // Why: focused Electron webviews represent guest-page keyboard focus; they
-  // are not editable DOM controls in the host document, but stealing focus from
-  // them still interrupts the user's typing in the page.
-  if (active.tagName === 'WEBVIEW') {
-    return false
-  }
-
   if (active.isContentEditable === true) {
     return false
   }

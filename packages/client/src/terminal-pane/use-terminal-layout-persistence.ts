@@ -1,11 +1,11 @@
 import { isRuntimePtyId } from '@yiru/runtime-protocol/terminal-identity/id'
 
 import { useEventCallback } from '../react/use-event-callback'
-import { clearRuntimeTerminalBuffer } from '../runtime/terminal-inspection'
 import {
-  clearWebRuntimeTerminalBuffer,
-  updateWebRuntimePaneLayout
-} from '../runtime/web-runtime-session'
+  clearRemoteRuntimeTerminalBuffer,
+  updateRemoteRuntimePaneLayout
+} from '../runtime/remote-runtime-session'
+import { clearRuntimeTerminalBuffer } from '../runtime/terminal-inspection'
 import { useAppStore } from '../store/state'
 import { serializeTerminalLayout } from './layout-serialization'
 import { mergeCapturedLeafState } from './merge-captured-leaf-state'
@@ -121,7 +121,7 @@ export function useTerminalLayoutPersistence({
     }
     state.setTabLayout(tabId, layout)
     if (Object.values(mergedPtyIds).some((ptyId) => isRuntimePtyId(ptyId))) {
-      void updateWebRuntimePaneLayout({
+      void updateRemoteRuntimePaneLayout({
         worktreeId,
         tabId,
         root: layout.root,
@@ -138,7 +138,7 @@ export function useTerminalLayoutPersistence({
     clearedScrollbackLeafIdsRef.current.add(pane.leafId)
     clearTerminalScrollbackAndFollowOutput(pane.terminal)
     const ptyId = paneTransportsRef.current.get(pane.id)?.getPtyId() ?? null
-    if (!clearWebRuntimeTerminalBuffer(ptyId) && ptyId) {
+    if (!clearRemoteRuntimeTerminalBuffer(ptyId) && ptyId) {
       void clearRuntimeTerminalBuffer(ptyId)
     }
     persistLayoutSnapshot()

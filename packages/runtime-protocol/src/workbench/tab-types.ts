@@ -199,7 +199,7 @@ export type BrowserWorkspace = {
    *  gracefully to the URL-derived label in getBrowserTabLabel. */
   label?: string
   // Why: each browser workspace binds to exactly one session profile at creation
-  // time. The profile determines which Electron partition (and thus which
+  // time. The profile determines which browser storage partition (and thus which
   // cookies/storage) the guest webview uses. Absent means the legacy shared
   // partition, which keeps backward compat with workspaces persisted before
   // session profiles existed.

@@ -1,6 +1,5 @@
 import type { AgentStatusIpcPayload } from '@yiru/runtime-protocol/model/agent'
 import type { RuntimeCapability } from '@yiru/runtime-protocol/protocol-version'
-import type { RuntimeDesktopWindowStatus } from '@yiru/runtime-protocol/workbench/runtime-types'
 import type { RuntimeSyncedTab } from '@yiru/runtime-protocol/workbench/runtime-types'
 import type {
   WarpThemeImportPreview,
@@ -10,7 +9,6 @@ import type { TerminalSideEffectBatch } from '@yiru/runtime-protocol/workbench/t
 import type { GhosttyImportPreview } from '@yiru/runtime-protocol/workbench/types'
 import type { IPtyProvider } from '~main/agents/provider-runtime/types'
 import type { RuntimeHostProcessMetricsProvider } from '~main/memory/collector'
-import type { RuntimeWindowTarget } from '~main/runtime/host/renderer-target'
 import type { OrchestrationEnvironmentTransport } from '~main/runtime/orchestration/environment-transport'
 import type { RuntimeProviderUsage } from '~main/runtime/provider-usage/capabilities'
 import type { TerminalSessionAuthority } from '~main/runtime/terminal-session-authority/terminal-session-authority'
@@ -58,10 +56,6 @@ export abstract class RuntimeCompositionContract extends RuntimeContractIsRecogn
   protected abstract readonly getAgentStatusSnapshotFn: (() => AgentStatusIpcPayload[]) | null
 
   protected abstract readonly buildAgentHookPtyEnv: (() => Record<string, string>) | null
-
-  protected abstract readonly getDesktopWindowStatusFn: () => RuntimeDesktopWindowStatus
-
-  protected abstract readonly getWindowByIdFn: (windowId: number) => RuntimeWindowTarget | null
 
   protected abstract readonly getHostProcessMetricsFn: RuntimeHostProcessMetricsProvider | undefined
 

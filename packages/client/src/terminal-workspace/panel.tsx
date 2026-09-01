@@ -2,7 +2,6 @@ import { hasFeatureInteraction } from '@yiru/runtime-protocol/workbench/feature-
 import { folderWorkspaceKey } from '@yiru/runtime-protocol/workbench/workspace/scope'
 import React, { useEffect } from 'react'
 import { useProjectCatalog } from '~renderer/project-catalog/provider'
-import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store/state'
 import { setForegroundTerminalTabIds } from '~renderer/tab-bar/foreground-terminals'
 import { cn } from '~renderer/ui/class-names'
@@ -11,6 +10,7 @@ import { useContextualTour } from '../contextual-tours/use-contextual-tour'
 import EditorAutosaveController from '../editor/autosave-controller-host'
 import { TAB_CONTENT_SURFACE_CLASSES } from '../tab-bar/tab-chrome-classes'
 import { resolveRepairedActiveTerminalTabId } from './active-terminal-repair'
+import { useEditorCloseQueue } from './editor-close-queue'
 import { useTerminalWorkspaceKeyboardShortcuts } from './keyboard-shortcuts'
 import { LegacyWorkspaceSurfaces } from './legacy-workspace-surfaces'
 import { SaveConfirmationDialog } from './save-confirmation-dialog'
@@ -19,17 +19,14 @@ import { useTabCloseActions } from './tab-close-actions'
 import { useTabCreateActions } from './tab-create-actions'
 import { useTerminalColdParking } from './terminal-cold-parking'
 import { useTerminalWorktreeMounting } from './terminal-worktree-mounting'
-import { TitlebarTabBarPortal } from './titlebar-tab-bar-portal'
 import { useTerminalProviderSnapshotCapability } from './use-terminal-provider-snapshot-capability'
-import { WindowCloseConfirmationDialog } from './window-close-confirmation-dialog'
-import { useWindowCloseGuard } from './window-close-guard'
 import { useWorktreeActivationBootstrap } from './worktree-activation-bootstrap'
 import { WorktreeSplitSurface } from './worktree-split-surface'
 
 // Why: the workspace panel owns the top-level terminal/editor/browser surface
 // for the active worktree, plus the tab bar portal that renders into the
 // titlebar. Its lifecycle concerns (worktree mounting, tab actions, keyboard
-// shortcuts, window-close guarding) are split into sibling hooks in this
+// shortcuts, and editor-close guarding) are split into sibling hooks in this
 // folder; this file only composes them and renders the surface.
 function TerminalWorkspacePanel(): React.JSX.Element | null {
   const { allWorktrees, folderWorkspaces } = useProjectCatalog()
@@ -46,28 +43,18 @@ function TerminalWorkspacePanel(): React.JSX.Element | null {
   const activeTabId = useAppStore((s) => s.activeTabId)
   const activeTabIdByWorktree = useAppStore((s) => s.activeTabIdByWorktree)
   const setActiveTab = useAppStore((s) => s.setActiveTab)
-  const setTabCustomTitle = useAppStore((s) => s.setTabCustomTitle)
-  const setTabColor = useAppStore((s) => s.setTabColor)
-  const expandedPaneByTabId = useAppStore((s) => s.expandedPaneByTabId)
   const workspaceSessionReady = useAppStore((s) => s.workspaceSessionReady)
   const hydrationSucceeded = useAppStore((s) => s.hydrationSucceeded)
   const openFiles = useAppStore((s) => s.openFiles)
-  const activeFileId = useAppStore((s) => s.activeFileId)
   const activeBrowserTabId = useAppStore((s) => s.activeBrowserTabId)
   const activeTabType = useAppStore((s) => s.activeTabType)
-  const mobileEmulatorEnabled = useAppStore((s) => s.settings?.mobileEmulatorEnabled !== false)
   const setActiveTabType = useAppStore((s) => s.setActiveTabType)
-  const setActiveFile = useAppStore((s) => s.setActiveFile)
-  const makePreviewFilePermanent = useAppStore((s) => s.makePreviewFilePermanent)
-  const pinFile = useAppStore((s) => s.pinFile)
   const browserTabsByWorktree = useAppStore((s) => s.browserTabsByWorktree)
   const setActiveBrowserTab = useAppStore((s) => s.setActiveBrowserTab)
   const groupsByWorktree = useAppStore((s) => s.groupsByWorktree)
   const layoutByWorktree = useAppStore((s) => s.layoutByWorktree)
   const activeGroupIdByWorktree = useAppStore((s) => s.activeGroupIdByWorktree)
   const ensureWorktreeRootGroup = useAppStore((s) => s.ensureWorktreeRootGroup)
-  const tabBarOrderByWorktree = useAppStore((s) => s.tabBarOrderByWorktree)
-  const tabBarOrder = activeWorktreeId ? tabBarOrderByWorktree[activeWorktreeId] : undefined
 
   const foregroundTerminalTabIds = (() => {
     const ids = new Set<string>()
@@ -85,10 +72,6 @@ function TerminalWorkspacePanel(): React.JSX.Element | null {
 
   const tabs = (() => (activeWorktreeId ? (tabsByWorktree[activeWorktreeId] ?? []) : []))()
   useTerminalProviderSnapshotCapability(workspaceSessionReady && hydrationSucceeded)
-
-  // Why: the TabBar is rendered into the titlebar via a portal so tabs share
-  // the same row as the "Yiru" title. The target element is created by application-shell.tsx.
-  const titlebarTabsTarget = document.getElementById('titlebar-tabs')
 
   useEffect(() => {
     if (!activeWorktreeId) {
@@ -134,14 +117,12 @@ function TerminalWorkspacePanel(): React.JSX.Element | null {
   const {
     saveDialogFileId,
     saveDialogFile,
-    windowCloseDialogOpen,
-    setWindowCloseDialogOpen,
     handleCloseFile,
     queueEditorCloseRequests,
     handleSaveDialogSave,
     handleSaveDialogDiscard,
     handleSaveDialogCancel
-  } = useWindowCloseGuard()
+  } = useEditorCloseQueue({ onQueueDrained: () => {}, onQueueCancelled: () => {} })
 
   const {
     mountedWorktreeIdsRef,
@@ -169,22 +150,11 @@ function TerminalWorkspacePanel(): React.JSX.Element | null {
     handleNewAgentTab,
     handleNewSimulatorTab,
     handleNewBrowserTab,
-    handleOpenEntry,
-    handleDuplicateBrowserTab,
     handleNewFile
   } = useTabCreateActions()
 
-  const {
-    handleCloseTab,
-    handleCloseBrowserTab,
-    handlePtyExit,
-    handleCloseOthers,
-    handleCloseTabsToRight,
-    handleCloseAllFiles,
-    handleActivateTab,
-    handleTogglePaneExpand,
-    handleActivateBrowserTab
-  } = useTabCloseActions(queueEditorCloseRequests)
+  const { handleCloseTab, handleCloseBrowserTab, handlePtyExit, handleCloseAllFiles } =
+    useTabCloseActions(queueEditorCloseRequests)
 
   useTerminalWorkspaceKeyboardShortcuts({
     handleNewTab,
@@ -269,66 +239,6 @@ function TerminalWorkspacePanel(): React.JSX.Element | null {
     >
       <EditorAutosaveController />
 
-      {/* Why: once split groups are enabled, each group owns its own tab strip
-          inline. The old titlebar portal stays only as a fallback
-          before the root-group layout has been established. */}
-      {activeWorktreeId && !effectiveActiveLayout && titlebarTabsTarget && (
-        <TitlebarTabBarPortal
-          target={titlebarTabsTarget}
-          tabs={tabs}
-          activeTabId={activeTabId}
-          worktreeId={activeWorktreeId}
-          onActivate={handleActivateTab}
-          onClose={handleCloseTab}
-          onCloseOthers={handleCloseOthers}
-          onCloseToRight={handleCloseTabsToRight}
-          onNewTerminalTab={() => handleNewTab()}
-          onNewTerminalWithShell={handleNewTab}
-          onNewBrowserTab={handleNewBrowserTab}
-          onNewSimulatorTab={mobileEmulatorEnabled ? handleNewSimulatorTab : undefined}
-          onOpenEntry={handleOpenEntry}
-          onNewFileTab={handleNewFile}
-          onSetCustomTitle={setTabCustomTitle}
-          onSetTabColor={setTabColor}
-          expandedPaneByTabId={expandedPaneByTabId}
-          onTogglePaneExpand={handleTogglePaneExpand}
-          editorFiles={worktreeFiles}
-          browserTabs={worktreeBrowserTabs}
-          activeFileId={activeFileId}
-          activeBrowserTabId={activeBrowserTabId}
-          activeSimulatorTabId={
-            activeTabType === 'simulator' && activeWorktreeId
-              ? (useAppStore.getState().getActiveTab(activeWorktreeId)?.id ?? null)
-              : null
-          }
-          activeTabType={activeTabType}
-          onActivateFile={(fileId) => {
-            const unifiedTabs =
-              useAppStore.getState().unifiedTabsByWorktree[activeWorktreeId ?? ''] ?? []
-            const unifiedTab = unifiedTabs.find((tab) => tab.id === fileId)
-            if (unifiedTab?.contentType === 'simulator') {
-              setActiveTab(fileId)
-              setActiveTabType('simulator')
-              return
-            }
-            setActiveFile(fileId)
-            setActiveTabType('editor')
-          }}
-          onCloseFile={handleCloseFile}
-          onActivateBrowserTab={handleActivateBrowserTab}
-          onCloseBrowserTab={handleCloseBrowserTab}
-          onDuplicateBrowserTab={handleDuplicateBrowserTab}
-          onCloseAllFiles={handleCloseAllFiles}
-          onMakePreviewFilePermanent={makePreviewFilePermanent}
-          onPinFile={pinFile}
-          tabBarOrder={tabBarOrder}
-        />
-      )}
-
-      {/* Why: the full-width titlebar is no longer rendered in workspace view
-          — tab groups + terminal extend to the top of the window instead.
-          The old summary label (workspace / active surface) is removed. */}
-
       {anyMountedWorktreeHasLayout ? (
         <div
           className={cn(
@@ -404,14 +314,6 @@ function TerminalWorkspacePanel(): React.JSX.Element | null {
         onCancel={handleSaveDialogCancel}
         onDiscard={handleSaveDialogDiscard}
         onSave={handleSaveDialogSave}
-      />
-      <WindowCloseConfirmationDialog
-        open={windowCloseDialogOpen}
-        onCancel={() => setWindowCloseDialogOpen(false)}
-        onConfirmClose={() => {
-          setWindowCloseDialogOpen(false)
-          shellClient.ui.confirmWindowClose()
-        }}
       />
     </div>
   )

@@ -17,7 +17,6 @@ import {
 } from '../search'
 import { SearchableSetting } from '../searchable-setting'
 import type { UseGhosttyImportReturn } from '../use-ghostty-import'
-import { isWebClientLocation } from '../use-navigation-metadata'
 import type { UseWarpThemeImportReturn } from '../use-warp-theme-import'
 import { WarpThemeImportModal } from '../warp-theme-import-modal'
 import { TerminalAdvancedTypographyControls } from './advanced-typography-controls'
@@ -49,7 +48,6 @@ type TerminalAppearanceSectionProps = {
   ghostty: UseGhosttyImportReturn
   warpThemes: UseWarpThemeImportReturn
   forceVisiblePrimary?: boolean
-  showNativeWindowSettings: boolean
 }
 
 type TerminalThemeTarget = 'dark' | 'light'
@@ -80,14 +78,13 @@ export function TerminalAppearanceSection({
   onRequestFontSuggestions,
   ghostty,
   warpThemes,
-  showNativeWindowSettings,
   forceVisiblePrimary = false
 }: TerminalAppearanceSectionProps): React.JSX.Element {
   const searchQuery = useAppStore((state) => state.settingsSearchQuery)
   const isSearching = normalizeSettingsSearchQuery(searchQuery).length > 0
   const [themeSearch, setThemeSearch] = useState('')
   const [previewFontFamily, setPreviewFontFamily] = useState<string | null>(null)
-  const showWarpThemeImport = !isWebClientLocation()
+  const showWarpThemeImport = true
   const darkThemeSearchEntries = getTerminalDarkThemeSearchEntries()
   const lightThemeSearchEntries = getTerminalLightThemeSearchEntries()
   const terminalTypographyEntries = getTerminalTypographySearchEntries()
@@ -112,10 +109,7 @@ export function TerminalAppearanceSection({
   )
   const cursorMatches = matchesSettingsSearch(searchQuery, getTerminalCursorSearchEntries())
   const paneMatches = matchesSettingsSearch(searchQuery, getTerminalPaneAppearanceSearchEntries())
-  const windowMatches = matchesSettingsSearch(
-    searchQuery,
-    getTerminalWindowSearchEntries({ showNativeWindowSettings })
-  )
+  const windowMatches = matchesSettingsSearch(searchQuery, getTerminalWindowSearchEntries())
   const themeCatalogMatches = matchesSettingsSearch(searchQuery, themeCatalogSearchEntries)
   const previewAdvancedMatches = cursorMatches || paneMatches || windowMatches
   const showThemeCatalog = !isSearching || themeCatalogMatches || previewAdvancedMatches
@@ -153,13 +147,7 @@ export function TerminalAppearanceSection({
     windowMatches
       ? {
           key: 'window',
-          node: (
-            <TerminalWindowSection
-              settings={settings}
-              updateSettings={updateSettings}
-              showNativeWindowSettings={showNativeWindowSettings}
-            />
-          )
+          node: <TerminalWindowSection settings={settings} updateSettings={updateSettings} />
         }
       : null
   ].filter((group): group is { key: string; node: React.JSX.Element } => group !== null)

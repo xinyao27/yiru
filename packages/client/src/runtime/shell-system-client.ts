@@ -1,4 +1,3 @@
-import type { ShellAppIdentity } from '@yiru/runtime-protocol/contract'
 import type { AppStarSource } from '@yiru/runtime-protocol/workbench/gh-star-source'
 import type {
   RuntimeSyncWindowGraph,
@@ -20,24 +19,17 @@ import {
   YIRU_UPDATER_QUIT_AND_INSTALL_STARTED_EVENT
 } from '~renderer/updater-renderer-events'
 
-import { getWebShellSystemApis } from '../web/shell/system'
-import { callShellOrpc, isWebRuntimeClient } from './orpc-client'
+import { callShellOrpc } from './orpc-client'
 import { subscribeShellEvent } from './shell-events-client'
 import {
-  electronShellNotificationsApi,
+  daemonShellNotificationsApi,
   type ShellNotificationsApi
 } from './shell-notifications-client'
 import { prepareShellRestart } from './shell-restart-client'
 
 export type ShellAppApi = {
-  getIdentity: () => Promise<ShellAppIdentity>
-  relaunch: () => Promise<void>
   restart: () => Promise<void>
-  reload: () => Promise<void>
-  awaitFirstWindowStartupServices: () => Promise<void>
   startupDiagnostic: (event: string, details?: Record<string, unknown>) => Promise<void>
-  getKeyboardInputSourceId: () => Promise<string | null>
-  setUnreadDockBadgeCount: (count: number) => Promise<void>
 }
 export type ShellRepoHostApi = {
   pickFolder: () => Promise<string | null>
@@ -100,14 +92,10 @@ export type ShellUpdaterApi = {
   check: (options?: UpdateCheckOptions) => Promise<void>
   download: () => Promise<void>
   quitAndInstall: () => Promise<void>
-  dismissNudge: () => Promise<void>
   onStatus: (callback: (status: UpdateStatus) => void) => () => void
-  onClearDismissal: (callback: () => void) => () => void
 }
 
-const electronAppApi: ShellAppApi = {
-  getIdentity: () => callShellOrpc((client) => client.shell.app.getIdentity, undefined),
-  relaunch: () => callShellOrpc((client) => client.shell.app.relaunch, undefined),
+export const shellAppApi: ShellAppApi = {
   restart: async () => {
     await prepareShellRestart({
       startedEventName: YIRU_APP_RESTART_STARTED_EVENT,
@@ -120,18 +108,11 @@ const electronAppApi: ShellAppApi = {
       throw error
     }
   },
-  reload: () => callShellOrpc((client) => client.shell.app.reload, undefined),
-  awaitFirstWindowStartupServices: () =>
-    callShellOrpc((client) => client.shell.app.awaitFirstWindowStartupServices, undefined),
   startupDiagnostic: (event, details) =>
-    callShellOrpc((client) => client.shell.app.startupDiagnostic, { event, details }),
-  getKeyboardInputSourceId: () =>
-    callShellOrpc((client) => client.shell.app.getKeyboardInputSourceId, undefined),
-  setUnreadDockBadgeCount: (count) =>
-    callShellOrpc((client) => client.shell.app.setUnreadDockBadgeCount, { count })
+    callShellOrpc((client) => client.shell.app.startupDiagnostic, { event, details })
 }
 
-const electronRepoHostApi: ShellRepoHostApi = {
+export const shellRepoHostApi: ShellRepoHostApi = {
   pickFolder: () => callShellOrpc((client) => client.shell.repoHost.pickFolder, undefined),
   pickFolders: () => callShellOrpc((client) => client.shell.repoHost.pickFolders, undefined),
   pickDirectory: () => callShellOrpc((client) => client.shell.repoHost.pickDirectory, undefined),
@@ -142,7 +123,7 @@ const electronRepoHostApi: ShellRepoHostApi = {
     callShellOrpc((client) => client.shell.repoHost.getDefaultCreateProjectParent, undefined)
 }
 
-const electronRuntimeStateApi: ShellRuntimeStateApi = {
+export const shellRuntimeStateApi: ShellRuntimeStateApi = {
   syncWindowGraph: (input) =>
     callShellOrpc((client) => client.shell.runtime.syncWindowGraph, input),
   getTerminalFitOverrides: () =>
@@ -153,7 +134,7 @@ const electronRuntimeStateApi: ShellRuntimeStateApi = {
     callShellOrpc((client) => client.shell.runtime.restoreTerminalFit, { ptyId })
 }
 
-const electronGitHubApi: ShellGitHubApi = {
+export const shellGitHubApi: ShellGitHubApi = {
   viewer: () => callShellOrpc((client) => client.shell.gh.viewer, undefined),
   enqueuePRRefresh: (input) => callShellOrpc((client) => client.shell.gh.enqueuePRRefresh, input),
   reportVisiblePRRefreshCandidates: (input) =>
@@ -162,7 +143,7 @@ const electronGitHubApi: ShellGitHubApi = {
   starYiru: (input) => callShellOrpc((client) => client.shell.gh.starYiru, input)
 }
 
-const electronStarNagApi: ShellStarNagApi = {
+export const shellStarNagApi: ShellStarNagApi = {
   onShow: (callback) =>
     subscribeShellEvent((event) => {
       if (event.type === 'starNagShow') {
@@ -190,7 +171,7 @@ const electronStarNagApi: ShellStarNagApi = {
     callShellOrpc((client) => client.shell.starNag.onboardingCompleted, undefined)
 }
 
-const electronUpdaterApi: ShellUpdaterApi = {
+export const shellUpdaterApi: ShellUpdaterApi = {
   getVersion: () => callShellOrpc((client) => client.shell.updater.getVersion, undefined),
   getStatus: () => callShellOrpc((client) => client.shell.updater.getStatus, undefined),
   check: (input) => callShellOrpc((client) => client.shell.updater.check, input),
@@ -207,29 +188,12 @@ const electronUpdaterApi: ShellUpdaterApi = {
       throw error
     }
   },
-  dismissNudge: () => callShellOrpc((client) => client.shell.updater.dismissNudge, undefined),
   onStatus: (callback) =>
     subscribeShellEvent((event) => {
       if (event.type === 'updaterStatus') {
         callback(event.status)
       }
-    }),
-  onClearDismissal: (callback) =>
-    subscribeShellEvent((event) => {
-      if (event.type === 'updaterClearDismissal') {
-        callback()
-      }
     })
 }
 
-const webApis = isWebRuntimeClient() ? getWebShellSystemApis() : null
-
-export const shellAppApi: ShellAppApi = webApis?.app ?? electronAppApi
-export const shellRepoHostApi: ShellRepoHostApi = webApis?.repoHost ?? electronRepoHostApi
-export const shellRuntimeStateApi: ShellRuntimeStateApi =
-  webApis?.runtime ?? electronRuntimeStateApi
-export const shellGitHubApi: ShellGitHubApi = webApis?.gh ?? electronGitHubApi
-export const shellNotificationsApi: ShellNotificationsApi =
-  webApis?.notifications ?? electronShellNotificationsApi
-export const shellStarNagApi: ShellStarNagApi = webApis?.starNag ?? electronStarNagApi
-export const shellUpdaterApi: ShellUpdaterApi = webApis?.updater ?? electronUpdaterApi
+export const shellNotificationsApi: ShellNotificationsApi = daemonShellNotificationsApi

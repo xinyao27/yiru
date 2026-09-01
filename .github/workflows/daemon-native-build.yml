@@ -5,6 +5,7 @@ on:
     paths:
       - 'apps/daemon/**'
       - 'scripts/build-skill-resources.mjs'
+      - 'skills/**'
       - 'packages/runtime-protocol/**'
       - 'package.json'
       - 'pnpm-lock.yaml'
@@ -15,6 +16,8 @@ on:
       - main
     paths:
       - 'apps/daemon/**'
+      - 'scripts/build-skill-resources.mjs'
+      - 'skills/**'
       - 'packages/runtime-protocol/**'
       - 'package.json'
       - 'pnpm-lock.yaml'

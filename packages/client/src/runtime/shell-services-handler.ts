@@ -15,20 +15,13 @@ import { createTerminalTabViaShell } from './terminal-create-shell-request'
 import { mountTerminalTabViaShell } from './terminal-mount-shell-request'
 import { revealTerminalSessionViaShell } from './terminal-reveal-shell-request'
 import { handleShellServicesUICommand } from './ui-command-shell-request'
-import { pickWebShellDirectories } from './web-shell-client'
-
-function isWebShell(): boolean {
-  return (globalThis as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__ === true
-}
 
 export function createShellServicesRouter() {
   const implementer = implement(shellServicesContract)
   return implementer.router({
     ping: implementer.ping.handler(() => ({ pong: true as const, respondedAtMs: Date.now() })),
-    // Why: Phase 5 slice S3 — job3 (driving the OS notification centre) needs
-    // Electron's main-process Notification API, unavailable in this renderer
-    // context, so this delegates through the authenticated shell notification
-    // contract to main/notifications/notifications.ts.
+    // Why: native notifications belong to the daemon, so the browser delegates
+    // through the authenticated shell notification contract.
     notifications: {
       display: implementer.notifications.display.handler(({ input }) =>
         shellClient.notifications.displayNative(input)
@@ -55,9 +48,6 @@ export function createShellServicesRouter() {
         return { opened: true }
       }),
       pickDirectory: implementer.platform.pickDirectory.handler(async ({ input }) => {
-        if (isWebShell()) {
-          return { selections: await pickWebShellDirectories() }
-        }
         const paths = input.allowMultiple
           ? await shellClient.repoHost.pickFolders()
           : [await shellClient.shell.pickDirectory({ defaultPath: input.defaultPath })].filter(
@@ -65,8 +55,7 @@ export function createShellServicesRouter() {
             )
         return { selections: paths.map((path) => ({ kind: 'path' as const, path })) }
       }),
-      // Why: the browser has no tray/global-attention equivalent. Electron's
-      // tray adapter remains in main and reports availability independently.
+      // Why: Chrome side panels have no tray/global-attention equivalent.
       requestAttention: implementer.platform.requestAttention.handler(() => ({
         kind: 'shell-unavailable' as const
       }))

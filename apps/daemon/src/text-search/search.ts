@@ -1,6 +1,6 @@
 /**
  * Shared, pure text-search helpers used by both the local main process and the
- * SSH relay. No Electron, child process, or filesystem access belongs here.
+ * SSH relay. No child-process or filesystem access belongs here.
  *
  * Why: both runtime paths must share argument construction, output parsing,
  * result limits, and relative-path normalization so their behavior cannot

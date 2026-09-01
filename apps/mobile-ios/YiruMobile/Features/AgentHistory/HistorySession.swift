@@ -44,7 +44,7 @@ nonisolated struct AgentHistorySession: Identifiable, Hashable, Sendable {
     }
 
     var updatedDate: Date? {
-        AgentHistoryDateParser.date(updatedAt ?? modifiedAt)
+        ISODateParser.date(updatedAt ?? modifiedAt)
     }
 
     var folderLabel: String {
@@ -83,12 +83,4 @@ nonisolated struct AgentHistoryIssue: Hashable, Sendable {
 nonisolated struct AgentHistorySnapshot: Sendable {
     let sessions: [AgentHistorySession]
     let issues: [AgentHistoryIssue]
-}
-
-nonisolated private enum AgentHistoryDateParser {
-    static func date(_ value: String) -> Date? {
-        let fractional = ISO8601DateFormatter()
-        fractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        return fractional.date(from: value) ?? ISO8601DateFormatter().date(from: value)
-    }
 }

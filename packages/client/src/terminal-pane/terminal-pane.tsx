@@ -23,7 +23,6 @@ import { useNotificationDispatch } from './use-notification-dispatch'
 import { useRegularTerminalFocus } from './use-regular-terminal-focus'
 import { useSystemPrefersDark } from './use-system-prefers-dark'
 import { useTerminalFitRestore } from './use-terminal-fit-restore'
-import { useTerminalFontZoom } from './use-terminal-font-zoom'
 import { useTerminalLayoutPersistence } from './use-terminal-layout-persistence'
 import { useTerminalLiveLayoutSync } from './use-terminal-live-layout-sync'
 import { useTerminalPaneAttention } from './use-terminal-pane-attention'
@@ -251,14 +250,6 @@ export default function TerminalPane({
       })
     }
   }, [local.pendingPaneSizeRefreshFrameIdsRef])
-
-  useTerminalFontZoom({
-    isActive,
-    containerRef: local.containerRef,
-    managerRef: local.managerRef,
-    paneFontSizesRef: local.paneFontSizesRef,
-    settingsRef
-  })
 
   useTerminalKeyboardShortcuts({
     tabId,

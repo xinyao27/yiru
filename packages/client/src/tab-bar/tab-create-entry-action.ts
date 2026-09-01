@@ -9,9 +9,9 @@ import {
   type RuntimeFileOperationArgs
 } from '~renderer/runtime/file-client'
 import {
-  createWebRuntimeSessionBrowserTab,
-  isWebRuntimeSessionActive
-} from '~renderer/runtime/web-runtime-session'
+  createRemoteRuntimeSessionBrowserTab,
+  isRemoteRuntimeSessionActive
+} from '~renderer/runtime/remote-runtime-session'
 import { useAppStore } from '~renderer/store/state'
 import { getRuntimeEnvironmentIdForWorktree } from '~renderer/worktree/runtime-owner'
 
@@ -49,8 +49,8 @@ export type TabEntryOperations = {
     }
   ) => BrowserTabState
   createRuntimePath: typeof createRuntimePath
-  createWebRuntimeSessionBrowserTab: typeof createWebRuntimeSessionBrowserTab
-  isWebRuntimeSessionActive: typeof isWebRuntimeSessionActive
+  createRemoteRuntimeSessionBrowserTab: typeof createRemoteRuntimeSessionBrowserTab
+  isRemoteRuntimeSessionActive: typeof isRemoteRuntimeSessionActive
   openFile: (
     file: Omit<OpenFile, 'id' | 'isDirty'>,
     options?: { preview?: boolean; targetGroupId?: string }
@@ -149,9 +149,9 @@ export async function openTabEntryWithOperations({
   }
 
   if (classification.kind === 'explicit-url' || classification.kind === 'host-url') {
-    const runtimeSessionActive = operations.isWebRuntimeSessionActive(activeRuntimeEnvironmentId)
+    const runtimeSessionActive = operations.isRemoteRuntimeSessionActive(activeRuntimeEnvironmentId)
     if (runtimeSessionActive) {
-      const created = await operations.createWebRuntimeSessionBrowserTab({
+      const created = await operations.createRemoteRuntimeSessionBrowserTab({
         worktreeId,
         environmentId: activeRuntimeEnvironmentId,
         url: classification.url,
@@ -240,8 +240,8 @@ export async function openTabBarEntry(args: TabCreateEntryArgs): Promise<void> {
     operations: {
       createBrowserTab: state.createBrowserTab,
       createRuntimePath,
-      createWebRuntimeSessionBrowserTab,
-      isWebRuntimeSessionActive,
+      createRemoteRuntimeSessionBrowserTab,
+      isRemoteRuntimeSessionActive,
       openFile: state.openFile,
       statRuntimePath
     }

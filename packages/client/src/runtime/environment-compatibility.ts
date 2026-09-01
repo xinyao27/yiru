@@ -1,11 +1,10 @@
 import type { RuntimeCapability } from '@yiru/runtime-protocol/protocol-version'
-import type { RuntimeRpcResponse } from '@yiru/runtime-protocol/rpc-envelope'
 import {
   RuntimeCapabilityAdvertisementSchema,
   RuntimeCapabilityCache,
   type RuntimeCapabilityScope
 } from '@yiru/runtime-protocol/runtime-capability-contract'
-import { STATUS_GET_CONTRACT } from '@yiru/runtime-protocol/status'
+import type { STATUS_GET_CONTRACT } from '@yiru/runtime-protocol/status'
 import type { RuntimeMethodResult } from '@yiru/runtime-protocol/workbench/runtime-method-contract'
 
 import { assertRuntimeStatusCompatible } from './protocol-compat'
@@ -85,14 +84,12 @@ export async function ensureRuntimeEnvironmentCompatible(
     statusCheckedAt: null
   }
   const check = (async () => {
-    const response = await runtimeEnvironmentsClient.call({
-      selector: environmentId,
-      method: STATUS_GET_CONTRACT.name,
-      timeoutMs: options.timeoutMs
-    })
     const status = normalizeRuntimeCapabilityAdvertisement(
-      unwrapRuntimeRpcResult<RuntimeEnvironmentStatus>(
-        response as RuntimeRpcResponse<RuntimeEnvironmentStatus>
+      unwrapRuntimeRpcResult(
+        await runtimeEnvironmentsClient.getStatus({
+          selector: environmentId,
+          timeoutMs: options.timeoutMs
+        })
       )
     )
     assertRuntimeStatusCompatible(status)
@@ -218,14 +215,9 @@ export async function getRuntimeEnvironmentStatus(
   // Why: publish the in-flight probe before awaiting so concurrent cold-cache
   // capability lookups coalesce onto this one status.get instead of duplicating probes.
   const check = (async () => {
-    const response = await runtimeEnvironmentsClient.call({
-      selector: trimmed,
-      method: STATUS_GET_CONTRACT.name,
-      timeoutMs
-    })
     const status = normalizeRuntimeCapabilityAdvertisement(
-      unwrapRuntimeRpcResult<RuntimeEnvironmentStatus>(
-        response as RuntimeRpcResponse<RuntimeEnvironmentStatus>
+      unwrapRuntimeRpcResult(
+        await runtimeEnvironmentsClient.getStatus({ selector: trimmed, timeoutMs })
       )
     )
     assertRuntimeStatusCompatible(status)

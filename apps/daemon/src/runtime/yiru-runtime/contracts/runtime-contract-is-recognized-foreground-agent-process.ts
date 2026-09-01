@@ -4,7 +4,6 @@ import type {
   RuntimeTerminalWait,
   RuntimeTerminalSummary
 } from '@yiru/runtime-protocol/workbench/runtime-types'
-import type { RuntimeWindowTarget } from '~main/runtime/host/renderer-target'
 
 import type { RuntimeLeafRecord, RuntimePtyWorktreeRecord } from '../model/terminal-records'
 import type {
@@ -113,7 +112,5 @@ export abstract class RuntimeContractIsRecognizedForegroundAgentProcess extends 
 
   protected abstract getLeafKey(tabId: string, leafId: string): string
 
-  protected abstract getAuthoritativeWindow(): RuntimeWindowTarget
-
-  protected abstract getAvailableAuthoritativeWindow(): RuntimeWindowTarget | null
+  protected abstract hasAvailableWorkbench(): boolean
 }

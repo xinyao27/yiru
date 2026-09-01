@@ -1,8 +1,8 @@
 import { toast } from 'sonner'
 import { translate } from '~renderer/i18n/i18n'
+import { extractRuntimeErrorMessage } from '~renderer/runtime/error-message'
 import { downloadRuntimeFile, type RuntimeFileOperationArgs } from '~renderer/runtime/file-client'
 import { downloadRuntimeFolder } from '~renderer/runtime/folder-download'
-import { extractIpcErrorMessage } from '~renderer/runtime/ipc-error'
 import { shellClient } from '~renderer/runtime/shell-client'
 
 import type { TreeNode } from './types'
@@ -26,11 +26,7 @@ export function shouldShowViewFileAction(node: TreeNode): boolean {
 export function shouldShowRemoteDownloadAction(
   runtimeDownloadContext?: RuntimeFileOperationArgs | null
 ): boolean {
-  // Why: download depends on Electron's native save dialog.
-  return (
-    Boolean(runtimeDownloadContext) &&
-    (globalThis as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__ !== true
-  )
+  return Boolean(runtimeDownloadContext)
 }
 
 export function shouldShowCopyFileAction(
@@ -39,11 +35,7 @@ export function shouldShowCopyFileAction(
   selectionSize = 1
 ): boolean {
   // Why: remote directories need recursive materialization semantics not supported here.
-  return (
-    (!connectionId || !node.isDirectory) &&
-    selectionSize === 1 &&
-    (globalThis as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__ !== true
-  )
+  return (!connectionId || !node.isDirectory) && selectionSize === 1
 }
 
 export async function downloadRemoteEntry(
@@ -74,7 +66,7 @@ export async function downloadRemoteEntry(
     )
   } catch (error) {
     toast.error(
-      extractIpcErrorMessage(
+      extractRuntimeErrorMessage(
         error,
         translate(
           'auto.components.right.sidebar.FileExplorerRow.b3e288bf41',
@@ -97,6 +89,6 @@ export async function copyFileToOsClipboard(node: TreeNode): Promise<void> {
       toast.error(failureMessage)
     }
   } catch (error) {
-    toast.error(extractIpcErrorMessage(error, failureMessage))
+    toast.error(extractRuntimeErrorMessage(error, failureMessage))
   }
 }

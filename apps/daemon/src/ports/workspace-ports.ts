@@ -25,7 +25,7 @@ export function registerWorkspacePortHandlers(
   )
 }
 
-// Why: PTY output feeds this watcher in both Electron and the Node host. Keep
+// Why: PTY output feeds this watcher for local and remote hosts. Keep
 // the Store ownership filter next to the source so neither runtime leaks another host's URLs.
 export function subscribeWorkspacePortAdvertisedUrlChanges(
   store: Store,

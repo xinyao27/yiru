@@ -61,3 +61,35 @@ nonisolated func activityProviderOpacity(_ provider: String) -> Double {
     default: 0.5
     }
 }
+
+nonisolated struct ActivityWeekdayPoint: Identifiable, Sendable {
+    let label: String
+    let value: Double
+    var id: String { label }
+}
+
+nonisolated func activityWeekdayRhythm(
+    _ points: [ActivityDailyPoint],
+    metric: ActivityMetric
+) -> [ActivityWeekdayPoint] {
+    var calendar = Calendar(identifier: .gregorian)
+    calendar.timeZone = .current
+    var totals = Array(repeating: 0.0, count: 7)
+    for point in points {
+        let parts = point.day.split(separator: "-", omittingEmptySubsequences: false)
+        guard parts.count == 3,
+            let year = Int(parts[0]),
+            let month = Int(parts[1]),
+            let day = Int(parts[2]),
+            let date = calendar.date(from: DateComponents(year: year, month: month, day: day))
+        else { continue }
+        totals[calendar.component(.weekday, from: date) - 1] += activityMetricValue(
+            metric,
+            daily: point
+        )
+    }
+    let symbols = Calendar.current.veryShortWeekdaySymbols
+    return totals.enumerated().map { index, value in
+        ActivityWeekdayPoint(label: symbols[index], value: value)
+    }
+}

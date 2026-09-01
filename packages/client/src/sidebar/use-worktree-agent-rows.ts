@@ -52,7 +52,7 @@ export function useWorktreeAgentRows(worktreeId: string, active = true): Dashboa
   )
   // Why: keep the store selector limited to stable raw records. Converting
   // migration entries creates fresh objects with Date.now(), which breaks
-  // useSyncExternalStore's cached-snapshot contract and can blank Electron.
+  // useSyncExternalStore's cached-snapshot contract and can blank the sidebar.
   const migrationUnsupported = useAppStore(
     useShallow((s) => (active ? selectMigrationUnsupportedEntriesForWorktree(s, worktreeId) : []))
   )

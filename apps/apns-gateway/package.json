@@ -9,7 +9,7 @@
     "deploy": "vp run typecheck && wrangler deploy",
     "lint": "vp lint src",
     "typecheck": "tsc --noEmit",
-    "types:generate": "wrangler types"
+    "types:generate": "node scripts/generate-bindings.mjs"
   },
   "devDependencies": {
     "typescript": "catalog:",

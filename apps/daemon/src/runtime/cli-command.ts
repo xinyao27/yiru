@@ -143,7 +143,7 @@ function getVersionManagerDirectories(
 ): string[] {
   const directories = getBaseVersionManagerDirectories(platform, homePath)
 
-  // Why: GUI-launched Electron apps do not inherit shell init from nvm, so
+  // Why: service-launched processes do not inherit shell init from nvm, so
   // command resolution probes the newest installed Node versions explicitly.
   const firstNvmMatch = findFirstExecutable(
     platform,
@@ -213,7 +213,7 @@ export function resolveClaudeCommand(options: ResolveCommandOptions = {}): strin
   return resolveCliCommand('claude', options)
 }
 
-// Why: GUI-launched Electron apps inherit a minimal PATH that excludes Node
+// Why: service-launched processes inherit a minimal PATH that excludes Node
 // version manager directories. CLI tools like codex/claude are Node scripts
 // with #!/usr/bin/env node shebangs — they need `node` in PATH to execute,
 // not just to be *found*. This function returns the version manager bin paths

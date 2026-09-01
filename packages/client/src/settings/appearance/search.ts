@@ -7,16 +7,10 @@ import { translateSearchKeyword } from '../search-keywords'
 import { getTerminalAppearanceSearchEntries } from '../terminal/search'
 import { getLeftSidebarAppearanceEntry, getSidebarEntries } from './sidebar-search'
 import { getStatusBarToggles } from './status-bar-search'
-import { getMenuBarIconEntries, getSystemTrayEntries } from './system-presence-search'
 import { getThemeColorEntries } from './theme-color-search'
 import { getUsagePercentageDisplayEntry } from './usage-percentage-search'
 
-export {
-  getMenuBarIconEntries,
-  getStatusBarToggles,
-  getSystemTrayEntries,
-  getUsagePercentageDisplayEntry
-}
+export { getStatusBarToggles, getUsagePercentageDisplayEntry }
 
 export const getThemeEntries = createLocalizedCatalog((): SettingsSearchEntry[] => [
   {
@@ -167,34 +161,6 @@ export const getStatusBarEntries = createLocalizedCatalog((): SettingsSearchEntr
 
 export { getLeftSidebarAppearanceEntry, getSidebarEntries }
 
-export const getAppIconEntries = createLocalizedCatalog((): SettingsSearchEntry[] => [
-  {
-    title: translate('auto.components.settings.appearance.search.2b313598c6', 'App Icon'),
-    description: translate(
-      'auto.components.settings.appearance.search.e80c2af428',
-      'Choose the app icon shown in the Dock and window switcher.'
-    ),
-    keywords: [
-      ...translateSearchKeyword(
-        'auto.components.settings.appearance.search.2cfb3420c0',
-        'app icon'
-      ),
-      ...translateSearchKeyword('auto.components.settings.appearance.search.1f2880a9d5', 'yiru'),
-      ...translateSearchKeyword('auto.components.settings.appearance.search.d18b54ca90', 'dock'),
-      ...translateSearchKeyword('auto.components.settings.appearance.search.e5bc35d59e', 'window'),
-      ...translateSearchKeyword(
-        'auto.components.settings.appearance.search.651f35b2c6',
-        'switcher'
-      ),
-      ...translateSearchKeyword('auto.components.settings.appearance.search.f586abfa35', 'blue'),
-      ...translateSearchKeyword(
-        'auto.components.settings.appearance.search.468448bba4',
-        'watercolor'
-      )
-    ]
-  }
-])
-
 const getAppearanceCoreSectionEntries = createLocalizedCatalog((): SettingsSearchEntry[] => [
   {
     title: translate('auto.components.settings.AppearancePane.interfaceTitle', 'Interface')
@@ -211,16 +177,11 @@ const getAppearanceCoreSectionEntries = createLocalizedCatalog((): SettingsSearc
   }
 ])
 
-function getAppearanceSectionEntries(showNativeWindowSettings: boolean): SettingsSearchEntry[] {
+function getAppearanceSectionEntries(): SettingsSearchEntry[] {
   return [
     ...getAppearanceCoreSectionEntries(),
     {
-      title: translate(
-        showNativeWindowSettings
-          ? 'auto.components.settings.AppearancePane.windowSidebarTitle'
-          : 'settings.appearance.sidebarLayoutTitle',
-        showNativeWindowSettings ? 'Window & Sidebar' : 'Sidebar & Layout'
-      ),
+      title: translate('settings.appearance.sidebarLayoutTitle', 'Sidebar & Layout'),
       description: translate(
         'auto.components.settings.AppearancePane.windowSidebarSummary',
         'Sidebar, status bar, and file explorer'
@@ -230,17 +191,14 @@ function getAppearanceSectionEntries(showNativeWindowSettings: boolean): Setting
 }
 
 type AppearancePaneSearchOptions = {
-  showNativeWindowSettings?: boolean
   showWarpImport?: boolean
-  showSystemTray?: boolean
-  showMenuBarIcon?: boolean
 }
 
 function buildAppearancePaneSearchEntries(
   options: AppearancePaneSearchOptions
 ): SettingsSearchEntry[] {
   return [
-    ...getAppearanceSectionEntries(options.showNativeWindowSettings ?? true),
+    ...getAppearanceSectionEntries(),
     ...getThemeEntries(),
     ...getLoaderStyleEntries(),
     ...(SHOW_UI_LANGUAGE_SETTING ? getLanguageEntries() : []),
@@ -250,9 +208,6 @@ function buildAppearancePaneSearchEntries(
     ...getLayoutEntries(),
     ...getStatusBarEntries(),
     ...getSidebarEntries(),
-    ...((options.showNativeWindowSettings ?? true) ? getAppIconEntries() : []),
-    ...getSystemTrayEntries(options),
-    ...getMenuBarIconEntries(options),
     ...getThemeColorEntries()
   ]
 }
@@ -261,9 +216,6 @@ export function getAppearancePaneSearchEntries(
   options: AppearancePaneSearchOptions = {}
 ): SettingsSearchEntry[] {
   return buildAppearancePaneSearchEntries({
-    showNativeWindowSettings: options.showNativeWindowSettings ?? true,
-    showWarpImport: options.showWarpImport ?? true,
-    showSystemTray: options.showSystemTray,
-    showMenuBarIcon: options.showMenuBarIcon
+    showWarpImport: options.showWarpImport ?? true
   })
 }

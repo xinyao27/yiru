@@ -4,11 +4,10 @@ import { toast } from 'sonner'
 import { translate } from '~renderer/i18n/i18n'
 import { dirname, basename } from '~renderer/path'
 import { getConnectionId } from '~renderer/runtime/connection-context'
+import { extractRuntimeErrorMessage } from '~renderer/runtime/error-message'
 import { importExternalPathsToRuntime } from '~renderer/runtime/file-client'
 import { settingsForRuntimeOwner } from '~renderer/runtime/rpc-client'
 import { useAppStore } from '~renderer/store/state'
-
-import { extractIpcErrorMessage } from './ipc-error-message'
 
 export type RichMarkdownImageInsertArgs = {
   editor: Editor
@@ -79,7 +78,7 @@ export async function insertRichMarkdownImageFromPath({
       )
     }
   } catch (err) {
-    toast.error(extractIpcErrorMessage(err, 'Failed to insert image.'))
+    toast.error(extractRuntimeErrorMessage(err, 'Failed to insert image.'))
   }
 }
 

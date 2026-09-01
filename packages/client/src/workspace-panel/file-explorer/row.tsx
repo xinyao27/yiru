@@ -73,8 +73,6 @@ type FileExplorerRowProps = {
   onDragTargetChange: (dir: string | null) => void
   onDragSourceChange: (path: string | null) => void
   onDragExpandDir: (dirPath: string) => void
-  onNativeDragTargetChange: (dir: string | null) => void
-  onNativeDragExpandDir: (dirPath: string) => void
   menuOnly?: boolean
   menuPoint?: { x: number; y: number }
   onMenuOpenChange?: (open: boolean) => void
@@ -115,8 +113,6 @@ export function FileExplorerRow({
   onDragTargetChange,
   onDragSourceChange,
   onDragExpandDir,
-  onNativeDragTargetChange,
-  onNativeDragExpandDir,
   menuOnly = false,
   menuPoint,
   onMenuOpenChange
@@ -130,8 +126,6 @@ export function FileExplorerRow({
       isExpanded,
       onDragTargetChange,
       onDragExpandDir,
-      onNativeDragTargetChange,
-      onNativeDragExpandDir,
       onMoveDrop
     })
   const handleDownload = () => {
@@ -212,7 +206,6 @@ export function FileExplorerRow({
               statusColor={statusColor}
               isIgnored={isIgnored}
               buttonRef={setRowDragNode}
-              data-native-file-drop-dir={rowDropDir}
               data-explorer-draggable="true"
               draggable
               onDragStart={handleDragStart}

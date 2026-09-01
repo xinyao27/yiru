@@ -31,7 +31,6 @@ type UseFileExplorerWatchParams = {
   refreshTree: () => Promise<void>
   inlineInput: InlineInput | null
   dragSourcePath: string | null
-  isNativeDragOver: boolean
 }
 
 export function getExternalFileChangeRelativePath(
@@ -119,8 +118,7 @@ export function useFileExplorerWatch({
   refreshDir,
   refreshTree,
   inlineInput,
-  dragSourcePath,
-  isNativeDragOver
+  dragSourcePath
 }: UseFileExplorerWatchParams): void {
   // Why: Explorer subscriptions are for the selected worktree. Host focus is
   // only a default for legacy untagged worktrees, not an ownership signal.
@@ -144,9 +142,6 @@ export function useFileExplorerWatch({
 
   const dragSourceRef = useRef(dragSourcePath)
   dragSourceRef.current = dragSourcePath
-
-  const isNativeDragOverRef = useRef(isNativeDragOver)
-  isNativeDragOverRef.current = isNativeDragOver
 
   // Why: refreshDir and refreshTree are stored as refs so the merged
   // subscribe+event effect does not re-subscribe the IPC listener when
@@ -297,17 +292,9 @@ export function useFileExplorerWatch({
     processPayloadRef.current = processPayload
 
     const handleFsChanged = (payload: FsChangedPayload): void => {
-      // Why: defer watcher-triggered refreshes while inline input or drag-drop
-      // is active to avoid displacing the inline input row or shifting rows
-      // under the drag cursor (design §6.2). Native OS file drags (e.g. PDFs)
-      // never set dragSourcePath, so we also check isNativeDragOver to prevent
-      // FS create events from the import racing with the tree refresh and
-      // causing the virtualizer to snap the scroll position.
-      if (
-        inlineInputRef.current !== null ||
-        dragSourceRef.current !== null ||
-        isNativeDragOverRef.current
-      ) {
+      // Why: defer watcher refreshes while inline input or internal drag-drop
+      // is active so rows do not shift beneath the interaction.
+      if (inlineInputRef.current !== null || dragSourceRef.current !== null) {
         deferredRef.current.push(payload)
         return
       }
@@ -368,12 +355,7 @@ export function useFileExplorerWatch({
 
   // ── Flush deferred events when interaction ends ────────────────────
   useEffect(() => {
-    if (
-      inlineInput === null &&
-      dragSourcePath === null &&
-      !isNativeDragOver &&
-      deferredRef.current.length > 0
-    ) {
+    if (inlineInput === null && dragSourcePath === null && deferredRef.current.length > 0) {
       const deferred = deferredRef.current.splice(0)
       const requiresFullRefresh = worktreePath
         ? deferred.some((payload) => payloadRequiresDeferredTreeRefresh(payload, worktreePath))
@@ -395,5 +377,5 @@ export function useFileExplorerWatch({
         void refreshTreeRef.current()
       }
     }
-  }, [inlineInput, dragSourcePath, isNativeDragOver, worktreePath])
+  }, [inlineInput, dragSourcePath, worktreePath])
 }

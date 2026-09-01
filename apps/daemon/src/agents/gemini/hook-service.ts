@@ -169,7 +169,7 @@ export class GeminiHookService {
 
     // Why: match by script filename (not exact command string) so a fresh
     // install sweeps stale entries left by older builds or a different
-    // Electron userData path (dev vs. prod). Without this, repeated installs
+    // userData path from an older build. Without this, repeated installs
     // accumulate duplicate hook entries pointing at defunct scripts.
     const isManagedCommand = createManagedCommandMatcher(getManagedScriptFileName())
 

@@ -136,7 +136,7 @@ export function mergePersistedWindowsPath(
   }
 
   // Why: Windows broadcasts PATH changes to future processes, but a running
-  // Electron app keeps its old environment. Append the persisted additions so
+  // daemon keeps its old environment. Append the persisted additions so
   // newly installed CLIs resolve without unexpectedly reordering existing PATH.
   env[pathKey] = [...currentSegments, ...missing].join(pathDelimiter)
 }

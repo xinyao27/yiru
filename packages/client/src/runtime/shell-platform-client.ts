@@ -6,7 +6,7 @@ import type {
 } from '@yiru/runtime-protocol/contract'
 import { parseRenderingHostBootstrap } from '~renderer/rendering-host-bootstrap'
 
-import { callShellOrpc, isWebRuntimeClient } from './orpc-client'
+import { callShellOrpc } from './orpc-client'
 
 export type ShellPlatformApi = {
   openPath: (path: string) => Promise<void>
@@ -27,7 +27,7 @@ export type ShellPlatformApi = {
 }
 
 function resolveRenderingHost(): ShellRenderingHost {
-  if (!isWebRuntimeClient() && typeof location !== 'undefined') {
+  if (typeof location !== 'undefined') {
     const bootstrap = parseRenderingHostBootstrap(location.search)
     if (bootstrap) {
       return bootstrap
@@ -61,7 +61,7 @@ function openInExternalEditor(
   )
 }
 
-export const electronShellPlatformApi: ShellPlatformApi = {
+export const daemonShellPlatformApi: ShellPlatformApi = {
   openPath: (path) => callShellOrpc((client) => client.shell.platform.openPath, { path }),
   openInFileManager: (path) =>
     callShellOrpc((client) => client.shell.platform.openInFileManager, { path }),

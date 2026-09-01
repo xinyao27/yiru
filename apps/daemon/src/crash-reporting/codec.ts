@@ -84,7 +84,6 @@ function decodeCrashReport(value: unknown): CrashReportRecord | null {
   const platform = platformValue(record.platform)
   const osRelease = requiredString(record, 'osRelease')
   const arch = requiredString(record, 'arch')
-  const electronVersion = requiredString(record, 'electronVersion')
   const chromeVersion = requiredString(record, 'chromeVersion')
   const exitCode = record.exitCode === null ? null : record.exitCode
   if (
@@ -98,7 +97,6 @@ function decodeCrashReport(value: unknown): CrashReportRecord | null {
     !platform ||
     !osRelease ||
     !arch ||
-    !electronVersion ||
     !chromeVersion ||
     (exitCode !== null && (typeof exitCode !== 'number' || !Number.isFinite(exitCode)))
   ) {
@@ -118,7 +116,6 @@ function decodeCrashReport(value: unknown): CrashReportRecord | null {
     platform,
     osRelease,
     arch,
-    electronVersion,
     chromeVersion,
     details: sanitizeCrashReportDetails(details),
     ...(breadcrumbs ? { breadcrumbs } : {})

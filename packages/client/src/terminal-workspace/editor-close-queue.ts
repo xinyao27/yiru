@@ -24,9 +24,6 @@ const CLOSE_DIALOG_DEBOUNCE_MS = 200
 export type QueueEditorCloseRequests = (fileIds: string[]) => void
 
 type EditorCloseQueueArgs = {
-  // Why: the caller owns whatever (if anything) is waiting behind the dirty-
-  // file queue — a pending native window close, in this codebase — so the
-  // queue only reports "drained" / "cancelled" and lets the caller decide.
   onQueueDrained: () => void
   onQueueCancelled: () => void
 }
@@ -41,9 +38,8 @@ type EditorCloseQueue = {
   handleSaveDialogCancel: () => void
 }
 
-// Why: gates individual editor-tab closes (and, via the caller's queueing,
-// window closes) behind one unsaved-changes save/discard/cancel dialog so
-// only one such prompt is ever in flight for the active worktree.
+// Why: gates individual editor-tab closes behind one unsaved-changes
+// save/discard/cancel dialog so only one prompt is in flight at a time.
 export function useEditorCloseQueue({
   onQueueDrained,
   onQueueCancelled
@@ -127,9 +123,8 @@ export function useEditorCloseQueue({
   const advanceEditorCloseQueue = () => {
     const nextFileId = getNextQueuedEditorClose()
     if (nextFileId) {
-      // Why: the queue can cross worktree boundaries during window-close
-      // flows. Switch to the target file's worktree before opening the
-      // dialog so the UI behind the dialog matches the filename in it.
+      // Why: bulk closes can cross worktree boundaries. Switch to the target
+      // worktree so the UI behind the dialog matches the filename in it.
       const state = useAppStore.getState()
       const file = state.openFiles.find((f) => f.id === nextFileId)
       if (file && file.worktreeId !== state.activeWorktreeId) {

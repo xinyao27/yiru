@@ -10,7 +10,6 @@ import {
 } from '~renderer/icons/hugeicons'
 import { getShortcutPlatform } from '~renderer/keyboard-input/use-shortcut-label'
 import { useEventCallback } from '~renderer/react/use-event-callback'
-import { shellClient } from '~renderer/runtime/shell-client'
 import { useAppStore } from '~renderer/store/state'
 import { cn } from '~renderer/ui/class-names'
 import {
@@ -106,23 +105,11 @@ export default function RecentTabSwitcher(): React.JSX.Element | null {
   })
 
   useEffect(() => {
-    const unsubscribeKeyDown = shellClient.ui.onCtrlTabKeyDown(({ shiftKey }) => {
-      openOrAdvance(shiftKey ? -1 : 1)
-    })
-    const unsubscribeKeyUp = shellClient.ui.onCtrlTabKeyUp(commit)
-    return () => {
-      unsubscribeKeyDown()
-      unsubscribeKeyUp()
-    }
-  }, [commit, openOrAdvance])
-
-  useEffect(() => {
     const onKeyDown = (event: KeyboardEvent): void => {
       const store = useAppStore.getState()
       if (matchesRecentTabSwitcherChord(event, getShortcutPlatform(), store.keybindings)) {
-        // Why: Electron's native before-input-event path is authoritative, but
-        // CDP/test-dispatched keys can reach the renderer directly. Respect the
-        // keybinding registry here too so tests do not bypass user customization.
+        // Why: handle the chord at the browser boundary while respecting the
+        // user's keybinding registry.
         consumeKeyboardEvent(event)
         openOrAdvance(event.shiftKey ? -1 : 1)
         return

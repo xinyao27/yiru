@@ -2,12 +2,10 @@ import { normalizeSourceControlAiSettings } from '@yiru/runtime-protocol/workben
 import type { SourceControlAiSettingsPatch } from '@yiru/runtime-protocol/workbench/source-control/ai-types'
 import type { GlobalSettings } from '@yiru/runtime-protocol/workbench/types'
 import { useEffect, useRef, useState } from 'react'
-import { registerWindowCloseGuard } from '~renderer/application-shell/window-close'
 import { translate } from '~renderer/i18n/i18n'
 import { useEventCallback } from '~renderer/react/use-event-callback'
 import { useAppStore } from '~renderer/store/state'
 import { useConfirmationDialog } from '~renderer/ui/confirmation-dialog'
-import { isIntentionalAppRestartInProgress } from '~renderer/updates/before-unload'
 
 type SourceControlPromptGuardInput = {
   closeSettingsPage: () => void
@@ -26,8 +24,6 @@ export function useSourceControlPromptGuard({
   const confirm = useConfirmationDialog()
   const writeQueueRef = useRef<Promise<void>>(Promise.resolve())
   const hasUnsavedChanges = hasUnsavedCommitPromptChanges || hasUnsavedBranchPromptChanges
-  const hasUnsavedChangesRef = useRef(hasUnsavedChanges)
-  hasUnsavedChangesRef.current = hasUnsavedChanges
 
   const writeSettings = (patch: SourceControlAiSettingsPatch): Promise<void> => {
     const next = writeQueueRef.current
@@ -82,16 +78,16 @@ export function useSourceControlPromptGuard({
     }
   })
 
-  useEffect(
-    () =>
-      registerWindowCloseGuard(() => {
-        if (isIntentionalAppRestartInProgress() || !hasUnsavedChangesRef.current) {
-          return true
-        }
-        return promptDiscard()
-      }),
-    [promptDiscard]
-  )
+  useEffect(() => {
+    if (!hasUnsavedChanges) {
+      return
+    }
+    const preventAccidentalClose = (event: BeforeUnloadEvent): void => {
+      event.preventDefault()
+    }
+    window.addEventListener('beforeunload', preventAccidentalClose)
+    return () => window.removeEventListener('beforeunload', preventAccidentalClose)
+  }, [hasUnsavedChanges])
 
   return {
     closeWithGuard,

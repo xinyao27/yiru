@@ -2,24 +2,12 @@ import { toast } from 'sonner'
 import { requestEditorSaveQuiesce } from '~renderer/editor/autosave'
 import { basename, dirname, joinPath } from '~renderer/path'
 import { getConnectionId } from '~renderer/runtime/connection-context'
+import { extractRuntimeErrorMessage } from '~renderer/runtime/error-message'
 import { renameRuntimePath } from '~renderer/runtime/file-client'
 import { useAppStore } from '~renderer/store/state'
 import { remapOpenEditorTabsForPathChange } from '~renderer/workspace-panel/remap-open-editor-tabs-for-path-change'
 
 import { commitFileExplorerOp } from '../workspace-panel/file-explorer/undo-redo'
-
-/**
- * Electron's ipcRenderer.invoke wraps errors as:
- *   "Error invoking remote method 'channel': Error: actual message"
- * Strip the wrapper so users see only the meaningful part.
- */
-export function extractIpcErrorMessage(err: unknown, fallback: string): string {
-  if (!(err instanceof Error)) {
-    return fallback
-  }
-  const match = err.message.match(/Error invoking remote method '[^']*': (?:Error: )?(.+)/)
-  return match ? match[1] : err.message
-}
 
 type RenameFileArgs = {
   oldPath: string
@@ -95,7 +83,7 @@ export async function renameFileOnDisk(args: RenameFileArgs): Promise<void> {
       }
     })
   } catch (err) {
-    toast.error(extractIpcErrorMessage(err, `Failed to rename '${existingName}'.`))
+    toast.error(extractRuntimeErrorMessage(err, `Failed to rename '${existingName}'.`))
   }
   if (refreshDir) {
     await refreshDir(parentDir)

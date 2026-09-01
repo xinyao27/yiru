@@ -1,18 +1,11 @@
-import { assertClipboardTextWithinLimitWithYield } from '@yiru/runtime-protocol/model/ui'
 import {
   keybindingMatchesAction,
   type KeybindingOverrides
 } from '@yiru/runtime-protocol/workbench/keybindings'
 import { useEffect } from 'react'
-import { APP_MENU_PASTE_EVENT } from '~renderer/application-shell/menu-paste'
 
 import type { PaneManager } from './pane-manager/pane-manager'
 import type { PtyTransport } from './pty/transport-types'
-import {
-  firesNativePasteEvent,
-  getClipboardEventText,
-  isClipboardEventPasteRequired
-} from './terminal-clipboard-event-paste'
 import { createTerminalPanePasteActions } from './terminal-pane-paste-actions'
 
 type TerminalPanePasteInput = {
@@ -112,9 +105,6 @@ export function useTerminalPanePaste({
         }
         return
       }
-      if (isClipboardEventPasteRequired() && firesNativePasteEvent(event, isMac)) {
-        return
-      }
       event.preventDefault()
       event.stopPropagation()
       const pane = getActivePane()
@@ -152,42 +142,17 @@ export function useTerminalPanePaste({
       pasteFromClipboard({
         activeElementAtDispatch: document.activeElement,
         pane,
-        source: 'paste-event',
-        ...(isClipboardEventPasteRequired()
-          ? {
-              readClipboardText: (options) =>
-                assertClipboardTextWithinLimitWithYield(getClipboardEventText(event), options)
-            }
-          : {})
+        source: 'paste-event'
       })
     }
-    const onAppMenuPaste = (event: Event): void => {
-      const activeElementAtDispatch = document.activeElement
-      if (
-        !(activeElementAtDispatch instanceof Element) ||
-        !container.contains(activeElementAtDispatch) ||
-        activeElementAtDispatch.closest('[data-terminal-search-root]')
-      ) {
-        return
-      }
-      event.preventDefault()
-      event.stopPropagation()
-      const pane = getActivePane()
-      if (pane) {
-        pasteFromClipboard({ activeElementAtDispatch, pane, source: 'app-menu' })
-      }
-    }
-
     container.addEventListener('keydown', onKeyPaste, { capture: true })
     container.addEventListener('paste', onPaste, { capture: true })
-    window.addEventListener(APP_MENU_PASTE_EVENT, onAppMenuPaste)
     return () => {
       if (pasteSuppressionTimerId !== null) {
         window.clearTimeout(pasteSuppressionTimerId)
       }
       container.removeEventListener('keydown', onKeyPaste, { capture: true })
       container.removeEventListener('paste', onPaste, { capture: true })
-      window.removeEventListener(APP_MENU_PASTE_EVENT, onAppMenuPaste)
     }
   }, [
     containerRef,

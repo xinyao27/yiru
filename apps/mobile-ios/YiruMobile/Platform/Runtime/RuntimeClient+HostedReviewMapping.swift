@@ -129,7 +129,7 @@ nonisolated func hostedReviewComment(
         author: wire.author,
         authorAvatarURL: URL(string: wire.authorAvatarUrl),
         body: wire.body,
-        createdAt: ISO8601DateFormatter().date(from: wire.createdAt),
+        createdAt: ISODateParser.date(wire.createdAt),
         url: URL(string: wire.url),
         reactions: (wire.reactions ?? []).map {
             HostedReviewReaction(content: $0.content, count: $0.count)

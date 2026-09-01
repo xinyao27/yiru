@@ -1,5 +1,5 @@
 import type { StateCreator } from 'zustand'
-import { extractIpcErrorMessage } from '~renderer/runtime/ipc-error'
+import { extractRuntimeErrorMessage } from '~renderer/runtime/error-message'
 import { publishRendererCommandResult } from '~renderer/runtime/renderer-command-result-channel'
 import type { AppState } from '~renderer/store/types'
 
@@ -50,7 +50,7 @@ export function createEditorMarkdownPreviewActions(
       } catch (err) {
         publishRendererCommandResult({
           type: 'editor-markdown-create-failed',
-          error: extractIpcErrorMessage(err, 'Failed to create untitled markdown file.')
+          error: extractRuntimeErrorMessage(err, 'Failed to create untitled markdown file.')
         })
       }
     },

@@ -18,10 +18,8 @@ function deleteBlockAndRestoreSelection(view: EditorView, from: number, to: numb
 }
 
 /**
- * Why: Electron's app menu `{ role: 'cut' }` binds Cmd/Ctrl+X at the
- * main-process level, so the keystroke never reaches handleKeyDown.
- * Instead, the menu dispatches a native cut command which fires this
- * DOM event. For empty selections we cut the current block (like VS
+ * Why: the browser's native cut action fires a DOM event independently of
+ * handleKeyDown. For empty selections we cut the current block (like VS
  * Code and Notion); for non-empty selections we defer to ProseMirror's
  * built-in clipboard serializer.
  */

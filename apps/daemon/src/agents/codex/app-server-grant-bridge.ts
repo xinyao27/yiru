@@ -1,7 +1,9 @@
 import { spawnSync } from 'node:child_process'
-import { existsSync } from 'node:fs'
-import { join } from 'node:path'
 
+import {
+  CODEX_GRANT_ENTRY_COMMAND,
+  resolveInternalEntryInvocation
+} from '../../runtime/internal-entry'
 import {
   CodexAppServerTimeoutError,
   CodexAppServerUnsupportedError,
@@ -18,53 +20,18 @@ import type {
   CodexUserHookTrustRebaseResult
 } from './user-hook-trust-rebase-client'
 
-// Why: hook install/refresh is synchronous launch prep — a Codex pane must
-// not start before its trust is settled — but a stdio JSON-RPC session needs
-// a live event loop. This bridge blocks the caller on spawnSync of a bundled
-// ELECTRON_RUN_AS_NODE entry (same pattern as the daemon and parcel-watcher
-// entries) that runs the session and reports one JSON envelope on stdout.
-
-const GRANT_ENTRY_FILE_NAME = 'codex-app-server-grant-entry.js'
 // Why: spawnSync must outlive the session deadline so the entry's own timeout
 // (and its result envelope) win the race; the margin only reaps a hung entry.
 const GRANT_ENTRY_TIMEOUT_MARGIN_MS = 5_000
 const GRANT_ENTRY_MAX_BUFFER_BYTES = 16 * 1024 * 1024
 
-export function resolveCodexGrantEntryPath(
-  pathExists: (candidate: string) => boolean = existsSync,
-  moduleDir = __dirname
-): string | null {
-  // Why: resolved from __dirname (not electron's app paths) so this module
-  // stays loadable in plain-node CLI entries — the build guard rejects any
-  // electron require reachable from them. The emitted bridge chunk sits in
-  // out/main or out/main/chunks, so the entry is one or two levels up.
-  // ELECTRON_RUN_AS_NODE bypasses asar integration, so packaged builds must
-  // run the copy under app.asar.unpacked (out/main/codex/** is asarUnpacked).
-  const toUnpackedDir = (dir: string): string =>
-    dir.replace(/([\\/])app\.asar(?=([\\/]|$))/, '$1app.asar.unpacked')
-  const baseDirs = [moduleDir, join(moduleDir, '..')].map(toUnpackedDir)
-  for (const baseDir of baseDirs) {
-    const candidate = join(baseDir, 'codex', GRANT_ENTRY_FILE_NAME)
-    if (pathExists(candidate)) {
-      return candidate
-    }
-  }
-  return null
-}
-
-export type RunGrantSessionSyncOptions = {
-  entryPath?: string
-  nodeCommand?: string
-  /** Test-only override; production keeps enough margin for child cleanup. */
-  timeoutMarginMs?: number
-}
+export type RunGrantSessionSyncOptions = { timeoutMarginMs?: number }
 
 /**
  * Blocking wrapper for the grant session. Hook install/refresh is synchronous
  * launch prep (pane launch must not proceed until trust is settled), and a
  * stdio JSON-RPC session needs a live event loop — so the session runs in a
- * short-lived ELECTRON_RUN_AS_NODE child (same pattern as the daemon and
- * parcel-watcher entries) while the caller blocks on spawnSync. spawnSync
+ * short-lived daemon child while the caller blocks on spawnSync. spawnSync
  * always reaps the entry; a killed entry closes the codex child's stdin,
  * which makes codex app-server exit on EOF.
  */
@@ -86,11 +53,8 @@ function runCodexAppServerEntrySync(
   request: CodexAppServerEntryRequest,
   options: RunGrantSessionSyncOptions
 ): CodexAppServerEntryResult {
-  const entryPath = options.entryPath ?? resolveCodexGrantEntryPath()
-  if (!entryPath) {
-    throw new Error('codex trust-grant entry bundle not found')
-  }
-  const spawned = spawnSync(options.nodeCommand ?? process.execPath, [entryPath], {
+  const invocation = resolveInternalEntryInvocation(CODEX_GRANT_ENTRY_COMMAND)
+  const spawned = spawnSync(invocation.command, invocation.args, {
     input: JSON.stringify(request),
     encoding: 'utf8',
     timeout:
@@ -98,7 +62,7 @@ function runCodexAppServerEntrySync(
     killSignal: 'SIGKILL',
     maxBuffer: GRANT_ENTRY_MAX_BUFFER_BYTES,
     windowsHide: true,
-    env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' }
+    env: { ...process.env }
   })
   if ((spawned.error as NodeJS.ErrnoException | undefined)?.code === 'ETIMEDOUT') {
     // Why: spawnSync reports its own deadline through error.code before the

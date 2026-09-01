@@ -8,10 +8,7 @@ import {
   shouldApplyTerminalImePendingCandidateKeyRelease
 } from './ime/candidate-key-release-guard'
 import { installTerminalImeCompositionTracker } from './ime/composition-tracker'
-import {
-  DISABLED_MAC_NATIVE_TEXT_INPUT_SOURCE_FEATURES,
-  getMacNativeTextInputSourceTracker
-} from './ime/input-source'
+import { DISABLED_MAC_NATIVE_TEXT_INPUT_SOURCE_FEATURES } from './ime/input-source'
 import { installTerminalImeLinuxCandidateState } from './ime/linux-candidate-state'
 import { installTerminalImeNativeTextForwarder } from './ime/native-text-forwarder'
 import type { PaneManager } from './pane-manager/pane-manager'
@@ -53,7 +50,6 @@ export function installTerminalPaneKeyboard({
   const linuxCandidateState = isLinux
     ? installTerminalImeLinuxCandidateState(pane.terminal.element)
     : null
-  const macInputSourceTracker = isMac ? getMacNativeTextInputSourceTracker() : null
   const compositionTracker = installTerminalImeCompositionTracker(pane.terminal.element)
   imeCompositionDisposables.set(pane.id, {
     dispose: () => {
@@ -66,8 +62,7 @@ export function installTerminalPaneKeyboard({
         terminalElement: pane.terminal.element,
         isComposing: () => compositionTracker.isActive(),
         sendInput: (data) => pane.terminal.input(data),
-        getInputSourceFeatures: () =>
-          macInputSourceTracker?.getFeatures() ?? DISABLED_MAC_NATIVE_TEXT_INPUT_SOURCE_FEATURES
+        getInputSourceFeatures: () => DISABLED_MAC_NATIVE_TEXT_INPUT_SOURCE_FEATURES
       })
     : { claimKeyEvent: () => false, dispose: () => undefined }
   imeNativeTextForwarderDisposables.set(pane.id, nativeTextForwarder)

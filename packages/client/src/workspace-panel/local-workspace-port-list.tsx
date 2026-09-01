@@ -142,8 +142,7 @@ function LocalWorkspacePortRow({
   )
   const confidenceLabel =
     port.kind === 'workspace' ? (port.owner.confidence === 'cwd' ? 'cwd' : 'command') : null
-  const canStopProcess =
-    port.kind === 'workspace' && Boolean(port.pid) && port.processName !== 'Electron'
+  const canStopProcess = port.kind === 'workspace' && Boolean(port.pid)
 
   return (
     <ContextMenu>

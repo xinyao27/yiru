@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { isWebRuntimeSessionActive } from '~renderer/runtime/web-runtime-session'
+import { isRemoteRuntimeSessionActive } from '~renderer/runtime/remote-runtime-session'
 import { useAppStore } from '~renderer/store/state'
 import { resumeSleepingAgentSessionsForWorktree } from '~renderer/terminal-workspace/resume-sleeping-agent-session'
 
@@ -28,7 +28,7 @@ export function useWorktreeActivationBootstrap(): void {
     }
     // Why: in the paired web client, host session-tabs are authoritative.
     // Creating a local fallback races the host's initial terminal and duplicates tabs.
-    if (isWebRuntimeSessionActive(getActiveWorktreeRuntimeEnvironmentId(activeWorktreeId))) {
+    if (isRemoteRuntimeSessionActive(getActiveWorktreeRuntimeEnvironmentId(activeWorktreeId))) {
       return
     }
 

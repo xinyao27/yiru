@@ -116,8 +116,8 @@ export type RpcContext = {
   sendBinary?: (bytes: Uint8Array<ArrayBufferLike>) => boolean | void
   openTerminalMultiplex?: (input: TerminalOpenMultiplexInput) => TerminalOpenMultiplexResult
   // Why: production hides the canary capability from paired/Web clients, while
-  // the hardened Electron loopback and OS-local runtime socket still carry the
-  // desktop's core terminal traffic. Only those transports may set this bit.
+  // OS-local runtime transports still carry core terminal traffic. Only those
+  // trusted transports may set this bit.
   allowUnadvertisedTerminalMultiplex?: true
   activateTerminalMultiplexEpoch?: () => boolean
   closeTerminalMultiplexConnection?: (code: number, reason: string) => void
@@ -130,9 +130,8 @@ export type RpcContext = {
     handler: (frame: TerminalMultiplexFrame) => void
   ) => () => void
   // Why: reverse shell calls target the renderer paired with this forward
-  // connection. The id is transport-neutral: Electron derives it from the
-  // WebContents handshake, while authenticated web clients derive it from the
-  // E2EE WebSocket connection. Missing or disconnected ids degrade normally.
+  // connection. The id is transport-neutral and authenticated clients derive
+  // it from their connection. Missing or disconnected ids degrade normally.
   shellConnectionId?: string
   delegateBrowserCommand?: (method: string, input: unknown) => Promise<unknown>
 }

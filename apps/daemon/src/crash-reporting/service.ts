@@ -213,7 +213,6 @@ export class CrashReportService {
         platform: process.platform,
         osRelease: release(),
         arch: arch(),
-        electronVersion: 'not-applicable',
         chromeVersion
       },
       notes,

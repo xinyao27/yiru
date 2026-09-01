@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import type React from 'react'
 import { toast } from 'sonner'
-import { extractIpcErrorMessage, renameFileOnDisk } from '~renderer/editor/rename-file'
+import { renameFileOnDisk } from '~renderer/editor/rename-file'
 import { detectLanguage } from '~renderer/file-presentation/language-detect'
 import { dirname, joinPath } from '~renderer/path'
 import { useEventCallback } from '~renderer/react/use-event-callback'
 import { getConnectionId } from '~renderer/runtime/connection-context'
+import { extractRuntimeErrorMessage } from '~renderer/runtime/error-message'
 import { createRuntimePath, deleteRuntimePath } from '~renderer/runtime/file-client'
 import { useAppStore } from '~renderer/store/state'
 
@@ -170,7 +171,7 @@ export function useFileExplorerInlineInput({
         } catch (err) {
           // Refresh the directory even on failure so the tree stays consistent
           await refreshDir(inlineInput.parentPath)
-          toast.error(extractIpcErrorMessage(err, `Failed to create '${name}'.`))
+          toast.error(extractRuntimeErrorMessage(err, `Failed to create '${name}'.`))
         }
       }
     }

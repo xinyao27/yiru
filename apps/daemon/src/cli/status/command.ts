@@ -11,7 +11,7 @@ export function runStatusCommand(args: string[]): void {
   const processRunning = metadata ? isProcessRunning(metadata.pid) : false
   const bootstrap =
     metadata && processRunning ? readExtensionBootstrapIfExists(userDataPath, metadata.pid) : null
-  // Why: legacy Desktop metadata can point at a live Electron PID without the
+  // Why: legacy metadata can point at a live unrelated PID without the
   // daemon bootstrap required by every current CLI and extension connection.
   const running = processRunning && bootstrap !== null
   const value = {

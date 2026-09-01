@@ -25,7 +25,7 @@ const WORKSPACE_PORT_STOP_SETTLE_MS = 500
 export function canStopWorkspacePort(
   port: WorkspacePort
 ): port is WorkspacePort & { kind: 'workspace'; pid: number } {
-  return port.kind === 'workspace' && Boolean(port.pid) && port.processName !== 'Electron'
+  return port.kind === 'workspace' && Boolean(port.pid)
 }
 
 type BrowserTabCreator = ReturnType<typeof useAppStore.getState>['createBrowserTab']

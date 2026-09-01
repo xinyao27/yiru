@@ -1,6 +1,6 @@
 import type { TerminalLeafId } from '@yiru/runtime-protocol/workbench/stable-pane-id'
 
-// Why: Electron/test runtimes can lack crypto.randomUUID. The fallback still
+// Why: older browser runtimes can lack crypto.randomUUID. The fallback still
 // produces a UUID-shaped v4 id so pane-key validation remains deterministic.
 export function mintStablePaneId(): TerminalLeafId {
   const cryptoApi = globalThis.crypto as Crypto | undefined

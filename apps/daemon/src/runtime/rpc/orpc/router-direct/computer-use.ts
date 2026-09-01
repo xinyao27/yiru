@@ -23,7 +23,7 @@ import { wireRuntimeMethod } from '../registered-method'
 // Why: `computer` operates the Computer Use sidecar on the target host (a
 // screenshot/click/type surface for automating another app's UI) — distinct
 // from `developerPermissions`, the preload-only surface covering the
-// Electron app bundle's own macOS TCC grants (see the sidecar's own
+// daemon binary's own macOS TCC grants (see the sidecar's own
 // `permissions*` vs the bundle's `developerPermissions` in
 // docs/runtime-orpc-migration.md Phase 6 D-stage history for `computer`).
 export const computerUseRuntimeHandlers = {

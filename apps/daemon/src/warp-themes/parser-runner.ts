@@ -1,36 +1,29 @@
-import { existsSync } from 'node:fs'
-import { join } from 'node:path'
-import { Worker } from 'node:worker_threads'
+import { spawn } from 'node:child_process'
 
-import { getRuntimeHostPathsProvider } from '~main/runtime/host/paths-provider'
-
+import {
+  resolveInternalEntryInvocation,
+  WARP_THEME_PARSE_ENTRY_COMMAND
+} from '../runtime/internal-entry'
 import type { ParsedWarpThemeResult, ParseWarpThemeOptions } from './parser'
 
 export const WARP_THEME_PARSE_TIMEOUT_MS = 1_000
+
+const MAX_RESULT_BYTES = 1024 * 1024
 
 type ParseWarpThemeTimeoutOptions = {
   timeoutMs?: number
 }
 
-function getParserWorkerPath(): string {
-  const nodeHostWorkerPath = join(__dirname, 'warp-theme-parser-worker.cjs')
-  if (existsSync(nodeHostWorkerPath)) {
-    return nodeHostWorkerPath
-  }
-  const paths = getRuntimeHostPathsProvider()
-  const resourcesPath = paths.resourcesPath()
-  if (paths.isPackaged() && resourcesPath) {
-    return join(resourcesPath, 'app.asar', 'out', 'main', 'warp-theme-parser-worker.js')
-  }
-  return join(__dirname, 'warp-theme-parser-worker.js')
+type WarpThemeParserEntryRequest = {
+  content: string
+  fileLabel: string
+  options: ParseWarpThemeOptions
 }
 
 function isParsedWarpThemeResult(value: unknown): value is ParsedWarpThemeResult {
-  if (!value || typeof value !== 'object') {
-    return false
-  }
-  const record = value as Record<string, unknown>
-  return record.ok === true || record.ok === false
+  return Boolean(
+    value && typeof value === 'object' && 'ok' in value && (value.ok === true || value.ok === false)
+  )
 }
 
 export function parseWarpThemeYamlWithTimeout(
@@ -39,47 +32,67 @@ export function parseWarpThemeYamlWithTimeout(
   options: ParseWarpThemeOptions = {},
   timeoutOptions: ParseWarpThemeTimeoutOptions = {}
 ): Promise<ParsedWarpThemeResult> {
+  const timeoutMs = Math.max(
+    0,
+    Math.min(WARP_THEME_PARSE_TIMEOUT_MS, timeoutOptions.timeoutMs ?? WARP_THEME_PARSE_TIMEOUT_MS)
+  )
+  const invocation = resolveInternalEntryInvocation(WARP_THEME_PARSE_ENTRY_COMMAND)
+  const request: WarpThemeParserEntryRequest = { content, fileLabel, options }
+
   return new Promise((resolve) => {
-    const worker = new Worker(getParserWorkerPath(), {
-      workerData: { content, fileLabel, options }
+    const child = spawn(invocation.command, invocation.args, {
+      stdio: ['pipe', 'pipe', 'ignore'],
+      windowsHide: true,
+      env: { ...process.env }
     })
-    let settled = false
-    // Why: callers may shorten the parse timeout (preview budget) but never
-    // extend it past the default cap, keeping untrusted-input parse time bounded.
-    const timeoutMs = Math.max(
-      0,
-      Math.min(WARP_THEME_PARSE_TIMEOUT_MS, timeoutOptions.timeoutMs ?? WARP_THEME_PARSE_TIMEOUT_MS)
-    )
+    let isSettled = false
+    let output = ''
+
+    const settle = (result: ParsedWarpThemeResult): void => {
+      if (isSettled) {
+        return
+      }
+      isSettled = true
+      clearTimeout(timeout)
+      resolve(result)
+    }
     const timeout = setTimeout(() => {
+      child.kill('SIGKILL')
       settle({ ok: false, reason: 'Theme file took too long to parse.' })
-      void worker.terminate()
     }, timeoutMs)
     timeout.unref?.()
 
-    function settle(result: ParsedWarpThemeResult): void {
-      if (settled) {
-        return
+    child.stdout.setEncoding('utf8')
+    child.stdout.on('data', (chunk: string) => {
+      output += chunk
+      if (Buffer.byteLength(output) > MAX_RESULT_BYTES) {
+        child.kill('SIGKILL')
+        settle({ ok: false, reason: 'Theme parser returned an invalid result.' })
       }
-      settled = true
-      clearTimeout(timeout)
-      worker.removeAllListeners()
-      resolve(result)
-    }
-
-    worker.once('message', (message: unknown) => {
-      settle(
-        isParsedWarpThemeResult(message)
-          ? message
-          : { ok: false, reason: 'Theme parser returned an invalid result.' }
-      )
     })
-    worker.once('error', () => {
+    child.once('error', () => {
       settle({ ok: false, reason: 'Invalid YAML' })
     })
-    worker.once('exit', (code) => {
-      if (code !== 0) {
+    child.once('exit', (code) => {
+      if (isSettled) {
+        return
+      }
+      const line = output.trim().split('\n').at(-1)
+      if (code !== 0 || !line) {
         settle({ ok: false, reason: 'Theme parser exited before returning a result.' })
+        return
+      }
+      try {
+        const result: unknown = JSON.parse(line)
+        settle(
+          isParsedWarpThemeResult(result)
+            ? result
+            : { ok: false, reason: 'Theme parser returned an invalid result.' }
+        )
+      } catch {
+        settle({ ok: false, reason: 'Theme parser returned an invalid result.' })
       }
     })
+    child.stdin.end(JSON.stringify(request))
   })
 }

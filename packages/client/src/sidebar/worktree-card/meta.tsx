@@ -129,7 +129,7 @@ export function WorktreeCardDetailsHover({
   }
   const copyLinkedWorkItemLink = async (url: string, label: string) => {
     try {
-      // Why: Electron clipboard IPC remains reliable from nested hover/dropdown
+      // Why: the shared clipboard client remains reliable from nested hover/dropdown
       // overlays where browser clipboard activation can be lost.
       await shellClient.ui.writeClipboardText(url)
       toast.success(

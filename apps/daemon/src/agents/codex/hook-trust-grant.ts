@@ -86,9 +86,8 @@ type CodexTrustGrantTelemetry = (event: {
   reason?: CodexTrustGrantFallbackReason
 }) => void
 
-// Why: hook-service is bundled into plain-node CLI entries where electron
-// (and therefore the telemetry client) cannot load; the Electron main process
-// injects the tracker at startup instead of a static import.
+// Why: hook-service is also used by lightweight CLI entries; the daemon
+// injects telemetry at startup instead of forcing a static dependency.
 let telemetry: CodexTrustGrantTelemetry = () => {}
 
 function emitTelemetry(event: Parameters<CodexTrustGrantTelemetry>[0]): void {

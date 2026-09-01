@@ -28,10 +28,6 @@ import { YiruProfileMenuHeader } from './yiru-profile-menu-header'
 import { YiruProfileSwitchConfirmDialog } from './yiru-profile-switch-confirm-dialog'
 import { getYiruProfileSwitchLiveWorkSummary } from './yiru-profile-switch-liveness'
 
-function isWebClient(): boolean {
-  return Boolean((window as unknown as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__)
-}
-
 function getProfileSubtitle(): string {
   return translate('auto.components.yiru.profiles.switcher.b4f9d1125d', 'Local')
 }
@@ -70,10 +66,7 @@ export function YiruProfileSwitcher({
     }
   }, [fetchProfiles, loading, profiles.length])
 
-  // Why: paired web/mobile clients only see the desktop stub's fabricated
-  // profile list; showing a switcher there would misreport the active profile
-  // and none of its actions can work remotely.
-  if (isWebClient() || !activeProfile) {
+  if (!activeProfile) {
     return null
   }
 
@@ -138,7 +131,7 @@ export function YiruProfileSwitcher({
                     variant="ghost"
                     size={sidebarPlacement ? 'icon-xs' : 'xs'}
                     className={cn(
-                      'shrink-0 text-muted-foreground [-webkit-app-region:no-drag]',
+                      'shrink-0 text-muted-foreground',
                       sidebarPlacement ? 'px-0' : 'mr-2 max-w-[180px] gap-1.5 px-1.5'
                     )}
                     disabled={profileActionDisabled}
