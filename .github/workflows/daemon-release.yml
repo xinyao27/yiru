@@ -13,6 +13,11 @@ permissions:
   contents: write
   id-token: write
 
+# Why: setup installs the exact pinned pnpm binary; disabling its nested version manager keeps
+# standalone and Node-distributed pnpm identities from rewriting the cross-platform lockfile.
+env:
+  PNPM_CONFIG_PM_ON_FAIL: ignore
+
 jobs:
   macos-helper:
     if: github.repository == 'xinyao27/yiru'

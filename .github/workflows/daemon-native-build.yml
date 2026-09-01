@@ -28,6 +28,11 @@ on:
 permissions:
   contents: read
 
+# Why: setup installs the exact pinned pnpm binary; disabling its nested version manager keeps
+# standalone and Node-distributed pnpm identities from rewriting the cross-platform lockfile.
+env:
+  PNPM_CONFIG_PM_ON_FAIL: ignore
+
 jobs:
   native:
     name: ${{ matrix.platform }} native runtime
