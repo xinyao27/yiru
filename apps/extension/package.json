@@ -20,13 +20,13 @@
   "funding": "https://github.com/sponsors/xinyao27",
   "type": "module",
   "scripts": {
-    "build": "vp run --filter '{.}^...' build && wxt build",
+    "build": "wxt build",
     "check": "vp check --fix && vp run typecheck",
     "dev": "wxt",
     "fmt": "vp fmt .",
     "lint": "vp lint . --fix",
     "package:web-store": "vp run build && bun scripts/package-web-store.mjs",
-    "typecheck": "vp run --filter '{.}^...' build && wxt prepare && tsc --noEmit"
+    "typecheck": "wxt prepare && tsc --noEmit"
   },
   "dependencies": {
     "@yiru/client": "workspace:*",

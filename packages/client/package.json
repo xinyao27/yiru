@@ -13,18 +13,12 @@
     "./extension-install": "./src/extension/install/bootstrap.tsx",
     "./extension-settings": "./src/extension/settings/bootstrap.tsx",
     "./styles": "./src/assets/main.css",
-    "./paraglide/messages": {
-      "types": "./generated/paraglide/messages.d.ts",
-      "default": "./generated/paraglide/messages.js"
-    },
     "./vite": "./vite.ts"
   },
   "scripts": {
-    "build": "vp run generate:i18n",
     "fmt": "vp fmt .",
     "lint": "vp lint . --fix",
-    "generate:i18n": "paraglide-js compile --project ./project.inlang --outdir ./generated/paraglide --emit-ts-declarations --output-structure locale-modules",
-    "typecheck": "vp run generate:i18n && tsc --noEmit"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@base-ui/react": "catalog:",
@@ -109,7 +103,6 @@
     "zustand": "catalog:workbench"
   },
   "devDependencies": {
-    "@inlang/paraglide-js": "catalog:",
     "@inlang/plugin-i18next": "catalog:",
     "@types/node": "catalog:",
     "@types/qrcode": "catalog:",

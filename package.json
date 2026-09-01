@@ -20,7 +20,7 @@
   "type": "module",
   "scripts": {
     "dev": "vp run --parallel --filter @yiru/daemon --filter @yiru/extension dev",
-    "build": "vp run --filter '!yiru-mobile' build",
+    "build": "vp run --filter @yiru/daemon --filter @yiru/extension --filter @yiru/apns-gateway build",
     "typecheck": "vp run --cache -r typecheck",
     "check": "vp check --fix && vp run typecheck",
     "lint": "vp lint --fix",

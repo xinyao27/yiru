@@ -6,7 +6,6 @@ catalog:
   '@dnd-kit/core': ^6.3.1
   '@dnd-kit/sortable': ^10.0.0
   '@floating-ui/dom': 1.8.0
-  '@inlang/paraglide-js': 2.25.0
   '@inlang/plugin-i18next': 6.2.6
   '@legendapp/list': 3.3.9
   '@opentelemetry/api': 1.9.1

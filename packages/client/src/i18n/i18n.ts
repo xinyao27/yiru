@@ -12,9 +12,9 @@ let activeLocale: SupportedUiLocale = DEFAULT_LOCALE
 const localeListeners = new Set<() => void>()
 
 export function translate(key: string, fallback: string, variables?: TranslationVariables): string {
-  // Why: English call sites already carry their source string. Loading Paraglide's generated
-  // all-locale function registry made every renderer parse megabytes of wrappers before first
-  // paint; only the non-English catalog needs to ship at runtime.
+  // Why: English call sites already carry their source string. An all-locale function registry
+  // made every renderer parse megabytes of wrappers before first paint; only the non-English
+  // catalog needs to ship at runtime.
   const messages = activeLocale === 'zh' ? zhMessages : EMPTY_MESSAGES
   return renderCompiledMessage(messages, key, fallback, activeLocale, variables)
 }

@@ -16,11 +16,10 @@ deliberately has no JavaScript distribution build:
 | `@yiru/client/extension-install` | Chrome extension installation surface |
 | `@yiru/client/extension-settings` | Chrome extension settings surface |
 | `@yiru/client/styles` | Global tokens and workbench chrome stylesheet |
-| `@yiru/client/paraglide/messages` | Generated messages consumed outside the client bundle |
 | `@yiru/client/vite` | Client root, aliases, React/Tailwind plugins, workers, and feature defines |
 
 Consumers use only these exports; they never import `@yiru/client/src/*`. The package owns its
-typecheck, lint, i18n generation, and UI policy gates. A client implementation change should not
+typecheck, lint, localization catalogs, and UI policy gates. A client implementation change should not
 require an extension-host edit unless it also changes a host-facing runtime or shell contract.
 
 ## Host setup
