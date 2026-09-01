@@ -1,43 +1,27 @@
 import { implement } from '@orpc/server'
 import { shellServicesContract } from '@yiru/runtime-protocol/contract'
-import { buildWorkspaceSessionPayload } from '~renderer/components/editor/workspace-session'
-import { persistWorkspaceSessionByHost } from '~renderer/components/editor/workspace-session-host-persistence'
-import { handleRateLimitResumeDispatchRequest } from '~renderer/components/rate-limit-resume/use-rate-limit-resume-dispatch'
-import { closeTerminalTab } from '~renderer/components/terminal/tab-actions'
-import { useAppStore } from '~renderer/store'
-import type { RateLimitResumeSchedule } from '~shared/rate-limit-resume/types'
+import type { RateLimitResumeSchedule } from '@yiru/runtime-protocol/workbench/rate-limit-resume/types'
+import { buildWorkspaceSessionPayload } from '~renderer/editor/workspace-session'
+import { persistWorkspaceSessionByHost } from '~renderer/editor/workspace-session-host-persistence'
+import { handleRateLimitResumeDispatchRequest } from '~renderer/rate-limit-resume/use-rate-limit-resume-dispatch'
+import { useAppStore } from '~renderer/store/state'
+import { closeTerminalTab } from '~renderer/terminal/tab-actions'
 
-import {
-  closeBrowserTabViaShell,
-  createBrowserTabViaShell,
-  setBrowserTabProfileViaShell
-} from './browser-tab-shell-requests'
+import { executeHostBrowserCommand } from '../browser-tab-projection/command'
 import { readMobileMarkdownTab, saveMobileMarkdownTab } from './mobile-markdown-bridge'
 import { shellClient } from './shell-client'
-import { electronShellPlatformApi, type ShellPlatformApi } from './shell-platform-client'
 import { shellSessionApi } from './shell-state-client'
 import { createTerminalTabViaShell } from './terminal-create-shell-request'
 import { mountTerminalTabViaShell } from './terminal-mount-shell-request'
 import { revealTerminalSessionViaShell } from './terminal-reveal-shell-request'
 import { handleShellServicesUICommand } from './ui-command-shell-request'
-import { getWebShellApi, pickWebShellDirectories } from './web-shell-client'
-
-function isWebShell(): boolean {
-  return (globalThis as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__ === true
-}
-
-function getShellApi(): ShellPlatformApi {
-  return isWebShell() ? getWebShellApi() : electronShellPlatformApi
-}
 
 export function createShellServicesRouter() {
   const implementer = implement(shellServicesContract)
   return implementer.router({
     ping: implementer.ping.handler(() => ({ pong: true as const, respondedAtMs: Date.now() })),
-    // Why: Phase 5 slice S3 — job3 (driving the OS notification centre) needs
-    // Electron's main-process Notification API, unavailable in this renderer
-    // context, so this delegates through the authenticated shell notification
-    // contract to main/notifications/notifications.ts.
+    // Why: native notifications belong to the daemon, so the browser delegates
+    // through the authenticated shell notification contract.
     notifications: {
       display: implementer.notifications.display.handler(({ input }) =>
         shellClient.notifications.displayNative(input)
@@ -60,22 +44,18 @@ export function createShellServicesRouter() {
         if (url.protocol !== 'https:' && url.protocol !== 'http:') {
           return { opened: false }
         }
-        await getShellApi().openUrl(url.toString())
+        await shellClient.shell.openUrl(url.toString())
         return { opened: true }
       }),
       pickDirectory: implementer.platform.pickDirectory.handler(async ({ input }) => {
-        if (isWebShell()) {
-          return { selections: await pickWebShellDirectories() }
-        }
         const paths = input.allowMultiple
           ? await shellClient.repoHost.pickFolders()
-          : [await getShellApi().pickDirectory({ defaultPath: input.defaultPath })].filter(
+          : [await shellClient.shell.pickDirectory({ defaultPath: input.defaultPath })].filter(
               (path): path is string => path !== null
             )
         return { selections: paths.map((path) => ({ kind: 'path' as const, path })) }
       }),
-      // Why: the browser has no tray/global-attention equivalent. Electron's
-      // tray adapter remains in main and reports availability independently.
+      // Why: Chrome side panels have no tray/global-attention equivalent.
       requestAttention: implementer.platform.requestAttention.handler(() => ({
         kind: 'shell-unavailable' as const
       }))
@@ -120,10 +100,6 @@ export function createShellServicesRouter() {
             })
           })
       ),
-      // Why: Phase 5 slice S4b (terminal creation cluster, 切片 46) — the
-      // actual logic lives in terminal-create-shell-request.ts, same
-      // extraction shape as browser-tab-shell-requests.ts for the browser
-      // tab trio, since use-ipc-events.ts is heavily contested.
       create: implementer.terminal.create.handler(({ input }) => createTerminalTabViaShell(input)),
       mount: implementer.terminal.mount.handler(({ input }) => mountTerminalTabViaShell(input)),
       // Why: `reveal` adopts a PTY main already spawned, unlike `create`
@@ -146,22 +122,10 @@ export function createShellServicesRouter() {
         saveMobileMarkdownTab(input.worktreeId, input.tabId, input.baseVersion, input.content)
       )
     },
-    // Why: Phase 5 slice S6 (切片 47) — the browser tab trio. Unlike
-    // terminal/mobileMarkdown above, the actual logic (store lookups, pinned-
-    // tab confirmation) lives in a sibling module, browser-tab-shell-
-    // requests.ts, rather than inline here — it moved out of use-ipc-events.ts
-    // wholesale (that file only kept the `onRequestTabX` subscription
-    // wiring), so keeping it in its own file rather than folding it into this
-    // handler's `browser` block preserves the same one-module-one-feature
-    // shape the extraction was for.
     browser: {
-      tabCreate: implementer.browser.tabCreate.handler(({ input }) =>
-        createBrowserTabViaShell(input)
-      ),
-      tabSetProfile: implementer.browser.tabSetProfile.handler(({ input }) =>
-        setBrowserTabProfileViaShell(input)
-      ),
-      tabClose: implementer.browser.tabClose.handler(({ input }) => closeBrowserTabViaShell(input))
+      command: implementer.browser.command.handler(async ({ input }) => ({
+        result: await executeHostBrowserCommand(input.method, input.input)
+      }))
     },
     // Why: the scheduler needs an immediate acknowledgement while the agent
     // may keep running for much longer; completion is reported separately.

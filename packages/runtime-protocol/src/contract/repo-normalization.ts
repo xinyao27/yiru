@@ -1,6 +1,5 @@
-import type { TuiAgent } from '@yiru/workbench-model/agent'
-import { sanitizeRepoIcon } from '@yiru/workbench-model/workspace'
-
+import type { TuiAgent } from '../model/agent.js'
+import { sanitizeRepoIcon } from '../model/workspace.js'
 import { isRuntimeTuiAgent } from './input-schema.js'
 import type {
   RuntimeRepoSourceControlAiOverrides,

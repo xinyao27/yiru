@@ -59,6 +59,8 @@ export class RemoteTerminalMultiplexedStream {
       allocateCorrelationId: options.allocateCorrelationId,
       callbacks: options.callbacks,
       getParsedSeq: () => this.delivery.parsedSeq,
+      gateOutputCredit: () => this.delivery.gateOutputCredit(),
+      setDeliveryGated: (gated) => this.delivery.setDeliveryGated(gated),
       beginReveal: () => this.delivery.beginReveal()
     })
     this.publicStream = {

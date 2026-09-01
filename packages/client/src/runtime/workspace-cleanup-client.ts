@@ -1,10 +1,10 @@
-import { useAppStore } from '~renderer/store'
 import type {
   WorkspaceCleanupDismissal,
   WorkspaceCleanupScanArgs,
   WorkspaceCleanupScanProgress,
   WorkspaceCleanupScanResult
-} from '~shared/workspace/cleanup'
+} from '@yiru/runtime-protocol/workbench/workspace/cleanup'
+import { useAppStore } from '~renderer/store/state'
 
 import { callRuntimeOrpc, createRuntimeOrpcClient, type RuntimeClientTarget } from './orpc-client'
 import { getActiveRuntimeTarget } from './rpc-client'

@@ -1,43 +1,27 @@
-import { translate } from '~renderer/i18n/i18n'
 import type {
   CrashReportBreadcrumbData,
   CrashReportCopyDiagnosticsArgs,
+  CrashReportCopyDiagnosticsResult,
   CrashReportRecord,
   CrashReportSubmitArgs,
   CrashReportSubmitResult,
   RendererErrorReportArgs,
   RendererErrorReportResult
-} from '~shared/crash-reporting'
-import type { TelemetryConsentState } from '~shared/telemetry-consent-types'
+} from '@yiru/runtime-protocol/workbench/crash-reporting'
+import type {
+  DiagnosticsBundle,
+  DiagnosticsStatus,
+  DiagnosticsUploadResult,
+  FeedbackSubmitArgs,
+  FeedbackSubmitResult
+} from '@yiru/runtime-protocol/workbench/support-report'
+import type { TelemetryConsentState } from '@yiru/runtime-protocol/workbench/telemetry-consent-types'
 
-import { callShellOrpc, isWebRuntimeClient } from './orpc-client'
+import { callShellOrpc } from './orpc-client'
 
 export type ShellFeedbackApi = {
-  submit: (args: {
-    feedback: string
-    submitAnonymously?: boolean
-    githubLogin: string | null
-    githubEmail: string | null
-  }) => Promise<{ ok: true } | { ok: false; status: number | null; error: string }>
+  submit: (args: FeedbackSubmitArgs) => Promise<FeedbackSubmitResult>
 }
-
-export type DiagnosticsStatusPayload = {
-  readonly localFileEnabled: boolean
-  readonly bundleEnabled: boolean
-  readonly traceFilePath: string
-  readonly traceFamilySize: number
-  readonly disabledReason?:
-    | 'do_not_track'
-    | 'yiru_telemetry_disabled'
-    | 'yiru_diagnostics_disabled'
-    | 'ci'
-}
-export type DiagnosticsBundlePayload = {
-  readonly bundleSubmissionId: string
-  readonly bytes: number
-  readonly spanCount: number
-}
-export type DiagnosticsUploadPayload = { readonly ticketId: string } | { readonly canceled: true }
 
 export type ShellCrashReportsApi = {
   getLatestPending: () => Promise<CrashReportRecord | null>
@@ -48,15 +32,15 @@ export type ShellCrashReportsApi = {
   submit: (args: CrashReportSubmitArgs) => Promise<CrashReportSubmitResult>
   copyLatestDiagnostics: (
     args?: CrashReportCopyDiagnosticsArgs
-  ) => Promise<{ ok: true } | { ok: false; error: string }>
+  ) => Promise<CrashReportCopyDiagnosticsResult>
 }
 
 export type ShellDiagnosticsApi = {
-  getStatus: () => Promise<DiagnosticsStatusPayload>
-  collectBundle: (lookbackMinutes?: number) => Promise<DiagnosticsBundlePayload>
+  getStatus: () => Promise<DiagnosticsStatus>
+  collectBundle: (lookbackMinutes?: number) => Promise<DiagnosticsBundle>
   openBundlePreview: (bundleSubmissionId: string) => Promise<void>
   discardBundlePreview: (bundleSubmissionId: string) => Promise<void>
-  uploadBundle: (bundleSubmissionId: string) => Promise<DiagnosticsUploadPayload>
+  uploadBundle: (bundleSubmissionId: string) => Promise<DiagnosticsUploadResult>
 }
 
 export type ShellTelemetryApi = {
@@ -70,50 +54,32 @@ function restoreShellDocument<T>(value: unknown): T {
   return value as T
 }
 
-const electronFeedbackApi: ShellFeedbackApi = {
-  submit: async (input) =>
-    restoreShellDocument(await callShellOrpc((client) => client.shell.feedback.submit, input))
+export const shellFeedbackApi: ShellFeedbackApi = {
+  submit: (input) => callShellOrpc((client) => client.shell.feedback.submit, input)
 }
 
-const electronCrashReportsApi: ShellCrashReportsApi = {
-  getLatestPending: async () =>
-    restoreShellDocument(
-      await callShellOrpc((client) => client.shell.crashReports.getLatestPending, undefined)
-    ),
-  getLatestReport: async () =>
-    restoreShellDocument(
-      await callShellOrpc((client) => client.shell.crashReports.getLatestReport, undefined)
-    ),
-  dismiss: async (input) =>
-    restoreShellDocument(await callShellOrpc((client) => client.shell.crashReports.dismiss, input)),
-  recordRendererError: async (input) =>
-    restoreShellDocument(
-      await callShellOrpc((client) => client.shell.crashReports.recordRendererError, input)
-    ),
+export const shellCrashReportsApi: ShellCrashReportsApi = {
+  getLatestPending: () =>
+    callShellOrpc((client) => client.shell.crashReports.getLatestPending, undefined),
+  getLatestReport: () =>
+    callShellOrpc((client) => client.shell.crashReports.getLatestReport, undefined),
+  dismiss: (input) => callShellOrpc((client) => client.shell.crashReports.dismiss, input),
+  recordRendererError: (input) =>
+    callShellOrpc((client) => client.shell.crashReports.recordRendererError, input),
   recordBreadcrumb: (input) => {
     void callShellOrpc((client) => client.shell.crashReports.recordBreadcrumb, input).catch(
       (error: unknown) => console.warn('[crash-reporting] Failed to record breadcrumb:', error)
     )
   },
-  submit: async (input) =>
-    restoreShellDocument(await callShellOrpc((client) => client.shell.crashReports.submit, input)),
-  copyLatestDiagnostics: async (input) =>
-    restoreShellDocument(
-      await callShellOrpc((client) => client.shell.crashReports.copyLatestDiagnostics, input)
-    )
+  submit: (input) => callShellOrpc((client) => client.shell.crashReports.submit, input),
+  copyLatestDiagnostics: (input) =>
+    callShellOrpc((client) => client.shell.crashReports.copyLatestDiagnostics, input)
 }
 
-const electronDiagnosticsApi: ShellDiagnosticsApi = {
-  getStatus: async () =>
-    restoreShellDocument(
-      await callShellOrpc((client) => client.shell.diagnostics.getStatus, undefined)
-    ),
-  collectBundle: async (lookbackMinutes) =>
-    restoreShellDocument(
-      await callShellOrpc((client) => client.shell.diagnostics.collectBundle, {
-        lookbackMinutes
-      })
-    ),
+export const shellDiagnosticsApi: ShellDiagnosticsApi = {
+  getStatus: () => callShellOrpc((client) => client.shell.diagnostics.getStatus, undefined),
+  collectBundle: (lookbackMinutes) =>
+    callShellOrpc((client) => client.shell.diagnostics.collectBundle, { lookbackMinutes }),
   openBundlePreview: (bundleSubmissionId) =>
     callShellOrpc((client) => client.shell.diagnostics.openBundlePreview, {
       bundleSubmissionId
@@ -122,15 +88,11 @@ const electronDiagnosticsApi: ShellDiagnosticsApi = {
     callShellOrpc((client) => client.shell.diagnostics.discardBundlePreview, {
       bundleSubmissionId
     }),
-  uploadBundle: async (bundleSubmissionId) =>
-    restoreShellDocument(
-      await callShellOrpc((client) => client.shell.diagnostics.uploadBundle, {
-        bundleSubmissionId
-      })
-    )
+  uploadBundle: (bundleSubmissionId) =>
+    callShellOrpc((client) => client.shell.diagnostics.uploadBundle, { bundleSubmissionId })
 }
 
-const electronTelemetryApi: ShellTelemetryApi = {
+export const shellTelemetryApi: ShellTelemetryApi = {
   track: (name, props) => callShellOrpc((client) => client.shell.telemetry.track, { name, props }),
   setOptIn: (optedIn) => callShellOrpc((client) => client.shell.telemetry.setOptIn, { optedIn }),
   getConsentState: async () =>
@@ -140,65 +102,3 @@ const electronTelemetryApi: ShellTelemetryApi = {
   acknowledgeBanner: () =>
     callShellOrpc((client) => client.shell.telemetry.acknowledgeBanner, undefined)
 }
-
-const webFeedbackApi: ShellFeedbackApi = {
-  submit: () =>
-    Promise.resolve({
-      ok: false,
-      status: null,
-      error: translate(
-        'auto.web.webShell.feedbackUnavailable',
-        'Feedback is unavailable in the web client.'
-      )
-    })
-}
-
-const webCrashReportsApi: ShellCrashReportsApi = {
-  getLatestPending: () => Promise.resolve(null),
-  getLatestReport: () => Promise.resolve(null),
-  dismiss: () => Promise.resolve(null),
-  recordRendererError: () => Promise.resolve({ ok: true, report: null, deduped: true }),
-  recordBreadcrumb: () => {},
-  submit: () =>
-    Promise.resolve({
-      ok: false,
-      status: null,
-      error: translate('auto.web.runtime.shellBoundary.unavailable', 'Unavailable on web.'),
-      report: null
-    }),
-  copyLatestDiagnostics: () =>
-    Promise.resolve({
-      ok: false,
-      error: translate('auto.web.runtime.shellBoundary.unavailable', 'Unavailable on web.')
-    })
-}
-
-const diagnosticsUnavailableOnWeb = (): Error =>
-  new Error(translate('auto.web.runtime.shellBoundary.unavailable', 'Unavailable on web.'))
-
-const webDiagnosticsApi: ShellDiagnosticsApi = {
-  getStatus: () =>
-    Promise.resolve({
-      localFileEnabled: false,
-      bundleEnabled: false,
-      traceFilePath: '',
-      traceFamilySize: 0
-    }),
-  collectBundle: () => Promise.reject(diagnosticsUnavailableOnWeb()),
-  openBundlePreview: () => Promise.reject(diagnosticsUnavailableOnWeb()),
-  discardBundlePreview: () => Promise.resolve(),
-  uploadBundle: () => Promise.reject(diagnosticsUnavailableOnWeb())
-}
-
-const webTelemetryApi: ShellTelemetryApi = {
-  track: () => Promise.resolve(),
-  setOptIn: () => Promise.resolve(),
-  getConsentState: () => Promise.resolve({ effective: 'disabled', reason: 'user_opt_out' }),
-  acknowledgeBanner: () => Promise.resolve()
-}
-
-const isWeb = isWebRuntimeClient()
-export const shellFeedbackApi = isWeb ? webFeedbackApi : electronFeedbackApi
-export const shellCrashReportsApi = isWeb ? webCrashReportsApi : electronCrashReportsApi
-export const shellDiagnosticsApi = isWeb ? webDiagnosticsApi : electronDiagnosticsApi
-export const shellTelemetryApi = isWeb ? webTelemetryApi : electronTelemetryApi

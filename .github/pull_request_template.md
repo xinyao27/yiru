@@ -9,15 +9,14 @@ Describe the user-visible change.
 
 ## Validation
 
-- [ ] `pnpm lint`
-- [ ] `pnpm typecheck`
+- [ ] `pnpm check`
 - [ ] `pnpm build`
 - [ ] Manually verified affected behavior on relevant platforms
 
 ## AI Review Report
 
 Summarize the code review you ran with your AI coding agent. Include the main risks it checked, what it flagged, and what you changed or verified as a result.
-Confirm that the review explicitly checked cross-platform compatibility for macOS, Linux, and Windows, including shortcuts, labels, paths, shell behavior, and any Electron-specific platform differences touched by this PR.
+Confirm that the review explicitly checked cross-platform compatibility for macOS, Linux, and Windows, including Bun daemon behavior, Chrome shortcuts, labels, paths, and shell behavior touched by this PR.
 
 ## Security Audit
 

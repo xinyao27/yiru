@@ -3,9 +3,9 @@ import {
   type TerminalMultiplexFrame
 } from '@yiru/runtime-protocol/terminal-multiplex/frame'
 import { decodeTerminalMultiplexJson } from '@yiru/runtime-protocol/terminal-multiplex/json'
+import { decodeTerminalMultiplexSideEffectBatch } from '@yiru/runtime-protocol/terminal-multiplex/side-effects'
 
 import type { RemoteRuntimeMultiplexedTerminalCallbacks } from '../types'
-import { decodeRemoteTerminalSideEffectBatch } from './side-effects'
 
 type PendingEvent = { seq: bigint; publish: () => void }
 
@@ -19,7 +19,7 @@ export class RemoteTerminalOrderedEvents {
 
   handle(frame: TerminalMultiplexFrame): boolean {
     if (frame.opcode === TerminalMultiplexOpcode.SideEffectBatch) {
-      const batch = decodeRemoteTerminalSideEffectBatch(frame.payload)
+      const batch = decodeTerminalMultiplexSideEffectBatch(frame.payload)
       if (!batch) {
         this.callbacks.onError?.('Invalid remote terminal side-effect batch.')
         return true

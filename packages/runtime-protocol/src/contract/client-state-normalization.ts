@@ -1,5 +1,4 @@
-import type { TuiAgent } from '@yiru/workbench-model/agent'
-
+import type { TuiAgent } from '../model/agent.js'
 import { isRuntimeTuiAgent } from './input-schema.js'
 import type { RuntimeWorkspaceTitlebarActionId, RuntimeWorktreeCardProperty } from './ui-types.js'
 

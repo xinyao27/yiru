@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useAppStore } from '~renderer/store'
+import { useAppStore } from '~renderer/store/state'
 
 import {
   startAgentHibernationCoordinator,

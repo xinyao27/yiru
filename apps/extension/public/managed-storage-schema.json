@@ -1,0 +1,32 @@
+{
+  "type": "object",
+  "properties": {
+    "DaemonEndpoint": {
+      "title": "Managed daemon WebSocket endpoint",
+      "description": "Forces a ws:// or wss:// daemon endpoint. Authentication remains device-local.",
+      "type": "string"
+    },
+    "ProtocolVersion": {
+      "title": "Managed runtime protocol version",
+      "type": "integer"
+    },
+    "AllowedSiteOrigins": {
+      "title": "Origins users may permanently trust",
+      "description": "An optional allowlist of exact HTTP(S) origins.",
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "DisableBrowserContext": {
+      "title": "Disable browser page context",
+      "type": "boolean"
+    },
+    "DisableOnDeviceAi": {
+      "title": "Disable Chrome on-device AI enhancements",
+      "type": "boolean"
+    },
+    "DisableCommunityAdapters": {
+      "title": "Disable community user-script adapters",
+      "type": "boolean"
+    }
+  }
+}

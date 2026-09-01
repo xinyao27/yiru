@@ -1,3 +1,2 @@
-/apps/desktop/scripts/yiru-dev.mjs text eol=lf
 /skills/*/SKILL.md text eol=lf
-/apps/desktop/src/cli/bundled-skill-guides.ts text eol=lf
+/config/patches/*.patch text eol=lf

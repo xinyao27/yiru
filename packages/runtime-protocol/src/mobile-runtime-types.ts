@@ -1,5 +1,4 @@
-import type { AgentStatusState, AgentType, AiVaultAgent } from '@yiru/workbench-model/agent'
-
+import type { AgentStatusState, AgentType, AiVaultAgent } from './model/agent.js'
 import type { StatsUsageRange } from './stats-usage-range'
 
 export type RuntimeStatsDailyActivity = {

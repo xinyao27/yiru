@@ -7,10 +7,10 @@ import {
   focusTerminalInitiatedTab,
   isRuntimeEnvironmentActive
 } from '~renderer/application-shell/use-ipc-events'
-import { requestBackgroundTerminalWorktreeMount } from '~renderer/components/terminal/background-terminal-worktree-mount'
 import { translate } from '~renderer/i18n/i18n'
-import { useAppStore } from '~renderer/store'
+import { useAppStore } from '~renderer/store/state'
 import type { AppState } from '~renderer/store/types'
+import { requestBackgroundTerminalWorktreeMount } from '~renderer/terminal/background-terminal-worktree-mount'
 
 import { resolveTerminalPresentation } from './terminal-create-presentation'
 
@@ -38,19 +38,8 @@ function reorderCreatedTabAfterAnchor(worktreeId: string, tabId: string, afterTa
   state.reorderUnifiedTabs(createdUnifiedTab.groupId, order, { recordInteraction: false })
 }
 
-// Why: Phase 5 slice S4b (terminal creation cluster) — implements
-// `shellServices.terminal.create` (see shell-services-handler.ts). This is
-// the exact logic the removed `onRequestTerminalCreate` IPC listener in
-// use-ipc-events.ts used to run; moved here so that heavily-contested file
-// only keeps its subscription wiring, not this feature's business logic
-// (same extraction shape as browser-tab-shell-requests.ts for the browser
-// tab trio). `create` is the renderer-owns-the-PTY-spawn half of terminal
-// creation (mints a fresh tab and queues its own PTY startup command),
-// unlike terminal-reveal-shell-request.ts's `reveal`. `createTerminal()`'s
-// foreground path and `runCreateMobileSessionTerminal` both funnel through
-// this one procedure — see the design note above
-// ShellServicesTerminalCreateInputSchema in contract/shell-services.ts for
-// why that is one wider input rather than a second procedure.
+// Why: create mints the surface and queues PTY startup; reveal adopts a PTY
+// that the daemon already spawned, so the two lifecycles stay separate.
 export function createTerminalTabViaShell(
   input: ShellServicesTerminalCreateInput
 ): ShellServicesTerminalCreateOutput {

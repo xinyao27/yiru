@@ -1,5 +1,5 @@
-import { resolveLeafIdForManager } from '~renderer/lib/pane-manager/pane-key-resolution'
-import type { PaneManager } from '~renderer/lib/pane-manager/pane-manager'
+import { resolveLeafIdForManager } from '~renderer/terminal-pane/pane-manager/pane-key-resolution'
+import type { PaneManager } from '~renderer/terminal-pane/pane-manager/pane-manager'
 
 export type RegisteredRuntimeTerminalTab = {
   tabId: string

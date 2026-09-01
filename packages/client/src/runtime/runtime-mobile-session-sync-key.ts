@@ -1,5 +1,5 @@
-import { getSystemPrefersDark } from '~renderer/lib/terminal-theme'
 import type { AppState } from '~renderer/store/types'
+import { getSystemPrefersDark } from '~renderer/terminal/theme'
 
 import {
   getBrowserPagesByWorkspace,

@@ -23,37 +23,45 @@ const localRepoClient: RepoWorkspaceApi = {
   getDefaultCreateProjectParent: () => shellClient.repoHost.getDefaultCreateProjectParent(),
   list: async () =>
     (await callRuntimeOrpc(LOCAL_TARGET, (client) => client.repo.list, undefined)).repos,
-  add: async ({ path, kind }) => {
+  add: async ({ expectedRevision, path, kind }) => {
     try {
-      return await callRuntimeOrpc(LOCAL_TARGET, (client) => client.repo.add, { path, kind })
+      return await callRuntimeOrpc(LOCAL_TARGET, (client) => client.repo.add, {
+        expectedRevision,
+        path,
+        kind
+      })
     } catch (error) {
       return { error: error instanceof Error ? error.message : String(error) }
     }
   },
-  create: ({ parentPath, name, kind }) =>
-    callRuntimeOrpc(LOCAL_TARGET, (client) => client.repo.create, { parentPath, name, kind }),
-  clone: async ({ url, destination }) =>
-    (
-      await callRuntimeOrpc(
-        LOCAL_TARGET,
-        (client) => client.repo.clone,
-        { url, destination },
-        { timeoutMs: 10 * 60_000 }
-      )
-    ).repo,
+  create: ({ expectedRevision, parentPath, name, kind }) =>
+    callRuntimeOrpc(LOCAL_TARGET, (client) => client.repo.create, {
+      expectedRevision,
+      parentPath,
+      name,
+      kind
+    }),
+  clone: ({ expectedRevision, url, destination }) =>
+    callRuntimeOrpc(
+      LOCAL_TARGET,
+      (client) => client.repo.clone,
+      { expectedRevision, url, destination },
+      { timeoutMs: 10 * 60_000 }
+    ),
   isGitAvailable: async () =>
     (await callRuntimeOrpc(LOCAL_TARGET, (client) => client.repo.gitAvailable, undefined))
       .available,
-  remove: async ({ repoId }) => {
-    await callRuntimeOrpc(LOCAL_TARGET, (client) => client.repo.rm, { repo: repoId })
-  },
-  update: async ({ repoId, updates }) =>
-    (
-      await callRuntimeOrpc(LOCAL_TARGET, (client) => client.repo.update, {
-        repo: repoId,
-        updates
-      })
-    ).repo,
+  remove: ({ expectedRevision, repoId }) =>
+    callRuntimeOrpc(LOCAL_TARGET, (client) => client.repo.rm, {
+      expectedRevision,
+      repo: repoId
+    }),
+  update: async ({ expectedRevision, repoId, updates }) =>
+    callRuntimeOrpc(LOCAL_TARGET, (client) => client.repo.update, {
+      expectedRevision,
+      repo: repoId,
+      updates
+    }),
   onCloneProgress: (callback) =>
     onLocalHostProgressEvent('repoCloneProgress', ({ phase, percent }) =>
       callback({ phase, percent })

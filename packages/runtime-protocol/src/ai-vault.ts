@@ -1,10 +1,11 @@
-import { AI_VAULT_SCOPE_PATHS_MAX_COUNT, type AiVaultListResult } from '@yiru/workbench-model/agent'
+import { z } from 'zod'
+
+import { AI_VAULT_SCOPE_PATHS_MAX_COUNT, type AiVaultListResult } from './model/agent.js'
 import {
   normalizeExecutionHostScope,
   parseExecutionHostId,
   type ExecutionHostScope
-} from '@yiru/workbench-model/workspace'
-import { z } from 'zod'
+} from './model/workspace.js'
 
 const AI_VAULT_SCOPE_PATH_MAX_LENGTH = 4096
 const AI_VAULT_LIMIT_MAX = 2000

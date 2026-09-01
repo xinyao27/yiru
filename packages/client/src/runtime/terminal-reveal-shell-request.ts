@@ -2,6 +2,8 @@ import type {
   ShellServicesTerminalRevealInput,
   ShellServicesTerminalRevealOutput
 } from '@yiru/runtime-protocol/contract'
+import { parseRuntimePtyId } from '@yiru/runtime-protocol/terminal-identity/id'
+import { makePaneKey } from '@yiru/runtime-protocol/workbench/stable-pane-id'
 import {
   activateTerminalInitiatedWorktree,
   focusTerminalInitiatedTab,
@@ -10,14 +12,11 @@ import {
 import { SPLIT_TERMINAL_PANE_EVENT } from '~renderer/constants/terminal'
 import type { SplitTerminalPaneDetail } from '~renderer/constants/terminal'
 import { translate } from '~renderer/i18n/i18n'
-import { useAppStore } from '~renderer/store'
-import { singlePaneLayoutSnapshot } from '~renderer/store/slices/terminal-layout-state'
-import { parseRuntimeTerminalPtyId } from '~shared/runtime-terminal-pty-id'
-import { makePaneKey } from '~shared/stable-pane-id'
+import { useAppStore } from '~renderer/store/state'
+import { singlePaneLayoutSnapshot } from '~renderer/terminal/state/layout-state'
 
 import { resolveTerminalPresentation } from './terminal-create-presentation'
 import { activateExistingLeafInLayout, addSplitLeafToLayout } from './terminal-reveal-split-layout'
-import { rememberTerminalSessionId } from './terminal-session-id-index'
 
 function tryMakePaneKey(tabId: string, leafId: string): string | null {
   try {
@@ -27,21 +26,8 @@ function tryMakePaneKey(tabId: string, leafId: string): string | null {
   }
 }
 
-// Why: Phase 5 slice S4b (terminal creation cluster) — implements
-// `shellServices.terminal.reveal` (see shell-services-handler.ts). This is
-// the exact logic the removed `onCreateTerminal` IPC listener in
-// use-ipc-events.ts used to run for its requestId-bearing branch; moved here
-// so that heavily-contested file only keeps its subscription wiring, not
-// this feature's business logic (same extraction shape as
-// browser-tab-shell-requests.ts for the browser tab trio). `reveal` adopts a
-// PTY main already spawned (`ptyId` is required by the contract), unlike
-// terminal-create-shell-request.ts's `create`, where the renderer owns the
-// spawn. `command`/`env` are deliberately absent from this input: the only
-// live caller (`notifier.revealTerminalSession`) is called after
-// `ptyController.spawn` already ran, so it never had a startup command to
-// queue — the removed fire-and-forget `notifier.createTerminal` was the only
-// sender that ever populated those fields on this channel, and it had zero
-// call sites (see 切片 44's dead-branch finding).
+// Why: reveal adopts a PTY already spawned by the daemon; create owns a new
+// renderer surface and therefore has a different lifecycle.
 export function revealTerminalSessionViaShell(
   input: ShellServicesTerminalRevealInput
 ): ShellServicesTerminalRevealOutput {
@@ -70,11 +56,11 @@ export function revealTerminalSessionViaShell(
     splitDirection,
     splitTelemetrySource
   } = input
-  const runtimePtyId = parseRuntimeTerminalPtyId(ptyId)
-  if (runtimePtyId && durablePtyId) {
-    rememberTerminalSessionId(runtimePtyId.handle, durablePtyId, runtimePtyId.environmentId)
-  }
   const store = useAppStore.getState()
+  const runtimePtyId = parseRuntimePtyId(ptyId)
+  if (runtimePtyId && durablePtyId) {
+    store.rememberTerminalSessionId(runtimePtyId.handle, durablePtyId, runtimePtyId.environmentId)
+  }
   const terminalPresentation = resolveTerminalPresentation({ presentation, activate })
   const shouldActivate = terminalPresentation === 'focused'
   const shouldSurfaceOwner = terminalPresentation !== 'background'

@@ -1,5 +1,8 @@
-import { isWindowsAbsolutePathLike, relativePathInsideRoot } from '@yiru/workbench-model/platform'
-import type { GlobalSettings } from '~shared/types'
+import {
+  isWindowsAbsolutePathLike,
+  relativePathInsideRoot
+} from '@yiru/runtime-protocol/model/platform'
+import type { GlobalSettings } from '@yiru/runtime-protocol/workbench/types'
 
 import type { RuntimeClientTarget } from '../orpc-client'
 import { getActiveRuntimeTarget } from '../rpc-client'

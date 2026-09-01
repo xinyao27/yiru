@@ -1,11 +1,9 @@
-import type { AppIdentity } from '~shared/app-identity'
-import type { AppStarSource } from '~shared/gh-star-source'
+import type { AppStarSource } from '@yiru/runtime-protocol/workbench/gh-star-source'
 import type {
-  RuntimeBrowserDriverState,
   RuntimeSyncWindowGraph,
   RuntimeSyncWindowGraphResult,
   RuntimeTerminalDriverState
-} from '~shared/runtime-types'
+} from '@yiru/runtime-protocol/workbench/runtime-types'
 import type {
   GitHubPRRefreshCandidate,
   GitHubPRRefreshEnqueueResult,
@@ -13,42 +11,40 @@ import type {
   GitHubViewer,
   UpdateCheckOptions,
   UpdateStatus
-} from '~shared/types'
+} from '@yiru/runtime-protocol/workbench/types'
 import {
   YIRU_APP_RESTART_ABORTED_EVENT,
   YIRU_APP_RESTART_STARTED_EVENT,
   YIRU_UPDATER_QUIT_AND_INSTALL_ABORTED_EVENT,
   YIRU_UPDATER_QUIT_AND_INSTALL_STARTED_EVENT
-} from '~shared/updater-renderer-events'
+} from '~renderer/updater-renderer-events'
 
-import { getWebShellSystemApis } from '../web/shell/system'
-import { callShellOrpc, isWebRuntimeClient } from './orpc-client'
+import { callShellOrpc } from './orpc-client'
 import { subscribeShellEvent } from './shell-events-client'
 import {
-  electronShellNotificationsApi,
+  daemonShellNotificationsApi,
   type ShellNotificationsApi
 } from './shell-notifications-client'
 import { prepareShellRestart } from './shell-restart-client'
 
 export type ShellAppApi = {
-  getIdentity: () => Promise<AppIdentity>
-  relaunch: () => Promise<void>
   restart: () => Promise<void>
-  reload: () => Promise<void>
-  awaitFirstWindowStartupServices: () => Promise<void>
   startupDiagnostic: (event: string, details?: Record<string, unknown>) => Promise<void>
-  getKeyboardInputSourceId: () => Promise<string | null>
-  setUnreadDockBadgeCount: (count: number) => Promise<void>
 }
 export type ShellRepoHostApi = {
   pickFolder: () => Promise<string | null>
   pickFolders: () => Promise<string[]>
   pickDirectory: () => Promise<string | null>
-  removeForHost: (args: { repoId: string; hostId: string }) => Promise<void>
+  removeForHost: (args: {
+    expectedRevision: number
+    repoId: string
+    hostId: string
+  }) => Promise<{ removed: true; revision: number }>
   reorderForHost: (args: {
+    expectedRevision: number
     orderedIds: string[]
     hostId: string
-  }) => Promise<{ status: 'applied' | 'rejected' }>
+  }) => Promise<{ revision?: number; status: 'applied' | 'rejected' }>
   cloneAbort: () => Promise<void>
   getDefaultCreateProjectParent: () => Promise<string>
 }
@@ -58,9 +54,7 @@ export type ShellRuntimeStateApi = {
     { ptyId: string; mode: 'mobile-fit' | 'remote-desktop-fit'; cols: number; rows: number }[]
   >
   getTerminalDrivers: () => Promise<{ ptyId: string; driver: RuntimeTerminalDriverState }[]>
-  getBrowserDrivers: () => Promise<{ browserPageId: string; driver: RuntimeBrowserDriverState }[]>
   restoreTerminalFit: (ptyId: string) => Promise<{ restored: boolean }>
-  reclaimBrowserForDesktop: (browserPageId: string) => Promise<{ reclaimed: boolean }>
 }
 export type ShellGitHubApi = {
   viewer: () => Promise<GitHubViewer | null>
@@ -98,21 +92,10 @@ export type ShellUpdaterApi = {
   check: (options?: UpdateCheckOptions) => Promise<void>
   download: () => Promise<void>
   quitAndInstall: () => Promise<void>
-  dismissNudge: () => Promise<void>
   onStatus: (callback: (status: UpdateStatus) => void) => () => void
-  onClearDismissal: (callback: () => void) => () => void
 }
 
-function restoreShellDocument<T>(value: unknown): T {
-  // Why: runtime-protocol cannot import desktop-only shared document types;
-  // main validates them before this adapter restores their concrete type.
-  return value as T
-}
-
-const electronAppApi: ShellAppApi = {
-  getIdentity: async () =>
-    restoreShellDocument(await callShellOrpc((client) => client.shell.app.getIdentity, undefined)),
-  relaunch: () => callShellOrpc((client) => client.shell.app.relaunch, undefined),
+export const shellAppApi: ShellAppApi = {
   restart: async () => {
     await prepareShellRestart({
       startedEventName: YIRU_APP_RESTART_STARTED_EVENT,
@@ -125,18 +108,11 @@ const electronAppApi: ShellAppApi = {
       throw error
     }
   },
-  reload: () => callShellOrpc((client) => client.shell.app.reload, undefined),
-  awaitFirstWindowStartupServices: () =>
-    callShellOrpc((client) => client.shell.app.awaitFirstWindowStartupServices, undefined),
   startupDiagnostic: (event, details) =>
-    callShellOrpc((client) => client.shell.app.startupDiagnostic, { event, details }),
-  getKeyboardInputSourceId: () =>
-    callShellOrpc((client) => client.shell.app.getKeyboardInputSourceId, undefined),
-  setUnreadDockBadgeCount: (count) =>
-    callShellOrpc((client) => client.shell.app.setUnreadDockBadgeCount, { count })
+    callShellOrpc((client) => client.shell.app.startupDiagnostic, { event, details })
 }
 
-const electronRepoHostApi: ShellRepoHostApi = {
+export const shellRepoHostApi: ShellRepoHostApi = {
   pickFolder: () => callShellOrpc((client) => client.shell.repoHost.pickFolder, undefined),
   pickFolders: () => callShellOrpc((client) => client.shell.repoHost.pickFolders, undefined),
   pickDirectory: () => callShellOrpc((client) => client.shell.repoHost.pickDirectory, undefined),
@@ -147,41 +123,27 @@ const electronRepoHostApi: ShellRepoHostApi = {
     callShellOrpc((client) => client.shell.repoHost.getDefaultCreateProjectParent, undefined)
 }
 
-const electronRuntimeStateApi: ShellRuntimeStateApi = {
-  syncWindowGraph: async (input) =>
-    restoreShellDocument(
-      await callShellOrpc((client) => client.shell.runtime.syncWindowGraph, input)
-    ),
-  getTerminalFitOverrides: async () =>
-    restoreShellDocument(
-      await callShellOrpc((client) => client.shell.runtime.getTerminalFitOverrides, undefined)
-    ),
-  getTerminalDrivers: async () =>
-    restoreShellDocument(
-      await callShellOrpc((client) => client.shell.runtime.getTerminalDrivers, undefined)
-    ),
-  getBrowserDrivers: async () =>
-    restoreShellDocument(
-      await callShellOrpc((client) => client.shell.runtime.getBrowserDrivers, undefined)
-    ),
+export const shellRuntimeStateApi: ShellRuntimeStateApi = {
+  syncWindowGraph: (input) =>
+    callShellOrpc((client) => client.shell.runtime.syncWindowGraph, input),
+  getTerminalFitOverrides: () =>
+    callShellOrpc((client) => client.shell.runtime.getTerminalFitOverrides, undefined),
+  getTerminalDrivers: () =>
+    callShellOrpc((client) => client.shell.runtime.getTerminalDrivers, undefined),
   restoreTerminalFit: (ptyId) =>
-    callShellOrpc((client) => client.shell.runtime.restoreTerminalFit, { ptyId }),
-  reclaimBrowserForDesktop: (browserPageId) =>
-    callShellOrpc((client) => client.shell.runtime.reclaimBrowserForDesktop, { browserPageId })
+    callShellOrpc((client) => client.shell.runtime.restoreTerminalFit, { ptyId })
 }
 
-const electronGitHubApi: ShellGitHubApi = {
-  viewer: async () =>
-    restoreShellDocument(await callShellOrpc((client) => client.shell.gh.viewer, undefined)),
-  enqueuePRRefresh: async (input) =>
-    restoreShellDocument(await callShellOrpc((client) => client.shell.gh.enqueuePRRefresh, input)),
+export const shellGitHubApi: ShellGitHubApi = {
+  viewer: () => callShellOrpc((client) => client.shell.gh.viewer, undefined),
+  enqueuePRRefresh: (input) => callShellOrpc((client) => client.shell.gh.enqueuePRRefresh, input),
   reportVisiblePRRefreshCandidates: (input) =>
     callShellOrpc((client) => client.shell.gh.reportVisiblePRRefreshCandidates, input),
   checkYiruStarred: () => callShellOrpc((client) => client.shell.gh.checkYiruStarred, undefined),
   starYiru: (input) => callShellOrpc((client) => client.shell.gh.starYiru, input)
 }
 
-const electronStarNagApi: ShellStarNagApi = {
+export const shellStarNagApi: ShellStarNagApi = {
   onShow: (callback) =>
     subscribeShellEvent((event) => {
       if (event.type === 'starNagShow') {
@@ -201,22 +163,17 @@ const electronStarNagApi: ShellStarNagApi = {
   openWeb: () => callShellOrpc((client) => client.shell.starNag.openWeb, undefined),
   starYiru: () => callShellOrpc((client) => client.shell.starNag.starYiru, undefined),
   forceShow: () => callShellOrpc((client) => client.shell.starNag.forceShow, undefined),
-  agentValueMoment: async () =>
-    restoreShellDocument(
-      await callShellOrpc((client) => client.shell.starNag.agentValueMoment, undefined)
-    ),
+  agentValueMoment: () =>
+    callShellOrpc((client) => client.shell.starNag.agentValueMoment, undefined),
   showAgentValueMoment: () =>
     callShellOrpc((client) => client.shell.starNag.showAgentValueMoment, undefined),
   onboardingCompleted: () =>
     callShellOrpc((client) => client.shell.starNag.onboardingCompleted, undefined)
 }
 
-const electronUpdaterApi: ShellUpdaterApi = {
+export const shellUpdaterApi: ShellUpdaterApi = {
   getVersion: () => callShellOrpc((client) => client.shell.updater.getVersion, undefined),
-  getStatus: async () =>
-    restoreShellDocument(
-      await callShellOrpc((client) => client.shell.updater.getStatus, undefined)
-    ),
+  getStatus: () => callShellOrpc((client) => client.shell.updater.getStatus, undefined),
   check: (input) => callShellOrpc((client) => client.shell.updater.check, input),
   download: () => callShellOrpc((client) => client.shell.updater.download, undefined),
   quitAndInstall: async () => {
@@ -231,29 +188,12 @@ const electronUpdaterApi: ShellUpdaterApi = {
       throw error
     }
   },
-  dismissNudge: () => callShellOrpc((client) => client.shell.updater.dismissNudge, undefined),
   onStatus: (callback) =>
     subscribeShellEvent((event) => {
       if (event.type === 'updaterStatus') {
-        callback(restoreShellDocument(event.status))
-      }
-    }),
-  onClearDismissal: (callback) =>
-    subscribeShellEvent((event) => {
-      if (event.type === 'updaterClearDismissal') {
-        callback()
+        callback(event.status)
       }
     })
 }
 
-const webApis = isWebRuntimeClient() ? getWebShellSystemApis() : null
-
-export const shellAppApi: ShellAppApi = webApis?.app ?? electronAppApi
-export const shellRepoHostApi: ShellRepoHostApi = webApis?.repoHost ?? electronRepoHostApi
-export const shellRuntimeStateApi: ShellRuntimeStateApi =
-  webApis?.runtime ?? electronRuntimeStateApi
-export const shellGitHubApi: ShellGitHubApi = webApis?.gh ?? electronGitHubApi
-export const shellNotificationsApi: ShellNotificationsApi =
-  webApis?.notifications ?? electronShellNotificationsApi
-export const shellStarNagApi: ShellStarNagApi = webApis?.starNag ?? electronStarNagApi
-export const shellUpdaterApi: ShellUpdaterApi = webApis?.updater ?? electronUpdaterApi
+export const shellNotificationsApi: ShellNotificationsApi = daemonShellNotificationsApi

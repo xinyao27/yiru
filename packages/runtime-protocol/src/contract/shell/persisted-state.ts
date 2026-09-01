@@ -1,5 +1,12 @@
 import { type, type ContractRouter } from '@orpc/contract'
 
+import type { ExecutionHostId } from '../../model/workspace.js'
+import type {
+  OnboardingState,
+  PRInfo,
+  WorkspaceSessionPatch,
+  WorkspaceSessionState
+} from '../../workbench/types.js'
 import { withAccess, type RuntimeProcedureMeta } from '../access-meta.js'
 
 const SHELL_STATE_READ_ACCESS = {
@@ -13,27 +20,39 @@ const SHELL_STATE_WRITE_ACCESS = {
   principals: ['local']
 } as const
 
-// Why: these documents persist renderer state on the machine rendering the
-// window. Their concrete desktop schemas stay opaque at this transport layer.
+export type ShellGitHubCache = {
+  pr: Record<string, { data: PRInfo | null; fetchedAt: number }>
+}
+
+export type ShellOnboardingUpdate = Partial<Omit<OnboardingState, 'checklist'>> & {
+  checklist?: Partial<OnboardingState['checklist']>
+}
+
+// Why: these documents persist UI state on the machine rendering the surface,
+// but their pure models belong to runtime-protocol rather than either host.
 export const shellSessionContract = {
   get: withAccess(SHELL_STATE_READ_ACCESS)
-    .input(type<{ hostId?: string | null } | undefined>())
-    .output(type<unknown>()),
+    .input(type<{ hostId?: ExecutionHostId | null } | undefined>())
+    .output(type<WorkspaceSessionState>()),
   set: withAccess(SHELL_STATE_WRITE_ACCESS)
-    .input(type<{ session: unknown; hostId?: string | null }>())
+    .input(type<{ session: WorkspaceSessionState; hostId?: ExecutionHostId | null }>())
     .output(type<void>()),
   patch: withAccess(SHELL_STATE_WRITE_ACCESS)
-    .input(type<{ patch: unknown; hostId?: string | null }>())
+    .input(type<{ patch: WorkspaceSessionPatch; hostId?: ExecutionHostId | null }>())
     .output(type<void>()),
   flush: withAccess(SHELL_STATE_WRITE_ACCESS).output(type<void>())
 } satisfies ContractRouter<RuntimeProcedureMeta>
 
 export const shellOnboardingContract = {
-  get: withAccess(SHELL_STATE_READ_ACCESS).output(type<unknown>()),
-  update: withAccess(SHELL_STATE_WRITE_ACCESS).input(type<unknown>()).output(type<unknown>())
+  get: withAccess(SHELL_STATE_READ_ACCESS).output(type<OnboardingState>()),
+  update: withAccess(SHELL_STATE_WRITE_ACCESS)
+    .input(type<ShellOnboardingUpdate>())
+    .output(type<OnboardingState>())
 } satisfies ContractRouter<RuntimeProcedureMeta>
 
 export const shellCacheContract = {
-  getGitHub: withAccess(SHELL_STATE_READ_ACCESS).output(type<unknown>()),
-  setGitHub: withAccess(SHELL_STATE_WRITE_ACCESS).input(type<unknown>()).output(type<void>())
+  getGitHub: withAccess(SHELL_STATE_READ_ACCESS).output(type<ShellGitHubCache>()),
+  setGitHub: withAccess(SHELL_STATE_WRITE_ACCESS)
+    .input(type<{ cache: ShellGitHubCache }>())
+    .output(type<void>())
 } satisfies ContractRouter<RuntimeProcedureMeta>

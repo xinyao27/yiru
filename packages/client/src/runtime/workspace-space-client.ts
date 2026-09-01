@@ -1,8 +1,8 @@
-import { useAppStore } from '~renderer/store'
 import type {
   WorkspaceSpaceAnalyzeResult,
   WorkspaceSpaceScanProgress
-} from '~shared/workspace/space-types'
+} from '@yiru/runtime-protocol/workbench/workspace/space-types'
+import { useAppStore } from '~renderer/store/state'
 
 import { callRuntimeOrpc, createRuntimeOrpcClient, type RuntimeClientTarget } from './orpc-client'
 import { getActiveRuntimeTarget } from './rpc-client'

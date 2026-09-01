@@ -1,0 +1,26 @@
+import type { TerminalPaneSplitSource } from '@yiru/runtime-protocol/workbench/feature-education-telemetry'
+import { trackTerminalPaneSplit } from '~renderer/feature-tips/telemetry'
+import { useAppStore } from '~renderer/store/state'
+
+export type TerminalPaneSplitCompletion = {
+  source: TerminalPaneSplitSource
+  direction: 'vertical' | 'horizontal'
+  telemetrySuppressed?: boolean
+}
+
+export function recordCreatedTerminalPaneSplit(
+  createdPane: unknown,
+  completion: TerminalPaneSplitCompletion
+): boolean {
+  if (!createdPane) {
+    return false
+  }
+  useAppStore.getState().recordFeatureInteraction('terminal-pane-split')
+  if (!completion.telemetrySuppressed) {
+    trackTerminalPaneSplit({
+      source: completion.source,
+      direction: completion.direction
+    })
+  }
+  return true
+}

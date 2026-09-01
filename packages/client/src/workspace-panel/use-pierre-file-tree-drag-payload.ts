@@ -1,0 +1,47 @@
+import {
+  encodeWorkspaceFilePaths,
+  WORKSPACE_FILE_PATH_MIME,
+  WORKSPACE_FILE_PATHS_MIME
+} from '~renderer/workspace/file-drag'
+
+import type { PierreFileTreeData } from './file-explorer/pierre-file-tree-data'
+
+export function usePierreFileTreeDragPayload({
+  onDragSourceChange,
+  selectedPaths,
+  treeData
+}: {
+  onDragSourceChange: (path: string | null) => void
+  selectedPaths: ReadonlySet<string>
+  treeData: PierreFileTreeData
+}): {
+  onDragStart: (event: React.DragEvent<HTMLElement>) => void
+  onDragEndCapture: () => void
+} {
+  const onDragStart = (event: React.DragEvent<HTMLElement>) => {
+    const row = event.nativeEvent
+      .composedPath()
+      .find(
+        (entry): entry is HTMLElement =>
+          entry instanceof HTMLElement && entry.dataset.type === 'item'
+      )
+    const canonicalPath = row?.dataset.itemPath
+    const node = canonicalPath ? treeData.nodeByCanonicalPath.get(canonicalPath) : null
+    if (!node) {
+      return
+    }
+    const paths =
+      selectedPaths.has(node.path) && selectedPaths.size > 1 ? [...selectedPaths] : [node.path]
+    event.dataTransfer.setData(WORKSPACE_FILE_PATH_MIME, node.path)
+    if (paths.length > 1) {
+      event.dataTransfer.setData(WORKSPACE_FILE_PATHS_MIME, encodeWorkspaceFilePaths(paths))
+    }
+    // Why: Pierre sets `effectAllowed` to move in its Shadow DOM drag-start
+    // handler, so this must run during bubbling after Pierre's handler.
+    event.dataTransfer.effectAllowed = 'copyMove'
+    onDragSourceChange(node.path)
+  }
+  const onDragEndCapture = () => onDragSourceChange(null)
+
+  return { onDragStart, onDragEndCapture }
+}

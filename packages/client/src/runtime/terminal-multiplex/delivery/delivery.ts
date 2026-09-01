@@ -2,8 +2,14 @@ import {
   TerminalMultiplexOpcode,
   type TerminalMultiplexFrame
 } from '@yiru/runtime-protocol/terminal-multiplex/frame'
-import { encodeTerminalMultiplexJson } from '@yiru/runtime-protocol/terminal-multiplex/json'
+import {
+  createTerminalMultiplexRecoveryState,
+  reduceRecovery,
+  type TerminalMultiplexRecoveryEvent,
+  type TerminalMultiplexRecoveryState
+} from '@yiru/runtime-protocol/terminal-multiplex/recovery'
 import { decodeTerminalMultiplexSnapshotEndRecord } from '@yiru/runtime-protocol/terminal-multiplex/snapshot-records'
+import * as streamRecords from '@yiru/runtime-protocol/terminal-multiplex/stream-records'
 
 import { RemoteTerminalManualSnapshot } from '../snapshot/manual'
 import { RemoteTerminalSnapshotAssembler, type RemoteTerminalSnapshot } from '../snapshot/snapshot'
@@ -16,7 +22,7 @@ import {
 } from './ack'
 import { applyRemoteTerminalOutputCredit } from './credit'
 import { RemoteTerminalOrderedEvents } from './ordered-events'
-import { decodeRemoteTerminalEnd, decodeRemoteTerminalModelRestore } from './records'
+import { executeRemoteTerminalRecoveryEffect } from './recovery-effects'
 import type { PendingRemoteTerminalOutput, RemoteTerminalDeliveryOptions } from './types'
 
 export class RemoteTerminalDelivery {
@@ -26,9 +32,8 @@ export class RemoteTerminalDelivery {
   private readonly orderedEvents: RemoteTerminalOrderedEvents
   private readonly manualSnapshot: RemoteTerminalManualSnapshot
   private readonly acks: RemoteTerminalDeliveryAcks
+  private recovery: TerminalMultiplexRecoveryState = createTerminalMultiplexRecoveryState()
   private expectedSequence = 0n
-  private snapshotting = true
-  private recoveryRequested = false
   private initialSnapshotId = 0
 
   constructor(options: RemoteTerminalDeliveryOptions) {
@@ -48,7 +53,7 @@ export class RemoteTerminalDelivery {
       allocateCorrelationId: options.allocateCorrelationId,
       send: options.send,
       getParsedSeq: () => this.acks.parsedSeq,
-      isSnapshotting: () => this.snapshotting
+      isSnapshotting: () => this.isSnapshotting
     })
   }
 
@@ -58,12 +63,19 @@ export class RemoteTerminalDelivery {
 
   beginInitialSnapshot(snapshotId: number): void {
     this.initialSnapshotId = snapshotId
-    this.snapshotting = true
-    this.options.setCredit(0)
+    this.dispatch({ type: 'client-begin-initial' })
+  }
+
+  gateOutputCredit(): void {
+    this.dispatch({ type: 'client-gate-credit' })
+  }
+
+  setDeliveryGated(gated: boolean): void {
+    this.dispatch({ type: gated ? 'delivery-gated' : 'delivery-active' })
   }
 
   beginReveal(): void {
-    this.snapshotting = true
+    this.dispatch({ type: 'client-begin-reveal' })
   }
 
   handle(frame: TerminalMultiplexFrame): boolean {
@@ -84,11 +96,7 @@ export class RemoteTerminalDelivery {
       return true
     }
     if (frame.opcode === TerminalMultiplexOpcode.SnapshotStart) {
-      this.snapshotting = this.snapshot.start(frame)
-      this.recoveryRequested = false
-      if (!this.snapshotting) {
-        this.recover('invalid snapshot start')
-      }
+      this.dispatch({ type: 'client-snapshot-started', accepted: this.snapshot.start(frame) })
       return true
     }
     if (frame.opcode === TerminalMultiplexOpcode.SnapshotChunk) {
@@ -102,7 +110,7 @@ export class RemoteTerminalDelivery {
       return true
     }
     if (frame.opcode === TerminalMultiplexOpcode.End) {
-      if (!decodeRemoteTerminalEnd(frame)) {
+      if (!streamRecords.decodeTerminalMultiplexEndRecord(frame)) {
         this.options.callbacks.onError?.('Invalid remote terminal end record.')
         return true
       }
@@ -110,15 +118,12 @@ export class RemoteTerminalDelivery {
       return true
     }
     if (frame.opcode === TerminalMultiplexOpcode.ModelRestore) {
-      const value = decodeRemoteTerminalModelRestore(frame)
+      const value = streamRecords.decodeTerminalMultiplexModelRestoreRecord(frame)
       if (!value) {
         this.options.callbacks.onError?.('Invalid remote terminal restore record.')
         return true
       }
-      this.snapshotting = true
-      this.recoveryRequested = value.snapshotFollows
-      this.snapshot.clear()
-      this.options.setCredit(0)
+      this.dispatch({ type: 'client-model-restore', snapshotFollows: value.snapshotFollows })
       return true
     }
     return false
@@ -131,10 +136,9 @@ export class RemoteTerminalDelivery {
   prepareForNewEpoch(): void {
     // Why: docs/reference/terminal-multiplex.md OQ-6 always restores a new epoch from an
     // authoritative snapshot; raw bytes from the previous epoch are never resumed.
-    this.snapshotting = true
+    this.dispatch({ type: 'reset' })
     this.snapshot.clear()
     this.pendingOutput.splice(0)
-    this.recoveryRequested = false
     this.acks.resetPending()
     this.orderedEvents.clear()
     this.manualSnapshot.cancel()
@@ -152,7 +156,7 @@ export class RemoteTerminalDelivery {
       return
     }
     const output = { payload: frame.payload, startSeq, endSeq: frame.seq }
-    if (this.snapshotting) {
+    if (this.isSnapshotting) {
       this.pendingOutput.push(output)
       return
     }
@@ -257,8 +261,7 @@ export class RemoteTerminalDelivery {
       snapshot.coverageEndSeq,
       0
     )
-    this.snapshotting = false
-    this.options.setCredit(2 * 1024 * 1024)
+    this.dispatch({ type: 'client-resumed' })
     for (const output of this.pendingOutput.splice(0)) {
       if (
         output.endSeq > snapshot.pendingDeliveryStartSeq &&
@@ -294,27 +297,25 @@ export class RemoteTerminalDelivery {
       this.acks.rebase(coverageEndSeq)
       this.expectedSequence = coverageEndSeq
     }
-    this.snapshotting = false
-    this.options.setCredit(2 * 1024 * 1024)
+    this.dispatch({ type: 'client-resumed' })
     for (const output of this.pendingOutput.splice(0)) {
       this.deliverOutput(output)
     }
   }
 
-  private recover(_reason: string): void {
-    if (this.recoveryRequested) {
-      return
-    }
-    this.recoveryRequested = true
-    this.snapshotting = true
-    this.snapshot.clear()
-    this.options.setCredit(0)
-    this.options.send(
-      TerminalMultiplexOpcode.SnapshotRequest,
-      this.options.routeId,
-      this.acks.parsedSeq,
-      this.options.allocateCorrelationId(),
-      encodeTerminalMultiplexJson({ requestedScrollbackRows: 1_000 })
+  private get isSnapshotting(): boolean {
+    return this.recovery.memory.clientSnapshotting
+  }
+
+  private dispatch(event: TerminalMultiplexRecoveryEvent): void {
+    const transition = reduceRecovery(this.recovery, event)
+    this.recovery = transition.state
+    transition.effects.forEach((effect) =>
+      executeRemoteTerminalRecoveryEffect(effect, this.snapshot, this.options, this.acks.parsedSeq)
     )
+  }
+
+  private recover(_reason: string): void {
+    this.dispatch({ type: 'client-recovery-needed' })
   }
 }

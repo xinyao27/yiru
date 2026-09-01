@@ -1,10 +1,7 @@
 import { type, type ContractRouter } from '@orpc/contract'
-import type {
-  AiVaultSubagentListArgs,
-  AiVaultSubagentListResult
-} from '@yiru/workbench-model/agent'
 
 import { AiVaultListSessionsInputSchema, type AiVaultListResult } from '../../ai-vault.js'
+import type { AiVaultSubagentListArgs, AiVaultSubagentListResult } from '../../model/agent.js'
 import { withAccess, type RuntimeProcedureMeta } from '../access-meta.js'
 
 const SHELL_AI_VAULT_ACCESS = {

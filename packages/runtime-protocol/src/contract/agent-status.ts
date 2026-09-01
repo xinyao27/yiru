@@ -1,11 +1,11 @@
 import { eventIterator, type, type ContractRouter } from '@orpc/contract'
+import { z } from 'zod'
+
 import type {
   AgentStatusIpcPayload,
   AgentType,
   MigrationUnsupportedPtyEntry
-} from '@yiru/workbench-model/agent'
-import { z } from 'zod'
-
+} from '../model/agent.js'
 import { withAccess, type RuntimeProcedureMeta } from './access-meta.js'
 
 // Which agent is running in which pane, and in what state. The shell learns
@@ -58,7 +58,7 @@ export const AgentStatusTransferPaneAuthorityInputSchema = z.object({
 })
 
 // Why: mirrors `~shared/agent/interrupt-intent`'s AgentInterruptInferenceRequest.
-// That type lives under @yiru/shared, which this lower-level protocol
+// That workbench type lives outside this narrow contract module, which
 // package cannot import — the shape is duplicated here as the wire contract,
 // The cast below adapts a legacy-shaped field at the wire boundary.
 export const AgentStatusInferInterruptInputSchema = z.object({

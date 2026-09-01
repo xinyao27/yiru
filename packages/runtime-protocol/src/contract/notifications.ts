@@ -105,11 +105,23 @@ export const NotificationDismissManyOutputSchema = z.object({ dismissed: z.numbe
 
 export type NotificationDismissManyOutput = z.output<typeof NotificationDismissManyOutputSchema>
 
+export const NotificationRegisterPushInputSchema = z
+  .object({
+    environment: z.enum(['production', 'sandbox']).nullish(),
+    token: z.string().trim().min(1).nullish()
+  })
+  .strict()
+
+export type NotificationRegisterPushInput = z.output<typeof NotificationRegisterPushInputSchema>
+
 const NOTIFICATION_ACCESS = { scope: 'host', tier: 'read' } as const
 const NOTIFICATION_REPORT_ACCESS = { scope: 'host', tier: 'control' } as const
 const MOBILE_CLIENT = { mobile: true } as const
 
 export const notificationsContract = {
+  registerPush: withAccess(NOTIFICATION_REPORT_ACCESS, MOBILE_CLIENT)
+    .input(NotificationRegisterPushInputSchema)
+    .output(type<{ registered: boolean }>()),
   subscribe: withAccess(NOTIFICATION_ACCESS, MOBILE_CLIENT)
     .input(z.void())
     .output(eventIterator(type<RuntimeNotificationSubscriptionEvent>())),

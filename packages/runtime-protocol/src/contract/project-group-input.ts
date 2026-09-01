@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { OptionalFiniteNumber, OptionalString, requiredString } from './input-schema.js'
 
 export const ProjectGroupCreateInputSchema = z.object({
+  expectedRevision: z.number().int().nonnegative(),
   name: requiredString('Missing group name'),
   parentPath: OptionalString,
   connectionId: OptionalString.nullable().optional(),
@@ -11,6 +12,7 @@ export const ProjectGroupCreateInputSchema = z.object({
 })
 
 export const ProjectGroupUpdateInputSchema = z.object({
+  expectedRevision: z.number().int().nonnegative(),
   groupId: requiredString('Missing group id'),
   updates: z.object({
     name: OptionalString,
@@ -21,10 +23,12 @@ export const ProjectGroupUpdateInputSchema = z.object({
 })
 
 export const ProjectGroupSelectorInputSchema = z.object({
+  expectedRevision: z.number().int().nonnegative(),
   groupId: requiredString('Missing group id')
 })
 
 export const ProjectGroupMoveProjectInputSchema = z.object({
+  expectedRevision: z.number().int().nonnegative(),
   repo: requiredString('Missing repo selector'),
   groupId: OptionalString.nullable(),
   order: OptionalFiniteNumber
@@ -44,6 +48,7 @@ export const ProjectGroupCancelNestedScanInputSchema = z.object({
 
 export const ProjectGroupImportNestedInputSchema = z.discriminatedUnion('mode', [
   z.object({
+    expectedRevision: z.number().int().nonnegative(),
     parentPath: requiredString('Missing parent path'),
     groupName: z.string().optional().default(''),
     projectPaths: z.array(z.string()),
@@ -53,6 +58,7 @@ export const ProjectGroupImportNestedInputSchema = z.discriminatedUnion('mode', 
     mode: z.literal('group')
   }),
   z.object({
+    expectedRevision: z.number().int().nonnegative(),
     parentPath: requiredString('Missing parent path'),
     // Why: separate imports do not create a group but retain the renderer's
     // shared payload shape, including its blank-name fallback field.

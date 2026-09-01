@@ -1,5 +1,5 @@
 import type { AgentTrustInput } from '@yiru/runtime-protocol/contract'
-import { useAppStore } from '~renderer/store'
+import { useAppStore } from '~renderer/store/state'
 
 import { callRuntimeOrpc, type RuntimeClientTarget } from './orpc-client'
 import { getActiveRuntimeTarget } from './rpc-client'

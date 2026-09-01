@@ -3,7 +3,7 @@ import type {
   GitForkSyncResult,
   GitPushTarget,
   GitUpstreamStatus
-} from '~shared/types'
+} from '@yiru/runtime-protocol/workbench/types'
 
 import { callRuntimeOrpc } from '../orpc-client'
 import { getRuntimeGitTarget, getRuntimeGitWorktree, type RuntimeGitContext } from './context'

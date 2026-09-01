@@ -1,4 +1,5 @@
-import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
+import type { RuntimeWorktreeCreateProgressEvent } from '@yiru/runtime-protocol/contract'
+import type { ExecutionHostId } from '@yiru/runtime-protocol/model/workspace'
 import type {
   CreateWorktreeArgs,
   CreateWorktreeResult,
@@ -15,24 +16,30 @@ import type {
   WorktreeMeta,
   WorktreeRemoteBranchConflictEvent,
   WorkspaceLineage
-} from '~shared/types'
+} from '@yiru/runtime-protocol/workbench/types'
 
 import type { ShellRepoHostApi } from './shell-system-client'
 
 export type RepoWorkspaceApi = ShellRepoHostApi & {
   list: () => Promise<Repo[]>
   add: (args: {
+    expectedRevision: number
     path: string
     kind?: 'git' | 'folder'
-  }) => Promise<{ repo: Repo } | { error: string }>
+  }) => Promise<{ repo: Repo; revision?: number } | { error: string }>
   create: (args: {
+    expectedRevision: number
     parentPath: string
     name: string
     kind: 'git' | 'folder'
-  }) => Promise<{ repo: Repo } | { error: string }>
+  }) => Promise<{ repo: Repo; revision?: number } | { error: string }>
   isGitAvailable: () => Promise<boolean>
-  remove: (args: { repoId: string }) => Promise<void>
+  remove: (args: {
+    expectedRevision: number
+    repoId: string
+  }) => Promise<{ removed: true; revision?: number }>
   update: (args: {
+    expectedRevision: number
     repoId: string
     updates: Partial<
       Pick<
@@ -58,8 +65,12 @@ export type RepoWorkspaceApi = ShellRepoHostApi & {
       sourceControlAi?: Repo['sourceControlAi'] | null
       externalWorktreeDiscoverySuppressedAt?: Repo['externalWorktreeDiscoverySuppressedAt'] | null
     }
-  }) => Promise<Repo>
-  clone: (args: { url: string; destination: string }) => Promise<Repo>
+  }) => Promise<{ repo: Repo; revision?: number }>
+  clone: (args: {
+    expectedRevision: number
+    url: string
+    destination: string
+  }) => Promise<{ repo: Repo; revision?: number }>
   onCloneProgress: (callback: (data: { phase: string; percent: number }) => void) => () => void
   onChanged: (callback: () => void) => () => void
 }
@@ -69,7 +80,7 @@ export type WorktreeWorkspaceApi = {
   listDetected: (args: { repoId: string }) => Promise<DetectedWorktreeListResult>
   create: (args: CreateWorktreeArgs) => Promise<CreateWorktreeResult>
   onCreateProgress: (
-    callback: (data: { creationId?: string; phase: 'fetching' | 'creating' }) => void
+    callback: (data: Omit<RuntimeWorktreeCreateProgressEvent, 'type'>) => void
   ) => () => void
   prefetchCreateBase: (args: { repoId: string; baseBranch?: string }) => Promise<void>
   resolvePrBase: (args: {
@@ -89,6 +100,7 @@ export type WorktreeWorkspaceApi = {
     { baseBranch: string; compareBaseRef?: string; pushTarget?: GitPushTarget } | { error: string }
   >
   remove: (args: {
+    expectedRevision: number
     worktreeId: string
     hostId?: ExecutionHostId
     force?: boolean
@@ -99,7 +111,11 @@ export type WorktreeWorkspaceApi = {
     branchName: string
     expectedHead: string
   }) => Promise<ForceDeleteWorktreeBranchResult>
-  updateMeta: (args: { worktreeId: string; updates: Partial<WorktreeMeta> }) => Promise<Worktree>
+  updateMeta: (args: {
+    expectedRevision: number
+    worktreeId: string
+    updates: Partial<WorktreeMeta>
+  }) => Promise<{ revision?: number; worktree: Worktree }>
   listLineage: () => Promise<{
     lineage: Record<string, WorktreeLineage>
     workspaceLineage?: Record<string, WorkspaceLineage>

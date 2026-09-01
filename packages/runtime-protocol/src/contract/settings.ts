@@ -44,7 +44,7 @@ export const settingsContract = {
     .output(type<RuntimeWarpThemeImportPreview>()),
   // Why: settings live on the host and a change made from any other client or
   // window must reach the rest. The IPC emitter already excludes the origin
-  // WebContents; this stream is the paired-client equivalent.
+  // browser page; this stream is the paired-client equivalent.
   events: {
     subscribe: withAccess(HOST_READ_ACCESS, MOBILE)
       .input(type<void>())

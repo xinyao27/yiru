@@ -1,11 +1,11 @@
 import { type, type ContractRouter } from '@orpc/contract'
+import { z } from 'zod'
+
 import type {
   CreateHostedReviewResult,
   HostedReviewCreationEligibility,
   HostedReviewInfo
-} from '@yiru/workbench-model/review'
-import { z } from 'zod'
-
+} from '../model/review.js'
 import { withAccess, type RuntimeProcedureMeta } from './access-meta.js'
 
 function requiredString(message: string) {

@@ -1,6 +1,9 @@
 import { z } from 'zod'
 
+import type { AgentPhase } from '../model/agent-phase.js'
 import type { TerminalOscLinkRange } from '../terminal-osc-link-ranges.js'
+
+export type { AgentPhase } from '../model/agent-phase.js'
 
 export type TerminalDriverState =
   | { kind: 'idle' }
@@ -77,6 +80,7 @@ export type TerminalOpenMultiplexResult = {
 }
 
 export type TerminalSummary = {
+  agentPhase?: AgentPhase | null
   handle: string
   ptyId: string | null
   worktreeId: string
@@ -182,6 +186,7 @@ export type TerminalSend = {
 }
 
 export type TerminalAgentStatus = {
+  agentPhase?: AgentPhase | null
   handle: string
   isRunningAgent: boolean
   status: 'working' | 'permission' | 'idle' | null

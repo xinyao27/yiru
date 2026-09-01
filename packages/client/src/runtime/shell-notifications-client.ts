@@ -8,7 +8,7 @@ import type {
   NotificationPermissionStatusResult,
   NotificationSoundDataResult,
   NotificationSoundResult
-} from '~shared/types'
+} from '@yiru/runtime-protocol/workbench/types'
 
 import { callShellOrpc } from './orpc-client'
 
@@ -111,7 +111,7 @@ async function playSound(options?: {
   }
 }
 
-export const electronShellNotificationsApi: ShellNotificationsApi = {
+export const daemonShellNotificationsApi: ShellNotificationsApi = {
   displayNative: async (input) =>
     restoreShellDocument<ShellServicesNotificationsDisplayOutput>(
       await callShellOrpc((client) => client.shell.notifications.displayNative, input)

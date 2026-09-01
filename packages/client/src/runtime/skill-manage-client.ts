@@ -1,38 +1,26 @@
-import { useAppStore } from '~renderer/store'
 import type {
   SkillFreshnessInventory,
   SkillManageScope,
   SkillUpdateRun,
   SkillUpdateStartResult
-} from '~shared/skill-freshness'
+} from '@yiru/runtime-protocol/workbench/skill-freshness'
 import type {
   SkillDirectoryListing,
   SkillDiscoveryResult,
   SkillDiscoveryTarget,
   SkillFileReadResult
-} from '~shared/skills'
+} from '@yiru/runtime-protocol/workbench/skills'
+import { useAppStore } from '~renderer/store/state'
 
 import { callRuntimeOrpc, createRuntimeOrpcClient, type RuntimeClientTarget } from './orpc-client'
 import { getActiveRuntimeTarget } from './rpc-client'
 
-function isWebRuntimeClient(): boolean {
-  return (globalThis as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__ === true
-}
-
-// Why: the manage rail had no web coverage at all — a pure `unsupported` stub
-// — so there is nothing web-specific to preserve. Both platforms resolve the
-// same way: local when no runtime environment is paired, that environment's
-// host otherwise (the web runtime connection keeps `activeRuntimeEnvironmentId`
-// synced to its connected host, so this is never undefined there).
 function activeSkillManageTarget(): RuntimeClientTarget {
   return getActiveRuntimeTarget(useAppStore.getState().settings)
 }
 
 export function discoverSkills(target?: SkillDiscoveryTarget): Promise<SkillDiscoveryResult> {
-  const runtimeTarget = isWebRuntimeClient()
-    ? activeSkillManageTarget()
-    : { kind: 'local' as const }
-  return callRuntimeOrpc(runtimeTarget, (client) => client.skills.discover, target)
+  return callRuntimeOrpc(activeSkillManageTarget(), (client) => client.skills.discover, target)
 }
 
 export function getSkillFreshnessInventory(): Promise<SkillFreshnessInventory> {

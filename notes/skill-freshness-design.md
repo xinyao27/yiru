@@ -1,11 +1,8 @@
 # Skill Freshness: Thin Stubs + Read-Only Detection
 
-Status: adopted direction 2026-07-13. Phase 1 (guide sources + binary-served CLI) is
-implemented, pending release; detection and stub migration are not implemented. This is the
-authoritative plan. It supersedes the write phases of `skill-auto-update-design.md` (Phases
-2–4: background updates, WSL, SSH) and the migration section of
-`skill-guide-indirection-design.md`. The detection and content-identity research in those
-notes still applies and is referenced below.
+Status: retained design input from 2026-07-13. The current Bun daemon keeps the runtime freshness
+contract, but guide serving, detection, and stub migration are not implemented. This document is
+the only retained plan; the background-writer and earlier indirection drafts were superseded.
 
 ## Problem (unchanged)
 
@@ -251,12 +248,3 @@ not thin, until the relevant variant passes.
   retired, not deferred.
 - **Agent Skills spec evolution** (frontmatter fields, allowed-tools syntax) is the most
   likely future cause of a real stub update wave; the nudge path covers it.
-
-## Relationship to prior notes
-
-- `skill-auto-update-design.md`: Problem statement, empirical CLI-behavior findings
-  (verbatim-LF mac/linux, CRLF Windows, XDG lock location, symlink topology, released-blob
-  provenance) and the Phase-1 detection design remain valid inputs. Phases 2–4 (background
-  writes, WSL, SSH reconcilers) are retired by this document.
-- `skill-guide-indirection-design.md`: The stub/CLI contract and prior-art survey are
-  folded in here; its migration-via-in-app-updater section is superseded by §E.

@@ -1,0 +1,38 @@
+{
+  "appName": {
+    "message": "Yiru"
+  },
+  "appDescription": {
+    "message": "Run coding agents across projects from Chrome."
+  },
+  "openSidePanel": {
+    "message": "Open Yiru"
+  },
+  "openYiruCommand": {
+    "message": "Open Yiru"
+  },
+  "forgeAction": {
+    "message": "Handle in Yiru"
+  },
+  "previewAction": {
+    "message": "Inspect with Yiru"
+  },
+  "useAsContext": {
+    "message": "Use in Yiru"
+  },
+  "agentActive": {
+    "message": "Yiru agent is operating"
+  },
+  "takeOver": {
+    "message": "Take over"
+  },
+  "viewAgent": {
+    "message": "View"
+  },
+  "agentsWaiting": {
+    "message": "agent(s) waiting for you"
+  },
+  "attentionRequired": {
+    "message": "Yiru needs your decision"
+  }
+}

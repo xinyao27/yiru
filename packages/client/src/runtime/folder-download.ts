@@ -1,8 +1,8 @@
 import {
   isWindowsAbsolutePathLike,
   normalizeRuntimePathSeparators
-} from '@yiru/workbench-model/platform'
-import type { DirEntry } from '~shared/types'
+} from '@yiru/runtime-protocol/model/platform'
+import type { DirEntry } from '@yiru/runtime-protocol/workbench/types'
 
 import {
   readRuntimeDirectory,

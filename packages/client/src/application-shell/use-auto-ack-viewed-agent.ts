@@ -1,9 +1,13 @@
-import type { AgentStatusEntry } from '@yiru/workbench-model/agent'
+import type { AgentStatusEntry } from '@yiru/runtime-protocol/model/agent'
+import {
+  isTerminalLeafId,
+  makePaneKey,
+  parsePaneKey
+} from '@yiru/runtime-protocol/workbench/stable-pane-id'
+import type { TerminalLayoutSnapshot } from '@yiru/runtime-protocol/workbench/types'
 import { useEffect } from 'react'
-import { useAppStore } from '~renderer/store'
-import type { RetainedAgentEntry } from '~renderer/store/slices/agent-status'
-import { isTerminalLeafId, makePaneKey, parsePaneKey } from '~shared/stable-pane-id'
-import type { TerminalLayoutSnapshot } from '~shared/types'
+import type { RetainedAgentEntry } from '~renderer/agent/status-state/slice'
+import { useAppStore } from '~renderer/store/state'
 
 function resolveActiveLeafId(
   state: { terminalLayoutsByTabId: Record<string, TerminalLayoutSnapshot> },

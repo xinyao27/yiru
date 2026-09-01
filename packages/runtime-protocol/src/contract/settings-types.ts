@@ -1,5 +1,5 @@
-import type { TuiAgent } from '@yiru/workbench-model/agent'
-import type { TerminalQuickCommand } from '@yiru/workbench-model/ui'
+import type { TuiAgent } from '../model/agent.js'
+import type { TerminalQuickCommand } from '../model/ui.js'
 
 export type RuntimeClientSettings = {
   defaultTuiAgent: TuiAgent | 'blank' | null

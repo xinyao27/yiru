@@ -1,10 +1,10 @@
-import { useAppStore } from '~renderer/store'
 import type {
   CodexRateLimitResetResult,
   CursorRateLimitRefreshContext,
   RateLimitRuntimeTarget,
   RateLimitState
-} from '~shared/rate-limit-types'
+} from '@yiru/runtime-protocol/workbench/rate-limit-types'
+import { useAppStore } from '~renderer/store/state'
 
 import { callRuntimeOrpc, createRuntimeOrpcClient, type RuntimeClientTarget } from './orpc-client'
 import { getActiveRuntimeTarget } from './rpc-client'

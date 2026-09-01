@@ -1,4 +1,4 @@
-import { clampUtf8TextTail } from '~shared/utf8-byte-limits'
+import { clampUtf8TextTail } from '@yiru/runtime-protocol/workbench/utf8-byte-limits'
 
 export type EagerBufferChunk = {
   data: string

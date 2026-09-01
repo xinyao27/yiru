@@ -1,11 +1,11 @@
-import type { TuiAgent } from '@yiru/workbench-model/agent'
-import type { GitHubRepositoryIdentity } from '@yiru/workbench-model/review'
+import type { TuiAgent } from '../model/agent.js'
+import type { GitHubRepositoryIdentity } from '../model/review.js'
 import type {
   BaseRefSearchResult,
   ExecutionHostId,
   RepoIcon,
   RepoKind
-} from '@yiru/workbench-model/workspace'
+} from '../model/workspace.js'
 
 export type RuntimeSourceControlOperation = 'commitMessage' | 'pullRequest' | 'branchName'
 export type RuntimeSourceControlActionId =
@@ -135,11 +135,16 @@ export type RuntimeSetupScriptImportCandidate = {
   unsupportedFields?: string[]
 }
 
-export type RuntimeRepoListResult = { repos: RuntimeRepo[] }
-export type RuntimeRepoResult = { repo: RuntimeRepo }
+// Why: the Bun daemon publishes revisions during the migration, while an older paired runtime
+// still returns the original shape until its store is moved behind the same revision journal.
+export type RuntimeRepoListResult = { repos: RuntimeRepo[]; revision?: number }
+export type RuntimeRepoResult = { repo: RuntimeRepo; revision?: number }
 export type RuntimeRepoCreateResult = RuntimeRepoResult | { error: string }
-export type RuntimeRepoRemoveResult = { removed: true }
-export type RuntimeRepoReorderResult = { status: 'applied' | 'rejected' }
+export type RuntimeRepoRemoveResult = { removed: true; revision?: number }
+export type RuntimeRepoReorderResult = {
+  revision?: number
+  status: 'applied' | 'rejected'
+}
 export type RuntimeRepoGitAvailableResult = { available: boolean }
 export type RuntimeRepoSparsePresetsResult = { presets: RuntimeSparsePreset[] }
 export type RuntimeRepoSparsePresetResult = { preset: RuntimeSparsePreset }

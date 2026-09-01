@@ -1,14 +1,14 @@
+import { createTextControlRejectedResult } from '../keyboard-input/paste/diagnostics'
+import {
+  classifyTextControlPastePayloadOwnership,
+  findOwnedPasteEventTextControlTarget
+} from '../keyboard-input/paste/ownership'
 import {
   TEXT_CONTROL_PASTE_MAX_BYTES,
   pasteTextIntoTextControl,
   type TextControlPasteOptions,
   type TextControlPasteResult
-} from '../lib/text-control-paste'
-import { createTextControlRejectedResult } from '../lib/text-control-paste-diagnostics'
-import {
-  classifyTextControlPastePayloadOwnership,
-  findOwnedPasteEventTextControlTarget
-} from '../lib/text-control-paste-ownership'
+} from '../keyboard-input/paste/write'
 
 export type LargeTextControlPasteResult =
   | { status: 'ignored'; reason: 'not-text-control' | 'empty' | 'small' | 'already-handled' }

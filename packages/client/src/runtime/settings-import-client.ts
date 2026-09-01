@@ -1,6 +1,9 @@
-import { useAppStore } from '~renderer/store'
-import type { WarpThemeImportPreview, WarpThemeImportSource } from '~shared/terminal/custom-themes'
-import type { GhosttyImportPreview } from '~shared/types'
+import type {
+  WarpThemeImportPreview,
+  WarpThemeImportSource
+} from '@yiru/runtime-protocol/workbench/terminal/custom-themes'
+import type { GhosttyImportPreview } from '@yiru/runtime-protocol/workbench/types'
+import { useAppStore } from '~renderer/store/state'
 
 import { callRuntimeOrpc } from './orpc-client'
 import { getActiveRuntimeTarget } from './rpc-client'

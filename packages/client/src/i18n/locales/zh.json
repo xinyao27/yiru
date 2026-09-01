@@ -2,14 +2,7 @@
   "app": {
     "recoverableError": {
       "rootTitle": "Yiru 遇到渲染器错误。",
-      "rootDescription": "应用 shell 无法完成渲染。重试以重新挂载，如果错误仍然存在，请重新启动 Yiru。",
-      "webTitle": "Yiru Web 遇到渲染器错误。",
-      "webDescription": "重试 Web 客户端或重新连接到配对的运行时。",
-      "loadLoopTitle": "Yiru 反复加载失败",
-      "loadLoopMessage": "应用窗口多次崩溃，已停止自动重新加载。",
-      "loadLoopDetail": "Yiru 连续尝试恢复 {{value0}} 次均未成功。这通常是显卡驱动或安装问题。可以重新加载再试一次，或退出后重新启动 Yiru。",
-      "reload": "重新加载",
-      "quit": "退出"
+      "rootDescription": "应用 shell 无法完成渲染。重试以重新挂载，如果错误仍然存在，请重新启动 Yiru。"
     }
   },
   "settings": {
@@ -28,16 +21,12 @@
         "opencodeGoToggleDescription": "显示当前工作区的 OpenCode Go Token 与费用消耗情况。",
         "kimiToggleDescription": "显示当前工作区的 Kimi 订阅使用情况。",
         "minimaxToggleDescription": "显示当前工作区的 MiniMax 订阅使用情况。",
-        "sshToggleDescription": "当有可用的 SSH 和 Coworking 主机时显示它们。",
+        "sshToggleDescription": "当有可用的 SSH 和 远程 daemon时显示它们。",
         "resourceUsageToggleDescription": "显示资源管理器。点击可查看 CPU、内存、会话、守护进程控制和工作区磁盘扫描。",
         "portsToggleDescription": "显示实时工作区端口。单击可查看工作区范围的端口和外部监听器。",
         "antigravityToggleDescription": "显示当前工作区的 Antigravity 订阅使用量。",
         "grokToggleDescription": "通过 Grok CLI 登录后显示 Grok 订阅额度使用量。",
         "cursorToggleDescription": "显示 Cursor Agent 报告的 Cursor 套餐用量。"
-      },
-      "menuBarIcon": {
-        "title": "显示菜单栏图标",
-        "description": "在 macOS 菜单栏中保留 Yiru 快捷方式和活动指示器。"
       },
       "loader": {
         "title": "加载动画",
@@ -70,41 +59,6 @@
         "orbM5": "M5 · 发散"
       }
     }
-  },
-  "menu": {
-    "checkForUpdates": "检查更新...",
-    "settings": "设置",
-    "exploreYiru": "探索 Yiru",
-    "gettingStarted": "Yiru 入门",
-    "reportCrash": "发送错误报告...",
-    "file": "文件",
-    "exit": "退出",
-    "edit": "编辑",
-    "appearance": "外观",
-    "toggleLeftSidebar": "显示/隐藏左侧边栏",
-    "openExplorerTab": "打开资源管理器标签页",
-    "showStatusBar": "显示状态栏",
-    "showMobileButton": "显示 Yiru 手机端按钮",
-    "showTitlebarAppName": "显示标题栏应用名称",
-    "view": "查看",
-    "reload": "重新加载",
-    "forceReload": "强制重新加载",
-    "resetSize": "重置尺寸",
-    "zoomIn": "放大",
-    "zoomOut": "缩小",
-    "openWorktreePalette": "打开工作树面板",
-    "window": "窗口",
-    "help": "帮助",
-    "paste": "粘贴"
-  },
-  "tray": {
-    "openYiru": "打开 Yiru",
-    "quit": "退出",
-    "minimizeNotice": {
-      "body": "Yiru 仍在系统托盘中运行"
-    },
-    "activityWaiting": "Yiru - 活动等待中",
-    "activityWaitingSuffix": "活动等待中"
   },
   "worktreeJumpPalette": {
     "matchLabel": {
@@ -159,99 +113,6 @@
       "ce37cf5279": "切换侧边栏 ({{value0}})",
       "e4b9e7dff7": "切换侧边栏"
     },
-    "web": {
-      "WebConnect": {
-        "b411ec0069": "连接",
-        "2cf9e5a294": "清除已保存的主机",
-        "4a4c017be1": "端点：",
-        "27393856e4": "yiru://pair?code=...",
-        "7a566540de": "配对 URL 或代码",
-        "cb4d287238": "主机名称",
-        "3affe7de3a": "粘贴来自该浏览器可以访问的运行时主机的配对 URL。",
-        "e3bcd082ac": "连接到 Yiru",
-        "runtimeHostName": "Runtime host",
-        "invalidPairingInput": "Enter a valid Yiru pairing URL or pairing code.",
-        "mobileScopeRejected": "此连接仅有受限的移动端访问权限。请让主机所有者通过 Coworking 授权此客户端，以使用完整 Web 应用。",
-        "mixedContentRejected": "This HTTPS page cannot connect to a plain ws:// runtime host. Open the web client over HTTP or use a wss:// endpoint.",
-        "grantExpired": "This pairing command expired. Refresh the page to create a new one.",
-        "title": "Connect your computer",
-        "description": "No account is required. This browser and your computer create their own private identities, then pair directly.",
-        "installTitle": "Install Yiru",
-        "installDescription": "Download Yiru on the computer you want to use, then install it as usual.",
-        "downloadMacArm64": "macOS · Apple silicon (.dmg)",
-        "downloadMacX64": "macOS · Intel (.dmg)",
-        "downloadLinuxX64": "Linux · x64 (.AppImage)",
-        "downloadLinuxArm64": "Linux · arm64 (.AppImage)",
-        "allDownloads": "All downloads — .deb, .rpm, and Windows",
-        "pairTitle": "Pair this browser",
-        "pairAppDescription": "If Yiru is already running on that computer, let it pair itself.",
-        "pairOpenApp": "Open Yiru and pair",
-        "pairDescription": "Or run this single-use command on that computer. It expires after 10 minutes.",
-        "verifyTitle": "Check the code before confirming",
-        "verifyDescription": "Yiru on {{machine}} must show this same code:",
-        "pairedTitle": "{{machine}} is paired",
-        "pairedDescription": "Keep the terminal command running to use this computer in the Web app. Ctrl+C takes it offline.",
-        "securityNote": "The private browser key cannot be exported. Clearing this site’s browser data removes access and requires pairing again.",
-        "copyCommand": "Copy command",
-        "creatingGrant": "Creating a secure pairing command…"
-      },
-      "webShell": {
-        "aiVaultUnavailableForHost": "此执行主机不支持 Agent 会话历史记录。",
-        "feedbackUnavailable": "Feedback is unavailable in the web client.",
-        "exportHtmlToPdfUnavailable": "Exporting to PDF is unavailable in the web client."
-      },
-      "runtime": {
-        "shellBoundary": {
-          "unavailable": "无法在网络上使用。"
-        }
-      },
-      "web": {
-        "keybindings": {
-          "conflictingShortcuts": "冲突的自定义快捷键被忽略：{{value0}}。",
-          "invalidObject": "{{value0}} 必须是一个对象。",
-          "invalidPlatforms": "platform 必须是具有 darwin、linux 或 win32 部分的对象。",
-          "invalidShortcut": "“{{value0}}”的快捷方式被忽略：{{value1}}",
-          "invalidShortcutList": "“{{value0}}”的快捷方式被忽略：使用字符串数组。",
-          "unknownAction": "未知的键绑定操作“{{value0}}”被忽略。",
-          "unknownPlatform": "未知平台“{{value0}}”被忽略。"
-        },
-        "shell": {
-          "repoHostUnavailable": "在网络客户端中不可用。"
-        },
-        "runtime": {
-          "environment": {
-            "07f788de83": "WebSocket"
-          }
-        }
-      },
-      "WebRuntimeConnectionPage": {
-        "checkingTitle": "正在连接 {{machine}}",
-        "offlineTitle": "{{machine}} 已离线",
-        "checkingDescription": "Yiru 正在检查已保存的私密连接，然后打开你的项目。",
-        "offlineDescription": "请在该电脑上启动 Yiru 或其 connect 命令。运行时可用后，此页面会自动重新连接。",
-        "checkingStatus": "正在检查运行时状态…",
-        "savedPairing": "配对信息仍保存在此浏览器中，无需运行新的配对命令。",
-        "retry": "重试",
-        "pairAnother": "配对另一台电脑"
-      },
-      "WebRuntimeStatus": {
-        "title": "Yiru CLI 连接",
-        "notPaired": "未配对",
-        "notPairedLabel": "尚未配对 Yiru CLI",
-        "notPairedDescription": "配对一台电脑，通过其 Yiru CLI 处理 Web 端工作。",
-        "computer": "电脑",
-        "checking": "检查中",
-        "checkingLabel": "正在检查 {{machine}} 上的 Yiru CLI",
-        "checkingDescription": "正在检查已保存的私密连接，然后打开你的项目。",
-        "connected": "已连接",
-        "connectedLabel": "已连接 {{machine}} 上的 Yiru CLI",
-        "connectedDescription": "Web 请求将通过 {{machine}} 上的 Yiru CLI 处理。",
-        "offline": "已离线",
-        "offlineLabel": "{{machine}} 上的 Yiru CLI 已离线",
-        "offlineDescription": "请在 {{machine}} 上启动 Yiru 或其 connect 命令，之后会自动重新连接。",
-        "footer": "Yiru CLI 状态"
-      }
-    },
     "runtime": {
       "remoteServerUpdateErrors": {
         "manualRequired": "必须通过服务管理器手动更新此主机。",
@@ -267,9 +128,6 @@
       },
       "orpcCallbackStream": {
         "streamFailed": "Runtime stream failed."
-      },
-      "webUiShellClient": {
-        "selectionClipboardUnavailable": "Selection clipboard is unavailable in the web client."
       }
     },
     "store": {
@@ -331,7 +189,7 @@
           "3b57982bf6": "删除工作区\"{{value1}}\"后，Git 无法安全删除分支\"{{value0}}\"，因此 Yiru 将其保留以避免丢失本地提交。",
           "81f13f48d2": "删除工作树\"{{value1}}\"后，Git 无法安全删除分支\"{{value0}}\"，因此 Yiru 将其保留以避免丢失本地提交。",
           "runtimeScopeForbiddenTitle": "此连接具有受限（移动端）访问权限",
-          "runtimeScopeForbiddenDescription": "移动端范围的连接无法使用工作区。请让主机所有者通过 Coworking 授权此客户端，以获得完整工作区访问权限。"
+          "runtimeScopeForbiddenDescription": "移动端范围的连接无法使用工作区。请让主机所有者通过 远程 daemon 授权此客户端，以获得完整工作区访问权限。"
         },
         "repos": {
           "2975400634": "请更新运行时主机，以便打开非 Git 文件夹。",
@@ -658,15 +516,6 @@
         "setupAgentStartupPolicySaveFailed": "保存设置启动行为失败",
         "5f3d2c8a1b": "解析 MR 基础分支失败"
       },
-      "useGlobalFileDrop": {
-        "38c9f034ff": "无法上传删除的文件。",
-        "d720e2f855": "部分已删除的文件无法上传。",
-        "245faa95b9": "没有可用于放置的文件的远程工作区路径。",
-        "nativeDropTooManyPathsDescription": "每次最多拖放 {{value0}} 个文件。",
-        "nativeDropTooManyPaths": "拖放包含过多文件。",
-        "nativeDropPathsTooLargeDescription": "请减少文件数量或使用更短的路径列表。",
-        "nativeDropPathsTooLarge": "拖放的路径列表过大。"
-      },
       "useIpcEvents": {
         "0e3cf53060": "未找到浏览器选项卡 {{value0}}",
         "2f6637fe6c": "浏览器选项卡 {{value0}} 已固定",
@@ -697,7 +546,7 @@
         "95a1886d94": "通过手机控制终端和 Agent。",
         "1cd25673df": "移动端",
         "40d80bad8a": "测试版",
-        "de0c2907a1": "Coworking 主机",
+        "de0c2907a1": "远程 daemon",
         "b351014180": "Yiru 统计，以及 Claude、Codex、OpenCode Token 分析和 Grok 订阅使用量。",
         "d72a58b5b9": "统计和使用情况",
         "dcd0d9b74f": "常见操作的键盘快捷键。",
@@ -748,12 +597,7 @@
         "devSearchKeywordError": "error",
         "devSearchKeywordNotification": "notification",
         "projectHostsSummary": "{{value0}} 个主机",
-        "33a5e1d597": "Connect GitHub, GitLab, and source-hosting services.",
-        "coworkingTitle": "Coworking",
-        "coworkingDescription": "Review and revoke persistent remote host authorizations."
-      },
-      "useAppMenuPaste": {
-        "pasteTooLarge": "粘贴内容过大。"
+        "33a5e1d597": "Connect GitHub, GitLab, and source-hosting services."
       },
       "useLargeTextControlPaste": {
         "pasteTooLarge": "粘贴内容过大。"
@@ -980,8 +824,6 @@
       "Terminal": {
         "73768427cf": "关闭",
         "f82e9f02df": "取消",
-        "7958465754": "有正在运行的进程的本地终端。还是关窗吧？",
-        "2fa9c69ff3": "关闭窗口？",
         "cd51e28d8b": "保存",
         "0037b21794": "不保存",
         "21295c6b8c": "未保存的更改",
@@ -1002,42 +844,6 @@
         "42e466b9f1": "正则表达式",
         "90c61387d9": "区分大小写",
         "e07012f26e": "搜索..."
-      },
-      "UpdateCard": {
-        "68b235d264": "重启即可更新",
-        "6714206e5a": "Yiru v{{value0}} 已下载。准备好后请重新启动。",
-        "93794ea932": "Yiru v{{value0}} 正在下载。",
-        "8acbdd3961": "最小化到状态栏",
-        "17412483da": "准备安装",
-        "47126bcf57": "手动下载",
-        "3553a8672f": "最后一个错误",
-        "90559b14e3": "这将在重启后启用进程级 Electron 网络开关。适用于拒绝 HTTP/2 更新下载的企业 VPN 或代理。",
-        "6e45bfa2e0": "正在下载...",
-        "558842597d": "下载更新",
-        "f58b5c57a6": "新的：",
-        "ec8fe71cfc": "更新",
-        "44324ef542": "发行说明",
-        "fdd4a364fa": "会话不会被中断。",
-        "05ad78a6d1": "Yiru v{{value0}} 已准备就绪。",
-        "318d3b4bc7": "关闭更新",
-        "9abc59f814": "可用更新",
-        "aad383aecc": "阅读完整的发行说明",
-        "ccd8b0a793": "自您上次更新以来还有更多内容",
-        "b1d867f4fb": "更新期间您的终端会话不会中断。",
-        "09a55c39b5": "正在安装...",
-        "ea2a41adbe": "您使用的是最新版本。",
-        "ba5ffc949c": "正在检查更新...",
-        "2c2d3e03ca": "重试",
-        "4cf109845a": "更新错误",
-        "6b0085010d": "重新检查",
-        "48565a32bc": "重试下载",
-        "933c6fdf5b": "启用并重新启动",
-        "1339b82cee": "HTTP/2 下载被阻止",
-        "7274ef6e59": "关闭提示",
-        "a726967bd3": "关闭",
-        "d5253b54af": "错误",
-        "7ffc08506e": "查看",
-        "522df222b9": "旋转器"
       },
       "WorktreeJumpPalette": {
         "ac037cfac2": "选择",
@@ -1494,12 +1300,12 @@
             "e8c4f2a91b": "恢复所有终端",
             "f2a8b9c1d3": "来自手机",
             "bc65bdf1a2": "终端已适配 Web",
-            "9d8ce04a71": "使用桌面尺寸",
+            "9d8ce04a71": "使用工作台尺寸",
             "e4af713b2c": "来自 Web",
-            "94fe1c7b6a": "Web 正按其窗口尺寸使用此终端。切换到桌面尺寸以适配此处，或折叠窗口继续查看。",
+            "94fe1c7b6a": "另一个浏览器正按其窗口尺寸使用此终端。切换到当前工作台尺寸，或折叠后继续查看。",
             "c7e4a2b8f1": "手机正在控制",
-            "d9f3c6e2a4": "桌面键盘已暂停。收回此终端以在此输入，收回手机控制的所有终端，或折叠以继续观看。",
-            "a6b1d8f3e2": "手机会话已结束。将此终端或手机留在手机尺寸的所有终端恢复为桌面尺寸。"
+            "d9f3c6e2a4": "工作台键盘已暂停。收回此终端以在此输入，收回手机控制的所有终端，或折叠后继续查看。",
+            "a6b1d8f3e2": "手机会话已结束。将此终端恢复为工作台尺寸，或恢复手机留在手机尺寸的全部终端。"
           },
           "TerminalAgentSessionForkDialog": {
             "17fc841e59": "复制上下文",
@@ -1991,7 +1797,7 @@
             "c0e972d726": "取消",
             "06741a2f3d": "打开 MiniMax 使用量详情",
             "3bbf140864": "MiniMax 使用量",
-            "remoteServerLabel": "Coworking 主机",
+            "remoteServerLabel": "远程 daemon",
             "antigravityUsage": "Antigravity 使用量",
             "antigravityUsageDetails": "打开 Antigravity 使用详情",
             "grokUsageAria": "打开 Grok 使用详情",
@@ -2018,11 +1824,11 @@
           },
           "RemoteServerUpdateStatusSegment": {
             "updating": "正在更新 {{value0}}/{{value1}}",
-            "updatingTooltip": "Coworking 主机正在更新",
+            "updatingTooltip": "远程 daemon正在更新",
             "failed": "{{value0}} 个主机更新失败",
-            "failedTooltip": "打开 Coworking 主机更新以查看并重试",
+            "failedTooltip": "打开 远程 daemon更新以查看并重试",
             "updated": "已更新 {{value0}} 个主机",
-            "updatedTooltip": "Coworking 主机更新已完成",
+            "updatedTooltip": "远程 daemon更新已完成",
             "failedOne": "1 个主机更新失败",
             "updatedOne": "已更新 1 个主机"
           },
@@ -2211,17 +2017,6 @@
             "detailed": "Detailed",
             "compact": "Compact",
             "footerDetailAria": "Usage footer detail"
-          },
-          "CoworkingRemoteHosts": {
-            "connecting": "Connecting…",
-            "disconnected": "Disconnected",
-            "title": "Remote hosts",
-            "hostAccessDenied": "Remote host access was denied.",
-            "hostAccessCancelled": "Remote host access request was cancelled.",
-            "hostAdded": "{{value0}} is ready as a remote host.",
-            "hostAccessFailed": "Could not request remote host access.",
-            "requesting": "Waiting…",
-            "useAsHost": "Use as host"
           },
           "DesktopRuntimeStatus": {
             "cli": "Yiru CLI",
@@ -2990,9 +2785,6 @@
           "workspaceSection": "工作区",
           "primaryDeleteDisabled": "主工作树不能删除。请改为移除项目。",
           "deleteWorktree": "删除工作树",
-          "makeCoworkingPrivate": "设为私有",
-          "makeCoworkingPublic": "设为公开",
-          "coworkingPrivateFailed": "无法将此 worktree 设为私有。",
           "create": "创建",
           "newGroupName": "{{name}} 组",
           "sleep": "休眠",
@@ -3051,10 +2843,7 @@
           "hostDisconnected": "已断开连接",
           "failedNestWorkspace": "无法嵌套工作区",
           "sidebarRowMissing": "目标不再存在",
-          "failedUnnestWorkspace": "展开工作区失败",
-          "makeCoworkingProjectPrivate": "将所有 worktree 设为私有",
-          "makeCoworkingProjectPublic": "将所有 worktree 设为公开",
-          "coworkingProjectPrivateFailed": "无法将这些 worktree 设为私有。"
+          "failedUnnestWorkspace": "展开工作区失败"
         },
         "WorktreeOpenInMenu": {
           "1417fd8380": "自定义应用程序...",
@@ -3305,7 +3094,7 @@
           "1a2b3c4d5e": "已移除 {{value0}}",
           "2b3c4d5e6f": "删除主机失败",
           "3c4d5e6f7a": "移除 {{value0}}？",
-          "4d5e6f7a8b": "这会打开 Coworking 主机设置，你可以在那里移除此主机。",
+          "4d5e6f7a8b": "这会打开 远程 daemon设置，你可以在那里移除此主机。",
           "5e6f7a8b9c": "这会从此计算机移除保存的 SSH 主机及其凭据。远程文件不会被删除。",
           "6f7a8b9c0d": "取消",
           "7a8b9c0d1e": "打开设置",
@@ -3390,32 +3179,6 @@
           "forget": "从 Yiru 中移除",
           "reconnectAndDelete": "重新连接并删除"
         },
-        "CoworkingDesktopRow": {
-          "connecting": "Connecting…",
-          "disconnected": "Disconnected",
-          "hostAccessDenied": "Remote host access was denied.",
-          "hostAccessCancelled": "Remote host access request was cancelled.",
-          "hostAdded": "{{value0}} is ready as a remote host.",
-          "hostAccessFailed": "Could not request remote host access.",
-          "requestingHostAccess": "Waiting…",
-          "useAsHost": "Use as host"
-        },
-        "CoworkingWorktreeRow": {
-          "collapse": "Collapse {{value0}}",
-          "expand": "Expand {{value0}}",
-          "loadingSessions": "正在加载会话…",
-          "ownerTitle": "{{value0}} 的 {{value1}}",
-          "sessionsUnavailable": "会话列表不可用"
-        },
-        "CoworkingSidebarProjectedRow": {
-          "heading": "Coworking"
-        },
-        "CoworkingDesktopUsageHoverCard": {
-          "usage": "Usage"
-        },
-        "CoworkingRemoteWorktreesHeader": {
-          "title": "Remote"
-        },
         "WorktreeMetaDialog": {
           "382fd11a3e": "Edit Worktree Details",
           "65770ad0f0": "Edit the GitHub pull request link and notes for this workspace.",
@@ -3448,307 +3211,10 @@
         },
         "WorktreeCardTabs": {
           "openTabs": "已打开的标签页"
-        }
-      },
-      "coworking": {
-        "CoworkingAvailabilityStatusSegment": {
-          "title": "Coworking 不可用",
-          "checkAgain": "重新检查",
-          "checking": "正在检查…",
-          "tailscaleUnavailable": "在这台电脑上找不到 Tailscale。",
-          "tailscaleNotRunning": "Tailscale 已安装，但其服务未运行。",
-          "tailscalePermissionDenied": "Yiru 没有读取 Tailscale 状态的权限。",
-          "tailscaleTimedOut": "Tailscale 未及时响应。Coworking 会继续检查。",
-          "tailscaleUnsupportedOutput": "Tailscale 返回了当前 Yiru 版本无法读取的状态数据。",
-          "portUnavailable": "TCP 端口 {{port}} 已被占用。请关闭冲突进程，Coworking 会继续检查。",
-          "permissionDenied": "系统权限阻止 Yiru 在 Tailnet 上打开 Coworking 监听端口。",
-          "persistenceUnavailable": "Coworking 无法安全加载共享设置，因此共享功能保持关闭。",
-          "unavailable": "Coworking 无法在这台电脑上启动。",
-          "starting": "Coworking 正在启动…",
-          "readyIdle": "Coworking 就绪 · 暂无连接",
-          "peersConnected": "已连接 {{count}} 位协作者",
-          "pendingRequests": "{{count}} 位协作者等待你的批准",
-          "sharedWorktrees": "已向 tailnet 发布 {{count}} 个工作区。",
-          "noSharedWorktrees": "尚未发布任何工作区，协作者看不到内容。",
-          "hasControl": "可编辑",
-          "readOnly": "只读",
-          "windowsFirewallUnavailable": "Windows 防火墙正在阻止 Coworking 监听 TCP 端口 {{port}}。",
-          "repairFirewall": "修复防火墙规则",
-          "suspendedHostUnavailable": "主机离线",
-          "suspendedIncarnation": "工作区已被替换",
-          "suspendedOverlapping": "共享路径重叠",
-          "suspendedUnknown": "未在提供服务",
-          "sharingAs": "以 {{node}} 共享",
-          "remoteHostsAvailable": "{{count}} remote host(s) available"
         },
-        "CoworkingWindowsFirewallNotice": {
-          "repairSuccess": "Windows 防火墙规则已修复。",
-          "title": "Coworking 被 Windows 防火墙阻止",
-          "readyTitle": "重新启动 Coworking",
-          "readyDescription": "所需规则现在已可用。重新应用规则即可在当前应用会话中重新启动 Coworking。",
-          "inspectUnavailable": "无法检查防火墙规则。请通过管理员确认重新创建规则。",
-          "ruleMissing": "已安装的 Yiru 应用缺少所需的专用网络规则。",
-          "ruleDetails": "Yiru.Coworking · TCP {{port}} · 专用网络",
-          "waiting": "等待 Windows…",
-          "repair": "修复防火墙规则",
-          "reapply": "重新应用并启动",
-          "repairFailed": "无法修复 Windows 防火墙规则。"
-        },
-        "CoworkingControlRequestDialog": {
-          "decisionFailed": "无法发送控制决定。",
-          "title": "允许 {{value0}} 控制这个 worktree？",
-          "worktree": "Worktree：{{value0}} / {{value1}}",
-          "capabilities": "对方将能够创建终端、启动已启用的 Agent、发送终端输入、修改文件、运行命令，并使用你当前激活的 Agent 账号。",
-          "shellWarning": "终端命令不会被限制在这个 worktree 内。",
-          "queued": "还有 {{value0}} 个控制请求正在排队。",
-          "deny": "拒绝",
-          "allow": "允许此连接"
-        },
-        "CoworkingOwnerControlGrants": {
-          "revokeFailed": "无法撤销远程控制。",
-          "heading": "远程控制",
-          "hasAccess": "{{value0}} 已获得访问权限",
-          "revoke": "撤销"
-        },
-        "CoworkingSessionPane": {
-          "continueFailed": "无法继续此 session。",
-          "continueOutcomeUnknown": "此 session 可能已在所有者的电脑上继续运行。请先检查 session 列表和终端，再次执行继续操作。",
-          "retryContinue": "Try again",
-          "retryAttach": "Reconnect terminal",
-          "startingAfterGrant": "Starting the agent on the owner’s desktop…",
-          "controlRequired": "Request control to continue this agent session on the owner’s desktop.",
-          "continuing": "Continuing the agent on the owner’s desktop…",
-          "attaching": "Connecting to the remote terminal…",
-          "attachFailed": "The agent started, but its terminal could not be connected.",
-          "continueAgent": "Continue agent",
-          "sessionEnded": "This agent session has ended.",
-          "controlRequiredAfterClose": "Request control to continue this agent session again.",
-          "terminalEnded": "This terminal session has ended.",
-          "terminalConnectionLost": "The remote terminal connection was lost."
-        },
-        "CoworkingTerminalPane": {
-          "connecting": "正在连接终端…",
-          "closed": "终端已关闭",
-          "unavailable": "终端不可用",
-          "outcomeUnknown": "此次终端操作可能已在所有者的电脑上成功。请先检查终端输出，再发送更多输入。",
-          "outcomeUnknownPersistent": "此次终端操作可能已经成功。请先检查输出，再恢复输入。",
-          "resumeInput": "恢复输入",
-          "inputBacklogFull": "远程输入仍在追赶。请等输入显示后，再继续键入或粘贴更多内容。"
-        },
-        "CoworkingWorktreeVisibilityDialog": {
-          "publishFailed": "无法将此 worktree 设为公开。",
-          "title": "将 {{value0}} 设为公开？",
-          "description": "Tailnet 中使用 Yiru 的成员将能够打开此 worktree。",
-          "historyWarning": "所有现有 session、transcript、终端回滚记录及未来终端输出都将可读。",
-          "shellWarning": "终端历史可能包含在此 worktree 之外产生的内容。",
-          "cancel": "取消",
-          "confirm": "设为公开",
-          "projectPublishFailed": "无法将这些 worktree 设为公开。",
-          "projectTitle": "将 {{value0}} 当前的所有 worktree 设为公开？",
-          "projectDescription": "此操作仅作用于项目当前的全部 worktree，未来创建的 worktree 仍为私有。",
-          "projectHistoryWarning": "这些 worktree 中的所有 session、transcript、终端回滚记录及未来终端输出都将可读。",
-          "projectShellWarning": "终端历史可能包含在这些 worktree 之外产生的内容。",
-          "projectConfirm": "全部设为公开"
-        },
-        "CoworkingWorkspaceSurface": {
-          "requestFailed": "无法请求控制权限。",
-          "controlGranted": "已获得控制权限",
-          "disconnected": "已断开连接",
-          "readOnly": "只读",
-          "requestPending": "请求等待确认",
-          "requestControl": "请求控制",
-          "tabs": {
-            "sessions": "Sessions",
-            "files": "文件",
-            "changes": "更改"
-          },
-          "sessions": "Sessions",
-          "terminalDescription": "远程 session 可用后，终端快照和实时输出会显示在这里。",
-          "selectSession": "选择一个 session 以打开其远程终端。",
-          "fileBrowser": "文件",
-          "fileDescription": "远程文件保留在所有者的执行主机上，并通过 Coworking workspace 模型在这里打开。",
-          "changesAndGit": "更改与 Git",
-          "changesDescription": "Worktree 状态、diff、历史、分支和 upstream 状态会显示在这里。",
-          "mutableMode": "此连接可以使用 worktree 的修改操作。",
-          "readOnlyMode": "这个公开 worktree 在所有者授予控制权限前保持只读。",
-          "noSessions": "This shared worktree has no Terminal or agent sessions yet."
-        },
-        "CoworkingFileActionDialog": {
-          "nameLabel": "名称",
-          "cancel": "取消",
-          "newFileTitle": "新建文件",
-          "newDirectoryTitle": "新建目录",
-          "renameTitle": "重命名项目",
-          "deleteTitle": "删除项目？",
-          "newFileDescription": "在当前远程文件夹中创建一个空文件。",
-          "newDirectoryDescription": "在当前远程文件夹中创建一个目录。",
-          "renameDescription": "输入 {{value0}} 的新名称。",
-          "deleteDescription": "这会从所有者的 worktree 中永久删除 {{value0}}。",
-          "create": "创建",
-          "rename": "重命名",
-          "delete": "删除"
-        },
-        "CoworkingFilePreview": {
-          "loading": "正在加载文件…",
-          "selectFile": "选择一个文件进行查看。",
-          "reload": "重新加载",
-          "workingDiff": "工作区 diff",
-          "stagedDiff": "已暂存 diff",
-          "content": "内容",
-          "rename": "重命名",
-          "delete": "删除",
-          "saving": "正在保存…",
-          "save": "保存",
-          "truncatedFile": "当前仅显示文件的一个分块。为避免用部分内容覆盖完整文件，已禁用编辑。",
-          "editorLabel": "文件内容",
-          "loadingDiff": "正在加载 diff…",
-          "truncatedDiff": "此 diff 已截断。",
-          "noDiff": "此文件没有 diff。",
-          "binaryDescription": "二进制预览 · {{value1}} 字节中的 {{value0}} 字节",
-          "binaryUnavailable": "无法显示二进制预览。",
-          "fileUnavailable": "此文件不可用。",
-          "diffUnavailable": "此 diff 不可用。",
-          "previousChunk": "上一分块",
-          "nextChunk": "下一分块",
-          "byteRange": "{{value0}}–{{value1}} / {{value2}} 字节",
-          "back": "Back to files",
-          "fileActions": "File actions",
-          "workingCompact": "Working",
-          "stagedCompact": "Staged"
-        },
-        "CoworkingFileTree": {
-          "up": "返回上一级目录",
-          "root": "Worktree 根目录",
-          "refresh": "刷新文件",
-          "newFile": "新建文件",
-          "newDirectory": "新建目录",
-          "loading": "正在加载文件…",
-          "empty": "此目录为空。",
-          "truncated": "这里只显示了此目录的一部分。",
-          "itemActions": "文件操作",
-          "rename": "重命名",
-          "delete": "删除",
-          "unavailable": "文件不可用。",
-          "retry": "Retry"
-        },
-        "CoworkingFilesPane": {
-          "listFailed": "无法加载文件。",
-          "readFailed": "无法读取此文件。",
-          "diffFailed": "无法加载此 diff。",
-          "fileTooLarge": "此文件太大，无法通过 Coworking 保存。",
-          "saved": "文件已保存。",
-          "saveFailed": "无法保存此文件。",
-          "invalidName": "请输入一个有效的文件名。",
-          "mutationFailed": "无法更改此文件。",
-          "outcomeUnknown": "此次文件更改可能已在所有者的 worktree 中成功。请先刷新并检查该项目，再进行其他更改。",
-          "outcomeUnknownPersistent": "此次文件更改可能已经成功。请先刷新并检查该项目，再进行其他更改。"
-        },
-        "CoworkingGitDiffPane": {
-          "selectItem": "选择一项更改或提交以查看其 diff。",
-          "loading": "正在加载 diff…",
-          "noDiff": "没有可用的文本 diff。",
-          "truncated": "此 diff 已截断。",
-          "staged": "已暂存",
-          "untracked": "未跟踪",
-          "unstaged": "未暂存",
-          "unavailable": "此 diff 不可用。",
-          "back": "Back"
-        },
-        "CoworkingGitPane": {
-          "refreshFailed": "无法加载 Git 状态。",
-          "diffFailed": "无法加载此 diff。",
-          "commitTooLong": "提交信息过长。",
-          "committed": "已创建提交。",
-          "mutationFailed": "无法更改此 worktree。",
-          "outcomeUnknown": "此次 Git 操作可能已在所有者的 worktree 中成功。请先刷新并检查 Git 状态，再进行其他更改。",
-          "outcomeUnknownPersistent": "此次 Git 操作可能已经成功。请先刷新并检查 Git 状态，再进行其他更改。"
-        },
-        "CoworkingMutationOutcomeNotice": {
-          "title": "需要确认操作结果",
-          "dismiss": "检查后关闭"
-        },
-        "CoworkingGitSidebar": {
-          "detached": "分离的 HEAD",
-          "refresh": "刷新",
-          "changes": "更改",
-          "history": "历史",
-          "commitMessage": "提交信息",
-          "commitPlaceholder": "提交信息",
-          "commit": "提交已暂存的更改",
-          "loadingChanges": "正在加载更改…",
-          "clean": "Worktree 没有更改。",
-          "unstage": "取消暂存",
-          "stage": "暂存",
-          "loadingHistory": "正在加载历史…",
-          "noHistory": "未找到提交。",
-          "historyLimited": "正在显示最近的提交。",
-          "noUpstream": "没有 upstream",
-          "upstream": "{{value0}} · ↑{{value1}} ↓{{value2}}",
-          "stateUnavailable": "Git 状态不可用。",
-          "changesLimited": "这里只显示了部分状态。"
-        },
-        "CoworkingAgentsPane": {
-          "publicSessions": "Public agents",
-          "noAgentSessions": "No public agent sessions in this worktree.",
-          "unknownAgent": "Agent"
-        },
-        "CoworkingChecksPane": {
-          "reviewChecks": "Review checks",
-          "refresh": "Refresh",
-          "loadFailed": "Could not load checks from the owner.",
-          "loading": "Loading checks…",
-          "noReview": "No hosted review was found for this branch.",
-          "unavailable": "Hosted review details are unavailable from the owner.",
-          "openReview": "Open review",
-          "checks": "Checks",
-          "detailsUnavailable": "Detailed checks could not be loaded.",
-          "detailsUnsupported": "Detailed checks are not available for this provider.",
-          "checksTruncated": "Showing a partial check list.",
-          "noChecks": "No checks were reported for this review.",
-          "passing": "Passing",
-          "failing": "Failing",
-          "pending": "Pending",
-          "neutral": "Neutral",
-          "queued": "Queued",
-          "inProgress": "In progress",
-          "succeeded": "Succeeded",
-          "failed": "Failed",
-          "cancelled": "Cancelled",
-          "timedOut": "Timed out",
-          "skipped": "Skipped",
-          "actionRequired": "Action required",
-          "hostedReview": "Hosted review",
-          "open": "Open",
-          "closed": "Closed",
-          "merged": "Merged",
-          "draft": "Draft"
-        },
-        "CoworkingSessionCreateMenu": {
-          "outcomeUnknown": "The terminal may already be running on the owner desktop. Creation was not retried.",
-          "createFailed": "Could not create the terminal.",
-          "noAgents": "No agents available",
-          "loadingAgents": "Loading owner agents…",
-          "agentsUnavailable": "Owner agents unavailable",
-          "disconnected": "Reconnect to create terminals.",
-          "controlPending": "Waiting for the owner to approve control.",
-          "controlRequired": "Request control to create terminals.",
-          "creating": "Creating terminal…"
-        },
-        "CoworkingHostAccessRequestDialog": {
-          "decisionFailed": "Could not send the host access decision.",
-          "nameRequired": "Name this authorized device before continuing.",
-          "title": "Authorize {{value0}} as a remote host client?",
-          "description": "This authorization lasts 90 days and is limited to this machine.",
-          "deviceName": "Authorized device name",
-          "readOnly": "Read only",
-          "readOnlyDescription": "Browse code and git history on this machine.",
-          "grantReadOnly": "Grant read only",
-          "fullAccess": "Full access",
-          "fullAccessDescription": "They will receive continuous shell access on this machine.",
-          "grantFullAccess": "Grant full access",
-          "revokeHelp": "You can revoke this authorization at any time in Settings → Coworking.",
-          "queued": "Queued host access requests: {{value0}}.",
-          "deny": "Deny"
+        "SidebarDisclosure": {
+          "collapse": "收起 {{value0}}",
+          "expand": "展开 {{value0}}"
         }
       },
       "shared": {
@@ -3913,7 +3379,7 @@
           "7492fb3bba": "在此粘贴并点击保存。",
           "9fec52de4b": "如何复制 Cookie",
           "4e32e030b2": "存储在本地。Yiru 仅将其发送到 platform.minimax.io 以刷新使用量。",
-          "remoteServerFallback": "Coworking 主机",
+          "remoteServerFallback": "远程 daemon",
           "loadAccountsFailed": "无法加载提供商账户。",
           "remoteScopeAccounts": "正在显示由 {{value0}} 管理的账户。请在该主机上添加或重新验证账户。",
           "remoteScopeAuthContext": "每个账户在 {{value0}} 上保留自己的登录上下文。",
@@ -3925,7 +3391,6 @@
           "40b29e0bf3": "重新启动",
           "87a2cb2ac8": "Yiru 在启动时应用此网络模式。",
           "89958d7edf": "需要重新启动",
-          "b3ad629640": "仅当企业 VPN 或代理因 HTTP/2 协议错误而中断更新下载时使用。重启后会影响所有 Electron 网络。",
           "6627e75c92": "解释 HTTP/1.1 兼容性",
           "e9506d3377": "HTTP/1.1 兼容性",
           "8b7a8df299": "支持故障排除的低级解决方法。",
@@ -4004,25 +3469,14 @@
           "codexSessionSourceInfo": "关于导入 Codex 历史记录",
           "codexSessionSourceTooltip": "Yiru 在隔离的主目录中运行 Codex。将此项指向您现有的 Codex 主目录以导入会话历史记录。留空则使用 ~/.codex。"
         },
-        "AppIconSelector": {
-          "d5a112dc9b": "下一个图标",
-          "415fa76f64": "选定的应用程序图标",
-          "5f5142a62a": "上一个图标"
-        },
         "AppearancePane": {
           "3057983501": "未分配",
-          "0cd9b8228f": "选择 Dock 和窗口切换器中显示的应用程序图标。",
-          "ca1590d42f": "应用程序图标",
           "61d842eca0": "在侧边栏中显示 Yiru 手机端 快捷方式。它仍然可以从工具箱中获取。",
           "9da1020447": "显示 Yiru 手机端按钮",
           "5db6ba961f": "在左侧边栏顶部显示 Yiru 手机端按钮。",
           "dc29f3cc0d": "侧边栏",
           "ea943d0db0": "选择窗口底部显示的指示器。您还可以右键单击状态栏进行相同的切换。",
           "3e4175e5c6": "状态栏",
-          "2df8f79aa5": "在标题栏中显示 Yiru。",
-          "9868f39007": "标题栏应用程序名称",
-          "4de76f6902": "控制应用程序标题栏中显示的内容。",
-          "6a272ca553": "标题栏",
           "e9f2ca5582": "关闭以隐藏文件资源管理器中与 .gitignore 匹配的文件。",
           "0fafabcf35": "显示 Git 忽略的文件",
           "75f07ab60c": "在文件资源管理器中显示与 .gitignore 匹配的文件。",
@@ -4049,9 +3503,6 @@
             "tintOpacity": "色调强度",
             "tintOpacityDescription": "控制色调混入边栏的强度。"
           },
-          "872af9556e": "系统托盘",
-          "2edf606c46": "关闭时最小化到托盘",
-          "b707773a0d": "启用后，关闭窗口会让 Yiru 继续在系统托盘中运行，而不是退出。",
           "interfaceDefaultFont": "默认字体",
           "terminalDefaultFont": "默认字体",
           "interfaceTitle": "界面",
@@ -4428,8 +3879,8 @@
           "currentCount": "{{value0}} 个已是最新",
           "manualCount": "{{value0}} 个需手动更新",
           "offlineCount": "{{value0}} 个离线",
-          "title": "Coworking 主机",
-          "description": "从此客户端检查并更新已配对的 Coworking 主机。",
+          "title": "远程 daemon",
+          "description": "从此客户端检查并更新已配对的 远程 daemon。",
           "updating": "正在更新主机…",
           "reviewServers": "检查主机更新",
           "serverCountOne": "1 个已配对主机"
@@ -4439,11 +3890,11 @@
           "restartingHelp": "正在等待替代主机以新版本重新连接。",
           "retry": "重试",
           "update": "更新此主机",
-          "title": "更新 Coworking 主机",
+          "title": "更新 远程 daemon",
           "description": "查看已配对主机，并从此 Yiru 客户端更新受支持的安装。",
           "restartWarning": "更新将重启这些主机。{{value0}} 个活动标签页和 {{value1}} 个终端窗格可能会短暂断开连接。",
           "checking": "正在检查已配对主机…",
-          "empty": "没有已配对的 Coworking 主机。",
+          "empty": "没有已配对的 远程 daemon。",
           "updateAll": "更新全部 {{value0}} 个主机",
           "noUpdates": "所有主机均已是最新。",
           "downloadProgress": "{{value0}} 下载进度"
@@ -4877,16 +4328,6 @@
           "76e02467b8": "更改自定义文件",
           "d3756cf5bc": "已禁用"
         },
-        "OpenAiTranscriptionKeyDialog": {
-          "fa83512e48": "保存密钥",
-          "07b26f2742": "清除键",
-          "d246b2bdb3": "本地运行时密钥使用 Electron 加密存储（如果可用）存储在 ~/.yiru 中。",
-          "c3380e4ca5": "sk-...",
-          "2f797018f0": "API 密钥已配置",
-          "16015322f9": "API密钥",
-          "07ed3e512e": "仅当选择 OpenAI 语音模型时，音频才会发送到 OpenAI。",
-          "439e91879e": "OpenAI 转录"
-        },
         "OpenAiTranscriptionSettingsRow": {
           "85c589cd61": "添加API密钥",
           "ae2df8f511": "断开 OpenAI API 密钥",
@@ -5254,11 +4695,11 @@
           "b2290ed203": "Yiru 会聚焦此主机并加载其项目。其他主机上的现有终端和浏览器标签页会保持运行。",
           "d570c35a99": "切换主机",
           "84b9b2be05": "创建可撤销的访问授权，以便浏览器或其他 Yiru 客户端可以连接。",
-          "6e1280ca55": "分享此 Coworking 主机",
-          "9a3758d983": "没有已保存的 Coworking 主机。",
-          "1826bd0608": "已保存的 Coworking 主机",
+          "6e1280ca55": "分享此 远程 daemon",
+          "9a3758d983": "没有已保存的 远程 daemon。",
+          "1826bd0608": "已保存的 远程 daemon",
           "6ce4664003": "刷新主机",
-          "b07070ed3c": "没有连接 Coworking 主机",
+          "b07070ed3c": "没有连接 远程 daemon",
           "78692becbd": "本地桌面",
           "64b6bea541": "默认主机",
           "99ac81fb43": "切换到 {{value0}}。",
@@ -5270,8 +4711,8 @@
           "9f7665a01b": "删除活动主机会先将 Yiru 切换回本地桌面。现有主机会话会保持不变。",
           "3595fd1948": "新链接",
           "54dee18f5c": "隐藏表格",
-          "8cf8790697": "已保存的 Coworking 主机会通过配对运行时路由此浏览器。",
-          "f75ce1c7a5": "本地会保留当前的桌面行为。已保存的 Coworking 主机会通过配对运行时路由受支持的客户端调用。",
+          "8cf8790697": "已保存的 远程 daemon会通过配对运行时路由此浏览器。",
+          "f75ce1c7a5": "本地会保留当前的桌面行为。已保存的 远程 daemon会通过配对运行时路由受支持的客户端调用。",
           "d25f0688b1": "移除",
           "f3a3d6d834": "{{value0}} 功能",
           "0ef838094a": "协议 {{value0}}",
@@ -5286,15 +4727,15 @@
           "hostModelCapabilityMissing": "主机模型支持：请更新主机以使用 {{value0}}",
           "hostModelCapabilityProjectSetup": "项目设置",
           "hostModelCapabilityWorkspaceRunContext": "工作区运行上下文",
-          "3f67e8078a": "默认使用此电脑。仅当你希望受支持的项目、文件、终端、提供商检查以及浏览器/移动端接续通过某个 Coworking 主机运行时，才选择已保存的主机。",
-          "2c85efb3e8": "选择已保存的 Coworking 主机后，此浏览器会将配对运行时用作默认主机。",
+          "3f67e8078a": "默认使用此电脑。仅当你希望受支持的项目、文件、终端、提供商检查以及浏览器/移动端接续通过某个 远程 daemon运行时，才选择已保存的主机。",
+          "2c85efb3e8": "选择已保存的 远程 daemon后，此浏览器会将配对运行时用作默认主机。",
           "serverConnected": "已连接",
           "serverChecking": "正在检查…",
           "serverDisconnected": "已断开连接",
           "disconnectedServer": "已断开与 {{value0}} 的连接。",
-          "connectToRemoteServers": "Coworking 主机",
-          "connectToRemoteServersHelp": "连接、断开或检查通过 Coworking 授权的主机。",
-          "activeServerRowHelp": "用于通过主机路由的项目、终端和提供商检查的活动 Coworking 主机。",
+          "connectToRemoteServers": "远程 daemon",
+          "connectToRemoteServersHelp": "连接、断开或检查通过 远程 daemon 授权的主机。",
+          "activeServerRowHelp": "用于通过主机路由的项目、终端和提供商检查的活动 远程 daemon。",
           "disconnect": "断开连接",
           "connect": "连接",
           "advanced": "高级",
@@ -5309,52 +4750,16 @@
           "versionUnavailable": "Yiru 版本不可用",
           "updateServer": "更新",
           "switchLocalFailed": "无法切换到本地桌面。请修复问题后重试。",
-          "disconnectFailed": "无法断开与此 Coworking 主机的连接。请修复问题后重试。",
+          "disconnectFailed": "无法断开与此 远程 daemon的连接。请修复问题后重试。",
           "removeFailed": "移除运行时环境失败。",
           "hostDisconnectFailed": "断开主机连接失败。",
           "hostConnectFailed": "连接主机失败。",
           "hostSwitchFailed": "无法切换主机。请修复问题后重试。",
           "hostSwitchError": "切换主机失败。",
-          "coworkingHostFallback": "Coworking 主机"
+          "remoteDaemonFallback": "远程 daemon"
         },
         "RuntimePairingGeneratedUrlRows": {
           "0495f68959": "复制 {{value0}}"
-        },
-        "RuntimePairingUrlGenerator": {
-          "849825e829": "将此配对 URL 粘贴到另一个 Yiru 客户端中。",
-          "2e5c4e3c93": "与另一个 Yiru 客户端配对",
-          "f7cafdc9f3": "浏览器链接在此版本中不可用。配对 URL 仍然适用于 Yiru 客户端。",
-          "6b9ca3e69b": "在浏览器中打开",
-          "1ca2e5194d": "从可以到达所选地址的浏览器使用此 URL。",
-          "8de0f84fff": "生成访问链接",
-          "279e0dcb57": "127.0.0.1 仅适用于此计算机。使用 LAN、Tailscale 或其他设备的自定义地址。",
-          "45cf476df3": "主机、主机:端口或 wss://主机/路径",
-          "4531ea3158": "自定义地址",
-          "360c548cf3": "刷新连接地址",
-          "de6d5cff95": "这台电脑（",
-          "de77eb1b65": "连接地址",
-          "ff80904fc4": "为浏览器或桌面客户端创建可撤销的访问授权。",
-          "f8500e134a": "分享此 Coworking 主机",
-          "d6c081adf4": "复制 URL 失败。",
-          "df0aa45a86": "复制的配对 URL。",
-          "13704d635e": "复制的 Web 客户端 URL。",
-          "e8d83f2b0f": "无法撤销共享访问。",
-          "9f8e037c4a": "共享访问权限已撤销。",
-          "d797f516b1": "共享访问权限已被撤销。",
-          "2ed55c841a": "无法生成配对 URL。",
-          "11d5248e62": "生成的配对 URL。",
-          "6dd594a507": "生成的 Web 客户端 URL。",
-          "2752126f3e": "运行时配对不可用。",
-          "95b8be4cea": "刷新网络接口失败。",
-          "1b4e0bbcc5": "无法加载共享访问授权。",
-          "b91e36a986": "网络",
-          "custom-option": "{{address}}（自定义）",
-          "add-custom": "添加自定义地址…",
-          "custom-title": "自定义连接地址",
-          "custom-description": "公布其他设备可以访问的地址：LAN 或 Tailscale 主机，或完整的 ws(s):// URL。",
-          "custom-hint": "请输入主机、host:port 或 ws(s):// URL。",
-          "custom-cancel": "取消",
-          "custom-use": "使用地址"
         },
         "Settings": {
           "3bf149e873": "项目设置 > {{value0}}",
@@ -5368,9 +4773,9 @@
           "65660d4548": "macOS 权限",
           "c6c01ac209": "通过手机控制终端和 Agent。",
           "c40dadaac8": "移动端",
-          "b5ee17826b": "管理通过 Coworking 授权的主机并选择活动运行时。",
-          "7686cb5c36": "在此浏览器中使用通过 Coworking 授权的主机。",
-          "bd0181eeca": "Coworking 主机",
+          "b5ee17826b": "管理通过 远程 daemon 授权的主机并选择活动运行时。",
+          "7686cb5c36": "在此浏览器中使用通过 远程 daemon 授权的主机。",
+          "bd0181eeca": "远程 daemon",
           "8acf3f22e0": "Yiru 统计，以及 Claude、Codex、OpenCode Token 分析和 Grok 订阅使用量。",
           "954a8f5aef": "统计和使用情况",
           "a737a4bb22": "常见操作的键盘快捷键。",
@@ -5412,7 +4817,7 @@
           "43b68e10f0": "您有未保存的 Git AI Author 更改。离开将丢弃它们。",
           "17bdee4ff1": "放弃未保存的 Git AI Author 更改？",
           "084d8fac5b": "隐私与安全",
-          "23931df7e8": "Coworking",
+          "23931df7e8": "远程 daemon",
           "mobile_group": "移动端",
           "8bd117d669": "界面",
           "e1578cd4bc": "工作流程",
@@ -5422,9 +4827,7 @@
           "65358016ea": "放弃",
           "dev": "开发工具",
           "devDescription": "仅用于调试 UI 状态的开发工具。",
-          "b07041697f": "Connect GitHub, GitLab, and source-hosting services.",
-          "coworkingTitle": "Coworking",
-          "coworkingDescription": "查看并撤销持久的 Coworking 主机授权。"
+          "b07041697f": "Connect GitHub, GitLab, and source-hosting services."
         },
         "SettingsFormControls": {
           "42a4d15a30": "没有匹配的字体。",
@@ -5761,15 +5164,9 @@
           "1afcc1d973": "垂直内边距",
           "25e2f8e8e1": "终端网格周围的水平填充（以像素为单位）。",
           "36b8402015": "水平填充",
-          "53ce336e15": "重新启动 Yiru 以应用窗口模糊更改。",
-          "c65bb9ce63": "需要重新启动",
-          "97950bb087": "将背景模糊应用到终端窗口。需要重新启动。",
-          "2b82242f43": "窗口模糊",
           "809f37738d": "控制终端背景的透明度。 1 是完全不透明，0 是完全透明。",
           "ea7b1a158e": "背景不透明度",
           "03acb60aa0": "控制终端背景的透明度。",
-          "00eaa6b881": "窗口外观和背景设置。",
-          "b96ba13ed1": "窗户",
           "42e01a6055": "ANSI 亮白色",
           "16948119cb": "亮白",
           "1601140f03": "ANSI 亮青色",
@@ -5971,7 +5368,6 @@
             "4d44352eea": "网络",
             "2b4d26d11e": "联网",
             "e04e9db503": "高级",
-            "585f56fae0": "当 HTTP/2 在代理后面失败时，使用 HTTP/1.1 进行 Electron 网络。",
             "11eea3da72": "HTTP/1.1 兼容性"
           }
         },
@@ -6035,15 +5431,6 @@
         },
         "appearance": {
           "search": {
-            "468448bba4": "水彩",
-            "f586abfa35": "蓝色",
-            "651f35b2c6": "切换器",
-            "e5bc35d59e": "窗户",
-            "d18b54ca90": "码头",
-            "1f2880a9d5": "yiru",
-            "2cfb3420c0": "应用程序图标",
-            "e80c2af428": "选择 Dock 和窗口切换器中显示的应用程序图标。",
-            "2b313598c6": "应用程序图标",
             "839fb1e3ed": "工具箱",
             "ac79fe4a04": "显示",
             "648eeada79": "隐藏",
@@ -6053,14 +5440,6 @@
             "74618577c7": "移动端",
             "682293cadf": "在左侧边栏顶部显示 Yiru 手机端按钮。",
             "1de96ec8a6": "显示 Yiru 手机端按钮",
-            "4c920ab2d1": "日程",
-            "2ee4810f38": "GitHub",
-            "a895d0f938": "品牌",
-            "51f957ce39": "姓名",
-            "36e006efc1": "应用程序",
-            "bed343b03e": "标题栏",
-            "18b4c4c30b": "在标题栏中显示 Yiru。",
-            "fdd31b00d0": "标题栏应用程序名称",
             "c1bca1885a": "文件浏览器",
             "9f2df826ac": "被忽略",
             "08c86bf58e": "吉蒂诺尔",
@@ -6145,8 +5524,6 @@
               "title": "左侧边栏外观",
               "description": "让左侧边栏匹配终端、保持默认，或使用色调。"
             },
-            "9a115966d3": "关闭时最小化到托盘",
-            "4d5b9427b5": "启用后，关闭窗口会让 Yiru 继续在系统托盘中运行，而不是退出。",
             "antigravityUsageTitle": "Antigravity 使用量",
             "antigravityUsageDescription": "在状态栏中显示 Antigravity 订阅使用量。",
             "antigravityKeyword": "antigravity",
@@ -6776,7 +6153,7 @@
           "search": {
             "aa288005c3": "测试",
             "ca8faa40d7": "通知",
-            "4e30b1925e": "使用本机传递路径触发示例桌面通知。",
+            "4e30b1925e": "使用宿主传递路径触发示例系统通知。",
             "ef9b311346": "发送测试通知",
             "ecdeff4993": "响度",
             "d58b64dddf": "体积",
@@ -6792,7 +6169,7 @@
             "57e34a31cd": "声音",
             "5362074f19": "mp3",
             "6e08f78315": "声音的",
-            "c718793e95": "选择 Yiru 为桌面通知播放的内置、系统或本地音频文件。",
+            "c718793e95": "选择 Yiru 为通知播放的内置、系统或本地音频文件。",
             "ea8cb8d9ce": "通知声音",
             "4ada6bfde9": "搜索",
             "fa60d8e4ab": "压制",
@@ -6813,7 +6190,7 @@
             "adbc3a0fcf": "本国的",
             "72539aede4": "系统",
             "51ae2183e1": "桌面",
-            "0534c76311": "Yiru 桌面通知的主开关。",
+            "0534c76311": "Yiru 系统通知的主开关。",
             "4a210b2f72": "启用通知"
           }
         },
@@ -7018,13 +6395,12 @@
               "09568ccc65": "服务器",
               "ebd5369acf": "环境",
               "d198440ce3": "运行时",
-              "baec27aa8f": "在此浏览器中使用通过 Coworking 授权的主机。",
-              "3517fb2ec0": "Coworking 主机",
+              "baec27aa8f": "在此浏览器中使用通过 远程 daemon 授权的主机。",
+              "3517fb2ec0": "远程 daemon",
               "c6e5a03aa0": "开发盒",
-              "f1575f1e09": "网络客户端",
               "81444c4102": "配对网址",
               "104f4d7dbd": "配对",
-              "4575341c77": "管理通过 Coworking 授权的主机或选择活动运行时。"
+              "4575341c77": "管理通过 远程 daemon 授权的主机或选择活动运行时。"
             }
           }
         },
@@ -7103,13 +6479,6 @@
             "692c4ad032": "垂直内边距",
             "75691e4911": "终端网格周围的水平填充（以像素为单位）。",
             "b4f182f24d": "水平填充",
-            "6c2f9f05c8": "活力",
-            "4f7f8f28ca": "透明度",
-            "f6dd9ff606": "背景",
-            "71eb45e293": "模糊",
-            "0838b3717b": "窗户",
-            "bc2054657a": "将背景模糊应用到终端窗口。需要重新启动。",
-            "72d0482137": "窗口模糊",
             "7db59c4738": "阿尔法",
             "46d99ef4bb": "不透明度",
             "4c643695aa": "控制终端背景的透明度。",
@@ -7509,28 +6878,28 @@
         },
         "ProviderHostScopeControl": {
           "scope_label": "{{value0}}：{{value1}}",
-          "change_host": "打开 Coworking 主机"
+          "change_host": "打开 远程 daemon"
         },
         "providerAccountScope": {
-          "remoteServer": "Coworking 主机：{{value0}}",
-          "remoteServerCredentials": "此提供商的凭据和账户检查由该 Coworking 主机拥有。使用“设置 > Coworking 主机 > 高级”编辑另一个默认运行时范围。",
+          "remoteServer": "远程 daemon：{{value0}}",
+          "remoteServerCredentials": "此提供商的凭据和账户检查由该 远程 daemon拥有。使用“设置 > 远程 daemon > 高级”编辑另一个默认运行时范围。",
           "localMac": "本地 Mac",
-          "localCredentials": "此提供商的凭据和账户检查由该桌面客户端拥有。使用“设置 > Coworking 主机 > 高级”编辑主机拥有的凭据。",
-          "remoteServerRateLimit": "{{value0}} API 预算从此 Coworking 主机上的 CLI 获取。使用“设置 > Coworking 主机 > 高级”查看另一个默认运行时预算。",
-          "localRateLimit": "{{value0}} API 预算从此桌面客户端上的 CLI 获取。使用“设置 > Coworking 主机 > 高级”查看主机拥有的预算。"
+          "localCredentials": "此提供商的凭据和账户检查由该桌面客户端拥有。使用“设置 > 远程 daemon > 高级”编辑主机拥有的凭据。",
+          "remoteServerRateLimit": "{{value0}} API 预算从此 远程 daemon上的 CLI 获取。使用“设置 > 远程 daemon > 高级”查看另一个默认运行时预算。",
+          "localRateLimit": "{{value0}} API 预算从此桌面客户端上的 CLI 获取。使用“设置 > 远程 daemon > 高级”查看主机拥有的预算。"
         },
         "settingOwnership": {
           "clientDefault": "客户端默认",
           "sourceControlAiDefaults": "方案、提示和托管评审默认值由此客户端共享；模型选择和发现则限定在 Agent 运行的主机内。",
           "projectOnThisHost": "此主机上的项目",
           "repositorySourceControlAi": "这些覆盖项应用于此项目设置，并继承客户端的源代码管理 AI 默认值，直至自定义。",
-          "agentLaunchDefaults": "默认 Agent、命令覆盖、CLI 参数和启动环境是客户端偏好。Coworking 主机启动仍会在运行时验证主机可用性。",
+          "agentLaunchDefaults": "默认 Agent、命令覆盖、CLI 参数和启动环境是客户端偏好。远程 daemon启动仍会在运行时验证主机可用性。",
           "clientDefaultProjectScopes": "客户端默认 + 项目范围",
           "terminalQuickCommands": "命令保存在此客户端，然后限定为全局或某项目设置，以便从所选终端上下文运行。",
           "hostOverride": "主机覆盖",
           "workspaceDirectory": "在主机需要自己的工作树目录之前，继承客户端默认值。",
           "providerHost": "提供商主机",
-          "providerAccounts": "凭据和账户检查归属于本地客户端或拥有该提供商集成的所选 Coworking 主机。"
+          "providerAccounts": "凭据和账户检查归属于本地客户端或拥有该提供商集成的所选 远程 daemon。"
         },
         "RepositoryForkSyncSection": {
           "defaultBranch": "默认分支",
@@ -7796,28 +7165,6 @@
           "gpt4oMiniDescription": "Cloud transcription with strong accuracy and low cost. Requires an OpenAI API key.",
           "gpt4oDescription": "Cloud transcription with higher accuracy. Requires an OpenAI API key.",
           "genericDescription": "Speech recognition model."
-        },
-        "CoworkingSettingsPane": {
-          "loadFailed": "Could not load authorized remote host clients.",
-          "alreadyRevoked": "This authorization was already revoked.",
-          "revoked": "Authorization revoked and active connections disconnected.",
-          "revokeFailed": "Could not revoke this authorization.",
-          "title": "Authorized remote host clients",
-          "description": "Like authorized_keys, these devices retain access until revoked or expired.",
-          "refresh": "Refresh",
-          "loading": "Loading…",
-          "empty": "No remote host clients have been authorized through Coworking.",
-          "fullAccess": "Full access",
-          "readOnly": "Read only",
-          "revokedState": "Revoked",
-          "expiredState": "Expired",
-          "identity": "{{value0}} · node {{value1}}",
-          "dates": "Paired {{value0}} · Last used {{value1}} · Expires {{value2}}",
-          "never": "Never",
-          "noExpiry": "Never",
-          "revoking": "Revoking…",
-          "revoke": "Revoke",
-          "searchTitle": "Authorized remote host clients"
         },
         "SettingsSetupGuidePane": {
           "restartOnboardingError": "无法重新启动新手引导。",
@@ -8704,10 +8051,6 @@
           },
           "useFileExplorerHandlers": {
             "32cd9fd991": "无法打开符号链接目标"
-          },
-          "useFileExplorerImport": {
-            "25919b2050": "跳过 {{value0}} {{value1}}。",
-            "132fd0e1e9": "无法导入 {{value0}} {{value1}}。"
           },
           "useFileExplorerKeys": {
             "8adb953095": "操作失败"
@@ -10715,22 +10058,14 @@
                 "unpublishWorktree": "unpublish worktree",
                 "makePublic": "make worktree public",
                 "makePrivate": "make worktree private",
-                "coworkingWorktree": "coworking worktree",
-                "coworkingSettings": "coworking settings",
-                "openCoworkingSettings": "open coworking settings",
                 "remoteHostAccess": "remote host access",
                 "authorizedDevices": "authorized devices"
               },
               "publishOrUnpublishWorktree": "Publish / Unpublish Worktree",
-              "publishOrUnpublishWorktreeDescription": "Publish or unpublish the current worktree through Coworking.",
-              "coworkingVisibilityFailed": "Could not update Coworking visibility.",
-              "openCoworkingSettings": "Open Coworking Settings",
-              "openCoworkingSettingsDescription": "Manage Coworking-authorized remote host access."
+              "publishOrUnpublishWorktreeDescription": "Publish or unpublish the current worktree through 远程 daemon."
             },
             "action": {
-              "context": {
-                "coworkingUnavailable": "Coworking is unavailable here."
-              }
+              "context": {}
             }
           },
           "palette": {
@@ -11443,18 +10778,6 @@
           "91b5c8d7e6": "GitLab"
         }
       }
-    },
-    "statusBar": {
-      "webConnect": {
-        "verifyTitle": "Confirm this browser",
-        "verifyDescription": "The web page must show this same code before you approve it.",
-        "confirm": "Codes match",
-        "cancel": "Cancel",
-        "openConnected": "Open in browser",
-        "connectBrowser": "Connect a browser",
-        "onlineDescription": "This computer is reachable from the Web app while Yiru stays open.",
-        "offlineDescription": "Opens the Web app and pairs it with this computer — no command needed."
-      }
     }
   },
   "components": {
@@ -11660,7 +10983,6 @@
     "shutdownFailed": "Runtime host 关闭失败",
     "unknownOption": "未知的 runtime host 选项：{{option}}",
     "userDataPathRequired": "`--user-data-path` 需要一个路径",
-    "webClient": "Runtime web client",
     "pairedDeviceUnauthorized": "已配对设备不再有权访问",
     "mobileWebSocketUnavailable": "Mobile WebSocket transport is unavailable",
     "terminalMultiplexDedicatedConnection": "Terminal multiplex requires its own connection",
@@ -11684,11 +11006,5 @@
       "send": "发送",
       "cancel": "取消"
     }
-  },
-  "webConnect": {
-    "pairingTitle": "将此浏览器连接到 Yiru？",
-    "pairingDetail": "网页上必须显示相同的验证码：\n\n{{code}}\n\n如果不一致，请取消。",
-    "confirmPairing": "验证码一致，连接",
-    "cancelPairing": "取消"
   }
 }

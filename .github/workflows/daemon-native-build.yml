@@ -1,0 +1,85 @@
+name: Daemon Native Builds
+
+on:
+  pull_request:
+    paths:
+      - 'apps/daemon/**'
+      - 'scripts/build-skill-resources.mjs'
+      - 'skills/**'
+      - 'packages/runtime-protocol/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.github/workflows/daemon-native-build.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/daemon/**'
+      - 'scripts/build-skill-resources.mjs'
+      - 'skills/**'
+      - 'packages/runtime-protocol/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.github/workflows/daemon-native-build.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Why: setup installs the exact pinned pnpm binary; disabling its nested version manager keeps
+# standalone and Node-distributed pnpm identities from rewriting the cross-platform lockfile.
+env:
+  PNPM_CONFIG_PM_ON_FAIL: ignore
+
+jobs:
+  native:
+    name: ${{ matrix.platform }} native runtime
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: Linux
+            runner: ubuntu-latest
+          - platform: macOS
+            runner: macos-26
+          - platform: Windows
+            runner: windows-2025
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
+
+      - name: Setup pnpm
+        uses: pnpm/setup@v2
+        with:
+          install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: package.json
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck daemon
+        run: pnpm exec vp run @yiru/daemon#typecheck
+
+      - name: Build native Bun executable
+        run: pnpm exec vp run @yiru/daemon#build
+
+      - name: Build macOS computer-use helper
+        if: runner.os == 'macOS'
+        run: pnpm exec vp run @yiru/daemon#build:computer-macos -- --universal

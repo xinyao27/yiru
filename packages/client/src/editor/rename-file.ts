@@ -1,0 +1,91 @@
+import { toast } from 'sonner'
+import { requestEditorSaveQuiesce } from '~renderer/editor/autosave'
+import { basename, dirname, joinPath } from '~renderer/path'
+import { getConnectionId } from '~renderer/runtime/connection-context'
+import { extractRuntimeErrorMessage } from '~renderer/runtime/error-message'
+import { renameRuntimePath } from '~renderer/runtime/file-client'
+import { useAppStore } from '~renderer/store/state'
+import { remapOpenEditorTabsForPathChange } from '~renderer/workspace-panel/remap-open-editor-tabs-for-path-change'
+
+import { commitFileExplorerOp } from '../workspace-panel/file-explorer/undo-redo'
+
+type RenameFileArgs = {
+  oldPath: string
+  /** just the new filename (no directory) */
+  newName: string
+  worktreeId: string
+  worktreePath: string
+  /** refresh the parent directory in the explorer tree, if caller tracks one */
+  refreshDir?: (dirPath: string) => Promise<void>
+}
+
+/**
+ * Rename a file or directory on disk. Handles:
+ *   - no-op when the name is unchanged
+ *   - quiescing any in-flight autosave on open tabs under `oldPath`
+ *     (so a trailing write can't recreate the old path post-rename)
+ *   - remapping every affected open editor tab to the new path
+ *   - committing an undo/redo pair via the file-explorer undo stack
+ *   - unwrapped toast on IPC failure
+ *
+ * Used by the file-explorer inline rename and by double-click-rename
+ * from an editor tab. Both entry points should go through here so
+ * the tab-remap + quiesce behavior stays consistent.
+ */
+export async function renameFileOnDisk(args: RenameFileArgs): Promise<void> {
+  const { oldPath, newName, worktreeId, worktreePath, refreshDir } = args
+  const trimmed = newName.trim()
+  if (!trimmed) {
+    return
+  }
+  const existingName = basename(oldPath)
+  if (trimmed === existingName) {
+    return
+  }
+  const parentDir = dirname(oldPath)
+  const newPath = joinPath(parentDir, trimmed)
+  const connectionId = getConnectionId(worktreeId) ?? undefined
+
+  // Let any in-flight autosave under `oldPath` finish first — a trailing
+  // write to the old path after rename would silently recreate it.
+  const state = useAppStore.getState()
+  const filesToQuiesce = state.openFiles.filter(
+    (file) =>
+      file.filePath === oldPath ||
+      file.filePath.startsWith(`${oldPath}/`) ||
+      file.filePath.startsWith(`${oldPath}\\`)
+  )
+  await Promise.all(filesToQuiesce.map((file) => requestEditorSaveQuiesce({ fileId: file.id })))
+  const fileContext = {
+    settings: state.settings,
+    worktreeId,
+    worktreePath,
+    connectionId
+  }
+
+  try {
+    await renameRuntimePath(fileContext, oldPath, newPath)
+    remapOpenEditorTabsForPathChange({ fromPath: oldPath, toPath: newPath, worktreePath })
+    commitFileExplorerOp({
+      undo: async () => {
+        await renameRuntimePath(fileContext, newPath, oldPath)
+        if (refreshDir) {
+          await refreshDir(parentDir)
+        }
+        remapOpenEditorTabsForPathChange({ fromPath: newPath, toPath: oldPath, worktreePath })
+      },
+      redo: async () => {
+        await renameRuntimePath(fileContext, oldPath, newPath)
+        if (refreshDir) {
+          await refreshDir(parentDir)
+        }
+        remapOpenEditorTabsForPathChange({ fromPath: oldPath, toPath: newPath, worktreePath })
+      }
+    })
+  } catch (err) {
+    toast.error(extractRuntimeErrorMessage(err, `Failed to rename '${existingName}'.`))
+  }
+  if (refreshDir) {
+    await refreshDir(parentDir)
+  }
+}

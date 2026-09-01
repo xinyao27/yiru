@@ -1,5 +1,5 @@
-import { splitWorktreeIdForFilesystem } from '@yiru/workbench-model/workspace'
-import type { GlobalSettings } from '~shared/types'
+import { splitWorktreeIdForFilesystem } from '@yiru/runtime-protocol/model/workspace'
+import type { GlobalSettings } from '@yiru/runtime-protocol/workbench/types'
 
 import type { RuntimeClientTarget } from '../orpc-client'
 import { getActiveRuntimeTarget } from '../rpc-client'

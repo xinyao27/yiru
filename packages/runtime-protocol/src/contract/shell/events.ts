@@ -1,8 +1,8 @@
 import { eventIterator, type, type ContractRouter } from '@orpc/contract'
 
+import type { KeybindingFileSnapshot } from '../../workbench/keybindings.js'
+import type { UpdateStatus } from '../../workbench/types.js'
 import { withAccess, type RuntimeProcedureMeta } from '../access-meta.js'
-import type { ShellUiEvent } from './ui-events.js'
-import type { ShellWebConnectStatus } from './web-connect.js'
 
 export type ShellBrowserContextMenuRequestedEvent = {
   type: 'browserContextMenuRequested'
@@ -28,14 +28,12 @@ export type ShellBrowserEvent =
 
 export type ShellStateEvent =
   | { type: 'settingsChanged' }
-  | { type: 'keybindingsChanged'; snapshot: unknown }
+  | { type: 'keybindingsChanged'; snapshot: KeybindingFileSnapshot }
   | { type: 'starNagShow'; mode?: 'gh' | 'web'; surface?: 'card' | 'toast' }
   | { type: 'starNagHide' }
-  | { type: 'updaterStatus'; status: unknown }
-  | { type: 'updaterClearDismissal' }
-  | { type: 'webConnectStatus'; status: ShellWebConnectStatus }
+  | { type: 'updaterStatus'; status: UpdateStatus }
 
-export type ShellEvent = ShellBrowserEvent | ShellStateEvent | ShellUiEvent
+export type ShellEvent = ShellBrowserEvent | ShellStateEvent
 
 export type SequencedShellEvent = ShellEvent & { seq: number }
 
@@ -45,8 +43,6 @@ export type ShellSubscriptionEvent =
   | SequencedShellEvent
 
 export type ShellEventsSubscribeInput = { lastSeenSeq?: number }
-
-export type * from './ui-events.js'
 
 const SHELL_READ_ACCESS = {
   scope: 'host',

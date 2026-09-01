@@ -1,0 +1,47 @@
+{
+  "name": "@yiru/extension",
+  "version": "0.0.36",
+  "private": true,
+  "description": "Chrome extension host for Yiru workspaces",
+  "homepage": "https://github.com/xinyao27/yiru#readme",
+  "bugs": {
+    "url": "https://github.com/xinyao27/yiru/issues"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "xinyao",
+    "email": "hi@xinyao.me"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xinyao27/yiru.git",
+    "directory": "apps/extension"
+  },
+  "funding": "https://github.com/sponsors/xinyao27",
+  "type": "module",
+  "scripts": {
+    "build": "wxt build",
+    "check": "vp check --fix && vp run typecheck",
+    "dev": "wxt",
+    "fmt": "vp fmt .",
+    "lint": "vp lint . --fix",
+    "package:web-store": "vp run build && bun scripts/package-web-store.mjs",
+    "typecheck": "wxt prepare && tsc --noEmit"
+  },
+  "dependencies": {
+    "@yiru/client": "workspace:*",
+    "@yiru/runtime-protocol": "workspace:*",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "chrome-types": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-plus": "catalog:",
+    "wxt": "catalog:"
+  }
+}

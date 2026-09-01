@@ -1,22 +1,22 @@
+import type { RuntimeTerminalSummary } from '@yiru/runtime-protocol/workbench/runtime-types'
 import { callRuntimeOrpc } from '~renderer/runtime/orpc-client'
 import { toRuntimeWorktreeSelector } from '~renderer/runtime/worktree-selector'
-import { useAppStore } from '~renderer/store'
+import { useAppStore } from '~renderer/store/state'
 import type { AppState } from '~renderer/store/types'
-import type { RuntimeTerminalSummary } from '~shared/runtime-types'
 
 import {
   planAgentHibernationCandidates,
   type AgentHibernationCandidate,
   type AgentHibernationPlannerSnapshot
-} from '../components/settings/agent/hibernation-planner'
-import { getAgentHibernationOutputSignature } from '../components/terminal-pane/agent/hibernation-output-activity'
-import { mergePendingTerminalInputActivity } from '../components/terminal-pane/input-activity-coalescing'
+} from '../settings/agent/hibernation-planner'
 import {
   getForegroundTerminalTabIds,
   getForegroundTerminalTabLastSeenAtById
-} from '../lib/foreground-terminal-tabs'
-import { getAllDrivers } from '../lib/pane-manager/mobile-driver-state'
-import { getRuntimeEnvironmentIdForWorktree } from '../lib/worktree-runtime-owner'
+} from '../tab-bar/foreground-terminals'
+import { getAgentHibernationOutputSignature } from '../terminal-pane/agent/hibernation-output-activity'
+import { mergePendingTerminalInputActivity } from '../terminal-pane/input-activity-coalescing'
+import { getAllDrivers } from '../terminal-pane/pane-manager/mobile-driver-state'
+import { getRuntimeEnvironmentIdForWorktree } from '../worktree/runtime-owner'
 import {
   confirmAgentHibernationCandidates,
   type AgentHibernationConfirmationState

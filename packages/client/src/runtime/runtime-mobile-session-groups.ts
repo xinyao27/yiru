@@ -1,12 +1,12 @@
+import type { RuntimeMobileSessionTabGroup } from '@yiru/runtime-protocol/workbench/runtime-types'
+import type { Tab, TabGroup, TabGroupLayoutNode } from '@yiru/runtime-protocol/workbench/types'
 import type { AppState } from '~renderer/store/types'
-import type { RuntimeMobileSessionTabGroup } from '~shared/runtime-types'
-import type { Tab, TabGroup, TabGroupLayoutNode } from '~shared/types'
 
 import {
   getActiveTabNavOrder,
   getGroupVisibleTabOrder,
   type VisibleTabRef
-} from '../components/tab-bar/group-tab-order'
+} from '../tab-bar/group-tab-order'
 
 function isEditorSurfaceTab(tab: Pick<Tab, 'contentType'>): boolean {
   // Why: mobile file snapshots can faithfully mirror ordinary edit/diff files;
@@ -165,10 +165,73 @@ export function buildMobileSessionGroupProjection(
     })
   }
 
+  appendUngroupedBrowserTabs({
+    activeBrowserId: state.activeBrowserTabIdByWorktree[worktreeId] ?? null,
+    activeGroupId: state.activeGroupIdByWorktree[worktreeId] ?? null,
+    browserIds: ids.browserIds,
+    groups,
+    order,
+    tabGroups
+  })
   const validGroupIds = new Set(tabGroups.map((group) => group.id))
   return {
     order,
     tabGroups,
     tabGroupLayout: pruneTabGroupLayout(layoutByWorktree[worktreeId], validGroupIds)
+  }
+}
+
+function appendUngroupedBrowserTabs(input: {
+  activeBrowserId: string | null
+  activeGroupId: string | null
+  browserIds: readonly string[]
+  groups: readonly TabGroup[]
+  order: VisibleTabRef[]
+  tabGroups: RuntimeMobileSessionTabGroup[]
+}): void {
+  const emittedIds = new Set(
+    input.order.filter((item) => item.type === 'browser').map((item) => item.id)
+  )
+  const missingIds = input.browserIds.filter((browserId) => !emittedIds.has(browserId))
+  if (missingIds.length === 0) {
+    return
+  }
+  const sourceGroup =
+    input.groups.find((group) => group.id === input.activeGroupId) ?? input.groups[0]
+  if (!sourceGroup) {
+    for (const browserId of missingIds) {
+      input.order.push({ type: 'browser', id: browserId })
+    }
+    return
+  }
+  const groupIndex = input.tabGroups.findIndex((group) => group.id === sourceGroup.id)
+  const projectedGroup: RuntimeMobileSessionTabGroup =
+    groupIndex >= 0
+      ? input.tabGroups[groupIndex]!
+      : {
+          id: sourceGroup.id,
+          activeTabId: null,
+          tabOrder: [],
+          recentTabIds: []
+        }
+  const activeBrowserId = missingIds.includes(input.activeBrowserId ?? '')
+    ? input.activeBrowserId
+    : null
+  const nextGroup = {
+    ...projectedGroup,
+    activeTabId: activeBrowserId ?? projectedGroup.activeTabId,
+    tabOrder: [...projectedGroup.tabOrder, ...missingIds],
+    recentTabIds:
+      activeBrowserId && !projectedGroup.recentTabIds?.includes(activeBrowserId)
+        ? [...(projectedGroup.recentTabIds ?? []), activeBrowserId]
+        : projectedGroup.recentTabIds
+  }
+  if (groupIndex >= 0) {
+    input.tabGroups[groupIndex] = nextGroup
+  } else {
+    input.tabGroups.push(nextGroup)
+  }
+  for (const browserId of missingIds) {
+    input.order.push({ type: 'browser', id: browserId })
   }
 }

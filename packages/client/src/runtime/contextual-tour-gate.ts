@@ -1,4 +1,7 @@
-import type { ContextualTour, ContextualTourStep } from '~shared/contextual-tours'
+import type {
+  ContextualTour,
+  ContextualTourStep
+} from '@yiru/runtime-protocol/workbench/contextual-tours'
 
 export type ContextualTourTarget = {
   element: Element

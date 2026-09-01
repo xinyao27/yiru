@@ -8,7 +8,7 @@ import type {
   GitRebaseOntoCommitResult,
   GitResetToCommitResult,
   GitRevertResult
-} from '~shared/git/write-op-results'
+} from '@yiru/runtime-protocol/workbench/git/write-op-results'
 
 import { callRuntimeOrpc } from '../orpc-client'
 import { getRuntimeGitTarget, getRuntimeGitWorktree, type RuntimeGitContext } from './context'

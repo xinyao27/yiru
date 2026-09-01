@@ -52,9 +52,8 @@ hypotheses. Rules:
 
 - **One JSON object per line** (NDJSON), appended to a file under `.yiru/debug/` at the
   repository root — e.g. `.yiru/debug/stale-cache.ndjson` — creating the directory if needed.
-  `.yiru/` is Yiru-reserved workspace state: the app's worktree menu can view and clear these
-  logs, and the directory must never be committed. Build the path with the language's path-join
-  facility rather than string concatenation with a hardcoded separator.
+  `.yiru/` is Yiru-reserved workspace state and must never be committed. Build the path with the
+  language's path-join facility rather than string concatenation with a hardcoded separator.
 - **Tag every line** with a fixed marker so lines are greppable and removal is mechanical:
 
 ```json
@@ -74,7 +73,7 @@ hypotheses. Rules:
 
 - If you can reproduce it yourself, do it and capture the output.
 - Otherwise, tell the user exactly what to do ("click X, then Y, then send me the contents of
-  the log"), and wait for the artifacts. Don't proceed on imagination while waiting.
+  the log"), and wait for the artifacts. Continue only when the evidence is available.
 - For intermittent bugs, ask for the failing run *and* a passing run — the diff between the two
   traces is often the answer.
 
@@ -99,7 +98,7 @@ longer know which change explained the new trace.
   the previously-failing trace now shows correct behavior on the exact lines that confirmed the
   bug.
 - Then **remove every instrumentation line** (grep for the marker tag) and delete the session's
-  log files under `.yiru/debug/` (the user can also clear them from Yiru's worktree menu).
+  log files under `.yiru/debug/`.
   Committed code must contain zero debug logging from this session.
 - Report honestly: root cause, the evidence that proved it, the fix, and how verification was
   performed. If the fix is unverified (e.g. the user hasn't reproduced yet), say so plainly.

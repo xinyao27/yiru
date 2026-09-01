@@ -1,6 +1,25 @@
+export type TerminalMultiplexSnapshotReason =
+  | 'initial'
+  | 'manual'
+  | 'recovery'
+  | 'reveal'
+  | 'resume'
+  | 'pending-cap'
+  | 'normal-buffer-resize'
+
+const SNAPSHOT_REASON_BY_WIRE = [
+  'initial',
+  'manual',
+  'recovery',
+  'reveal',
+  'resume',
+  'pending-cap',
+  'normal-buffer-resize'
+] as const satisfies readonly TerminalMultiplexSnapshotReason[]
+
 export type TerminalMultiplexSnapshotStartRecord = {
   snapshotId: number
-  reason: 0 | 1 | 2 | 3 | 4 | 5 | 6
+  reason: TerminalMultiplexSnapshotReason
   source: 0 | 1
   activeBuffer: 0 | 1
   truncated: boolean
@@ -97,7 +116,7 @@ export function encodeTerminalMultiplexSnapshotStartRecord(
     (record.byteBudget ? wire.byteBudgetFlag : 0) |
     (record.coldRestore ? wire.coldRestoreFlag : 0)
   view.setUint32(wire.snapshotIdOffset, record.snapshotId, true)
-  view.setUint8(wire.reasonOffset, record.reason)
+  view.setUint8(wire.reasonOffset, encodeTerminalMultiplexSnapshotReason(record.reason))
   view.setUint8(wire.sourceOffset, record.source)
   view.setUint8(wire.activeBufferOffset, record.activeBuffer)
   view.setUint8(wire.flagsOffset, flags)
@@ -122,14 +141,16 @@ export function decodeTerminalMultiplexSnapshotStartRecord(
     return null
   }
   const view = payloadView(payload)
-  const reason = view.getUint8(wire.reasonOffset)
+  const reasonWire = view.getUint8(wire.reasonOffset)
+  const reason = SNAPSHOT_REASON_BY_WIRE[reasonWire]
   const source = view.getUint8(wire.sourceOffset)
   const activeBuffer = view.getUint8(wire.activeBufferOffset)
   const flags = view.getUint8(wire.flagsOffset)
   const coverageEndSeq = view.getBigUint64(wire.coverageEndSeqOffset, true)
   const pendingDeliveryStartSeq = view.getBigUint64(wire.pendingDeliveryStartSeqOffset, true)
   if (
-    reason > wire.reasonMax ||
+    reason === undefined ||
+    reasonWire > wire.reasonMax ||
     source > wire.sourceMax ||
     activeBuffer > wire.activeBufferMax ||
     (flags & ~wire.flagsMask) !== 0 ||
@@ -145,7 +166,7 @@ export function decodeTerminalMultiplexSnapshotStartRecord(
   }
   return {
     snapshotId: view.getUint32(wire.snapshotIdOffset, true),
-    reason: reason as TerminalMultiplexSnapshotStartRecord['reason'],
+    reason,
     source: source as TerminalMultiplexSnapshotStartRecord['source'],
     activeBuffer: activeBuffer as TerminalMultiplexSnapshotStartRecord['activeBuffer'],
     truncated: (flags & wire.truncatedFlag) !== 0,
@@ -164,6 +185,12 @@ export function decodeTerminalMultiplexSnapshotStartRecord(
       view.getUint32(wire.sectionBytesOffset + wire.sectionStrideBytes * 4, true)
     ]
   }
+}
+
+export function encodeTerminalMultiplexSnapshotReason(
+  reason: TerminalMultiplexSnapshotReason
+): number {
+  return SNAPSHOT_REASON_BY_WIRE.indexOf(reason)
 }
 
 export function encodeTerminalMultiplexSnapshotChunkRecord(

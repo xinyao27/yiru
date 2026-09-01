@@ -4,7 +4,7 @@ import type {
   RuntimeEmulatorVideoStreamEvent,
   RuntimeEmulatorVideoStreamInput
 } from '@yiru/runtime-protocol/contract'
-import { useAppStore } from '~renderer/store'
+import { useAppStore } from '~renderer/store/state'
 
 import { createRuntimeOrpcClient } from './orpc-client'
 import { getActiveRuntimeTarget } from './rpc-client'

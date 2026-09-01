@@ -17,7 +17,7 @@ const shellEventFanOut = createRuntimeStreamFanOut<void, ShellSubscriptionEvent>
   open: (_client, signal) =>
     callShellOrpc((client) => client.shell.events.subscribe, { lastSeenSeq }, { signal }),
   // Why: menu and window intent delivery must recover without a reconnect
-  // stampede when Electron resumes or a renderer transport briefly drops.
+  // stampede when the browser resumes or its transport briefly drops.
   retryDelayMs: (attempt) => {
     const exponentialMs = Math.min(30_000, 500 * 2 ** Math.min(attempt - 1, 6))
     return exponentialMs + Math.floor(Math.random() * Math.min(1_000, exponentialMs / 4))
@@ -32,9 +32,11 @@ const shellEventFanOut = createRuntimeStreamFanOut<void, ShellSubscriptionEvent>
 
 function observeShellSubscriptionEvent(event: ShellSubscriptionEvent): void {
   if (event.type === 'ready') {
+    lastSeenSeq = event.seq
     return
   }
   if (event.type === 'resync') {
+    lastSeenSeq = event.seq
     for (const listener of Array.from(resyncListeners)) {
       listener()
     }

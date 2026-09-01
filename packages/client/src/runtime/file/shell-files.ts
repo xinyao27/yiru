@@ -2,7 +2,7 @@ import { callShellOrpc } from '../orpc-client'
 
 // Why: this facade keeps absolute, renderer-authorized path operations visibly
 // separate from target-aware `files.*`. Every method fixes its destination to
-// the Electron host that renders the current window.
+// the daemon host serving the current Chrome client.
 export const shellFilesClient = {
   readFile: (args: {
     filePath: string

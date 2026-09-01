@@ -1,4 +1,4 @@
-import { basename, joinPath, normalizeRelativePath } from '~renderer/lib/path'
+import { basename, joinPath, normalizeRelativePath } from '~renderer/path'
 
 import { callRuntimeOrpc, type RuntimeClientTarget } from '../orpc-client'
 import { getActiveRuntimeTarget } from '../rpc-client'

@@ -47,13 +47,17 @@ export type RuntimeProjectGroupImportResult = {
   importedCount: number
   alreadyKnownCount: number
   failedCount: number
+  revision?: number
 }
 
-export type RuntimeProjectGroupListResult = { groups: RuntimeProjectGroup[] }
-export type RuntimeProjectGroupResult = { group: RuntimeProjectGroup }
-export type RuntimeNullableProjectGroupResult = { group: RuntimeProjectGroup | null }
-export type RuntimeProjectGroupDeleteResult = { deleted: boolean }
-export type RuntimeProjectGroupMoveProjectResult = { repo: RuntimeRepo }
+export type RuntimeProjectGroupListResult = { groups: RuntimeProjectGroup[]; revision?: number }
+export type RuntimeProjectGroupResult = { group: RuntimeProjectGroup; revision?: number }
+export type RuntimeNullableProjectGroupResult = {
+  group: RuntimeProjectGroup | null
+  revision?: number
+}
+export type RuntimeProjectGroupDeleteResult = { deleted: boolean; revision?: number }
+export type RuntimeProjectGroupMoveProjectResult = { repo: RuntimeRepo; revision?: number }
 export type RuntimeProjectGroupCancelNestedScanResult = { cancelled: boolean }
 
 // Why: nested-repo scanning is long-running and per-request (scoped to a

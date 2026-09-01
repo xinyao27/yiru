@@ -1,11 +1,8 @@
-import { isDecorativeAgentTitleFrameChange } from '~shared/agent/decorative-title-signature'
-import type { WorkspaceSessionPatch } from '~shared/types'
+import type { WorkspaceSessionPatch } from '@yiru/runtime-protocol/workbench/types'
+import { isDecorativeAgentTitleFrameChange } from '~renderer/agent/decorative-title-signature'
 
-import {
-  SESSION_RELEVANT_FIELDS,
-  shouldPersistWorkspaceSession
-} from '../components/editor/workspace-session'
-import type { AppState } from '../store'
+import { SESSION_RELEVANT_FIELDS, shouldPersistWorkspaceSession } from '../editor/workspace-session'
+import type { AppState } from '../store/state'
 import { buildWorkspaceSessionPatch } from './workspace-session-patch'
 
 type SessionRelevantField = (typeof SESSION_RELEVANT_FIELDS)[number]

@@ -1,25 +1,13 @@
-// Why: this codec is shared with the desktop main runtime (shell reveal/mount
-// RPCs must mint the same `runtime:`-prefixed shape this module parses) — see
-// ~shared/runtime-terminal-pty-id.ts's file-level Why comment.
 import {
-  getRuntimeTerminalEnvironmentId,
-  getRuntimeTerminalHandle
-} from '~shared/runtime-terminal-pty-id'
-import type { GlobalSettings } from '~shared/types'
+  runtimePtyEnvironmentId,
+  runtimePtyHandle
+} from '@yiru/runtime-protocol/terminal-identity/id'
+import type { GlobalSettings } from '@yiru/runtime-protocol/workbench/types'
 
 import { callRuntimeOrpc } from './orpc-client'
 import { RuntimeRpcCallError, getActiveRuntimeTarget } from './rpc-client'
 import { getRuntimeTerminalMultiplexer } from './terminal-multiplex/registry'
 import { publishRendererTerminalSideEffects } from './terminal-side-effect-client'
-
-export type { RuntimeTerminalPtyIdParts } from '~shared/runtime-terminal-pty-id'
-export {
-  getRuntimeTerminalEnvironmentId,
-  getRuntimeTerminalHandle,
-  isRuntimeTerminalPtyId,
-  parseRuntimeTerminalPtyId,
-  toRuntimeTerminalPtyId
-} from '~shared/runtime-terminal-pty-id'
 
 const LIVE_TAIL_SUBSCRIPTION_TIMEOUT_MS = 10_000
 
@@ -44,8 +32,8 @@ export async function subscribeToRuntimeTerminalData(
     }
   }
 ): Promise<() => void> {
-  const terminal = getRuntimeTerminalHandle(ptyId)
-  const ownerEnvironmentId = getRuntimeTerminalEnvironmentId(ptyId)
+  const terminal = runtimePtyHandle(ptyId)
+  const ownerEnvironmentId = runtimePtyEnvironmentId(ptyId)
   const target = ownerEnvironmentId
     ? ({ kind: 'environment', environmentId: ownerEnvironmentId } as const)
     : getActiveRuntimeTarget(settings)
@@ -134,11 +122,11 @@ export function subscribeToRuntimeTerminalExit(
   ptyId: string,
   onExit: (code: number) => void
 ): () => void {
-  const terminal = getRuntimeTerminalHandle(ptyId)
+  const terminal = runtimePtyHandle(ptyId)
   if (!terminal) {
     return () => {}
   }
-  const environmentId = getRuntimeTerminalEnvironmentId(ptyId)
+  const environmentId = runtimePtyEnvironmentId(ptyId)
   const target = environmentId
     ? ({ kind: 'environment', environmentId } as const)
     : getActiveRuntimeTarget(settings)

@@ -1,6 +1,9 @@
-import { YIRU_GITHUB_STARGAZERS_URL } from '@yiru/workbench-model/product'
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { openHttpLink } from '~renderer/components/editor/http-link-routing'
+import { YIRU_GITHUB_STARGAZERS_URL } from '@yiru/runtime-protocol/model/product'
+import { isGitRepoKind } from '@yiru/runtime-protocol/workbench/repo-kind'
+import type { Repo } from '@yiru/runtime-protocol/workbench/types'
+import { useEffect, useRef, useState } from 'react'
+import { openHttpLink } from '~renderer/editor/http-link-routing'
+import { translate } from '~renderer/i18n/i18n'
 import {
   Warning as AlertTriangle,
   Star,
@@ -8,22 +11,20 @@ import {
   FolderPlus,
   GitMerge,
   X
-} from '~renderer/components/icons/hugeicons'
-import { Button } from '~renderer/components/ui/button'
-import { useMountedRef } from '~renderer/hooks/use-mounted-ref'
-import { translate } from '~renderer/i18n/i18n'
+} from '~renderer/icons/hugeicons'
+import { useProjectCatalog } from '~renderer/project-catalog/provider'
+import { useMountedRef } from '~renderer/react/use-mounted-ref'
 import {
   checkShellYiruStarred,
   completeShellStarNag,
   starYiruFromShell
 } from '~renderer/runtime/github-shell-client'
-import { isGitRepoKind } from '~shared/repo-kind'
-import type { Repo } from '~shared/types'
+import { Button } from '~renderer/ui/button'
 
-import { cn } from '../lib/class-names'
 import { callRuntimeOrpc } from '../runtime/orpc-client'
 import { getActiveRuntimeTarget } from '../runtime/rpc-client'
-import { useAppStore } from '../store'
+import { useAppStore } from '../store/state'
+import { cn } from '../ui/class-names'
 import {
   dismissPreflightIssue,
   githubProjectKeys,
@@ -170,27 +171,17 @@ function PreflightBanner({
   // GitHub project (which changes the key) re-evaluates dismissals, so a lapsed
   // dismissal re-surfaces the nudge without a manual reset.
   const githubKey = githubProjectKeys(repos).join('|')
-  const [dismissed, setDismissed] = useState<Set<string>>(
-    () =>
-      new Set(
-        issues
-          .filter((issue) => issue.dismissible && isPreflightIssueDismissed(issue.id, repos))
-          .map((issue) => issue.id)
-      )
+  const persistedDismissed = new Set(
+    issues
+      .filter((issue) => issue.dismissible && isPreflightIssueDismissed(issue.id, repos))
+      .map((issue) => issue.id)
   )
-
-  useEffect(() => {
-    setDismissed(
-      new Set(
-        issues
-          .filter((issue) => issue.dismissible && isPreflightIssueDismissed(issue.id, repos))
-          .map((issue) => issue.id)
-      )
-    )
-    // Why: re-seed only when the GitHub project set changes; issues identity is
-    // stable per render and would otherwise reset transient dismiss state.
-    // oxlint-disable-next-line react-hooks/exhaustive-deps
-  }, [githubKey])
+  const [dismissedState, setDismissedState] = useState<{
+    githubKey: string
+    issueIds: Set<string>
+  }>({ githubKey, issueIds: persistedDismissed })
+  const dismissed =
+    dismissedState.githubKey === githubKey ? dismissedState.issueIds : persistedDismissed
 
   const visibleIssues = issues.filter((issue) => !dismissed.has(issue.id))
   if (visibleIssues.length === 0) {
@@ -199,7 +190,7 @@ function PreflightBanner({
 
   const dismiss = (issue: PreflightIssue): void => {
     dismissPreflightIssue(issue.id, repos)
-    setDismissed((prev) => new Set(prev).add(issue.id))
+    setDismissedState({ githubKey, issueIds: new Set(dismissed).add(issue.id) })
   }
 
   return (
@@ -242,13 +233,13 @@ function PreflightBanner({
 }
 
 export default function Landing(): React.JSX.Element {
-  const repos = useAppStore((s) => s.repos)
+  const { repos } = useProjectCatalog()
   const openModal = useAppStore((s) => s.openModal)
 
   const createTargetLabel =
     repos.length > 0 && repos.every((repo) => isGitRepoKind(repo)) ? 'Worktree' : 'Workspace'
   const canCreateWorktree = repos.length > 0
-  const hasGitHubProject = useMemo(() => hasGitHubBackedProject(repos), [repos])
+  const hasGitHubProject = (() => hasGitHubBackedProject(repos))()
   const showGitHubSupportFooter = repos.length === 0 || hasGitHubProject
 
   const [preflightIssues, setPreflightIssues] = useState<PreflightIssue[]>([])
@@ -270,7 +261,6 @@ export default function Landing(): React.JSX.Element {
       })
     }
 
-    // oxlint-disable-next-line react-doctor/no-initialize-state -- Why: preflight status is read from an external IPC probe on mount and focus.
     refreshPreflight()
 
     // Why: users often install/authenticate gh outside Yiru. Re-check when the

@@ -53,7 +53,7 @@ export type RuntimeWorkspacePortScanResult = {
 export type RuntimeWorkspacePortKillResult = { ok: true } | { ok: false; reason: string }
 
 // Why: the desktop renderer's own listener only wires up for `kind === 'local'`
-// today (Electron IPC push, always same-machine) — remote environments fall
+// today (local runtime event push, always same-machine) — remote environments fall
 // back to the 30s poll in `workspace-port-scanner.tsx`. This stream lets
 // paired clients get the same push the local shell already has instead of
 // waiting out the poll interval.

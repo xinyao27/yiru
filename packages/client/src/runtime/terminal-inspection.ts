@@ -1,11 +1,14 @@
-import { makePaneKey } from '~shared/stable-pane-id'
-import { isTerminalInputTooLargeWithDeferredMeasurement } from '~shared/terminal/input'
-import type { GlobalSettings } from '~shared/types'
+import {
+  runtimePtyEnvironmentId,
+  runtimePtyHandle
+} from '@yiru/runtime-protocol/terminal-identity/id'
+import { makePaneKey } from '@yiru/runtime-protocol/workbench/stable-pane-id'
+import { isTerminalInputTooLargeWithDeferredMeasurement } from '@yiru/runtime-protocol/workbench/terminal/input'
+import type { GlobalSettings } from '@yiru/runtime-protocol/workbench/types'
 
-import { useAppStore } from '../store'
+import { useAppStore } from '../store/state'
 import { callRuntimeOrpc, isRuntimeOrpcErrorCode } from './orpc-client'
 import { getActiveRuntimeTarget } from './rpc-client'
-import { getRuntimeTerminalEnvironmentId, getRuntimeTerminalHandle } from './terminal-stream'
 
 export type RuntimeTerminalProcessInspection = {
   foregroundProcess: string | null
@@ -18,10 +21,6 @@ const DESKTOP_RUNTIME_CLIENT = { id: 'yiru-desktop', type: 'desktop' } as const
 
 function isRuntimePtyInputTooLarge(data: string): boolean | Promise<boolean> {
   return isTerminalInputTooLargeWithDeferredMeasurement(data)
-}
-
-export function isRuntimeTerminalPtyId(ptyId: string): boolean {
-  return getRuntimeTerminalHandle(ptyId) !== null
 }
 
 function isTerminalGoneError(error: unknown): boolean {
@@ -44,12 +43,12 @@ function targetForRuntimePty(
     | null
     | undefined = useAppStore.getState().settings
 ): TerminalTarget {
-  const environmentId = getRuntimeTerminalEnvironmentId(ptyId)
+  const environmentId = runtimePtyEnvironmentId(ptyId)
   return environmentId ? { kind: 'environment', environmentId } : getActiveRuntimeTarget(settings)
 }
 
 export async function hasRuntimeTerminal(ptyId: string): Promise<boolean> {
-  const terminal = getRuntimeTerminalHandle(ptyId)
+  const terminal = runtimePtyHandle(ptyId)
   if (!terminal) {
     return false
   }
@@ -67,7 +66,7 @@ export async function hasRuntimeTerminal(ptyId: string): Promise<boolean> {
 }
 
 export async function closeRuntimeTerminal(ptyId: string): Promise<void> {
-  const terminal = getRuntimeTerminalHandle(ptyId)
+  const terminal = runtimePtyHandle(ptyId)
   if (!terminal) {
     return
   }
@@ -75,7 +74,7 @@ export async function closeRuntimeTerminal(ptyId: string): Promise<void> {
 }
 
 export async function clearRuntimeTerminalBuffer(ptyId: string): Promise<void> {
-  const terminal = getRuntimeTerminalHandle(ptyId)
+  const terminal = runtimePtyHandle(ptyId)
   if (!terminal) {
     return
   }
@@ -88,7 +87,7 @@ export async function readRuntimeTerminalBuffer(
   ptyId: string,
   limit = 10_000
 ): Promise<string | null> {
-  const terminal = getRuntimeTerminalHandle(ptyId)
+  const terminal = runtimePtyHandle(ptyId)
   if (!terminal) {
     return null
   }
@@ -138,7 +137,7 @@ export async function inspectRuntimeTerminalProcess(
   ptyId: string
 ): Promise<RuntimeTerminalProcessInspection> {
   const target = targetForRuntimePty(ptyId, settings)
-  const terminal = getRuntimeTerminalHandle(ptyId)
+  const terminal = runtimePtyHandle(ptyId)
   if (!terminal) {
     return { foregroundProcess: null, hasChildProcesses: false }
   }
@@ -189,7 +188,7 @@ function sendRuntimePtyInputWithinLimit(
   data: string
 ): boolean {
   const target = targetForRuntimePty(ptyId, settings)
-  const terminal = getRuntimeTerminalHandle(ptyId)
+  const terminal = runtimePtyHandle(ptyId)
   if (!terminal) {
     return false
   }
@@ -222,7 +221,7 @@ export async function sendRuntimePtyInputVerified(
     return false
   }
   const target = targetForRuntimePty(ptyId, settings)
-  const terminal = getRuntimeTerminalHandle(ptyId)
+  const terminal = runtimePtyHandle(ptyId)
   if (!terminal) {
     return false
   }

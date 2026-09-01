@@ -1,5 +1,17 @@
 import { type, type ContractRouter } from '@orpc/contract'
 
+import type { KeybindingActionId, KeybindingFileSnapshot } from '../../workbench/keybindings.js'
+import type {
+  CreateLocalYiruProfileArgs,
+  CreateLocalYiruProfileResult,
+  FindYiruProfileProjectsByPathArgs,
+  FindYiruProfileProjectsByPathResult,
+  SwitchYiruProfileArgs,
+  SwitchYiruProfileResult,
+  TransferYiruProfileProjectArgs,
+  TransferYiruProfileProjectResult,
+  YiruProfileListResult
+} from '../../workbench/yiru-profiles.js'
 import { withAccess, type RuntimeProcedureMeta } from '../access-meta.js'
 
 const SHELL_CONFIGURATION_READ_ACCESS = {
@@ -14,30 +26,30 @@ const SHELL_CONFIGURATION_WRITE_ACCESS = {
 } as const
 
 export const shellKeybindingsContract = {
-  get: withAccess(SHELL_CONFIGURATION_READ_ACCESS).output(type<unknown>()),
-  ensureFile: withAccess(SHELL_CONFIGURATION_WRITE_ACCESS).output(type<unknown>()),
+  get: withAccess(SHELL_CONFIGURATION_READ_ACCESS).output(type<KeybindingFileSnapshot>()),
+  ensureFile: withAccess(SHELL_CONFIGURATION_WRITE_ACCESS).output(type<KeybindingFileSnapshot>()),
   setAction: withAccess(SHELL_CONFIGURATION_WRITE_ACCESS)
-    .input(type<{ actionId: string; bindings: string[] | null }>())
-    .output(type<unknown>()),
-  reload: withAccess(SHELL_CONFIGURATION_WRITE_ACCESS).output(type<unknown>()),
-  openFile: withAccess(SHELL_CONFIGURATION_WRITE_ACCESS).output(type<unknown>()),
-  revealFile: withAccess(SHELL_CONFIGURATION_WRITE_ACCESS).output(type<unknown>())
+    .input(type<{ actionId: KeybindingActionId; bindings: string[] | null }>())
+    .output(type<KeybindingFileSnapshot>()),
+  reload: withAccess(SHELL_CONFIGURATION_WRITE_ACCESS).output(type<KeybindingFileSnapshot>()),
+  openFile: withAccess(SHELL_CONFIGURATION_WRITE_ACCESS).output(type<KeybindingFileSnapshot>()),
+  revealFile: withAccess(SHELL_CONFIGURATION_WRITE_ACCESS).output(type<KeybindingFileSnapshot>())
 } satisfies ContractRouter<RuntimeProcedureMeta>
 
-// Why: profiles select this Electron installation's userData directory and
+// Why: profiles select this installation's userData directory and
 // relaunch this binary; they never follow a selected runtime environment.
 export const shellYiruProfilesContract = {
-  list: withAccess(SHELL_CONFIGURATION_READ_ACCESS).output(type<unknown>()),
+  list: withAccess(SHELL_CONFIGURATION_READ_ACCESS).output(type<YiruProfileListResult>()),
   createLocal: withAccess(SHELL_CONFIGURATION_WRITE_ACCESS)
-    .input(type<unknown>())
-    .output(type<unknown>()),
+    .input(type<CreateLocalYiruProfileArgs | undefined>())
+    .output(type<CreateLocalYiruProfileResult>()),
   switchProfile: withAccess(SHELL_CONFIGURATION_WRITE_ACCESS)
-    .input(type<unknown>())
-    .output(type<unknown>()),
+    .input(type<SwitchYiruProfileArgs>())
+    .output(type<SwitchYiruProfileResult>()),
   transferProject: withAccess(SHELL_CONFIGURATION_WRITE_ACCESS)
-    .input(type<unknown>())
-    .output(type<unknown>()),
+    .input(type<TransferYiruProfileProjectArgs>())
+    .output(type<TransferYiruProfileProjectResult>()),
   findProjectProfiles: withAccess(SHELL_CONFIGURATION_READ_ACCESS)
-    .input(type<unknown>())
-    .output(type<unknown>())
+    .input(type<FindYiruProfileProjectsByPathArgs>())
+    .output(type<FindYiruProfileProjectsByPathResult>())
 } satisfies ContractRouter<RuntimeProcedureMeta>

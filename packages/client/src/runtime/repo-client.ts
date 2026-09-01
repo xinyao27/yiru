@@ -1,6 +1,6 @@
-import { legacyBaseRefSearchResult } from '@yiru/workbench-model/review'
-import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
-import type { BaseRefSearchResult, GlobalSettings } from '~shared/types'
+import { legacyBaseRefSearchResult } from '@yiru/runtime-protocol/model/review'
+import type { ExecutionHostId } from '@yiru/runtime-protocol/model/workspace'
+import type { BaseRefSearchResult, GlobalSettings } from '@yiru/runtime-protocol/workbench/types'
 
 import { callRuntimeOrpc } from './orpc-client'
 import { isRuntimeRepoRefSearchQueryWithinLimit } from './repo-search-bounds'

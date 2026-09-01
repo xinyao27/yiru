@@ -1,43 +1,9 @@
-import type { TuiAgent } from '@yiru/workbench-model/agent'
 import { z } from 'zod'
 
-const TUI_AGENT_IDS = [
-  'claude',
-  'claude-agent-teams',
-  'openclaude',
-  'codex',
-  'autohand',
-  'opencode',
-  'mimo-code',
-  'pi',
-  'omp',
-  'gemini',
-  'antigravity',
-  'aider',
-  'goose',
-  'amp',
-  'kilo',
-  'kiro',
-  'crush',
-  'aug',
-  'cline',
-  'codebuff',
-  'command-code',
-  'continue',
-  'cursor',
-  'droid',
-  'kimi',
-  'mistral-vibe',
-  'qwen-code',
-  'rovo',
-  'hermes',
-  'openclaw',
-  'copilot',
-  'grok',
-  'devin',
-  'ante',
-  'trae'
-] as const satisfies readonly TuiAgent[]
+import type { TuiAgent } from '../model/agent.js'
+import { TUI_AGENT_IDS } from './terminal-agent-ids.js'
+
+export { TUI_AGENT_IDS } from './terminal-agent-ids.js'
 const TUI_AGENT_ID_SET: ReadonlySet<string> = new Set(TUI_AGENT_IDS)
 
 const TERMINAL_PANE_SPLIT_SOURCES = [
@@ -155,7 +121,10 @@ export const TerminalSendInputSchema = TerminalHandleInputSchema.extend({
   client: z
     .object({
       id: requiredString('Missing client ID'),
-      type: z.enum(['mobile', 'desktop']).default('desktop').optional()
+      type: z
+        .enum(['mobile', 'desktop', 'extension', 'daemon', 'cli'])
+        .default('desktop')
+        .optional()
     })
     .optional(),
   viewport: z
@@ -204,7 +173,7 @@ export const TerminalCreateInputSchema = z.object({
   focus: z.unknown().optional(),
   rendererBacked: z.unknown().optional(),
   activate: z.unknown().optional(),
-  presentation: z.enum(['background', 'focused']).optional(),
+  presentation: z.enum(['background', 'visible', 'focused']).optional(),
   tabId: OptionalString,
   leafId: OptionalString
 })

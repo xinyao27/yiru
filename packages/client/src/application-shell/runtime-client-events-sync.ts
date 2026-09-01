@@ -1,4 +1,4 @@
-import type { RuntimeClientEvent } from '~shared/runtime-client-events'
+import type { RuntimeClientEvent } from '@yiru/runtime-protocol/workbench/runtime-client-events'
 
 export type RuntimeClientEventSubscriptionHandle = {
   unsubscribe: () => void

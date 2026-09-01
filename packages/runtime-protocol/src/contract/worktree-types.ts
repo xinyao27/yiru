@@ -1,4 +1,5 @@
-import type { TuiAgent } from '@yiru/workbench-model/agent'
+import type { RuntimeWorktreeAgentRow } from '../mobile-runtime-types.js'
+import type { TuiAgent } from '../model/agent.js'
 import type {
   DiffComment,
   ExecutionHostId,
@@ -6,9 +7,7 @@ import type {
   GitPushTarget,
   MobileDiffReviewState,
   WorkspaceStatus
-} from '@yiru/workbench-model/workspace'
-
-import type { RuntimeWorktreeAgentRow } from '../mobile-runtime-types.js'
+} from '../model/workspace.js'
 
 export type RuntimeGitWorktreeInfo = {
   path: string
@@ -115,6 +114,7 @@ export type RuntimeDetectedWorktree = RuntimeWorktree & {
 }
 
 export type RuntimeDetectedWorktreeListResult = {
+  revision?: number
   repoId: string
   authoritative: boolean
   source: 'git' | 'metadata-fallback' | 'session-fallback'
@@ -173,6 +173,7 @@ export type RuntimeWorktreePsResult = {
 }
 
 export type RuntimeWorktreeCreateResult = {
+  revision?: number
   worktree: RuntimeWorktree & {
     parentWorktreeId?: string | null
     childWorktreeIds?: string[]
@@ -239,7 +240,7 @@ export type RuntimeWorktreeCreateResult = {
   agentTerminalHandle?: string
 }
 
-export type RuntimeWorktreeShowResult = { worktree: RuntimeWorktreeRecord }
+export type RuntimeWorktreeShowResult = { revision?: number; worktree: RuntimeWorktreeRecord }
 export type RuntimeWorktreeLineageListResult = {
   lineage: Record<string, RuntimeWorktreeLineage>
   workspaceLineage: Record<RuntimeWorkspaceKey, RuntimeWorkspaceLineage>
@@ -252,6 +253,7 @@ export type RuntimeWorktreeActivateResult = {
   sleepingAgentWake: 'requested' | 'unsupported-headless' | 'not-applicable'
 }
 export type RuntimeWorktreeRemoveResult = {
+  revision?: number
   removed: boolean
   preservedBranch?: { branchName: string; head?: string }
   warning?: string

@@ -1,4 +1,4 @@
-import type { RuntimeTerminalPresentation } from '~shared/runtime-types'
+import type { RuntimeTerminalPresentation } from '@yiru/runtime-protocol/workbench/runtime-types'
 
 // Why: shared by terminal-create-shell-request.ts's `create` and
 // terminal-reveal-shell-request.ts's `reveal` — both derive the same

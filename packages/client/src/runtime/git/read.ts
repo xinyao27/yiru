@@ -1,4 +1,7 @@
-import type { GitHistoryOptions, GitHistoryResult } from '~shared/git/history'
+import type {
+  GitHistoryOptions,
+  GitHistoryResult
+} from '@yiru/runtime-protocol/workbench/git/history'
 import type {
   GitBranchCompareResult,
   GitCommitCompareResult,
@@ -6,7 +9,7 @@ import type {
   GitDiffResult,
   GitStagingArea,
   GitStatusResult
-} from '~shared/types'
+} from '@yiru/runtime-protocol/workbench/types'
 
 import { callRuntimeOrpc } from '../orpc-client'
 import { getRuntimeGitTarget, getRuntimeGitWorktree, type RuntimeGitContext } from './context'

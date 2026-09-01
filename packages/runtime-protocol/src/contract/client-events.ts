@@ -1,7 +1,7 @@
 import { eventIterator, type, type ContractRouter } from '@orpc/contract'
-import type { SleepingAgentLaunchConfig, TuiAgent } from '@yiru/workbench-model/agent'
 import { z } from 'zod'
 
+import type { SleepingAgentLaunchConfig, TuiAgent } from '../model/agent.js'
 import { withAccess, type RuntimeProcedureMeta } from './access-meta.js'
 import type { TerminalDriverState } from './terminal-results.js'
 
@@ -57,8 +57,8 @@ export type RuntimeClientWorktreeDefaultTabsLaunch = {
 }
 
 // Head/branch snapshot read from Git metadata files without spawning Git.
-// Mirrors `WorktreeHeadIdentity` (packages/shared/src/types.ts); kept as an
-// independent literal here so this lower-level protocol never depends on @yiru/shared.
+// Mirrors the workbench `WorktreeHeadIdentity`; kept as an independent literal here so this
+// lower-level event contract never depends on the complete workbench model.
 export type RuntimeClientWorktreeHeadIdentity = {
   worktreePath: string
   head: string
@@ -131,9 +131,28 @@ export const driverEventsContract = {
 
 // Long-running host work whose progress the shell renders as a spinner. Paired
 // clients drive the same UI and need the same ticks.
+export type WorktreeCreateProgressPhase =
+  | 'preparing'
+  | 'fetching'
+  | 'creating'
+  | 'copying-files'
+  | 'checking-setup'
+  | 'running-setup'
+  | 'starting-workspace'
+
+export type RuntimeWorktreeCreateProgressEvent = {
+  type: 'worktreeCreateProgress'
+  operationId?: string
+  repoId: string
+  phase: WorktreeCreateProgressPhase
+  copiedFileCount?: number
+  setupCommand?: string
+  setupConfigured?: boolean
+}
+
 export type RuntimeHostProgressEvent =
   | { type: 'repoCloneProgress'; phase: string; percent: number }
-  | { type: 'worktreeCreateProgress'; creationId?: string; phase: 'fetching' | 'creating' }
+  | RuntimeWorktreeCreateProgressEvent
 
 export type RuntimeHostProgressSubscriptionEvent =
   | { type: 'ready'; subscriptionId: string }

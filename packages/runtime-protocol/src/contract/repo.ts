@@ -1,7 +1,7 @@
 import { type, type ContractRouter } from '@orpc/contract'
-import { normalizeExecutionHostId, type ExecutionHostId } from '@yiru/workbench-model/workspace'
 import { z } from 'zod'
 
+import { normalizeExecutionHostId, type ExecutionHostId } from '../model/workspace.js'
 import { withAccess, type RuntimeProcedureMeta } from './access-meta.js'
 import { OptionalFiniteNumber, OptionalString, requiredString } from './input-schema.js'
 import {
@@ -52,26 +52,54 @@ export type RepoHooksCheckInput = z.output<typeof RepoHooksCheckInputSchema>
 
 export const RepoPathInputSchema = z.object({
   path: requiredString('Missing repo path'),
-  kind: z.enum(['git', 'folder']).optional()
+  kind: z.enum(['git', 'folder']).optional(),
+  expectedRevision: z.number().int().nonnegative().default(0),
+  hostId: ExecutionHostIdSchema.optional()
 })
 
+const RepoDiscoverInputSchema = z.object({
+  hostId: ExecutionHostIdSchema.optional(),
+  query: z.string().max(1_024).optional()
+})
+
+const RepoBrowseInputSchema = z.object({
+  hostId: ExecutionHostIdSchema.optional(),
+  path: z.string().trim().min(1).max(8_192).optional()
+})
+
+export type RuntimeProjectDirectoryEntry = {
+  isGitProject: boolean
+  name: string
+  path: string
+}
+
 export const RepoCreateInputSchema = z.object({
+  expectedRevision: z.number().int().nonnegative(),
   parentPath: requiredString('Missing parent path'),
   name: requiredString('Missing repo name'),
   kind: z.enum(['git', 'folder']).optional()
 })
 
 export const RepoCloneInputSchema = z.object({
+  expectedRevision: z.number().int().nonnegative(),
   url: requiredString('Missing clone URL'),
   destination: requiredString('Missing clone destination')
 })
 
 export const RepoSetBaseRefInputSchema = z.object({
+  expectedRevision: z.number().int().nonnegative(),
   repo: requiredString('Missing repo selector'),
   ref: requiredString('Missing base ref')
 })
 
-export const RepoReorderInputSchema = z.object({ orderedIds: z.array(z.string()) })
+export const RepoRemoveInputSchema = RepoSelectorInputSchema.extend({
+  expectedRevision: z.number().int().nonnegative()
+})
+
+export const RepoReorderInputSchema = z.object({
+  expectedRevision: z.number().int().nonnegative(),
+  orderedIds: z.array(z.string())
+})
 
 // Why: a repoId can collide across execution hosts within the same store;
 // hostId disambiguates which host's repo record to resolve the default base
@@ -117,6 +145,7 @@ const RepoBadgeColorSchema = z
   )
 
 export const RepoUpdateInputSchema = RepoSelectorInputSchema.extend({
+  expectedRevision: z.number().int().nonnegative(),
   updates: z.object({
     displayName: OptionalString,
     badgeColor: RepoBadgeColorSchema,
@@ -147,6 +176,7 @@ export type RepoSelectorInput = z.infer<typeof RepoSelectorInputSchema>
 export type RepoPathInput = z.infer<typeof RepoPathInputSchema>
 export type RepoCreateInput = z.infer<typeof RepoCreateInputSchema>
 export type RepoCloneInput = z.infer<typeof RepoCloneInputSchema>
+export type RepoRemoveInput = z.infer<typeof RepoRemoveInputSchema>
 export type RepoSetBaseRefInput = z.infer<typeof RepoSetBaseRefInputSchema>
 export type RepoReorderInput = z.infer<typeof RepoReorderInputSchema>
 export type RepoBaseRefDefaultInput = z.output<typeof RepoBaseRefDefaultInputSchema>
@@ -173,6 +203,16 @@ export const repoContract = {
     .input(RepoSparsePresetRemoveInputSchema)
     .output(type<RuntimeRepoSparsePresetRemoveResult>()),
   add: withAccess(HOST_ACCESS).input(RepoPathInputSchema).output(type<RuntimeRepoResult>()),
+  browse: withAccess(HOST_READ_ACCESS).input(RepoBrowseInputSchema).output(
+    type<{
+      directory: string
+      entries: RuntimeProjectDirectoryEntry[]
+      parent: string | null
+    }>()
+  ),
+  discover: withAccess(HOST_READ_ACCESS)
+    .input(RepoDiscoverInputSchema)
+    .output(type<{ paths: string[] }>()),
   create: withAccess(HOST_ACCESS)
     .input(RepoCreateInputSchema)
     .output(type<RuntimeRepoCreateResult>()),
@@ -184,9 +224,7 @@ export const repoContract = {
   update: withAccess(PROJECT_CONTROL_ACCESS, MOBILE)
     .input(RepoUpdateInputSchema)
     .output(type<RuntimeRepoResult>()),
-  rm: withAccess(HOST_ACCESS)
-    .input(RepoSelectorInputSchema)
-    .output(type<RuntimeRepoRemoveResult>()),
+  rm: withAccess(HOST_ACCESS).input(RepoRemoveInputSchema).output(type<RuntimeRepoRemoveResult>()),
   reorder: withAccess(PROJECT_CONTROL_ACCESS)
     .input(RepoReorderInputSchema)
     .output(type<RuntimeRepoReorderResult>()),

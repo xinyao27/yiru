@@ -1,0 +1,203 @@
+name: Release Bun Daemon
+
+on:
+  push:
+    tags:
+      - 'v*'
+  # Why: tag-triggered releases must be retryable after a transient signing, registry,
+  # or GitHub outage without deleting and recreating an immutable release tag.
+  workflow_dispatch:
+
+permissions:
+  attestations: write
+  contents: write
+  id-token: write
+
+# Why: setup installs the exact pinned pnpm binary; disabling its nested version manager keeps
+# standalone and Node-distributed pnpm identities from rewriting the cross-platform lockfile.
+env:
+  PNPM_CONFIG_PM_ON_FAIL: ignore
+
+jobs:
+  macos-helper:
+    if: github.repository == 'xinyao27/yiru'
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - name: Checkout tag
+        uses: actions/checkout@v7
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
+
+      - name: Setup pnpm
+        uses: pnpm/setup@v2
+        with:
+          install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: package.json
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Why: TCC grants bind to the signed helper identity, so release helpers must keep the
+      # Developer ID identity used to sign the standalone computer-use sidecar.
+      - name: Import Developer ID certificate
+        env:
+          MAC_CERTS: ${{ secrets.MAC_CERTS }}
+          MAC_CERTS_PASSWORD: ${{ secrets.MAC_CERTS_PASSWORD }}
+        run: |
+          set -euo pipefail
+          keychain_path="$RUNNER_TEMP/yiru-computer-use.keychain-db"
+          keychain_password="$(openssl rand -base64 24)"
+          certificate_path="$RUNNER_TEMP/yiru-computer-use.p12"
+          echo "$MAC_CERTS" | base64 --decode > "$certificate_path"
+          security create-keychain -p "$keychain_password" "$keychain_path"
+          security set-keychain-settings -lut 21600 "$keychain_path"
+          security unlock-keychain -p "$keychain_password" "$keychain_path"
+          security import "$certificate_path" -P "$MAC_CERTS_PASSWORD" \
+            -A -t cert -f pkcs12 -k "$keychain_path"
+          security set-key-partition-list -S apple-tool:,apple: \
+            -k "$keychain_password" "$keychain_path" >/dev/null
+          security list-keychains -d user -s "$keychain_path" login.keychain-db
+          rm -f "$certificate_path"
+
+      - name: Build signed universal computer-use helper
+        env:
+          YIRU_MAC_RELEASE: '1'
+        run: |
+          set -euo pipefail
+          identity="$(security find-identity -v -p codesigning | sed -n 's/.*"\(Developer ID Application:[^"]*\)".*/\1/p' | head -1)"
+          if [ -z "$identity" ]; then
+            echo "Developer ID Application identity is unavailable." >&2
+            exit 1
+          fi
+          YIRU_COMPUTER_MACOS_SIGN_IDENTITY="$identity" \
+            pnpm exec vp run @yiru/daemon#build:computer-macos -- --universal
+
+      - name: Notarize and package computer-use helper
+        env:
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          app="apps/daemon/native/computer-use-macos/.build/release/Yiru Computer Use.app"
+          archive="apps/daemon/dist/yiru-computer-use-macos.zip"
+          mkdir -p "$(dirname "$archive")"
+          ditto -c -k --sequesterRsrc --keepParent "$app" "$archive"
+          xcrun notarytool submit "$archive" \
+            --apple-id "$APPLE_ID" \
+            --password "$APPLE_APP_SPECIFIC_PASSWORD" \
+            --team-id "$APPLE_TEAM_ID" \
+            --wait
+          xcrun stapler staple "$app"
+          codesign --verify --deep --strict "$app"
+          spctl --assess --type execute "$app"
+          rm -f "$archive"
+          ditto -c -k --sequesterRsrc --keepParent "$app" "$archive"
+
+      - name: Attest computer-use helper
+        uses: actions/attest@v4
+        with:
+          subject-path: apps/daemon/dist/yiru-computer-use-macos.zip
+
+      - name: Upload computer-use helper
+        uses: actions/upload-artifact@v7
+        with:
+          name: yiru-computer-use-macos
+          path: apps/daemon/dist/yiru-computer-use-macos.zip
+          if-no-files-found: error
+          retention-days: 7
+
+  release:
+    if: github.repository == 'xinyao27/yiru'
+    needs: macos-helper
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout tag
+        uses: actions/checkout@v7
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
+
+      - name: Setup pnpm
+        uses: pnpm/setup@v2
+        with:
+          install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: package.json
+          registry-url: https://registry.npmjs.org
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify release versions
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          version="${RELEASE_TAG#v}"
+          daemon_version="$(node -p "require('./apps/daemon/package.json').version")"
+          cli_version="$(node -p "require('./packages/cli/package.json').version")"
+          if [ "$version" != "$daemon_version" ] || [ "$version" != "$cli_version" ]; then
+            echo "Tag, daemon package, and npm CLI versions must match." >&2
+            exit 1
+          fi
+          grep -Fq "version \"$version\"" Formula/yiru.rb
+
+      - name: Build release target matrix
+        run: pnpm exec vp run @yiru/daemon#build:release
+
+      - name: Download computer-use helper
+        uses: actions/download-artifact@v8
+        with:
+          name: yiru-computer-use-macos
+          path: apps/daemon/dist
+
+      - name: Create and verify checksums
+        run: |
+          cd apps/daemon/dist
+          shasum -a 256 yiru-bun-* yiru-computer-use-macos.zip > yiru-checksums.txt
+          shasum -a 256 --check yiru-checksums.txt
+          for asset in yiru-bun-darwin-arm64 yiru-bun-darwin-x64 yiru-bun-linux-arm64 yiru-bun-linux-x64; do
+            checksum="$(shasum -a 256 "$asset" | awk '{ print $1 }')"
+            grep -Fq "$checksum" ../../../Formula/yiru.rb
+          done
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 || gh release create "$GITHUB_REF_NAME" --generate-notes --title "$GITHUB_REF_NAME"
+          gh release upload "$GITHUB_REF_NAME" apps/daemon/dist/yiru-bun-* apps/daemon/dist/yiru-computer-use-macos.zip apps/daemon/dist/yiru-checksums.txt --clobber
+
+      - name: Attest daemon binaries
+        uses: actions/attest@v4
+        with:
+          subject-path: apps/daemon/dist/yiru-bun-*
+
+      - name: Publish npm and bunx installer
+        working-directory: packages/cli
+        env:
+          # Why: the token bootstraps the package's first release. Once @yiru/cli exists,
+          # npm trusted publishing uses this job's OIDC identity and the token can be removed.
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          if npm view "@yiru/cli@${version}" version >/dev/null 2>&1; then
+            echo "@yiru/cli@${version} is already published"
+          else
+            npm publish --access public
+          fi

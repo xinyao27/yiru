@@ -1,18 +1,21 @@
-import type { SleepingAgentSessionRecord } from '@yiru/workbench-model/agent'
-import { requestBackgroundTerminalWorktreeMount } from '~renderer/components/terminal/background-terminal-worktree-mount'
+import type { SleepingAgentSessionRecord } from '@yiru/runtime-protocol/model/agent'
+import {
+  parseLegacyNumericPaneKey,
+  parsePaneKey
+} from '@yiru/runtime-protocol/workbench/stable-pane-id'
 import {
   WAKE_HIBERNATED_AGENTS_WORKTREE_EVENT,
   type WakeHibernatedAgentsWorktreeDetail
 } from '~renderer/constants/terminal'
-import { useAppStore } from '~renderer/store'
-import { parseLegacyNumericPaneKey, parsePaneKey } from '~shared/stable-pane-id'
+import { useAppStore } from '~renderer/store/state'
+import { requestBackgroundTerminalWorktreeMount } from '~renderer/terminal/background-terminal-worktree-mount'
 
 import {
   getProviderSessionClaimKey,
   isPassiveCompletedHibernationEvidence,
   recordPaneIsOwnedByPreservedPane
-} from '../components/terminal-pane/sleeping-agent-pane-ownership'
-import { resumeSleepingAgentSessionsForWorktree } from '../components/terminal-workspace/resume-sleeping-agent-session'
+} from '../terminal-pane/sleeping-agent-pane-ownership'
+import { resumeSleepingAgentSessionsForWorktree } from '../terminal-workspace/resume-sleeping-agent-session'
 
 type BackgroundSleepingAgentWakeDispatcherOptions = {
   isWorkspaceSessionReady?: () => boolean

@@ -1,6 +1,6 @@
-import { normalizeExecutionHostId } from '@yiru/workbench-model/workspace'
 import { z } from 'zod'
 
+import { normalizeExecutionHostId } from '../model/workspace.js'
 import { OptionalString, requiredString } from './input-schema.js'
 
 const ProjectExecutionHostIdSchema = requiredString('Missing host ID').transform(
@@ -21,6 +21,7 @@ const LocalWindowsRuntimePreferenceSchema = z.discriminatedUnion('kind', [
 ])
 
 export const ProjectUpdateInputSchema = z.object({
+  expectedRevision: z.number().int().nonnegative(),
   projectId: requiredString('Missing project ID'),
   updates: z.object({
     localWindowsRuntimePreference: LocalWindowsRuntimePreferenceSchema.optional()
@@ -28,6 +29,7 @@ export const ProjectUpdateInputSchema = z.object({
 })
 
 export const ProjectHostSetupExistingFolderInputSchema = z.object({
+  expectedRevision: z.number().int().nonnegative(),
   projectId: requiredString('Missing project ID'),
   hostId: ProjectExecutionHostIdSchema,
   path: requiredString('Missing project path'),
@@ -37,6 +39,7 @@ export const ProjectHostSetupExistingFolderInputSchema = z.object({
 })
 
 export const ProjectHostSetupCloneInputSchema = z.object({
+  expectedRevision: z.number().int().nonnegative(),
   projectId: requiredString('Missing project ID'),
   hostId: ProjectExecutionHostIdSchema,
   url: requiredString('Missing clone URL'),
@@ -45,6 +48,7 @@ export const ProjectHostSetupCloneInputSchema = z.object({
 })
 
 export const ProjectHostSetupCreateInputSchema = z.object({
+  expectedRevision: z.number().int().nonnegative(),
   projectId: requiredString('Missing project ID'),
   hostId: ProjectExecutionHostIdSchema,
   setupId: OptionalString,
@@ -58,6 +62,7 @@ export const ProjectHostSetupCreateInputSchema = z.object({
 })
 
 export const ProjectHostSetupUpdateInputSchema = z.object({
+  expectedRevision: z.number().int().nonnegative(),
   setupId: requiredString('Missing setup ID'),
   updates: z.object({
     displayName: OptionalString,
@@ -73,6 +78,7 @@ export const ProjectHostSetupUpdateInputSchema = z.object({
 })
 
 export const ProjectHostSetupDeleteInputSchema = z.object({
+  expectedRevision: z.number().int().nonnegative(),
   setupId: requiredString('Missing setup ID')
 })
 

@@ -1,7 +1,7 @@
-import type { TuiAgent } from '@yiru/workbench-model/agent'
-import { MAX_QUICK_COMMAND_AGENT_PROMPT_LENGTH } from '@yiru/workbench-model/ui'
 import { z } from 'zod'
 
+import type { TuiAgent } from '../model/agent.js'
+import { MAX_QUICK_COMMAND_AGENT_PROMPT_LENGTH } from '../model/ui.js'
 import {
   isRuntimeTuiAgent,
   OptionalBoolean,

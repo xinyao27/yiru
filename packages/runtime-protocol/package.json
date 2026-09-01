@@ -6,6 +6,24 @@
   "type": "commonjs",
   "sideEffects": false,
   "exports": {
+    "./terminal-identity/*": {
+      "types": "./src/terminal-identity/*.ts",
+      "react-native": "./src/terminal-identity/*.ts",
+      "browser": "./src/terminal-identity/*.ts",
+      "development": "./src/terminal-identity/*.ts",
+      "import": "./dist/esm/terminal-identity/*.mjs",
+      "require": "./dist/terminal-identity/*.js",
+      "default": "./dist/terminal-identity/*.js"
+    },
+    "./workbench/*": {
+      "types": "./src/workbench/*.ts",
+      "react-native": "./src/workbench/*.ts",
+      "browser": "./src/workbench/*.ts",
+      "development": "./src/workbench/*.ts",
+      "import": "./dist/esm/workbench/*.mjs",
+      "require": "./dist/workbench/*.js",
+      "default": "./dist/workbench/*.js"
+    },
     "./ai-vault": {
       "types": "./src/ai-vault.ts",
       "react-native": "./src/ai-vault.ts",
@@ -33,23 +51,140 @@
       "require": "./dist/cjs/contract.cjs",
       "default": "./dist/cjs/contract.cjs"
     },
-    "./capabilities": {
-      "types": "./src/capabilities.ts",
-      "react-native": "./src/capabilities.ts",
-      "browser": "./src/capabilities.ts",
-      "development": "./src/capabilities.ts",
-      "import": "./dist/esm/capabilities.mjs",
-      "require": "./dist/capabilities.js",
-      "default": "./dist/capabilities.js"
+    "./model/agent": {
+      "types": "./src/model/agent.ts",
+      "react-native": "./src/model/agent.ts",
+      "browser": "./src/model/agent.ts",
+      "development": "./src/model/agent.ts",
+      "import": "./dist/esm/model/agent.mjs",
+      "require": "./dist/model/agent.js",
+      "default": "./dist/model/agent.js"
     },
-    "./client-invalidations": {
-      "types": "./src/runtime-client-invalidations.ts",
-      "react-native": "./src/runtime-client-invalidations.ts",
-      "browser": "./src/runtime-client-invalidations.ts",
-      "development": "./src/runtime-client-invalidations.ts",
-      "import": "./dist/esm/client-invalidations.mjs",
-      "require": "./dist/runtime-client-invalidations.js",
-      "default": "./dist/runtime-client-invalidations.js"
+    "./model/loader": {
+      "types": "./src/model/loader.ts",
+      "react-native": "./src/model/loader.ts",
+      "browser": "./src/model/loader.ts",
+      "development": "./src/model/loader.ts",
+      "import": "./dist/esm/model/loader.mjs",
+      "require": "./dist/model/loader.js",
+      "default": "./dist/model/loader.js"
+    },
+    "./model/loader-geometry": {
+      "types": "./src/model/loader-geometry.ts",
+      "react-native": "./src/model/loader-geometry.ts",
+      "browser": "./src/model/loader-geometry.ts",
+      "development": "./src/model/loader-geometry.ts",
+      "import": "./dist/esm/model/loader-geometry.mjs",
+      "require": "./dist/model/loader-geometry.js",
+      "default": "./dist/model/loader-geometry.js"
+    },
+    "./model/platform": {
+      "types": "./src/model/platform.ts",
+      "react-native": "./src/model/platform.ts",
+      "browser": "./src/model/platform.ts",
+      "development": "./src/model/platform.ts",
+      "import": "./dist/esm/model/platform.mjs",
+      "require": "./dist/model/platform.js",
+      "default": "./dist/model/platform.js"
+    },
+    "./model/product": {
+      "types": "./src/model/product.ts",
+      "react-native": "./src/model/product.ts",
+      "browser": "./src/model/product.ts",
+      "development": "./src/model/product.ts",
+      "import": "./dist/esm/model/product.mjs",
+      "require": "./dist/model/product.js",
+      "default": "./dist/model/product.js"
+    },
+    "./model/review": {
+      "types": "./src/model/review.ts",
+      "react-native": "./src/model/review.ts",
+      "browser": "./src/model/review.ts",
+      "development": "./src/model/review.ts",
+      "import": "./dist/esm/model/review.mjs",
+      "require": "./dist/model/review.js",
+      "default": "./dist/model/review.js"
+    },
+    "./model/ui": {
+      "types": "./src/model/ui.ts",
+      "react-native": "./src/model/ui.ts",
+      "browser": "./src/model/ui.ts",
+      "development": "./src/model/ui.ts",
+      "import": "./dist/esm/model/ui.mjs",
+      "require": "./dist/model/ui.js",
+      "default": "./dist/model/ui.js"
+    },
+    "./model/workspace": {
+      "types": "./src/model/workspace.ts",
+      "react-native": "./src/model/workspace.ts",
+      "browser": "./src/model/workspace.ts",
+      "development": "./src/model/workspace.ts",
+      "import": "./dist/esm/model/workspace.mjs",
+      "require": "./dist/model/workspace.js",
+      "default": "./dist/model/workspace.js"
+    },
+    "./mobile/e2ee-contract": {
+      "types": "./src/mobile-transport/mobile-e2ee-v2-contract.ts",
+      "react-native": "./src/mobile-transport/mobile-e2ee-v2-contract.ts",
+      "browser": "./src/mobile-transport/mobile-e2ee-v2-contract.ts",
+      "development": "./src/mobile-transport/mobile-e2ee-v2-contract.ts",
+      "import": "./dist/esm/mobile/e2ee-contract.mjs",
+      "require": "./dist/mobile-transport/mobile-e2ee-v2-contract.js",
+      "default": "./dist/mobile-transport/mobile-e2ee-v2-contract.js"
+    },
+    "./mobile/e2ee-framing": {
+      "types": "./src/mobile-transport/mobile-e2ee-v2-framing.ts",
+      "react-native": "./src/mobile-transport/mobile-e2ee-v2-framing.ts",
+      "browser": "./src/mobile-transport/mobile-e2ee-v2-framing.ts",
+      "development": "./src/mobile-transport/mobile-e2ee-v2-framing.ts",
+      "import": "./dist/esm/mobile/e2ee-framing.mjs",
+      "require": "./dist/mobile-transport/mobile-e2ee-v2-framing.js",
+      "default": "./dist/mobile-transport/mobile-e2ee-v2-framing.js"
+    },
+    "./mobile/outbound-backpressure": {
+      "types": "./src/mobile-transport/ws-outbound-backpressure-queue.ts",
+      "react-native": "./src/mobile-transport/ws-outbound-backpressure-queue.ts",
+      "browser": "./src/mobile-transport/ws-outbound-backpressure-queue.ts",
+      "development": "./src/mobile-transport/ws-outbound-backpressure-queue.ts",
+      "import": "./dist/esm/mobile/outbound-backpressure.mjs",
+      "require": "./dist/mobile-transport/ws-outbound-backpressure-queue.js",
+      "default": "./dist/mobile-transport/ws-outbound-backpressure-queue.js"
+    },
+    "./mobile/pairing-offer": {
+      "types": "./src/mobile-transport/mobile-pairing-offer.ts",
+      "react-native": "./src/mobile-transport/mobile-pairing-offer.ts",
+      "browser": "./src/mobile-transport/mobile-pairing-offer.ts",
+      "development": "./src/mobile-transport/mobile-pairing-offer.ts",
+      "import": "./dist/esm/mobile/pairing-offer.mjs",
+      "require": "./dist/mobile-transport/mobile-pairing-offer.js",
+      "default": "./dist/mobile-transport/mobile-pairing-offer.js"
+    },
+    "./protocol-version": {
+      "types": "./src/protocol-version.ts",
+      "react-native": "./src/protocol-version.ts",
+      "browser": "./src/protocol-version.ts",
+      "development": "./src/protocol-version.ts",
+      "import": "./dist/esm/protocol-version.mjs",
+      "require": "./dist/protocol-version.js",
+      "default": "./dist/protocol-version.js"
+    },
+    "./runtime-capability-contract": {
+      "types": "./src/runtime-capability-contract.ts",
+      "react-native": "./src/runtime-capability-contract.ts",
+      "browser": "./src/runtime-capability-contract.ts",
+      "development": "./src/runtime-capability-contract.ts",
+      "import": "./dist/esm/runtime-capability-contract.mjs",
+      "require": "./dist/runtime-capability-contract.js",
+      "default": "./dist/runtime-capability-contract.js"
+    },
+    "./runtime-compatibility": {
+      "types": "./src/runtime-compatibility.ts",
+      "react-native": "./src/runtime-compatibility.ts",
+      "browser": "./src/runtime-compatibility.ts",
+      "development": "./src/runtime-compatibility.ts",
+      "import": "./dist/esm/runtime-compatibility.mjs",
+      "require": "./dist/runtime-compatibility.js",
+      "default": "./dist/runtime-compatibility.js"
     },
     "./rpc-envelope": {
       "types": "./src/runtime-rpc-envelope.ts",
@@ -97,175 +232,175 @@
       "default": "./dist/mobile-runtime-types.js"
     },
     "./mobile-accounts-wire": {
-      "types": "./src/mobile-accounts-wire.ts",
-      "react-native": "./src/mobile-accounts-wire.ts",
-      "browser": "./src/mobile-accounts-wire.ts",
-      "development": "./src/mobile-accounts-wire.ts",
+      "types": "./src/mobile-wire/accounts-wire.ts",
+      "react-native": "./src/mobile-wire/accounts-wire.ts",
+      "browser": "./src/mobile-wire/accounts-wire.ts",
+      "development": "./src/mobile-wire/accounts-wire.ts",
       "import": "./dist/esm/mobile-accounts-wire.mjs",
-      "require": "./dist/mobile-accounts-wire.js",
-      "default": "./dist/mobile-accounts-wire.js"
+      "require": "./dist/mobile-wire/accounts-wire.js",
+      "default": "./dist/mobile-wire/accounts-wire.js"
     },
     "./mobile-agent-history-wire": {
-      "types": "./src/mobile-agent-history-wire.ts",
-      "react-native": "./src/mobile-agent-history-wire.ts",
-      "browser": "./src/mobile-agent-history-wire.ts",
-      "development": "./src/mobile-agent-history-wire.ts",
+      "types": "./src/mobile-wire/agent-history-wire.ts",
+      "react-native": "./src/mobile-wire/agent-history-wire.ts",
+      "browser": "./src/mobile-wire/agent-history-wire.ts",
+      "development": "./src/mobile-wire/agent-history-wire.ts",
       "import": "./dist/esm/mobile-agent-history-wire.mjs",
-      "require": "./dist/mobile-agent-history-wire.js",
-      "default": "./dist/mobile-agent-history-wire.js"
+      "require": "./dist/mobile-wire/agent-history-wire.js",
+      "default": "./dist/mobile-wire/agent-history-wire.js"
     },
     "./mobile-agent-status-wire": {
-      "types": "./src/mobile-agent-status-wire.ts",
-      "react-native": "./src/mobile-agent-status-wire.ts",
-      "browser": "./src/mobile-agent-status-wire.ts",
-      "development": "./src/mobile-agent-status-wire.ts",
+      "types": "./src/mobile-wire/agent-status-wire.ts",
+      "react-native": "./src/mobile-wire/agent-status-wire.ts",
+      "browser": "./src/mobile-wire/agent-status-wire.ts",
+      "development": "./src/mobile-wire/agent-status-wire.ts",
       "import": "./dist/esm/mobile-agent-status-wire.mjs",
-      "require": "./dist/mobile-agent-status-wire.js",
-      "default": "./dist/mobile-agent-status-wire.js"
+      "require": "./dist/mobile-wire/agent-status-wire.js",
+      "default": "./dist/mobile-wire/agent-status-wire.js"
     },
     "./mobile-client-events-wire": {
-      "types": "./src/mobile-client-events-wire.ts",
-      "react-native": "./src/mobile-client-events-wire.ts",
-      "browser": "./src/mobile-client-events-wire.ts",
-      "development": "./src/mobile-client-events-wire.ts",
+      "types": "./src/mobile-wire/client-events-wire.ts",
+      "react-native": "./src/mobile-wire/client-events-wire.ts",
+      "browser": "./src/mobile-wire/client-events-wire.ts",
+      "development": "./src/mobile-wire/client-events-wire.ts",
       "import": "./dist/esm/mobile-client-events-wire.mjs",
-      "require": "./dist/mobile-client-events-wire.js",
-      "default": "./dist/mobile-client-events-wire.js"
+      "require": "./dist/mobile-wire/client-events-wire.js",
+      "default": "./dist/mobile-wire/client-events-wire.js"
     },
     "./mobile-hosted-review-wire": {
-      "types": "./src/mobile-hosted-review-wire.ts",
-      "react-native": "./src/mobile-hosted-review-wire.ts",
-      "browser": "./src/mobile-hosted-review-wire.ts",
-      "development": "./src/mobile-hosted-review-wire.ts",
+      "types": "./src/mobile-wire/hosted-review-wire.ts",
+      "react-native": "./src/mobile-wire/hosted-review-wire.ts",
+      "browser": "./src/mobile-wire/hosted-review-wire.ts",
+      "development": "./src/mobile-wire/hosted-review-wire.ts",
       "import": "./dist/esm/mobile-hosted-review-wire.mjs",
-      "require": "./dist/mobile-hosted-review-wire.js",
-      "default": "./dist/mobile-hosted-review-wire.js"
+      "require": "./dist/mobile-wire/hosted-review-wire.js",
+      "default": "./dist/mobile-wire/hosted-review-wire.js"
     },
     "./mobile-github-review-wire": {
-      "types": "./src/mobile-github-review-wire.ts",
-      "react-native": "./src/mobile-github-review-wire.ts",
-      "browser": "./src/mobile-github-review-wire.ts",
-      "development": "./src/mobile-github-review-wire.ts",
+      "types": "./src/mobile-wire/github-review-wire.ts",
+      "react-native": "./src/mobile-wire/github-review-wire.ts",
+      "browser": "./src/mobile-wire/github-review-wire.ts",
+      "development": "./src/mobile-wire/github-review-wire.ts",
       "import": "./dist/esm/mobile-github-review-wire.mjs",
-      "require": "./dist/mobile-github-review-wire.js",
-      "default": "./dist/mobile-github-review-wire.js"
+      "require": "./dist/mobile-wire/github-review-wire.js",
+      "default": "./dist/mobile-wire/github-review-wire.js"
     },
     "./mobile-files-wire": {
-      "types": "./src/mobile-files-wire.ts",
-      "react-native": "./src/mobile-files-wire.ts",
-      "browser": "./src/mobile-files-wire.ts",
-      "development": "./src/mobile-files-wire.ts",
+      "types": "./src/mobile-wire/files-wire.ts",
+      "react-native": "./src/mobile-wire/files-wire.ts",
+      "browser": "./src/mobile-wire/files-wire.ts",
+      "development": "./src/mobile-wire/files-wire.ts",
       "import": "./dist/esm/mobile-files-wire.mjs",
-      "require": "./dist/mobile-files-wire.js",
-      "default": "./dist/mobile-files-wire.js"
+      "require": "./dist/mobile-wire/files-wire.js",
+      "default": "./dist/mobile-wire/files-wire.js"
     },
     "./mobile-clipboard-wire": {
-      "types": "./src/mobile-clipboard-wire.ts",
-      "react-native": "./src/mobile-clipboard-wire.ts",
-      "browser": "./src/mobile-clipboard-wire.ts",
-      "development": "./src/mobile-clipboard-wire.ts",
+      "types": "./src/mobile-wire/clipboard-wire.ts",
+      "react-native": "./src/mobile-wire/clipboard-wire.ts",
+      "browser": "./src/mobile-wire/clipboard-wire.ts",
+      "development": "./src/mobile-wire/clipboard-wire.ts",
       "import": "./dist/esm/mobile-clipboard-wire.mjs",
-      "require": "./dist/mobile-clipboard-wire.js",
-      "default": "./dist/mobile-clipboard-wire.js"
+      "require": "./dist/mobile-wire/clipboard-wire.js",
+      "default": "./dist/mobile-wire/clipboard-wire.js"
     },
     "./mobile-notifications-wire": {
-      "types": "./src/mobile-notifications-wire.ts",
-      "react-native": "./src/mobile-notifications-wire.ts",
-      "browser": "./src/mobile-notifications-wire.ts",
-      "development": "./src/mobile-notifications-wire.ts",
+      "types": "./src/mobile-wire/notifications-wire.ts",
+      "react-native": "./src/mobile-wire/notifications-wire.ts",
+      "browser": "./src/mobile-wire/notifications-wire.ts",
+      "development": "./src/mobile-wire/notifications-wire.ts",
       "import": "./dist/esm/mobile-notifications-wire.mjs",
-      "require": "./dist/mobile-notifications-wire.js",
-      "default": "./dist/mobile-notifications-wire.js"
+      "require": "./dist/mobile-wire/notifications-wire.js",
+      "default": "./dist/mobile-wire/notifications-wire.js"
     },
     "./mobile-review-wire": {
-      "types": "./src/mobile-review-wire.ts",
-      "react-native": "./src/mobile-review-wire.ts",
-      "browser": "./src/mobile-review-wire.ts",
-      "development": "./src/mobile-review-wire.ts",
+      "types": "./src/mobile-wire/review-wire.ts",
+      "react-native": "./src/mobile-wire/review-wire.ts",
+      "browser": "./src/mobile-wire/review-wire.ts",
+      "development": "./src/mobile-wire/review-wire.ts",
       "import": "./dist/esm/mobile-review-wire.mjs",
-      "require": "./dist/mobile-review-wire.js",
-      "default": "./dist/mobile-review-wire.js"
+      "require": "./dist/mobile-wire/review-wire.js",
+      "default": "./dist/mobile-wire/review-wire.js"
     },
     "./mobile-browser-wire": {
-      "types": "./src/mobile-browser-wire.ts",
-      "react-native": "./src/mobile-browser-wire.ts",
-      "browser": "./src/mobile-browser-wire.ts",
-      "development": "./src/mobile-browser-wire.ts",
+      "types": "./src/mobile-wire/browser-wire.ts",
+      "react-native": "./src/mobile-wire/browser-wire.ts",
+      "browser": "./src/mobile-wire/browser-wire.ts",
+      "development": "./src/mobile-wire/browser-wire.ts",
       "import": "./dist/esm/mobile-browser-wire.mjs",
-      "require": "./dist/mobile-browser-wire.js",
-      "default": "./dist/mobile-browser-wire.js"
+      "require": "./dist/mobile-wire/browser-wire.js",
+      "default": "./dist/mobile-wire/browser-wire.js"
     },
     "./mobile-session-content-wire": {
-      "types": "./src/mobile-session-content-wire.ts",
-      "react-native": "./src/mobile-session-content-wire.ts",
-      "browser": "./src/mobile-session-content-wire.ts",
-      "development": "./src/mobile-session-content-wire.ts",
+      "types": "./src/mobile-wire/session-content-wire.ts",
+      "react-native": "./src/mobile-wire/session-content-wire.ts",
+      "browser": "./src/mobile-wire/session-content-wire.ts",
+      "development": "./src/mobile-wire/session-content-wire.ts",
       "import": "./dist/esm/mobile-session-content-wire.mjs",
-      "require": "./dist/mobile-session-content-wire.js",
-      "default": "./dist/mobile-session-content-wire.js"
+      "require": "./dist/mobile-wire/session-content-wire.js",
+      "default": "./dist/mobile-wire/session-content-wire.js"
     },
     "./mobile-session-tabs-wire": {
-      "types": "./src/mobile-session-tabs-wire.ts",
-      "react-native": "./src/mobile-session-tabs-wire.ts",
-      "browser": "./src/mobile-session-tabs-wire.ts",
-      "development": "./src/mobile-session-tabs-wire.ts",
+      "types": "./src/mobile-wire/session-tabs-wire.ts",
+      "react-native": "./src/mobile-wire/session-tabs-wire.ts",
+      "browser": "./src/mobile-wire/session-tabs-wire.ts",
+      "development": "./src/mobile-wire/session-tabs-wire.ts",
       "import": "./dist/esm/mobile-session-tabs-wire.mjs",
-      "require": "./dist/mobile-session-tabs-wire.js",
-      "default": "./dist/mobile-session-tabs-wire.js"
+      "require": "./dist/mobile-wire/session-tabs-wire.js",
+      "default": "./dist/mobile-wire/session-tabs-wire.js"
     },
     "./mobile-source-control-wire": {
-      "types": "./src/mobile-source-control-wire.ts",
-      "react-native": "./src/mobile-source-control-wire.ts",
-      "browser": "./src/mobile-source-control-wire.ts",
-      "development": "./src/mobile-source-control-wire.ts",
+      "types": "./src/mobile-wire/source-control-wire.ts",
+      "react-native": "./src/mobile-wire/source-control-wire.ts",
+      "browser": "./src/mobile-wire/source-control-wire.ts",
+      "development": "./src/mobile-wire/source-control-wire.ts",
       "import": "./dist/esm/mobile-source-control-wire.mjs",
-      "require": "./dist/mobile-source-control-wire.js",
-      "default": "./dist/mobile-source-control-wire.js"
+      "require": "./dist/mobile-wire/source-control-wire.js",
+      "default": "./dist/mobile-wire/source-control-wire.js"
     },
     "./mobile-stats-wire": {
-      "types": "./src/mobile-stats-wire.ts",
-      "react-native": "./src/mobile-stats-wire.ts",
-      "browser": "./src/mobile-stats-wire.ts",
-      "development": "./src/mobile-stats-wire.ts",
+      "types": "./src/mobile-wire/stats-wire.ts",
+      "react-native": "./src/mobile-wire/stats-wire.ts",
+      "browser": "./src/mobile-wire/stats-wire.ts",
+      "development": "./src/mobile-wire/stats-wire.ts",
       "import": "./dist/esm/mobile-stats-wire.mjs",
-      "require": "./dist/mobile-stats-wire.js",
-      "default": "./dist/mobile-stats-wire.js"
+      "require": "./dist/mobile-wire/stats-wire.js",
+      "default": "./dist/mobile-wire/stats-wire.js"
     },
     "./mobile-terminal-wire": {
-      "types": "./src/mobile-terminal-wire.ts",
-      "react-native": "./src/mobile-terminal-wire.ts",
-      "browser": "./src/mobile-terminal-wire.ts",
-      "development": "./src/mobile-terminal-wire.ts",
+      "types": "./src/mobile-wire/terminal-wire.ts",
+      "react-native": "./src/mobile-wire/terminal-wire.ts",
+      "browser": "./src/mobile-wire/terminal-wire.ts",
+      "development": "./src/mobile-wire/terminal-wire.ts",
       "import": "./dist/esm/mobile-terminal-wire.mjs",
-      "require": "./dist/mobile-terminal-wire.js",
-      "default": "./dist/mobile-terminal-wire.js"
+      "require": "./dist/mobile-wire/terminal-wire.js",
+      "default": "./dist/mobile-wire/terminal-wire.js"
     },
     "./mobile-terminal-quick-commands-wire": {
-      "types": "./src/mobile-terminal-quick-commands-wire.ts",
-      "react-native": "./src/mobile-terminal-quick-commands-wire.ts",
-      "browser": "./src/mobile-terminal-quick-commands-wire.ts",
-      "development": "./src/mobile-terminal-quick-commands-wire.ts",
+      "types": "./src/mobile-wire/terminal-quick-commands-wire.ts",
+      "react-native": "./src/mobile-wire/terminal-quick-commands-wire.ts",
+      "browser": "./src/mobile-wire/terminal-quick-commands-wire.ts",
+      "development": "./src/mobile-wire/terminal-quick-commands-wire.ts",
       "import": "./dist/esm/mobile-terminal-quick-commands-wire.mjs",
-      "require": "./dist/mobile-terminal-quick-commands-wire.js",
-      "default": "./dist/mobile-terminal-quick-commands-wire.js"
+      "require": "./dist/mobile-wire/terminal-quick-commands-wire.js",
+      "default": "./dist/mobile-wire/terminal-quick-commands-wire.js"
     },
     "./mobile-worktree-wire": {
-      "types": "./src/mobile-worktree-wire.ts",
-      "react-native": "./src/mobile-worktree-wire.ts",
-      "browser": "./src/mobile-worktree-wire.ts",
-      "development": "./src/mobile-worktree-wire.ts",
+      "types": "./src/mobile-wire/worktree-wire.ts",
+      "react-native": "./src/mobile-wire/worktree-wire.ts",
+      "browser": "./src/mobile-wire/worktree-wire.ts",
+      "development": "./src/mobile-wire/worktree-wire.ts",
       "import": "./dist/esm/mobile-worktree-wire.mjs",
-      "require": "./dist/mobile-worktree-wire.js",
-      "default": "./dist/mobile-worktree-wire.js"
+      "require": "./dist/mobile-wire/worktree-wire.js",
+      "default": "./dist/mobile-wire/worktree-wire.js"
     },
     "./mobile-workspace-creation-wire": {
-      "types": "./src/mobile-workspace-creation-wire.ts",
-      "react-native": "./src/mobile-workspace-creation-wire.ts",
-      "browser": "./src/mobile-workspace-creation-wire.ts",
-      "development": "./src/mobile-workspace-creation-wire.ts",
+      "types": "./src/mobile-wire/workspace-creation-wire.ts",
+      "react-native": "./src/mobile-wire/workspace-creation-wire.ts",
+      "browser": "./src/mobile-wire/workspace-creation-wire.ts",
+      "development": "./src/mobile-wire/workspace-creation-wire.ts",
       "import": "./dist/esm/mobile-workspace-creation-wire.mjs",
-      "require": "./dist/mobile-workspace-creation-wire.js",
-      "default": "./dist/mobile-workspace-creation-wire.js"
+      "require": "./dist/mobile-wire/workspace-creation-wire.js",
+      "default": "./dist/mobile-wire/workspace-creation-wire.js"
     },
     "./mobile-development-pairing": {
       "types": "./src/mobile-development-pairing.ts",
@@ -384,6 +519,15 @@
       "require": "./dist/terminal-multiplex/json.js",
       "default": "./dist/terminal-multiplex/json.js"
     },
+    "./terminal-multiplex/recovery": {
+      "types": "./src/terminal-multiplex/recovery.ts",
+      "react-native": "./src/terminal-multiplex/recovery.ts",
+      "browser": "./src/terminal-multiplex/recovery.ts",
+      "development": "./src/terminal-multiplex/recovery.ts",
+      "import": "./dist/esm/terminal-multiplex/recovery.mjs",
+      "require": "./dist/terminal-multiplex/recovery.js",
+      "default": "./dist/terminal-multiplex/recovery.js"
+    },
     "./terminal-multiplex/side-effects": {
       "types": "./src/terminal-multiplex/side-effects.ts",
       "react-native": "./src/terminal-multiplex/side-effects.ts",
@@ -419,33 +563,6 @@
       "import": "./dist/esm/updater.mjs",
       "require": "./dist/updater.js",
       "default": "./dist/updater.js"
-    },
-    "./web-connect": {
-      "types": "./src/web-connect/contracts.ts",
-      "react-native": "./src/web-connect/contracts.ts",
-      "browser": "./src/web-connect/contracts.ts",
-      "development": "./src/web-connect/contracts.ts",
-      "import": "./dist/esm/web-connect/contracts.mjs",
-      "require": "./dist/web-connect/contracts.js",
-      "default": "./dist/web-connect/contracts.js"
-    },
-    "./web-connect/relay-frames": {
-      "types": "./src/web-connect/relay-frames.ts",
-      "react-native": "./src/web-connect/relay-frames.ts",
-      "browser": "./src/web-connect/relay-frames.ts",
-      "development": "./src/web-connect/relay-frames.ts",
-      "import": "./dist/esm/web-connect/relay-frames.mjs",
-      "require": "./dist/web-connect/relay-frames.js",
-      "default": "./dist/web-connect/relay-frames.js"
-    },
-    "./web-connect/signing-messages": {
-      "types": "./src/web-connect/signing-messages.ts",
-      "react-native": "./src/web-connect/signing-messages.ts",
-      "browser": "./src/web-connect/signing-messages.ts",
-      "development": "./src/web-connect/signing-messages.ts",
-      "import": "./dist/esm/web-connect/signing-messages.mjs",
-      "require": "./dist/web-connect/signing-messages.js",
-      "default": "./dist/web-connect/signing-messages.js"
     }
   },
   "scripts": {
@@ -456,14 +573,15 @@
   },
   "dependencies": {
     "@opentelemetry/api": "catalog:",
+    "@orpc/client": "catalog:",
     "@orpc/contract": "catalog:",
-    "@yiru/workbench-model": "workspace:*",
+    "@xterm/xterm": "catalog:workbench",
+    "tweetnacl": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@types/node": "catalog:",
-    "typescript": "catalog:desktop",
+    "typescript": "catalog:workbench",
     "vite": "catalog:"
-  },
-  "packageManager": "pnpm@11.22.0"
+  }
 }

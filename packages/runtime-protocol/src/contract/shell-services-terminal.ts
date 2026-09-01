@@ -1,7 +1,7 @@
 import { oc, type ContractRouter } from '@orpc/contract'
-import type { TuiAgent } from '@yiru/workbench-model/agent'
 import { z } from 'zod'
 
+import type { TuiAgent } from '../model/agent.js'
 import { isRuntimeTuiAgent, SleepingAgentLaunchConfigSchema } from './input-schema.js'
 
 // Why: Phase 5 slice S4b — collapses the hand-rolled `requestId` +
@@ -54,7 +54,7 @@ export const ShellServicesTerminalCreateInputSchema = z
     startupCommandDelivery: z.enum(['fast', 'shell-ready']).optional(),
     title: z.string().optional(),
     activate: z.boolean().optional(),
-    presentation: z.enum(['background', 'focused']).optional(),
+    presentation: z.enum(['background', 'visible', 'focused']).optional(),
     // Why: only host-owned runtime-session requests may bypass the shell's
     // active-remote-runtime local-terminal guard; desktop-originated creates omit this.
     source: z.literal('runtime-session').optional()
@@ -103,7 +103,7 @@ export const ShellServicesTerminalRevealInputSchema = z
       .custom<TuiAgent>(isRuntimeTuiAgent, { message: 'Unknown launch agent' })
       .optional(),
     activate: z.boolean().optional(),
-    presentation: z.enum(['background', 'focused']).optional(),
+    presentation: z.enum(['background', 'visible', 'focused']).optional(),
     tabId: z.string().optional(),
     leafId: z.string().optional(),
     splitFromLeafId: z.string().optional(),

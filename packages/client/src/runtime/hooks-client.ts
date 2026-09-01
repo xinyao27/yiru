@@ -1,6 +1,6 @@
-import type { ExecutionHostId } from '@yiru/workbench-model/workspace'
-import type { SetupScriptImportCandidate } from '~shared/setup/script-imports'
-import type { GlobalSettings, YiruHooks } from '~shared/types'
+import type { ExecutionHostId } from '@yiru/runtime-protocol/model/workspace'
+import type { SetupScriptImportCandidate } from '@yiru/runtime-protocol/workbench/setup/script-imports'
+import type { GlobalSettings, YiruHooks } from '@yiru/runtime-protocol/workbench/types'
 
 import { callRuntimeOrpc } from './orpc-client'
 import { getActiveRuntimeTarget } from './rpc-client'

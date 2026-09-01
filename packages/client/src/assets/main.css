@@ -11,7 +11,7 @@
    pane-manager.css, terminal.css, pane-title.css) moved to side-effect
    imports at their owning lazy-loaded component/module so they ship in that
    feature's chunk instead of this eager first-paint stylesheet. */
-@import '../components/editor/markdown-body.css';
+@import '../editor/markdown-body.css';
 
 @font-face {
   font-family: 'Geist';
@@ -261,16 +261,6 @@
 
 .workspace-native-material-frame {
   background: var(--background);
-}
-
-/* Why: workspace frames reveal native material only through the shared 36px
-   titlebar while keeping their content body on the canonical app surface. */
-[data-native-sidebar-material='true'] .workspace-native-material-frame {
-  background: linear-gradient(
-    to bottom,
-    transparent var(--titlebar-height),
-    var(--background) var(--titlebar-height)
-  );
 }
 
 /* Why: the opt-in workspace theme gradient (Settings → Appearance) is the one
@@ -548,10 +538,7 @@
     margin: 0;
     padding: 0;
     overflow: hidden;
-    /* Why: dvh tracks the visible viewport so the web app shell isn't taller
-       than the screen when a mobile browser's URL bar is shown (100vh = the
-       large viewport, which forces a ~40-100px scroll). In Electron there is
-       no browser chrome, so dvh resolves identically to the window height. */
+    /* Why: dvh tracks the visible viewport when browser chrome changes height. */
     height: 100dvh;
     font-family: var(
       --app-font-family,
@@ -566,12 +553,6 @@
     /* Why: keep the native macOS anti-aliasing baseline used by the reference typography. */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-  }
-
-  /* Why: the main content paints its own opaque canvas; clearing only the
-     window base lets the left rail reveal Electron's native OS material. */
-  body:has([data-native-sidebar-material='true']) {
-    background-color: transparent;
   }
 
   ul {
@@ -780,33 +761,6 @@
   height: 100dvh;
   width: 100vw;
   overflow: hidden;
-}
-
-/* ── Titlebar ────────────────────────────────────────── */
-
-/* Why: Radix portals (dropdowns, popovers, dialogs, sheets) render at the
-   document root. Electron's OS-level drag hit-test ignores z-index — portaled
-   content that visually overlaps a -webkit-app-region: drag element is
-   unclickable without an explicit no-drag. These rules cover every Radix
-   portal variant: popper wrappers (dropdowns, popovers), dialog/sheet
-   overlays, and their content panels. */
-[data-radix-popper-content-wrapper],
-[data-slot='sheet-overlay'],
-[data-slot='sheet-content'],
-[data-slot='dialog-overlay'],
-[data-slot='dialog-content'] {
-  -webkit-app-region: no-drag;
-}
-
-[data-terminal-focus-release-surface='true'] {
-  -webkit-app-region: drag;
-}
-
-/* Why: Electron drag regions swallow renderer pointer events. While regular
-   xterm owns focus, make the next top-chrome click observable so it can release
-   terminal zoom ownership; after release these surfaces become draggable again. */
-:root[data-regular-terminal-input-focused] [data-terminal-focus-release-surface='true'] {
-  -webkit-app-region: no-drag;
 }
 
 /* Why: keyframes run when the content mounts already in its final state. */

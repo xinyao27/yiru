@@ -1,7 +1,7 @@
 # `@yiru/client`
 
-`@yiru/client` is Yiru's source-only workbench UI, shared by the Electron renderer and browser
-hosts. It deliberately has no JavaScript distribution build:
+`@yiru/client` is Yiru's source-only workbench UI consumed by the Chrome extension host. It
+deliberately has no JavaScript distribution build:
 
 - Hosts already bundle its TypeScript and TSX source, avoiding a second compilation boundary.
 - Wildcard exports cannot describe a tree containing TSX, CSS, fonts, workers, and `?url` assets.
@@ -11,15 +11,16 @@ hosts. It deliberately has no JavaScript distribution build:
 
 | Export | Purpose |
 | --- | --- |
-| `@yiru/client/web-index.html` | HTML input for the browser workbench build |
-| `@yiru/client/web-bootstrap` | Browser workbench React bootstrap |
+| `@yiru/client/extension-bootstrap` | Chrome workbench and side-panel bootstrap |
+| `@yiru/client/extension-devtools` | Chrome DevTools panel bootstrap |
+| `@yiru/client/extension-install` | Chrome extension installation surface |
+| `@yiru/client/extension-settings` | Chrome extension settings surface |
 | `@yiru/client/styles` | Global tokens and workbench chrome stylesheet |
-| `@yiru/client/paraglide/messages` | Generated messages consumed outside the client bundle |
 | `@yiru/client/vite` | Client root, aliases, React/Tailwind plugins, workers, and feature defines |
 
 Consumers use only these exports; they never import `@yiru/client/src/*`. The package owns its
-typecheck, lint, i18n generation, and UI policy gates. A client implementation change should not
-require a desktop edit unless it also changes a host-facing runtime or shell contract.
+typecheck, lint, localization catalogs, and UI policy gates. A client implementation change should not
+require an extension-host edit unless it also changes a host-facing runtime or shell contract.
 
 ## Host setup
 
@@ -31,7 +32,7 @@ const client = createClientVitePreset({ featureWallEnabled: true })
 
 export default defineConfig({
   ...client,
-  build: { outDir: 'out/web' }
+  build: { outDir: 'out/extension' }
 })
 ```
 

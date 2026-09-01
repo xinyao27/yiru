@@ -14,7 +14,6 @@ export const statusContract = {
 
 export { STATUS_GET_CONTRACT } from '../status.js'
 export type {
-  RuntimeDesktopWindowStatus,
   RuntimeDeviceScope,
   RuntimeGraphStatus,
   RuntimeHostPlatformName,

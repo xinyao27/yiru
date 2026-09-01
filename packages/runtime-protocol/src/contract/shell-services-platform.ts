@@ -1,7 +1,7 @@
 import { oc, type ContractRouter } from '@orpc/contract'
 import { z } from 'zod'
 
-// L1: Electron and browsers can both open an external HTTP(S) URL.
+// L1: browser clients can open an external HTTP(S) URL.
 export const ShellServicesOpenExternalInputSchema = z.object({ url: z.string() }).strict()
 
 export type ShellServicesOpenExternalInput = z.output<typeof ShellServicesOpenExternalInputSchema>

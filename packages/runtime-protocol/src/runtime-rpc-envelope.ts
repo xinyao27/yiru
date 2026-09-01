@@ -1,4 +1,4 @@
-// Why: runtime clients can be CLI, desktop, or future non-Electron shells.
+// Why: runtime clients can be Chrome, iOS, or CLI processes.
 // Keeping the envelope contract here avoids making those clients import each
 // other just to validate the shared RPC frame shape.
 import { z } from 'zod'

@@ -1,21 +1,26 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import AgentSettingsDialog from '~renderer/components/agent/settings-dialog'
-import { NewWorkspaceComposerCard } from '~renderer/components/new-workspace-composer-card/card'
-import { useComposerState } from '~renderer/components/new-workspace/use-composer-state'
-import { getFolderWorkspacePrimaryActionLabel } from '~renderer/components/sidebar/folder-workspace-composer-model'
+import type { ProjectSourceContext } from '@yiru/runtime-protocol/workbench/project-source-context'
+import type {
+  TuiAgent,
+  WorkspaceCreateTelemetrySource,
+  WorkspaceStatus
+} from '@yiru/runtime-protocol/workbench/types'
+import React, { useEffect, useState } from 'react'
+import AgentSettingsDialog from '~renderer/agent/settings-dialog'
+import { translate } from '~renderer/i18n/i18n'
+import { isScreenSubmitShortcut } from '~renderer/keyboard-input/screen-submit-shortcut'
+import { NewWorkspaceComposerCard } from '~renderer/new-workspace-composer-card/card'
+import { useComposerState } from '~renderer/new-workspace/use-composer-state'
+import type { LinkedWorkItemSummary } from '~renderer/new-workspace/workspace-creation'
+import { useEventCallback } from '~renderer/react/use-event-callback'
+import { getFolderWorkspacePrimaryActionLabel } from '~renderer/sidebar/folder-workspace-composer-model'
+import { useAppStore } from '~renderer/store/state'
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle
-} from '~renderer/components/ui/dialog'
-import { translate } from '~renderer/i18n/i18n'
-import type { LinkedWorkItemSummary } from '~renderer/lib/new-workspace'
-import { isScreenSubmitShortcut } from '~renderer/lib/screen-submit-shortcut'
-import { useAppStore } from '~renderer/store'
-import type { ProjectSourceContext } from '~shared/project-source-context'
-import type { TuiAgent, WorkspaceCreateTelemetrySource, WorkspaceStatus } from '~shared/types'
+} from '~renderer/ui/dialog'
 
 import { shouldAllowComposerEnterSubmitTarget } from './new-workspace-enter-guard'
 import {
@@ -49,14 +54,11 @@ export default function NewWorkspaceComposerModal(): React.JSX.Element | null {
   // Why: Dialog open-state transitions must be driven by the store, not a
   // mirror useState, so palette/open-modal calls feel instantaneous and the
   // modal doesn't linger with stale data after close.
-  const handleOpenChange = useCallback(
-    (open: boolean) => {
-      if (!open) {
-        closeModal()
-      }
-    },
-    [closeModal]
-  )
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      closeModal()
+    }
+  }
 
   if (!visible) {
     return null
@@ -150,12 +152,12 @@ function QuickTabBody({
   const [quickAgentOverride, setQuickAgentOverride] = useState<TuiAgent | null | undefined>(
     undefined
   )
-  const preferredQuickAgent = useMemo<TuiAgent | null>(() => {
+  const preferredQuickAgent = (() => {
     const pref = settings?.defaultTuiAgent
     // Why: detection can still be pending when quick-create submits; keep the
     // prior catalog fallback while filtering disabled agents out of that choice.
     return pickQuickWorkspaceAgent(pref, cardProps.detectedAgentIds, settings?.disabledTuiAgents)
-  }, [cardProps.detectedAgentIds, settings?.defaultTuiAgent, settings?.disabledTuiAgents])
+  })()
   const resolvedQuickAgentSelection = resolveQuickWorkspaceAgentSelection({
     quickAgentOverride,
     preferredQuickAgent,
@@ -169,13 +171,13 @@ function QuickTabBody({
   }
   const quickAgent = resolvedQuickAgentSelection.quickAgent
 
-  const handleQuickAgentChange = useCallback((agent: TuiAgent | null) => {
+  const handleQuickAgentChange = (agent: TuiAgent | null) => {
     setQuickAgentOverride(agent)
-  }, [])
+  }
 
-  const handleCreate = useCallback(async (): Promise<void> => {
+  const handleCreate = useEventCallback(async (): Promise<void> => {
     await submitQuick(quickAgent)
-  }, [quickAgent, submitQuick])
+  })
   const selectedProjectOption = cardProps.projectOptions.find(
     (option) => option.id === cardProps.selectedProjectId
   )

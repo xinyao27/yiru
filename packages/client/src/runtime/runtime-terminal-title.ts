@@ -1,5 +1,5 @@
-import { resolveTerminalTabTitle } from '~shared/tab-title-resolution'
-import type { TerminalTab } from '~shared/types'
+import type { TerminalTab } from '@yiru/runtime-protocol/workbench/types'
+import { resolveTerminalTabTitle } from '~renderer/tab-title-resolution'
 
 export function resolveRuntimeTerminalTitle(
   tab: Pick<TerminalTab, 'customTitle' | 'quickCommandLabel' | 'generatedTitle' | 'title'>,

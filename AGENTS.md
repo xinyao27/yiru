@@ -1,8 +1,11 @@
 # AGENTS.md
 
-Yiru is an Electron desktop app — plus a native SwiftUI iOS companion — for running coding agents across many git worktrees, on local, WSL, SSH, and relay-connected hosts.
+Yiru is a Bun daemon with a Chrome MV3 workbench and a native SwiftUI iOS companion for running
+coding agents across many git worktrees on local, WSL, and SSH hosts.
 
-This file is the contract for every agent writing code here: structure, naming, cohesion, code quality. For visual work, the platform contract is canonical: [`apps/desktop/DESIGN.md`](./apps/desktop/DESIGN.md) for desktop and [`apps/mobile-ios/DESIGN.md`](./apps/mobile-ios/DESIGN.md) for mobile. [`docs/style-guide.md`](./docs/style-guide.md) is the detailed shared reference.
+This file is the contract for every agent writing code here: structure, naming, cohesion, code
+quality. For browser visual work, [`docs/style-guide.md`](./docs/style-guide.md) is canonical. For
+mobile visual work, use [`apps/mobile/DESIGN.md`](./apps/mobile/DESIGN.md).
 
 **The organizing principle.** Tailwind won because the style lives next to the markup: one place to look, one place to change. Apply that to all code. A feature's directory, filenames, and module boundaries exist so an agent can find the code from the feature name alone and change it without touching the rest of the tree. Optimize for *"where does this live?"* being answerable in one guess.
 
@@ -17,15 +20,15 @@ not treat "no automated check" as "not a rule." No exceptions inside a feature t
 
 | Never | Enforced by |
 | --- | --- |
-| Write or retain any test. No test files or test suites are allowed. | Section 9 |
-| Add an `eslint-disable`/`oxlint-disable max-lines`, or a new entry to `apps/desktop/config/max-lines-baseline.txt` | Convention only — no automated check (the script that enforced this was deleted) |
-| Add a project-owned `.d.ts` under `apps/desktop/src/preload` or `packages/shared/src` | PR workflow guard (`.github/workflows/pr.yml`) |
+| Write or retain any test, smoke check, E2E harness, or validation-only script. | Section 9 |
+| Add an `eslint-disable`/`oxlint-disable max-lines` or a max-lines baseline | Convention only — no automated check (the script that enforced this was deleted) |
+| Add a hand-written project-owned `.d.ts`; generated platform bindings are the only exception | Convention only |
 | Add a variable to the `@theme inline` block in `packages/client/src/assets/main.css` | Convention only — no automated check (the script that enforced this was deleted) |
-| Use a native `<button>`/`<input>`/`<textarea>`/`<select>` in client feature TSX; write `rounded-*`; use `bg-black/N`-style alpha washes; import `components/ui/*-styles.ts` from feature code | Convention only — no automated check (the script that enforced this was deleted) |
+| Use a native `<button>`/`<input>`/`<textarea>`/`<select>` in client feature TSX; write `rounded-*`; use `bg-black/N`-style alpha washes; import `ui/*-styles.ts` from feature code | Convention only — no automated check (the script that enforced this was deleted) |
 | Use `interface`, `enum`, `namespace`, or `any` | oxlint + `erasableSyntaxOnly` |
 | Ship a user-visible string that isn't wrapped in `t()` / `translate()` | Convention only — no automated check (the script that enforced this was deleted) |
 | Hardcode `e.metaKey`, a path separator, or a platform font | Section 7 |
-| Import desktop main/preload modules from `packages/client/src`, or use `~renderer` from desktop source | Section 1 |
+| Import daemon or extension-host implementations from `packages/client/src` | Section 1 |
 | Name a file or folder `helpers`, `utils`, `common`, `misc`, or `shared-stuff`; add an `index.ts` re-export barrel | Section 2 |
 | Rename or move a file without updating the paths written as *strings* — build scripts, CI jobs, baselines, allowlists, `Why:` comments | Convention only — no automated check (the script that enforced this was deleted) |
 | Follow an absolute path from a subagent result into the main repo instead of this worktree | Section 12 |
@@ -35,59 +38,49 @@ not treat "no automated check" as "not a rule." No exceptions inside a feature t
 ## 1. Structure: a feature is a folder
 
 ```
-apps/desktop/src/
-  main/       Electron main: OS, git, PTY, agent providers, IPC handlers
-  preload/    audited loopback bootstrap plus the native file-drop event adapter
-  relay/      headless runtime server (local, SSH, and remote hosts dispatch through it)
-  cli/        the `yiru` CLI
-  types/      desktop build and runtime ambient declarations
-apps/mobile-ios/
-              native SwiftUI iOS app: YiruMobile/ = app source, YiruWidgets/ = widgets
-apps/web/     landing site and product web entrypoints
+apps/
+  daemon/       Bun runtime, CLI, Native Messaging host, host adapters, and authoritative state
+  extension/    WXT-managed Chrome MV3 host: background, side panel, DevTools, browser bootstrap
+  mobile/       native SwiftUI app, widgets, and notification service extension
+  apns-gateway/ stateless Cloudflare Worker forwarding opaque encrypted pushes to APNs
 packages/
-  client/     source-only workbench UI consumed by desktop and web hosts
-  shared/     cross-process pure logic, types, and the bootstrap contract
-  workbench-model/, runtime-protocol/, mobile-relay-protocol/
-              cross-client domain and transport contracts
-skills/       agent skill packages shipped to end users, one folder per skill
-scripts/      workspace-level tooling: contracts that span apps, skill generators
+  client/       source-only browser workbench UI consumed through declared exports
+  runtime-protocol/
+                cross-client domain, daemon RPC, and mobile E2EE transport contracts
+  cli/          npm/bunx installer shim for compiled daemon releases
+skills/         agent skill packages shipped to end users, one folder per skill
+scripts/        workspace-level tooling whose inputs cross package boundaries
 ```
 
-**Scripts live at the level they serve.** `scripts/` holds only tooling whose
-inputs cross app boundaries — the source-path and max-lines contracts, the skill
-generators — and the root `package.json` owns their npm scripts. Everything
+**Scripts live at the level they serve.** `scripts/` holds only tooling whose inputs cross app
+boundaries, and the root `package.json` owns their npm scripts. Everything
 scoped to one app lives in that app's own `apps/<app>/scripts/`, invoked from
 that app's `package.json`. A script that reaches outside its app is in the wrong
-folder; `config/` is for configuration, never executables.
+folder; `config/` is for configuration, never executables. A script also has to earn its file:
+if a one-line `package.json` task can express it, it does not exist — and every surviving script
+opens with a `Why:` line naming the reason it can't be one. An unexplained script is a deletion
+candidate. Durable scripts exist only for necessary product workflows such as starting, building,
+packaging, publishing, deploying, or generating application artifacts. A script written only to
+verify a task is temporary: run it, remove it before finishing, and never add it to a package script
+or CI workflow.
 
-`skills/<name>/SKILL.md` is product content, not app source — it sits at the
-repository root because it is shipped to users' agent installs rather than built
-into any one client. It is the **source of truth** for
-`apps/desktop/src/cli/bundled-skill-guides.ts` and `apps/desktop/resources/skills/*.json`.
-Both used to be regenerated from `SKILL.md` by `scripts/generate-bundled-skill-guides.mjs` and
-`scripts/generate-skill-bundle-manifest.mjs`; both generators were deleted, so the two files are
-now frozen snapshots that no script keeps in sync. Edit `SKILL.md` as the source of truth, and
-hand-update `bundled-skill-guides.ts` and the manifest JSON to match in the same change.
+`skills/<name>/SKILL.md` is product content, not app source. It sits at the repository root because
+it is shipped to users' agent installs rather than built into one client, and it is the source of
+truth for that skill.
 
-**Import direction is one-way.** `packages/client` never imports desktop `main` or `preload`.
-`packages/shared` never imports desktop, client, or `electron` modules — Node built-ins are fine.
-`relay` and `cli` may reuse `main` modules. The preload contextBridge exposes only the loopback
-endpoint and process token defined in `packages/shared/src/preload/`; it exposes no product
-capability. Its sole platform event adapter resolves native OS `File` objects with Electron
-`webUtils.getPathForFile`, then sends one validated file-drop payload for main to publish on the
-shell event stream. It exposes no callable renderer API and is not a general transport. After the
-bootstrap, renderer-to-host capability traffic has one transport: authenticated oRPC over
-WebSocket. Use `shell.*` for capabilities owned by the local Electron shell or browser process, and
-the runtime contract for capabilities executed by the local or selected runtime host. Web supplies
-its runtime connection explicitly and never emulates an Electron preload API. Pure types or logic
-used by more than one desktop process belong in `packages/shared`, even when no other app consumes
-them.
+**Import direction is one-way.** `packages/client` may import pure contracts and models, but never
+`apps/daemon`, `apps/extension`, Bun, Node, or Chrome globals. `apps/extension` imports only declared
+`@yiru/client` exports and owns browser APIs, Native Messaging bootstrap, and capability adapters.
+`apps/daemon` owns filesystem, git, process, PTY, persistence, and runtime capability effects.
+`packages/runtime-protocol` stays pure and never imports an app. After bootstrap,
+client-to-daemon capability traffic has one
+transport: authenticated oRPC over WebSocket.
 
 `@yiru/client` is independently consumable source. Hosts import only its declared package exports;
 they never reach into `packages/client/src`. Its `@yiru/client/vite` preset owns source resolution,
 React/Tailwind plugins, and client aliases, while the package owns its own typecheck, lint, and i18n
-generation. Changing client implementation must not require a desktop edit unless the runtime
-protocol or the bootstrap handshake itself changes.
+generation. Changing client implementation must not require an extension-host edit unless the
+bootstrap capability surface itself changes.
 
 ### Where a new file goes
 
@@ -118,10 +111,9 @@ Past ~15 files, a feature folder has sub-features inside it — nest them (`sour
 
 Crossing the process boundary is the one legitimate multi-file change. Keep a runtime capability to
 three touchpoints sharing one feature name: the contract in `packages/runtime-protocol/src/`, the
-handler in `apps/desktop/src/main/runtime/`, and the caller in `packages/client/src/`. A local
-shell capability uses the same three-point shape under the `shell.*` contract. The preload is not a
-capability layer; touch it only for the loopback bootstrap or an Electron-only platform event that
-cannot be observed with the same information in the isolated renderer.
+handler in `apps/daemon/src/rpc/`, and the caller in `packages/client/src/`. A browser-owned
+capability has the same narrow shape: client capability type, `apps/extension` implementation, and
+feature caller. Keep Chrome APIs out of the source-only client package.
 
 ---
 
@@ -146,7 +138,14 @@ Splitting is good; scattering is not. The difference is whether the pieces stay 
 - **Split along seams, not line counts.** Extract when a unit has its own reason to change — a parser, a protocol frame, a capability probe, a pure reducer. Don't extract because a file got long; restructure so it doesn't need to be.
 - **Hard limits** (counted lines, blanks and comments excluded): 300 `.ts`, 400 `.tsx`, 600 `.mjs`. Hitting one means more than one responsibility. Split within the feature folder, never into a shared dump, and never suppress the rule.
 - **Push logic out of components.** A component decides layout and wiring; branching rules, parsing, and normalization go to a pure sibling module in the same folder.
-- **State lives at one altitude.** Store slice, feature module, or component — one owner writes, the rest read.
+- **State lives at one altitude.** Store slice, feature module, or component — one owner writes, the rest read. Section 5 has the ladder that picks the altitude.
+
+**When to extract a function** — colocate-first and push-logic-out meet here; work down and stop at the first match:
+
+1. It is a decision — branching, parsing, normalization, validation → a pure sibling module in the feature folder, even with one caller. Pure functions with narrow types are this repo's testability substitute: the type system verifies what an effect braid hides.
+2. It gains a second caller inside the feature → hoist to a feature-folder file named for what it operates on.
+3. A second, unrelated feature needs it → one level up, named for the domain (`capability-cache.ts`), never for a role.
+4. Otherwise it stays inline. A private helper above its single caller is healthy; a one-function file is scattering.
 
 ---
 
@@ -158,20 +157,18 @@ Splitting is good; scattering is not. The difference is whether the pieces stay 
 - Use `unknown` at boundaries and narrow. Rest args are the only `any` exemption.
 - `import type { … }` for type-only imports.
 - `switch` over a union is exhaustive with no `default` — adding a union member should break every switch that handles it.
-- Type declarations go in `.ts`. Under `apps/desktop/src/preload` and `packages/shared/src` this is a CI gate: `skipLibCheck: true` silently widens unresolved names in a `.d.ts` to `any`, which is how a broken IPC signature once shipped past typecheck.
+- Type declarations go in `.ts`. A generated platform binding such as Wrangler's
+  `worker-configuration.d.ts` is the only exception. `skipLibCheck: true` can silently widen
+  unresolved names in a hand-written `.d.ts` to `any`.
 - Prefer `satisfies` over `as`. An `as` cast is a claim the type system can't back — if you need one, say why.
 - **Imports use an alias the moment they leave the folder they belong to.** `~renderer/*` means
   `packages/client/src/*`; it is package-internal and supplied to hosts by the
-  `@yiru/client/vite` preset. `~shared/*` means `packages/shared/src/*`. `~main/*` and
-  `~preload/*` are desktop-only. Inside one area, `./x` and `../x`
-  stay relative — reach for the alias at two levels up or more. `relay/` and `cli/` are leaf
-  executables nothing imports into, so they have no aliases, and desktop has no bare `~`.
-- `packages/shared/src` uses only relative imports internally; aliases there would make the package
-  depend on a host resolver. Desktop source cannot use `~renderer`; it consumes public
-  `@yiru/client` exports. Client source cannot use `~main` or `~preload`. These are architectural
-  rules, not style preferences — the script that used to fail the build on a violation
-  (`check-import-path-policy.mjs`) was deleted, so nothing currently checks this automatically.
-- `build:cli` is a plain `tsc` emit, so it cannot resolve aliases at runtime: `scripts/rewrite-emitted-aliases.mjs` turns them back into relative requires and fails the build on any it does not recognize. Adding a desktop alias means updating that script and `config/tsconfig.cli.json` together.
+  `@yiru/client/vite` preset. Inside an app or package, `./x` and `../x` stay relative — reach for
+  the package's alias at two levels up or more. Protocol and model packages use relative imports
+  internally so they never depend on a host resolver.
+- Extension source cannot use `~renderer`; it consumes public `@yiru/client` exports. Client source
+  cannot import app source. These are architectural rules, not style preferences; review currently
+  enforces them.
 
 ---
 
@@ -184,6 +181,16 @@ Splitting is good; scattering is not. The difference is whether the pieces stay 
 - No inline object or array literals as context values or memo-sensitive props.
 - Store access goes through selectors, so a component re-renders only on what it reads.
 - Keys are stable identities, never array indices.
+
+### Where state lives
+
+Work down the ladder and stop at the first level that fits. A fact lives at exactly one level — every mirror is a bug that hasn't fired yet, and syncing mirrors is how derived-state effects sneak back in.
+
+1. **The runtime host** owns anything that must survive the window: sessions, terminals, worktrees, agent state. The renderer subscribes and sends commands; it never keeps an authoritative copy. Test: if closing the window must not lose it, it is host state.
+2. **The URL** owns location — which project, worktree, and panel is on screen. Test: if back/forward or reopening the page should restore it, it is URL state, not store state.
+3. **The zustand store** owns UI state shared across unrelated components or outliving a mount: selection, layout, optimistic pending writes. A slice lives in the feature folder that writes it; reads go through selectors.
+4. **`useState`** owns single-component interaction state: drafts, open/hover/focus flags. When a second component needs it, it moves up the ladder — not sideways through prop threading or a context invented for the pair.
+5. **Derived values are stored nowhere.** Compute in render, `useMemo` when genuinely expensive, or derive in a selector.
 
 ---
 
@@ -201,14 +208,16 @@ No `TODO` without an issue link. No commented-out code — git has it.
 
 ## 7. Hosts and platforms: never assume local
 
-Work runs on the local machine, in a WSL distro, over SSH, and through a relay. Every path that touches a filesystem, a process, or a git binary must work on all of them, on macOS, Linux, and Windows alike — code, commands, and scripts.
+Work runs on the local machine, in a WSL distro, and over SSH. Every path that touches a filesystem,
+a process, or a git binary must work on all of them, on macOS, Linux, and Windows alike — code,
+commands, and scripts.
 
-- Resolve paths with `path.join` or Electron path utilities. Never assume `/` or `\`.
-- Route filesystem, git, terminal, and search operations through the runtime clients
-  (`packages/client/src/runtime/*-client.ts`, `apps/desktop/src/main/runtime/`) instead of calling
-  Node from a feature.
+- Resolve paths with `path.join` in local effects and the selected `Host` path methods in host-scoped
+  effects. Never assume `/` or `\`.
+- Route filesystem, git, terminal, and search operations through authenticated daemon capabilities
+  and `apps/daemon/src/hosts/`; browser features never call Node or Bun directly.
 - Scope cached host state — capabilities, versions, connection health — to the host that executes it. One host's answer must never leak into another's.
-- Keyboard shortcuts branch on platform: `navigator.userAgent.includes('Mac')` → `metaKey`, else `ctrlKey`. Electron menu accelerators use `CmdOrCtrl`.
+- Keyboard shortcuts branch on platform: `navigator.userAgent.includes('Mac')` → `metaKey`, else `ctrlKey`.
 
 ---
 
@@ -217,12 +226,12 @@ Work runs on the local machine, in a WSL distro, over SSH, and through a relay. 
 Yiru shells out to **the user's** git binary, whose version differs across native, WSL, and SSH hosts. **Git 2.25** is the core-workflow baseline.
 
 - Check when every subcommand and option was introduced. Newer behavior needs a baseline-compatible fallback, or must degrade safely.
-- Route the preferred/fallback pair through `GitCapabilityCache`
-  (`packages/shared/src/git/capability-cache.ts`) with a narrow unsupported-error predicate, so a
-  known-invalid command isn't retried on every poll. `git --version` isn't sufficient, and
-  `simple-git` doesn't paper over host differences.
+- A newer preferred/fallback pair owns a host-scoped capability cache and a narrow
+  unsupported-error predicate, so a known-invalid command is not retried on every poll. `git
+  --version` is not sufficient.
 - Preserve global options that precede the subcommand (`git -c …`), including auto-maintenance suppression on worktree-create fetches.
-- PR CI verifies compatibility against real git 2.25.5, 2.38.1, and 2.54.0. Adopting a newer feature means adding its version boundary to the compatibility check so both paths get exercised.
+- Adopting a newer feature means exercising preferred and fallback paths against the relevant real
+  git binaries during the task. Any temporary verification harness must be removed before finish.
 
 GitHub, GitLab, Bitbucket, Gitea, and Azure DevOps are all supported: keep provider-specific behavior behind explicit checks, and don't give a generic source-control concept a GitHub-only name. The user's `gh` rate limit is a shared resource — batch requests and skip calls you don't need.
 
@@ -230,22 +239,27 @@ GitHub, GitLab, Bitbucket, Gitea, and Azure DevOps are all supported: keep provi
 
 ## 9. No tests
 
-**Do not write any tests. Do not retain any tests.**
+**Do not write or retain tests, smoke checks, or E2E harnesses.**
 
-Delete existing unit, integration, snapshot, and end-to-end tests instead of repairing, updating, or expanding them. The repository must contain no test files or test suites, and CI must not run tests. Verify behavior through builds, typechecking, linting, repository-contract checks, and running the app.
+Delete existing unit, integration, snapshot, smoke, and end-to-end tests instead of repairing,
+updating, or expanding them. The repository must contain no test files, test suites,
+validation-only scripts, package commands, or CI jobs. If an unusual task truly needs an automated
+exercise, keep it temporary and delete it immediately after use. Verify retained code through
+builds, typechecking, linting, repository-contract checks, and running the app.
 
 ---
 
 ## 10. Verify before you finish
 
-`pnpm check` is the gate — `vp lint --fix`, then typecheck, then `verify:repository-contracts`. That
-task now checks switch exhaustiveness only: the design-token budget, UI style drift, source path
-references, max-lines ratchet, skill guides/manifest, and localization catalog/coverage checks it
-used to run were all deleted along with their scripts, and nothing has replaced them — those rules
-still apply (see "Read first") but are enforced by review, not by this command. `pnpm typecheck`,
-`pnpm lint`, and `pnpm fmt` run the remaining pieces individually.
+`pnpm check` is the gate — repository lint/format fixes followed by the workspace typecheck graph.
+The design-token budget, UI style drift, source-path references, max-lines ratchet, and localization
+coverage rules currently have no repository-contract script; they still apply and require review.
+`pnpm typecheck`, `pnpm lint`, and `pnpm fmt` run the pieces individually.
 
-**Reach into a package with `vp run <package>#<task>`**, from anywhere in the repo — `vp run yiru#build:mac`, `vp run yiru-mobile-ios#dev`. The root `package.json` no longer keeps a forwarding script per package task; it holds only what the whole workspace shares. Inside a package, one script calls another with `vp run <task>`, never `pnpm run <task>`, so the task graph stays visible to the runner.
+**Reach into a package with `vp run <package>#<task>`**, from anywhere in the repo — `vp run
+@yiru/daemon#build:release`, `vp run @yiru/extension#build`, `vp run yiru-mobile#dev`. The root
+`package.json` holds only what the whole workspace shares. Inside a package, one script calls another
+with `vp run <task>`, never `pnpm run <task>`, so the task graph stays visible to the runner.
 
 A script that needs its workspace dependencies built first says so itself, with `vp run --filter '{.}^...' build` — the filter resolves this package's own dependencies from the workspace graph, so no caller has to remember the order and no package list gets hardcoded. Keep such work in `package.json`: a task defined in `vite.config.ts` is unreachable from `pnpm run`, which strands every call site that isn't already inside Vite+.
 
@@ -257,13 +271,13 @@ Report results honestly: if something fails, show the output; if you skipped a s
 
 ## 11. Working in legacy areas
 
-Much of this repo predates these rules — hundreds of loose modules in `packages/shared/src` and
-`packages/client/src/lib`, flat feature folders, stuttering filenames, feature CSS in
-`packages/client/src/assets/main.css`, and a `max-lines` grandfather list. That is the state to move
-away from, not a precedent to copy.
+Some retained protocol models, mobile screens, and client primitives predate these rules. Flat
+feature folders, stuttering filenames, and feature CSS in `packages/client/src/assets/main.css` are
+states to move away from, not precedents to copy.
 
 - **New code follows this document**, without exception.
-- **When you touch a legacy area, move what you touch toward it**: pull the files you're already editing into the feature folder, drop the redundant prefixes. Don't launch an unrequested refactor beyond that.
+- **When you touch a legacy area, move what you touch toward it**: pull the files you're already editing into the feature folder, drop the redundant prefixes.
+- **A low-quality file you're working in may be refactored outright.** If a file or module you're already changing clearly violates this document — role-named dump, smeared state, effect-derived state, unreadable control flow — rewriting it to standard is in scope, not an unrequested refactor. Keep the blast radius to the files the task already touches plus their immediate callers, and say in the PR what was rewritten and why.
 - Never resolve a conflict between this document and surrounding code by matching the surrounding code.
 
 ---

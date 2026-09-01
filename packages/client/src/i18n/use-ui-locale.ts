@@ -1,5 +1,5 @@
+import type { SupportedUiLocale } from '@yiru/runtime-protocol/workbench/ui-locale'
 import { useSyncExternalStore } from 'react'
-import type { SupportedUiLocale } from '~shared/ui-locale'
 
 import { getRendererLocale, subscribeRendererLocale } from './i18n'
 

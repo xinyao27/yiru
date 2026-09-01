@@ -1,6 +1,6 @@
 import { useEffect, type ReactNode } from 'react'
 
-import { useAppStore } from '../store'
+import { useAppStore } from '../store/state'
 import { setRendererUiLanguage } from './i18n'
 
 export function I18nProvider({ children }: { children: ReactNode }): React.JSX.Element {

@@ -1,4 +1,4 @@
-import type { UISlice } from '~renderer/store/slices/ui'
+import type { UISlice } from '~renderer/application-shell/state/slice'
 
 export type WorktreeCreationSurfaceInput = {
   activeView: UISlice['activeView']

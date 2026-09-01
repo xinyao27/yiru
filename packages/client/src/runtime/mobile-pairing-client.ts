@@ -4,23 +4,17 @@ import type {
   RuntimeMobilePairingQRResult,
   RuntimeMobileRevokeDeviceResult
 } from '@yiru/runtime-protocol/contract'
-import type { GlobalSettings } from '~shared/types'
+import type { GlobalSettings } from '@yiru/runtime-protocol/workbench/types'
 
 import { callRuntimeOrpc } from './orpc-client'
-import { getActiveRuntimeTarget, type RuntimeClientTarget } from './rpc-client'
+import type { RuntimeClientTarget } from './rpc-client'
 
 type RuntimeSettings = Pick<GlobalSettings, 'activeRuntimeEnvironmentId'> | null | undefined
 
-// Why: pairing mints a device credential against whichever host will accept the
-// phone's connection, so the target choice is security-relevant, not cosmetic.
-// The shell has always paired to its own machine; a web client has no machine
-// of its own and can only mean the runtime it is attached to. Following the
-// active environment on desktop would silently move an existing user's pairing
-// to a remote host the moment they activated one, so the shell stays pinned.
-function pairingTarget(settings?: RuntimeSettings): RuntimeClientTarget {
-  return (globalThis as { __YIRU_WEB_CLIENT__?: boolean }).__YIRU_WEB_CLIENT__ === true
-    ? getActiveRuntimeTarget(settings)
-    : { kind: 'local' }
+// Why: pairing mints a device credential on the daemon accepting the phone's connection.
+// Keep it pinned to the Chrome extension's local daemon when the selected work host changes.
+function pairingTarget(_settings?: RuntimeSettings): RuntimeClientTarget {
+  return { kind: 'local' }
 }
 
 export async function listMobileNetworkInterfaces(

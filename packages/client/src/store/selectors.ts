@@ -1,19 +1,20 @@
-import { useShallow } from 'zustand/react/shallow'
-import type { Repo, Worktree } from '~shared/types'
+import type { Repo, Worktree } from '@yiru/runtime-protocol/workbench/types'
+import { useProjectCatalog } from '~renderer/project-catalog/provider'
+import { projectCatalogRepoKey } from '~renderer/project-catalog/query'
 
-import { useAppStore } from './index'
-import { getProjectHostSetupProjectionFromState } from './project-host-setup-selector'
-import type { AppState } from './types'
 import {
   getIndexedAllWorktrees as getCachedAllWorktrees,
   getIndexedRepoMap as getCachedRepoMap,
   getIndexedWorktreeMap as getCachedWorktreeMap
-} from './worktree-repo-index'
+} from '../worktree/repo-index'
+import { useAppStore } from './state'
+import type { AppState } from './types'
 
-export { getProjectHostSetupProjectionFromState } from './project-host-setup-selector'
+export { getProjectHostSetupProjectionFromState } from '../project-catalog/host-setup-selector'
 
 const EMPTY_WORKTREES: Worktree[] = []
 const hasAnyWorktreesCache = new WeakMap<AppState['worktreesByRepo'], boolean>()
+const catalogWorktreeMapCache = new WeakMap<Worktree[], Map<string, Worktree>>()
 
 function getCachedHasAnyWorktrees(worktreesByRepo: AppState['worktreesByRepo']): boolean {
   const cached = hasAnyWorktreesCache.get(worktreesByRepo)
@@ -26,6 +27,16 @@ function getCachedHasAnyWorktrees(worktreesByRepo: AppState['worktreesByRepo']):
   const hasWorktrees = Object.values(worktreesByRepo).some((worktrees) => worktrees.length > 0)
   hasAnyWorktreesCache.set(worktreesByRepo, hasWorktrees)
   return hasWorktrees
+}
+
+function getCachedCatalogWorktreeMap(allWorktrees: Worktree[]): Map<string, Worktree> {
+  const cached = catalogWorktreeMapCache.get(allWorktrees)
+  if (cached) {
+    return cached
+  }
+  const worktreeMap = new Map(allWorktrees.map((worktree) => [worktree.id, worktree]))
+  catalogWorktreeMapCache.set(allWorktrees, worktreeMap)
+  return worktreeMap
 }
 
 export function getAllWorktreesFromState(state: Pick<AppState, 'worktreesByRepo'>): Worktree[] {
@@ -47,28 +58,41 @@ export function getRepoMapFromState(state: Pick<AppState, 'repos'>): Map<string,
 }
 
 // ─── Repos ──────────────────────────────────────────────────────────
-export const useRepos = () => useAppStore((s) => s.repos)
-export const useActiveRepo = () =>
-  useAppStore(useShallow((s) => s.repos.find((r) => r.id === s.activeRepoId) ?? null))
-export const useRepoMap = () => useAppStore((s) => getCachedRepoMap(s.repos))
-export const useRepoById = (repoId: string | null) =>
-  useAppStore((s) => (repoId ? (getCachedRepoMap(s.repos).get(repoId) ?? null) : null))
-export const useProjectHostSetupProjection = () =>
-  useAppStore((s) => getProjectHostSetupProjectionFromState(s))
+export const useRepos = (): Repo[] => useProjectCatalog().repos
+export const useActiveRepo = (): Repo | null => {
+  const activeRepoId = useAppStore((state) => state.activeRepoId)
+  return useProjectCatalog().repos.find((repo) => repo.id === activeRepoId) ?? null
+}
+export const useRepoMap = (): Map<string, Repo> => getCachedRepoMap(useProjectCatalog().repos)
+export const useRepoById = (repoId: string | null): Repo | null => {
+  const repoMap = useRepoMap()
+  return repoId ? (repoMap.get(repoId) ?? null) : null
+}
+export const useProjectHostSetupProjection = () => {
+  const { projects, projectHostSetups: setups } = useProjectCatalog()
+  return { projects, setups }
+}
 
 // ─── Worktrees ──────────────────────────────────────────────────────
 export const useActiveWorktreeId = () => useAppStore((s) => s.activeWorktreeId)
-export const useWorktreesForRepo = (repoId: string | null) =>
-  useAppStore((s) => (repoId ? (s.worktreesByRepo[repoId] ?? EMPTY_WORKTREES) : EMPTY_WORKTREES))
-export const useAllWorktrees = () => useAppStore((s) => getCachedAllWorktrees(s.worktreesByRepo))
-export const useWorktreeMap = () => useAppStore((s) => getCachedWorktreeMap(s.worktreesByRepo))
-export const useWorktreeById = (worktreeId: string | null) =>
-  useAppStore((s) =>
-    worktreeId ? (getCachedWorktreeMap(s.worktreesByRepo).get(worktreeId) ?? null) : null
-  )
-export const useActiveWorktree = () => {
+export const useWorktreesForRepo = (repoId: string | null): Worktree[] => {
+  const catalog = useProjectCatalog()
+  if (!repoId) {
+    return EMPTY_WORKTREES
+  }
+  return catalog.repos
+    .filter((repo) => repo.id === repoId)
+    .flatMap((repo) => catalog.worktreesByRepo[projectCatalogRepoKey(repo)] ?? EMPTY_WORKTREES)
+}
+export const useAllWorktrees = (): Worktree[] => useProjectCatalog().allWorktrees
+export const useWorktreeMap = (): Map<string, Worktree> =>
+  getCachedCatalogWorktreeMap(useProjectCatalog().allWorktrees)
+export const useWorktreeById = (worktreeId: string | null): Worktree | null => {
+  const worktreeMap = useWorktreeMap()
+  return worktreeId ? (worktreeMap.get(worktreeId) ?? null) : null
+}
+export const useActiveWorktree = (): Worktree | null => {
   const activeWorktreeId = useActiveWorktreeId()
-  return useAppStore((s) =>
-    activeWorktreeId ? (s.getKnownWorktreeById(activeWorktreeId) ?? null) : null
-  )
+  const worktreeMap = useWorktreeMap()
+  return activeWorktreeId ? (worktreeMap.get(activeWorktreeId) ?? null) : null
 }

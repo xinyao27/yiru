@@ -18,7 +18,7 @@
 
 import { useState } from 'react'
 
-import { useAppStore } from '../store'
+import { useAppStore } from '../store/state'
 import { FirstLaunchBanner } from './first-launch-banner'
 
 export function TelemetryFirstLaunchSurface(): React.JSX.Element | null {

@@ -1,15 +1,13 @@
 import type { BrowserCertificateFailure, BrowserLoadError } from './session-result.js'
 
-// Host-observable browser events. These are the browser signals a client needs
-// regardless of whether it is the Electron shell or a paired web/mobile client —
-// unlike pane focus, view activation, native context menus, and grab-mode
-// shortcuts, which are Electron-window concerns and stay on the preload face.
+// Host-observable browser events. These are the browser signals Chrome and iOS
+// clients need, unlike local pane focus and view activation.
 // Origins are sanitized to origin/host upstream so auth query params never leak
 // into client UI state.
 
 export type BrowserPermissionDeniedEvent = {
   browserPageId: string
-  /** Electron permission string (e.g. "media", "notifications"). */
+  /** Browser permission name (e.g. "media", "notifications"). */
   permission: string
   origin: string
 }

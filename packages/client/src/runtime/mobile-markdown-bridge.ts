@@ -1,21 +1,21 @@
 import {
-  YIRU_EDITOR_FILE_SAVED_EVENT,
-  requestEditorFileSave,
-  requestEditorSaveQuiesce,
-  type EditorFileSavedDetail
-} from '~renderer/components/editor/autosave'
-import { flushPendingEditorChange } from '~renderer/components/editor/pending-flush'
-import type { OpenFile } from '~renderer/components/editor/state'
-import { getActiveTabNavOrder } from '~renderer/components/tab-bar/group-tab-order'
-import { getConnectionIdForFile } from '~renderer/lib/connection-context'
-import { useAppStore } from '~renderer/store'
-import {
   hashMarkdownContent,
   isMarkdownContentByteLengthOverLimit,
   MOBILE_MARKDOWN_EDIT_MAX_BYTES,
   type RuntimeMarkdownReadTabResult,
   type RuntimeMarkdownSaveTabResult
-} from '~shared/mobile-markdown-document'
+} from '@yiru/runtime-protocol/workbench/mobile-markdown-document'
+import {
+  YIRU_EDITOR_FILE_SAVED_EVENT,
+  requestEditorFileSave,
+  requestEditorSaveQuiesce,
+  type EditorFileSavedDetail
+} from '~renderer/editor/autosave'
+import { flushPendingEditorChange } from '~renderer/editor/pending-flush'
+import type { OpenFile } from '~renderer/editor/state'
+import { getConnectionIdForFile } from '~renderer/runtime/connection-context'
+import { useAppStore } from '~renderer/store/state'
+import { getActiveTabNavOrder } from '~renderer/tab-bar/group-tab-order'
 
 import { readRuntimeFileContent } from './file-client'
 import { settingsForRuntimeOwner } from './rpc-client'

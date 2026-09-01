@@ -1,8 +1,8 @@
 import type {
   AgentStatusIpcPayload,
   MigrationUnsupportedPtyEntry
-} from '@yiru/workbench-model/agent'
-import type { AgentInterruptInferenceRequest } from '~shared/agent/interrupt-intent'
+} from '@yiru/runtime-protocol/model/agent'
+import type { AgentInterruptInferenceRequest } from '@yiru/runtime-protocol/workbench/agent/interrupt-intent'
 
 import {
   callRuntimeOrpc,

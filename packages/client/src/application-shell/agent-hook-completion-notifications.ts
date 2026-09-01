@@ -1,16 +1,16 @@
-import { createCodexAutoApprovalHookCompletionSuppressor } from '~renderer/components/terminal-pane/codex-auto-approval-notification-suppression'
-import { collectLeafIdsInOrder } from '~renderer/components/terminal-pane/layout-serialization'
-import { dispatchTerminalNotification } from '~renderer/components/terminal-pane/use-notification-dispatch'
+import { parsePaneKey } from '@yiru/runtime-protocol/workbench/stable-pane-id'
 import type { RuntimeTerminalProcessInspection } from '~renderer/runtime/terminal-inspection'
-import { useAppStore } from '~renderer/store'
-import { parsePaneKey } from '~shared/stable-pane-id'
+import { useAppStore } from '~renderer/store/state'
+import { createCodexAutoApprovalHookCompletionSuppressor } from '~renderer/terminal-pane/codex-auto-approval-notification-suppression'
+import { collectLeafIdsInOrder } from '~renderer/terminal-pane/layout-serialization'
+import { dispatchTerminalNotification } from '~renderer/terminal-pane/use-notification-dispatch'
 
-import { createAgentCompletionCoordinator } from '../components/terminal-pane/agent/completion-coordinator'
+import { createAgentCompletionCoordinator } from '../terminal-pane/agent/completion-coordinator'
 import type {
   AgentCompletionCoordinator,
   AgentCompletionStatusSnapshot
-} from '../components/terminal-pane/agent/completion-coordinator-types'
-import { dispatchAgentHookTerminalLifecycle } from '../components/terminal-pane/agent/hook-terminal-lifecycle'
+} from '../terminal-pane/agent/completion-coordinator-types'
+import { dispatchAgentHookTerminalLifecycle } from '../terminal-pane/agent/hook-terminal-lifecycle'
 import {
   shouldSyncAgentHookCompletionForStoreUpdate,
   type AgentHookCompletionStoreSnapshot

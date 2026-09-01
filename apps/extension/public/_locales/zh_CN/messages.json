@@ -1,0 +1,38 @@
+{
+  "appName": {
+    "message": "Yiru"
+  },
+  "appDescription": {
+    "message": "在 Chrome 中跨项目运行编程 agent。"
+  },
+  "openSidePanel": {
+    "message": "打开 Yiru"
+  },
+  "openYiruCommand": {
+    "message": "打开 Yiru"
+  },
+  "forgeAction": {
+    "message": "交给 Yiru 处理"
+  },
+  "previewAction": {
+    "message": "用 Yiru 检查"
+  },
+  "useAsContext": {
+    "message": "用作 Yiru 上下文"
+  },
+  "agentActive": {
+    "message": "Yiru agent 正在操作"
+  },
+  "takeOver": {
+    "message": "接管"
+  },
+  "viewAgent": {
+    "message": "查看"
+  },
+  "agentsWaiting": {
+    "message": "个 agent 正在等你决定"
+  },
+  "attentionRequired": {
+    "message": "Yiru 需要你决定"
+  }
+}

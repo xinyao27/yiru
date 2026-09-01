@@ -2,9 +2,7 @@ import type { AgentStatusHostSnapshot } from '@yiru/runtime-protocol/contract'
 import type {
   AgentStatusIpcPayload,
   MigrationUnsupportedPtyEntry
-} from '@yiru/workbench-model/agent'
-import { isWebClientLocation } from '~renderer/lib/web-client-location'
-import { useAppStore } from '~renderer/store'
+} from '@yiru/runtime-protocol/model/agent'
 
 import { createRuntimeOrpcClient, type RuntimeClientTarget } from './orpc-client'
 
@@ -19,11 +17,7 @@ type AgentStatusEventHandlers = {
 const AGENT_STATUS_RECONNECT_MS = 1_000
 
 function agentStatusTarget(): RuntimeClientTarget | null {
-  if (!isWebClientLocation()) {
-    return { kind: 'local' }
-  }
-  const environmentId = useAppStore.getState().settings?.activeRuntimeEnvironmentId?.trim()
-  return environmentId ? { kind: 'environment', environmentId } : null
+  return { kind: 'local' }
 }
 
 export function subscribeAgentStatusEvents(handlers: AgentStatusEventHandlers): () => void {
@@ -82,21 +76,10 @@ export function subscribeAgentStatusEvents(handlers: AgentStatusEventHandlers): 
     })()
   }
 
-  const unsubscribeTargetChanges = isWebClientLocation()
-    ? useAppStore.subscribe((state, previousState) => {
-        if (
-          state.settings?.activeRuntimeEnvironmentId !==
-          previousState.settings?.activeRuntimeEnvironmentId
-        ) {
-          openStream()
-        }
-      })
-    : () => {}
   openStream()
   return () => {
     cancelled = true
     generation += 1
-    unsubscribeTargetChanges()
     controller?.abort()
     if (retryTimer) {
       clearTimeout(retryTimer)

@@ -1,7 +1,7 @@
 import { type, type ContractRouter } from '@orpc/contract'
-import type { AgentType } from '@yiru/workbench-model/agent'
 import { z } from 'zod'
 
+import type { AgentType } from '../model/agent.js'
 import { withAccess, type RuntimeProcedureMeta } from './access-meta.js'
 
 // Cross-process contract for rate-limit resume. Codex classification comes

@@ -36,6 +36,8 @@ type RemoteTerminalControlSenderOptions = {
   allocateCorrelationId: () => number
   callbacks: RemoteRuntimeMultiplexedTerminalCallbacks
   getParsedSeq: () => bigint
+  gateOutputCredit: () => void
+  setDeliveryGated: (gated: boolean) => void
   beginReveal: () => void
 }
 
@@ -149,7 +151,7 @@ export class RemoteTerminalControlSender {
     const revealing =
       !this.delivery.visible && !this.delivery.interested && (state.visible || state.interested)
     if (revealing) {
-      this.sendCredit(0)
+      this.options.gateOutputCredit()
     }
     const sent = this.options.send(
       TerminalMultiplexOpcode.VisibilityGate,
@@ -165,6 +167,7 @@ export class RemoteTerminalControlSender {
     )
     if (sent) {
       this.delivery = state
+      this.options.setDeliveryGated(!state.visible && !state.interested)
       this.pendingRevealStateVersion = revealing ? stateVersion : null
     }
     return sent

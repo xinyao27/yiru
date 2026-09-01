@@ -2,8 +2,11 @@ import type {
   RuntimeGitHubSubscriptionEvent,
   RuntimeGitHubWorkItemMutatedEvent
 } from '@yiru/runtime-protocol/contract'
-import { getRepoExecutionHostId, parseExecutionHostId } from '@yiru/workbench-model/workspace'
-import type { GitHubPRRefreshEvent, Repo } from '~shared/types'
+import {
+  getRepoExecutionHostId,
+  parseExecutionHostId
+} from '@yiru/runtime-protocol/model/workspace'
+import type { GitHubPRRefreshEvent, Repo } from '@yiru/runtime-protocol/workbench/types'
 
 import { createRuntimeOrpcClient, type RuntimeClientTarget } from './orpc-client'
 

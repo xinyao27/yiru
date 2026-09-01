@@ -1,9 +1,12 @@
-import type { GrokAccountStatus, RateLimitState } from '~shared/rate-limit-types'
+import type {
+  GrokAccountStatus,
+  RateLimitState
+} from '@yiru/runtime-protocol/workbench/rate-limit-types'
 import type {
   ClaudeRateLimitAccountsState,
   CodexRateLimitAccountsState,
   GlobalSettings
-} from '~shared/types'
+} from '@yiru/runtime-protocol/workbench/types'
 
 import { callRuntimeOrpc, createRuntimeOrpcClient } from './orpc-client'
 import { getActiveRuntimeTarget } from './rpc-client'

@@ -6,13 +6,13 @@ Thanks for contributing to Yiru.
 
 - Keep changes scoped to a clear user-facing improvement, bug fix, or refactor.
 - Yiru targets macOS, Linux, and Windows. Every change must stay compatible with all three platforms unless the code is explicitly guarded by a runtime platform check.
-- For keyboard shortcuts, use runtime platform checks in renderer code and `CmdOrCtrl` in Electron menu accelerators.
+- For keyboard shortcuts, use runtime platform checks in extension pages and Chrome's `mac` command override in the manifest.
 - For shortcut labels, show `⌘` and `⇧` on macOS, and `Ctrl+` and `Shift+` on Linux and Windows.
-- For file paths, use Node or Electron path utilities such as `path.join`.
-- Yiru must work against local repositories, remote servers, and SSH worktrees. Do not assume a process, file, credential, shell, or network path exists only on the local machine.
+- For file paths, use Node or Bun-compatible path utilities such as `path.join`.
+- The daemon can run locally, inside WSL, or on a remote host. Keep process, file, credential, shell, and network facts scoped to that daemon host.
 - Yiru supports many CLI agents, integrations, and git providers. Keep generic behavior provider-neutral; guard integration-specific logic behind explicit checks.
 - Keep changes well-engineered and performant: follow existing architecture, avoid unnecessary work in hot paths, clean up owned resources, and use concrete module names.
-- For UI work, follow [`docs/STYLEGUIDE.md`](../docs/STYLEGUIDE.md), use the tokens and shadcn primitives it specifies, and verify polished behavior across platforms, light/dark mode, and SSH latency.
+- For UI work, follow [`docs/style-guide.md`](../docs/style-guide.md), use the tokens and primitives it specifies, and verify polished behavior across Chrome surfaces and light/dark mode.
 
 ## Local Setup
 
@@ -20,6 +20,10 @@ Thanks for contributing to Yiru.
 pnpm install
 pnpm dev
 ```
+
+Load `apps/extension/.output/chrome-mv3-dev` once from `chrome://extensions` with Developer mode
+enabled. The WXT process keeps that unpacked build current: extension-page React and CSS changes use
+HMR, while background or manifest changes reload the extension.
 
 ## Branch Naming
 
@@ -39,17 +43,18 @@ Run the same checks that CI runs:
 
 ```bash
 pnpm lint
-pnpm typecheck
+pnpm check
 pnpm build
 ```
 
 If your change affects UI or interaction behavior, verify it manually on the platforms it could impact.
 
-## Type Declarations: Prefer `.ts` Over `.d.ts`
+## Type declarations
 
-Project-owned type declarations belong in `.ts` files. `.d.ts` is reserved for ambient shims (e.g., `env.d.ts`, `vite/client.d.ts`). TypeScript's `skipLibCheck: true` setting applies globally, including to our own `.d.ts` files, which means any unresolved type reference in a `.d.ts` silently becomes `any` at its call sites. Write your types in `.ts` files so the compiler actually checks them.
-
-CI enforces this for `apps/desktop/src/preload/` and `packages/shared/src/` — see `docs/preload-typecheck-hole.md`.
+Project-owned declarations belong in `.ts` files. Do not add a hand-written `.d.ts`: generated
+platform bindings such as Wrangler's `worker-configuration.d.ts` are the only exception.
+`skipLibCheck` can silently widen unresolved names in a declaration file, while ordinary `.ts`
+files remain part of the checked program.
 
 ## Pull Requests
 
@@ -58,7 +63,7 @@ Each pull request should:
 - explain the user-visible change
 - stay focused on a single topic when possible
 - include screenshots or screen recordings for new UI or behavior changes
-- include high-quality tests when behavior changes or bug fixes warrant them
+- explain the manual or runtime verification used; this repository does not retain test suites
 - include a brief code review summary from your AI coding agent that explicitly checks cross-platform compatibility, SSH/remote/local compatibility, supported agent and integration compatibility, performance risk, UI quality when applicable, and basic security risk
 - mention any platform-specific, remote/SSH-specific, agent-specific, integration-specific, or git-provider-specific behavior and testing notes
 
@@ -70,10 +75,7 @@ Version bumps, tags, and releases are maintainer-managed. Do not include release
 
 ### Cutting a release (maintainers)
 
-Run the **Cut Release** GitHub Actions workflow (`.github/workflows/release-cut.yml`) and choose the
-release kind and source ref. It resolves the next version from GitHub Releases, bumps the workspace
-and desktop package versions, tags the release, builds the enabled desktop platforms, verifies the
-published artifacts, and only then makes the draft release visible. macOS signing runs in the
-isolated `release-mac-build.yml` workflow. Windows artifacts are included only when the repository's
-SignPath secret and variable are both configured; otherwise the release is intentionally macOS and
-Linux only.
+Update the daemon, npm CLI, Homebrew Formula, extension package, and workspace versions together,
+then push a matching `v<version>` tag. `.github/workflows/daemon-release.yml` compiles the Bun target
+matrix, verifies checksums and installer metadata, uploads and attests the binaries, and publishes
+`@yiru/cli` when `NPM_TOKEN` is configured.
