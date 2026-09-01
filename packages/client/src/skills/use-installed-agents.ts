@@ -1,10 +1,11 @@
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import type {
   DiscoveredSkill,
   SkillDiscoveryResult,
   SkillDiscoveryTarget,
   SkillSourceKind
 } from '@yiru/runtime-protocol/workbench/skills'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect } from 'react'
 import {
   getInstalledAgentSkillDiscoveryGeneration,
   INSTALLED_AGENT_SKILLS_CHANGED_EVENT,
@@ -18,7 +19,6 @@ import { discoverSkills } from '~renderer/runtime/skill-manage-client'
 import { markOrchestrationSetupComplete } from '~renderer/skills/orchestration-setup-state'
 
 import { useEventCallback } from '../react/use-event-callback'
-import { useMountedRef } from '../react/use-mounted-ref'
 import {
   hasInstalledAgentSkillNamed,
   isOrchestrationSkillName,
@@ -152,94 +152,24 @@ export function useInstalledAgentSkillNames(
   const skillNamesKey = skillNames.map(normalizeInstalledSkillName).join('\n')
   const candidateSkillNames = skillNamesKey.split('\n')
   const discoveryTargetKey = getSkillDiscoveryTargetKey(discoveryTarget)
-  // Why: store-backed callers can rebuild an equivalent target object on unrelated writes.
-  // Latch one target per stable key so refresh and its discovery effect do not restart.
-  const latchedDiscoveryTargetRef = useRef({
-    key: discoveryTargetKey,
-    target: discoveryTarget
-  })
-  if (latchedDiscoveryTargetRef.current.key !== discoveryTargetKey) {
-    latchedDiscoveryTargetRef.current = { key: discoveryTargetKey, target: discoveryTarget }
-  }
-  const stableDiscoveryTarget = latchedDiscoveryTargetRef.current.target
   const cachedDiscovery = peekInstalledAgentSkillDiscovery(discoveryTargetKey)
-  const [result, setResult] = useState<SkillDiscoveryResult | null>(cachedDiscovery)
-  const [loading, setLoading] = useState(enabled && !cachedDiscovery)
-  const [error, setError] = useState<string | null>(null)
-  const currentDiscoveryTargetKeyRef = useRef(discoveryTargetKey)
-  const refreshGenerationRef = useRef(0)
-  const stateResetInputRef = useRef({ discoveryTargetKey, enabled })
-  currentDiscoveryTargetKeyRef.current = discoveryTargetKey
-  // Why: skill scans can outlive transient settings/onboarding panels; keep
-  // the module cache update but skip React state writes after unmount.
-  const mountedRef = useMountedRef()
-  let resultForRender = result
-  let loadingForRender = loading
-  let errorForRender = error
-  if (
-    stateResetInputRef.current.discoveryTargetKey !== discoveryTargetKey ||
-    stateResetInputRef.current.enabled !== enabled
-  ) {
-    const nextCachedDiscovery = peekInstalledAgentSkillDiscovery(discoveryTargetKey)
-    const nextLoading = enabled && !nextCachedDiscovery
-    stateResetInputRef.current = { discoveryTargetKey, enabled }
-    resultForRender = nextCachedDiscovery
-    loadingForRender = nextLoading
-    errorForRender = null
-    setResult(nextCachedDiscovery)
-    setLoading(nextLoading)
-    setError(null)
-  }
+  const queryClient = useQueryClient()
+  const queryKey = ['installed-agent-skills', discoveryTargetKey] as const
+  const discovery = useQuery({
+    queryKey,
+    queryFn: () => discoverInstalledAgentSkills(false, discoveryTarget),
+    enabled,
+    initialData: cachedDiscovery ?? undefined
+  })
 
   const refresh = useEventCallback(async (force = true): Promise<boolean> => {
-    const requestDiscoveryTargetKey = discoveryTargetKey
-    const requestGeneration = ++refreshGenerationRef.current
-    const writeIfCurrent = (write: () => void): void => {
-      if (
-        mountedRef.current &&
-        requestGeneration === refreshGenerationRef.current &&
-        currentDiscoveryTargetKeyRef.current === requestDiscoveryTargetKey
-      ) {
-        write()
-      }
-    }
-
     if (!enabled) {
-      writeIfCurrent(() => {
-        setLoading(false)
-      })
       return false
     }
-    writeIfCurrent(() => {
-      setLoading(true)
-    })
-    let installedAfterRefresh = false
-    try {
-      const next = await discoverInstalledAgentSkills(force, stableDiscoveryTarget)
-      installedAfterRefresh = hasInstalledAgentSkillNamed(next.skills, candidateSkillNames, {
-        sourceKinds
-      })
-      writeIfCurrent(() => {
-        setResult(next)
-        setError(null)
-      })
-    } catch (refreshError) {
-      writeIfCurrent(() => {
-        setError(
-          refreshError instanceof Error ? refreshError.message : 'Could not scan installed skills.'
-        )
-      })
-    } finally {
-      writeIfCurrent(() => {
-        setLoading(false)
-      })
-    }
-    return installedAfterRefresh
+    const next = await discoverInstalledAgentSkills(force, discoveryTarget)
+    queryClient.setQueryData(queryKey, next)
+    return hasInstalledAgentSkillNamed(next.skills, candidateSkillNames, { sourceKinds })
   })
-
-  useEffect(() => {
-    void refresh(false)
-  }, [refresh])
 
   useEffect(() => {
     if (!enabled) {
@@ -258,7 +188,7 @@ export function useInstalledAgentSkillNames(
     }
   }, [enabled, refresh])
 
-  const skills = (() => (enabled && resultForRender ? resultForRender.skills : []))()
+  const skills = (() => (enabled && discovery.data ? discovery.data.skills : []))()
 
   const installed = (() =>
     enabled ? hasInstalledAgentSkillNamed(skills, candidateSkillNames, { sourceKinds }) : false)()
@@ -275,8 +205,13 @@ export function useInstalledAgentSkillNames(
 
   return {
     installed,
-    loading: loadingForRender,
-    error: errorForRender,
+    loading: enabled && discovery.isPending,
+    error:
+      discovery.error instanceof Error
+        ? discovery.error.message
+        : discovery.error
+          ? 'Could not scan installed skills.'
+          : null,
     skills,
     refresh: forceRefresh
   }

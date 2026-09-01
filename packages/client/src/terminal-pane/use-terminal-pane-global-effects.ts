@@ -56,7 +56,6 @@ function reportRendererPtyVisibility(
 export function useTerminalPaneGlobalEffects({
   tabId,
   worktreeId,
-  cwd,
   isActive,
   isVisible,
   isWorktreeActive = isVisible,
@@ -69,10 +68,6 @@ export function useTerminalPaneGlobalEffects({
   isVisibleRef,
   toggleExpandPane
 }: UseTerminalPaneGlobalEffectsArgs): void {
-  const worktreeIdRef = useRef(worktreeId)
-  worktreeIdRef.current = worktreeId
-  const cwdRef = useRef(cwd)
-  cwdRef.current = cwd
   // Starts true so the first render with isVisible=false triggers a
   // suspendRendering(). Background worktrees that mount hidden would
   // otherwise leak WebGL contexts — openTerminal() unconditionally creates
@@ -161,8 +156,17 @@ export function useTerminalPaneGlobalEffects({
     }
     wasVisibleRef.current = false
     wasWorktreeActiveRef.current = isWorktreeActive
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isActive, isWorktreeActive, rendererVisible])
+  }, [
+    applyPendingFollowOutputRequests,
+    captureViewportPositions,
+    isActive,
+    isActiveRef,
+    isVisibleRef,
+    isWorktreeActive,
+    managerRef,
+    rendererVisible,
+    withSuppressedScrollTracking
+  ])
 
   useEffect(() => {
     const onToggleExpand = (event: Event): void => {
@@ -186,8 +190,7 @@ export function useTerminalPaneGlobalEffects({
     }
     window.addEventListener(TOGGLE_TERMINAL_PANE_EXPAND_EVENT, onToggleExpand)
     return () => window.removeEventListener(TOGGLE_TERMINAL_PANE_EXPAND_EVENT, onToggleExpand)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tabId])
+  }, [managerRef, tabId, toggleExpandPane])
 
   useEffect(() => {
     const onFocusPane = (event: Event): void => {
@@ -210,12 +213,12 @@ export function useTerminalPaneGlobalEffects({
       handleTerminalProgrammaticTextPaste({
         detail,
         tabId,
-        worktreeId: worktreeIdRef.current,
+        worktreeId,
         getManager: () => managerRef.current,
         getPaneTransports: () => paneTransportsRef.current
       })
     }
     window.addEventListener(PASTE_TERMINAL_TEXT_EVENT, onPasteText)
     return () => window.removeEventListener(PASTE_TERMINAL_TEXT_EVENT, onPasteText)
-  }, [tabId, managerRef, paneTransportsRef])
+  }, [managerRef, paneTransportsRef, tabId, worktreeId])
 }

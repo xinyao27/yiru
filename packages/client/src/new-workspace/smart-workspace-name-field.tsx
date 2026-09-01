@@ -159,7 +159,7 @@ export default function SmartWorkspaceNameField({
             })
     })))()
   const repoSlugCacheRef = useRef<Map<string, RepoSlug | null>>(new Map())
-  const handledCrossRepoUrlRef = useRef<string | null>(null)
+  const [handledCrossRepoUrl, setHandledCrossRepoUrl] = useState<string | null>(null)
   const [crossRepoPromptState, setCrossRepoPromptState] = useState<CrossRepoPrompt | null>(null)
   const preflightStatusCurrent = preflightStatusContextKey === expectedPreflightContextKey
   const localGitlabAvailable = preflightStatusCurrent && preflightStatus?.glab?.installed === true
@@ -225,13 +225,14 @@ export default function SmartWorkspaceNameField({
     debouncedQuery,
     disabled,
     githubSourceContext,
-    handledCrossRepoUrlRef,
+    handledCrossRepoUrl,
     mode,
     repoBackedSearchTargets,
     repoBackedSourcesDisabled,
     repoSlugCacheRef,
     repos,
     selectedRepo,
+    setHandledCrossRepoUrl,
     setCrossRepoPrompt: setCrossRepoPromptState,
     textOnly
   })
@@ -273,7 +274,7 @@ export default function SmartWorkspaceNameField({
     if (!crossRepoPrompt) {
       return
     }
-    handledCrossRepoUrlRef.current = debouncedQuery.trim()
+    setHandledCrossRepoUrl(debouncedQuery.trim())
     const sourceContext = buildProjectSourceContextFromRepo({
       provider: 'github',
       projectId: targetRepo.id,
@@ -321,7 +322,7 @@ export default function SmartWorkspaceNameField({
   }
 
   const dismissCrossRepoPrompt = (): void => {
-    handledCrossRepoUrlRef.current = debouncedQuery.trim()
+    setHandledCrossRepoUrl(debouncedQuery.trim())
     setCrossRepoPromptState(null)
   }
 

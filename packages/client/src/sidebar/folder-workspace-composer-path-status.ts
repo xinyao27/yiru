@@ -34,9 +34,9 @@ export function useFolderWorkspaceComposerPathStatus(
     projectGroup ? { scope: 'project-group' as const, projectGroupId: projectGroup.id } : null)()
   const cacheExpiryTick = useFolderWorkspacePathStatusCacheExpiryTick(folderWorkspacePathStatuses)
   const activePathStatusRefreshIdRef = useRef(0)
-  const [completedPathStatusRefreshKeys, setCompletedPathStatusRefreshKeys] = useState<
-    ReadonlySet<string>
-  >(() => new Set())
+  const [completedPathStatusRefreshKey, setCompletedPathStatusRefreshKey] = useState<string | null>(
+    null
+  )
   const pathStatusRouteOptions = (() => ({ runtimeEnvironmentId: runtimeEnvironmentId ?? null }))()
   const pathStatusCacheKey = pathStatusRequest
     ? getFolderWorkspacePathStatusCacheKey(pathStatusRequest, pathStatusRouteOptions)
@@ -64,26 +64,13 @@ export function useFolderWorkspaceComposerPathStatus(
     }
     const refreshId = activePathStatusRefreshIdRef.current + 1
     activePathStatusRefreshIdRef.current = refreshId
-    setCompletedPathStatusRefreshKeys((current) => {
-      if (!current.has(pathStatusRefreshKey)) {
-        return current
-      }
-      const next = new Set(current)
-      next.delete(pathStatusRefreshKey)
-      return next
-    })
     void Promise.resolve(
       fetchFolderWorkspacePathStatus(pathStatusRequest, { force: true, runtimeEnvironmentId })
     ).finally(() => {
       if (activePathStatusRefreshIdRef.current !== refreshId) {
         return
       }
-      setCompletedPathStatusRefreshKeys((current) => {
-        if (current.has(pathStatusRefreshKey)) {
-          return current
-        }
-        return new Set(current).add(pathStatusRefreshKey)
-      })
+      setCompletedPathStatusRefreshKey(pathStatusRefreshKey)
     })
   }, [
     fetchFolderWorkspacePathStatus,
@@ -98,7 +85,7 @@ export function useFolderWorkspaceComposerPathStatus(
     pathStatusRequest !== null &&
     pathStatusRefreshKey !== null &&
     pathStatus === null &&
-    !completedPathStatusRefreshKeys.has(pathStatusRefreshKey)
+    completedPathStatusRefreshKey !== pathStatusRefreshKey
   const cachedBlockingPathStatus =
     pathStatus === null &&
     cachedPathStatusEntry?.status.exists === false &&

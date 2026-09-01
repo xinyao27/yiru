@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { useEventCallback } from '~renderer/react/use-event-callback'
 
 import { shouldHydratePullRequestGenerationResult } from '../pull-request-generation-state'
 import { useCreatePullRequestDialogFields } from '../use-create-pull-request-dialog-fields'
@@ -17,7 +18,6 @@ export function useChecksPanelGenerationFields(context: useChecksPanelGeneration
     activePullRequestGenerationSeedRestoreKey,
     activeWorktreeId,
     activeWorktreePath,
-    asyncResultKeyRef,
     branch,
     createComposerOpen,
     handleCancelGeneratePullRequestFieldsForActive,
@@ -148,10 +148,9 @@ export function useChecksPanelGenerationFields(context: useChecksPanelGeneration
           )
         : checksPanelAsyncResultKey(prCacheKey, branch, prNumber, pr?.prRepo, pr?.headSha)
       : ''
-  asyncResultKeyRef.current = stateRequestKey
-
-  const isCurrentAsyncResult = (requestKey: string) =>
-    shouldCommitChecksPanelAsyncResult(asyncResultKeyRef.current, requestKey)
+  const isCurrentAsyncResult = useEventCallback((requestKey: string) =>
+    shouldCommitChecksPanelAsyncResult(stateRequestKey, requestKey)
+  )
 
   return {
     ...context,

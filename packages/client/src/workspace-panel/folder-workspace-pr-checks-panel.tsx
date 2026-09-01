@@ -126,13 +126,8 @@ export default function FolderWorkspacePrChecksPanel({
     ([identity, outcome]) => currentRefreshIdentities.has(identity) && outcome.kind === 'loading'
   )
 
-  useEffect(() => {
-    const validRowIds = new Set(projection.rows.map((row) => row.id))
-    setExpandedRowIds((current) => {
-      const next = new Set([...current].filter((id) => validRowIds.has(id)))
-      return next.size === current.size ? current : next
-    })
-  }, [projection.rows])
+  const validRowIds = new Set(projection.rows.map((row) => row.id))
+  const visibleExpandedRowIds = new Set([...expandedRowIds].filter((id) => validRowIds.has(id)))
 
   const toggleRowExpanded = (rowId: string): void => {
     setExpandedRowIds((current) => {
@@ -247,7 +242,7 @@ export default function FolderWorkspacePrChecksPanel({
               <FolderWorkspacePrChecksRow
                 key={row.id}
                 row={row}
-                expanded={expandedRowIds.has(row.id)}
+                expanded={visibleExpandedRowIds.has(row.id)}
                 onToggle={() => toggleRowExpanded(row.id)}
                 onLoadCheckDetails={(check) => loadCheckDetails(row, check)}
               />

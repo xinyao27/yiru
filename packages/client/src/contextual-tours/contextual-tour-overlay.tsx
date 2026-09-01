@@ -53,7 +53,10 @@ export function ContextualTourOverlay(): JSX.Element | null {
   const detachContextualTourSource = useAppStore((s) => s.detachContextualTourSource)
   const setSidebarOpen = useAppStore((s) => s.setSidebarOpen)
   const openModal = useAppStore((s) => s.openModal)
-  const [renderState, setRenderState] = useState<ActiveTourRenderState | null>(null)
+  const [measuredRenderState, setMeasuredRenderState] = useState<{
+    tourId: ContextualTourId
+    state: ActiveTourRenderState
+  } | null>(null)
   const [measureVersion, setMeasureVersion] = useState(0)
   const panelRef = useRef<HTMLElement | null>(null)
   const markedTourIdRef = useRef<string | null>(null)
@@ -67,6 +70,8 @@ export function ContextualTourOverlay(): JSX.Element | null {
   const telemetryDefinedStepCountRef = useRef(1)
 
   const activeTour = (() => (activeTourId ? getContextualTour(activeTourId) : null))()
+  const renderState =
+    measuredRenderState?.tourId === activeTourId ? measuredRenderState.state : null
 
   const emitContextualTourOutcome = useEventCallback((outcome: ContextualTourOutcome): void => {
     if (
@@ -95,7 +100,6 @@ export function ContextualTourOverlay(): JSX.Element | null {
 
   useLayoutEffect(() => {
     if (!activeTourId) {
-      setRenderState(null)
       return
     }
     // Why: reset before the measurement layout effect below, otherwise the
@@ -107,7 +111,6 @@ export function ContextualTourOverlay(): JSX.Element | null {
     telemetryTotalStepsRef.current = 1
     telemetryFurthestStepIndexRef.current = 0
     telemetryDefinedStepCountRef.current = activeTour?.steps.length ?? 1
-    setRenderState(null)
   }, [activeTour?.steps.length, activeTourId])
 
   useEffect(() => {
@@ -151,7 +154,6 @@ export function ContextualTourOverlay(): JSX.Element | null {
 
   useLayoutEffect(() => {
     if (!activeTour || activeTourId === null) {
-      setRenderState(null)
       return
     }
 
@@ -181,7 +183,7 @@ export function ContextualTourOverlay(): JSX.Element | null {
       return
     }
 
-    setRenderState(measurement.renderState)
+    setMeasuredRenderState({ tourId: activeTourId, state: measurement.renderState })
   }, [
     activeStepIndex,
     activeTour,

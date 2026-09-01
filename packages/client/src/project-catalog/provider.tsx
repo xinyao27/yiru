@@ -45,9 +45,7 @@ export function useProjectCatalog(): ProjectCatalog {
 
 function useLegacyProjectCatalogStoreBridge(catalog: ProjectCatalog): void {
   const projection = projectCatalogStoreProjection(catalog)
-  const projectionRef = useRef<ProjectCatalogStoreProjection>(projection)
   const lastAppliedProjectionRef = useRef<ProjectCatalogStoreProjection | null>(null)
-  projectionRef.current = projection
 
   useLayoutEffect(() => {
     if (catalog.isPending || lastAppliedProjectionRef.current === projection) {
@@ -55,7 +53,7 @@ function useLegacyProjectCatalogStoreBridge(catalog: ProjectCatalog): void {
     }
     lastAppliedProjectionRef.current = projection
     useAppStore.setState((state) => ({
-      ...projectionRef.current,
+      ...projection,
       sortEpoch: state.sortEpoch + 1
     }))
   }, [catalog.isPending, projection])

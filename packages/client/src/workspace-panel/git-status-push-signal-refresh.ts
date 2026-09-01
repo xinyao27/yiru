@@ -1,5 +1,6 @@
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 import { isWindowVisible } from '~renderer/application-shell/window-visibility-interval'
+import { useEventCallback } from '~renderer/react/use-event-callback'
 import { worktreeHostClient } from '~renderer/runtime/worktree-host-client'
 import {
   YIRU_TERMINAL_COMMAND_FINISHED_EVENT,
@@ -24,8 +25,7 @@ export function useGitStatusPushSignalRefresh({
   enabled,
   fetchStatus
 }: UseGitStatusPushSignalRefreshParams): void {
-  const fetchStatusRef = useRef(fetchStatus)
-  fetchStatusRef.current = fetchStatus
+  const refreshStatus = useEventCallback(fetchStatus)
 
   useEffect(() => {
     if (!enabled || !activeRepoId) {
@@ -35,7 +35,7 @@ export function useGitStatusPushSignalRefresh({
       if (repoId !== activeRepoId || !isWindowVisible()) {
         return
       }
-      fetchStatusRef.current()
+      refreshStatus()
     }
     // Repo metadata changed on disk. Hidden windows skip the nudge; the
     // visibility interval refreshes immediately on reveal.
@@ -48,7 +48,7 @@ export function useGitStatusPushSignalRefresh({
         unsubscribe()
       }
     }
-  }, [enabled, activeRepoId])
+  }, [activeRepoId, enabled, refreshStatus])
 
   useEffect(() => {
     if (!enabled || !activeWorktreeId) {
@@ -59,11 +59,11 @@ export function useGitStatusPushSignalRefresh({
       if (detail?.worktreeId !== activeWorktreeId || !isWindowVisible()) {
         return
       }
-      fetchStatusRef.current()
+      refreshStatus()
     }
     window.addEventListener(YIRU_TERMINAL_COMMAND_FINISHED_EVENT, handleCommandFinished)
     return () => {
       window.removeEventListener(YIRU_TERMINAL_COMMAND_FINISHED_EVENT, handleCommandFinished)
     }
-  }, [enabled, activeWorktreeId])
+  }, [activeWorktreeId, enabled, refreshStatus])
 }

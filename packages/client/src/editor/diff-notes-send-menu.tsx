@@ -40,10 +40,11 @@ export function DiffNotesSendMenu({
   const clearDeliveredDiffComments = useAppStore((s) => s.clearDeliveredDiffComments)
   const openRequest = useAppStore((s) => s.diffNotesSendMenuOpenRequest)
   const consumeOpenRequest = useAppStore((s) => s.consumeDiffNotesSendMenuOpenRequest)
+  const [mountedAt] = React.useState(() => Date.now())
   const openRequestNonce =
     respondToOpenRequest &&
     openRequest?.worktreeId === worktreeId &&
-    Date.now() - openRequest.issuedAt < OPEN_REQUEST_TTL_MS
+    mountedAt - openRequest.issuedAt < OPEN_REQUEST_TTL_MS
       ? openRequest.nonce
       : null
   const handleOpenRequestHandled = () => consumeOpenRequest(worktreeId)

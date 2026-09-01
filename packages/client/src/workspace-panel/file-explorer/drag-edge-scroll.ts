@@ -1,4 +1,3 @@
-import type { RefObject } from 'react'
 import { useRef } from 'react'
 
 const DRAG_EDGE_ZONE_PX = 48
@@ -33,7 +32,7 @@ export function getDragEdgeScrollTarget({
   return nextScrollTop === scrollTop ? null : nextScrollTop
 }
 
-export function useFileExplorerDragEdgeScroll(scrollRef: RefObject<HTMLDivElement | null>): {
+export function useFileExplorerDragEdgeScroll(scrollElement: HTMLDivElement | null): {
   recordDragClientY: (clientY: number) => void
   stopDragEdgeScroll: () => void
 } {
@@ -50,7 +49,7 @@ export function useFileExplorerDragEdgeScroll(scrollRef: RefObject<HTMLDivElemen
 
   const tickDragEdgeScroll = () => {
     edgeScrollRafRef.current = null
-    const viewport = scrollRef.current
+    const viewport = scrollElement
     const clientY = lastDragClientYRef.current
     if (!viewport || clientY === null) {
       return
@@ -63,7 +62,7 @@ export function useFileExplorerDragEdgeScroll(scrollRef: RefObject<HTMLDivElemen
       localY: clientY - rect.top
     })
     if (nextScrollTop !== null) {
-      viewport.scrollTop = nextScrollTop
+      viewport.scrollTo({ top: nextScrollTop })
       edgeScrollRafRef.current = requestAnimationFrame(tickDragEdgeScroll)
     }
   }

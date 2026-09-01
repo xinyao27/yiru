@@ -1,5 +1,4 @@
 import { parseExecutionHostId, type ExecutionHostId } from '@yiru/runtime-protocol/model/workspace'
-/* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: base-ref defaults and search results come from runtime repo IPC and must clear stale repo results before new requests resolve. */
 import { useEffect, useRef, useState } from 'react'
 import { translate } from '~renderer/i18n/i18n'
 import { getRuntimeEnvironmentIdForRepo } from '~renderer/repo/runtime-owner'
@@ -41,15 +40,32 @@ export function BaseRefPicker({
   // Why: null until the IPC resolves (or when the repo has no default base ref
   // available). We avoid seeding with 'origin/main' because that would display
   // a fabricated default in repos that don't actually have origin/main.
-  const [defaultBaseRef, setDefaultBaseRef] = useState<string | null>(null)
+  const defaultRequestKey = `${activeRuntimeEnvironmentId ?? 'local'}:${hostId ?? ''}:${repoId}`
+  const [defaultState, setDefaultState] = useState<{
+    key: string
+    defaultBaseRef: string | null
+    remoteCount: number
+  }>({ key: '', defaultBaseRef: null, remoteCount: 0 })
+  const defaultBaseRef = defaultState.key === defaultRequestKey ? defaultState.defaultBaseRef : null
   // Why: starts at 0 so the multi-remote hint stays suppressed until the IPC
   // resolves. `0` is also the failure sentinel: if the main-process remote
   // count throws, we prefer no hint over a wrong hint (fail-closed per
   // docs/upstream-base-ref-design.md §4).
-  const [remoteCount, setRemoteCount] = useState<number>(0)
+  const remoteCount = defaultState.key === defaultRequestKey ? defaultState.remoteCount : 0
   const [baseRefQuery, setBaseRefQuery] = useState('')
-  const [baseRefResults, setBaseRefResults] = useState<string[]>([])
-  const [isSearchingBaseRefs, setIsSearchingBaseRefs] = useState(false)
+  const trimmedBaseRefQuery = baseRefQuery.trim()
+  const searchRequestKey =
+    isRuntimeRepoRefSearchQueryWithinLimit(baseRefQuery) && trimmedBaseRefQuery.length >= 2
+      ? `${defaultRequestKey}:${trimmedBaseRefQuery}`
+      : null
+  const [searchState, setSearchState] = useState<{
+    key: string | null
+    results: string[]
+    loading: boolean
+  }>({ key: null, results: [], loading: false })
+  const baseRefResults = searchState.key === searchRequestKey ? searchState.results : []
+  const isSearchingBaseRefs =
+    searchRequestKey !== null && (searchState.key !== searchRequestKey || searchState.loading)
   const baseRefResultsListRef = useRef<HTMLDivElement>(null)
 
   // Why: Radix Dialog scroll-lock cancels wheel events on in-dialog scroll
@@ -81,47 +97,34 @@ export function BaseRefPicker({
           hostId
         )
         if (!stale) {
-          setDefaultBaseRef(result.defaultBaseRef)
-          setRemoteCount(result.remoteCount)
+          setDefaultState({
+            key: defaultRequestKey,
+            defaultBaseRef: result.defaultBaseRef,
+            remoteCount: result.remoteCount
+          })
         }
       } catch (err) {
         console.error('[BaseRefPicker] getBaseRefDefault failed', err)
         if (!stale) {
-          setDefaultBaseRef(null)
-          setRemoteCount(0)
+          setDefaultState({ key: defaultRequestKey, defaultBaseRef: null, remoteCount: 0 })
         }
       }
     }
 
-    setBaseRefQuery('')
-    setBaseRefResults([])
-    // Why: reset the previous repo's default ref before the new IPC resolves so
-    // we never attribute a stale "Following primary branch (<ref>)" label to
-    // the newly selected repo during the brief resolution window.
-    setDefaultBaseRef(null)
-    setRemoteCount(0)
     void loadDefaultBaseRef()
 
     return () => {
       stale = true
     }
-  }, [activeRuntimeEnvironmentId, hostId, repoId])
+  }, [activeRuntimeEnvironmentId, defaultRequestKey, hostId, repoId])
 
   useEffect(() => {
-    if (!isRuntimeRepoRefSearchQueryWithinLimit(baseRefQuery)) {
-      setBaseRefResults([])
-      setIsSearchingBaseRefs(false)
-      return
-    }
-    const trimmedQuery = baseRefQuery.trim()
-    if (trimmedQuery.length < 2) {
-      setBaseRefResults([])
-      setIsSearchingBaseRefs(false)
+    if (!searchRequestKey) {
       return
     }
 
     let stale = false
-    setIsSearchingBaseRefs(true)
+    const trimmedQuery = trimmedBaseRefQuery
 
     const timer = window.setTimeout(() => {
       void searchRuntimeRepoBaseRefs(
@@ -133,18 +136,13 @@ export function BaseRefPicker({
       )
         .then((results) => {
           if (!stale) {
-            setBaseRefResults(results)
+            setSearchState({ key: searchRequestKey, results, loading: false })
           }
         })
         .catch((err) => {
           console.error('[BaseRefPicker] searchBaseRefs failed', err)
           if (!stale) {
-            setBaseRefResults([])
-          }
-        })
-        .finally(() => {
-          if (!stale) {
-            setIsSearchingBaseRefs(false)
+            setSearchState({ key: searchRequestKey, results: [], loading: false })
           }
         })
     }, 200)
@@ -153,7 +151,7 @@ export function BaseRefPicker({
       stale = true
       window.clearTimeout(timer)
     }
-  }, [activeRuntimeEnvironmentId, baseRefQuery, hostId, repoId])
+  }, [activeRuntimeEnvironmentId, hostId, repoId, searchRequestKey, trimmedBaseRefQuery])
 
   const effectiveBaseRef = currentBaseRef ?? defaultBaseRef
 
@@ -257,7 +255,7 @@ export function BaseRefPicker({
                     // visually compete with the new "Pinned for this repo"
                     // label, implying the selection is still pending.
                     setBaseRefQuery('')
-                    setBaseRefResults([])
+                    setSearchState({ key: null, results: [], loading: false })
                     onSelect(ref)
                   }}
                   className={cn(

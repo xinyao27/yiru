@@ -3,7 +3,12 @@ import type { UseTerminalPaneLifecycleDeps } from './terminal-pane-lifecycle-typ
 
 type TerminalPaneRuntimeInput = Pick<
   UseTerminalPaneLifecycleDeps,
-  'managerRef' | 'setPaneCount' | 'setPaneLayoutRevision' | 'setTabCanExpandPane' | 'tabId'
+  | 'managerRef'
+  | 'setPaneCount'
+  | 'setPaneLayoutRevision'
+  | 'setPaneSnapshot'
+  | 'setTabCanExpandPane'
+  | 'tabId'
 >
 
 export type TerminalPaneRuntime = {
@@ -18,10 +23,18 @@ export function createTerminalPaneRuntime({
   managerRef,
   setPaneCount,
   setPaneLayoutRevision,
+  setPaneSnapshot,
   setTabCanExpandPane,
   tabId
 }: TerminalPaneRuntimeInput): TerminalPaneRuntime {
   let resizeFrame: number | null = null
+  const syncPaneSnapshot = (): void => {
+    const manager = managerRef.current
+    setPaneSnapshot({
+      activePane: manager?.getActivePane() ?? null,
+      panes: manager?.getPanes() ?? []
+    })
+  }
   const cancelQueuedResize = (): void => {
     if (resizeFrame !== null) {
       cancelAnimationFrame(resizeFrame)
@@ -50,9 +63,11 @@ export function createTerminalPaneRuntime({
     },
     syncPaneCount: () => {
       setPaneCount(managerRef.current?.getPanes().length ?? 0)
+      syncPaneSnapshot()
     },
     syncPaneLayoutRevision: () => {
       setPaneLayoutRevision((revision) => revision + 1)
+      syncPaneSnapshot()
     }
   }
 }

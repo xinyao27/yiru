@@ -80,14 +80,20 @@ export function OnboardingInlineCommandTerminal({
   }, [onOpened])
 
   useEffect(() => {
+    let cancelled = false
     const tab = createTab(worktreeId, undefined, shellOverride, {
       activate: false,
       recordInteraction: false
     })
     setActiveTabForWorktree(worktreeId, tab.id)
     setTabCustomTitle(tab.id, title, { recordInteraction: false })
-    setTabId(tab.id)
+    queueMicrotask(() => {
+      if (!cancelled) {
+        setTabId(tab.id)
+      }
+    })
     return () => {
+      cancelled = true
       // Why: inline setup panels can disappear after detection succeeds; close
       // the backing tab so installer shells do not keep running invisibly.
       closeTab(tab.id, { recordInteraction: false, reason: 'cleanup' })

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ContributionHeatmap } from '~renderer/contribution-heatmap/heatmap'
 import type { TokenValueMetric } from '~renderer/contribution-heatmap/metric'
 import {
@@ -36,10 +36,8 @@ export default function HomePage(): React.JSX.Element {
   useUiLocale()
   const liveStats = useAppStore((state) => state.statsSummary)
   const fetchStatsSummary = useAppStore((state) => state.fetchStatsSummary)
-  const [initialCachedSnapshot] = useState(loadHomeDataSnapshot)
+  const [cachedSnapshot] = useState(loadHomeDataSnapshot)
   const [usageRange, setUsageRange] = useUsageRangePreference()
-  const cachedSnapshotRef = useRef(initialCachedSnapshot)
-  const cachedSnapshot = cachedSnapshotRef.current
   const [metric, setMetric] = useState<TokenValueMetric>(loadContributionMetric)
   const liveUsageValue = useUsageValue(usageRange)
   const stats = liveStats ?? cachedSnapshot?.stats ?? null
@@ -60,7 +58,7 @@ export default function HomePage(): React.JSX.Element {
 
   useEffect(() => {
     if (liveStats !== null && liveUsageValue.isReady) {
-      cachedSnapshotRef.current = saveHomeDataSnapshot(liveStats, liveUsageValue)
+      saveHomeDataSnapshot(liveStats, liveUsageValue)
     }
   }, [liveStats, liveUsageValue])
 

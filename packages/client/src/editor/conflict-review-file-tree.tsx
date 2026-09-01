@@ -161,7 +161,6 @@ function ConflictReviewFileTreeRow({
     )
   }
 
-  const FileIcon = getFileTypeIcon(node.entry.path)
   const liveEntry = node.entry.liveEntry
   const isStillUnresolved = liveEntry?.conflictStatus === 'unresolved'
 
@@ -186,7 +185,10 @@ function ConflictReviewFileTreeRow({
         }
       }}
     >
-      <FileIcon className={cn('size-3.5 shrink-0', isStillUnresolved && 'text-destructive')} />
+      {renderConflictReviewFileIcon(
+        node.entry.path,
+        cn('size-3.5 shrink-0', isStillUnresolved && 'text-destructive')
+      )}
       <span className="min-w-0 flex-1 truncate">
         <span className="text-foreground">{node.name}</span>
       </span>
@@ -206,4 +208,8 @@ function ConflictReviewFileTreeRow({
       </span>
     </Button>
   )
+}
+
+function renderConflictReviewFileIcon(path: string, className: string): React.JSX.Element {
+  return React.createElement(getFileTypeIcon(path), { className })
 }

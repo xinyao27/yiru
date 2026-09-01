@@ -20,7 +20,7 @@ import CloseTerminalDialog from './close-terminal-dialog'
 import { handleInternalTerminalFileDrop } from './drop/handler'
 import TerminalPaneHeaderOverlay from './header-overlay'
 import type { SearchState } from './keyboard-handlers'
-import type { PaneManager } from './pane-manager/pane-manager'
+import type { ManagedPane, PaneManager } from './pane-manager/pane-manager'
 import type { PtyTransport } from './pty/transport-types'
 import TerminalSearch from './search/panel'
 import { SessionRestoredBannerPortals } from './session-restored-banner-portals'
@@ -48,6 +48,7 @@ type TerminalContainerStyle = CSSProperties & {
 }
 
 type TerminalPaneViewProps = {
+  activePane: ManagedPane | null
   agentSessionContinuation: AgentSessionContinuationRequest | null
   agentSessionFork: PreparedAgentSessionFork | null
   contextMenu: ReturnType<typeof useTerminalPaneContextMenu>
@@ -65,7 +66,9 @@ type TerminalPaneViewProps = {
   paneClose: ReturnType<typeof useTerminalPaneClose>
   paneCount: number
   paneCwdRef: React.RefObject<Map<number, { cwd: string; confirmed: boolean }>>
+  panePtyIds: ReadonlyMap<number, string>
   paneTitles: Record<number, string>
+  panes: ManagedPane[]
   paneTransportsRef: React.RefObject<Map<number, PtyTransport>>
   primarySelection: ReturnType<typeof useTerminalPrimarySelectionPaste>
   quickCommands: ReturnType<typeof useTerminalQuickCommandMenu>
@@ -99,8 +102,19 @@ export function TerminalPaneView(props: TerminalPaneViewProps): React.JSX.Elemen
     settings,
     systemPrefersDark
   } = props
-  const activePane = managerRef.current?.getActivePane()
-  const panes = managerRef.current?.getPanes() ?? []
+  const {
+    handleRemoveTitle,
+    handleRenameBlur,
+    handleRenameCancel,
+    handleRenameSubmit,
+    handleStartRename,
+    renameInputRef,
+    renameValue,
+    renamingPaneId,
+    setContainerRef,
+    setRenameValue
+  } = rename
+  const { activePane, panes } = props
   const contextMenuLeafId =
     contextMenu.menuPaneId === null
       ? (activePane?.leafId ?? null)
@@ -170,7 +184,7 @@ export function TerminalPaneView(props: TerminalPaneViewProps): React.JSX.Elemen
   return (
     <ContextMenu open={contextMenu.open} onOpenChange={handleContextMenuOpenChange}>
       <ContextMenuTrigger
-        ref={rename.setContainerRef}
+        ref={setContainerRef}
         className="absolute inset-0 min-h-0 min-w-0"
         data-terminal-tab-id={props.tabId}
         data-terminal-layout-leaf-ids={props.expectedLayoutLeafIdsAttr}
@@ -301,9 +315,9 @@ export function TerminalPaneView(props: TerminalPaneViewProps): React.JSX.Elemen
         panes={panes}
         paneTitles={props.paneTitles}
         paneTitleOverlayRects={props.headerChrome.paneTitleOverlayRects}
-        renamingPaneId={rename.renamingPaneId}
-        renameValue={rename.renameValue}
-        renameInputRef={rename.renameInputRef}
+        renamingPaneId={renamingPaneId}
+        renameValue={renameValue}
+        renameInputRef={renameInputRef}
         titleUsesLightSurface={titleUsesLightSurface}
         paneTitleBackground={paneTitleBackground}
         terminalContentVisible={terminalContentVisible}
@@ -322,17 +336,17 @@ export function TerminalPaneView(props: TerminalPaneViewProps): React.JSX.Elemen
           managerRef.current?.setActivePane(paneId, { focus: false })
         }
         onPaneTitleContextMenu={contextMenu.onPaneTitleContextMenu}
-        onStartRename={rename.handleStartRename}
-        onRemoveTitle={rename.handleRemoveTitle}
+        onStartRename={handleStartRename}
+        onRemoveTitle={handleRemoveTitle}
         onClosePane={props.paneClose.handleRequestClosePane}
-        onRenameValueChange={rename.setRenameValue}
-        onRenameSubmit={rename.handleRenameSubmit}
-        onRenameCancel={rename.handleRenameCancel}
-        onRenameBlur={rename.handleRenameBlur}
+        onRenameValueChange={setRenameValue}
+        onRenameSubmit={handleRenameSubmit}
+        onRenameCancel={handleRenameCancel}
+        onRenameBlur={handleRenameBlur}
       />
       <TerminalDriverPortals
         panes={panes}
-        paneTransportsRef={paneTransportsRef}
+        panePtyIds={props.panePtyIds}
         restoreAllTerminalFits={props.fitRestore.restoreAllTerminalFits}
         restorePaneTerminalFit={props.fitRestore.restorePaneTerminalFit}
       />

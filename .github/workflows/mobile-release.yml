@@ -1,11 +1,11 @@
-name: Mobile iOS Release
+name: Mobile Release
 
 # Why: preserve the established iOS release inputs, tag pattern, TestFlight audience behavior,
 # and artifact contract while building the sole native mobile client.
 on:
   push:
     tags:
-      - 'mobile-ios-v*'
+      - 'mobile-v*'
   workflow_dispatch:
     inputs:
       bump_patch_version:
@@ -39,7 +39,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: mobile-ios-release
+  group: mobile-release
   cancel-in-progress: false
 
 jobs:
@@ -49,7 +49,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: apps/mobile-ios
+        working-directory: apps/mobile
 
     steps:
       - name: Checkout
@@ -91,9 +91,9 @@ jobs:
           echo 'iOS TestFlight credentials are configured'
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v6
+        uses: pnpm/setup@v2
         with:
-          run_install: false
+          install: false
 
       - name: Install workspace dependencies
         run: pnpm install --frozen-lockfile
@@ -109,7 +109,7 @@ jobs:
         with:
           ruby-version: '3.3'
           bundler-cache: true
-          working-directory: apps/mobile-ios
+          working-directory: apps/mobile
 
       - name: Resolve release version and build number
         env:
@@ -165,5 +165,5 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: yiru-mobile-ipa
-          path: apps/mobile-ios/build/*.ipa
+          path: apps/mobile/build/*.ipa
           if-no-files-found: ignore

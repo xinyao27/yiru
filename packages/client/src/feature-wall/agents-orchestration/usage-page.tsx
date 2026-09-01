@@ -1,4 +1,3 @@
-/* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: this page is a timed storyboard; phase state intentionally advances from animation effects and reduced-motion gates. */
 import { useEffect, useState } from 'react'
 import type { JSX } from 'react'
 import { translate } from '~renderer/i18n/i18n'
@@ -15,17 +14,16 @@ const SWAP_DELAY = 4400
 const LOOP_DELAY = 7800
 
 export function UsagePage(props: { active: boolean; reducedMotion: boolean }): JSX.Element {
+  return <UsageAnimation key={`${props.active}:${props.reducedMotion}`} {...props} />
+}
+
+function UsageAnimation(props: { active: boolean; reducedMotion: boolean }): JSX.Element {
   const { active, reducedMotion } = props
-  const [phase, setPhase] = useState<Phase>('reset')
+  const [phase, setPhase] = useState<Phase>(active && reducedMotion ? 'swapped' : 'reset')
   const [pulseKey, setPulseKey] = useState(0)
 
   useEffect(() => {
-    if (!active) {
-      setPhase('reset')
-      return
-    }
-    if (reducedMotion) {
-      setPhase('swapped')
+    if (!active || reducedMotion) {
       return
     }
     let cancelled = false
@@ -40,7 +38,6 @@ export function UsagePage(props: { active: boolean; reducedMotion: boolean }): J
       )
     }
     const loop = (): void => {
-      setPhase('reset')
       at(EXPAND_DELAY, () => setPhase('expanded'))
       at(TARGET_DELAY, () => setPhase('targeted'))
       at(SWAP_DELAY, () => {
@@ -49,6 +46,7 @@ export function UsagePage(props: { active: boolean; reducedMotion: boolean }): J
       })
       at(LOOP_DELAY, () => {
         if (!cancelled) {
+          setPhase('reset')
           loop()
         }
       })

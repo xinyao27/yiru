@@ -21,6 +21,11 @@ type TerminalContextMenuTarget = {
   setOpen: React.Dispatch<React.SetStateAction<boolean>>
 }
 
+type TerminalContextMenuSnapshot = {
+  menuPaneId: number | null
+  paneCount: number
+}
+
 export function useTerminalContextMenuTarget({
   managerRef,
   onRightClickPaste,
@@ -33,6 +38,10 @@ export function useTerminalContextMenuTarget({
   const contextPaneIdRef = useRef<number | null>(null)
   const menuOpenedAtRef = useRef(0)
   const [open, setOpen] = useState(false)
+  const [menuSnapshot, setMenuSnapshot] = useState<TerminalContextMenuSnapshot>({
+    menuPaneId: null,
+    paneCount: 1
+  })
 
   useEffect(() => {
     const closeMenu = (): void => {
@@ -67,10 +76,9 @@ export function useTerminalContextMenuTarget({
       contextPaneIdRef.current = null
       return
     }
+    const panes = manager.getPanes()
     const clickedPane =
-      clickedPaneId !== null
-        ? (manager.getPanes().find((pane) => pane.id === clickedPaneId) ?? null)
-        : null
+      clickedPaneId !== null ? (panes.find((pane) => pane.id === clickedPaneId) ?? null) : null
     contextPaneIdRef.current = clickedPane?.id ?? null
     // Why: terminal-style right-click copies a selection and otherwise
     // pastes; Ctrl+right-click keeps the application menu reachable.
@@ -89,6 +97,10 @@ export function useTerminalContextMenuTarget({
       }
       return
     }
+    setMenuSnapshot({
+      menuPaneId: clickedPane?.id ?? manager.getActivePane()?.id ?? panes[0]?.id ?? null,
+      paneCount: panes.length || 1
+    })
     menuOpenedAtRef.current = Date.now()
   }
 
@@ -123,8 +135,8 @@ export function useTerminalContextMenuTarget({
   }
 
   // Why: closed menus do not need PaneManager's allocated public wrappers.
-  const paneCount = open ? (managerRef.current?.getPanes().length ?? 1) : 1
-  const menuPaneId = open ? (resolveMenuPane()?.id ?? null) : null
+  const paneCount = open ? menuSnapshot.paneCount : 1
+  const menuPaneId = open ? menuSnapshot.menuPaneId : null
   return {
     clearMenuPaneTarget,
     menuOpenedAtRef,

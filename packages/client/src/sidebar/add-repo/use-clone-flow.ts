@@ -1,7 +1,7 @@
 import type { AddRepoExistingWorkspaceSource } from '@yiru/runtime-protocol/workbench/telemetry-events'
 import type { Repo } from '@yiru/runtime-protocol/workbench/types'
 import type { Dispatch, SetStateAction } from 'react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { translate } from '~renderer/i18n/i18n'
 import { readProjectCatalogMutationRevision } from '~renderer/project-catalog/catalog-snapshot'
@@ -41,7 +41,8 @@ export function useAddRepoCloneFlow({
   handleClone: () => Promise<void>
 } {
   const [cloneUrl, setCloneUrl] = useState('')
-  const [cloneDestination, setCloneDestination] = useState('')
+  const [cloneDestination, setCloneDestinationState] = useState('')
+  const [isCloneDestinationTouched, setIsCloneDestinationTouched] = useState(false)
   const [isCloning, setIsCloning] = useState(false)
   const [cloneError, setCloneError] = useState<string | null>(null)
   const [cloneProgress, setCloneProgress] = useState<{ phase: string; percent: number } | null>(
@@ -49,12 +50,13 @@ export function useAddRepoCloneFlow({
   )
   const hostToken = activeRuntimeEnvironmentId?.trim() ?? ''
   const hostTokenRef = useRef(hostToken)
-  hostTokenRef.current = hostToken
+  useLayoutEffect(() => {
+    hostTokenRef.current = hostToken
+  }, [hostToken])
   // Why: monotonic ID so stale clone callbacks can detect they were superseded.
   const cloneGenRef = useRef(0)
   // Why: track whether we've already auto-filled for this entry into the clone step,
   // so a late settings hydration still gets a chance to set the default.
-  const cloneStepAutoFilledRef = useRef(false)
 
   useEffect(() => {
     if (!isCloning) {
@@ -68,21 +70,20 @@ export function useAddRepoCloneFlow({
     cloneDestination,
     activeRuntimeEnvironmentId,
     workspaceDir,
-    cloneStepAutoFilled: cloneStepAutoFilledRef.current
+    cloneStepAutoFilled: isCloneDestinationTouched
   })
-  if (step !== 'clone') {
-    cloneStepAutoFilledRef.current = false
-  } else if (cloneDestinationAutoFill) {
-    // Why: late settings hydration should still seed the local clone path,
-    // but runtime/server clone flows must keep their destination user-entered.
-    cloneStepAutoFilledRef.current = true
-    setCloneDestination(cloneDestinationAutoFill.destination)
+  const effectiveCloneDestination = cloneDestinationAutoFill?.destination ?? cloneDestination
+
+  const setCloneDestination: Dispatch<SetStateAction<string>> = (value) => {
+    setIsCloneDestinationTouched(true)
+    setCloneDestinationState(value)
   }
 
   const resetCloneFlow = (): void => {
     cloneGenRef.current++
     setCloneUrl('')
-    setCloneDestination('')
+    setCloneDestinationState('')
+    setIsCloneDestinationTouched(false)
     setIsCloning(false)
     setCloneError(null)
     setCloneProgress(null)
@@ -103,17 +104,18 @@ export function useAddRepoCloneFlow({
     const gen = cloneGenRef.current
     const dir = await workspaceHostClient.repos.pickDirectory()
     if (dir && gen === cloneGenRef.current) {
-      setCloneDestination(dir)
+      setCloneDestinationState(dir)
+      setIsCloneDestinationTouched(true)
       setCloneError(null)
     }
   }
 
   const handleClone = async (): Promise<void> => {
     const trimmedUrl = cloneUrl.trim()
-    if (!trimmedUrl || !cloneDestination.trim()) {
+    if (!trimmedUrl || !effectiveCloneDestination.trim()) {
       return
     }
-    const requestHostToken = hostTokenRef.current
+    const requestHostToken = hostToken
     const gen = ++cloneGenRef.current
     setIsCloning(true)
     setCloneError(null)
@@ -134,14 +136,14 @@ export function useAddRepoCloneFlow({
               {
                 expectedRevision,
                 url: trimmedUrl,
-                destination: cloneDestination.trim()
+                destination: effectiveCloneDestination.trim()
               },
               { timeoutMs: 10 * 60_000 }
             )
           : await workspaceHostClient.repos.clone({
               expectedRevision,
               url: trimmedUrl,
-              destination: cloneDestination.trim()
+              destination: effectiveCloneDestination.trim()
             })
       await refreshAfterProjectCatalogMutation(target, cloneResult.revision)
       const repo = cloneResult.repo satisfies Repo
@@ -174,7 +176,7 @@ export function useAddRepoCloneFlow({
 
   return {
     cloneUrl,
-    cloneDestination,
+    cloneDestination: effectiveCloneDestination,
     cloneError,
     cloneProgress,
     isCloning,

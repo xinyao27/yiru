@@ -1,6 +1,6 @@
 import type { Editor } from '@tiptap/react'
 import type { DiffComment } from '@yiru/runtime-protocol/workbench/types'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { MutableRefObject } from 'react'
 import { useEventCallback } from '~renderer/react/use-event-callback'
 import type { AppState } from '~renderer/store/state'
@@ -49,12 +49,10 @@ export function useRichMarkdownReviewController({
   worktreeId,
   worktreeRoot
 }: UseRichMarkdownReviewControllerOptions) {
-  const [annotationTarget, setAnnotationTarget] = useState<RichMarkdownAnnotationTarget | null>(
-    null
-  )
-  const [annotationPopover, setAnnotationPopover] = useState<RichMarkdownAnnotationTarget | null>(
-    null
-  )
+  const [storedAnnotationTarget, setAnnotationTarget] =
+    useState<RichMarkdownAnnotationTarget | null>(null)
+  const [storedAnnotationPopover, setAnnotationPopover] =
+    useState<RichMarkdownAnnotationTarget | null>(null)
   const annotationPopoverRef = useRef<RichMarkdownAnnotationTarget | null>(null)
   const canAnnotateRichMarkdownRef = useRef(false)
   const markdownCommentsRef = useRef<DiffComment[]>([])
@@ -74,11 +72,15 @@ export function useRichMarkdownReviewController({
     markdownReviewContent,
     worktreeRoot
   })
+  const annotationTarget = canAnnotateRichMarkdown ? storedAnnotationTarget : null
+  const annotationPopover = canAnnotateRichMarkdown ? storedAnnotationPopover : null
 
-  annotationPopoverRef.current = annotationPopover
-  canAnnotateRichMarkdownRef.current = canAnnotateRichMarkdown
-  markdownCommentsRef.current = markdownComments
-  markdownSourceLineOffsetRef.current = markdownSourceLineOffset
+  useLayoutEffect(() => {
+    annotationPopoverRef.current = annotationPopover
+    canAnnotateRichMarkdownRef.current = canAnnotateRichMarkdown
+    markdownCommentsRef.current = markdownComments
+    markdownSourceLineOffsetRef.current = markdownSourceLineOffset
+  })
 
   const copyFeedback = useRichMarkdownReviewCopyFeedback({
     markdownReviewContent,
@@ -222,12 +224,8 @@ export function useRichMarkdownReviewController({
     if (canAnnotateRichMarkdown) {
       return
     }
-    // Why: disabling annotations must immediately remove stale popovers and
-    // highlights that cannot be derived from the next non-annotatable render.
-    // oxlint-disable-next-line react-doctor/no-adjust-state-on-prop-change
-    setAnnotationTarget(null)
-    // oxlint-disable-next-line react-doctor/no-adjust-state-on-prop-change
-    setAnnotationPopover(null)
+    // Why: the popover and target are hidden by the render-time capability
+    // derivation; only the editor-owned highlight needs imperative cleanup.
     clearAllAnnotationHighlights()
   }, [canAnnotateRichMarkdown, clearAllAnnotationHighlights])
 

@@ -2,9 +2,9 @@ import type {
   CrashReportCopySubmissionFailure,
   CrashReportRecord
 } from '@yiru/runtime-protocol/workbench/crash-reporting'
-import { useRef } from 'react'
 import { toast } from 'sonner'
 import { translate } from '~renderer/i18n/i18n'
+import { useEventCallback } from '~renderer/react/use-event-callback'
 import { shellClient } from '~renderer/runtime/shell-client'
 
 export const CRASH_REPORT_COPY_FAILURE_TOAST_ID = 'crash-report-copy-failure'
@@ -28,22 +28,13 @@ export function useCrashReportCopy(
   report: CrashReportRecord | null,
   notes: string
 ): (submissionFailure?: CrashReportCopySubmissionFailure) => Promise<void> {
-  const reportId = report?.id ?? null
-  const notesRef = useRef({ reportId, value: notes })
   // Why: a submission toast can outlive the render that created it while the
-  // user edits or changes reports; keep live notes scoped to that report.
-  if (notesRef.current.reportId === reportId) {
-    notesRef.current.value = notes
-  } else {
-    notesRef.current = { reportId, value: notes }
-  }
-  const reportNotes = notesRef.current
-
-  return async (submissionFailure?: CrashReportCopySubmissionFailure): Promise<void> => {
+  // user edits or changes reports; the event callback always sees the latest pair.
+  return useEventCallback(async (submissionFailure?: CrashReportCopySubmissionFailure) => {
     try {
       const result = await shellClient.crashReports.copyLatestDiagnostics({
         ...(report ? { reportId: report.id } : {}),
-        notes: reportNotes.value,
+        notes,
         ...(submissionFailure ? { submissionFailure } : {})
       })
       if (!result.ok) {
@@ -64,5 +55,5 @@ export function useCrashReportCopy(
       // replacement keeps the failure actionable without exposing raw IPC detail.
       showCopyFailure()
     }
-  }
+  })
 }

@@ -77,14 +77,14 @@
             SourceStatusSnapshot(
                 entries: [
                     entry(
-                        "apps/mobile-ios/YiruMobile/DesignSystem/Foundations/Theme.swift",
+                        "apps/mobile/YiruMobile/DesignSystem/Foundations/Theme.swift",
                         .modified,
                         .unstaged,
                         added: 18,
                         removed: 4
                     ),
                     entry(
-                        "apps/mobile-ios/YiruMobile/Features/Workspace/WorkspaceListView.swift",
+                        "apps/mobile/YiruMobile/Features/Workspace/WorkspaceListView.swift",
                         .modified,
                         .unstaged,
                         added: 22,
@@ -98,7 +98,7 @@
                         removed: 1
                     ),
                     entry(
-                        "apps/mobile-ios/YiruMobile/Features/SourceControl/SourceView.swift",
+                        "apps/mobile/YiruMobile/Features/SourceControl/SourceView.swift",
                         .untracked,
                         .untracked,
                         added: 284
@@ -110,7 +110,7 @@
                         added: 94
                     ),
                     entry(
-                        "scripts/mobile-ios-wire/source-control-wire.mjs",
+                        "scripts/mobile-wire/source-control-wire.mjs",
                         .added,
                         .staged,
                         added: 176
@@ -199,14 +199,14 @@
                 errorMessage: nil,
                 entries: [
                     SourceBranchFile(
-                        path: "apps/mobile-ios/YiruMobile/App/AppView.swift",
+                        path: "apps/mobile/YiruMobile/App/AppView.swift",
                         status: .modified,
                         oldPath: nil,
                         added: 22,
                         removed: 8
                     ),
                     SourceBranchFile(
-                        path: "apps/mobile-ios/README.md",
+                        path: "apps/mobile/README.md",
                         status: .added,
                         oldPath: nil,
                         added: 48,
@@ -270,14 +270,14 @@
             if commitID == "de7b1a4f93b2" {
                 return [
                     SourceCommitFile(
-                        path: "apps/mobile-ios/YiruMobile/App/AppView.swift",
+                        path: "apps/mobile/YiruMobile/App/AppView.swift",
                         status: .modified,
                         oldPath: nil,
                         added: 42,
                         removed: 8
                     ),
                     SourceCommitFile(
-                        path: "apps/mobile-ios/RELEASE.md",
+                        path: "apps/mobile/RELEASE.md",
                         status: .added,
                         oldPath: nil,
                         added: 184,

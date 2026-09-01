@@ -1,5 +1,5 @@
 import type { GitBranchChangeEntry, GitStatusEntry } from '@yiru/runtime-protocol/workbench/types'
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useLayoutEffect, useRef } from 'react'
 import type { ReactNode } from 'react'
 import { selectWorktreeDiffCommentsOrEmpty } from '~renderer/diff-comments/worktree-selector'
 import { useEventCallback } from '~renderer/react/use-event-callback'
@@ -111,7 +111,9 @@ export default function CombinedDiffViewer({
 
   const sectionIndexByKey = (() => createCombinedDiffSectionIndexMap(sections))()
   const sectionIndexByKeyRef = useRef(sectionIndexByKey)
-  sectionIndexByKeyRef.current = sectionIndexByKey
+  useLayoutEffect(() => {
+    sectionIndexByKeyRef.current = sectionIndexByKey
+  }, [sectionIndexByKey])
   const requestCombinedDiffSectionReload = useEventCallback((index: number): void => {
     const section = sectionsRef.current[index]
     if (!section || section.dirty) {
@@ -259,8 +261,7 @@ export default function CombinedDiffViewer({
     }
   }
 
-  const handleSectionSaveRef = useRef(handleSectionSave)
-  handleSectionSaveRef.current = handleSectionSave
+  const handleSectionSaveEvent = useEventCallback(handleSectionSave)
 
   useEffect(() => {
     if (sections.length === 0 && entries.length > 0) {
@@ -331,7 +332,7 @@ export default function CombinedDiffViewer({
   const handleFileEditComplete = (fileKey: string, contents: string) => {
     const index = sectionIndexByKeyRef.current.get(fileKey)
     if (index !== undefined) {
-      void handleSectionSaveRef.current(index, contents)
+      void handleSectionSaveEvent(index, contents)
     }
   }
   const handleRetryFile = (fileKey: string) => {

@@ -152,8 +152,6 @@ export function FeatureWallTourSurface({
     markWorkbenchStepVisited,
     markReviewStepVisited
   } = completion
-  const markWorkflowVisitedRef = useRef(markWorkflowVisited)
-  markWorkflowVisitedRef.current = markWorkflowVisited
 
   const agentsActiveStep =
     selected.id === 'agents-orchestration'
@@ -175,10 +173,10 @@ export function FeatureWallTourSurface({
 
   useEffect(() => {
     if (isOpen) {
-      markWorkflowVisitedRef.current(DEFAULT_FEATURE_WALL_WORKFLOW_ID)
+      markWorkflowVisited(DEFAULT_FEATURE_WALL_WORKFLOW_ID)
       trackFeatureWallWorkflowSelection(FEATURE_WALL_WORKFLOWS[0], source)
     }
-  }, [isOpen, source])
+  }, [isOpen, markWorkflowVisited, source])
 
   const handleSelect = (workflow: FeatureWallWorkflow): void => {
     markWorkflowVisited(workflow.id)

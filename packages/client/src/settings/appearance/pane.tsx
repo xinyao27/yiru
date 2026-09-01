@@ -80,6 +80,9 @@ export function AppearancePane({
   const [manuallyOpenSection, setManuallyOpenSection] = useState<AppearanceSectionKey | null>(
     'interface'
   )
+  if (appearanceAccordionDeepLink && manuallyOpenSection !== appearanceAccordionDeepLink) {
+    setManuallyOpenSection(appearanceAccordionDeepLink)
+  }
 
   // Why: nested deep links (e.g. Usage percentages) land under Window & Sidebar;
   // expand that accordion before Settings scrolls so the row is actually visible.
@@ -87,7 +90,6 @@ export function AppearancePane({
     if (!appearanceAccordionDeepLink) {
       return
     }
-    setManuallyOpenSection(appearanceAccordionDeepLink)
     clearAppearanceAccordionDeepLink()
     // Why: accordion expand is layout-synchronous; scroll on the next frame so
     // the target has non-zero height when Settings (or this fallback) scrolls.

@@ -1,5 +1,5 @@
 import type { AiVaultScope, AiVaultSession } from '@yiru/runtime-protocol/model/agent'
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { toast } from 'sonner'
 import { AgentSessionContinuationDialog } from '~renderer/agent-session-continuation/dialog'
 import { translate } from '~renderer/i18n/i18n'
@@ -69,7 +69,11 @@ function LocalAiVaultPanel(): React.JSX.Element {
     useAiVaultOriginalPaneActions()
   const [query, setQuery] = useState('')
   // Why: scope depends on current workspace/project availability, so only stable view options persist.
-  const [scope, setScope] = useState<AiVaultScope>(DEFAULT_AI_VAULT_SCOPE)
+  const [scopeSelection, setScopeSelection] = useState({
+    scope: DEFAULT_AI_VAULT_SCOPE,
+    preferredScope: DEFAULT_AI_VAULT_SCOPE,
+    userChangedScope: false
+  })
   const {
     agents,
     sort,
@@ -82,8 +86,6 @@ function LocalAiVaultPanel(): React.JSX.Element {
     resetViewOptions
   } = usePersistedAiVaultViewOptions()
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(() => new Set())
-  const userChangedScopeRef = useRef(false)
-  const preferredScopeRef = useRef<AiVaultScope>(DEFAULT_AI_VAULT_SCOPE)
 
   const runtimeHostOptions = (() => buildRuntimeAiVaultHostScopeOptions(runtimeEnvironments))()
   const availableExecutionHostScopes = (() => runtimeHostOptions.map((option) => option.id))()
@@ -154,30 +156,24 @@ function LocalAiVaultPanel(): React.JSX.Element {
     hideEmptySessions
   })
 
-  // Workspace is the preferred default, but unavailable context still falls back to All.
-  useEffect(() => {
-    const normalizedScope = normalizeAiVaultScopeForContext({
-      scope,
-      activeProjectKey,
-      activeWorktreePath
-    })
-    if (normalizedScope !== scope) {
-      setScope(normalizedScope)
-    }
-  }, [activeProjectKey, activeWorktreePath, scope])
-
-  useEffect(() => {
-    const restorableScope = getRestorableAiVaultScope({
-      scope,
+  // Workspace is the preferred default, but unavailable context still falls
+  // back to All and restores without keeping a second effect-synchronized fact.
+  const normalizedScope = normalizeAiVaultScopeForContext({
+    scope: scopeSelection.scope,
+    activeProjectKey,
+    activeWorktreePath
+  })
+  const scope =
+    getRestorableAiVaultScope({
+      scope: normalizedScope,
       activeProjectKey,
       activeWorktreePath,
-      preferredScope: preferredScopeRef.current,
-      userChangedScope: userChangedScopeRef.current
-    })
-    if (restorableScope) {
-      setScope(restorableScope)
-    }
-  }, [activeProjectKey, activeWorktreePath, scope])
+      preferredScope: scopeSelection.preferredScope,
+      userChangedScope: scopeSelection.userChangedScope
+    }) ?? normalizedScope
+  if (scopeSelection.scope !== scope) {
+    setScopeSelection({ ...scopeSelection, scope })
+  }
 
   const filteredSessions = (() =>
     filterAiVaultSessions(sessions, {
@@ -230,9 +226,11 @@ function LocalAiVaultPanel(): React.JSX.Element {
     })
 
   const handleScopeChange = (nextScope: AiVaultScope) => {
-    preferredScopeRef.current = nextScope
-    userChangedScopeRef.current = nextScope !== DEFAULT_AI_VAULT_SCOPE
-    setScope(nextScope)
+    setScopeSelection({
+      scope: nextScope,
+      preferredScope: nextScope,
+      userChangedScope: nextScope !== DEFAULT_AI_VAULT_SCOPE
+    })
   }
 
   const toggleGroup = (key: string) => {

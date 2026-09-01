@@ -151,17 +151,10 @@ export function WorktreeTitleInlineRename({
   // request has been acked, so a same-value re-render — including React's
   // Strict Mode remount check — can't ack twice; it resets once the parent
   // clears its trigger so the *next* request is treated as fresh.
-  const ackedBeginEditingRef = useRef(false)
   useEffect(() => {
-    if (!beginEditing) {
-      ackedBeginEditingRef.current = false
-      return
+    if (beginEditing) {
+      onBeginEditingConsumed?.()
     }
-    if (ackedBeginEditingRef.current) {
-      return
-    }
-    ackedBeginEditingRef.current = true
-    onBeginEditingConsumed?.()
   }, [beginEditing, onBeginEditingConsumed])
 
   // Why: opening the editor for a beginEditing request reacts to a prop
@@ -171,11 +164,9 @@ export function WorktreeTitleInlineRename({
   // recommends for adjusting state when a prop changes. The ref tracks
   // "opened for this request" independently of the ack ref above, so Strict
   // Mode re-invoking render can't open it twice.
-  const openedForBeginEditingRef = useRef(false)
-  if (!beginEditing) {
-    openedForBeginEditingRef.current = false
-  } else if (!openedForBeginEditingRef.current) {
-    openedForBeginEditingRef.current = true
+  const [previousBeginEditing, setPreviousBeginEditing] = useState(beginEditing)
+  if (beginEditing !== previousBeginEditing) {
+    setPreviousBeginEditing(beginEditing)
     if (!disabled && !editing) {
       setValue(displayName)
       setEditing(true)

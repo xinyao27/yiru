@@ -1,6 +1,6 @@
 import { useSortable } from '@dnd-kit/sortable'
 import type { GitFileStatus } from '@yiru/runtime-protocol/workbench/types'
-import { useEffect, useRef, useState } from 'react'
+import { createElement, useEffect, useRef, useState } from 'react'
 import { getEditorDisplayLabel } from '~renderer/editor/labels'
 import { canOpenMarkdownPreview } from '~renderer/editor/markdown-preview/controls'
 import { renameFileOnDisk } from '~renderer/editor/rename-file'
@@ -268,7 +268,7 @@ export default function EditorFileTab({
       ) : isMarkdownPreviewTab ? (
         <Eye className={tabIconClassName} />
       ) : (
-        <FileIcon className={tabIconClassName} />
+        createElement(FileIcon, { className: tabIconClassName })
       )}
       {isPinned && <Pin className="text-muted-foreground mr-1 size-3.5 shrink-0" aria-hidden />}
       <span className="flex min-w-0 flex-1 items-baseline">

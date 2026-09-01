@@ -1,11 +1,6 @@
 import type { OnDiffLineEnterLeaveProps, OnLineEnterLeaveProps } from '@pierre/diffs'
-import {
-  CodeView,
-  type CodeViewHandle,
-  type CodeViewReactOptions,
-  type DiffLineAnnotation
-} from '@pierre/diffs/react'
-import { useImperativeHandle, useLayoutEffect, useRef, useState } from 'react'
+import { CodeView, type CodeViewHandle, type CodeViewReactOptions } from '@pierre/diffs/react'
+import { useImperativeHandle, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { DecoratedDiffComment } from '~renderer/diff-comments/decorated-diff-comment'
 import { translate } from '~renderer/i18n/i18n'
 import { Copy, SelectionAll } from '~renderer/icons/hugeicons'
@@ -66,12 +61,6 @@ type OpenComposer = {
   itemId: string
   lineNumber: number
   startLine?: number
-}
-
-type CachedFileAnnotations = {
-  comments: readonly DecoratedDiffComment[]
-  composer: OpenComposer | null
-  annotations: DiffLineAnnotation<DiffCodeViewAnnotation>[]
 }
 
 type HoveredLine = {
@@ -142,47 +131,33 @@ export function DiffCodeView({
   const [composer, setComposer] = useState<OpenComposer | null>(null)
   const isMac = (() => navigator.userAgent.includes('Mac'))()
 
-  const fileById = (() => {
+  const fileById = useMemo(() => {
     const map = new Map<string, DiffCodeViewFile>()
     for (const file of files) {
       map.set(file.source.key, file)
     }
     return map
-  })()
-  // Why: CodeView diffs the whole options object per render and force-renders
-  // every mounted row when it differs, so nothing that changes with the file
-  // list may be captured in it. Callbacks reach the current list through here.
-  const fileByIdRef = useRef(fileById)
-  fileByIdRef.current = fileById
+  }, [files])
 
   // Why: CodeView adopts an item only when its object identity changes, so the
   // annotation array has to stay referentially stable while nothing about that
   // file's comments or composer moved.
-  const annotationCacheRef = useRef(new Map<string, CachedFileAnnotations>())
-  const fileInputs: DiffCodeViewFileInput[] = (() => {
-    const cache = annotationCacheRef.current
-    const next = new Map<string, CachedFileAnnotations>()
-    const inputs = files.map((file) => {
-      const id = file.source.key
-      const comments = file.comments ?? EMPTY_COMMENTS
-      const fileComposer = composer?.itemId === id ? composer : null
-      const cached = cache.get(id)
-      const annotations =
-        cached && cached.comments === comments && cached.composer === fileComposer
-          ? cached.annotations
-          : buildDiffCodeViewAnnotations(comments, fileComposer)
-      next.set(id, { comments, composer: fileComposer, annotations })
-      return {
-        source: file.source,
-        collapsed: file.collapsed === true,
-        annotations,
-        notice: file.notice,
-        editable: file.editable
-      }
-    })
-    annotationCacheRef.current = next
-    return inputs
-  })()
+  const fileInputs: DiffCodeViewFileInput[] = useMemo(
+    () =>
+      files.map((file) => {
+        const id = file.source.key
+        const comments = file.comments ?? EMPTY_COMMENTS
+        const fileComposer = composer?.itemId === id ? composer : null
+        return {
+          source: file.source,
+          collapsed: file.collapsed === true,
+          annotations: buildDiffCodeViewAnnotations(comments, fileComposer),
+          notice: file.notice,
+          editable: file.editable
+        }
+      }),
+    [composer, files]
+  )
   const items = useDiffCodeViewItems(fileInputs)
 
   const handleSubmitComment = async (body: string) => {
@@ -218,7 +193,7 @@ export function DiffCodeView({
     // Why: Pierre treats this callback as a complete gutter API and rejects
     // pairing it with the React renderGutterUtility API.
     onGutterUtilityClick: (range, context) => {
-      const target = fileByIdRef.current.get(context.item.id)
+      const target = fileById.get(context.item.id)
       if (!target || !isCommentableRange(range, target.commentableLineNumbers)) {
         return
       }
@@ -250,7 +225,7 @@ export function DiffCodeView({
     item: { id: string }
   ) =>
     renderDiffCodeViewAnnotation(annotation, {
-      relativePath: fileByIdRef.current.get(item.id)?.source.path ?? '',
+      relativePath: fileById.get(item.id)?.source.path ?? '',
       onRetry: onRetryFile ? () => onRetryFile(item.id) : undefined,
       onSaveLimitedDiff: onSaveLimitedDiff ? () => onSaveLimitedDiff(item.id) : undefined,
       worktreeId,

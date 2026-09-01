@@ -5,7 +5,7 @@
 // shared lazy chunk instead of the app's eager first-paint CSS.
 import '@xterm/xterm/css/xterm.css'
 import './terminal.css'
-import { useEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef } from 'react'
 import { useEffectiveMacOptionAsAlt } from '~renderer/keyboard-layout/use-effective-mac-option-as-alt'
 // Why: registry lives in a leaf module so the store slice can import it
 // without re-entering the `slice → TerminalPane → store → slice` cycle
@@ -92,7 +92,6 @@ export default function TerminalPane({
   const quickCommands = useTerminalQuickCommandMenu({ tabId, worktreeId })
 
   const settingsRef = useRef(paneStore.settings)
-  settingsRef.current = paneStore.settings
   // Why: the persisted setting can be 'auto' (default) or one of the four
   // explicit modes. useEffectiveMacOptionAsAlt resolves 'auto' into
   // 'true' | 'false' based on the probe's current layout category (US → 'true',
@@ -103,9 +102,12 @@ export default function TerminalPane({
     paneStore.settings?.terminalMacOptionAsAlt
   )
   const macOptionAsAltRef = useRef<MacOptionAsAlt>(effectiveMacOptionAsAlt)
-  macOptionAsAltRef.current = effectiveMacOptionAsAlt
   const onPtyExitRef = useRef(onPtyExit)
-  onPtyExitRef.current = onPtyExit
+  useLayoutEffect(() => {
+    settingsRef.current = paneStore.settings
+    macOptionAsAltRef.current = effectiveMacOptionAsAlt
+    onPtyExitRef.current = onPtyExit
+  }, [effectiveMacOptionAsAlt, onPtyExit, paneStore.settings])
 
   const systemPrefersDark = useSystemPrefersDark()
   const dispatchNotification = useNotificationDispatch(worktreeId)
@@ -381,6 +383,7 @@ export default function TerminalPane({
     <TerminalPaneView
       agentSessionContinuation={local.agentSessionContinuation}
       agentSessionFork={local.agentSessionFork}
+      activePane={local.paneSnapshot.activePane}
       contextMenu={contextMenu}
       cwd={cwd}
       daemonActions={local.daemonActions}
@@ -396,7 +399,9 @@ export default function TerminalPane({
       paneClose={paneClose}
       paneCount={local.paneCount}
       paneCwdRef={local.paneCwdRef}
+      panePtyIds={local.panePtyIds}
       paneTitles={local.paneTitles}
+      panes={local.paneSnapshot.panes}
       paneTransportsRef={local.paneTransportsRef}
       primarySelection={primarySelection}
       quickCommands={quickCommands}

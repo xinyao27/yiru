@@ -1,13 +1,13 @@
 import type { IDisposable } from '@xterm/xterm'
 import type { TerminalKittyKeyboardModeTracker } from '@yiru/runtime-protocol/workbench/terminal/kitty-keyboard-mode-tracker'
-import { useRef, useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 
 import { useDaemonActions } from '../daemon-actions/use-actions'
 import { isTerminalSessionStateSaveFailure } from '../terminal/session-state-save-failure'
 import { isTerminalZeroDimensionsDiagnostic } from '../terminal/zero-dimensions-diagnostic'
 import type { AgentSessionContinuationRequest } from './agent/session-continuation'
 import type { SearchState } from './keyboard-handlers'
-import type { PaneManager } from './pane-manager/pane-manager'
+import type { ManagedPane, PaneManager } from './pane-manager/pane-manager'
 import type { PtyTransport } from './pty/transport-types'
 import type { PreparedAgentSessionFork } from './terminal-agent-session-fork'
 import { reportTerminalPaneError } from './terminal-error-reporting'
@@ -17,6 +17,11 @@ type TerminalPaneLocalStateInput = {
   isActive: boolean
   isVisible: boolean
   isWorktreeActive: boolean
+}
+
+export type TerminalPaneSnapshot = {
+  activePane: ManagedPane | null
+  panes: ManagedPane[]
 }
 
 export function useTerminalPaneLocalState({
@@ -40,17 +45,18 @@ export function useTerminalPaneLocalState({
   const panePtyBindingsRef = useRef<Map<number, IDisposable>>(new Map())
   const replayingPanesRef = useRef<Map<number, number>>(new Map())
   const isActiveRef = useRef(isActive)
-  isActiveRef.current = isActive
   const isRendererVisible = isVisible && isWorktreeActive
   const isVisibleRef = useRef(isRendererVisible)
-  isVisibleRef.current = isRendererVisible
 
   const [expandedPaneId, setExpandedPaneId] = useState<number | null>(null)
   const [paneCount, setPaneCount] = useState(0)
   const [paneLayoutRevision, setPaneLayoutRevision] = useState(0)
+  const [paneSnapshot, setPaneSnapshot] = useState<TerminalPaneSnapshot>({
+    activePane: null,
+    panes: []
+  })
   const [searchOpen, setSearchOpen] = useState(false)
   const searchOpenRef = useRef(false)
-  searchOpenRef.current = searchOpen
   const searchStateRef = useRef<SearchState>({ query: '', caseSensitive: false, regex: false })
   const [agentSessionFork, setAgentSessionFork] = useState<PreparedAgentSessionFork | null>(null)
   const [agentSessionContinuation, setAgentSessionContinuation] =
@@ -60,7 +66,12 @@ export function useTerminalPaneLocalState({
 
   const [paneTitles, setPaneTitles] = useState<Record<number, string>>({})
   const paneTitlesRef = useRef<Record<number, string>>({})
-  paneTitlesRef.current = paneTitles
+  useLayoutEffect(() => {
+    isActiveRef.current = isActive
+    isVisibleRef.current = isRendererVisible
+    searchOpenRef.current = searchOpen
+    paneTitlesRef.current = paneTitles
+  }, [isActive, isRendererVisible, paneTitles, searchOpen])
   const removedTitleLeafIdsRef = useRef<Set<string>>(new Set())
   const clearedScrollbackLeafIdsRef = useRef<Set<string>>(new Set())
   const onPtyErrorRef = useRef((_paneId: number, message: string) => {
@@ -70,7 +81,10 @@ export function useTerminalPaneLocalState({
       reportTerminalPaneError(message, 'terminal-pty')
     }
   })
-  const refreshMobileFitState = useTerminalMobileFit({ managerRef, paneTransportsRef })
+  const { panePtyIds, refreshMobileFitState } = useTerminalMobileFit({
+    managerRef,
+    paneTransportsRef
+  })
 
   return {
     agentSessionContinuation,
@@ -93,7 +107,9 @@ export function useTerminalPaneLocalState({
     paneLastThemeModeRef,
     paneLayoutRevision,
     paneMode2031Ref,
+    paneSnapshot,
     panePtyBindingsRef,
+    panePtyIds,
     paneTitles,
     paneTitlesRef,
     paneTransportsRef,
@@ -110,6 +126,7 @@ export function useTerminalPaneLocalState({
     setExpandedPaneId,
     setPaneCount,
     setPaneLayoutRevision,
+    setPaneSnapshot,
     setPaneTitles,
     setSearchOpen,
     setSessionStateSaveFailureOpen

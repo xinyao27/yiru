@@ -1,6 +1,29 @@
 import { Extension } from '@tiptap/core'
 import { Plugin, PluginKey } from '@tiptap/pm/state'
 import { CellSelection } from '@tiptap/pm/tables'
+import type { EditorView } from '@tiptap/pm/view'
+
+type ProseMirrorDomSelectionRange = {
+  anchorNode: Node | null
+  anchorOffset: number
+  focusNode: Node | null
+  focusOffset: number
+}
+
+type ProseMirrorDomObserver = {
+  currentSelection: { set: (selection: ProseMirrorDomSelectionRange) => void }
+  flush: () => void
+  onSelectionChange: () => void
+  setCurSelection: () => void
+  start: () => void
+  stop: () => void
+}
+
+type ProseMirrorDragView = EditorView & {
+  domObserver: ProseMirrorDomObserver
+  domSelectionRange: () => ProseMirrorDomSelectionRange
+  input: { mouseDown: { allowDefault?: boolean } | null }
+}
 
 /**
  * Workaround for ProseMirror/Chrome drag-selection breakage.
@@ -44,8 +67,7 @@ export const DragSelectionGuard = Extension.create({
 
   addProseMirrorPlugins() {
     // Why: shared across the plugin's view() and filterTransaction() hooks.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let viewRef: any = null
+    let viewRef: ProseMirrorDragView | null = null
     let suppressedDuringDrag = false
 
     return [
@@ -71,9 +93,9 @@ export const DragSelectionGuard = Extension.create({
         view(editorView) {
           // Why: domObserver and input are ProseMirror-internal properties
           // with no public API. The cast is required to access them.
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          viewRef = editorView as any
-          const observer = viewRef.domObserver
+          const dragView = editorView as unknown as ProseMirrorDragView
+          viewRef = dragView
+          const observer = dragView.domObserver
           const doc = editorView.dom.ownerDocument
 
           const originalOnSelectionChange: () => void = observer.onSelectionChange
@@ -83,7 +105,7 @@ export const DragSelectionGuard = Extension.create({
           doc.removeEventListener('selectionchange', originalOnSelectionChange)
 
           const patchedOnSelectionChange = (): void => {
-            const mouseDown = viewRef.input.mouseDown
+            const mouseDown = dragView.input.mouseDown
             // Why: allowDefault is false on initial click, then becomes true
             // once the mouse moves ≥ 4 px — i.e. it's a genuine drag, not a
             // click. We only suppress during actual drags so normal
@@ -119,14 +141,14 @@ export const DragSelectionGuard = Extension.create({
               // Why: if the plugin was destroyed between mouseup and this
               // rAF callback, viewRef is null — bail out to avoid a
               // TypeError on viewRef.domSelectionRange().
-              if (!viewRef || !editorView.dom.isConnected) {
+              if (viewRef !== dragView || !editorView.dom.isConnected) {
                 return
               }
               // Why: if a new drag started between mouseup and this rAF
               // callback (extremely unlikely but possible within a single
               // frame), bail out to avoid disrupting the new drag's
               // native selection.
-              const mouseDown = viewRef?.input?.mouseDown
+              const mouseDown = dragView.input.mouseDown
               if (mouseDown && mouseDown.allowDefault) {
                 return
               }
@@ -135,7 +157,7 @@ export const DragSelectionGuard = Extension.create({
               // from programmatically-set ones (table cells stay highlighted
               // with a drag selection but lose highlighting when set via
               // collapse + extend).
-              const domSel = viewRef.domSelectionRange()
+              const domSel = dragView.domSelectionRange()
               const savedAnchor: Node | null = domSel.anchorNode
               const savedAnchorOff: number = domSel.anchorOffset
               const savedFocus: Node | null = domSel.focusNode
@@ -156,12 +178,7 @@ export const DragSelectionGuard = Extension.create({
               // table-cell highlighting. We pause the DOMObserver around the
               // restore to prevent the selection write from triggering another
               // flush → dispatch → selectionToDOM cycle.
-              if (
-                savedAnchor &&
-                savedFocus &&
-                (savedAnchor as Element).isConnected &&
-                (savedFocus as Element).isConnected
-              ) {
+              if (savedAnchor && savedFocus && savedAnchor.isConnected && savedFocus.isConnected) {
                 const sel = doc.getSelection()
                 if (sel) {
                   observer.stop()

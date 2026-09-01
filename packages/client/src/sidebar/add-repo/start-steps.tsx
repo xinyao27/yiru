@@ -108,14 +108,11 @@ export function AddRepoLocalStartStep({
   const [selectedKind, setSelectedKind] = useState<string | null>(primaryAction.kind)
 
   useEffect(() => {
-    if (isAdding) {
-      setSelectedKind(null)
-      return
-    }
     if (!isAdding) {
       browseActionRef.current?.focus()
     }
   }, [isAdding])
+  const displayedSelectedKind = isAdding ? null : selectedKind
 
   // ↑/↓ rove focus across the action buttons in visual order; focus drives the selection.
   const handleArrowNavigation = (event: React.KeyboardEvent<HTMLDivElement>): void => {
@@ -173,7 +170,7 @@ export function AddRepoLocalStartStep({
           title={primaryAction.title}
           description={primaryAction.description}
           disabled={isAdding}
-          selected={selectedKind === primaryAction.kind}
+          selected={displayedSelectedKind === primaryAction.kind}
           buttonRef={browseActionRef}
           onClick={primaryAction.onClick}
           onFocus={() => setSelectedKind(primaryAction.kind)}
@@ -195,7 +192,7 @@ export function AddRepoLocalStartStep({
                 title={action.title}
                 description={action.description}
                 disabled={isAdding || Boolean(action.disabled)}
-                selected={selectedKind === action.kind}
+                selected={displayedSelectedKind === action.kind}
                 onClick={action.onClick}
                 onFocus={() => setSelectedKind(action.kind)}
                 className={cn(

@@ -37,18 +37,14 @@ export function ConfirmationDialogProvider({
 }): React.JSX.Element {
   const nextIdRef = useRef(0)
   const [queue, setQueue] = useState<ConfirmationDialogRequest[]>([])
+  const [lastDisplayedRequest, setLastDisplayedRequest] =
+    useState<ConfirmationDialogRequest | null>(null)
   const activeRequest = queue[0] ?? null
-  const activeRequestRef = useRef<ConfirmationDialogRequest | null>(activeRequest)
   const setContextualToursBlockingSurfaceVisible = useAppStore(
     (s) => s.setContextualToursBlockingSurfaceVisible
   )
-  const lastDisplayedRequestRef = useRef<ConfirmationDialogRequest | null>(activeRequest)
-  activeRequestRef.current = activeRequest
-  if (activeRequest) {
-    lastDisplayedRequestRef.current = activeRequest
-  }
   // Why: Radix keeps dialog content mounted while closing; keep labels stable without a post-render Effect.
-  const displayedRequest = activeRequest ?? lastDisplayedRequestRef.current
+  const displayedRequest = activeRequest ?? lastDisplayedRequest
 
   useEffect(() => {
     // Why: this provider's dialog is not represented by activeModal. Block
@@ -70,10 +66,11 @@ export function ConfirmationDialogProvider({
   }) satisfies ConfirmationDialogContextValue)
 
   const settleActiveRequest = (confirmed: boolean) => {
-    const request = activeRequestRef.current
+    const request = activeRequest
     if (!request) {
       return
     }
+    setLastDisplayedRequest(request)
     request.resolve(confirmed)
     setQueue((currentQueue) => {
       if (currentQueue[0]?.id === request.id) {

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 // Why: when the .md file is being modified externally (e.g. the AI is
 // streaming writes), each external-change event replaces the `content`
@@ -13,7 +13,9 @@ export function usePreserveSectionDuringExternalEdit(
 ): string {
   const [renderedContent, setRenderedContent] = useState(content)
   const pendingContentRef = useRef(content)
-  pendingContentRef.current = content
+  useLayoutEffect(() => {
+    pendingContentRef.current = content
+  }, [content])
   useEffect(() => {
     if (content === renderedContent) {
       return

@@ -42,7 +42,7 @@ export function EmulatorScreenStreamContent({
       ? previewUrl.slice(SCRCPY_PREFIX.length)
       : null
 
-  const video = useEmulatorVideoStream(
+  const { canvasRef, error: videoError } = useEmulatorVideoStream(
     androidDeviceId ?? undefined,
     streamKey,
     showStream && Boolean(androidDeviceId),
@@ -55,10 +55,10 @@ export function EmulatorScreenStreamContent({
   )
 
   useEffect(() => {
-    if (frameStream.error || video.error) {
+    if (frameStream.error || videoError) {
       onStreamError()
     }
-  }, [frameStream.error, video.error, onStreamError])
+  }, [frameStream.error, videoError, onStreamError])
 
   const mediaStyle = resolveStreamMediaStyle(streamRotation, screenAspectRatio)
   const mediaClassName =
@@ -66,10 +66,10 @@ export function EmulatorScreenStreamContent({
       ? 'block h-full w-full bg-black object-contain'
       : 'absolute left-1/2 top-1/2 block max-w-none bg-black object-contain'
 
-  if (androidDeviceId && showStream && !video.error) {
+  if (androidDeviceId && showStream && !videoError) {
     return (
       <canvas
-        ref={video.canvasRef}
+        ref={canvasRef}
         className={mediaClassName}
         style={mediaStyle}
         aria-label={translate(
@@ -104,8 +104,8 @@ export function EmulatorScreenStreamContent({
     )
   }
 
-  const waitingForFrame = showStream && !frameStream.error && !video.error
-  const displayError = streamError || Boolean(frameStream.error) || Boolean(video.error)
+  const waitingForFrame = showStream && !frameStream.error && !videoError
+  const displayError = streamError || Boolean(frameStream.error) || Boolean(videoError)
 
   return (
     <div className="bg-muted/20 text-muted-foreground flex h-full w-full flex-col items-center justify-center gap-3">

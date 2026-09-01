@@ -32,15 +32,15 @@ export function useOnboardingPreferences(currentStepId: StepId) {
     }) !== 'manual'
   )
   const [theme, setTheme] = useState<GlobalSettings['theme']>(settings?.theme ?? 'dark')
-  const themeInteractedRef = useRef(false)
-  const agentInteractedRef = useRef(false)
-  const yoloPermissionsInteractedRef = useRef(false)
+  const [themeInteracted, setThemeInteracted] = useState(false)
+  const [agentInteracted, setAgentInteracted] = useState(false)
+  const [yoloPermissionsInteracted, setYoloPermissionsInteracted] = useState(false)
   const [settingsHydrated, setSettingsHydrated] = useState(settings != null)
   const settingsHydration = resolveOnboardingSettingsHydration({
     settings,
     settingsHydrated,
-    themeInteracted: themeInteractedRef.current,
-    agentInteracted: agentInteractedRef.current,
+    themeInteracted,
+    agentInteracted,
     currentTheme: theme,
     currentAgent: selectedAgent
   })
@@ -54,7 +54,7 @@ export function useOnboardingPreferences(currentStepId: StepId) {
       setSelectedAgent(settingsHydration.selectedAgent)
     }
   }
-  if (settings && !yoloPermissionsInteractedRef.current) {
+  if (settings && !yoloPermissionsInteracted) {
     const nextYoloPermissions =
       resolveAgentPermissionModeSummary({
         agentDefaultArgs: settings.agentDefaultArgs,
@@ -65,20 +65,9 @@ export function useOnboardingPreferences(currentStepId: StepId) {
     }
   }
 
-  const selectedAgentRef = useRef(selectedAgent)
-  const detectedAgentIdsRef = useRef<readonly TuiAgent[]>(detectedAgentIds ?? [])
-  const isDetectingRef = useRef(isDetectingAgents)
-  const pathSourceRef = useRef(pathSource)
-  const pathFailureReasonRef = useRef(pathFailureReason)
-  selectedAgentRef.current = selectedAgent
-  detectedAgentIdsRef.current = detectedAgentIds ?? []
-  isDetectingRef.current = isDetectingAgents
-  pathSourceRef.current = pathSource
-  pathFailureReasonRef.current = pathFailureReason
-
   const setSelectedAgentInteractive = (value: TuiAgent | null, fromCollapsedSection = false) => {
-    agentInteractedRef.current = true
-    const previousAgent = selectedAgentRef.current
+    setAgentInteracted(true)
+    const previousAgent = selectedAgent
     setSelectedAgent(value)
     if (value === null || value === previousAgent) {
       return
@@ -87,25 +76,23 @@ export function useOnboardingPreferences(currentStepId: StepId) {
       'onboarding_agent_picked',
       buildAgentPickedPayload({
         agent: value,
-        detectedAgentIds: detectedAgentIdsRef.current,
-        isDetecting: isDetectingRef.current,
+        detectedAgentIds: detectedAgentIds ?? [],
+        isDetecting: isDetectingAgents,
         fromCollapsedSection,
-        pathSource: pathSourceRef.current,
-        pathFailureReason: pathFailureReasonRef.current
+        pathSource,
+        pathFailureReason
       })
     )
   }
   const setThemeInteractive = (value: GlobalSettings['theme']) => {
-    themeInteractedRef.current = true
+    setThemeInteracted(true)
     setTheme(value)
   }
   const setYoloPermissionsInteractive = (enabled: boolean) => {
-    yoloPermissionsInteractedRef.current = true
+    setYoloPermissionsInteracted(true)
     setYoloPermissions(enabled)
   }
 
-  const persistedThemeRef = useRef<GlobalSettings['theme']>(settings?.theme ?? 'dark')
-  persistedThemeRef.current = settings?.theme ?? 'dark'
   const themeStepEntryThemeRef = useRef<GlobalSettings['theme'] | null>(null)
   const themeStepEntryCapturedRef = useRef(false)
   useEffect(() => {
@@ -135,19 +122,13 @@ export function useOnboardingPreferences(currentStepId: StepId) {
     // Why: the session cache may predate shell PATH hydration, so onboarding
     // re-runs detection before choosing a default agent.
     void refreshDetectedAgents().then((ids) => {
-      if (selectedAgentRef.current !== null) {
+      if (selectedAgent !== null) {
         return
       }
       const preferred = getAgentCatalog().find((agent) => ids.includes(agent.id))?.id ?? null
       setSelectedAgent(preferred)
     })
-  }, [refreshDetectedAgents])
-
-  const setLifecycleRootRef = (node: HTMLElement | null): void => {
-    if (node === null) {
-      applyDocumentTheme(persistedThemeRef.current)
-    }
-  }
+  }, [refreshDetectedAgents, selectedAgent])
 
   return {
     settings,
@@ -160,7 +141,6 @@ export function useOnboardingPreferences(currentStepId: StepId) {
     setTheme: setThemeInteractive,
     detectedSet: new Set(detectedAgentIds ?? []),
     isDetectingAgents,
-    getThemeBeforePreview: () => themeStepEntryThemeRef.current,
-    setLifecycleRootRef
+    getThemeBeforePreview: () => themeStepEntryThemeRef.current
   }
 }

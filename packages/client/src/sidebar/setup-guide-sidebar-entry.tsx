@@ -56,17 +56,7 @@ export function SetupGuideSidebarEntry(): React.JSX.Element | null {
     setupComplete,
     dismissed: setupGuideSidebarDismissed
   })
-  const lastVisibleProgressRef = React.useRef<FeatureWallSetupProgress | null>(null)
-  if (showSetupGuideEntry) {
-    lastVisibleProgressRef.current = setupProgress
-  }
-  // Why: host/workspace switches can briefly refresh setup probes. Once the
-  // checklist is visibly available, keep that stable row through the refresh.
-  const renderedProgress = showSetupGuideEntry
-    ? setupProgress
-    : !setupProgress.ready && !setupGuideSidebarDismissed
-      ? lastVisibleProgressRef.current
-      : null
+  const renderedProgress = showSetupGuideEntry ? setupProgress : null
   const handleHideSetupGuide = () => {
     setSetupGuideSidebarDismissed(true)
   }

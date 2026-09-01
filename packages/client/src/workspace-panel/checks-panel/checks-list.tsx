@@ -1,5 +1,5 @@
 import type { PRCheckDetail, PRCheckRunDetails } from '@yiru/runtime-protocol/workbench/types'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { openHttpLink } from '~renderer/editor/http-link-routing'
 import { translate } from '~renderer/i18n/i18n'
 import {
@@ -54,81 +54,89 @@ export function ChecksList({
     : null
   const patchOpenCheckRunDetails = useAppStore((s) => s.patchOpenCheckRunDetails)
   const [checksExpanded, setChecksExpanded] = useState(true)
-  const [expandedCheckKeys, setExpandedCheckKeys] = useState<Set<string>>(new Set())
-  const [detailsByCheckKey, setDetailsByCheckKey] = useState<Record<string, CheckDetailsLoadState>>(
-    {}
+  const [expandedState, setExpandedState] = useState<{
+    contextKey: string
+    keys: Set<string>
+  }>({ contextKey: '', keys: new Set() })
+  const [detailsState, setDetailsState] = useState<{
+    contextKey: string
+    values: Record<string, CheckDetailsLoadState>
+  }>({ contextKey: '', values: {} })
+  const sorted = useMemo(
+    () =>
+      [...checks].sort(
+        (a, b) =>
+          (CHECK_SORT_ORDER[a.conclusion ?? 'pending'] ?? 3) -
+          (CHECK_SORT_ORDER[b.conclusion ?? 'pending'] ?? 3)
+      ),
+    [checks]
   )
-  const detailsContextRef = useRef(checkDetailsContextKey)
-  const autoExpandedContextRef = useRef<string | null>(null)
-  detailsContextRef.current = checkDetailsContextKey
-  const sorted = (() =>
-    [...checks].sort(
-      (a, b) =>
-        (CHECK_SORT_ORDER[a.conclusion ?? 'pending'] ?? 3) -
-        (CHECK_SORT_ORDER[b.conclusion ?? 'pending'] ?? 3)
-    ))()
-  const rows = (() =>
-    sorted.map((check, index) => ({
-      check,
-      key: getCheckDetailsKey(checkDetailsContextKey, check, index)
-    })))()
+  const rows = useMemo(
+    () =>
+      sorted.map((check, index) => ({
+        check,
+        key: getCheckDetailsKey(checkDetailsContextKey, check, index)
+      })),
+    [checkDetailsContextKey, sorted]
+  )
   const passingCount = checks.filter((c) => c.conclusion === 'success').length
   const failingCount = checks.filter((c) => isFailedCheck(c)).length
   const pendingCount = checks.filter(
     (c) => c.conclusion === 'pending' || c.conclusion === null
   ).length
-
-  useEffect(() => {
+  const expandedCheckKeys = useMemo(() => {
     const validKeys = new Set(rows.map((row) => row.key))
-    setDetailsByCheckKey((current) => {
-      const next: Record<string, CheckDetailsLoadState> = {}
-      for (const [key, state] of Object.entries(current)) {
-        if (validKeys.has(key)) {
-          next[key] = state
-        }
+    const next = new Set(
+      expandedState.contextKey === checkDetailsContextKey
+        ? [...expandedState.keys].filter((key) => validKeys.has(key))
+        : []
+    )
+    if (expandedState.contextKey !== checkDetailsContextKey) {
+      const firstFailed = rows.find((row) => isFailedCheck(row.check))
+      if (firstFailed) {
+        next.add(firstFailed.key)
       }
-      return next
-    })
-    setExpandedCheckKeys((current) => {
-      const next = new Set([...current].filter((key) => validKeys.has(key)))
-      if (autoExpandedContextRef.current !== checkDetailsContextKey) {
-        const firstFailed = rows.find((row) => isFailedCheck(row.check))
-        if (firstFailed) {
-          next.add(firstFailed.key)
-        }
-        autoExpandedContextRef.current = checkDetailsContextKey
+    }
+    return next
+  }, [checkDetailsContextKey, expandedState, rows])
+  const storedDetails =
+    detailsState.contextKey === checkDetailsContextKey ? detailsState.values : {}
+  const detailsByCheckKey = Object.fromEntries(
+    rows.flatMap((row) => {
+      const cached = storedDetails[row.key]
+      if (
+        !cached ||
+        (cached.details &&
+          (cached.details.status !== row.check.status ||
+            cached.details.conclusion !== row.check.conclusion))
+      ) {
+        return []
       }
-      return next
+      return [[row.key, cached]]
     })
-  }, [checkDetailsContextKey, rows])
-
-  useEffect(() => {
-    setDetailsByCheckKey((current) => {
-      let changed = false
-      const next: Record<string, CheckDetailsLoadState> = { ...current }
-      for (const row of rows) {
-        const cached = next[row.key]
-        if (!cached?.details) {
-          continue
-        }
-        if (
-          cached.details.status !== row.check.status ||
-          cached.details.conclusion !== row.check.conclusion
-        ) {
-          delete next[row.key]
-          changed = true
-        }
-      }
-      return changed ? next : current
-    })
-  }, [rows])
+  ) satisfies Record<string, CheckDetailsLoadState>
+  const updateDetails = useEventCallback(
+    (
+      update: (
+        current: Record<string, CheckDetailsLoadState>
+      ) => Record<string, CheckDetailsLoadState>
+    ): void => {
+      setDetailsState((current) => ({
+        contextKey: checkDetailsContextKey,
+        values: update(current.contextKey === checkDetailsContextKey ? current.values : {})
+      }))
+    }
+  )
+  const isCurrentDetailsContext = useEventCallback(
+    (requestContextKey: string): boolean => requestContextKey === checkDetailsContextKey
+  )
 
   const requestCheckDetails = useEventCallback((row: { check: PRCheckDetail; key: string }) => {
     if (detailsByCheckKey[row.key]?.loading || detailsByCheckKey[row.key]?.details) {
       return
     }
     if (!row.check.checkRunId && !row.check.workflowRunId && !row.check.url) {
-      setDetailsByCheckKey((current) => ({
+      updateDetails((current) => ({
         ...current,
         [row.key]: {
           loading: false,
@@ -142,7 +150,7 @@ export function ChecksList({
       return
     }
     if (!onLoadCheckDetails) {
-      setDetailsByCheckKey((current) => ({
+      updateDetails((current) => ({
         ...current,
         [row.key]: {
           loading: false,
@@ -156,16 +164,16 @@ export function ChecksList({
       return
     }
     const requestContextKey = checkDetailsContextKey
-    setDetailsByCheckKey((current) => ({
+    updateDetails((current) => ({
       ...current,
       [row.key]: { loading: true, details: null, error: null }
     }))
     void onLoadCheckDetails(row.check)
       .then((details) => {
-        if (detailsContextRef.current !== requestContextKey) {
+        if (!isCurrentDetailsContext(requestContextKey)) {
           return
         }
-        setDetailsByCheckKey((current) => ({
+        updateDetails((current) => ({
           ...current,
           [row.key]: {
             loading: false,
@@ -175,10 +183,10 @@ export function ChecksList({
         }))
       })
       .catch((err) => {
-        if (detailsContextRef.current !== requestContextKey) {
+        if (!isCurrentDetailsContext(requestContextKey)) {
           return
         }
-        setDetailsByCheckKey((current) => ({
+        updateDetails((current) => ({
           ...current,
           [row.key]: {
             loading: false,
@@ -225,14 +233,14 @@ export function ChecksList({
 
   const toggleCheckExpanded = (row: { check: PRCheckDetail; key: string }) => {
     const willExpand = !expandedCheckKeys.has(row.key)
-    setExpandedCheckKeys((current) => {
-      const next = new Set(current)
+    setExpandedState(() => {
+      const next = new Set(expandedCheckKeys)
       if (next.has(row.key)) {
         next.delete(row.key)
       } else {
         next.add(row.key)
       }
-      return next
+      return { contextKey: checkDetailsContextKey, keys: next }
     })
     if (willExpand) {
       requestCheckDetails(row)

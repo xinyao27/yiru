@@ -4,7 +4,7 @@ import { isShellProcess } from '@yiru/runtime-protocol/workbench/agent/detection
 import { resolveCompatibleAgentTypeForOwner } from '@yiru/runtime-protocol/workbench/agent/title-owner'
 import { isTerminalLeafId, makePaneKey } from '@yiru/runtime-protocol/workbench/stable-pane-id'
 import type { TerminalTab, TuiAgent } from '@yiru/runtime-protocol/workbench/types'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { resolvePaneAgentOwner } from '~renderer/pane-agent-owner'
 import { useAppStore } from '~renderer/store/state'
 import { worktreeUsesRemoteConnection } from '~renderer/terminal/state/slice'
@@ -305,34 +305,24 @@ export function useTabAgent(tab: TerminalTab): TuiAgent | null {
   // naturally invalidates a stale flag the instant a pane respawns, with no
   // separate reset branch to keep in sync.
   const [observedSignalGeneration, setObservedSignalGeneration] = useState<string | null>(null)
-  const observedSignalGenerationRef = useRef<string | null>(null)
   const completedHookEvidence = hasCompletedHook && completedHookScopeKnown
+  const explicitTitleAgent = resolveExplicitTerminalTitleAgentType(tab.title)
+  const fallbackAgentSignal = tab.launchAgent
+    ? explicitTitleAgent === tab.launchAgent
+    : Boolean(explicitTitleAgent || siblingHookAgent)
+  const hasCurrentAgentSignal = Boolean(
+    focusedHookAgent || completedHookEvidence || processAgent || fallbackAgentSignal
+  )
 
   useEffect(() => {
-    const explicitTitleAgent = resolveExplicitTerminalTitleAgentType(tab.title)
-    // Why: for launched panes, only a title naming the launched agent counts as
-    // its activity — other-agent or sibling evidence must not arm exit clearing
-    // for an agent that never produced evidence of its own.
-    const fallbackAgentSignal = tab.launchAgent
-      ? explicitTitleAgent === tab.launchAgent
-      : Boolean(explicitTitleAgent || siblingHookAgent)
-    // Why: a recognized foreground process is focused-pane ground truth, so it
-    // arms exit clearing even for agents with no hook or title integration.
-    if (focusedHookAgent || completedHookEvidence || processAgent || fallbackAgentSignal) {
-      observedSignalGenerationRef.current = generation
-      setObservedSignalGeneration(generation)
+    if (!hasCurrentAgentSignal) {
+      return
     }
-  }, [
-    generation,
-    focusedHookAgent,
-    completedHookEvidence,
-    processAgent,
-    siblingHookAgent,
-    tab.launchAgent,
-    tab.title
-  ])
+    const update = window.setTimeout(() => setObservedSignalGeneration(generation), 0)
+    return () => window.clearTimeout(update)
+  }, [generation, hasCurrentAgentSignal])
 
-  const hasObservedAgentSignal = observedSignalGeneration === generation
+  const hasObservedAgentSignal = hasCurrentAgentSignal || observedSignalGeneration === generation
 
   useEffect(() => {
     if (!tab.launchAgent) {
@@ -347,8 +337,7 @@ export function useTabAgent(tab: TerminalTab): TuiAgent | null {
       title: tab.title,
       defaultTitle: tab.defaultTitle,
       isRemote: isRemoteLike,
-      hasObservedAgentSignal:
-        hasObservedAgentSignal && observedSignalGenerationRef.current === generation,
+      hasObservedAgentSignal,
       hookAgent: focusedHookAgent,
       siblingHookAgent,
       hasCompletedHook: completedHookEvidence,

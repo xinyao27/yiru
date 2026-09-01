@@ -1,7 +1,6 @@
 import type { GitHistoryItem } from '@yiru/runtime-protocol/workbench/git/history'
 import type { GitBranchChangeEntry, GitFileStatus } from '@yiru/runtime-protocol/workbench/types'
-import type React from 'react'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { getFileTypeIcon } from '~renderer/file-presentation/icons'
 import { translate } from '~renderer/i18n/i18n'
 import { ArrowUpRight } from '~renderer/icons/hugeicons'
@@ -48,7 +47,10 @@ function CommitFileRow({
       onClick={(event) => onOpen(entry, toSourceControlRowOpenEvent(event))}
       onDoubleClick={(event) => onOpen(entry, toPermanentSourceControlRowOpenEvent(event))}
     >
-      <FileIcon className="size-3.5 shrink-0" style={{ color: STATUS_COLORS[status] }} />
+      {React.createElement(FileIcon, {
+        className: 'size-3.5 shrink-0',
+        style: { color: STATUS_COLORS[status] }
+      })}
       <span className="min-w-0 flex-1 truncate">
         <span className="text-foreground">{fileName}</span>
         {dirPath && <span className="text-muted-foreground ml-1.5 text-[11px]">{dirPath}</span>}

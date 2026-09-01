@@ -23,6 +23,29 @@ import { WorkspaceTabCreateMenu } from './workspace-tab-create-menu'
 const TERMINAL_FOCUS_RETRY_MS = 50
 const TERMINAL_FOCUS_TIMEOUT_MS = 5_000
 
+function focusNewTerminalWhenReady(
+  previousActiveTabId: string | null,
+  expiresAt: number,
+  retryRef: React.MutableRefObject<number | null>
+): void {
+  const state = useAppStore.getState()
+  if (
+    (state.activeTabType === 'terminal' || state.activeTabType === 'simulator') &&
+    state.activeTabId &&
+    state.activeTabId !== previousActiveTabId
+  ) {
+    focusTerminalTabSurface(state.activeTabId)
+    return
+  }
+  if (Date.now() >= expiresAt) {
+    return
+  }
+  retryRef.current = window.setTimeout(() => {
+    retryRef.current = null
+    focusNewTerminalWhenReady(previousActiveTabId, expiresAt, retryRef)
+  }, TERMINAL_FOCUS_RETRY_MS)
+}
+
 export function TabCreateMenu(props: TabBarProps): React.JSX.Element {
   const {
     onNewBrowserTab,
@@ -58,31 +81,14 @@ export function TabCreateMenu(props: TabBarProps): React.JSX.Element {
       retryRef.current = null
     }
   }
-  const focusNewTerminalWhenReady = (
-    previousActiveTabId: string | null,
-    expiresAt: number
-  ): void => {
-    const state = useAppStore.getState()
-    if (
-      (state.activeTabType === 'terminal' || state.activeTabType === 'simulator') &&
-      state.activeTabId &&
-      state.activeTabId !== previousActiveTabId
-    ) {
-      focusTerminalTabSurface(state.activeTabId)
-      return
-    }
-    if (Date.now() >= expiresAt) {
-      return
-    }
-    retryRef.current = window.setTimeout(() => {
-      retryRef.current = null
-      focusNewTerminalWhenReady(previousActiveTabId, expiresAt)
-    }, TERMINAL_FOCUS_RETRY_MS)
-  }
   const queueNewTerminalFocus = (): void => {
     const previousActiveTabId = useAppStore.getState().activeTabId
     pendingFocusRef.current = () =>
-      focusNewTerminalWhenReady(previousActiveTabId, Date.now() + TERMINAL_FOCUS_TIMEOUT_MS)
+      focusNewTerminalWhenReady(
+        previousActiveTabId,
+        Date.now() + TERMINAL_FOCUS_TIMEOUT_MS,
+        retryRef
+      )
   }
   const queueTerminalFocus = (tabId: string): void => {
     pendingFocusRef.current = () => focusTerminalTabSurface(tabId)
@@ -118,11 +124,12 @@ export function TabCreateMenu(props: TabBarProps): React.JSX.Element {
     window.addEventListener('blur', dismiss)
     return () => window.removeEventListener('blur', dismiss)
   }, [isOpen])
-  useEffect(() => {
-    if (!isOpen) {
+  const handleOpenChange = (nextOpen: boolean): void => {
+    setIsOpen(nextOpen)
+    if (!nextOpen) {
       setQuery('')
     }
-  }, [isOpen])
+  }
 
   const menuOptions = (() =>
     buildTabCreateMenuOptions({
@@ -196,7 +203,7 @@ export function TabCreateMenu(props: TabBarProps): React.JSX.Element {
   return (
     <WorkspaceTabCreateMenu
       open={isOpen}
-      onOpenChange={setIsOpen}
+      onOpenChange={handleOpenChange}
       finalFocus={() => {
         runPendingFocus()
         return false
@@ -218,7 +225,7 @@ export function TabCreateMenu(props: TabBarProps): React.JSX.Element {
             onOpenEntry={onOpenEntry}
             onQueryChange={setQuery}
             onSelectMenuOption={selectMenuOption}
-            onDidOpenEntry={() => setIsOpen(false)}
+            onDidOpenEntry={() => handleOpenChange(false)}
           />
           {showStaticItems ? <DropdownMenuSeparator /> : null}
         </>

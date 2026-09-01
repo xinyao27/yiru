@@ -1,29 +1,30 @@
-import { useEffect, useRef, useState } from 'react'
-import { useProjectCatalog } from '~renderer/project-catalog/provider'
-import { projectCatalogRepoBuckets } from '~renderer/project-catalog/repo-buckets'
+import { useState } from 'react'
 import { useAppStore } from '~renderer/store/state'
 
-import { splitPathSegments } from '../path-tree'
 import { useFileDeletion } from '../use-file-deletion'
 import type { FileExplorerModel } from './model'
-import { getFileExplorerOwnerUnresolvedMessage } from './operation-owner'
 import type { PierreFileExplorerTreeHandle } from './pierre-file-explorer-tree'
-import { shouldResetFileExplorerForVisibleWorktree } from './reset'
 import type { TreeNode } from './types'
-import { clearFileExplorerUndoHistory } from './undo-redo'
 import { useFileExplorerAutoReveal } from './use-auto-reveal'
 import { useFileExplorerDragDrop } from './use-drag-drop'
 import { useFileExplorerHandlers } from './use-handlers'
 import { useFileExplorerInlineInput } from './use-inline-input'
 import { useFileExplorerKeys } from './use-keys'
+import { useFileExplorerOwnerRefresh } from './use-owner-refresh'
 import { useFileExplorerReveal } from './use-reveal'
 import { useFileExplorerRowActions } from './use-row-actions'
 import { useFileExplorerSelection } from './use-selection'
+import { useVisibleWorktreeReset } from './use-visible-worktree-reset'
 import { useFileExplorerWatch } from './use-watch'
 
 export function useFileExplorerInteractions(
   model: FileExplorerModel,
-  workspacePanelTabId?: string
+  workspacePanelTabId: string | undefined,
+  elements: {
+    explorerShellElement: HTMLDivElement | null
+    pierreTree: PierreFileExplorerTreeHandle | null
+    scrollElement: HTMLDivElement | null
+  }
 ) {
   const { view, owner, tree, actions } = model
   const toggleDir = useAppStore((state) => state.toggleDir)
@@ -37,10 +38,7 @@ export function useFileExplorerInteractions(
 
   const [flashingPath, setFlashingPath] = useState<string | null>(null)
   const [bgMenuOpen, setBgMenuOpen] = useState(false)
-  const scrollRef = useRef<HTMLDivElement>(null)
-  const pierreTreeRef = useRef<PierreFileExplorerTreeHandle>(null)
-  const explorerShellRef = useRef<HTMLDivElement | null>(null)
-  const flashTimeoutRef = useRef<number | null>(null)
+  const { explorerShellElement, pierreTree, scrollElement } = elements
   const isMac = (() => navigator.userAgent.includes('Mac'))()
   const isWindows = (() => navigator.userAgent.includes('Windows'))()
   const selection = useFileExplorerSelection(tree.rowProjection, isMac)
@@ -62,65 +60,23 @@ export function useFileExplorerInteractions(
     expanded: tree.expanded,
     toggleDir,
     refreshDir: tree.refreshDir,
-    scrollRef
+    scrollElement
   })
 
-  const lastResetWorktreePathRef = useRef<string | null>(null)
-  useEffect(() => {
-    if (
-      !owner.visibleFilesWorktreePath ||
-      !shouldResetFileExplorerForVisibleWorktree(
-        lastResetWorktreePathRef.current,
-        owner.visibleFilesWorktreePath
-      )
-    ) {
-      return
-    }
-    lastResetWorktreePathRef.current = owner.visibleFilesWorktreePath
-    selection.resetSelection()
-    view.setNameFilterQuery('')
-    tree.resetAndLoad()
-    clearFileExplorerUndoHistory()
-  }, [owner.visibleFilesWorktreePath, selection.resetSelection]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Why: the first root load can land before the host catalog does — on the web
-  // client the paired runtime answers over the relay seconds after first paint —
-  // and an owner-unresolved failure would otherwise stay on screen until the user
-  // switched workspaces. Retry once the catalog that names the owner arrives —
-  // and only for that failure, so a real read error (missing path, denied
-  // directory) does not re-run on every catalog refresh.
-  const projectCatalog = useProjectCatalog()
-  const ownerEvidence = projectCatalog.repos
-  const ownerWorktreeEvidence = projectCatalogRepoBuckets(projectCatalog).worktreesByRepo
-  useEffect(() => {
-    if (
-      !owner.visibleFilesWorktreePath ||
-      tree.rootError !== getFileExplorerOwnerUnresolvedMessage()
-    ) {
-      return
-    }
-    tree.resetAndLoad()
-  }, [ownerEvidence, ownerWorktreeEvidence]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    if (!owner.visibleFilesWorktreePath) {
-      return
-    }
-    for (const dirPath of tree.expanded) {
-      if (!tree.dirCache[dirPath]?.children.length && !tree.dirCache[dirPath]?.loading) {
-        const depth =
-          splitPathSegments(dirPath.slice(owner.visibleFilesWorktreePath.length + 1)).length - 1
-        void tree.loadDir(dirPath, depth)
-      }
-    }
-  }, [tree.expanded, owner.visibleFilesWorktreePath]) // eslint-disable-line react-hooks/exhaustive-deps
+  useVisibleWorktreeReset({
+    visibleWorktreePath: owner.visibleFilesWorktreePath,
+    resetSelection: selection.resetSelection,
+    clearNameFilter: () => view.setNameFilterQuery(''),
+    resetAndLoad: tree.resetAndLoad
+  })
+  useFileExplorerOwnerRefresh(model)
 
   const inline = useFileExplorerInlineInput({
     activeWorktreeId: owner.activeWorktreeId,
     worktreePath: owner.visibleFilesWorktreePath,
     expanded: tree.expanded,
     rowProjection: tree.rowProjection,
-    scrollRef,
+    scrollElement,
     refreshDir: tree.refreshDir
   })
   useFileExplorerWatch({
@@ -139,14 +95,15 @@ export function useFileExplorerInteractions(
     scrollToIndex: (index: number, options: { align: 'center' | 'auto' }) => {
       const node = tree.rowProjection.getRowAtIndex(index)
       if (node) {
-        pierreTreeRef.current?.scrollToAbsolutePath(
+        pierreTree?.scrollToAbsolutePath(
           node.path,
           options.align === 'center' ? 'center' : 'nearest'
         )
       }
     }
   }))()
-  const cancelRevealTimers = useFileExplorerReveal({
+  useFileExplorerReveal({
+    isExplorerAttached: explorerShellElement !== null,
     activeWorktreeId: owner.activeWorktreeId,
     worktreePath: owner.visibleFilesWorktreePath,
     pendingExplorerReveal,
@@ -158,16 +115,8 @@ export function useFileExplorerInteractions(
     loadDir: tree.loadDir,
     setSelectedPath: selection.setSingleSelectedPath,
     setFlashingPath,
-    flashTimeoutRef,
     virtualizer: explorerScrollController
   })
-  const setExplorerShellRef = (node: HTMLDivElement | null): void => {
-    explorerShellRef.current = node
-    if (node === null) {
-      // Why: reveal timers target this owner and must stop when it detaches.
-      cancelRevealTimers()
-    }
-  }
   useFileExplorerAutoReveal({
     activeFileId,
     activeWorktreeId: owner.activeWorktreeId,
@@ -190,14 +139,14 @@ export function useFileExplorerInteractions(
     statPath: tree.statPath,
     markPathAsDirectory: tree.markPathAsDirectory,
     setSelectedPath: selection.setSingleSelectedPath,
-    scrollRef
+    scrollElement
   })
   const { handleClick } = handlers
   const activateNode = (node: TreeNode) => void handleClick(node)
   const scrollToIndex = (index: number) =>
     explorerScrollController.scrollToIndex(index, { align: 'auto' })
   useFileExplorerKeys({
-    containerRef: explorerShellRef,
+    containerElement: explorerShellElement,
     rowProjection: tree.rowProjection,
     expandedPaths: tree.rowExpandedPaths,
     canToggleDirectories: true,
@@ -249,7 +198,6 @@ export function useFileExplorerInteractions(
     copyPathsForNode: selection.copyPathsForNode,
     selectedNode
   }))()
-  const refsGroup = (() => ({ scrollRef, pierreTreeRef, setExplorerShellRef }))()
   const menuGroup = (() => ({ bgMenuOpen, setBgMenuOpen }))()
   const displayGroup = (() => ({ flashingPath, activeFileId }))()
   const actionsGroup = (() => ({ ...rowActions, toggleDir }))()
@@ -262,7 +210,6 @@ export function useFileExplorerInteractions(
     dragDrop,
     inline,
     handlers,
-    refs: refsGroup,
     menu: menuGroup,
     display: displayGroup,
     actions: actionsGroup

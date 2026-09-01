@@ -79,7 +79,7 @@ export function AgentSessionContinuationDialog({
     null
   )
   const [starting, setStarting] = useState(false)
-  const [showStarting, setShowStarting] = useState(false)
+  const showStarting = starting
   const disabledAgents = settings?.disabledTuiAgents ?? EMPTY_DISABLED_AGENTS
   const requestWorktreeId = request?.worktreeId ?? null
 
@@ -159,16 +159,6 @@ export function AgentSessionContinuationDialog({
       cancelled = true
     }
   }, [open, request])
-
-  useEffect(() => {
-    if (!starting) {
-      setShowStarting(false)
-      return
-    }
-    // Why: local launches are often instant; defer progress chrome so fast paths do not flicker.
-    const timer = window.setTimeout(() => setShowStarting(true), 200)
-    return () => window.clearTimeout(timer)
-  }, [starting])
 
   const handleStart = async (): Promise<void> => {
     if (!request || !selectedAgent || starting) {

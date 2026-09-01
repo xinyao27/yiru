@@ -25,7 +25,8 @@ export function useSourceControlHostedReviewState(scope: SourceControlStatusRefr
     fallbackGitHubPRNumber,
     hostedReview,
     hostedReviewCreation,
-    hostedReviewCreationProviderHintRef,
+    hostedReviewCreationProviderHint,
+    setHostedReviewCreationProviderHint,
     hostedReviewCreationRequestState,
     hostedReviewEntry,
     isBranchVisible,
@@ -88,45 +89,35 @@ export function useSourceControlHostedReviewState(scope: SourceControlStatusRefr
       linkedAzureDevOpsPR,
       linkedGiteaPR
     }))()
-  useEffect(() => {
-    const hasConcreteProviderHint =
-      hostedReview !== null ||
-      hostedReviewCreation !== null ||
-      linkedGitHubPR !== null ||
-      fallbackGitHubPRNumber !== null ||
-      linkedGitLabMR !== null ||
-      linkedAzureDevOpsPR !== null ||
-      linkedGiteaPR !== null
-
-    if (!hasConcreteProviderHint) {
-      return
-    }
-
-    hostedReviewCreationProviderHintRef.current = {
+  const hasConcreteProviderHint =
+    hostedReview !== null ||
+    hostedReviewCreation !== null ||
+    linkedGitHubPR !== null ||
+    fallbackGitHubPRNumber !== null ||
+    linkedGitLabMR !== null ||
+    linkedAzureDevOpsPR !== null ||
+    linkedGiteaPR !== null
+  if (hasConcreteProviderHint) {
+    const nextProviderHint = {
       repoId: activeRepo?.id ?? null,
       worktreeId: activeWorktreeId ?? null,
       branch: branchName,
       provider: provisionalHostedReviewProvider
     }
-  }, [
-    activeRepo?.id,
-    activeWorktreeId,
-    branchName,
-    fallbackGitHubPRNumber,
-    hostedReview,
-    hostedReviewCreation,
-    hostedReviewCreationProviderHintRef,
-    linkedAzureDevOpsPR,
-    linkedGiteaPR,
-    linkedGitHubPR,
-    linkedGitLabMR,
-    provisionalHostedReviewProvider
-  ])
+    if (
+      hostedReviewCreationProviderHint.repoId !== nextProviderHint.repoId ||
+      hostedReviewCreationProviderHint.worktreeId !== nextProviderHint.worktreeId ||
+      hostedReviewCreationProviderHint.branch !== nextProviderHint.branch ||
+      hostedReviewCreationProviderHint.provider !== nextProviderHint.provider
+    ) {
+      setHostedReviewCreationProviderHint(nextProviderHint)
+    }
+  }
   const hostedReviewCreationForHeader = (() => {
     // Why: disable stale eligibility during preflight while retaining provider
     // copy from the previous safe snapshot.
     if (isHostedReviewCreationLoading) {
-      const providerHint = hostedReviewCreationProviderHintRef.current
+      const providerHint = hostedReviewCreationProviderHint
       const provider =
         providerHint.repoId === (activeRepo?.id ?? null) &&
         providerHint.worktreeId === (activeWorktreeId ?? null) &&

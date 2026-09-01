@@ -3,6 +3,7 @@ import type React from 'react'
 import { useEffect, useId, useRef, useState } from 'react'
 import { translate } from '~renderer/i18n/i18n'
 import { Check, XCircle as CircleX, CaretUpDown as ChevronsUpDown } from '~renderer/icons/hugeicons'
+import { useEventCallback } from '~renderer/react/use-event-callback'
 import { Button } from '~renderer/ui/button'
 import { cn } from '~renderer/ui/class-names'
 
@@ -39,18 +40,16 @@ export function FontAutocomplete({
   const [isFilteringQuery, setIsFilteringQuery] = useState(false)
   const inputRef = useRef<HTMLInputElement | null>(null)
   const rootRef = useRef<HTMLDivElement | null>(null)
-  const previewFontFamilyRef = useRef(onPreviewFontFamily)
   const listboxId = useId()
-
-  previewFontFamilyRef.current = onPreviewFontFamily
+  const clearFontPreview = useEventCallback(() => onPreviewFontFamily?.(null))
 
   useEffect(
     () => () => {
       // Why: settings search can unmount this control while a hover preview is
       // active; the consumer must not keep rendering that transient font.
-      previewFontFamilyRef.current?.(null)
+      clearFontPreview()
     },
-    []
+    [clearFontPreview]
   )
 
   if (value !== prevValue) {

@@ -1,4 +1,3 @@
-/* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: entry changes reset virtualized section measurements and stale async generations before paint. */
 import type { GitBranchChangeEntry, GitStatusEntry } from '@yiru/runtime-protocol/workbench/types'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { Dispatch, MutableRefObject, SetStateAction } from 'react'
@@ -35,6 +34,19 @@ type UseCombinedDiffSectionsOptions = {
   viewStateKey: string
 }
 
+function createCombinedDiffLoadController(): {
+  scheduler: ReturnType<typeof createCombinedDiffLoadScheduler>
+  setLoadSection: (loadSection: (index: number) => Promise<void>) => void
+} {
+  let loadSection = async (_index: number): Promise<void> => {}
+  return {
+    scheduler: createCombinedDiffLoadScheduler({ loadSection: (index) => loadSection(index) }),
+    setLoadSection: (nextLoadSection) => {
+      loadSection = nextLoadSection
+    }
+  }
+}
+
 export function useCombinedDiffSections({
   defaultView,
   file,
@@ -42,67 +54,68 @@ export function useCombinedDiffSections({
   liveBranchEntries,
   viewStateKey
 }: UseCombinedDiffSectionsOptions): CombinedDiffSections {
-  const [sections, setSections] = useState<DiffSection[]>([])
-  const [sideBySide, setSideBySide] = useState(() =>
-    combinedDiffPreferences.getSideBySide(defaultView)
-  )
-  const [, setGeneration] = useState(0)
+  const [sectionState, setSectionState] = useState<{ key: string; sections: DiffSection[] }>({
+    key: '',
+    sections: []
+  })
+  const [defaultSideBySide] = useState(() => combinedDiffPreferences.getSideBySide(defaultView))
+  const [sideOverride, setSideOverride] = useState<{ key: string; value: boolean } | null>(null)
   const loadedIndicesRef = useRef<Set<number>>(new Set())
   const loadingIndicesRef = useRef<Set<number>>(new Set())
   const sectionsRef = useRef<DiffSection[]>([])
   const generationRef = useRef(0)
-  const loadSectionRef = useRef<(index: number) => Promise<void>>(async () => {})
-  const loadSchedulerRef = useRef(
-    createCombinedDiffLoadScheduler({ loadSection: (index) => loadSectionRef.current(index) })
-  )
-  sectionsRef.current = sections
+  const [loadController] = useState(createCombinedDiffLoadController)
 
   const model = resolveCombinedDiffModel({
     file,
     gitStatusEntries,
     liveBranchEntries,
-    retainedResolvedEntries: getRetainedResolvedSnapshotEntries(sectionsRef.current)
+    retainedResolvedEntries: getRetainedResolvedSnapshotEntries(sectionState.sections)
+  })
+  const sectionStateKey = `${viewStateKey}\0${model.entrySignature}`
+  const initial =
+    sectionState.key === sectionStateKey
+      ? null
+      : resolveInitialCombinedDiffSectionState({
+          combinedMode: model.combinedMode,
+          entries: model.entries,
+          entrySignature: model.entrySignature,
+          gitStatusEntries,
+          hasUncommittedEntriesSnapshot: model.hasUncommittedEntriesSnapshot,
+          shouldAutoReloadFromGitStatus: model.shouldAutoReloadFromGitStatus,
+          viewStateKey
+        })
+  const sections = initial?.sections ?? sectionState.sections
+  const defaultViewSideBySide =
+    defaultView !== undefined && !combinedDiffPreferences.hasSideBySide()
+      ? defaultView === 'side-by-side'
+      : defaultSideBySide
+  const sideBySide =
+    sideOverride?.key === sectionStateKey
+      ? sideOverride.value
+      : (initial?.sideBySide ?? defaultViewSideBySide)
+  const setSections = useEventCallback((update: SetStateAction<DiffSection[]>): void => {
+    setSectionState((current) => {
+      const currentSections = current.key === sectionStateKey ? current.sections : sections
+      return {
+        key: sectionStateKey,
+        sections: typeof update === 'function' ? update(currentSections) : update
+      }
+    })
   })
 
-  useEffect(() => {
-    if (defaultView !== undefined && !combinedDiffPreferences.hasSideBySide()) {
-      setSideBySide(defaultView === 'side-by-side')
-    }
-  }, [defaultView])
+  useLayoutEffect(() => {
+    sectionsRef.current = sections
+  }, [sections])
 
   useLayoutEffect(() => {
-    const initial = resolveInitialCombinedDiffSectionState({
-      combinedMode: model.combinedMode,
-      entries: model.entries,
-      entrySignature: model.entrySignature,
-      gitStatusEntries,
-      hasUncommittedEntriesSnapshot: model.hasUncommittedEntriesSnapshot,
-      shouldAutoReloadFromGitStatus: model.shouldAutoReloadFromGitStatus,
-      viewStateKey
-    })
-    setSections(initial.sections)
-    if (initial.sideBySide !== undefined) {
-      setSideBySide(initial.sideBySide)
-    }
-    loadedIndicesRef.current = initial.loadedIndices
+    loadedIndicesRef.current = initial?.loadedIndices ?? new Set()
     loadingIndicesRef.current.clear()
-    if (initial.sideBySide !== undefined) {
-      return
-    }
-    loadSchedulerRef.current.reset()
+    loadController.scheduler.reset()
     generationRef.current += 1
-    setGeneration((generation) => generation + 1)
-  }, [
-    gitStatusEntries,
-    model.combinedMode,
-    model.entries,
-    model.entrySignature,
-    model.hasUncommittedEntriesSnapshot,
-    model.shouldAutoReloadFromGitStatus,
-    viewStateKey
-  ])
+  }, [initial, loadController, sectionStateKey])
 
-  const loadSectionNow = async (index: number): Promise<void> => {
+  const loadSectionNow = useEventCallback(async (index: number): Promise<void> => {
     if (loadedIndicesRef.current.has(index) || loadingIndicesRef.current.has(index)) {
       return
     }
@@ -132,18 +145,20 @@ export function useCombinedDiffSections({
         sectionIndex === index ? { ...section, ...loadedSection, loading: false } : section
       )
     )
-  }
-  loadSectionRef.current = loadSectionNow
+  })
+  useLayoutEffect(() => {
+    loadController.setLoadSection(loadSectionNow)
+  }, [loadController, loadSectionNow])
 
   useEffect(() => {
-    const scheduler = loadSchedulerRef.current
+    const scheduler = loadController.scheduler
     scheduler.reset()
     return () => scheduler.dispose()
-  }, [])
+  }, [loadController])
 
   const requestSectionLoad = useEventCallback((index: number) => {
     if (!sectionsRef.current[index]?.collapsed) {
-      loadSchedulerRef.current.request(index)
+      loadController.scheduler.request(index)
     }
   })
 
@@ -169,7 +184,6 @@ export function useCombinedDiffSections({
     loadingIndicesRef.current.delete(index)
     deleteCombinedDiffViewState(viewStateKey)
     generationRef.current += 1
-    setGeneration((generation) => generation + 1)
     setSections((current) =>
       current.map((section, sectionIndex) =>
         sectionIndex === index
@@ -187,7 +201,7 @@ export function useCombinedDiffSections({
       )
     )
     if (!collapsed) {
-      loadSchedulerRef.current.rerequest(index)
+      loadController.scheduler.rerequest(index)
     }
   }
 
@@ -199,7 +213,7 @@ export function useCombinedDiffSections({
       )
     )
     if (shouldLoad) {
-      loadSchedulerRef.current.request(index)
+      loadController.scheduler.request(index)
     }
   }
 
@@ -212,17 +226,15 @@ export function useCombinedDiffSections({
         loadedIndices: loadedIndicesRef.current
       })
       for (const index of initialIndices) {
-        loadSchedulerRef.current.request(index)
+        loadController.scheduler.request(index)
       }
     }
   }
 
   const toggleSideBySide = (): void => {
-    setSideBySide((current) => {
-      const next = !current
-      combinedDiffPreferences.setSideBySide(next)
-      return next
-    })
+    const next = !sideBySide
+    combinedDiffPreferences.setSideBySide(next)
+    setSideOverride({ key: sectionStateKey, value: next })
   }
 
   return {

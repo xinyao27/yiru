@@ -1,5 +1,6 @@
 import type { PRComment } from '@yiru/runtime-protocol/workbench/types'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
+import { useNow } from '~renderer/dashboard/use-now'
 import { translate } from '~renderer/i18n/i18n'
 import CommentMarkdown from '~renderer/sidebar/comment-markdown'
 import { Button } from '~renderer/ui/button'
@@ -62,12 +63,6 @@ export function CommentRow({
   const [draft, setDraft] = useState(comment.body)
   const [submittingEdit, setSubmittingEdit] = useState(false)
 
-  useEffect(() => {
-    if (!editing) {
-      setDraft(comment.body)
-    }
-  }, [comment.body, editing])
-
   const handleStartEdit = (): void => {
     setDraft(comment.body)
     setEditing(true)
@@ -103,7 +98,7 @@ export function CommentRow({
 
   const trimmedDraft = draft.trim()
   const canSaveEdit = !submittingEdit && trimmedDraft.length > 0 && trimmedDraft !== comment.body
-  const relativeTime = formatPrCommentRelativeTime(comment.createdAt, Date.now())
+  const relativeTime = formatPrCommentRelativeTime(comment.createdAt, useNow(30_000))
 
   const authorAvatar = comment.authorAvatarUrl ? (
     <img

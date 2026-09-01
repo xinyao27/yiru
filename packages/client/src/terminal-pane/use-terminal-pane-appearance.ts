@@ -1,5 +1,6 @@
 import type { IDisposable } from '@xterm/xterm'
-import { useEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef } from 'react'
+import { useEventCallback } from '~renderer/react/use-event-callback'
 
 import { installMouseHideWhileTyping } from './mouse-hide-while-typing'
 import type { PaneManager } from './pane-manager/pane-manager'
@@ -39,9 +40,11 @@ export function useTerminalPaneAppearance({
   terminalScrollbackRows
 }: TerminalPaneAppearanceInput): (manager: PaneManager) => void {
   const systemPrefersDarkRef = useRef(systemPrefersDark)
-  systemPrefersDarkRef.current = systemPrefersDark
+  useLayoutEffect(() => {
+    systemPrefersDarkRef.current = systemPrefersDark
+  }, [systemPrefersDark])
 
-  const applyAppearance = (manager: PaneManager): void => {
+  const applyAppearance = useEventCallback((manager: PaneManager): void => {
     const currentSettings = settingsRef.current
     if (!currentSettings) {
       return
@@ -56,7 +59,7 @@ export function useTerminalPaneAppearance({
       paneMode2031Ref.current,
       paneLastThemeModeRef.current
     )
-  }
+  })
 
   useEffect(() => {
     const manager = managerRef.current
@@ -64,8 +67,7 @@ export function useTerminalPaneAppearance({
       return
     }
     applyAppearance(manager)
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- Why: refs provide current pane registries without rebuilding the manager lifecycle.
-  }, [settings, systemPrefersDark, effectiveMacOptionAsAlt])
+  }, [applyAppearance, effectiveMacOptionAsAlt, managerRef, settings, systemPrefersDark])
 
   useEffect(() => {
     managerRef.current?.setTerminalGpuAcceleration(settings?.terminalGpuAcceleration ?? 'auto')

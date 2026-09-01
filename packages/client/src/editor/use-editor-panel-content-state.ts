@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { OpenFile } from '~renderer/editor/state'
 import { joinPath } from '~renderer/path'
 import { useEventCallback } from '~renderer/react/use-event-callback'
@@ -47,7 +47,6 @@ export function useEditorPanelContentState({
   const [fileContents, setFileContents] = useState<Record<string, FileContent>>({})
   const [diffContents, setDiffContents] = useState<Record<string, DiffContent>>({})
   const diffContentsRef = useRef(diffContents)
-  diffContentsRef.current = diffContents
   const fileLoadRetryAttemptsRef = useRef<Record<string, number>>({})
   // Why: per-tab read generations let a forced/external reload supersede an
   // older in-flight read so a slower stale promise cannot overwrite fresh state.
@@ -56,9 +55,12 @@ export function useEditorPanelContentState({
   const fileReadGenerationCounterRef = useRef(0)
   const diffReadGenerationCounterRef = useRef(0)
   const openFilesRef = useRef(openFiles)
-  openFilesRef.current = openFiles
   const editorViewModeRef = useRef(editorViewMode)
-  editorViewModeRef.current = editorViewMode
+  useLayoutEffect(() => {
+    diffContentsRef.current = diffContents
+    openFilesRef.current = openFiles
+    editorViewModeRef.current = editorViewMode
+  }, [diffContents, editorViewMode, openFiles])
   const selectedConflictReviewFile =
     activeFile?.mode === 'conflict-review' && activeFile.conflictReview?.selectedFileId
       ? (openFiles.find((file) => file.id === activeFile.conflictReview?.selectedFileId) ?? null)
@@ -211,10 +213,10 @@ export function useEditorPanelContentState({
         )
       }
       if (isChangesMode && !diffContents[fileToLoad.id]) {
-        void loadDiffContent(fileToLoad)
+        window.requestAnimationFrame(() => void loadDiffContent(fileToLoad))
       }
     } else if (isReloadableSingleFileDiffTab(fileToLoad) && !diffContents[fileToLoad.id]) {
-      void loadDiffContent(fileToLoad)
+      window.requestAnimationFrame(() => void loadDiffContent(fileToLoad))
     }
   }, [
     activeFile,

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { JSX, MutableRefObject, RefObject } from 'react'
 import { translate } from '~renderer/i18n/i18n'
 import { CaretDown as ChevronDown, FlowArrow as Workflow } from '~renderer/icons/hugeicons'
+import { useEventCallback } from '~renderer/react/use-event-callback'
 import { ClaudeIcon, OpenAIIcon } from '~renderer/status-bar/icons'
 import { cn } from '~renderer/ui/class-names'
 
@@ -22,6 +23,7 @@ export type OrchestrationBubble = {
 }
 
 export type OrchestrationStageRefs = {
+  registerRow: (key: AgentKey, node: HTMLDivElement | null) => void
   rows: MutableRefObject<Partial<Record<AgentKey, HTMLDivElement | null>>>
   stage: RefObject<HTMLDivElement | null>
 }
@@ -102,12 +104,12 @@ export function OrchestrationStage(props: {
   stageRefs: OrchestrationStageRefs
 }): JSX.Element {
   const { bubble, childCount, rowFlash, rowMessages, rowPending, rowState, stageRefs } = props
-  const arrowLayout = useArrowLayout(stageRefs.stage, childCount)
-  const rowRefs = stageRefs.rows
+  const { registerRow, stage } = stageRefs
+  const arrowLayout = useArrowLayout(stage, childCount)
 
   return (
     <div
-      ref={stageRefs.stage}
+      ref={stage}
       className="feature-wall-orch-stage relative grid"
       style={{
         gridTemplateColumns: 'minmax(0, 1fr)',
@@ -135,9 +137,7 @@ export function OrchestrationStage(props: {
               state={rowState['coord-claude']}
               message={rowMessages['coord-claude']}
               flashKey={rowFlash['coord-claude'] ?? 0}
-              registerRef={(node) => {
-                rowRefs.current['coord-claude'] = node
-              }}
+              registerRef={(node) => registerRow('coord-claude', node)}
             />
           ]}
         />
@@ -193,9 +193,7 @@ export function OrchestrationStage(props: {
                     flashKey={rowFlash['child-codex'] ?? 0}
                     pending={rowPending['child-codex']}
                     spawnRow
-                    registerRef={(node) => {
-                      rowRefs.current['child-codex'] = node
-                    }}
+                    registerRef={(node) => registerRow('child-codex', node)}
                   />
                 ]}
               />
@@ -218,9 +216,7 @@ export function OrchestrationStage(props: {
                     flashKey={rowFlash['child-claude'] ?? 0}
                     pending={rowPending['child-claude']}
                     spawnRow
-                    registerRef={(node) => {
-                      rowRefs.current['child-claude'] = node
-                    }}
+                    registerRef={(node) => registerRow('child-claude', node)}
                   />
                 ]}
               />
@@ -253,5 +249,8 @@ export function OrchestrationStage(props: {
 export function useOrchestrationStageRefs(): OrchestrationStageRefs {
   const rows = useRef<Partial<Record<AgentKey, HTMLDivElement | null>>>({})
   const stage = useRef<HTMLDivElement | null>(null)
-  return (() => ({ rows, stage }))()
+  const registerRow = useEventCallback((key: AgentKey, node: HTMLDivElement | null): void => {
+    rows.current[key] = node
+  })
+  return { registerRow, rows, stage }
 }

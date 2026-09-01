@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import type { Dispatch, RefObject, SetStateAction } from 'react'
+import type { Dispatch, SetStateAction } from 'react'
 import { useEventCallback } from '~renderer/react/use-event-callback'
 import { useAppStore } from '~renderer/store/state'
 
@@ -8,6 +8,7 @@ import type { FileExplorerRowProjection } from './row-projection'
 import type { DirCache } from './types'
 
 type UseFileExplorerRevealParams = {
+  isExplorerAttached: boolean
   activeWorktreeId: string | null
   worktreePath: string | null
   pendingExplorerReveal: {
@@ -24,13 +25,13 @@ type UseFileExplorerRevealParams = {
   loadDir: (dirPath: string, depth: number, options?: { force?: boolean }) => Promise<boolean>
   setSelectedPath: (path: string | null) => void
   setFlashingPath: Dispatch<SetStateAction<string | null>>
-  flashTimeoutRef: RefObject<number | null>
   virtualizer: {
     scrollToIndex: (index: number, options: { align: 'center' | 'auto' }) => void
   }
 }
 
 export function useFileExplorerReveal({
+  isExplorerAttached,
   activeWorktreeId,
   worktreePath,
   pendingExplorerReveal,
@@ -42,9 +43,9 @@ export function useFileExplorerReveal({
   loadDir,
   setSelectedPath,
   setFlashingPath,
-  flashTimeoutRef,
   virtualizer
-}: UseFileExplorerRevealParams): () => void {
+}: UseFileExplorerRevealParams): void {
+  const flashTimeoutRef = useRef<number | null>(null)
   const revealScrollFrameRef = useRef<number | null>(null)
   const revealScrollTimeoutRef = useRef<number | null>(null)
 
@@ -59,13 +60,20 @@ export function useFileExplorerReveal({
     }
   })
 
-  const cancelRevealTimers = (): void => {
+  const cancelRevealTimers = useEventCallback((): void => {
     cancelRevealScroll()
     if (flashTimeoutRef.current !== null) {
       window.clearTimeout(flashTimeoutRef.current)
       flashTimeoutRef.current = null
     }
-  }
+  })
+
+  useEffect(() => {
+    if (!isExplorerAttached) {
+      cancelRevealTimers()
+    }
+  }, [cancelRevealTimers, isExplorerAttached])
+  useEffect(() => cancelRevealTimers, [cancelRevealTimers])
 
   const pendingRevealAncestorDirs = (() => {
     if (
@@ -223,6 +231,4 @@ export function useFileExplorerReveal({
     virtualizer,
     worktreePath
   ])
-
-  return cancelRevealTimers
 }

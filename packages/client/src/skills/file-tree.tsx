@@ -1,7 +1,12 @@
 import type { SkillDirectoryEntry } from '@yiru/runtime-protocol/workbench/skills'
-import { useState } from 'react'
+import { createElement, useState } from 'react'
 import { getFileTypeIcon } from '~renderer/file-presentation/icons'
-import { CaretRight as ChevronRight, Folder, FolderOpen } from '~renderer/icons/hugeicons'
+import {
+  CaretRight as ChevronRight,
+  Folder,
+  FolderOpen,
+  type IconProps
+} from '~renderer/icons/hugeicons'
 import { Button } from '~renderer/ui/button'
 import { ScrollArea } from '~renderer/ui/scroll-area'
 
@@ -112,7 +117,6 @@ function SkillFileTreeFileRow({
   selected: boolean
   onSelect: (relativePath: string) => void
 }): React.JSX.Element {
-  const FileIcon = getFileTypeIcon(node.relativePath)
   return (
     <Button
       type="button"
@@ -125,11 +129,15 @@ function SkillFileTreeFileRow({
       onClick={() => onSelect(node.relativePath)}
     >
       <span className="size-3 shrink-0" />
-      <FileIcon className="text-muted-foreground size-3 shrink-0" />
+      <FileTypeIcon path={node.relativePath} className="text-muted-foreground size-3 shrink-0" />
       <span className="truncate">{node.name}</span>
       <span className="text-muted-foreground ml-auto shrink-0 pl-2 text-[10px]">
         {formatFileSize(node.size)}
       </span>
     </Button>
   )
+}
+
+function FileTypeIcon({ path, ...props }: IconProps & { path: string }): React.JSX.Element {
+  return createElement(getFileTypeIcon(path), props)
 }

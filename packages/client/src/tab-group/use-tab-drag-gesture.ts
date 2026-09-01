@@ -7,6 +7,7 @@ import {
 } from '@dnd-kit/core'
 import type { RefObject } from 'react'
 import { useRef, useState } from 'react'
+import { useEventCallback } from '~renderer/react/use-event-callback'
 import { useAppStore } from '~renderer/store/state'
 
 import {
@@ -68,7 +69,17 @@ export function useTabDragGesture(worktreeId: string, enabled: boolean): TabDrag
     releaseMissedEndFallbackRef.current?.()
     releaseMissedEndFallbackRef.current = null
   }
-  const clearDragStateRef = useRef<() => void>(() => {})
+  const clearDragState = useEventCallback((): void => {
+    isTabDragActiveRef.current = false
+    releaseMissedEndFallback()
+    setActiveDrag(null)
+    setHoveredDropTarget(null)
+    tabInsertion.clear()
+    preDragActivationSnapshotRef.current = null
+    lastPreviewRef.current = null
+    lastHoveredTabPreviewRef.current = null
+    dragGeometryRef.current = null
+  })
 
   const installMissedEndFallback = () => {
     releaseMissedEndFallback()
@@ -82,7 +93,7 @@ export function useTabDragGesture(worktreeId: string, enabled: boolean): TabDrag
         if (isTabDragActiveRef.current) {
           // Why: Chromium/dnd-kit can miss drag end/cancel and leave later
           // clicks looking like drag releases.
-          clearDragStateRef.current()
+          clearDragState()
         }
       }, 0)
     }
@@ -106,19 +117,6 @@ export function useTabDragGesture(worktreeId: string, enabled: boolean): TabDrag
       releaseMissedEndFallback()
     }
   }
-  const clearDragState = () => {
-    isTabDragActiveRef.current = false
-    releaseMissedEndFallback()
-    setActiveDrag(null)
-    setHoveredDropTarget(null)
-    tabInsertion.clear()
-    preDragActivationSnapshotRef.current = null
-    lastPreviewRef.current = null
-    lastHoveredTabPreviewRef.current = null
-    dragGeometryRef.current = null
-  }
-  clearDragStateRef.current = clearDragState
-
   const restorePreDragActivation = () => {
     const snapshot = preDragActivationSnapshotRef.current
     if (snapshot) {

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { translate } from '~renderer/i18n/i18n'
 import { subscribeEmulatorVideoStream } from '~renderer/runtime/emulator-stream-client'
 
@@ -31,24 +31,18 @@ export function useEmulatorVideoStream(
   const streamIdentity = getVideoStreamIdentity(deviceId, streamKey, enabled)
   const [state, setState] = useState<VideoStreamState>({ error: null, streamIdentity: null })
   const onSizeRef = useRef(onSize)
-  onSizeRef.current = onSize
+  useLayoutEffect(() => {
+    onSizeRef.current = onSize
+  }, [onSize])
 
   useEffect(() => {
     if (!streamIdentity || !deviceId) {
       return
     }
-    setState({ error: null, streamIdentity })
     const DecoderCtor = (globalThis as { VideoDecoder?: typeof VideoDecoder }).VideoDecoder
     const ChunkCtor = (globalThis as { EncodedVideoChunk?: typeof EncodedVideoChunk })
       .EncodedVideoChunk
     if (!DecoderCtor || !ChunkCtor) {
-      setState({
-        error: translate(
-          'auto.components.emulator.pane.use.emulator.video.stream.c3fb77cb87',
-          'This build does not support WebCodecs H.264 decoding.'
-        ),
-        streamIdentity
-      })
       return
     }
 
@@ -57,6 +51,11 @@ export function useEmulatorVideoStream(
     let timestamp = 0
     let configBytes: Uint8Array | null = null
     let unsubscribe: (() => void) | undefined
+    queueMicrotask(() => {
+      if (!disposed) {
+        setState({ error: null, streamIdentity })
+      }
+    })
     const canvas = canvasRef.current
     const context = canvas?.getContext('2d') ?? null
     context?.clearRect(0, 0, canvas?.width ?? 0, canvas?.height ?? 0)
@@ -166,6 +165,17 @@ export function useEmulatorVideoStream(
     return cleanup
   }, [deviceId, streamIdentity])
 
-  const error = state.streamIdentity === streamIdentity ? state.error : null
+  const hasVideoDecoder = Boolean(
+    (globalThis as { VideoDecoder?: typeof VideoDecoder }).VideoDecoder &&
+    (globalThis as { EncodedVideoChunk?: typeof EncodedVideoChunk }).EncodedVideoChunk
+  )
+  const unsupportedError =
+    streamIdentity && !hasVideoDecoder
+      ? translate(
+          'auto.components.emulator.pane.use.emulator.video.stream.c3fb77cb87',
+          'This build does not support WebCodecs H.264 decoding.'
+        )
+      : null
+  const error = unsupportedError ?? (state.streamIdentity === streamIdentity ? state.error : null)
   return { canvasRef, error }
 }

@@ -63,7 +63,7 @@ export function StarNagAgentValueMomentObserver(): null {
   const lastTypingAtRef = useRef(0)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const scheduleCheck = useEventCallback((): void => {
+  const scheduleCheck = useEventCallback(function schedule(): void {
     if (timerRef.current) {
       clearTimeout(timerRef.current)
     }
@@ -77,7 +77,7 @@ export function StarNagAgentValueMomentObserver(): null {
         hasActiveAgent(useAppStore.getState().agentStatusByPaneKey) ||
         elapsedSinceTyping < QUIET_WINDOW_MS
       ) {
-        scheduleCheck()
+        schedule()
         return
       }
       void (async () => {
@@ -94,7 +94,7 @@ export function StarNagAgentValueMomentObserver(): null {
           hasActiveAgent(useAppStore.getState().agentStatusByPaneKey) ||
           freshElapsedSinceTyping < QUIET_WINDOW_MS
         ) {
-          scheduleCheck()
+          schedule()
           return
         }
         pendingRef.current = false

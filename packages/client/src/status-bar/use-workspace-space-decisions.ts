@@ -1,4 +1,5 @@
 import type { WorkspaceSpaceWorktree } from '@yiru/runtime-protocol/workbench/workspace/space-types'
+import { useNow } from '~renderer/dashboard/use-now'
 import { getRepoMapFromState, getWorktreeMapFromState } from '~renderer/store/selectors'
 import { useAppStore } from '~renderer/store/state'
 
@@ -30,7 +31,7 @@ export function useWorkspaceSpaceDecisions(
   // Why: active-agent freshness is time-based; the epoch crosses stale boundaries.
   void agentStatusEpoch
   const details = new Map<string, WorkspaceDecisionDetails>()
-  const now = Date.now()
+  const now = useNow(30_000)
   for (const worktree of worktrees) {
     details.set(
       worktree.worktreeId,

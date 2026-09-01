@@ -1,5 +1,5 @@
 import type { GitHistoryItemRef } from '@yiru/runtime-protocol/workbench/git/history'
-import type React from 'react'
+import React from 'react'
 import { CloudCheck, GitBranch, GitCommit, Tag as TagIcon, Target } from '~renderer/icons/hugeicons'
 import { cn } from '~renderer/ui/class-names'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~renderer/ui/tooltip'
@@ -47,7 +47,7 @@ export function GitGraphRefBadge({ itemRef }: { itemRef: GitHistoryItemRef }): R
               className="flex h-full shrink-0 items-center justify-center px-0.5"
               style={{ backgroundColor: laneColor, color: 'var(--background)' }}
             >
-              <Icon className="size-3" />
+              {React.createElement(Icon, { className: 'size-3' })}
             </span>
             <span className="text-foreground truncate px-1.5">{label}</span>
           </span>

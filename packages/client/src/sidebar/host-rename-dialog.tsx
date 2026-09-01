@@ -1,5 +1,5 @@
 import type { ExecutionHostId } from '@yiru/runtime-protocol/model/workspace'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { translate } from '~renderer/i18n/i18n'
 import { useAppStore } from '~renderer/store/state'
 import { Button } from '~renderer/ui/button'
@@ -33,29 +33,27 @@ export function HostRenameDialog({
   const settings = useAppStore((s) => s.settings)
   const updateSettings = useAppStore((s) => s.updateSettings)
   const currentOverride = getHostDisplayLabelOverride(settings, hostId)
-  const [value, setValue] = useState(currentOverride ?? '')
-
-  // Why: reseed the field from the persisted override each time the dialog opens
-  // so a prior cancelled edit doesn't leak into the next open.
-  useEffect(() => {
-    if (open) {
-      setValue(currentOverride ?? '')
-    }
-  }, [open, currentOverride])
+  const draftIdentity = open ? `${hostId}:${currentOverride ?? ''}` : ''
+  const [draft, setDraft] = useState({ identity: '', value: '' })
+  const value = draft.identity === draftIdentity ? draft.value : (currentOverride ?? '')
+  const close = (): void => {
+    setDraft({ identity: '', value: '' })
+    onOpenChange(false)
+  }
 
   const submit = (): void => {
     void updateSettings({ hostSettingOverrides: applyHostRename(settings, hostId, value) })
-    onOpenChange(false)
+    close()
   }
 
   const reset = (): void => {
-    setValue('')
+    setDraft({ identity: draftIdentity, value: '' })
     void updateSettings({ hostSettingOverrides: applyHostRename(settings, hostId, '') })
-    onOpenChange(false)
+    close()
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(nextOpen) => (nextOpen ? onOpenChange(true) : close())}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
@@ -77,7 +75,7 @@ export function HostRenameDialog({
             autoFocus
             value={value}
             placeholder={derivedLabel}
-            onChange={(e) => setValue(e.target.value)}
+            onChange={(e) => setDraft({ identity: draftIdentity, value: e.target.value })}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 e.preventDefault()
@@ -91,7 +89,7 @@ export function HostRenameDialog({
             {translate('auto.components.sidebar.HostRenameDialog.4d5e6f7a8b', 'Reset to default')}
           </Button>
           <div className="flex gap-2">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="outline" onClick={close}>
               {translate('auto.components.sidebar.HostRenameDialog.5e6f7a8b9c', 'Cancel')}
             </Button>
             <Button type="button" onClick={submit}>

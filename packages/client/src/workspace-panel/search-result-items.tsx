@@ -88,7 +88,9 @@ export function FileResultRow({
                           !collapsed && 'rotate-90'
                         )}
                       />
-                      <FileIcon className="text-muted-foreground size-3.5 flex-shrink-0" />
+                      {React.createElement(FileIcon, {
+                        className: 'text-muted-foreground size-3.5 flex-shrink-0'
+                      })}
                       <div className="min-w-0 flex-1 text-xs">
                         <span className="block min-w-0 truncate">
                           <span className="text-foreground">{fileName}</span>

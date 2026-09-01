@@ -125,9 +125,12 @@ function TerminalWorkspacePanel(): React.JSX.Element | null {
   } = useEditorCloseQueue({ onQueueDrained: () => {}, onQueueCancelled: () => {} })
 
   const {
+    activationDeferredMountTabIdsByWorktree,
     mountedWorktreeIdsRef,
+    mountedWorktreeIds,
     measurableBackgroundWorktreeIdsRef,
-    backgroundMountTabIdsByWorktreeRef,
+    measurableBackgroundWorktreeIds,
+    backgroundMountTabIdsByWorktree,
     activationDeferredMountTabIdsByWorktreeRef,
     backgroundMountRevision,
     anyMountedWorktreeHasLayout
@@ -191,7 +194,6 @@ function TerminalWorkspacePanel(): React.JSX.Element | null {
     // react to tab-order/content changes, not just scalar IDs. The list comes
     // from Zustand selectors and is small in practice, so this explicit repair
     // effect is preferred over duplicating reconciliation state.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTabId, activeTabType, setActiveTab, tabs, activeTabIdByWorktree, activeWorktreeId])
 
   useWorktreeActivationBootstrap()
@@ -251,7 +253,7 @@ function TerminalWorkspacePanel(): React.JSX.Element | null {
               a relative anchor here so those panes size to the workspace body
               rather than some outer ancestor when split groups are enabled. */}
           {workspaceSurfaces
-            .filter((workspace) => mountedWorktreeIdsRef.current.has(workspace.id))
+            .filter((workspace) => mountedWorktreeIds.has(workspace.id))
             .map((workspace) => {
               const layout = getEffectiveLayoutForWorktree(workspace.id)
               if (!layout) {
@@ -261,7 +263,7 @@ function TerminalWorkspacePanel(): React.JSX.Element | null {
               // behind every non-terminal top-level view.
               const isVisible = activeView === 'terminal' && workspace.id === activeWorktreeId
               const shouldMeasureHiddenWorktree =
-                !isVisible && measurableBackgroundWorktreeIdsRef.current.has(workspace.id)
+                !isVisible && measurableBackgroundWorktreeIds.has(workspace.id)
               const shouldColdParkTerminalPanes =
                 !isVisible &&
                 !shouldMeasureHiddenWorktree &&
@@ -277,11 +279,9 @@ function TerminalWorkspacePanel(): React.JSX.Element | null {
                   shouldMeasureHiddenWorktree={shouldMeasureHiddenWorktree}
                   shouldColdParkTerminalPanes={shouldColdParkTerminalPanes}
                   forceParkTerminalPanes={forceParkedTerminalWorktreeIds.has(workspace.id)}
-                  backgroundMountTabIds={
-                    backgroundMountTabIdsByWorktreeRef.current.get(workspace.id) ?? null
-                  }
+                  backgroundMountTabIds={backgroundMountTabIdsByWorktree.get(workspace.id) ?? null}
                   activationDeferredMountTabIds={
-                    activationDeferredMountTabIdsByWorktreeRef.current.get(workspace.id) ?? null
+                    activationDeferredMountTabIdsByWorktree.get(workspace.id) ?? null
                   }
                 />
               )
@@ -292,11 +292,11 @@ function TerminalWorkspacePanel(): React.JSX.Element | null {
       {!effectiveActiveLayout && !anyMountedWorktreeHasLayout && (
         <LegacyWorkspaceSurfaces
           workspaceSurfaces={workspaceSurfaces}
-          mountedWorktreeIdsRef={mountedWorktreeIdsRef}
-          measurableBackgroundWorktreeIdsRef={measurableBackgroundWorktreeIdsRef}
+          mountedWorktreeIds={mountedWorktreeIds}
+          measurableBackgroundWorktreeIds={measurableBackgroundWorktreeIds}
           parkedTerminalWorktreeIds={parkedTerminalWorktreeIds}
           forceParkedTerminalWorktreeIds={forceParkedTerminalWorktreeIds}
-          backgroundMountTabIdsByWorktreeRef={backgroundMountTabIdsByWorktreeRef}
+          backgroundMountTabIdsByWorktree={backgroundMountTabIdsByWorktree}
           activeView={activeView}
           activeWorktreeId={activeWorktreeId}
           activeTabId={activeTabId}

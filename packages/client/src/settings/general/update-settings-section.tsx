@@ -1,6 +1,6 @@
 import { YIRU_GITHUB_RELEASES_URL } from '@yiru/runtime-protocol/model/product'
 import type React from 'react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { openHttpLink } from '~renderer/editor/http-link-routing'
 import { translate } from '~renderer/i18n/i18n'
@@ -25,14 +25,16 @@ export function GeneralUpdateSettingsSection(): React.JSX.Element {
   // the preceding 'available'/'downloading'/'downloaded' state). Cache the
   // last-known version so the error copy below can distinguish the two cases
   // without adding IPC. Mirrors `versionRef` in update-card.tsx.
-  const updateVersionRef = useRef<string | null>(null)
+  const [updateVersion, setUpdateVersion] = useState<string | null>(null)
   if (
     (updateStatus.state === 'available' ||
       updateStatus.state === 'downloading' ||
       updateStatus.state === 'downloaded') &&
     updateStatus.version
   ) {
-    updateVersionRef.current = updateStatus.version
+    if (updateVersion !== updateStatus.version) {
+      setUpdateVersion(updateStatus.version)
+    }
   } else if (
     updateStatus.state === 'checking' ||
     updateStatus.state === 'idle' ||
@@ -41,7 +43,9 @@ export function GeneralUpdateSettingsSection(): React.JSX.Element {
     // Why: a new check cycle has started or completed cleanly. Clear the
     // cached version so a subsequent check failure cannot be mis-classified
     // as a download failure based on a stale version from a prior cycle.
-    updateVersionRef.current = null
+    if (updateVersion !== null) {
+      setUpdateVersion(null)
+    }
   }
 
   const [appVersion, setAppVersion] = useState<string | null>(null)
@@ -251,7 +255,7 @@ export function GeneralUpdateSettingsSection(): React.JSX.Element {
             // (version cached from a prior 'available'/'downloading'/
             // 'downloaded' state). Label accordingly so a download failure
             // isn't mislabeled as a "check" failure. Mirrors update-card.tsx.
-            (updateVersionRef.current
+            (updateVersion
               ? translate(
                   'auto.components.settings.GeneralUpdateSettingsSection.b9ad70c30d',
                   'Update error. {{value0}}',

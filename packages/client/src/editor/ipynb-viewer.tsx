@@ -1,5 +1,4 @@
 import { DIFFS_TAG_NAME } from '@pierre/diffs'
-/* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: source drafts are reconciled against parsed notebook cells after editor flushes so stale drafts do not overwrite external notebook updates. */
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { resolveEditorFontFamilyOrInherit } from '~renderer/editor/font-family'
 import { computeEditorFontSize } from '~renderer/editor/font-zoom'
@@ -84,10 +83,12 @@ export default function IpynbViewer({
       }
     }
   })()
-  contentRef.current = content
-  notebookRef.current = parsed.notebook
-  onContentChangeRef.current = onContentChange
-  onDirtyStateHintRef.current = onDirtyStateHint
+  useLayoutEffect(() => {
+    contentRef.current = content
+    notebookRef.current = parsed.notebook
+    onContentChangeRef.current = onContentChange
+    onDirtyStateHintRef.current = onDirtyStateHint
+  }, [content, onContentChange, onDirtyStateHint, parsed.notebook])
 
   // Why: execution trust belongs to the currently rendered file; resetting
   // during render avoids a paint with the previous file's trust prompt state.

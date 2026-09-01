@@ -23,6 +23,13 @@ export function WorkbenchAnimatedVisual(props: {
   reducedMotion: boolean
   variant?: WorkbenchAnimatedVisualVariant
 }): JSX.Element {
+  return <WorkbenchAnimation key={`${props.reducedMotion}:${props.variant ?? 'tour'}`} {...props} />
+}
+
+function WorkbenchAnimation(props: {
+  reducedMotion: boolean
+  variant?: WorkbenchAnimatedVisualVariant
+}): JSX.Element {
   const { reducedMotion, variant = 'tour' } = props
   const isTwoAgentsChecklist = variant === 'two-agents-checklist'
   const splitRightShortcutLabel = useShortcutLabel('terminal.splitRight')
@@ -30,6 +37,9 @@ export function WorkbenchAnimatedVisual(props: {
   const panelRef = useRef<HTMLDivElement | null>(null)
   const leftPaneRef = useRef<HTMLDivElement | null>(null)
   const splitRowRef = useRef<HTMLDivElement | null>(null)
+  const setSplitRow = (node: HTMLDivElement | null): void => {
+    splitRowRef.current = node
+  }
   const {
     cursorTarget,
     phase,
@@ -86,7 +96,7 @@ export function WorkbenchAnimatedVisual(props: {
           <ContextMenu
             shown={menuShown}
             splitRowActive={splitRowActive}
-            splitRowRef={splitRowRef}
+            setSplitRow={setSplitRow}
             splitRightShortcutLabel={splitRightShortcutLabel}
             splitDownShortcutLabel={splitDownShortcutLabel}
           />

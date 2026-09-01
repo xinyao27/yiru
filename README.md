@@ -105,7 +105,7 @@ Any package task is reachable from the repository root with `vp run <package>#<t
 ```bash
 vp run @yiru/daemon#build:release  # Compile the daemon target matrix
 vp run @yiru/extension#build       # Build the unpacked Chrome extension
-vp run yiru-mobile-ios#build       # Build the native iOS companion
+vp run yiru-mobile#build           # Build the native iOS companion
 ```
 
 See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for repository conventions, platform setup, and contribution guidance.

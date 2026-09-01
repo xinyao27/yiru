@@ -1,4 +1,3 @@
-/* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: this page is a timed storyboard; reveal state intentionally resets when the active/reduced-motion gates change. */
 import { useEffect, useRef, useState } from 'react'
 import type { JSX, ReactNode } from 'react'
 import { getAgentCatalog, AgentIcon, type AgentCatalogEntry } from '~renderer/agent/catalog'
@@ -25,20 +24,21 @@ const CLAUDE_ACTIVITIES: readonly ClaudeActivity[] = [
 ]
 
 export function StatusesPage(props: { active: boolean; reducedMotion: boolean }): JSX.Element {
+  return <StatusesAnimation key={`${props.active}:${props.reducedMotion}`} {...props} />
+}
+
+function StatusesAnimation(props: { active: boolean; reducedMotion: boolean }): JSX.Element {
   const { active, reducedMotion } = props
-  const [revealed, setRevealed] = useState({ claude: false, opencode: false, codex: false })
+  const [revealed, setRevealed] = useState(
+    active && reducedMotion
+      ? { claude: true, opencode: true, codex: true }
+      : { claude: false, opencode: false, codex: false }
+  )
   const [claudeIdx, setClaudeIdx] = useState(0)
   const [claudeFading, setClaudeFading] = useState(false)
 
   useEffect(() => {
-    if (!active) {
-      setRevealed({ claude: false, opencode: false, codex: false })
-      setClaudeIdx(0)
-      setClaudeFading(false)
-      return
-    }
-    if (reducedMotion) {
-      setRevealed({ claude: true, opencode: true, codex: true })
+    if (!active || reducedMotion) {
       return
     }
     const timeouts: number[] = []

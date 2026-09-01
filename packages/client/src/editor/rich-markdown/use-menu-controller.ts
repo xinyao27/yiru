@@ -1,5 +1,5 @@
 import type { MarkdownDocument } from '@yiru/runtime-protocol/workbench/types'
-import { useRef, useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 
 import { getMarkdownDocCompletionDocuments } from '../markdown-doc-completions'
 import type { DocLinkMenuRow, DocLinkMenuState } from './commands'
@@ -32,9 +32,6 @@ export function useRichMarkdownMenuController({
   const filteredDocLinkRowsRef = useRef<DocLinkMenuRow[]>([])
   const selectedDocLinkIndexRef = useRef(0)
   const handleEmojiPickRef = useRef<(menu: SlashMenuState) => void>(() => {})
-
-  slashMenuRef.current = slashMenu
-  docLinkMenuRef.current = docLinkMenu
 
   const setSelectedCommandIndex = (nextIndex: MenuSelectionUpdate) => {
     setSlashSelection((current) => {
@@ -72,8 +69,6 @@ export function useRichMarkdownMenuController({
     slashMenu?.query ?? null,
     filteredSlashCommands.length
   )
-  filteredSlashCommandsRef.current = filteredSlashCommands
-  selectedCommandIndexRef.current = selectedCommandIndex
 
   const { docLinkRows, docLinkTotalMatches } = (() => {
     if (!docLinkMenu || !markdownDocuments) {
@@ -90,14 +85,19 @@ export function useRichMarkdownMenuController({
     docLinkMenu?.query ?? null,
     docLinkRows.length
   )
-  filteredDocLinkRowsRef.current = docLinkRows
-  selectedDocLinkIndexRef.current = selectedDocLinkIndex
-
   const openEmojiMenu = (menu: SlashMenuState): void => {
     setSlashMenu(null)
     setEmojiMenu({ left: menu.left, top: menu.top })
   }
-  handleEmojiPickRef.current = openEmojiMenu
+  useLayoutEffect(() => {
+    slashMenuRef.current = slashMenu
+    docLinkMenuRef.current = docLinkMenu
+    filteredSlashCommandsRef.current = filteredSlashCommands
+    selectedCommandIndexRef.current = selectedCommandIndex
+    filteredDocLinkRowsRef.current = docLinkRows
+    selectedDocLinkIndexRef.current = selectedDocLinkIndex
+    handleEmojiPickRef.current = openEmojiMenu
+  })
 
   return {
     docLinkMenu,

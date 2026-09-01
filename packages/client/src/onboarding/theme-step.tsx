@@ -67,7 +67,10 @@ function fieldGroupCountBucket(count: number): '0' | '1-3' | '4-7' | '8+' {
 
 export function ThemeStep({ theme, onThemeChange, settings, updateSettings }: ThemeStepProps) {
   const [importing, setImporting] = useState(false)
-  const [discovery, setDiscovery] = useState<DiscoveryState>({ status: 'idle' })
+  const shouldDetectGhostty = navigator.userAgent.includes('Mac')
+  const [discovery, setDiscovery] = useState<DiscoveryState>(
+    shouldDetectGhostty ? { status: 'detecting' } : { status: 'idle' }
+  )
   const mountedRef = useMountedRef()
 
   // Why: read-only IPC. Auto-detect on step mount so the user sees a clear
@@ -78,12 +81,10 @@ export function ThemeStep({ theme, onThemeChange, settings, updateSettings }: Th
     // Skip the IPC + telemetry emission entirely on non-Mac so the
     // `_discovered: absent` rate measured by the Mac-cohort dashboard isn't
     // polluted by a population that cannot have a Ghostty config.
-    if (!navigator.userAgent.includes('Mac')) {
+    if (!shouldDetectGhostty) {
       return
     }
     let cancelled = false
-    // oxlint-disable-next-line react-doctor/no-initialize-state -- Why: non-Mac intentionally remains idle; only Mac enters detecting before IPC.
-    setDiscovery({ status: 'detecting' })
     void previewGhosttyImportOnActiveHost()
       .then((preview) => {
         if (cancelled) {
@@ -121,7 +122,7 @@ export function ThemeStep({ theme, onThemeChange, settings, updateSettings }: Th
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [shouldDetectGhostty])
 
   const importGhostty = async (preview: GhosttyImportPreview) => {
     if (!settings || importing) {

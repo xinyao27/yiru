@@ -56,9 +56,15 @@ function DetailRow({ label, value }: { label: string; value: string }): React.JS
 // action/cancel buttons into the same row as the title, which squashes them.
 // Rendering the body as a custom node puts the actions in a full-width footer
 // while still reusing sonner's frame, icon, close button, and swipe-to-dismiss.
-function RateLimitToastBody({ notice }: { notice: RateLimitNotice }): React.JSX.Element {
+function RateLimitToastBody({
+  notice,
+  renderedAt
+}: {
+  notice: RateLimitNotice
+  renderedAt: number
+}): React.JSX.Element {
   const { hit, schedule } = notice
-  const countdown = hit.resetsAt === null ? null : formatResetDuration(hit.resetsAt - Date.now())
+  const countdown = hit.resetsAt === null ? null : formatResetDuration(hit.resetsAt - renderedAt)
   const workspace = useWorktreeById(hit.worktreeId)?.displayName ?? null
 
   return (
@@ -129,8 +135,9 @@ function RateLimitToastBody({ notice }: { notice: RateLimitNotice }): React.JSX.
 /** Raise or update the toast for one pane. Same id, so state changes in place. */
 export function showRateLimitResumeToast(notice: RateLimitNotice): void {
   const { hit, schedule } = notice
+  const renderedAt = Date.now()
   const agentLabel = formatAgentTypeLabel(hit.agent)
-  const countdown = hit.resetsAt === null ? null : formatResetDuration(hit.resetsAt - Date.now())
+  const countdown = hit.resetsAt === null ? null : formatResetDuration(hit.resetsAt - renderedAt)
   const title = schedule
     ? translate(
         'rateLimitResume.title.scheduled',
@@ -142,7 +149,7 @@ export function showRateLimitResumeToast(notice: RateLimitNotice): void {
       })
   const options = {
     id: rateLimitToastId(hit.ptyId),
-    description: <RateLimitToastBody notice={notice} />,
+    description: <RateLimitToastBody notice={notice} renderedAt={renderedAt} />,
     // Why: an outage lasts hours. A toast that auto-expires would strand the
     // user with no way back to the decision.
     duration: Infinity,

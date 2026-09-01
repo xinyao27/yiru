@@ -20,6 +20,7 @@ import { useFolderPathStatus } from './use-folder-path-status'
 import { useHeaderModel } from './use-header-model'
 import { useViewportDrag } from './use-viewport-drag'
 import { useViewportScroll } from './use-viewport-scroll'
+import { useViewportScrollRoot } from './use-viewport-scroll-root'
 import { ViewportDropIndicators } from './viewport-drop-indicators'
 import { ViewportHeaderRow } from './viewport-header-row'
 import { WORKTREE_SIDEBAR_CONTENT_STYLE, WORKTREE_SIDEBAR_SCROLL_STYLE } from './viewport-layout'
@@ -88,14 +89,9 @@ export function LegendWorktreeViewport({
   onReorderWorktrees,
   scrollOffsetRef
 }: LegendWorktreeViewportProps) {
-  const scrollRef = useRef<HTMLDivElement>(null)
   const legendListRef = useRef<LegendListRef>(null)
-  const markScrollMovement = (): void => {
-    const container = scrollRef.current
-    if (container) {
-      scrollOffsetRef.current = container.scrollTop
-    }
-  }
+  const { scrollRef, scrollOffset, markScrollMovement, setScrollRoot } =
+    useViewportScrollRoot(scrollOffsetRef)
   const runtimeLabel = navigationSurface ? getSidebarRuntimeLabel() : null
   const keybindings = useAppStore((state) => state.keybindings)
   const settings = useAppStore((state) => state.settings)
@@ -223,7 +219,8 @@ export function LegendWorktreeViewport({
     legendListRef,
     scrollRef,
     clearWorktreeDrag,
-    markScrollMovement
+    markScrollMovement,
+    setScrollRoot
   })
   return (
     <div
@@ -232,7 +229,7 @@ export function LegendWorktreeViewport({
       className="relative min-h-0 flex-1"
     >
       <ViewportDropIndicators
-        scrollOffset={scrollOffsetRef.current}
+        scrollOffset={scrollOffset}
         repo={{
           isEnabled: canReorderRepoHeaders,
           draggingId: repoDrag.state.draggingRepoId,
@@ -260,7 +257,7 @@ export function LegendWorktreeViewport({
         keyExtractor={getWorkspaceSidebarRowKey}
         getItemType={getLegendListRowType}
         itemsAreEqual={areWorkspaceSidebarRowsEqual}
-        initialScrollOffset={scrollOffsetRef.current}
+        initialScrollOffset={scrollOffset}
         maintainVisibleContentPosition={false}
         stickyHeaderIndices={stickyHeaderIndexes}
         onViewableItemsChanged={handleViewableItemsChanged}

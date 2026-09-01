@@ -24,8 +24,6 @@ import { SetupScriptPromptCardShell } from './setup-script-prompt-card-shell'
 import { trackSetupScriptPromptExposure } from './setup-script-prompt-exposure-telemetry'
 import {
   getRenderedSetupScriptPromptState,
-  getRepoProjectId,
-  type LastVisibleSetupScriptPrompt,
   useSetupScriptPromptProjectContext
 } from './setup-script-prompt-render-state'
 import { showSavedInProjectSettingsToast } from './setup-script-prompt-toast'
@@ -51,7 +49,7 @@ function SetupScriptPromptCard(): React.JSX.Element | null {
   const mountedRef = useMountedRef()
 
   const activeRepo = (() => repos.find((repo) => repo.id === activeRepoId) ?? null)()
-  const { activeProjectId, setupByRepoId } = useSetupScriptPromptProjectContext(
+  const { activeProjectId } = useSetupScriptPromptProjectContext(
     activeRepo,
     repos,
     projectHostSetups
@@ -59,19 +57,13 @@ function SetupScriptPromptCard(): React.JSX.Element | null {
   const isDismissed = activeRepo
     ? isSetupScriptPromptDismissed(activeRepo.id, dismissedRepoIds)
     : false
-  const lastVisiblePromptRef = useRef<LastVisibleSetupScriptPrompt | null>(null)
-
   useEffect(() => {
     if (!sidebarOpen || !activeRepo || !isGitRepoKind(activeRepo) || isDismissed) {
-      setPromptState(null)
-      setDetectedSetupDraft('')
       return
     }
 
     const repo = activeRepo
     let cancelled = false
-    setPromptState(null)
-
     async function inspectRepoSetup(): Promise<void> {
       const nextState = await inspectSetupScriptPromptState({
         repo,
@@ -321,29 +313,22 @@ function SetupScriptPromptCard(): React.JSX.Element | null {
   }
 
   if (!sidebarOpen || !activeRepo || !isGitRepoKind(activeRepo) || isDismissed) {
-    lastVisiblePromptRef.current = null
     return null
   }
 
-  const promptProjectId = promptState?.repoId
-    ? getRepoProjectId(promptState.repoId, repos, projectHostSetups, setupByRepoId)
-    : null
   const renderedPromptState =
     activeRepo &&
     getRenderedSetupScriptPromptState({
       promptState,
       activeRepoId: activeRepo.id,
       activeProjectId,
-      lastVisiblePrompt: lastVisiblePromptRef.current
+      lastVisiblePrompt: null
     })
 
   if (
     !renderedPromptState ||
     (renderedPromptState.status === 'ok' && renderedPromptState.hasEffectiveSetup)
   ) {
-    if (renderedPromptState?.status === 'ok' && renderedPromptState.hasEffectiveSetup) {
-      lastVisiblePromptRef.current = null
-    }
     return null
   }
 
@@ -351,19 +336,7 @@ function SetupScriptPromptCard(): React.JSX.Element | null {
   // retry-able card entirely — the global scope-mismatch banner explains it and
   // a retry would just re-fire repo.hooksCheck on every repo focus.
   if (renderedPromptState.status === 'forbidden') {
-    lastVisiblePromptRef.current = null
     return null
-  }
-
-  if (
-    renderedPromptState.status === 'ok' &&
-    !renderedPromptState.hasEffectiveSetup &&
-    (renderedPromptState.repoId === activeRepo.id || promptProjectId === activeProjectId)
-  ) {
-    lastVisiblePromptRef.current = {
-      state: renderedPromptState,
-      projectId: activeProjectId
-    }
   }
 
   const isInspectionError = renderedPromptState.status === 'error'

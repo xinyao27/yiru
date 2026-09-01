@@ -62,8 +62,18 @@ export function createTerminalQuickCommandDraft(
   }
 }
 
-export function TerminalQuickCommandDialog({
-  open,
+export function TerminalQuickCommandDialog(
+  props: TerminalQuickCommandDialogProps
+): React.JSX.Element {
+  const { command, onOpenChange, open } = props
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      {open ? <TerminalQuickCommandDialogForm key={JSON.stringify(command)} {...props} /> : null}
+    </Dialog>
+  )
+}
+
+function TerminalQuickCommandDialogForm({
   mode,
   command,
   repos = EMPTY_REPOS,
@@ -73,11 +83,9 @@ export function TerminalQuickCommandDialog({
   const fallbackAgent: TuiAgent =
     getAgentCatalog().find((entry) => supportsTerminalAgentQuickCommand(entry.id))?.id ?? 'claude'
   const [draft, setDraft] = useState<TerminalQuickCommand>(command)
-  const wasOpenRef = useRef(open)
-  const syncedCommandRef = useRef(command)
   const draftMemoryRef = useRef(createTerminalQuickCommandDialogDraftMemory(command, fallbackAgent))
   const initialScope = getTerminalQuickCommandScope(command)
-  const lastRepoScopeIdRef = useRef<string | null>(
+  const [lastRepoScopeId, setLastRepoScopeId] = useState<string | null>(
     initialScope.type === 'repo' ? initialScope.repoId : null
   )
   const [advancedOpen, setAdvancedOpen] = useState(false)
@@ -90,18 +98,6 @@ export function TerminalQuickCommandDialog({
       : null
   const selectedRepoId = selectedRepo?.id ?? ''
   const selectedRepoMissing = selectedScope.type === 'repo' && selectedRepo === null
-
-  if (!open) {
-    wasOpenRef.current = false
-  } else if (!wasOpenRef.current || syncedCommandRef.current !== command) {
-    wasOpenRef.current = true
-    syncedCommandRef.current = command
-    draftMemoryRef.current = createTerminalQuickCommandDialogDraftMemory(command, fallbackAgent)
-    const commandScope = getTerminalQuickCommandScope(command)
-    lastRepoScopeIdRef.current = commandScope.type === 'repo' ? commandScope.repoId : null
-    setAdvancedOpen(false)
-    setDraft({ ...command })
-  }
 
   const selectedAgent =
     isAgentAction && supportsTerminalAgentQuickCommand(draft.agent) ? draft.agent : fallbackAgent
@@ -167,81 +163,80 @@ export function TerminalQuickCommandDialog({
   const submitShortcutLabel = getScreenSubmitShortcutLabel()
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md sm:max-w-md" showCloseButton={false}>
-        <DialogHeader>
-          <DialogTitle className="text-sm">
-            {mode === 'edit'
-              ? translate(
-                  'auto.components.terminal.quick.commands.TerminalQuickCommandDialog.f9b184fc16',
-                  'Edit Quick Command'
-                )
-              : translate(
-                  'auto.components.terminal.quick.commands.TerminalQuickCommandDialog.5b3f634a55',
-                  'Add Quick Command'
-                )}
-          </DialogTitle>
-          <DialogDescription className="text-xs">
-            {translate(
-              'auto.components.terminal.quick.commands.TerminalQuickCommandDialog.ed04233b3e',
-              'Save terminal commands or agent prompts for quick access.'
-            )}
-          </DialogDescription>
-        </DialogHeader>
-
-        <div
-          className="space-y-4"
-          onKeyDown={(event) => {
-            if (isScreenSubmitShortcut(event) && canSave) {
-              event.preventDefault()
-              saveDraft()
-            }
-          }}
-        >
-          <TerminalQuickCommandLabelField label={draft.label} setDraft={setDraft} />
-
-          <div className="space-y-2">
-            <Label>
-              {translate(
-                'auto.components.terminal.quick.commands.TerminalQuickCommandDialog.ec8f081919',
-                'Action'
+    <DialogContent className="max-w-md sm:max-w-md" showCloseButton={false}>
+      <DialogHeader>
+        <DialogTitle className="text-sm">
+          {mode === 'edit'
+            ? translate(
+                'auto.components.terminal.quick.commands.TerminalQuickCommandDialog.f9b184fc16',
+                'Edit Quick Command'
+              )
+            : translate(
+                'auto.components.terminal.quick.commands.TerminalQuickCommandDialog.5b3f634a55',
+                'Add Quick Command'
               )}
-            </Label>
-            <TerminalQuickCommandActionToggle
-              selectedAction={selectedAction}
-              onActionChange={setAction}
-            />
-          </div>
+        </DialogTitle>
+        <DialogDescription className="text-xs">
+          {translate(
+            'auto.components.terminal.quick.commands.TerminalQuickCommandDialog.ed04233b3e',
+            'Save terminal commands or agent prompts for quick access.'
+          )}
+        </DialogDescription>
+      </DialogHeader>
 
-          <TerminalQuickCommandContentSection
-            draft={draft}
-            isAgentAction={isAgentAction}
-            selectedAgent={selectedAgent}
-            draftMemoryRef={draftMemoryRef}
-            setDraft={setDraft}
-          />
+      <div
+        className="space-y-4"
+        onKeyDown={(event) => {
+          if (isScreenSubmitShortcut(event) && canSave) {
+            event.preventDefault()
+            saveDraft()
+          }
+        }}
+      >
+        <TerminalQuickCommandLabelField label={draft.label} setDraft={setDraft} />
 
-          <TerminalQuickCommandAdvancedSection
-            draft={draft}
-            repos={repos}
-            advancedOpen={advancedOpen}
-            selectedScope={selectedScope}
-            selectedRepoId={selectedRepoId}
-            selectedRepoMissing={selectedRepoMissing}
-            lastRepoScopeIdRef={lastRepoScopeIdRef}
-            setAdvancedOpen={setAdvancedOpen}
-            setDraft={setDraft}
-            toggleAppendEnter={toggleAppendEnter}
+        <div className="space-y-2">
+          <Label>
+            {translate(
+              'auto.components.terminal.quick.commands.TerminalQuickCommandDialog.ec8f081919',
+              'Action'
+            )}
+          </Label>
+          <TerminalQuickCommandActionToggle
+            selectedAction={selectedAction}
+            onActionChange={setAction}
           />
         </div>
 
-        <TerminalQuickCommandDialogFooter
-          canSave={canSave}
-          submitShortcutLabel={submitShortcutLabel}
-          onCancel={() => onOpenChange(false)}
-          onSave={saveDraft}
+        <TerminalQuickCommandContentSection
+          draft={draft}
+          isAgentAction={isAgentAction}
+          selectedAgent={selectedAgent}
+          draftMemoryRef={draftMemoryRef}
+          setDraft={setDraft}
         />
-      </DialogContent>
-    </Dialog>
+
+        <TerminalQuickCommandAdvancedSection
+          draft={draft}
+          repos={repos}
+          advancedOpen={advancedOpen}
+          selectedScope={selectedScope}
+          selectedRepoId={selectedRepoId}
+          selectedRepoMissing={selectedRepoMissing}
+          lastRepoScopeId={lastRepoScopeId}
+          rememberRepoScopeId={setLastRepoScopeId}
+          setAdvancedOpen={setAdvancedOpen}
+          setDraft={setDraft}
+          toggleAppendEnter={toggleAppendEnter}
+        />
+      </div>
+
+      <TerminalQuickCommandDialogFooter
+        canSave={canSave}
+        submitShortcutLabel={submitShortcutLabel}
+        onCancel={() => onOpenChange(false)}
+        onSave={saveDraft}
+      />
+    </DialogContent>
   )
 }

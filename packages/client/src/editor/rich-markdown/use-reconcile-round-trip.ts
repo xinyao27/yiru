@@ -1,4 +1,4 @@
-import { useRef, type MutableRefObject } from 'react'
+import { useLayoutEffect, useRef, type MutableRefObject } from 'react'
 import { useAppStore } from '~renderer/store/state'
 
 import type { RichMarkdownHtmlSuperscriptLinkContext } from './html-superscript-link-context'
@@ -28,16 +28,25 @@ export function useRichMarkdownReconcileRoundTrip({
 }: ReconcileRoundTripParams): MutableRefObject<(markdown: string) => string | null> {
   const settings = useAppStore((s) => s.settings)
   const ref = useRef<(markdown: string) => string | null>(() => null)
-  ref.current = (markdown) =>
-    serializeRichMarkdownForReconcile(markdown, {
-      htmlSuperscriptLinkContext,
-      imageResolverContext: createRichMarkdownImageResolverContext({
-        filePath,
-        runtimeEnvironmentId,
-        settings,
-        worktreeId,
-        worktreeRoot
+  useLayoutEffect(() => {
+    ref.current = (markdown) =>
+      serializeRichMarkdownForReconcile(markdown, {
+        htmlSuperscriptLinkContext,
+        imageResolverContext: createRichMarkdownImageResolverContext({
+          filePath,
+          runtimeEnvironmentId,
+          settings,
+          worktreeId,
+          worktreeRoot
+        })
       })
-    })
+  }, [
+    filePath,
+    htmlSuperscriptLinkContext,
+    runtimeEnvironmentId,
+    settings,
+    worktreeId,
+    worktreeRoot
+  ])
   return ref
 }

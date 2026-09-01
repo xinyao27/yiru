@@ -1,4 +1,4 @@
-import type { JSX } from 'react'
+import { useMemo, useState, type JSX } from 'react'
 import { translate } from '~renderer/i18n/i18n'
 import { useShortcutLabel } from '~renderer/keyboard-input/use-shortcut-label'
 import { ClaudeIcon } from '~renderer/status-bar/icons'
@@ -24,7 +24,34 @@ export function BrowserAnimatedVisual(props: {
   reducedMotion: boolean
   onCycleComplete?: () => void
 }): JSX.Element {
-  const storyboard = useBrowserStoryboard(props.reducedMotion, props.onCycleComplete)
+  const [browserPageElement, setBrowserPageElement] = useState<HTMLDivElement | null>(null)
+  const [titlebarElement, setTitlebarElement] = useState<HTMLDivElement | null>(null)
+  const [newtabButtonElement, setNewtabButtonElement] = useState<HTMLSpanElement | null>(null)
+  const [newtabRowElement, setNewtabRowElement] = useState<HTMLDivElement | null>(null)
+  const [starterCardElement, setStarterCardElement] = useState<HTMLDivElement | null>(null)
+  const [ctaElement, setCtaElement] = useState<HTMLSpanElement | null>(null)
+  const [sendButtonElement, setSendButtonElement] = useState<HTMLSpanElement | null>(null)
+  const elements = useMemo(
+    () => ({
+      browserPage: browserPageElement,
+      titlebar: titlebarElement,
+      newtabButton: newtabButtonElement,
+      newtabRow: newtabRowElement,
+      starterCard: starterCardElement,
+      cta: ctaElement,
+      sendButton: sendButtonElement
+    }),
+    [
+      browserPageElement,
+      ctaElement,
+      newtabButtonElement,
+      newtabRowElement,
+      sendButtonElement,
+      starterCardElement,
+      titlebarElement
+    ]
+  )
+  const storyboard = useBrowserStoryboard(props.reducedMotion, props.onCycleComplete, elements)
   const newBrowserShortcutLabel = useShortcutLabel('tab.newBrowser')
 
   return (
@@ -39,7 +66,7 @@ export function BrowserAnimatedVisual(props: {
         >
           <div className="border-border bg-card text-card-foreground relative flex min-w-0 flex-col overflow-hidden border">
             <div
-              ref={storyboard.titlebarRef}
+              ref={setTitlebarElement}
               className="border-border bg-muted/40 relative flex min-h-[32px] items-end gap-1.5 border-b px-2.5 pt-2"
             >
               <div className="ml-1 flex flex-1 items-end gap-1 overflow-visible">
@@ -62,7 +89,7 @@ export function BrowserAnimatedVisual(props: {
                   />
                 ) : null}
                 <span
-                  ref={storyboard.newtabBtnRef}
+                  ref={setNewtabButtonElement}
                   className={cn(
                     'mb-1 inline-flex size-[22px] items-center justify-center text-muted-foreground transition-colors duration-150',
                     storyboard.newtabActive ? 'bg-foreground/10 text-foreground' : null
@@ -87,7 +114,7 @@ export function BrowserAnimatedVisual(props: {
               >
                 <BrowserStoryboardDropdownRow widthPct={64} />
                 <div
-                  ref={storyboard.newtabRowRef}
+                  ref={setNewtabRowElement}
                   className={cn(
                     'grid items-center gap-2 px-2 py-[5px]',
                     storyboard.newtabRowActive ? 'bg-accent' : null
@@ -157,7 +184,7 @@ export function BrowserAnimatedVisual(props: {
               }}
             >
               <div
-                ref={storyboard.browserPageRef}
+                ref={setBrowserPageElement}
                 className="relative flex flex-col gap-3 px-5 py-4"
                 style={{ visibility: storyboard.browserChromeVisible ? 'visible' : 'hidden' }}
               >
@@ -165,8 +192,8 @@ export function BrowserAnimatedVisual(props: {
                   <BrowserStoryboardSignup />
                 ) : (
                   <BrowserStoryboardPricing
-                    cardRef={storyboard.starterCardRef}
-                    ctaRef={storyboard.ctaRef}
+                    cardRef={setStarterCardElement}
+                    ctaRef={setCtaElement}
                     ringStarter={storyboard.ringStarter}
                     ctaHighlighted={storyboard.ctaHighlighted}
                     ctaPressing={storyboard.ctaPressing}
@@ -209,7 +236,7 @@ export function BrowserAnimatedVisual(props: {
                   </div>
                   <div className="flex justify-end">
                     <span
-                      ref={storyboard.sendBtnRef}
+                      ref={setSendButtonElement}
                       aria-label={translate(
                         'auto.components.feature.wall.BrowserAnimatedVisual.0f8481e1a7',
                         'Send to Claude'

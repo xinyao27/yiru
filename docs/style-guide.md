@@ -3,7 +3,7 @@
 This is the visual contract for the Chrome workbench in `packages/client/src`. Architecture,
 module boundaries, localization, and component rules remain owned by [`AGENTS.md`](../AGENTS.md).
 The native iOS client has a separate contract in
-[`apps/mobile-ios/DESIGN.md`](../apps/mobile-ios/DESIGN.md).
+[`apps/mobile/DESIGN.md`](../apps/mobile/DESIGN.md).
 
 | Source | Ownership |
 | --- | --- |

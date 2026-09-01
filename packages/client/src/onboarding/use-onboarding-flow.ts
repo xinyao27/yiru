@@ -51,8 +51,7 @@ export function useOnboardingFlow(
     setTheme,
     detectedSet,
     isDetectingAgents,
-    getThemeBeforePreview,
-    setLifecycleRootRef
+    getThemeBeforePreview
   } = useOnboardingPreferences(currentStep.id)
   const closeWith = useCloseWith({
     onOnboardingChange,
@@ -268,7 +267,6 @@ export function useOnboardingFlow(
     dismissOnboarding,
     back,
     jumpToStep,
-    setLifecycleRootRef,
     openFolder: projectActions.openFolder,
     continueWithExistingProject: projectActions.continueWithExistingProject,
     clone: projectActions.clone

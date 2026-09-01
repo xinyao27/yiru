@@ -1,7 +1,7 @@
 import type { getTerminalQuickCommandScope } from '@yiru/runtime-protocol/workbench/terminal/quick-commands'
 import { isTerminalAgentQuickCommand } from '@yiru/runtime-protocol/workbench/terminal/quick-commands'
 import type { Repo, TerminalQuickCommand } from '@yiru/runtime-protocol/workbench/types'
-import type { Dispatch, MutableRefObject, SetStateAction } from 'react'
+import type { Dispatch, SetStateAction } from 'react'
 import { translate } from '~renderer/i18n/i18n'
 import { CaretDown as ChevronDown } from '~renderer/icons/hugeicons'
 import { Button } from '~renderer/ui/button'
@@ -17,7 +17,8 @@ type TerminalQuickCommandAdvancedSectionProps = {
   selectedScope: ReturnType<typeof getTerminalQuickCommandScope>
   selectedRepoId: string
   selectedRepoMissing: boolean
-  lastRepoScopeIdRef: MutableRefObject<string | null>
+  lastRepoScopeId: string | null
+  rememberRepoScopeId: (repoId: string) => void
   setAdvancedOpen: Dispatch<SetStateAction<boolean>>
   setDraft: Dispatch<SetStateAction<TerminalQuickCommand>>
   toggleAppendEnter: () => void
@@ -30,7 +31,8 @@ export function TerminalQuickCommandAdvancedSection({
   selectedScope,
   selectedRepoId,
   selectedRepoMissing,
-  lastRepoScopeIdRef,
+  lastRepoScopeId,
+  rememberRepoScopeId,
   setAdvancedOpen,
   setDraft,
   toggleAppendEnter
@@ -78,10 +80,8 @@ export function TerminalQuickCommandAdvancedSection({
               selectedScope={selectedScope}
               selectedRepoId={selectedRepoId}
               selectedRepoMissing={selectedRepoMissing}
-              lastRepoScopeId={lastRepoScopeIdRef.current}
-              rememberRepoScopeId={(repoId) => {
-                lastRepoScopeIdRef.current = repoId
-              }}
+              lastRepoScopeId={lastRepoScopeId}
+              rememberRepoScopeId={rememberRepoScopeId}
               setDraft={setDraft}
             />
           </div>

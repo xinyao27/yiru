@@ -1,6 +1,6 @@
 # iOS release
 
-The GitHub Actions workflow [mobile-ios-release.yml](../../.github/workflows/mobile-ios-release.yml)
+The GitHub Actions workflow [mobile-release.yml](../../.github/workflows/mobile-release.yml)
 builds the native SwiftUI app, signs the app and widget, verifies the resulting archive, and uploads
 the IPA to TestFlight.
 
@@ -25,7 +25,7 @@ The manual workflow preserves the previous iOS release interface:
 - `testflight_distribution`: upload for `internal` or `external` testers.
 - `testflight_changelog`: release notes used for external TestFlight distribution.
 
-Pushing a `mobile-ios-v*` tag runs the same lane with internal distribution. Unless an exact version
+Pushing a `mobile-v*` tag runs the same lane with internal distribution. Unless an exact version
 is supplied, Fastlane resolves the highest marketing version from the existing app's App Store and
 TestFlight history, together with the project version. The build number is the highest integer build
 number in that TestFlight history plus one, including builds produced by the former Expo client.

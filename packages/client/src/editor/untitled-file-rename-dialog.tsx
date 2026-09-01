@@ -26,6 +26,12 @@ type UntitledFileRenameDialogProps = {
 }
 
 export function UntitledFileRenameDialog({
+  ...props
+}: UntitledFileRenameDialogProps): React.JSX.Element {
+  return <OpenUntitledFileRenameDialog key={props.open ? 'open' : 'closed'} {...props} />
+}
+
+function OpenUntitledFileRenameDialog({
   open,
   currentName,
   worktreePath,
@@ -40,7 +46,6 @@ export function UntitledFileRenameDialog({
   const [error, setError] = useState<string | null>(null)
   const nameInputRef = useRef<HTMLInputElement>(null)
   const focusFrameRef = useRef<number | null>(null)
-  const seededOpenStateRef = useRef({ open: false, baseName, worktreePath })
   const mountedRef = useMountedRef()
 
   const displayError = externalError ?? error
@@ -59,20 +64,6 @@ export function UntitledFileRenameDialog({
       cancelFocusFrame()
     }
     nameInputRef.current = node
-  }
-
-  // Why: seed the drafts before the open dialog paints; focus is handled by
-  // Radix's open lifecycle below so this does not need a post-render Effect.
-  if (open) {
-    const seeded = seededOpenStateRef.current
-    if (!seeded.open || seeded.baseName !== baseName || seeded.worktreePath !== worktreePath) {
-      seededOpenStateRef.current = { open: true, baseName, worktreePath }
-      setName(baseName)
-      setDir(worktreePath)
-      setError(null)
-    }
-  } else if (seededOpenStateRef.current.open) {
-    seededOpenStateRef.current = { open: false, baseName, worktreePath }
   }
 
   const handleBrowse = async () => {

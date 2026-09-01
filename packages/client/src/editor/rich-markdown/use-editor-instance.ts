@@ -17,6 +17,5 @@ export function useRichMarkdownEditorInstance(params: EditorConfigParams): Edito
       ...createRichMarkdownEditorConfig(params)
     }))()
   )
-  params.editorRef.current = editor ?? null
   return editor
 }

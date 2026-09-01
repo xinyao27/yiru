@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { translate } from '~renderer/i18n/i18n'
 import {
@@ -38,11 +38,14 @@ export function AgentCapabilitiesSetupAction(props: {
   const { onBrowserUseSkillInstalledChange, onOrchestrationSkillInstalledChange } = props
   const capabilitySetupStatus = useAgentCapabilitySetupStatus()
   const { readiness } = capabilitySetupStatus
-  const featureSetupDefaultsAppliedRef = useRef(false)
-  const featureSetupChangedByUserRef = useRef(false)
-  const [featureSetup, setFeatureSetup] = useState<OnboardingFeatureSetupSelection>(
-    DEFAULT_ONBOARDING_FEATURE_SETUP_SELECTION
+  const [userFeatureSetup, setUserFeatureSetup] = useState<OnboardingFeatureSetupSelection | null>(
+    null
   )
+  const featureSetup =
+    userFeatureSetup ??
+    (isAgentCapabilityReadinessChecking(readiness)
+      ? DEFAULT_ONBOARDING_FEATURE_SETUP_SELECTION
+      : getDefaultAgentCapabilitySetupSelection(readiness))
   const [featureSetupCommand, setFeatureSetupCommand] = useState<string | null>(null)
   const [featureSetupCommandSelection, setFeatureSetupCommandSelection] =
     useState<OnboardingFeatureSetupSelection | null>(null)
@@ -54,19 +57,8 @@ export function AgentCapabilitiesSetupAction(props: {
   useEffect(() => {
     onOrchestrationSkillInstalledChange(readiness.orchestrationSkillInstalled)
   }, [onOrchestrationSkillInstalledChange, readiness.orchestrationSkillInstalled])
-  useEffect(() => {
-    if (featureSetupDefaultsAppliedRef.current || featureSetupChangedByUserRef.current) {
-      return
-    }
-    if (isAgentCapabilityReadinessChecking(readiness)) {
-      return
-    }
-    featureSetupDefaultsAppliedRef.current = true
-    setFeatureSetup(getDefaultAgentCapabilitySetupSelection(readiness))
-  }, [readiness])
   const handleFeatureSetupChange = (value: OnboardingFeatureSetupSelection): void => {
-    featureSetupChangedByUserRef.current = true
-    setFeatureSetup(value)
+    setUserFeatureSetup(value)
   }
   const handleStartFeatureSetup = async (): Promise<void> => {
     if (setupBusyLabel !== null || featureSetupCommand !== null) {

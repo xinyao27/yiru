@@ -1,7 +1,7 @@
 import type { NodeViewRenderer } from '@tiptap/core'
 import { NodeSelection } from '@tiptap/pm/state'
 import { ReactNodeViewRenderer } from '@tiptap/react'
-import type { ReactNodeViewProps, ReactNodeViewRendererOptions } from '@tiptap/react'
+import type { ReactNodeView, ReactNodeViewProps, ReactNodeViewRendererOptions } from '@tiptap/react'
 import type { ComponentType } from 'react'
 
 /**
@@ -39,32 +39,27 @@ export function safeReactNodeViewRenderer<T = HTMLElement>(
     // original and our patch is a no-op. On destroy(), the class calls
     // editor.off('selectionUpdate', this.handleSelectionUpdate), so storing
     // the patched function back on the property ensures clean teardown.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const nv = nodeView as any
+    const nv = nodeView as ReactNodeView<T>
     const originalBound = nv.handleSelectionUpdate
     nv.editor.off('selectionUpdate', originalBound)
 
-    nv.handleSelectionUpdate = function patchedHandleSelectionUpdate(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      this: any
-    ): void {
+    nv.handleSelectionUpdate = (): void => {
       // Why: only NodeSelection means the user intentionally selected this
       // specific node (e.g. Ctrl/Cmd-click on an atom node). Text and All
       // selections that happen to span across the node should not trigger
       // selectNode(), because that causes a React re-render mid-drag which
       // disrupts the browser's native selection tracking.
-      if (this.editor.state.selection instanceof NodeSelection) {
+      if (nv.editor.state.selection instanceof NodeSelection) {
         originalBound()
       } else {
         // Why: if a previous NodeSelection had set selected=true, clear it
         // now that the selection is no longer a NodeSelection.
-        if (this.renderer?.props?.selected) {
-          this.deselectNode()
+        if (nv.renderer.props.selected) {
+          nv.deselectNode()
         }
       }
     }
 
-    nv.handleSelectionUpdate = nv.handleSelectionUpdate.bind(nv)
     nv.editor.on('selectionUpdate', nv.handleSelectionUpdate)
 
     return nodeView

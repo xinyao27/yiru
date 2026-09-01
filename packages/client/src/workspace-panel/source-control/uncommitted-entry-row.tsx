@@ -133,7 +133,10 @@ export const UncommittedEntryRow = function UncommittedEntryRow({
             )}
           />
         )}
-        <FileIcon className="size-3.5 shrink-0" style={{ color: STATUS_COLORS[entry.status] }} />
+        {React.createElement(FileIcon, {
+          className: 'size-3.5 shrink-0',
+          style: { color: STATUS_COLORS[entry.status] }
+        })}
         <div className="min-w-0 flex-1 text-xs">
           <span className="block min-w-0 truncate">
             <span className="text-foreground">{fileName}</span>

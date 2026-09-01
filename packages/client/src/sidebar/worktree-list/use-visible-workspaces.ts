@@ -1,6 +1,6 @@
 import type { OnViewableItemsChangedInfo } from '@legendapp/list/react'
 import type { Worktree } from '@yiru/runtime-protocol/workbench/types'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useProjectCatalog } from '~renderer/project-catalog/provider'
 import { projectCatalogRepoBuckets } from '~renderer/project-catalog/repo-buckets'
 import { useEventCallback } from '~renderer/react/use-event-callback'
@@ -110,7 +110,9 @@ export function useVisibleWorkspaces(args: {
     lastRefreshKeyRef.current = key
     reportCandidates([...ids], Date.now())
   })
-  reportVisibleRef.current = reportVisible
+  useLayoutEffect(() => {
+    reportVisibleRef.current = reportVisible
+  }, [reportVisible])
 
   const handleViewableItemsChanged = (
     info: OnViewableItemsChangedInfo<WorkspaceSidebarProjectedRow>

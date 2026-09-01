@@ -1,6 +1,6 @@
 # iOS Simulator development
 
-Applies to the native SwiftUI app in [`apps/mobile-ios`](../../apps/mobile-ios). Mobile pairs
+Applies to the native SwiftUI app in [`apps/mobile`](../../apps/mobile). Mobile pairs
 directly with the daemon over an authenticated, end-to-end encrypted WebSocket, without another
 Yiru client in the path.
 
@@ -9,13 +9,13 @@ Yiru client in the path.
 Run:
 
 ```sh
-vp run yiru-mobile-ios#dev
+vp run yiru-mobile#dev
 ```
 
 The task builds the current-platform daemon binary, generates the Xcode project, builds and launches
 the Simulator app, starts or reuses the daemon, and passes a short-lived pairing link to the debug
 app. Its implementation lives in
-[`apps/mobile-ios/scripts/start-development.mjs`](../../apps/mobile-ios/scripts/start-development.mjs).
+[`apps/mobile/scripts/start-development.mjs`](../../apps/mobile/scripts/start-development.mjs).
 
 To pair manually, open **Yiru Mobile** from the Chrome side panel and scan its QR code. The same offer
 can be generated from the CLI:
@@ -35,9 +35,9 @@ Open the returned `yiru://` link in a booted Simulator with `xcrun simctl openur
 | --- | --- |
 | Direct mobile listener and pairing offer | [`apps/daemon/src/mobile`](../../apps/daemon/src/mobile) |
 | Pairing URL / QR page | [`mobile-page.tsx`](../../packages/client/src/extension/workspace/mobile-page.tsx) |
-| Deep-link decoding and confirmation | [`Features/Pairing`](../../apps/mobile-ios/YiruMobile/Features/Pairing) |
-| Host profile persistence | [`KeychainHostRepository.swift`](../../apps/mobile-ios/YiruMobile/Platform/Persistence/KeychainHostRepository.swift) |
-| Authenticated socket and E2EE handshake | [`Platform/Runtime`](../../apps/mobile-ios/YiruMobile/Platform/Runtime) |
+| Deep-link decoding and confirmation | [`Features/Pairing`](../../apps/mobile/YiruMobile/Features/Pairing) |
+| Host profile persistence | [`KeychainHostRepository.swift`](../../apps/mobile/YiruMobile/Platform/Persistence/KeychainHostRepository.swift) |
+| Authenticated socket and E2EE handshake | [`Platform/Runtime`](../../apps/mobile/YiruMobile/Platform/Runtime) |
 
 The phone stores the selected endpoint, pinned daemon public key, and device credential in its
 Keychain. Changing the endpoint does not silently change identity; a rejected key or credential
@@ -56,7 +56,7 @@ Never advertise `127.0.0.1` to a physical phone: it means the phone itself. Pass
 
 ## iOS network policy
 
-[`apps/mobile-ios/project.yml`](../../apps/mobile-ios/project.yml) declares local-network usage,
+[`apps/mobile/project.yml`](../../apps/mobile/project.yml) declares local-network usage,
 local ATS networking, camera access for the QR scanner, and the `yiru` deep-link scheme. Simulator
 does not exercise the physical device's Local Network Privacy prompt, so a successful Simulator
 pair verifies reachability, credential exchange, E2EE, and UI behavior but not the permission-denied

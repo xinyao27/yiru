@@ -1,4 +1,3 @@
-/* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: match state mirrors CSS Highlight ranges owned outside React. */
 import { useEffect, useRef, useState } from 'react'
 import type { RefCallback, RefObject } from 'react'
 import { useEventCallback } from '~renderer/react/use-event-callback'
@@ -71,25 +70,30 @@ export function useMarkdownPreviewSearch({
   })
 
   useEffect(() => {
-    const body = bodyRef.current
-    if (!body) {
-      return
-    }
     const instanceId = searchInstanceRef.current
-    if (!isSearchOpen) {
-      matchesRef.current = []
-      setMatchCount(0)
+    const frameId = window.requestAnimationFrame(() => {
+      const body = bodyRef.current
+      if (!body) {
+        return
+      }
+      if (!isSearchOpen) {
+        matchesRef.current = []
+        setMatchCount(0)
+        clearMarkdownPreviewSearchHighlights(instanceId)
+        return
+      }
+      const matches = applyMarkdownPreviewSearchHighlights(instanceId, body, query)
+      matchesRef.current = matches
+      setMatchCount(matches.length)
+      setSearchRevision((revision) => revision + 1)
+      setActiveMatchIndex((current) =>
+        matches.length === 0 ? -1 : current >= 0 && current < matches.length ? current : 0
+      )
+    })
+    return () => {
+      window.cancelAnimationFrame(frameId)
       clearMarkdownPreviewSearchHighlights(instanceId)
-      return
     }
-    const matches = applyMarkdownPreviewSearchHighlights(instanceId, body, query)
-    matchesRef.current = matches
-    setMatchCount(matches.length)
-    setSearchRevision((revision) => revision + 1)
-    setActiveMatchIndex((current) =>
-      matches.length === 0 ? -1 : current >= 0 && current < matches.length ? current : 0
-    )
-    return () => clearMarkdownPreviewSearchHighlights(instanceId)
   }, [bodyRef, isSearchOpen, query, renderedContent])
 
   useEffect(() => {

@@ -28,13 +28,16 @@ export function useRepositoryHookSettingsDraft({
     getHookSettingsDraft(repo.hookSettings)
   )
   const draftRef = useRef(hookSettingsDraft)
-  draftRef.current = hookSettingsDraft
   const repoIdentityRef = useRef(repoHostIdentity)
   const dirtyRef = useRef(false)
   const autosaveTimerRef = useRef<number | null>(null)
   const persistRef = useRef(onUpdateHookSettings)
-  persistRef.current = onUpdateHookSettings
   const persistForRepoRef = useRef(onUpdateHookSettings)
+
+  useEffect(() => {
+    draftRef.current = hookSettingsDraft
+    persistRef.current = onUpdateHookSettings
+  }, [hookSettingsDraft, onUpdateHookSettings])
 
   const syncDraft = useEventCallback((next: RepoHookSettings) => {
     if (!areHookSettingsDraftsEqual(draftRef.current, next)) {

@@ -1,6 +1,6 @@
 import type { ExecutionHostId } from '@yiru/runtime-protocol/model/workspace'
 import type { PointerEvent as ReactPointerEvent } from 'react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useEventCallback } from '~renderer/react/use-event-callback'
 
 import {
@@ -47,13 +47,15 @@ export function useHostHeaderDrag({
   const [state, setState] = useState<HostDragState>(INITIAL_STATE)
   const [sessionArmed, setSessionArmed] = useState(false)
   const latestDropIndexRef = useRef<number | null>(null)
-  latestDropIndexRef.current = state.dropIndex
   const orderedIdsRef = useRef(orderedHostIds)
-  orderedIdsRef.current = orderedHostIds
   const onCommitRef = useRef(onCommit)
-  onCommitRef.current = onCommit
   const getContainerRef = useRef(getScrollContainer)
-  getContainerRef.current = getScrollContainer
+
+  useLayoutEffect(() => {
+    orderedIdsRef.current = orderedHostIds
+    onCommitRef.current = onCommit
+    getContainerRef.current = getScrollContainer
+  }, [getScrollContainer, onCommit, orderedHostIds])
 
   const dragSessionRef = useRef<{
     hostId: ExecutionHostId

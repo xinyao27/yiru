@@ -34,7 +34,8 @@ export function useSourceControlRemoteActions(scope: SourceControlCommitGenerati
     rebaseFromBase,
     refreshActiveGitStatusAfterMutation,
     refreshBranchCompareRef,
-    remoteActionErrorSequenceByWorktreeRef,
+    beginRemoteActionSequence,
+    isCurrentRemoteActionSequence,
     setRemoteActionErrors,
     syncBranch,
     updateCommitMessageGenerationRecord,
@@ -82,8 +83,7 @@ export function useSourceControlRemoteActions(scope: SourceControlCommitGenerati
     if (!target) {
       return { status: 'skipped' }
     }
-    const sequence = (remoteActionErrorSequenceByWorktreeRef.current[target.worktreeId] ?? 0) + 1
-    remoteActionErrorSequenceByWorktreeRef.current[target.worktreeId] = sequence
+    const sequence = beginRemoteActionSequence(target.worktreeId)
     const targetIsActiveWorktree = target.worktreeId === activeWorktreeId
     const recoveryEntrySnapshot = captureSourceControlRecoveryEntrySnapshot(
       targetIsActiveWorktree
@@ -190,14 +190,14 @@ export function useSourceControlRemoteActions(scope: SourceControlCommitGenerati
           runtimeTargetSettings: target.settings
         }
       )
-      if (remoteActionErrorSequenceByWorktreeRef.current[target.worktreeId] === sequence) {
+      if (isCurrentRemoteActionSequence(target.worktreeId, sequence)) {
         setRemoteActionErrors((prev) => ({ ...prev, [target.worktreeId]: null }))
       }
       return { status: 'ok' }
     } catch (error) {
       // Why: editor actions own the single toast path, while inline state keeps
       // dropdown-only failures visible after the menu closes.
-      if (remoteActionErrorSequenceByWorktreeRef.current[target.worktreeId] !== sequence) {
+      if (!isCurrentRemoteActionSequence(target.worktreeId, sequence)) {
         return { status: 'superseded' }
       }
       const actionError: SourceControlActionError = {

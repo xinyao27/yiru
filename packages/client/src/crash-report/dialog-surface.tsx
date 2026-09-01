@@ -6,7 +6,7 @@ import {
   type CrashReportRecord
 } from '@yiru/runtime-protocol/workbench/crash-reporting'
 import type { GitHubViewer } from '@yiru/runtime-protocol/workbench/types'
-import { useDeferredValue, useEffect, useRef, useState } from 'react'
+import { useDeferredValue, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { translate } from '~renderer/i18n/i18n'
 import {
@@ -122,10 +122,6 @@ type CrashReportDialogSurfaceProps = {
   onReportChange: (report: CrashReportRecord | null) => void
 }
 
-// Why: tagging the fetched viewer with the request id it resolved for lets a stale or
-// superseded lookup be ignored by comparison instead of an imperative clear.
-type ViewerFetchResult = { requestId: number; viewer: GitHubViewer | null }
-
 export function CrashReportDialogSurface({
   open,
   report,
@@ -140,38 +136,24 @@ export function CrashReportDialogSurface({
   // resets the checkbox on every genuine open without an imperative effect.
   const [includeDiagnosticLogs, setIncludeDiagnosticLogs] = useState(true)
   const [submitting, setSubmitting] = useState(false)
-  const [viewerResult, setViewerResult] = useState<ViewerFetchResult | null>(null)
-  // Why: account lookup can resolve after the dialog closes or reopens.
-  // Sequence the request so a stale viewer is never used for submission.
-  const viewerRequestIdRef = useRef(0)
-  const viewer =
-    open && viewerResult && viewerResult.requestId === viewerRequestIdRef.current
-      ? viewerResult.viewer
-      : null
+  const [viewer, setViewer] = useState<GitHubViewer | null>(null)
   const deferredNotes = useDeferredValue(notes)
   const diagnosticText = (() => (report ? formatCrashReportText(report, deferredNotes) : ''))()
   const copyCrashReportDetails = useCrashReportCopy(report, notes)
-
-  // Why: bumping the request id invalidates any in-flight lookup so it can no longer
-  // match in the `viewer` derivation above, without needing to set state here.
-  const clearViewer = (): void => {
-    viewerRequestIdRef.current += 1
-  }
 
   useEffect(() => {
     if (!open) {
       return
     }
-    const requestId = ++viewerRequestIdRef.current
     void getShellGitHubViewer()
       .then((nextViewer) => {
-        if (mountedRef.current && requestId === viewerRequestIdRef.current) {
-          setViewerResult({ requestId, viewer: nextViewer })
+        if (mountedRef.current) {
+          setViewer(nextViewer)
         }
       })
       .catch((error) => {
-        if (mountedRef.current && requestId === viewerRequestIdRef.current) {
-          setViewerResult({ requestId, viewer: null })
+        if (mountedRef.current) {
+          setViewer(null)
           console.error('Failed to load GitHub viewer for crash report:', error)
         }
       })
@@ -270,7 +252,6 @@ export function CrashReportDialogSurface({
           return
         }
         if (!nextOpen) {
-          clearViewer()
           void dismissReportIfNeeded().finally(() => {
             if (mountedRef.current) {
               onOpenChange(false)

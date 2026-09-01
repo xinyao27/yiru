@@ -55,10 +55,6 @@ export function useMarkdownPreviewReview({
   const copiedReviewNoteResetTimerRef = useRef<number | null>(null)
   const attentionReviewCommentTimeoutRef = useRef<number | null>(null)
   const isMountedRef = useRef(false)
-  const bodyRevisionRef = useRef<{ inputs: readonly unknown[]; value: number }>({
-    inputs: [],
-    value: 0
-  })
   const markdownReviewNotes = sortMarkdownReviewNotes(markdownComments as MarkdownReviewNote[])
   const unsentNotes = markdownReviewNotes.filter((note) => !note.sentAt)
   const unsentReviewScope = [
@@ -348,29 +344,30 @@ export function useMarkdownPreviewReview({
     )
   }
 
-  const bodyInputs = [
+  const bodyRevision = [
     content,
-    markdownAnnotationsEnabled,
-    markdownComments,
+    markdownAnnotationsEnabled ? 'annotations' : 'plain',
+    markdownComments
+      .map((comment) =>
+        [
+          comment.id,
+          comment.body,
+          comment.lineNumber,
+          comment.startLine ?? '',
+          comment.sentAt ?? ''
+        ].join(':')
+      )
+      .join('\0'),
     sourceRelativePath,
-    sourceWorktree,
+    sourceWorktree?.id ?? '',
     activeAnnotationBlockKey,
     activeReviewCommentId,
     attentionReviewCommentId,
     copiedReviewNoteId
-  ]
-  if (
-    bodyRevisionRef.current.inputs.length !== bodyInputs.length ||
-    bodyInputs.some((value, index) => !Object.is(value, bodyRevisionRef.current.inputs[index]))
-  ) {
-    bodyRevisionRef.current = {
-      inputs: bodyInputs,
-      value: bodyRevisionRef.current.value + 1
-    }
-  }
+  ].join('\u0001')
 
   return {
-    bodyRevision: bodyRevisionRef.current.value,
+    bodyRevision,
     canShowReviewTools: Boolean(
       markdownAnnotationsEnabled && sourceWorktree && sourceRelativePath !== null
     ),

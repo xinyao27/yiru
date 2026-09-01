@@ -8,7 +8,6 @@ import type {
   SetupAgentStartupPolicy,
   SetupRunPolicy
 } from '@yiru/runtime-protocol/workbench/types'
-/* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: repository hook saves synchronize debounced persistence state with external repo settings. */
 import { useState } from 'react'
 import { translate } from '~renderer/i18n/i18n'
 import { useUiLocale } from '~renderer/i18n/use-ui-locale'

@@ -35,8 +35,14 @@ export function ThemePicker({
   importedHighlightSignal
 }: ThemePickerProps): React.JSX.Element {
   const importedGroupRef = useRef<HTMLDivElement | null>(null)
-  const [flashingSignal, setFlashingSignal] = useState<number | null>(null)
-  const highlightImported = flashingSignal !== null
+  const [flashState, setFlashState] = useState({
+    signal: importedHighlightSignal,
+    isVisible: false
+  })
+  if (importedHighlightSignal && flashState.signal !== importedHighlightSignal) {
+    setFlashState({ signal: importedHighlightSignal, isVisible: true })
+  }
+  const highlightImported = flashState.isVisible
 
   // Why: imported themes render below the built-in list inside a fixed-height
   // scroll area, so after an import they sit off-screen. On each import signal,
@@ -46,8 +52,10 @@ export function ThemePicker({
       return
     }
     importedGroupRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-    setFlashingSignal(importedHighlightSignal)
-    const timer = setTimeout(() => setFlashingSignal(null), 2000)
+    const timer = setTimeout(
+      () => setFlashState({ signal: importedHighlightSignal, isVisible: false }),
+      2000
+    )
     return () => clearTimeout(timer)
   }, [importedHighlightSignal])
 

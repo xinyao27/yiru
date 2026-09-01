@@ -95,7 +95,7 @@
                 case "apps":
                     [
                         entry("mobile", directory: true),
-                        entry("mobile-ios", directory: true),
+                        entry("mobile", directory: true),
                     ]
                 default: []
                 }

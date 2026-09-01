@@ -1,5 +1,5 @@
 import type { Editor } from '@tiptap/react'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { translate } from '~renderer/i18n/i18n'
 import {
@@ -197,7 +197,9 @@ export function RichMarkdownLinkBubble({
 }: RichMarkdownLinkBubbleProps): React.JSX.Element {
   const bubbleRef = useRef<HTMLDivElement | null>(null)
   const onDismissRef = useRef(onDismiss)
-  onDismissRef.current = onDismiss
+  useLayoutEffect(() => {
+    onDismissRef.current = onDismiss
+  }, [onDismiss])
 
   useEffect(() => {
     if (!anchorElement || !isAnchorVisible(anchorElement)) {

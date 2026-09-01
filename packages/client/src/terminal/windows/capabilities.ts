@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 
 import {
   readWindowsTerminalCapabilities,
@@ -206,49 +206,24 @@ export function useWindowsTerminalCapabilities(
     target: resolvedTarget,
     sshConnectionId: sshConnectionIdKey
   })
-  const [state, setState] = useState(() => ({
-    ownerKey: resolvedOwnerKey,
-    capabilities: getCachedWindowsTerminalCapabilities(resolvedOwnerKey)
-  }))
-
-  useEffect(() => {
-    if (!enabled) {
-      setState({ ownerKey: resolvedOwnerKey, capabilities: UNAVAILABLE_CAPABILITIES })
-      return
-    }
-    let cancelled = false
-    const cached = getCachedWindowsTerminalCapabilities(resolvedOwnerKey)
-    const hasOwnerCache = cachedCapabilitiesByOwnerKey.has(resolvedOwnerKey)
-    setState({
-      ownerKey: resolvedOwnerKey,
-      capabilities: hasOwnerCache ? cached : { ...cached, isLoading: true }
-    })
-    const setCapabilities = (capabilities: WindowsTerminalCapabilities): void => {
-      setState({ ownerKey: resolvedOwnerKey, capabilities })
-    }
-    const subscribers = subscribersByOwnerKey.get(resolvedOwnerKey) ?? new Set()
-    subscribers.add(setCapabilities)
-    subscribersByOwnerKey.set(resolvedOwnerKey, subscribers)
-    void loadWindowsTerminalCapabilities({
-      force: forceRefreshOnMount,
-      ownerKey: resolvedOwnerKey,
-      target: resolvedTarget,
-      sshConnectionId: sshConnectionIdKey
-    }).then((nextCapabilities) => {
-      if (!cancelled) {
-        setState({ ownerKey: resolvedOwnerKey, capabilities: nextCapabilities })
-      }
-    })
-
-    return () => {
-      cancelled = true
-      const currentSubscribers = subscribersByOwnerKey.get(resolvedOwnerKey)
-      currentSubscribers?.delete(setCapabilities)
-      if (currentSubscribers?.size === 0) {
-        subscribersByOwnerKey.delete(resolvedOwnerKey)
-      }
-    }
-  }, [enabled, forceRefreshOnMount, resolvedOwnerKey, resolvedTarget, sshConnectionIdKey])
-
-  return selectWindowsTerminalCapabilitiesForOwner(state, enabled, resolvedOwnerKey)
+  const cached = getCachedWindowsTerminalCapabilities(resolvedOwnerKey)
+  const hasOwnerCache = cachedCapabilitiesByOwnerKey.has(resolvedOwnerKey)
+  const query = useQuery({
+    queryKey: ['windows-terminal-capabilities', resolvedOwnerKey],
+    queryFn: () =>
+      loadWindowsTerminalCapabilities({
+        force: forceRefreshOnMount,
+        ownerKey: resolvedOwnerKey,
+        target: resolvedTarget,
+        sshConnectionId: sshConnectionIdKey
+      }),
+    enabled,
+    initialData: hasOwnerCache ? cached : undefined,
+    staleTime: CAPABILITY_CACHE_TTL_MS,
+    refetchOnMount: forceRefreshOnMount ? 'always' : true
+  })
+  if (!enabled) {
+    return UNAVAILABLE_CAPABILITIES
+  }
+  return query.data ?? { ...UNAVAILABLE_CAPABILITIES, isLoading: true }
 }

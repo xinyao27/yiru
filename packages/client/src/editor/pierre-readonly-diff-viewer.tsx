@@ -1,5 +1,5 @@
 import type { DiffComment } from '@yiru/runtime-protocol/workbench/types'
-import { useEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef } from 'react'
 import { selectWorktreeDiffComments } from '~renderer/diff-comments/worktree-selector'
 import { isDiffComment } from '~renderer/editor/diff-comment-compat'
 import { resolveDocumentTheme } from '~renderer/editor/document-theme'
@@ -64,11 +64,9 @@ export function PierreReadonlyDiffViewer(props: DiffViewerProps): React.JSX.Elem
   }
 
   const latestEditedContentRef = useRef(props.modifiedContent)
-  const previousInputContentRef = useRef(props.modifiedContent)
-  if (previousInputContentRef.current !== props.modifiedContent) {
-    previousInputContentRef.current = props.modifiedContent
+  useLayoutEffect(() => {
     latestEditedContentRef.current = props.modifiedContent
-  }
+  }, [props.modifiedContent])
   const onContentChange = props.onContentChange
   const onSave = props.onSave
   const handleFileEditChange = (_fileKey: string, contents: string) => {

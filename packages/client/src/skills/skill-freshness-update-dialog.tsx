@@ -1,9 +1,8 @@
 import {
   buildTargetedSkillUpdateCommand,
-  type SkillFreshnessInventory,
   type SkillUpdateRun
 } from '@yiru/runtime-protocol/workbench/skill-freshness'
-import { useRef, useState, useSyncExternalStore } from 'react'
+import { useState, useSyncExternalStore } from 'react'
 import { translate } from '~renderer/i18n/i18n'
 import {
   Warning as AlertTriangle,
@@ -75,11 +74,7 @@ export function SkillFreshnessUpdateDialog(): React.JSX.Element {
     getSkillFreshnessUpdateDialogRequest
   )
   const [copied, setCopied] = useState(false)
-  const lastInventoryRef = useRef<SkillFreshnessInventory | null>(null)
-  if (state.inventory) {
-    lastInventoryRef.current = state.inventory
-  }
-  const inventory = state.inventory ?? (state.loading ? lastInventoryRef.current : null)
+  const inventory = state.inventory
   const eligibleNames = (() => state.inventory?.eligibleUpdateNames ?? [])()
   const displayEligibleCount = inventory?.eligibleUpdateNames.length ?? 0
   const runNames = (() => (run.state === 'idle' ? [] : run.names))()

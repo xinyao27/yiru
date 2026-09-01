@@ -1,6 +1,6 @@
+import { useQuery } from '@tanstack/react-query'
 import { YIRU_GITHUB_ISSUES_URL } from '@yiru/runtime-protocol/model/product'
 import type { GitHubViewer } from '@yiru/runtime-protocol/workbench/types'
-/* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: feedback viewer details are loaded through GitHub IPC after the dialog receives the issue URL. */
 import React, { useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { openHttpLink } from '~renderer/editor/http-link-routing'
@@ -55,41 +55,16 @@ export function SidebarFeedbackDialog({
 }: SidebarFeedbackDialogProps): React.JSX.Element {
   const [feedback, setFeedback] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [viewer, setViewer] = useState<GitHubViewer | null>(null)
-  const [isViewerLoading, setIsViewerLoading] = useState(false)
+  const viewerQuery = useQuery({
+    queryKey: ['github-viewer'],
+    queryFn: getShellGitHubViewer,
+    enabled: open
+  })
+  const viewer = viewerQuery.data ?? null
+  const isViewerLoading = viewerQuery.isPending
   const [submitAnonymously, setSubmitAnonymously] = useState(false)
   const mountedRef = useMountedRef()
   const feedbackTextareaRef = useRef<HTMLTextAreaElement>(null)
-
-  React.useEffect(() => {
-    if (!open) {
-      return
-    }
-
-    let cancelled = false
-    setIsViewerLoading(true)
-    void getShellGitHubViewer()
-      .then((nextViewer) => {
-        if (!cancelled) {
-          setViewer(nextViewer)
-        }
-      })
-      .catch((err) => {
-        if (!cancelled) {
-          setViewer(null)
-          console.error('Failed to load GitHub viewer:', err)
-        }
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setIsViewerLoading(false)
-        }
-      })
-
-    return () => {
-      cancelled = true
-    }
-  }, [open])
 
   const handleSubmit = async (): Promise<void> => {
     const trimmed = feedback.trim()

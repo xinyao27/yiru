@@ -19,7 +19,7 @@ export type UseMarkdownPreviewReviewOptions = {
 }
 
 export type MarkdownPreviewReview = {
-  bodyRevision: number
+  bodyRevision: string
   canShowReviewTools: boolean
   copyReviewNotes: () => Promise<void>
   handleAnnotatedMarkdownBlockClick: (

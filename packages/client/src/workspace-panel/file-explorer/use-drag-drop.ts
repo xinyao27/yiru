@@ -1,4 +1,3 @@
-import type { RefObject } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { useEventCallback } from '~renderer/react/use-event-callback'
@@ -19,7 +18,7 @@ type UseFileExplorerDragDropParams = {
   expanded: Set<string>
   toggleDir: (worktreeId: string, dirPath: string) => void
   refreshDir: (dirPath: string) => Promise<void>
-  scrollRef: RefObject<HTMLDivElement | null>
+  scrollElement: HTMLDivElement | null
 }
 
 type UseFileExplorerDragDropResult = {
@@ -45,13 +44,13 @@ export function useFileExplorerDragDrop({
   expanded,
   toggleDir,
   refreshDir,
-  scrollRef
+  scrollElement
 }: UseFileExplorerDragDropParams): UseFileExplorerDragDropResult {
   const [isRootDragOver, setIsRootDragOver] = useState(false)
   const rootDragCounterRef = useRef(0)
   const [dropTargetDir, setDropTargetDir] = useState<string | null>(null)
   const [dragSourcePath, setDragSourcePath] = useState<string | null>(null)
-  const { recordDragClientY, stopDragEdgeScroll } = useFileExplorerDragEdgeScroll(scrollRef)
+  const { recordDragClientY, stopDragEdgeScroll } = useFileExplorerDragEdgeScroll(scrollElement)
   const clearDropTarget = () => setDropTargetDir(null)
   const handleMoveDrop = useFileExplorerPathMove({
     worktreePath,

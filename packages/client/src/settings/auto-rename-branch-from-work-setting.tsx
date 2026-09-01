@@ -9,9 +9,10 @@ import type {
   SourceControlAiSettings
 } from '@yiru/runtime-protocol/workbench/source-control/ai-types'
 import type { GlobalSettings } from '@yiru/runtime-protocol/workbench/types'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { translate } from '~renderer/i18n/i18n'
 import { CaretDown as ChevronDown } from '~renderer/icons/hugeicons'
+import { useEventCallback } from '~renderer/react/use-event-callback'
 import { useAppStore } from '~renderer/store/state'
 import { cn } from '~renderer/ui/class-names'
 import { Switch } from '~renderer/ui/switch'
@@ -70,39 +71,42 @@ export function AutoRenameBranchFromWorkSetting({
     config.actions,
     'branchName'
   )
-  const persistedBranchNameTemplateRef = useRef(persistedBranchNameTemplate)
-  persistedBranchNameTemplateRef.current = persistedBranchNameTemplate
   const [branchNameTemplateDraft, setBranchNameTemplateDraft] = useState(
     persistedBranchNameTemplate
   )
+  const [syncedBranchNameTemplate, setSyncedBranchNameTemplate] = useState(
+    persistedBranchNameTemplate
+  )
+  const [consumedDiscardSignal, setConsumedDiscardSignal] = useState(branchPromptDiscardSignal)
   const [isSavingPrompt, setIsSavingPrompt] = useState(false)
   const branchNamePromptDirty = branchNameTemplateDraft !== persistedBranchNameTemplate
 
-  useEffect(() => {
-    if (!branchNamePromptDirty) {
+  if (syncedBranchNameTemplate !== persistedBranchNameTemplate) {
+    setSyncedBranchNameTemplate(persistedBranchNameTemplate)
+    if (branchNameTemplateDraft === syncedBranchNameTemplate) {
       setBranchNameTemplateDraft(persistedBranchNameTemplate)
     }
-  }, [branchNamePromptDirty, persistedBranchNameTemplate])
+  }
 
-  useEffect(() => {
-    setBranchNameTemplateDraft(persistedBranchNameTemplateRef.current)
+  if (consumedDiscardSignal !== branchPromptDiscardSignal) {
+    setConsumedDiscardSignal(branchPromptDiscardSignal)
+    setBranchNameTemplateDraft(persistedBranchNameTemplate)
     // Why: Settings owns the discard confirmation, but the draft lives here so
     // the row can keep its prompt-specific save/discard affordances.
-  }, [branchPromptDiscardSignal])
+  }
 
   useEffect(() => {
     onBranchPromptDirtyChange?.(branchNamePromptDirty)
   }, [branchNamePromptDirty, onBranchPromptDirtyChange])
 
-  const onBranchPromptDirtyChangeRef = useRef(onBranchPromptDirtyChange)
-  onBranchPromptDirtyChangeRef.current = onBranchPromptDirtyChange
+  const clearBranchPromptDirty = useEventCallback(() => onBranchPromptDirtyChange?.(false))
   const setSettingRootRef = (node: HTMLDivElement | null): void => {
     if (node !== null) {
       return
     }
     // Why: Settings owns the global unsaved-branch-prompt guard; reset it
     // when this setting detaches without a passive cleanup-only Effect.
-    onBranchPromptDirtyChangeRef.current?.(false)
+    clearBranchPromptDirty()
   }
 
   const onSavePrompt = async (): Promise<void> => {

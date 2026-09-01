@@ -9,21 +9,28 @@ import { shouldShowIgnoredDecoration, STATUS_COLORS } from '../status-display'
 import { canShowAddAsProjectAction } from './add-project-action'
 import type { FileExplorerInteractions } from './interactions'
 import type { FileExplorerModel } from './model'
-import { PierreFileExplorerTree } from './pierre-file-explorer-tree'
+import {
+  PierreFileExplorerTree,
+  type PierreFileExplorerTreeHandle
+} from './pierre-file-explorer-tree'
 import { FileExplorerRow } from './row'
 import { FileExplorerTreeStatus } from './tree-status'
 
 type FileExplorerTreeContentProps = {
   model: FileExplorerModel
   interactions: FileExplorerInteractions
+  setPierreTree: (tree: PierreFileExplorerTreeHandle | null) => void
+  setScrollElement: (element: HTMLDivElement | null) => void
 }
 
 function FileExplorerTreeContent({
   model,
-  interactions
+  interactions,
+  setPierreTree,
+  setScrollElement
 }: FileExplorerTreeContentProps): React.JSX.Element {
   const { view, owner, tree, display, actions } = model
-  const { selection, deletion, dragDrop, inline, handlers, refs } = interactions
+  const { selection, deletion, dragDrop, inline, handlers } = interactions
   const isEmptyState = tree.visibleRowCount === 0 && !inline.inlineInput
   const isNameFilterLoading = view.nameFilterSource?.relativePaths === null
   const isLoading =
@@ -71,7 +78,7 @@ function FileExplorerTreeContent({
         )}
         {showTree && (
           <PierreFileExplorerTree
-            ref={refs.pierreTreeRef}
+            ref={setPierreTree}
             worktreePath={owner.worktreePath!}
             rowProjection={tree.rowProjection}
             expandedPaths={tree.rowExpandedPaths}
@@ -80,7 +87,7 @@ function FileExplorerTreeContent({
             inlineInput={inline.inlineInput}
             statusByRelativePath={display.statusByRelativePath}
             ignoredByRelativePath={tree.ignoredByRelativePath}
-            scrollElementRef={refs.scrollRef}
+            onScrollElementChange={setScrollElement}
             onActivateFile={handlers.handleClick}
             onDoubleClickFile={handlers.handleDoubleClick}
             onToggleDirectory={(node) => {

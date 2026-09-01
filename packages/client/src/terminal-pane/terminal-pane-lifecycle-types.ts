@@ -22,6 +22,7 @@ import type {
 import type { PtyTransport } from './pty/transport-types'
 import type { ReplayingPanesRef } from './replay-guard'
 import type { PaneCwdMap } from './resolve-split-cwd'
+import type { TerminalPaneSnapshot } from './use-terminal-pane-local-state'
 
 export type UseTerminalPaneLifecycleDeps = {
   tabId: string
@@ -109,6 +110,7 @@ export type UseTerminalPaneLifecycleDeps = {
   setRenamingPaneId: React.Dispatch<React.SetStateAction<number | null>>
   setPaneCount: React.Dispatch<React.SetStateAction<number>>
   setPaneLayoutRevision: React.Dispatch<React.SetStateAction<number>>
+  setPaneSnapshot: React.Dispatch<React.SetStateAction<TerminalPaneSnapshot>>
   resolveExternalPaneDropTarget?: PaneExternalDropResolver
   onExternalPaneDrop?: PaneExternalDropHandler
 }

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useEventCallback } from '~renderer/react/use-event-callback'
 
 import { applyDesktopFitFallbackAfterReplay } from './desktop-fit-fallback'
 import { getOverrideAffectedPanes, getPanesNeedingOverrideFit } from './override-affected-panes'
@@ -13,11 +14,21 @@ type TerminalMobileFitInput = {
   paneTransportsRef: React.RefObject<Map<number, PtyTransport>>
 }
 
-export function useTerminalMobileFit({
-  managerRef,
-  paneTransportsRef
-}: TerminalMobileFitInput): () => void {
-  const [, setOverrideRevision] = useState(0)
+export function useTerminalMobileFit({ managerRef, paneTransportsRef }: TerminalMobileFitInput): {
+  panePtyIds: ReadonlyMap<number, string>
+  refreshMobileFitState: () => void
+} {
+  const [panePtyIds, setPanePtyIds] = useState<ReadonlyMap<number, string>>(new Map())
+  const refreshMobileFitState = useEventCallback((): void => {
+    const nextPanePtyIds = new Map<number, string>()
+    for (const pane of managerRef.current?.getPanes() ?? []) {
+      const ptyId = paneTransportsRef.current.get(pane.id)?.getPtyId()
+      if (ptyId) {
+        nextPanePtyIds.set(pane.id, ptyId)
+      }
+    }
+    setPanePtyIds(nextPanePtyIds)
+  })
   useEffect(() => {
     const pendingFitFrames = new Set<number>()
     const pendingFallbackTimers = new Set<number>()
@@ -37,7 +48,7 @@ export function useTerminalMobileFit({
     }
 
     const unsubscribe = onOverrideChange((event) => {
-      setOverrideRevision((revision) => revision + 1)
+      refreshMobileFitState()
       const manager = managerRef.current
       if (!manager) {
         return
@@ -93,15 +104,14 @@ export function useTerminalMobileFit({
         window.clearTimeout(timerId)
       }
     }
-  }, [managerRef, paneTransportsRef])
+  }, [managerRef, paneTransportsRef, refreshMobileFitState])
 
-  const [, setDriverRevision] = useState(0)
   useEffect(
     () =>
       onDriverChange(() => {
-        setDriverRevision((revision) => revision + 1)
+        refreshMobileFitState()
       }),
-    []
+    [refreshMobileFitState]
   )
-  return () => setOverrideRevision((revision) => revision + 1)
+  return { panePtyIds, refreshMobileFitState }
 }

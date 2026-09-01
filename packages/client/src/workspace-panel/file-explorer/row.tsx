@@ -1,5 +1,6 @@
 import type { GitFileStatus } from '@yiru/runtime-protocol/workbench/types'
 import { useEffect, useRef } from 'react'
+import { useEventCallback } from '~renderer/react/use-event-callback'
 import type { RuntimeFileOperationArgs } from '~renderer/runtime/file-client'
 import { CLOSE_ALL_CONTEXT_MENUS_EVENT } from '~renderer/tab-bar/sortable-tab'
 import { ContextMenu, ContextMenuTrigger } from '~renderer/ui/context-menu'
@@ -138,8 +139,7 @@ export function FileExplorerRow({
   }
 
   const menuTriggerRef = useRef<HTMLDivElement | null>(null)
-  const onContextMenuSelectRef = useRef(onContextMenuSelect)
-  onContextMenuSelectRef.current = onContextMenuSelect
+  const selectContextMenu = useEventCallback(onContextMenuSelect)
   const menuPointX = menuPoint?.x
   const menuPointY = menuPoint?.y
 
@@ -154,7 +154,7 @@ export function FileExplorerRow({
     }
     // Why: Pierre owns selection, but the React menu owns the anchored overlay.
     window.dispatchEvent(new Event(CLOSE_ALL_CONTEXT_MENUS_EVENT))
-    onContextMenuSelectRef.current()
+    selectContextMenu()
     menuTriggerRef.current.dispatchEvent(
       new MouseEvent('contextmenu', {
         bubbles: true,
@@ -166,7 +166,7 @@ export function FileExplorerRow({
         view: window
       })
     )
-  }, [menuOnly, menuPointX, menuPointY])
+  }, [menuOnly, menuPointX, menuPointY, selectContextMenu])
 
   const handleDragStart = (event: React.DragEvent<HTMLButtonElement>): void => {
     const paths =

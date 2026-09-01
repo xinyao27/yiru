@@ -23,8 +23,11 @@ export function useCreateReviewBaseSearch(
     setBaseSearchError
   } = state
   const settingsRef = useRef(settings)
-  settingsRef.current = settings
   const runtimeEnvironmentId = settings?.activeRuntimeEnvironmentId ?? null
+
+  useEffect(() => {
+    settingsRef.current = settings
+  }, [settings])
 
   useEffect(() => {
     if (!open || base) {

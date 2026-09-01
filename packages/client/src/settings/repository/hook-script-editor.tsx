@@ -94,18 +94,15 @@ export function ScriptEditor({
   // rather than stored as its own imperative flag.
   const [activeSaveValue, setActiveSaveValue] = useState<string | null>(null)
   const [confirmedSaveValue, setConfirmedSaveValue] = useState<string | null>(null)
-  const lastValueRef = useRef(value)
   const savedTimerRef = useRef<number | null>(null)
 
   const saveStatus: SaveStatus =
     activeSaveValue === null ? 'idle' : activeSaveValue === confirmedSaveValue ? 'saved' : 'saving'
 
-  useEffect(() => {
-    if (value === lastValueRef.current) {
-      return
-    }
-    lastValueRef.current = value
-    setActiveSaveValue(value)
+  const handleChange = (nextValue: string): void => {
+    onChange(nextValue)
+    setActiveSaveValue(nextValue)
+    setConfirmedSaveValue(null)
     if (savedTimerRef.current !== null) {
       window.clearTimeout(savedTimerRef.current)
     }
@@ -113,20 +110,23 @@ export function ScriptEditor({
     // show "Saving..." then "Saved" so the indicator carries the auto-save trust
     // signal a Save button would (without the click).
     savedTimerRef.current = window.setTimeout(() => {
-      setConfirmedSaveValue(value)
+      setConfirmedSaveValue(nextValue)
       savedTimerRef.current = window.setTimeout(() => {
         setActiveSaveValue(null)
         setConfirmedSaveValue(null)
         savedTimerRef.current = null
       }, 1500)
     }, 250)
+  }
+
+  useEffect(() => {
     return () => {
       if (savedTimerRef.current !== null) {
         window.clearTimeout(savedTimerRef.current)
         savedTimerRef.current = null
       }
     }
-  }, [value])
+  }, [])
 
   const showLocalEditor = showLocal || value.length > 0 || !hasShared
   const editorRows = getRepositoryHookScriptTextareaRows(value)
@@ -191,7 +191,7 @@ export function ScriptEditor({
           <Textarea
             value={value}
             aria-label={field.label}
-            onChange={(event) => onChange(event.target.value)}
+            onChange={(event) => handleChange(event.target.value)}
             onBlur={onCommit}
             placeholder={field.placeholder}
             spellCheck={false}

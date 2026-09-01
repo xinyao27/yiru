@@ -1,10 +1,9 @@
 import type { DiffComment } from '@yiru/runtime-protocol/workbench/types'
-import { useRef } from 'react'
+import { useMemo } from 'react'
 
-import type { DiffCodeViewNotice } from '../diff-code-view/notices'
 import type { DiffCodeViewFile } from '../diff-code-view/view'
 import type { DiffSection } from '../diff-section/types'
-import { areCombinedDiffNoticesEqual, resolveCombinedDiffNotice } from './view-state'
+import { resolveCombinedDiffNotice } from './view-state'
 
 type UseCombinedDiffCodeViewFilesOptions = {
   comments: DiffComment[]
@@ -19,9 +18,11 @@ export function useCombinedDiffCodeViewFiles({
   sections,
   sideBySide
 }: UseCombinedDiffCodeViewFilesOptions): DiffCodeViewFile[] {
-  // Why: stable notice identities prevent each loaded row from re-versioning
-  // every still-loading row and causing quadratic CodeView relayout.
-  const noticeCacheRef = useRef(new Map<string, DiffCodeViewNotice>())
+  const notices = useMemo(
+    () =>
+      sections.map((section) => resolveCombinedDiffNotice(section, { isBranchMode, sideBySide })),
+    [isBranchMode, sections, sideBySide]
+  )
   const commentsByPath = new Map<string, DiffComment[]>()
   for (const comment of comments) {
     const fileComments = commentsByPath.get(comment.filePath)
@@ -32,7 +33,7 @@ export function useCombinedDiffCodeViewFiles({
     }
   }
 
-  return sections.map((section) => ({
+  return sections.map((section, index) => ({
     source: {
       key: section.key,
       path: section.path,
@@ -45,27 +46,6 @@ export function useCombinedDiffCodeViewFiles({
     // Why: staged and committed sides have no working-tree file this view may edit.
     editable: section.area === 'unstaged',
     comments: commentsByPath.get(section.path),
-    notice: getMemoizedNotice(noticeCacheRef.current, section, {
-      isBranchMode,
-      sideBySide
-    })
+    notice: notices[index]
   }))
-}
-
-function getMemoizedNotice(
-  cache: Map<string, DiffCodeViewNotice>,
-  section: DiffSection,
-  context: { isBranchMode: boolean; sideBySide: boolean }
-): DiffCodeViewNotice | undefined {
-  const next = resolveCombinedDiffNotice(section, context)
-  const cached = cache.get(section.key)
-  if (!next) {
-    cache.delete(section.key)
-    return undefined
-  }
-  if (cached && areCombinedDiffNoticesEqual(cached, next)) {
-    return cached
-  }
-  cache.set(section.key, next)
-  return next
 }

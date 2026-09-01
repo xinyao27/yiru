@@ -91,7 +91,11 @@ export function MarkdownPreviewSurface({
   )
 }
 
-function PreviewSearch({ search }: { search: MarkdownPreviewSearchSurface }): React.JSX.Element {
+function PreviewSearch({
+  search: { activeMatchIndex, close, focusPreview, inputRef, matchCount, move, query, setQuery }
+}: {
+  search: MarkdownPreviewSearchSurface
+}): React.JSX.Element {
   return (
     <div
       className="markdown-preview-search border-border bg-background sticky top-0 z-20 -mr-5 mb-1.5 ml-auto flex w-fit max-w-[min(100%,460px)] items-center border pt-0 pr-0.5 pb-0 pl-1"
@@ -99,17 +103,17 @@ function PreviewSearch({ search }: { search: MarkdownPreviewSearchSurface }): Re
     >
       <div className="border-ring bg-background flex w-[220px] min-w-0 flex-[0_1_auto] items-center border">
         <Input
-          ref={search.inputRef}
-          value={search.query}
-          onChange={(event) => search.setQuery(event.target.value)}
+          ref={inputRef}
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
           onKeyDown={(event) => {
             if (event.key === 'Enter') {
               event.preventDefault()
-              search.move(event.shiftKey ? -1 : 1)
+              move(event.shiftKey ? -1 : 1)
             } else if (event.key === 'Escape') {
               event.preventDefault()
-              search.close()
-              search.focusPreview()
+              close()
+              focusPreview()
             }
           }}
           placeholder={translate(
@@ -124,18 +128,18 @@ function PreviewSearch({ search }: { search: MarkdownPreviewSearchSurface }): Re
         />
       </div>
       <div className="text-muted-foreground min-w-0 flex-none px-1.5 text-xs leading-none whitespace-nowrap tabular-nums">
-        {search.query && search.matchCount === 0
+        {query && matchCount === 0
           ? translate('auto.components.editor.MarkdownPreview.c5dc92cfe3', 'No results')
-          : `${search.matchCount === 0 ? 0 : search.activeMatchIndex + 1}/${search.matchCount}`}
+          : `${matchCount === 0 ? 0 : activeMatchIndex + 1}/${matchCount}`}
       </div>
-      <SearchButton direction={-1} isDisabled={search.matchCount === 0} onMove={search.move} />
-      <SearchButton direction={1} isDisabled={search.matchCount === 0} onMove={search.move} />
+      <SearchButton direction={-1} isDisabled={matchCount === 0} onMove={move} />
+      <SearchButton direction={1} isDisabled={matchCount === 0} onMove={move} />
       <div className="bg-border mx-0.5 h-4 w-px" />
       <Button
         type="button"
         variant="ghost"
         size="icon-xs"
-        onClick={search.close}
+        onClick={close}
         title={translate('auto.components.editor.MarkdownPreview.12052c639c', 'Close search')}
         aria-label={translate('auto.components.editor.MarkdownPreview.12052c639c', 'Close search')}
         className={SEARCH_BUTTON_CLASS_NAME}

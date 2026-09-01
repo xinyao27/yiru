@@ -35,51 +35,61 @@ export type CreateMarkdownPreviewComponentsOptions = {
   ) => React.ReactNode
 }
 
+type MarkdownPreviewImageProps = React.ComponentPropsWithoutRef<'img'> & {
+  node?: unknown
+  options: CreateMarkdownPreviewComponentsOptions
+}
+
+function MarkdownPreviewImage({
+  node: _node,
+  options,
+  src,
+  alt,
+  ...props
+}: MarkdownPreviewImageProps): React.JSX.Element {
+  const {
+    activateMarkdownLink,
+    filePath,
+    isMac,
+    resolvedSourceRuntimeEnvironmentId,
+    sourceOwner,
+    sourceRoutingWorktreeId,
+    worktreeRoot
+  } = options.linkContext
+  const resolvedSrc = useLocalImageSrc(src, filePath, undefined, options.imageRuntimeContext)
+  const handleImageClick = (event: React.MouseEvent<HTMLImageElement>): void => {
+    if (!isMarkdownPreviewOpenModifier(event, isMac)) {
+      return
+    }
+
+    if (!src || !sourceRoutingWorktreeId || !worktreeRoot) {
+      return
+    }
+
+    event.preventDefault()
+    event.stopPropagation()
+    void activateMarkdownLink(src, {
+      sourceFilePath: filePath,
+      worktreeId: sourceRoutingWorktreeId,
+      worktreeRoot,
+      runtimeEnvironmentId: resolvedSourceRuntimeEnvironmentId,
+      openInYiruBrowser: true,
+      sourceOwner
+    })
+  }
+
+  // Why: display uses IPC-backed blob URLs, but Cmd/Ctrl-click should open
+  // the original markdown target so local and SSH worktree images route
+  // through the same editor path as normal file links.
+  return <img {...props} src={resolvedSrc} alt={alt ?? ''} onClick={handleImageClick} />
+}
+
 export function createMarkdownPreviewComponents({
   ...options
 }: CreateMarkdownPreviewComponentsOptions): Components {
   return {
     a: createMarkdownPreviewLink(options.linkContext),
-    img: function MarkdownImg({ src, alt, ...props }) {
-      const {
-        activateMarkdownLink,
-        filePath,
-        isMac,
-        resolvedSourceRuntimeEnvironmentId,
-        sourceOwner,
-        sourceRoutingWorktreeId,
-        worktreeRoot
-      } = options.linkContext
-      // eslint-disable-next-line react-hooks/rules-of-hooks -- react-markdown
-      // instantiates component overrides as regular React components, so hooks
-      // are valid here despite the lowercase function name.
-      const resolvedSrc = useLocalImageSrc(src, filePath, undefined, options.imageRuntimeContext)
-      const handleImageClick = (event: React.MouseEvent<HTMLImageElement>): void => {
-        if (!isMarkdownPreviewOpenModifier(event, isMac)) {
-          return
-        }
-
-        if (!src || !sourceRoutingWorktreeId || !worktreeRoot) {
-          return
-        }
-
-        event.preventDefault()
-        event.stopPropagation()
-        void activateMarkdownLink(src, {
-          sourceFilePath: filePath,
-          worktreeId: sourceRoutingWorktreeId,
-          worktreeRoot,
-          runtimeEnvironmentId: resolvedSourceRuntimeEnvironmentId,
-          openInYiruBrowser: true,
-          sourceOwner
-        })
-      }
-
-      // Why: display uses IPC-backed blob URLs, but Cmd/Ctrl-click should open
-      // the original markdown target so local and SSH worktree images route
-      // through the same editor path as normal file links.
-      return <img {...props} src={resolvedSrc} alt={alt ?? ''} onClick={handleImageClick} />
-    },
+    img: (props) => <MarkdownPreviewImage {...props} options={options} />,
     // Why: Intercept code elements to detect mermaid fenced blocks. rehype-highlight
     // sets className="language-mermaid" on the <code> inside <pre> for ```mermaid blocks.
     // We render those as SVG diagrams instead of highlighted source. Markdown preview

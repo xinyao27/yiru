@@ -1,7 +1,7 @@
 import { getDefaultRepoHookSettings } from '@yiru/runtime-protocol/workbench/constants'
 import { isGitRepoKind } from '@yiru/runtime-protocol/workbench/repo-kind'
 import type { Repo, RepoHookSettings, Worktree } from '@yiru/runtime-protocol/workbench/types'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { toast } from 'sonner'
 import { translate } from '~renderer/i18n/i18n'
 import { FloppyDisk as Save, Gear as Settings, ArrowUpRight, Plus } from '~renderer/icons/hugeicons'
@@ -101,15 +101,11 @@ export function SetupScriptAction(): React.JSX.Element {
   const updateRepo = useAppStore((s) => s.updateRepo)
   const repo = getSetupGuideGitRepo(repos, activeRepoId)
   const canConfigure = repo !== null
-  const [setupScript, setSetupScript] = useState('pnpm install')
-
-  useEffect(() => {
-    if (!canConfigure) {
-      setSetupScript('pnpm install')
-      return
-    }
-    setSetupScript(repo.hookSettings?.scripts?.setup?.trim() || 'pnpm install')
-  }, [canConfigure, repo])
+  const setupScriptDefault = repo?.hookSettings?.scripts?.setup?.trim() || 'pnpm install'
+  const setupScriptIdentity = repo?.id ?? 'no-repo'
+  const [setupScriptDraft, setSetupScriptDraft] = useState({ identity: '', value: '' })
+  const setupScript =
+    setupScriptDraft.identity === setupScriptIdentity ? setupScriptDraft.value : setupScriptDefault
 
   const openLocalCommandSettings = () => {
     if (!repo || !isGitRepoKind(repo)) {
@@ -167,7 +163,9 @@ export function SetupScriptAction(): React.JSX.Element {
         <Input
           value={setupScript}
           disabled={!canConfigure}
-          onChange={(event) => setSetupScript(event.target.value)}
+          onChange={(event) =>
+            setSetupScriptDraft({ identity: setupScriptIdentity, value: event.target.value })
+          }
           placeholder={translate(
             'auto.components.feature.wall.FeatureWallSetupWorkflowActions.5c5b65044e',
             'pnpm install'

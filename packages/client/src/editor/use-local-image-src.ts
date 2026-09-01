@@ -175,43 +175,17 @@ export function useLocalImageSrc(
     return onImageCacheInvalidated(() => setGeneration(cacheGeneration))
   }, [])
 
-  const [displaySrc, setDisplaySrc] = useState<string | undefined>(() => {
-    if (!rawSrc) {
-      return undefined
-    }
-    if (isExternalUrl(rawSrc)) {
-      return rawSrc
-    }
-    const absolutePath = resolveImageAbsolutePath(rawSrc, filePath)
-    if (absolutePath) {
-      const cacheKey = getLocalImageCacheKey(absolutePath, connectionId, runtimeContext)
-      if (blobUrlCache.has(cacheKey)) {
-        return blobUrlCache.get(cacheKey)
-      }
-    }
-    return undefined
-  })
+  const isExternal = rawSrc ? isExternalUrl(rawSrc) : false
+  const absolutePath = rawSrc && !isExternal ? resolveImageAbsolutePath(rawSrc, filePath) : null
+  const cacheKey = absolutePath
+    ? getLocalImageCacheKey(absolutePath, connectionId, runtimeContext)
+    : null
+  const cachedSrc = cacheKey ? blobUrlCache.get(cacheKey) : undefined
+  const requestKey = cacheKey ? `${generation}\0${cacheKey}` : null
+  const [loadedSrc, setLoadedSrc] = useState<{ requestKey: string; src?: string } | null>(null)
 
   useEffect(() => {
-    if (!rawSrc) {
-      setDisplaySrc(undefined)
-      return
-    }
-
-    if (isExternalUrl(rawSrc)) {
-      setDisplaySrc(rawSrc)
-      return
-    }
-
-    const absolutePath = resolveImageAbsolutePath(rawSrc, filePath)
-    if (!absolutePath) {
-      setDisplaySrc(undefined)
-      return
-    }
-
-    const cacheKey = getLocalImageCacheKey(absolutePath, connectionId, runtimeContext)
-    if (blobUrlCache.has(cacheKey)) {
-      setDisplaySrc(blobUrlCache.get(cacheKey))
+    if (!absolutePath || !requestKey || cachedSrc !== undefined) {
       return
     }
 
@@ -222,20 +196,29 @@ export function useLocalImageSrc(
         if (cancelled) {
           return
         }
-        setDisplaySrc(cacheGeneration === effectGeneration && url ? url : undefined)
+        setLoadedSrc({
+          requestKey,
+          src: cacheGeneration === effectGeneration && url ? url : undefined
+        })
       })
       .catch(() => {
         if (!cancelled) {
-          setDisplaySrc(undefined)
+          setLoadedSrc({ requestKey })
         }
       })
 
     return () => {
       cancelled = true
     }
-  }, [rawSrc, filePath, generation, connectionId, runtimeContext])
+  }, [absolutePath, cachedSrc, connectionId, generation, requestKey, runtimeContext])
 
-  return displaySrc
+  if (!rawSrc) {
+    return undefined
+  }
+  if (isExternal) {
+    return rawSrc
+  }
+  return cachedSrc ?? (loadedSrc?.requestKey === requestKey ? loadedSrc.src : undefined)
 }
 
 /**

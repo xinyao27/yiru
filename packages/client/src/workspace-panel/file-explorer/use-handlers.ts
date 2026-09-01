@@ -1,5 +1,4 @@
 import type React from 'react'
-import type { RefObject } from 'react'
 import { toast } from 'sonner'
 import { detectLanguage } from '~renderer/file-presentation/language-detect'
 import { translate } from '~renderer/i18n/i18n'
@@ -37,7 +36,7 @@ type UseFileExplorerHandlersParams = {
   statPath: (path: string) => Promise<{ isDirectory: boolean }>
   markPathAsDirectory: (path: string) => void
   setSelectedPath: (path: string) => void
-  scrollRef: RefObject<HTMLDivElement | null>
+  scrollElement: HTMLDivElement | null
 }
 
 type UseFileExplorerHandlersReturn = {
@@ -153,7 +152,7 @@ export function useFileExplorerHandlers({
   statPath,
   markPathAsDirectory,
   setSelectedPath,
-  scrollRef
+  scrollElement
 }: UseFileExplorerHandlersParams): UseFileExplorerHandlersReturn {
   const handleClick = (node: TreeNode) => {
     void activateFileExplorerNode({
@@ -179,7 +178,7 @@ export function useFileExplorerHandlers({
   }
 
   const handleWheelCapture = (e: React.WheelEvent<HTMLDivElement>) => {
-    const container = scrollRef.current
+    const container = scrollElement
     if (!container || Math.abs(e.deltaY) <= Math.abs(e.deltaX)) {
       return
     }
@@ -191,7 +190,7 @@ export function useFileExplorerHandlers({
       return
     }
     e.preventDefault()
-    container.scrollTop += e.deltaY
+    container.scrollBy({ top: e.deltaY })
   }
 
   // Why: the tree consumes pointer behavior as one capability group.

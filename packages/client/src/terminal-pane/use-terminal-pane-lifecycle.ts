@@ -1,5 +1,6 @@
 import { normalizeDesktopTerminalScrollbackRows } from '@yiru/runtime-protocol/workbench/terminal/scrollback-policy'
 import { useEffect } from 'react'
+import { useEventCallback } from '~renderer/react/use-event-callback'
 import {
   registerRuntimeTerminalTab,
   scheduleRuntimeGraphSync
@@ -81,7 +82,8 @@ export function useTerminalPaneLifecycle(deps: UseTerminalPaneLifecycleDeps): vo
     setPaneTitles,
     paneTitlesRef,
     setPaneCount,
-    setPaneLayoutRevision
+    setPaneLayoutRevision,
+    setPaneSnapshot
   } = deps
   const terminalScrollbackRows = normalizeDesktopTerminalScrollbackRows(
     settings?.terminalScrollbackRows
@@ -117,8 +119,7 @@ export function useTerminalPaneLifecycle(deps: UseTerminalPaneLifecycleDeps): vo
     worktreeId
   })
 
-  // Initialize PaneManager instance once
-  useEffect(() => {
+  const mountTerminalPane = useEventCallback(() => {
     const container = containerRef.current
     if (!container) {
       return
@@ -159,6 +160,7 @@ export function useTerminalPaneLifecycle(deps: UseTerminalPaneLifecycleDeps): vo
       managerRef,
       setPaneCount,
       setPaneLayoutRevision,
+      setPaneSnapshot,
       setTabCanExpandPane,
       tabId
     })
@@ -287,6 +289,9 @@ export function useTerminalPaneLifecycle(deps: UseTerminalPaneLifecycleDeps): vo
         worktreeId
       })
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tabId, cwd])
+  })
+
+  // Why: a terminal runtime is scoped to the tab and working directory. Other
+  // values are read from the latest render when a new runtime is mounted.
+  useEffect(() => mountTerminalPane(), [cwd, mountTerminalPane, tabId])
 }

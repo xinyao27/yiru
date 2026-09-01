@@ -1,4 +1,3 @@
-/* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: this hook owns a timed storyboard; typed text, cursor, and phase state intentionally advance from animation effects. */
 import { useEffect, useState } from 'react'
 
 import {
@@ -88,13 +87,6 @@ export function useWorkbenchStoryboard(options: WorkbenchStoryboardOptions) {
   // can short-circuit the entire effect cleanly.
   useEffect(() => {
     if (reducedMotion) {
-      setPhase(isTwoAgentsChecklist ? { kind: 'split-active' } : { kind: 'idle' })
-      setCursorTarget({ kind: 'hidden' })
-      setRightTyped('')
-      setRightLines(isTwoAgentsChecklist ? getTwoAgentsReducedMotionLines() : [])
-      setShowInputLine(!isTwoAgentsChecklist)
-      setPromptGlyph('$')
-      setShowCaret(!isTwoAgentsChecklist)
       return
     }
     let cancelled = false

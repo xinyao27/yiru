@@ -1,6 +1,6 @@
 import { useEditorState, type Editor } from '@tiptap/react'
 import type { DiffComment, MarkdownDocument } from '@yiru/runtime-protocol/workbench/types'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { selectWorktreeDiffComments } from '~renderer/diff-comments/worktree-selector'
 
 // Why: this module is the RichMarkdownEditor lazy chunk's entry — Tiptap
@@ -79,6 +79,7 @@ export default function RichMarkdownEditor({
   headerSlot
 }: RichMarkdownEditorProps): React.JSX.Element {
   const rootRef = useRef<HTMLDivElement | null>(null)
+  const [rootElement, setRootElementState] = useState<HTMLDivElement | null>(null)
   const settings = useAppStore((s) => s.settings)
   const richMarkdownSpellcheckEnabled = settings?.richMarkdownSpellcheckEnabled ?? true
   const editorFontZoomLevel = useAppStore((s) => s.editorFontZoomLevel)
@@ -150,15 +151,14 @@ export default function RichMarkdownEditor({
     scrollContainerRef
   )
 
-  // Why: assigning callback refs during render keeps them current before any
-  // ProseMirror handler reads them, avoiding the one-render stale window that
-  // useEffect would introduce. Refs are mutable and never trigger re-renders.
-  onContentChangeRef.current = onContentChange
-  onDirtyStateHintRef.current = onDirtyStateHint
-  onSaveRef.current = onSave
-  onOpenDocLinkRef.current = onOpenDocLink
-  isEditingLinkRef.current = isEditingLink
-  openAnnotationPopoverRef.current = review.openAnnotationPopover
+  useLayoutEffect(() => {
+    onContentChangeRef.current = onContentChange
+    onDirtyStateHintRef.current = onDirtyStateHint
+    onSaveRef.current = onSave
+    onOpenDocLinkRef.current = onOpenDocLink
+    isEditingLinkRef.current = isEditingLink
+    openAnnotationPopoverRef.current = review.openAnnotationPopover
+  }, [isEditingLink, onContentChange, onDirtyStateHint, onOpenDocLink, onSave, review])
   const reconcileRoundTripRef = useRichMarkdownReconcileRoundTrip({
     htmlSuperscriptLinkContext,
     filePath,
@@ -205,6 +205,7 @@ export default function RichMarkdownEditor({
       cancelAutoFocusRef.current = null
     }
     rootRef.current = node
+    setRootElementState(node)
   }
 
   const editor = useRichMarkdownEditorInstance({
@@ -258,6 +259,9 @@ export default function RichMarkdownEditor({
     setSlashMenu: menu.setSlashMenu,
     setDocLinkMenu: menu.setDocLinkMenu
   })
+  useLayoutEffect(() => {
+    editorRef.current = editor
+  }, [editor])
   // Why: useEditor defaults shouldRerenderOnTransaction to false, so selection-only
   // citation NodeSelections would leave aria status stale without useEditorState.
   const selectedCitationStatus = useEditorState({
@@ -310,7 +314,9 @@ export default function RichMarkdownEditor({
   })
 
   const handleLocalImagePick = useLocalImagePick(editor, filePath, worktreeId, runtimeEnvironmentId)
-  handleLocalImagePickRef.current = handleLocalImagePick
+  useLayoutEffect(() => {
+    handleLocalImagePickRef.current = handleLocalImagePick
+  }, [handleLocalImagePick])
 
   const {
     handleLinkSave,
@@ -332,13 +338,15 @@ export default function RichMarkdownEditor({
     rootRef,
     scrollContainerRef
   })
-  openSearchRef.current = openSearch
+  useLayoutEffect(() => {
+    openSearchRef.current = openSearch
+  }, [openSearch])
 
   return (
     <RichMarkdownEditorSurface
       editor={editor}
       editorFontZoomLevel={editorFontZoomLevel}
-      rootElement={rootRef.current}
+      rootElement={rootElement}
       rootRef={setRootElement}
       isModifierHeld={isModifierHeld}
       scrollContainerRef={scrollContainerRef}

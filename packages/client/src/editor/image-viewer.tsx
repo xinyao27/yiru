@@ -2,7 +2,6 @@ import { buildImageDataUri } from '@yiru/runtime-protocol/model/ui'
 import type { JSX } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { translate } from '~renderer/i18n/i18n'
-/* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: image surface size is measured with ResizeObserver and DOM refs, which are external layout systems outside render derivation. */
 import {
   Image as ImageIcon,
   MagnifyingGlassPlus as ZoomIn,
@@ -152,12 +151,10 @@ export default function ImageViewer({
   useEffect(() => {
     const surface = inlineSurfaceRef.current
     if (!surface) {
-      setInlineSurfaceSize(null)
       return
     }
 
     const updateSize = () => setInlineSurfaceSize(getElementSurfaceSize(surface))
-    updateSize()
     if (typeof ResizeObserver === 'undefined') {
       return
     }
@@ -169,7 +166,6 @@ export default function ImageViewer({
 
   useEffect(() => {
     if (!isPopupOpen) {
-      setPopupSurfaceSize(null)
       return
     }
 
@@ -179,7 +175,6 @@ export default function ImageViewer({
     }
 
     const updateSize = () => setPopupSurfaceSize(getElementSurfaceSize(surface))
-    updateSize()
     if (typeof ResizeObserver === 'undefined') {
       return
     }

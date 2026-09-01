@@ -124,15 +124,9 @@
     "vite-plus": "catalog:"
   },
   "peerDependencies": {
-    "react": ">=19",
-    "react-dom": ">=19",
-    "vite": ">=7"
+    "react": "catalog:compatibility",
+    "react-dom": "catalog:compatibility",
+    "vite": "catalog:compatibility"
   },
-  "packageManager": "pnpm@11.22.0",
-  "//": "Why: the Chrome extension bundles this TS/TSX source directly; wildcard exports cannot model TSX plus CSS, fonts, and ?url assets, so the supported host entrypoints stay explicit and there is deliberately no dist build.",
-  "reactDoctor": {
-    "rules": {
-      "react-doctor/js-combine-iterations": "off"
-    }
-  }
+  "//": "Why: the Chrome extension bundles this TS/TSX source directly; wildcard exports cannot model TSX plus CSS, fonts, and ?url assets, so the supported host entrypoints stay explicit and there is deliberately no dist build."
 }

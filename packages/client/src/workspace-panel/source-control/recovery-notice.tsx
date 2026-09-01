@@ -2,7 +2,7 @@ import type {
   SourceControlActionRecipe,
   SourceControlLaunchActionId
 } from '@yiru/runtime-protocol/workbench/source-control/ai-actions'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { translate } from '~renderer/i18n/i18n'
 import { Warning as TriangleAlert } from '~renderer/icons/hugeicons'
 import { readSourceControlLaunchRecipeAgentId } from '~renderer/source-control/agent-selection'
@@ -202,6 +202,10 @@ export function SourceControlRecoveryNotice({
     worktreeKey,
     open: false
   })
+  const syncedDialogState = syncRecoveryDialogState(dialogState, worktreeKey, hasDetails)
+  if (syncedDialogState !== dialogState) {
+    setDialogState(syncedDialogState)
+  }
   const dialogOpen = shouldShowRecoveryDialog(dialogState, worktreeKey, hasDetails)
   const setDialogOpen = (open: boolean) => {
     setDialogState({ worktreeKey, open })
@@ -218,10 +222,6 @@ export function SourceControlRecoveryNotice({
   const handlePromptDelivered = () => {
     setDialogOpen(false)
   }
-
-  useEffect(() => {
-    setDialogState((current) => syncRecoveryDialogState(current, worktreeKey, hasDetails))
-  }, [hasDetails, worktreeKey])
 
   const splitButtonProps = {
     actionId,

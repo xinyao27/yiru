@@ -24,7 +24,7 @@ type ComposerTargetActionsOptions = {
   baseBranch: string | undefined
   eligibleRepos: Repo[]
   folderSourceRepos: Repo[]
-  initialProjectGroupAppliedRef: RefObject<boolean>
+  markInitialProjectGroupApplied: () => void
   isProjectGroupTarget: boolean
   linkedWorkItem: LinkedWorkItemSummary | null
   projectGroups: ProjectGroup[]
@@ -132,7 +132,7 @@ export function createComposerTargetActions(options: ComposerTargetActionsOption
   }
 
   const handleProjectChange = (projectId: string): void => {
-    options.initialProjectGroupAppliedRef.current = true
+    options.markInitialProjectGroupApplied()
     const projectGroupId = getProjectGroupIdFromNewWorkspaceOptionId(projectId)
     if (projectGroupId) {
       const group = options.projectGroups.find(

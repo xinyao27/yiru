@@ -8,7 +8,7 @@ import {
   type ExecutionHostScope
 } from '@yiru/runtime-protocol/model/workspace'
 import type { PublicKnownRuntimeEnvironment } from '@yiru/runtime-protocol/workbench/runtime-environments'
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { getAiVaultResumeWorkspaceExecutionHostId } from '~renderer/workspace-panel/ai-vault/resume-target'
 
 import type { AiVaultSessionResumeTargetState } from './session-resume'
@@ -27,7 +27,6 @@ export function useAiVaultExecutionHostScope(args: {
   activeExecutionHostScope: ExecutionHostId | null
   onExecutionHostScopeChange: (scope: ExecutionHostScope) => void
 } {
-  const userChangedHostScopeRef = useRef(false)
   const activeExecutionHostId = (() =>
     getAiVaultResumeWorkspaceExecutionHostId(args.resumeTargetState, args.activeWorktreeId))()
   const activeExecutionHost = parseExecutionHostId(activeExecutionHostId)
@@ -35,37 +34,29 @@ export function useAiVaultExecutionHostScope(args: {
     activeExecutionHost?.kind === 'runtime' ? activeExecutionHost.id : null
   const defaultExecutionHostScope: ExecutionHostScope =
     activeExecutionHostScope ?? LOCAL_EXECUTION_HOST_ID
-  const [executionHostScope, setExecutionHostScope] =
-    useState<ExecutionHostScope>(defaultExecutionHostScope)
-
-  useEffect(() => {
-    // Why: preserve an explicit user choice (e.g. "All") across incidental
-    // rerenders, but reset to the new default once that choice no longer
-    // applies to the active worktree's host.
-    const allowedScopes = new Set<ExecutionHostScope>([
-      LOCAL_EXECUTION_HOST_ID,
-      ALL_EXECUTION_HOSTS_SCOPE,
-      ...(activeExecutionHostScope ? [activeExecutionHostScope] : []),
-      ...(args.availableExecutionHostScopes ?? [])
-    ])
-    if (!allowedScopes.has(executionHostScope)) {
-      setExecutionHostScope(defaultExecutionHostScope)
-      userChangedHostScopeRef.current = false
-      return
-    }
-    if (!userChangedHostScopeRef.current && executionHostScope !== defaultExecutionHostScope) {
-      setExecutionHostScope(defaultExecutionHostScope)
-    }
-  }, [
-    activeExecutionHostScope,
-    args.availableExecutionHostScopes,
-    defaultExecutionHostScope,
-    executionHostScope
+  const [selection, setSelection] = useState<{
+    scope: ExecutionHostScope
+    isUserChanged: boolean
+  }>({ scope: defaultExecutionHostScope, isUserChanged: false })
+  const allowedScopes = new Set<ExecutionHostScope>([
+    LOCAL_EXECUTION_HOST_ID,
+    ALL_EXECUTION_HOSTS_SCOPE,
+    ...(activeExecutionHostScope ? [activeExecutionHostScope] : []),
+    ...(args.availableExecutionHostScopes ?? [])
   ])
+  const executionHostScope =
+    allowedScopes.has(selection.scope) && selection.isUserChanged
+      ? selection.scope
+      : defaultExecutionHostScope
+  if (selection.scope !== executionHostScope) {
+    setSelection({ scope: executionHostScope, isUserChanged: false })
+  }
 
   const handleExecutionHostScopeChange = (nextScope: ExecutionHostScope) => {
-    userChangedHostScopeRef.current = nextScope !== defaultExecutionHostScope
-    setExecutionHostScope(nextScope)
+    setSelection({
+      scope: nextScope,
+      isUserChanged: nextScope !== defaultExecutionHostScope
+    })
   }
 
   return {

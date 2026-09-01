@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 
 import { saveSessionCommitDrafts } from '../commit-draft-session'
 import { createDefaultCollapsedSections } from '../panel-constants'
@@ -29,7 +29,7 @@ export function useSourceControlLifecycle(scope: SourceControlFileModelControlle
     openSettingsTarget,
     previousConflictOperationsRef,
     pushRecovery,
-    remoteActionErrorSequenceByWorktreeRef,
+    pruneRemoteActionSequences,
     setAbortOperationInFlightByWorktree,
     setBaseRefDialogOpen,
     setCollapsedSections,
@@ -98,10 +98,12 @@ export function useSourceControlLifecycle(scope: SourceControlFileModelControlle
     openSettingsTarget,
     openSettingsPage
   })
-  const worktreeIds = new Set(worktreeMap.keys())
+  const worktreeIds = useMemo(() => new Set(worktreeMap.keys()), [worktreeMap])
   const worktreeIdsKey = JSON.stringify([...worktreeIds].sort())
   const worktreeIdsRef = useRef(worktreeIds)
-  worktreeIdsRef.current = worktreeIds
+  useEffect(() => {
+    worktreeIdsRef.current = worktreeIds
+  }, [worktreeIds])
   useEffect(() => {
     if (sourceControlAiActionsVisible) {
       return
@@ -144,11 +146,7 @@ export function useSourceControlLifecycle(scope: SourceControlFileModelControlle
         delete commitInFlightRef.current[key]
       }
     }
-    for (const key of Object.keys(remoteActionErrorSequenceByWorktreeRef.current)) {
-      if (!worktreeIdsRef.current.has(key)) {
-        delete remoteActionErrorSequenceByWorktreeRef.current[key]
-      }
-    }
+    pruneRemoteActionSequences(worktreeIdsRef.current)
     for (const key of Object.keys(generateInFlightRef.current)) {
       if (!worktreeIdsRef.current.has(key)) {
         delete generateInFlightRef.current[key]
@@ -166,7 +164,7 @@ export function useSourceControlLifecycle(scope: SourceControlFileModelControlle
     createPrIntentInFlightRef,
     createPrIntentRunTokenRef,
     generateInFlightRef,
-    remoteActionErrorSequenceByWorktreeRef,
+    pruneRemoteActionSequences,
     setAbortOperationInFlightByWorktree,
     setCommitErrors,
     setCommitInFlightByWorktree,

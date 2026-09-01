@@ -5,11 +5,10 @@ import { shouldShowMobileDriverOverlay } from './mobile-driver-overlay-visibilit
 import { getDriverForPty } from './pane-manager/mobile-driver-state'
 import { getFitOverrideForPty } from './pane-manager/mobile-fit-overrides'
 import type { ManagedPane } from './pane-manager/pane-manager'
-import type { PtyTransport } from './pty/transport-types'
 
 type TerminalDriverPortalsProps = {
   panes: ManagedPane[]
-  paneTransportsRef: React.RefObject<Map<number, PtyTransport>>
+  panePtyIds: ReadonlyMap<number, string>
   restoreAllTerminalFits: (focusPane: ManagedPane) => Promise<void>
   restorePaneTerminalFit: (
     pane: ManagedPane,
@@ -20,7 +19,7 @@ type TerminalDriverPortalsProps = {
 
 export function TerminalDriverPortals({
   panes,
-  paneTransportsRef,
+  panePtyIds,
   restoreAllTerminalFits,
   restorePaneTerminalFit
 }: TerminalDriverPortalsProps): React.JSX.Element {
@@ -28,7 +27,7 @@ export function TerminalDriverPortals({
     <>
       {panes.map((pane) => {
         // Why: pane IDs collide across tabs; the transport's PTY identity is global.
-        const ptyId = paneTransportsRef.current.get(pane.id)?.getPtyId()
+        const ptyId = panePtyIds.get(pane.id)
         if (!ptyId) {
           return null
         }

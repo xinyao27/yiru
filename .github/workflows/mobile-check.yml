@@ -1,11 +1,11 @@
-name: Mobile iOS Checks
+name: Mobile Checks
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'apps/mobile-ios/**'
+      - 'apps/mobile/**'
       - 'packages/runtime-protocol/**'
       - 'package.json'
       - 'pnpm-lock.yaml'
@@ -37,9 +37,9 @@ jobs:
           node-version-file: package.json
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v6
+        uses: pnpm/setup@v2
         with:
-          run_install: false
+          install: false
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -51,4 +51,4 @@ jobs:
         run: xcodebuild -downloadComponent MetalToolchain
 
       - name: Verify iOS package
-        run: pnpm exec vp run yiru-mobile-ios#check
+        run: pnpm exec vp run yiru-mobile#check

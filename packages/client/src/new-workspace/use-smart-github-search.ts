@@ -50,13 +50,14 @@ type UseSmartGithubSearchOptions = {
   debouncedQuery: string
   disabled: boolean
   githubSourceContext: ProjectSourceContext | null
-  handledCrossRepoUrlRef: RefObject<string | null>
+  handledCrossRepoUrl: string | null
   mode: SmartNameMode
   repoBackedSearchTargets: SmartWorkspaceSearchTarget[]
   repoBackedSourcesDisabled: boolean
   repoSlugCacheRef: RefObject<Map<string, RepoSlug | null>>
   repos: SmartWorkspaceRepo[]
   selectedRepo: SmartWorkspaceRepo | null
+  setHandledCrossRepoUrl: (url: string) => void
   setCrossRepoPrompt: (prompt: CrossRepoPrompt | null) => void
   textOnly: boolean
 }
@@ -66,13 +67,14 @@ export function useSmartGithubSearch({
   debouncedQuery,
   disabled,
   githubSourceContext,
-  handledCrossRepoUrlRef,
+  handledCrossRepoUrl,
   mode,
   repoBackedSearchTargets,
   repoBackedSourcesDisabled,
   repoSlugCacheRef,
   repos,
   selectedRepo,
+  setHandledCrossRepoUrl,
   setCrossRepoPrompt,
   textOnly
 }: UseSmartGithubSearchOptions): { isLoading: boolean; items: GitHubWorkItem[] } {
@@ -99,7 +101,7 @@ export function useSmartGithubSearch({
     query: debouncedQuery.trim(),
     hasDirectNumber: normalizedQuery.directNumber !== null,
     hasDirectLink: parsedLink !== null,
-    crossRepoLinkAlreadyHandled: handledCrossRepoUrlRef.current === debouncedQuery.trim(),
+    crossRepoLinkAlreadyHandled: handledCrossRepoUrl === debouncedQuery.trim(),
     crossRepoSwitchTarget,
     selectedRepoId: selectedRepo?.id ?? null,
     targetRepoIds: repoBackedSearchTargets.map((target) => target.repo.id)
@@ -138,7 +140,7 @@ export function useSmartGithubSearch({
             parsedLink.slug,
             repoSlugCacheRef.current
           )
-          handledCrossRepoUrlRef.current = request.query
+          setHandledCrossRepoUrl(request.query)
           const target = matchingRepo ? targetForRepo(matchingRepo) : null
           if (!target) {
             return { items: [], prompt: null }
@@ -159,7 +161,7 @@ export function useSmartGithubSearch({
         }
         const selectedSlug = await getRepoSlugCached(selectedRepo, repoSlugCacheRef.current)
         if (!selectedSlug || sameRepoSlug(selectedSlug, parsedLink.slug)) {
-          handledCrossRepoUrlRef.current = request.query
+          setHandledCrossRepoUrl(request.query)
           const item = await lookupSmartGitHubSubmitItem({
             repoPath: selectedRepo.path,
             repoId: selectedRepo.id,
@@ -277,7 +279,7 @@ export function useSmartGithubSearch({
     fetchWorkItemsAcrossRepos,
     getCachedWorkItems,
     githubSourceContext,
-    handledCrossRepoUrlRef,
+    handledCrossRepoUrl,
     normalizedQuery,
     parsedLink,
     repoBackedSearchTargets,
@@ -285,6 +287,7 @@ export function useSmartGithubSearch({
     repos,
     request,
     selectedRepo,
+    setHandledCrossRepoUrl,
     setCrossRepoPrompt
   ])
 

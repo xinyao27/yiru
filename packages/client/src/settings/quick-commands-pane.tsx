@@ -1,6 +1,6 @@
 import { getTerminalQuickCommandScope } from '@yiru/runtime-protocol/workbench/terminal/quick-commands'
 import type { GlobalSettings, TerminalQuickCommand } from '@yiru/runtime-protocol/workbench/types'
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { translate } from '~renderer/i18n/i18n'
 import { Plus } from '~renderer/icons/hugeicons'
 import { useProjectCatalog } from '~renderer/project-catalog/provider'
@@ -53,7 +53,7 @@ export function QuickCommandsPane({
   const confirm = useConfirmationDialog()
 
   const [editor, setEditor] = useState<EditorState>(null)
-  const consumedAddIntentSignalRef = useRef(0)
+  const [consumedAddIntentSignal, setConsumedAddIntentSignal] = useState(0)
   // Why: `null` means "show all" (sticky-all), independent of the current repo
   // list — mirrors the repository combobox so newly added repos appear
   // automatically rather than being silently excluded.
@@ -100,11 +100,11 @@ export function QuickCommandsPane({
   const intentSignal = addCommandIntentSignal
   if (
     typeof intentSignal === 'number' &&
-    shouldOpenQuickCommandAddIntent(intentSignal, consumedAddIntentSignalRef.current)
+    shouldOpenQuickCommandAddIntent(intentSignal, consumedAddIntentSignal)
   ) {
     // Why: Settings deep-links use this one-shot signal to open the add dialog;
     // consume it before paint so the pane never flashes without the editor.
-    consumedAddIntentSignalRef.current = intentSignal
+    setConsumedAddIntentSignal(intentSignal)
     setEditor({ mode: 'add', command: createDraftForCurrentFilter() })
   }
 

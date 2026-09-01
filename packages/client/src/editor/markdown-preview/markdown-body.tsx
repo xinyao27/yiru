@@ -1,8 +1,7 @@
 import type { MarkdownDocument, Worktree } from '@yiru/runtime-protocol/workbench/types'
-import React, { useRef } from 'react'
+import React from 'react'
 import type { ComponentProps, RefObject } from 'react'
 import Markdown from 'react-markdown'
-import type { Components } from 'react-markdown'
 import rehypeHighlight from 'rehype-highlight'
 import rehypeKatex from 'rehype-katex'
 import rehypeRaw from 'rehype-raw'
@@ -78,51 +77,36 @@ type MarkdownBodyProps = {
 export const MarkdownBody = React.memo(function MarkdownBody(
   props: MarkdownBodyProps
 ): React.JSX.Element {
-  const latestRef = useRef(props)
-  latestRef.current = props
-  const linkContextRef = useRef<MarkdownPreviewLinkContext | null>(null)
-  if (!linkContextRef.current) {
-    linkContextRef.current = createLinkContext(props)
-  } else {
-    Object.assign(linkContextRef.current, createLinkContext(props))
-  }
-  const renderOptionsRef = useRef<CreateMarkdownPreviewComponentsOptions | null>(null)
-  if (!renderOptionsRef.current) {
-    renderOptionsRef.current = {
-      handleAnnotatedMarkdownBlockClick: (...args) =>
-        latestRef.current.handleAnnotatedMarkdownBlockClick(...args),
-      imageRuntimeContext: props.imageRuntimeContext,
-      isDark: props.isDark,
-      linkContext: linkContextRef.current,
-      renderAnnotationControls: (...args) => latestRef.current.renderAnnotationControls(...args),
-      wrapAnnotatedBlock: (...args) => latestRef.current.wrapAnnotatedBlock(...args)
-    }
-  }
-  renderOptionsRef.current.imageRuntimeContext = props.imageRuntimeContext
-  renderOptionsRef.current.isDark = props.isDark
-  const componentsRef = useRef<Components | null>(null)
-  componentsRef.current ??= createMarkdownPreviewComponents(renderOptionsRef.current)
-  void props.reviewRevision
+  const { bodyRef, frontMatterInner, isFrontMatterVisible, renderedContent, reviewRevision } = props
+  const components = createMarkdownPreviewComponents({
+    handleAnnotatedMarkdownBlockClick: props.handleAnnotatedMarkdownBlockClick,
+    imageRuntimeContext: props.imageRuntimeContext,
+    isDark: props.isDark,
+    linkContext: createLinkContext(props),
+    renderAnnotationControls: props.renderAnnotationControls,
+    wrapAnnotatedBlock: props.wrapAnnotatedBlock
+  })
+  void reviewRevision
 
   return (
-    <div ref={props.bodyRef} className="markdown-body" translate="no">
-      {props.isFrontMatterVisible ? (
+    <div ref={bodyRef} className="markdown-body" translate="no">
+      {isFrontMatterVisible ? (
         <div className="border-border/60 bg-muted/40 mb-4 border px-3 py-2">
           <div className="text-muted-foreground mb-1 text-[10px] font-medium tracking-wider uppercase">
             {translate('auto.components.editor.MarkdownPreview.2b2b31382c', 'Front Matter')}
           </div>
           <pre className="text-muted-foreground scrollbar-editor max-h-48 overflow-auto font-mono text-xs whitespace-pre-wrap">
-            {props.frontMatterInner}
+            {frontMatterInner}
           </pre>
         </div>
       ) : null}
       <Markdown
-        components={componentsRef.current}
+        components={components}
         urlTransform={markdownPreviewUrlTransform}
         remarkPlugins={MARKDOWN_REMARK_PLUGINS}
         rehypePlugins={MARKDOWN_REHYPE_PLUGINS}
       >
-        {props.renderedContent}
+        {renderedContent}
       </Markdown>
     </div>
   )

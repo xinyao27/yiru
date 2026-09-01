@@ -70,7 +70,7 @@ function EditorPanelInner({
   const setEditorDraft = useAppStore((s) => s.setEditorDraft)
   const settings = useAppStore((s) => s.settings)
   const panelRef = useRef<HTMLDivElement>(null)
-  const [copiedPathToast, setCopiedPathToast] = useState<{ fileId: string; token: number } | null>(
+  const [copiedPathToast, setCopiedPathToast] = useState<{ fileId: string; token: object } | null>(
     null
   )
   const copiedPathToastResetTimerRef = useRef<number | null>(null)
@@ -205,7 +205,7 @@ function EditorPanelInner({
         return
       }
       clearCopiedPathToastResetTimer()
-      const nextToast = { fileId: activeFile.id, token: Date.now() }
+      const nextToast = { fileId: activeFile.id, token: {} }
       setCopiedPathToast(nextToast)
       copiedPathToastResetTimerRef.current = window.setTimeout(() => {
         copiedPathToastResetTimerRef.current = null

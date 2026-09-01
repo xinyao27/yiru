@@ -129,19 +129,10 @@ export function useFileExplorerWatch({
   // Keep refs for values accessed inside the event handler to avoid
   // re-subscribing the IPC listener on every render.
   const dirCacheRef = useRef(dirCache)
-  dirCacheRef.current = dirCache
-
   const expandedRef = useRef(expanded)
-  expandedRef.current = expanded
-
   const worktreeIdRef = useRef(activeWorktreeId)
-  worktreeIdRef.current = activeWorktreeId
-
   const inlineInputRef = useRef(inlineInput)
-  inlineInputRef.current = inlineInput
-
   const dragSourceRef = useRef(dragSourcePath)
-  dragSourceRef.current = dragSourcePath
 
   // Why: refreshDir and refreshTree are stored as refs so the merged
   // subscribe+event effect does not re-subscribe the IPC listener when
@@ -149,10 +140,17 @@ export function useFileExplorerWatch({
   // refs, every expand/collapse would tear down and re-create the watcher
   // subscription and IPC listener unnecessarily (review issue §1).
   const refreshDirRef = useRef(refreshDir)
-  refreshDirRef.current = refreshDir
-
   const refreshTreeRef = useRef(refreshTree)
-  refreshTreeRef.current = refreshTree
+
+  useEffect(() => {
+    dirCacheRef.current = dirCache
+    expandedRef.current = expanded
+    worktreeIdRef.current = activeWorktreeId
+    inlineInputRef.current = inlineInput
+    dragSourceRef.current = dragSourcePath
+    refreshDirRef.current = refreshDir
+    refreshTreeRef.current = refreshTree
+  }, [activeWorktreeId, dirCache, dragSourcePath, expanded, inlineInput, refreshDir, refreshTree])
 
   // Deferred events queue: events that arrive during inline input or drag
   const deferredRef = useRef<FsChangedPayload[]>([])

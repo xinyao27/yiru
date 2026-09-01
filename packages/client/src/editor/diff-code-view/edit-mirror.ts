@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef } from 'react'
 
 /**
  * Keeps the live document of every editing row, and writes what is still
@@ -19,8 +19,10 @@ export function useDiffCodeViewEditMirror(
   const pendingEditsRef = useRef(new Map<string, string>())
   const onFileEditChangeRef = useRef(onFileEditChange)
   const onFileEditCompleteRef = useRef(onFileEditComplete)
-  onFileEditChangeRef.current = onFileEditChange
-  onFileEditCompleteRef.current = onFileEditComplete
+  useLayoutEffect(() => {
+    onFileEditChangeRef.current = onFileEditChange
+    onFileEditCompleteRef.current = onFileEditComplete
+  }, [onFileEditChange, onFileEditComplete])
 
   useEffect(() => {
     const pendingEdits = pendingEditsRef.current

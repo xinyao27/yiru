@@ -30,6 +30,12 @@ type ColorFieldButtonProps = {
   onClick: () => void
 }
 
+type IdentifiedThemeGradientDot = {
+  identity: 'primary' | 'secondary' | 'tertiary'
+  dot: ThemeGradientDot
+  isPrimary: boolean
+}
+
 const KEYBOARD_STEP = 0.02
 
 const TWO_COLOR_HARMONIES: readonly ThemeGradientHarmony[] = ['complementary', 'singleAnalogous']
@@ -74,6 +80,25 @@ function harmoniesForDotCount(dotCount: number): readonly ThemeGradientHarmony[]
     return THREE_COLOR_HARMONIES
   }
   return ['floating']
+}
+
+function identifyThemeGradientDots(
+  dots: readonly ThemeGradientDot[]
+): IdentifiedThemeGradientDot[] {
+  const identifiedDots: IdentifiedThemeGradientDot[] = []
+  const primary = dots[0]
+  const secondary = dots[1]
+  const tertiary = dots[2]
+  if (primary) {
+    identifiedDots.push({ identity: 'primary', dot: primary, isPrimary: true })
+  }
+  if (secondary) {
+    identifiedDots.push({ identity: 'secondary', dot: secondary, isPrimary: false })
+  }
+  if (tertiary) {
+    identifiedDots.push({ identity: 'tertiary', dot: tertiary, isPrimary: false })
+  }
+  return identifiedDots
 }
 
 function isColorFieldControlEvent(event: React.PointerEvent): boolean {
@@ -271,17 +296,13 @@ export function ThemeGradientPad({
         </span>
       ) : null}
 
-      {theme.dots.map((dot, index) => {
-        const isPrimary = index === 0
+      {identifyThemeGradientDots(theme.dots).map(({ identity, dot, isPrimary }) => {
         return (
           <div
             data-theme-color-dot
             data-primary={isPrimary ? 'true' : undefined}
             data-dragging={isPrimary && dragging ? 'true' : undefined}
-            // Why: harmony rebuilds companion colors by positional slot, so the
-            // slot is the stable identity across every primary-color move.
-            // oxlint-disable-next-line react/no-array-index-key
-            key={index}
+            key={identity}
             className={cn(
               'absolute z-[2]',
               isPrimary ? 'pointer-events-auto cursor-pointer' : 'pointer-events-none'

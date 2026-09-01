@@ -1,6 +1,6 @@
 import { LOCAL_EXECUTION_HOST_ID } from '@yiru/runtime-protocol/model/workspace'
 import type { GlobalSettings } from '@yiru/runtime-protocol/workbench/types'
-import React, { useEffect, useId, useRef, useState } from 'react'
+import React, { useId, useRef, useState } from 'react'
 import {
   getEffectiveHostSetting,
   getHostSettingOverride,
@@ -65,18 +65,15 @@ export function WorkspaceDirectorySetting({
     : settings.workspaceDir
   // Why: settings:set prepares the workspace root with mkdir; committing each
   // keystroke would create every typed path prefix as a real directory.
-  const [draftValue, setDraftValue] = useState(value)
-  const draftValueRef = useRef(value)
+  const [draftState, setDraftState] = useState({ source: value, value })
   const skipNextBlurCommitRef = useRef(false)
-
-  useEffect(() => {
-    setDraftValue(value)
-    draftValueRef.current = value
-  }, [value])
+  if (draftState.source !== value) {
+    setDraftState({ source: value, value })
+  }
+  const draftValue = draftState.source === value ? draftState.value : value
 
   const setDraft = (next: string): void => {
-    draftValueRef.current = next
-    setDraftValue(next)
+    setDraftState({ source: value, value: next })
   }
 
   const writeValue = (next: string): void => {
@@ -95,7 +92,7 @@ export function WorkspaceDirectorySetting({
   }
 
   const commitDraftValue = (): void => {
-    const next = draftValueRef.current
+    const next = draftValue
     if (next === value) {
       return
     }

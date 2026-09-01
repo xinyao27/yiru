@@ -1,6 +1,7 @@
 import { isGitRepoKind } from '@yiru/runtime-protocol/workbench/repo-kind'
 import { useEffect, useRef } from 'react'
 import { isWindowVisible } from '~renderer/application-shell/window-visibility-interval'
+import { useEventCallback } from '~renderer/react/use-event-callback'
 import { getConnectionId } from '~renderer/runtime/connection-context'
 import {
   hasInteractiveActiveGitStatusConsumer,
@@ -148,23 +149,21 @@ export function useGitStatusPolling(options: { enabled?: boolean } = {}): void {
 
   // Why: the scheduler must survive harmless store rerenders so its in-flight,
   // trailing-signal, and safety-horizon state remain authoritative.
-  const runFetchStatusRef = useRef(runFetchStatus)
-  runFetchStatusRef.current = runFetchStatus
-  const canApplyScheduledStatusRef = useRef(canFetchActiveWorktreeGitStatus)
-  canApplyScheduledStatusRef.current = canFetchActiveWorktreeGitStatus
   const statusRefreshGenerationRef = useRef(0)
+  const runScheduledFetchStatus = useEventCallback(runFetchStatus)
+  const canApplyScheduledStatus = useEventCallback(() => canFetchActiveWorktreeGitStatus)
 
   const statusSchedulerRef = useRef<GitStatusRefreshScheduler | null>(null)
   useEffect(() => {
     const generation = ++statusRefreshGenerationRef.current
     const scheduler = createGitStatusRefreshScheduler(
       ({ reason, signal }) =>
-        runFetchStatusRef.current({
+        runScheduledFetchStatus({
           reason,
           signal,
           shouldApply: () =>
             statusRefreshGenerationRef.current === generation &&
-            canApplyScheduledStatusRef.current &&
+            canApplyScheduledStatus() &&
             !signal.aborted &&
             isWindowVisible()
         }),
@@ -186,7 +185,14 @@ export function useGitStatusPolling(options: { enabled?: boolean } = {}): void {
     // Why: push-target changes must bump the generation so an in-flight refresh
     // captured against the old remote/branch can't apply or cache stale upstream
     // status for the new one.
-  }, [activeExecutionHostId, activePushTarget, activeWorktreeId, worktreePath])
+  }, [
+    activeExecutionHostId,
+    activePushTarget,
+    activeWorktreeId,
+    canApplyScheduledStatus,
+    runScheduledFetchStatus,
+    worktreePath
+  ])
 
   useEffect(() => {
     const reconcile = (catchUp: boolean): void => {

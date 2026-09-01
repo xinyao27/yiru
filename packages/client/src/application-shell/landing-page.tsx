@@ -171,27 +171,17 @@ function PreflightBanner({
   // GitHub project (which changes the key) re-evaluates dismissals, so a lapsed
   // dismissal re-surfaces the nudge without a manual reset.
   const githubKey = githubProjectKeys(repos).join('|')
-  const [dismissed, setDismissed] = useState<Set<string>>(
-    () =>
-      new Set(
-        issues
-          .filter((issue) => issue.dismissible && isPreflightIssueDismissed(issue.id, repos))
-          .map((issue) => issue.id)
-      )
+  const persistedDismissed = new Set(
+    issues
+      .filter((issue) => issue.dismissible && isPreflightIssueDismissed(issue.id, repos))
+      .map((issue) => issue.id)
   )
-
-  useEffect(() => {
-    setDismissed(
-      new Set(
-        issues
-          .filter((issue) => issue.dismissible && isPreflightIssueDismissed(issue.id, repos))
-          .map((issue) => issue.id)
-      )
-    )
-    // Why: re-seed only when the GitHub project set changes; issues identity is
-    // stable per render and would otherwise reset transient dismiss state.
-    // oxlint-disable-next-line react-hooks/exhaustive-deps
-  }, [githubKey])
+  const [dismissedState, setDismissedState] = useState<{
+    githubKey: string
+    issueIds: Set<string>
+  }>({ githubKey, issueIds: persistedDismissed })
+  const dismissed =
+    dismissedState.githubKey === githubKey ? dismissedState.issueIds : persistedDismissed
 
   const visibleIssues = issues.filter((issue) => !dismissed.has(issue.id))
   if (visibleIssues.length === 0) {
@@ -200,7 +190,7 @@ function PreflightBanner({
 
   const dismiss = (issue: PreflightIssue): void => {
     dismissPreflightIssue(issue.id, repos)
-    setDismissed((prev) => new Set(prev).add(issue.id))
+    setDismissedState({ githubKey, issueIds: new Set(dismissed).add(issue.id) })
   }
 
   return (
@@ -271,7 +261,6 @@ export default function Landing(): React.JSX.Element {
       })
     }
 
-    // oxlint-disable-next-line react-doctor/no-initialize-state -- Why: preflight status is read from an external IPC probe on mount and focus.
     refreshPreflight()
 
     // Why: users often install/authenticate gh outside Yiru. Re-check when the

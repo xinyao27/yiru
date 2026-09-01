@@ -8,6 +8,7 @@ import '@xterm/xterm/css/xterm.css'
 import { useEffect, useRef, useState } from 'react'
 import { translate } from '~renderer/i18n/i18n'
 import { Moon, Sun } from '~renderer/icons/hugeicons'
+import { useEventCallback } from '~renderer/react/use-event-callback'
 import { buildFontFamily } from '~renderer/terminal-pane/layout-serialization'
 import { buildDefaultTerminalOptions } from '~renderer/terminal-pane/pane-manager/pane-terminal-options'
 import { composeActiveTerminalTheme } from '~renderer/terminal-pane/terminal-appearance'
@@ -120,7 +121,7 @@ export function TerminalSettingsPreview({
   const inactivePaneOpacity = clampNumber(settings.terminalInactivePaneOpacity, 0, 1)
   const paneBackground = composedTheme?.background ?? '#000'
 
-  useEffect(() => {
+  const mountTerminal = useEventCallback(() => {
     const container = containerRef.current
     if (!container) {
       return
@@ -168,11 +169,8 @@ export function TerminalSettingsPreview({
       terminal.dispose()
       terminalRef.current = null
     }
-    // Why empty deps: mount effect intentionally runs once. Subsequent
-    // setting changes (including cursor style) flow through the dedicated
-    // option-mutation effects below.
-    // oxlint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  })
+  useEffect(() => mountTerminal(), [mountTerminal])
 
   // Why: font/cursor options are mutated directly so the preview repaints in
   // xterm's normal cycle. No fit/refit needed since cols/rows are pinned.

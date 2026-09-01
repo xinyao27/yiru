@@ -7,7 +7,6 @@ import {
   PDFLinkService,
   PDFViewer as PdfJsViewer
 } from 'pdfjs-dist/web/pdf_viewer.mjs'
-/* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: PDF loading drives pdf.js document/viewer instances and decode errors through an external worker lifecycle. */
 import type { JSX } from 'react'
 import { useEffect, useRef, useState } from 'react'
 
@@ -39,10 +38,21 @@ type PdfViewerProps = {
   src?: string
 }
 
-export default function PdfViewer({ content = '', filePath, src }: PdfViewerProps): JSX.Element {
+type PdfSourceState =
+  | { source: { url: string } | { data: Uint8Array<ArrayBuffer> }; error: null }
+  | { source: null; error: string | null }
+
+export default function PdfViewer(props: PdfViewerProps): JSX.Element {
+  const content = props.content ?? ''
+  return <PdfViewerContent key={`${props.filePath}\0${props.src ?? content}`} {...props} />
+}
+
+function PdfViewerContent({ content = '', filePath, src }: PdfViewerProps): JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null)
   const viewerDivRef = useRef<HTMLDivElement>(null)
-  const [pdfError, setPdfError] = useState<string | null>(null)
+  const [sourceState] = useState<PdfSourceState>(() => resolvePdfSource(content, src))
+  const [asyncPdfError, setAsyncPdfError] = useState<string | null>(null)
+  const pdfError = sourceState.error ?? asyncPdfError
   const [findOpen, setFindOpen] = useState(false)
   const [scale, setScale] = useState(1)
   const keybindings = useAppStore((state) => state.keybindings)
@@ -52,35 +62,14 @@ export default function PdfViewer({ content = '', filePath, src }: PdfViewerProp
   const pdfViewerRef = useRef<InstanceType<typeof PdfJsViewer> | null>(null)
 
   const filename = (() => filePath.split(/[/\\]/).pop() || filePath)()
-  const cleanedContent = (() => content.replace(/\s/g, ''))()
-
   useEffect(() => {
     const container = containerRef.current
     const viewerDiv = viewerDivRef.current
-    if (!container || !viewerDiv || (!cleanedContent && !src)) {
+    if (!container || !viewerDiv || !sourceState.source) {
       return
     }
 
-    setPdfError(null)
     let cancelled = false
-
-    let source: { url: string } | { data: Uint8Array<ArrayBuffer> }
-    if (src) {
-      source = { url: src }
-    } else {
-      let binary: string
-      try {
-        binary = window.atob(cleanedContent)
-      } catch {
-        setPdfError('Failed to decode PDF content')
-        return
-      }
-      const bytes = new Uint8Array(binary.length)
-      for (let i = 0; i < binary.length; i += 1) {
-        bytes[i] = binary.charCodeAt(i)
-      }
-      source = { data: bytes }
-    }
 
     const eventBus = new EventBus()
     eventBusRef.current = eventBus
@@ -110,7 +99,7 @@ export default function PdfViewer({ content = '', filePath, src }: PdfViewerProp
     }
     eventBus.on('scalechanging', handleScaleChanging)
 
-    const loadingTask = pdfjsLib.getDocument(source)
+    const loadingTask = pdfjsLib.getDocument(sourceState.source)
 
     loadingTask.promise
       .then((doc) => {
@@ -127,9 +116,9 @@ export default function PdfViewer({ content = '', filePath, src }: PdfViewerProp
           return
         }
         if (err?.name === 'PasswordException') {
-          setPdfError('This PDF is password-protected')
+          setAsyncPdfError('This PDF is password-protected')
         } else {
-          setPdfError('Failed to load PDF preview')
+          setAsyncPdfError('Failed to load PDF preview')
         }
       })
 
@@ -150,7 +139,7 @@ export default function PdfViewer({ content = '', filePath, src }: PdfViewerProp
       findControllerRef.current = null
       pdfViewerRef.current = null
     }
-  }, [cleanedContent, src])
+  }, [sourceState])
 
   const closeFindBar = () => {
     const eventBus = eventBusRef.current
@@ -314,4 +303,24 @@ export default function PdfViewer({ content = '', filePath, src }: PdfViewerProp
       </div>
     </div>
   )
+}
+
+function resolvePdfSource(content: string, src?: string): PdfSourceState {
+  if (src) {
+    return { source: { url: src }, error: null }
+  }
+  const cleanedContent = content.replace(/\s/g, '')
+  if (!cleanedContent) {
+    return { source: null, error: null }
+  }
+  try {
+    const binary = window.atob(cleanedContent)
+    const bytes = new Uint8Array(binary.length)
+    for (let index = 0; index < binary.length; index += 1) {
+      bytes[index] = binary.charCodeAt(index)
+    }
+    return { source: { data: bytes }, error: null }
+  } catch {
+    return { source: null, error: 'Failed to decode PDF content' }
+  }
 }

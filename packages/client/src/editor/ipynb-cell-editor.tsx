@@ -1,9 +1,10 @@
-import React, { useRef } from 'react'
+import React from 'react'
 import Markdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
 import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
 import { computeEditorFontSize } from '~renderer/editor/font-zoom'
+import { useEventCallback } from '~renderer/react/use-event-callback'
 import { useAppStore } from '~renderer/store/state'
 import { Textarea } from '~renderer/ui/textarea'
 
@@ -41,12 +42,8 @@ function CodeCell({
 }): React.JSX.Element {
   const settings = useAppStore((s) => s.settings)
   const editorFontZoomLevel = useAppStore((s) => s.editorFontZoomLevel)
-  const onDeactivateRef = useRef(onDeactivate)
-  const onSaveRequestRef = useRef(onSaveRequest)
-  // Why: listeners are installed once on mount and need the latest callbacks
-  // without rebuilding the embedded editor.
-  onDeactivateRef.current = onDeactivate
-  onSaveRequestRef.current = onSaveRequest
+  const handleDeactivate = useEventCallback(onDeactivate)
+  const handleSaveRequest = useEventCallback(onSaveRequest)
   const fontSize = computeEditorFontSize(settings?.terminalFontSize ?? 13, editorFontZoomLevel)
   const editorHeight = getIpynbCodeCellEditorHeight(source, fontSize)
   const lines = (() => getIpynbCodeCellPreviewLines(source))()
@@ -85,12 +82,12 @@ function CodeCell({
         style={{ height: editorHeight }}
         onKeyDown={(event) => {
           if (event.key === 'Escape') {
-            onDeactivateRef.current()
+            handleDeactivate()
           }
         }}
         onBlur={(event) => {
           if (!event.currentTarget.contains(event.relatedTarget)) {
-            onDeactivateRef.current()
+            handleDeactivate()
           }
         }}
       >
@@ -103,7 +100,7 @@ function CodeCell({
           language={cell.language}
           onContentChange={onChange}
           onSave={() => {
-            void onSaveRequestRef.current()
+            void handleSaveRequest()
           }}
         />
       </div>

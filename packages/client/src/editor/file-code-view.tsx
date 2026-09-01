@@ -1,7 +1,7 @@
 import type { CodeViewFileItem, LineAnnotation } from '@pierre/diffs'
 import { CodeView, type CodeViewHandle, type CodeViewReactOptions } from '@pierre/diffs/react'
 import type { DiffComment } from '@yiru/runtime-protocol/workbench/types'
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { selectWorktreeDiffComments } from '~renderer/diff-comments/worktree-selector'
 import { useAppStore } from '~renderer/store/state'
 
@@ -40,6 +40,70 @@ export type FileCodeViewProps = {
 
 registerCursorPierreThemes()
 
+function createFileCodeViewItemController(): {
+  getEditedContent: () => string
+  recordEdit: (content: string) => void
+  resolveItems: (input: {
+    annotations: LineAnnotation<DiffCodeViewAnnotation>[]
+    content: string
+    fileId: string
+    pierreLanguage: string
+    readOnly: boolean
+    relativePath: string
+    viewStateKey: string
+  }) => CodeViewFileItem<DiffCodeViewAnnotation>[]
+} {
+  let editedContent: string | null = null
+  let version = 0
+  let previous: {
+    annotations: LineAnnotation<DiffCodeViewAnnotation>[]
+    content: string
+    readOnly: boolean
+  } | null = null
+  return {
+    getEditedContent: () => editedContent ?? '',
+    recordEdit: (content) => {
+      editedContent = content
+    },
+    resolveItems: (input) => {
+      editedContent ??= input.content
+      const hasContentChanged = previous !== null && previous.content !== input.content
+      const hasExternalContentChanged = hasContentChanged && editedContent !== input.content
+      if (
+        previous &&
+        (hasExternalContentChanged ||
+          previous.annotations !== input.annotations ||
+          previous.readOnly !== input.readOnly)
+      ) {
+        version += 1
+      }
+      if (hasExternalContentChanged) {
+        editedContent = input.content
+      }
+      previous = {
+        content: input.content,
+        annotations: input.annotations,
+        readOnly: input.readOnly
+      }
+      return [
+        {
+          id: input.fileId,
+          type: 'file',
+          file: {
+            name: input.relativePath,
+            contents: input.content,
+            lang: input.pierreLanguage,
+            cacheKey: `${input.viewStateKey}:${version}`
+          },
+          annotations: input.annotations,
+          edit: !input.readOnly,
+          version
+        }
+      ]
+    }
+  }
+}
+
 /**
  * A single file, rendered and edited through Pierre.
  *
@@ -64,7 +128,7 @@ export default function FileCodeView({
   const containerRef = useRef<HTMLDivElement | null>(null)
   // Why: the save shortcut needs the live document, and CodeView reports it
   // through onItemEditChange rather than exposing the editor's text.
-  const editedContentRef = useRef(content)
+  const [itemController] = useState(createFileCodeViewItemController)
   const [composer, setComposer] = useState<DiffCodeViewComposer | null>(null)
 
   const settings = useAppStore((s) => s.settings)
@@ -76,58 +140,31 @@ export default function FileCodeView({
   const allDiffComments = useAppStore((s): DiffComment[] | undefined =>
     selectWorktreeDiffComments(s, worktreeId)
   )
-  const comments = (() =>
-    (allDiffComments ?? []).filter(
-      (comment) => comment.filePath === relativePath && isDiffComment(comment)
-    ))()
+  const comments = useMemo(
+    () =>
+      (allDiffComments ?? []).filter(
+        (comment) => comment.filePath === relativePath && isDiffComment(comment)
+      ),
+    [allDiffComments, relativePath]
+  )
 
   const isDark = resolveDocumentTheme(settings?.theme ?? 'system')
   const fontSize = computeEditorFontSize(settings?.terminalFontSize ?? 13, editorFontZoomLevel)
   const pierreLanguage = (() => resolvePierreDiffLanguage(relativePath, language))()
 
-  const annotations = (() => buildDiffCodeViewFileAnnotations(comments, composer))()
-  const versionRef = useRef(0)
-  const lastItemInputRef = useRef({ content, annotations, readOnly })
-  const items: CodeViewFileItem<DiffCodeViewAnnotation>[] = (() => {
-    const previous = lastItemInputRef.current
-    const hasContentChanged = previous.content !== content
-    const hasExternalContentChanged = hasContentChanged && editedContentRef.current !== content
-    if (
-      hasExternalContentChanged ||
-      previous.annotations !== annotations ||
-      previous.readOnly !== readOnly
-    ) {
-      versionRef.current += 1
-    }
-    if (
-      hasContentChanged ||
-      previous.annotations !== annotations ||
-      previous.readOnly !== readOnly
-    ) {
-      lastItemInputRef.current = { content, annotations, readOnly }
-    }
-    if (hasExternalContentChanged) {
-      editedContentRef.current = content
-    }
-    return [
-      {
-        id: fileId,
-        type: 'file',
-        file: {
-          name: relativePath,
-          contents: content,
-          lang: pierreLanguage,
-          // Why: Pierre owns the live document while editing. Bump this for
-          // external content only; bumping for a local draft echo rebuilds the
-          // document on every keystroke and drops focus.
-          cacheKey: `${viewStateKey}:${versionRef.current}`
-        },
-        annotations,
-        edit: !readOnly,
-        version: versionRef.current
-      }
-    ]
-  })()
+  const annotations = useMemo(
+    () => buildDiffCodeViewFileAnnotations(comments, composer),
+    [comments, composer]
+  )
+  const items = itemController.resolveItems({
+    annotations,
+    content,
+    fileId,
+    pierreLanguage,
+    readOnly,
+    relativePath,
+    viewStateKey
+  })
 
   const options: CodeViewReactOptions<DiffCodeViewAnnotation> = {
     ...buildDiffCodeViewRenderOptions({
@@ -185,7 +222,7 @@ export default function FileCodeView({
     })
 
   const handleItemEditChange = (_item: { id: string }, editedFile: { contents: string }) => {
-    editedContentRef.current = editedFile.contents
+    itemController.recordEdit(editedFile.contents)
     onContentChange(editedFile.contents)
   }
 
@@ -202,11 +239,11 @@ export default function FileCodeView({
         return
       }
       event.preventDefault()
-      onSave(editedContentRef.current)
+      onSave(itemController.getEditedContent())
     }
     container.addEventListener('keydown', handleKeyDown)
     return () => container.removeEventListener('keydown', handleKeyDown)
-  }, [onSave, readOnly])
+  }, [itemController, onSave, readOnly])
 
   useLayoutEffect(() => {
     if (revealLine === undefined) {

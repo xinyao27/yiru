@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { installWindowVisibilityInterval } from '~renderer/application-shell/window-visibility-interval'
+import { useEventCallback } from '~renderer/react/use-event-callback'
 import { getConnectionId } from '~renderer/runtime/connection-context'
 import { getRuntimeGitBranchCompare } from '~renderer/runtime/git-client'
 import { useAppStore } from '~renderer/store/state'
@@ -33,7 +34,7 @@ export function useSourceControlBranchCompare(scope: SourceControlBulkActionsCon
     setGitBranchCompareResult,
     worktreePath
   } = scope
-  const runBranchCompare = async () => {
+  const runBranchCompare = useEventCallback(async () => {
     if (!activeWorktreeId || !worktreePath || !compareBaseRef || isFolder) {
       return
     }
@@ -82,8 +83,8 @@ export function useSourceControlBranchCompare(scope: SourceControlBulkActionsCon
         entries: []
       })
     }
-  }
-  const refreshBranchCompare = async () => {
+  })
+  const refreshBranchCompare = useEventCallback(async () => {
     if (branchCompareInFlightRef.current) {
       branchCompareRerunRef.current = true
       return branchCompareRunPromiseRef.current ?? undefined
@@ -111,8 +112,10 @@ export function useSourceControlBranchCompare(scope: SourceControlBulkActionsCon
         branchCompareRunPromiseRef.current = null
       }
     }
-  }
-  refreshBranchCompareRef.current = refreshBranchCompare
+  })
+  useEffect(() => {
+    refreshBranchCompareRef.current = refreshBranchCompare
+  }, [refreshBranchCompare, refreshBranchCompareRef])
   useEffect(() => {
     if (!activeWorktreeId || !worktreePath || !isBranchVisible || !compareBaseRef || isFolder) {
       branchCompareStatusHeadRef.current = null

@@ -3,6 +3,7 @@ import type { GitConflictOperation } from '@yiru/runtime-protocol/workbench/type
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { getLocalProjectExecutionRuntimeContext } from '~renderer/preflight/context'
 import { useProjectCatalogRuntimeState } from '~renderer/project-catalog/runtime-state'
+import { useEventCallback } from '~renderer/react/use-event-callback'
 import { getConnectionId } from '~renderer/runtime/connection-context'
 import { resolveSourceControlLaunchPlatform } from '~renderer/source-control/agent-platform'
 import { useAppStore } from '~renderer/store/state'
@@ -78,6 +79,29 @@ export function useSourceControlInteractionState(scope: SourceControlStoreStateC
     Record<string, SourceControlActionError | null>
   >({})
   const remoteActionErrorSequenceByWorktreeRef = useRef<Record<string, number>>({})
+  const [remoteActionSequenceByWorktree, setRemoteActionSequenceByWorktree] = useState<
+    Record<string, number>
+  >({})
+  const beginRemoteActionSequence = useEventCallback((worktreeId: string): number => {
+    const sequence = (remoteActionErrorSequenceByWorktreeRef.current[worktreeId] ?? 0) + 1
+    remoteActionErrorSequenceByWorktreeRef.current[worktreeId] = sequence
+    setRemoteActionSequenceByWorktree((current) => ({ ...current, [worktreeId]: sequence }))
+    return sequence
+  })
+  const isCurrentRemoteActionSequence = useEventCallback(
+    (worktreeId: string, sequence: number): boolean =>
+      remoteActionErrorSequenceByWorktreeRef.current[worktreeId] === sequence
+  )
+  const pruneRemoteActionSequences = useEventCallback((worktreeIds: ReadonlySet<string>): void => {
+    for (const key of Object.keys(remoteActionErrorSequenceByWorktreeRef.current)) {
+      if (!worktreeIds.has(key)) {
+        delete remoteActionErrorSequenceByWorktreeRef.current[key]
+      }
+    }
+    setRemoteActionSequenceByWorktree((current) =>
+      Object.fromEntries(Object.entries(current).filter(([key]) => worktreeIds.has(key)))
+    )
+  })
   const previousConflictOperationsRef = useRef<Record<string, GitConflictOperation>>({})
   const [commitInFlightByWorktree, setCommitInFlightByWorktree] = useState<Record<string, boolean>>(
     {}
@@ -97,12 +121,13 @@ export function useSourceControlInteractionState(scope: SourceControlStoreStateC
     useState<HostedReviewCreationState | null>(null)
   const [hostedReviewCreationRequestState, setHostedReviewCreationRequestState] =
     useState<HostedReviewCreationRequestState | null>(null)
-  const hostedReviewCreationProviderHintRef = useRef<HostedReviewCreationProviderHint>({
-    repoId: null,
-    worktreeId: null,
-    branch: '',
-    provider: 'github'
-  })
+  const [hostedReviewCreationProviderHint, setHostedReviewCreationProviderHint] =
+    useState<HostedReviewCreationProviderHint>({
+      repoId: null,
+      worktreeId: null,
+      branch: '',
+      provider: 'github'
+    })
   const createPrInFlightRef = useRef<Record<string, boolean>>({})
   const [createPrInFlightByWorktree, setCreatePrInFlightByWorktree] = useState<
     Record<string, boolean>
@@ -164,7 +189,7 @@ export function useSourceControlInteractionState(scope: SourceControlStoreStateC
   const commitError = commitErrors[activeWorktreeId ?? ''] ?? null
   const remoteActionError = remoteActionErrors[activeWorktreeId ?? ''] ?? null
   const activeRemoteActionSequence = activeWorktreeId
-    ? (remoteActionErrorSequenceByWorktreeRef.current[activeWorktreeId] ?? null)
+    ? (remoteActionSequenceByWorktree[activeWorktreeId] ?? null)
     : null
   useEffect(() => {
     commitDraftsRef.current = commitDrafts
@@ -263,7 +288,9 @@ export function useSourceControlInteractionState(scope: SourceControlStoreStateC
     setCommitErrors,
     remoteActionErrors,
     setRemoteActionErrors,
-    remoteActionErrorSequenceByWorktreeRef,
+    beginRemoteActionSequence,
+    isCurrentRemoteActionSequence,
+    pruneRemoteActionSequences,
     previousConflictOperationsRef,
     commitInFlightByWorktree,
     setCommitInFlightByWorktree,
@@ -281,7 +308,8 @@ export function useSourceControlInteractionState(scope: SourceControlStoreStateC
     setHostedReviewCreationState,
     hostedReviewCreationRequestState,
     setHostedReviewCreationRequestState,
-    hostedReviewCreationProviderHintRef,
+    hostedReviewCreationProviderHint,
+    setHostedReviewCreationProviderHint,
     createPrInFlightRef,
     createPrInFlightByWorktree,
     setCreatePrInFlightByWorktree,

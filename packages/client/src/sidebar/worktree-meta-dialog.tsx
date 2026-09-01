@@ -52,15 +52,17 @@ const WorktreeMetaDialog = function WorktreeMetaDialog() {
   const [saving, setSaving] = useState(false)
   const prInputRef = useRef<HTMLInputElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const prevIsOpenRef = useRef(false)
+  const [wasOpen, setWasOpen] = useState(false)
   const displayNameInputRef = useRef<HTMLInputElement>(null)
   const mountedRef = useMountedRef()
-  if (isOpen && !prevIsOpenRef.current) {
+  if (isOpen && !wasOpen) {
+    setWasOpen(true)
     setDisplayNameInput(currentDisplayName)
     setPrInput(currentPR)
     setCommentInput(currentComment)
+  } else if (!isOpen && wasOpen) {
+    setWasOpen(false)
   }
-  prevIsOpenRef.current = isOpen
 
   const handleCommentChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setCommentInput(event.target.value)

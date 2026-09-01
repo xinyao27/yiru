@@ -1,5 +1,5 @@
 diff --git a/dist/react/utils/useFileDiffInstance.js b/dist/react/utils/useFileDiffInstance.js
-index 5775aaad39022671c29fad47f64f0a0c65bd4067..f8ea39e22064b2c80d5f9473ed8978fa771b9924 100644
+index 26c535488822389863909b158472a1c8876eaa41..e545e1f93b66b5130867741423c2a4ef27c8f0e4 100644
 --- a/dist/react/utils/useFileDiffInstance.js
 +++ b/dist/react/utils/useFileDiffInstance.js
 @@ -37,7 +37,8 @@ function useFileDiffInstance({ fileDiff, options, editorOptions, lineAnnotations

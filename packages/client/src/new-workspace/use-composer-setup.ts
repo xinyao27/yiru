@@ -56,9 +56,11 @@ export function useComposerSetup({
     promise: Promise<boolean>
   } | null>(null)
   const hookCheckRef = useRef<{ key: string; promise: Promise<HookCheckResult> } | null>(null)
-  repoIdRef.current = repoId
-  reposRef.current = repos
-  selectedRepoSettingsRef.current = selectedRepoSettings
+  useEffect(() => {
+    repoIdRef.current = repoId
+    reposRef.current = repos
+    selectedRepoSettingsRef.current = selectedRepoSettings
+  }, [repoId, repos, selectedRepoSettings])
 
   const setupAgentStartupPolicy =
     policyDraft?.repoId === repoId

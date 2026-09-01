@@ -1,6 +1,5 @@
 import { isWindowsAbsolutePathLike } from '@yiru/runtime-protocol/model/platform'
 import type { Worktree } from '@yiru/runtime-protocol/workbench/types'
-/* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: quick-open file lists are fetched over local or SSH runtime IPC, so loading/error/results track the request lifecycle. */
 import { useEffect, useRef, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 import { createBrowserUuid } from '~renderer/browser/uuid'
@@ -114,18 +113,9 @@ export function useRuntimeFileListForWorktree({
   const repoWorktrees = useWorktreesForRepo(worktree?.repoId ?? null)
   const catalog = useProjectCatalog()
   const catalogBuckets = projectCatalogRepoBuckets(catalog)
-  const [files, setFiles] = useState<string[]>([])
-  const [loading, setLoading] = useState(false)
-  const [loadError, setLoadError] = useState<string | null>(null)
-  const [listedOperationOwner, setListedOperationOwner] = useState<FileExplorerOperationOwner>({
-    kind: 'unresolved'
-  })
-  const lastRequestKeyRef = useRef('')
-
   const target = getRuntimeFileListTarget(worktreeId, worktreePath, repoWorktrees)
   const { excludeRequest } = target
   const excludePathsRef = useRef(excludeRequest.paths)
-  excludePathsRef.current = excludeRequest.paths
 
   const operationOwnerUiState = useAppStore(
     useShallow((state) => ({
@@ -145,7 +135,10 @@ export function useRuntimeFileListForWorktree({
     getFileExplorerOperationOwnerFromState(operationOwnerState, worktreeId))()
   const operationOwnerKey = JSON.stringify(operationOwner)
   const operationOwnerRef = useRef(operationOwner)
-  operationOwnerRef.current = operationOwner
+  useEffect(() => {
+    excludePathsRef.current = excludeRequest.paths
+    operationOwnerRef.current = operationOwner
+  }, [excludeRequest.paths, operationOwner])
   const operationRoute = getFileExplorerOperationRoute(operationOwner)
   const operationRouteAvailable = operationRoute !== null
   const connectionId = operationRoute?.connectionId
@@ -159,31 +152,37 @@ export function useRuntimeFileListForWorktree({
     activeTargetStatus === 'reconnecting'
   const requestKey = (() =>
     `${worktreePath ?? ''}\n${operationOwnerKey}\n${excludeRequest.key}\n${activeTargetStatus ?? ''}`)()
+  const [listedState, setListedState] = useState<RuntimeFileListState & { requestKey: string }>({
+    requestKey: '',
+    files: [],
+    loading: false,
+    loadError: null,
+    operationOwner: { kind: 'unresolved' }
+  })
+  const visibleState: RuntimeFileListState = !enabled
+    ? { files: [], loading: false, loadError: null, operationOwner: { kind: 'unresolved' } }
+    : !target.canList || !worktreeId || !worktreePath || !operationRouteAvailable
+      ? {
+          files: [],
+          loading: false,
+          loadError: operationRouteAvailable ? null : getFileExplorerOwnerUnresolvedMessage(),
+          operationOwner: { kind: 'unresolved' }
+        }
+      : listedState.requestKey === requestKey
+        ? listedState
+        : {
+            files: [],
+            loading: true,
+            loadError: null,
+            operationOwner: { kind: 'unresolved' }
+          }
 
   useEffect(() => {
-    if (!enabled) {
-      setLoading(false)
-      setListedOperationOwner({ kind: 'unresolved' })
-      return
-    }
-
-    if (!target.canList || !worktreeId || !worktreePath || !operationRouteAvailable) {
-      setFiles([])
-      setListedOperationOwner({ kind: 'unresolved' })
-      setLoadError(operationRouteAvailable ? null : getFileExplorerOwnerUnresolvedMessage())
-      setLoading(false)
+    if (!enabled || !target.canList || !worktreeId || !worktreePath || !operationRouteAvailable) {
       return
     }
 
     let cancelled = false
-    const requestKeyChanged = lastRequestKeyRef.current !== requestKey
-    if (requestKeyChanged) {
-      setFiles([])
-    }
-    lastRequestKeyRef.current = requestKey
-    setLoadError(null)
-    setLoading(true)
-
     const excludePaths = excludePathsRef.current.length > 0 ? excludePathsRef.current : undefined
     const requestToken = createBrowserUuid()
     const requestOperationOwner = operationOwnerRef.current
@@ -201,19 +200,24 @@ export function useRuntimeFileListForWorktree({
     })
       .then((result) => {
         if (!cancelled) {
-          setFiles(result)
-          setListedOperationOwner(requestOperationOwner)
+          setListedState({
+            requestKey,
+            files: result,
+            loading: false,
+            loadError: null,
+            operationOwner: requestOperationOwner
+          })
         }
       })
       .catch((error) => {
         if (!cancelled) {
-          setFiles([])
-          setLoadError(cleanRuntimeFileListError(error))
-        }
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setLoading(false)
+          setListedState({
+            requestKey,
+            files: [],
+            loading: false,
+            loadError: cleanRuntimeFileListError(error),
+            operationOwner: { kind: 'unresolved' }
+          })
         }
       })
 
@@ -239,9 +243,7 @@ export function useRuntimeFileListForWorktree({
   ])
 
   return {
-    files,
-    loading: loading || connectionPending,
-    loadError,
-    operationOwner: listedOperationOwner
+    ...visibleState,
+    loading: visibleState.loading || connectionPending
   }
 }

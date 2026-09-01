@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useEventCallback } from '~renderer/react/use-event-callback'
 
 import { commitProjectHeaderDragDrop } from './project-header-drag-commit'
@@ -34,21 +34,30 @@ export function useRepoHeaderDrag({
   const [state, setState] = useState<RepoDragState>(INITIAL_REPO_DRAG_STATE)
   const [sessionArmed, setSessionArmed] = useState(false)
   const latestDropIndexRef = useRef<number | null>(null)
-  latestDropIndexRef.current = state.dropIndex
   const orderedIdsRef = useRef(orderedRepoIds)
-  orderedIdsRef.current = orderedRepoIds
   const sidebarRepoHeaderIdsByBucketRef = useRef(sidebarRepoHeaderIdsByBucket)
-  sidebarRepoHeaderIdsByBucketRef.current = sidebarRepoHeaderIdsByBucket
   const repoByIdRef = useRef(repoById)
-  repoByIdRef.current = repoById
   const usesProjectGroupOrderingRef = useRef(usesProjectGroupOrdering)
-  usesProjectGroupOrderingRef.current = usesProjectGroupOrdering
   const onCommitRepoOrderRef = useRef(onCommitRepoOrder)
-  onCommitRepoOrderRef.current = onCommitRepoOrder
   const onCommitProjectGroupOrderRef = useRef(onCommitProjectGroupOrder)
-  onCommitProjectGroupOrderRef.current = onCommitProjectGroupOrder
   const getContainerRef = useRef(getScrollContainer)
-  getContainerRef.current = getScrollContainer
+  useLayoutEffect(() => {
+    orderedIdsRef.current = orderedRepoIds
+    sidebarRepoHeaderIdsByBucketRef.current = sidebarRepoHeaderIdsByBucket
+    repoByIdRef.current = repoById
+    usesProjectGroupOrderingRef.current = usesProjectGroupOrdering
+    onCommitRepoOrderRef.current = onCommitRepoOrder
+    onCommitProjectGroupOrderRef.current = onCommitProjectGroupOrder
+    getContainerRef.current = getScrollContainer
+  }, [
+    getScrollContainer,
+    onCommitProjectGroupOrder,
+    onCommitRepoOrder,
+    orderedRepoIds,
+    repoById,
+    sidebarRepoHeaderIdsByBucket,
+    usesProjectGroupOrdering
+  ])
   const autoscrollLastFrameTimeRef = useRef<number | null>(null)
   const autoscrollFrameIdRef = useRef<number | null>(null)
 

@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
+import { useEventCallback } from '~renderer/react/use-event-callback'
 
 import {
   ModifierDoubleTapDetector,
@@ -11,14 +12,12 @@ import {
 } from './global-shortcut-dispatch'
 
 export function useGlobalShortcuts(state: GlobalShortcutState): void {
-  const stateRef = useRef(state)
-  stateRef.current = state
+  const dispatch = useEventCallback((input: ShortcutDispatchInput): void => {
+    dispatchGlobalShortcut(input, state)
+  })
 
   useEffect(() => {
     const doubleTapDetector = new ModifierDoubleTapDetector()
-    const dispatch = (input: ShortcutDispatchInput): void => {
-      dispatchGlobalShortcut(input, stateRef.current)
-    }
     const handleKeyDown = (event: KeyboardEvent): void => {
       const detected = doubleTapDetector.process(
         toModifierDoubleTapEvent({
@@ -81,5 +80,5 @@ export function useGlobalShortcuts(state: GlobalShortcutState): void {
       window.removeEventListener('keyup', handleKeyUp, { capture: true })
       window.removeEventListener('blur', handleBlur)
     }
-  }, [])
+  }, [dispatch])
 }

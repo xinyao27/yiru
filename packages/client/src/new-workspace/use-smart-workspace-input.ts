@@ -62,19 +62,16 @@ export function useSmartWorkspaceInput({
     return true
   })
   const mrStateFilters = getMrStateFilters()
+  const activeMode = availableModes.some((item) => item.id === mode)
+    ? mode
+    : (availableModes[0]?.id ?? 'text')
   const selectedSourceFocusKey = selectedSource
     ? `${selectedSource.kind}:${selectedSource.label}:${selectedSource.url ?? ''}`
     : null
 
   useEffect(() => {
-    onActiveSourceModeChange?.(mode)
-  }, [mode, onActiveSourceModeChange])
-
-  useEffect(() => {
-    if (!availableModes.some((item) => item.id === mode)) {
-      setMode(availableModes[0]?.id ?? 'text')
-    }
-  }, [availableModes, mode])
+    onActiveSourceModeChange?.(activeMode)
+  }, [activeMode, onActiveSourceModeChange])
 
   useEffect(() => {
     const timer = window.setTimeout(() => setDebouncedQuery(value), SEARCH_DEBOUNCE_MS)
@@ -93,7 +90,7 @@ export function useSmartWorkspaceInput({
   }
 
   const tryOpenPopover = (): void => {
-    if (!disabled && mode !== 'text' && !deferSourcePopoverUntilInteractionRef.current) {
+    if (!disabled && activeMode !== 'text' && !deferSourcePopoverUntilInteractionRef.current) {
       setOpen(true)
     }
   }
@@ -149,11 +146,12 @@ export function useSmartWorkspaceInput({
     commandValue,
     debouncedQuery,
     handlePopoverOpenChange,
-    isPopoverOpen: !disabled && !textOnly && open && mode !== 'text' && selectedSource === null,
+    isPopoverOpen:
+      !disabled && !textOnly && open && activeMode !== 'text' && selectedSource === null,
     localInputFocusFrameRef,
     localInputRef,
     markPopoverEngaged,
-    mode,
+    mode: activeMode,
     mrStateFilter,
     mrStateFilters,
     setCommandValue,

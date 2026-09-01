@@ -158,7 +158,6 @@ export function useSavedSourceControlAgentActionAutoStart({
   if (wasAutoStartOpen !== open) {
     setWasAutoStartOpen(open)
     if (!open) {
-      autoStartedOpenCycleRef.current = 0
       setReceiptState(null)
     }
   }
@@ -194,6 +193,14 @@ export function useSavedSourceControlAgentActionAutoStart({
     })
   })()
 
+  if (open && receiptState?.openCycle !== openCycle) {
+    setReceiptState({
+      openCycle,
+      receiptKey: receiptKey ?? NO_SAVED_RECEIPT_KEY,
+      revealed: !receiptKey
+    })
+  }
+
   const currentReceiptState = receiptState?.openCycle === openCycle ? receiptState : null
   const consideredDifferentReceipt = Boolean(
     currentReceiptState && receiptKey && currentReceiptState.receiptKey !== receiptKey
@@ -209,13 +216,6 @@ export function useSavedSourceControlAgentActionAutoStart({
   useEffect(() => {
     if (!open) {
       return
-    }
-    if (receiptState?.openCycle !== openCycle) {
-      setReceiptState({
-        openCycle,
-        receiptKey: receiptKey ?? NO_SAVED_RECEIPT_KEY,
-        revealed: !receiptKey
-      })
     }
     if (!matchedSavedReceiptTargetValue || !receiptKey || !savedAgentId) {
       return

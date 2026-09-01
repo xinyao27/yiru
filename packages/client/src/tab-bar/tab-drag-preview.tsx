@@ -1,3 +1,4 @@
+import { createElement } from 'react'
 import { AgentIcon } from '~renderer/agent/catalog'
 import { getFileTypeIcon } from '~renderer/file-presentation/icons'
 import { GitBranch, Globe, Terminal as TerminalIcon } from '~renderer/icons/hugeicons'
@@ -12,7 +13,7 @@ function LeadingIcon({ drag }: { drag: TabDragItemData }): React.JSX.Element {
   }
   if (drag.tabType === 'editor') {
     const FileIcon = getFileTypeIcon(drag.iconPath ?? drag.label)
-    return <FileIcon className="h-3.5 w-3.5 shrink-0" />
+    return createElement(FileIcon, { className: 'h-3.5 w-3.5 shrink-0' })
   }
   if (drag.tabType === 'git-graph') {
     return <GitBranch className="h-3.5 w-3.5 shrink-0" />

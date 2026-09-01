@@ -1,6 +1,7 @@
 import { isFolderRepo } from '@yiru/runtime-protocol/workbench/repo-kind'
 import type { PRInfo } from '@yiru/runtime-protocol/workbench/types'
 import { useEffect, useState } from 'react'
+import { useNow } from '~renderer/dashboard/use-now'
 import { getGitHubPRCacheKey } from '~renderer/github/cache-key'
 import {
   buildGitHubPRRefreshStateClearToken,
@@ -55,13 +56,12 @@ export function useChecksPanelReviewIdentity(context: useChecksPanelStateCoreSta
   } = context
 
   const [prevPanelContextKey, setPrevPanelContextKey] = useState(panelContextKey)
-  const [prRefreshStateNow, setPrRefreshStateNow] = useState(() => Date.now())
+  const prRefreshStateNow = useNow(30_000)
   if (panelContextKey !== prevPanelContextKey) {
     setPrevPanelContextKey(panelContextKey)
     setEditingTitle(false)
     setTitleDraft('')
     setTitleSaving(false)
-    clearTitleInputFocusTimer()
     setChecks([])
     setChecksLoading(false)
     setComments([])
@@ -69,8 +69,6 @@ export function useChecksPanelReviewIdentity(context: useChecksPanelStateCoreSta
     setIsRefreshing(false)
     setEmptyRefreshing(false)
     setConflictDetailsRefreshing(false)
-    setPrRefreshStateNow(Date.now())
-    createPrInFlightRef.current = null
     setIsCreatingPr(false)
     setCreatePrError(null)
     setIsPublishingBranch(false)
@@ -78,6 +76,11 @@ export function useChecksPanelReviewIdentity(context: useChecksPanelStateCoreSta
     setHostedReviewCreationSnapshot(null)
     setGitStatusSnapshot(null)
     setGitStatusRefreshNonce((value) => value + 1)
+  }
+
+  useEffect(() => {
+    clearTitleInputFocusTimer()
+    createPrInFlightRef.current = null
     pollIntervalRef.current = 30_000
     prevChecksRef.current = ''
     conflictSummaryRefreshKeyRef.current = null
@@ -87,7 +90,17 @@ export function useChecksPanelReviewIdentity(context: useChecksPanelStateCoreSta
       clearTimeout(gitStatusSnapshotRetryTimerRef.current)
       gitStatusSnapshotRetryTimerRef.current = null
     }
-  }
+  }, [
+    clearTitleInputFocusTimer,
+    conflictSummaryRefreshKeyRef,
+    createPrInFlightRef,
+    gitStatusSnapshotRetryTimerRef,
+    panelContextKey,
+    pollIntervalRef,
+    prevChecksRef,
+    refreshInFlightRef,
+    refreshRequestKeyRef
+  ])
 
   // Find active worktree and repo
   const isFolder = repo ? isFolderRepo(repo) : false
@@ -100,10 +113,10 @@ export function useChecksPanelReviewIdentity(context: useChecksPanelStateCoreSta
       ? getHostedReviewCacheKey(repo.path, branch, settings, repo.id, repo.executionHostId, true)
       : ''
   const refreshContextKey = `${activeWorktreeId ?? ''}::${prCacheKey}::${branch}`
-  if (refreshContextKey !== refreshContextKeyRef.current) {
+  useEffect(() => {
     refreshContextKeyRef.current = refreshContextKey
     refreshRequestKeyRef.current = null
-  }
+  }, [refreshContextKey, refreshContextKeyRef, refreshRequestKeyRef])
   // Why: background PR refreshes replace the cache map; Checks only renders
   // the entry for the active repo and branch.
   const prCacheEntry = useAppStore((s) => selectReviewCacheEntry(s.prCache, prCacheKey || null))
@@ -151,7 +164,6 @@ export function useChecksPanelReviewIdentity(context: useChecksPanelStateCoreSta
     }
     const timeout = window.setTimeout(
       () => {
-        setPrRefreshStateNow(Date.now())
         const storeState = useAppStore.getState()
         const rawState = storeState.prRefreshStates[prCacheKey]
         const token = buildGitHubPRRefreshStateClearToken(
@@ -205,7 +217,6 @@ export function useChecksPanelReviewIdentity(context: useChecksPanelStateCoreSta
     prevPanelContextKey,
     setPrevPanelContextKey,
     prRefreshStateNow,
-    setPrRefreshStateNow,
     isFolder,
     prCacheKey,
     hostedReviewCacheKey,

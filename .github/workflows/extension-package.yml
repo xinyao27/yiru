@@ -50,9 +50,9 @@ jobs:
           bun-version: 1.4.0
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v6
+        uses: pnpm/setup@v2
         with:
-          run_install: false
+          install: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -79,7 +79,8 @@ jobs:
           retention-days: 14
 
   publish-web-store:
-    if: startsWith(github.ref, 'refs/tags/extension-v') && github.repository == 'xinyao27/yiru'
+    if: startsWith(github.ref, 'refs/tags/extension-v') && github.repository ==
+      'xinyao27/yiru'
     needs: package
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -97,7 +98,7 @@ jobs:
           persist-credentials: false
 
       - name: Download extension package
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: yiru-extension-web-store
           path: apps/extension/release

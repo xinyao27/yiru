@@ -27,27 +27,29 @@ export function useEmulatorScreenKeyboard({
   const captureActiveRef = useRef(false)
   const canInteractRef = useRef(canInteract)
   const pasteRequestIdRef = useRef(0)
-  const [keyboardCaptureActive, setKeyboardCaptureActive] = useState(false)
+  const [captureState, setCaptureState] = useState({ canInteract, active: false })
+  const keyboardCaptureActive = captureState.canInteract === canInteract && captureState.active
 
-  const cancelActivePaste = (): void => {
+  const cancelActivePaste = useEventCallback((): void => {
     pasteRequestIdRef.current += 1
     cancelKeyboardFrames()
-  }
+  })
 
   const setCaptureActive = useEventCallback((active: boolean): void => {
     if (!active) {
       cancelActivePaste()
     }
     captureActiveRef.current = active
-    setKeyboardCaptureActive(active)
+    setCaptureState({ canInteract, active })
   })
 
   useEffect(() => {
     canInteractRef.current = canInteract
     if (!canInteract) {
-      setCaptureActive(false)
+      cancelActivePaste()
+      captureActiveRef.current = false
     }
-  }, [canInteract, setCaptureActive])
+  }, [canInteract, cancelActivePaste])
 
   const enableKeyboardCapture = () => {
     if (canInteract) {

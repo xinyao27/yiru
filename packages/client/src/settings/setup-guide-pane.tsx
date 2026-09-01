@@ -3,7 +3,7 @@ import {
   getFirstIncompleteFeatureWallSetupStepId
 } from '@yiru/runtime-protocol/workbench/feature-wall-setup-steps'
 import type { FeatureWallSetupStepId } from '@yiru/runtime-protocol/workbench/feature-wall-setup-steps'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { toast } from 'sonner'
 import { translate } from '~renderer/i18n/i18n'
 import { ArrowCounterClockwise } from '~renderer/icons/hugeicons'
@@ -15,7 +15,6 @@ import { useSettingsSetupGuideFullProgress } from './setup-guide-progress'
 
 export function SettingsSetupGuidePane(): React.JSX.Element {
   const setupSteps = (() => getFeatureWallSetupSteps())()
-  const [userSelectedStep, setUserSelectedStep] = useState(false)
   const [isRestartingOnboarding, setIsRestartingOnboarding] = useState(false)
   const [orchestrationSkillInstalled, setOrchestrationSkillInstalled] = useState(false)
   const [browserUseSkillInstalled, setBrowserUseSkillInstalled] = useState(false)
@@ -24,31 +23,12 @@ export function SettingsSetupGuidePane(): React.JSX.Element {
     orchestrationSkillInstalled,
     browserUseSkillInstalled
   )
-  const [activeStepId, setActiveStepId] = useState<FeatureWallSetupStepId>(() =>
-    getFirstIncompleteFeatureWallSetupStepId(progress.stepDone)
-  )
+  const [selectedStepId, setSelectedStepId] = useState<FeatureWallSetupStepId | null>(null)
+  const activeStepId = selectedStepId ?? getFirstIncompleteFeatureWallSetupStepId(progress.stepDone)
   const activeStep = setupSteps.find((step) => step.id === activeStepId) ?? setupSteps[0] ?? null
 
-  useEffect(() => {
-    if (userSelectedStep) {
-      return
-    }
-    setActiveStepId(getFirstIncompleteFeatureWallSetupStepId(progress.stepDone))
-  }, [progress.stepDone, userSelectedStep])
-
-  useEffect(() => {
-    if (!activeStep || userSelectedStep || !progress.stepDone[activeStep.id]) {
-      return
-    }
-    const nextUnfinishedStepId = getFirstIncompleteFeatureWallSetupStepId(progress.stepDone)
-    if (nextUnfinishedStepId !== activeStep.id) {
-      setActiveStepId(nextUnfinishedStepId)
-    }
-  }, [activeStep, progress.stepDone, userSelectedStep])
-
   const handleSelectStep = (id: FeatureWallSetupStepId): void => {
-    setUserSelectedStep(true)
-    setActiveStepId(id)
+    setSelectedStepId(id)
   }
 
   const handleRestartOnboarding = async (): Promise<void> => {

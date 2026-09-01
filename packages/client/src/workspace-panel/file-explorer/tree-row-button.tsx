@@ -1,5 +1,5 @@
 import type { GitFileStatus } from '@yiru/runtime-protocol/workbench/types'
-import type React from 'react'
+import React from 'react'
 import { getFileTypeIcon } from '~renderer/file-presentation/icons'
 import { translate } from '~renderer/i18n/i18n'
 import {
@@ -91,7 +91,9 @@ export function FileExplorerTreeRowButton({
           {node.isSymlink ? (
             <Link className="text-muted-foreground size-3 shrink-0" />
           ) : (
-            <FileIcon className="text-muted-foreground size-3 shrink-0" />
+            React.createElement(FileIcon, {
+              className: 'text-muted-foreground size-3 shrink-0'
+            })
           )}
         </>
       )}

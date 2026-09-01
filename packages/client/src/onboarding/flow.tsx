@@ -1,5 +1,6 @@
 import type { OnboardingState } from '@yiru/runtime-protocol/workbench/types'
 import { useEffect, useRef, useState } from 'react'
+import { applyDocumentTheme } from '~renderer/editor/document-theme'
 import { translate } from '~renderer/i18n/i18n'
 import { isEditableTarget } from '~renderer/keyboard-input/editable-target'
 import {
@@ -7,6 +8,7 @@ import {
   isScreenSubmitShortcut
 } from '~renderer/keyboard-input/screen-submit-shortcut'
 import { useEventCallback } from '~renderer/react/use-event-callback'
+import { useAppStore } from '~renderer/store/state'
 import { Button } from '~renderer/ui/button'
 import { cn } from '~renderer/ui/class-names'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~renderer/ui/tooltip'
@@ -172,6 +174,8 @@ export default function OnboardingFlow({
     return () => window.removeEventListener('keydown', onKeyDown, { capture: true })
   }, [requestSkipConfirmation, skipConfirmOpen])
 
+  useEffect(() => () => applyDocumentTheme(useAppStore.getState().settings?.theme ?? 'dark'), [])
+
   return (
     <TooltipProvider timeout={0}>
       {/* Why: modal backdrops intentionally reveal and dim the app beneath;
@@ -187,7 +191,6 @@ export default function OnboardingFlow({
         }}
       >
         <section
-          ref={flow.setLifecycleRootRef}
           role="dialog"
           aria-label={translate(
             'auto.components.onboarding.OnboardingFlow.277ba45540',

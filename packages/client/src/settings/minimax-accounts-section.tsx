@@ -1,6 +1,7 @@
 import type { GlobalSettings } from '@yiru/runtime-protocol/workbench/types'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import { useNow } from '~renderer/dashboard/use-now'
 import { openHttpLink } from '~renderer/editor/http-link-routing'
 import { translate } from '~renderer/i18n/i18n'
 import {
@@ -95,6 +96,7 @@ export function MiniMaxAccountsSection({
   settings,
   updateSettings
 }: MiniMaxAccountsSectionProps): React.JSX.Element {
+  const now = useNow(30_000)
   const limits = useAppStore((state) => state.rateLimits.minimax)
   const recordFeatureInteraction = useAppStore((state) => state.recordFeatureInteraction)
   const [cookieDraft, setCookieDraft] = useState('')
@@ -297,7 +299,7 @@ export function MiniMaxAccountsSection({
             {translate(
               'auto.components.settings.AccountsPane.53f7b8c7a2',
               'Last refresh: {{value0}}',
-              { value0: formatRelativeRefresh(limits.updatedAt, Date.now()) }
+              { value0: formatRelativeRefresh(limits.updatedAt, now) }
             )}
           </p>
         ) : null}

@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState, type RefObject } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
+import type { BrowserStoryboard, BrowserStoryboardElements } from './browser-storyboard-state'
 import {
   BROWSER_STORYBOARD_MS,
   BROWSER_STORYBOARD_PROMPT,
@@ -10,43 +11,10 @@ import {
 
 type Point = { x: number; y: number }
 
-export type BrowserStoryboard = {
-  phase: BrowserStoryboardPhase
-  typedChars: number
-  flashKey: number
-  clickRingKey: number
-  clickRingVisible: boolean
-  menuOffsetX: number
-  annotateAnchor: { left: number; top: number }
-  cursorPos: Point
-  browserPageRef: RefObject<HTMLDivElement | null>
-  titlebarRef: RefObject<HTMLDivElement | null>
-  newtabBtnRef: RefObject<HTMLSpanElement | null>
-  newtabRowRef: RefObject<HTMLDivElement | null>
-  starterCardRef: RefObject<HTMLDivElement | null>
-  ctaRef: RefObject<HTMLSpanElement | null>
-  sendBtnRef: RefObject<HTMLSpanElement | null>
-  browserChromeVisible: boolean
-  browserTabVisible: boolean
-  terminalTabMinimized: boolean
-  newtabActive: boolean
-  newtabRowActive: boolean
-  dropdownVisible: boolean
-  cursorVisible: boolean
-  ringStarter: boolean
-  annotateOpen: boolean
-  sendPressed: boolean
-  isSplit: boolean
-  ctaHighlighted: boolean
-  ctaPressing: boolean
-  showSignup: boolean
-  flashing: boolean
-  bodyOverflowVisible: boolean
-}
-
 export function useBrowserStoryboard(
   reducedMotion: boolean,
-  onCycleComplete: (() => void) | undefined
+  onCycleComplete: (() => void) | undefined,
+  elements: BrowserStoryboardElements
 ): BrowserStoryboard {
   const [phase, setPhase] = useState<BrowserStoryboardPhase>('idle')
   const [typedChars, setTypedChars] = useState(0)
@@ -57,21 +25,9 @@ export function useBrowserStoryboard(
   const [annotateAnchor, setAnnotateAnchor] = useState({ left: 116, top: 70 })
   const [cursorPos, setCursorPos] = useState<Point>({ x: 40, y: 18 })
   const cursorPosRef = useRef<Point>({ x: 40, y: 18 })
-  const browserPageRef = useRef<HTMLDivElement | null>(null)
-  const titlebarRef = useRef<HTMLDivElement | null>(null)
-  const newtabBtnRef = useRef<HTMLSpanElement | null>(null)
-  const newtabRowRef = useRef<HTMLDivElement | null>(null)
-  const starterCardRef = useRef<HTMLDivElement | null>(null)
-  const ctaRef = useRef<HTMLSpanElement | null>(null)
-  const sendBtnRef = useRef<HTMLSpanElement | null>(null)
 
-  /* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: the
-     storyboard synchronizes timed local animation state with motion settings. */
   useEffect(() => {
     if (reducedMotion) {
-      setPhase('verified')
-      setTypedChars(BROWSER_STORYBOARD_PROMPT.length)
-      setClickRingVisible(false)
       return
     }
     let cancelled = false
@@ -86,7 +42,7 @@ export function useBrowserStoryboard(
       setCursorPos(point)
     }
     const elementPoint = (element: HTMLElement | null, offsetX = 0, offsetY = 0): Point => {
-      const page = browserPageRef.current
+      const page = elements.browserPage
       if (!page || !element) {
         return cursorPosRef.current
       }
@@ -122,16 +78,16 @@ export function useBrowserStoryboard(
           return
         }
 
-        setCursorTo(elementPoint(newtabBtnRef.current))
+        setCursorTo(elementPoint(elements.newtabButton))
         if (!(await advance('newtab-approach', BROWSER_STORYBOARD_MS.newtabApproach))) {
           return
         }
 
         setPhase('newtab-click')
         pulseClickRing()
-        if (titlebarRef.current && newtabBtnRef.current) {
-          const titlebarRect = titlebarRef.current.getBoundingClientRect()
-          const buttonRect = newtabBtnRef.current.getBoundingClientRect()
+        if (elements.titlebar && elements.newtabButton) {
+          const titlebarRect = elements.titlebar.getBoundingClientRect()
+          const buttonRect = elements.newtabButton.getBoundingClientRect()
           setMenuOffsetX(buttonRect.left - titlebarRect.left)
         }
         if (!(await wait(BROWSER_STORYBOARD_MS.newtabClick))) {
@@ -141,7 +97,7 @@ export function useBrowserStoryboard(
           return
         }
 
-        setCursorTo(elementPoint(newtabRowRef.current, 6))
+        setCursorTo(elementPoint(elements.newtabRow, 6))
         if (!(await advance('newtab-row-approach', BROWSER_STORYBOARD_MS.newtabRowHover))) {
           return
         }
@@ -154,7 +110,7 @@ export function useBrowserStoryboard(
           return
         }
 
-        setCursorTo(elementPoint(starterCardRef.current, 0, -8))
+        setCursorTo(elementPoint(elements.starterCard, 0, -8))
         if (!(await advance('approach-card', BROWSER_STORYBOARD_MS.approachCard))) {
           return
         }
@@ -164,9 +120,9 @@ export function useBrowserStoryboard(
           return
         }
 
-        if (browserPageRef.current && starterCardRef.current) {
-          const pageRect = browserPageRef.current.getBoundingClientRect()
-          const cardRect = starterCardRef.current.getBoundingClientRect()
+        if (elements.browserPage && elements.starterCard) {
+          const pageRect = elements.browserPage.getBoundingClientRect()
+          const cardRect = elements.starterCard.getBoundingClientRect()
           setAnnotateAnchor({
             left: cardRect.right - pageRect.left + 6,
             top: cardRect.top - pageRect.top
@@ -188,7 +144,7 @@ export function useBrowserStoryboard(
           return
         }
 
-        setCursorTo(elementPoint(sendBtnRef.current))
+        setCursorTo(elementPoint(elements.sendButton))
         if (!(await advance('send-approach', BROWSER_STORYBOARD_MS.sendApproach))) {
           return
         }
@@ -213,7 +169,7 @@ export function useBrowserStoryboard(
           return
         }
 
-        setCursorTo(elementPoint(ctaRef.current))
+        setCursorTo(elementPoint(elements.cta))
         if (!(await advance('click-approach', BROWSER_STORYBOARD_MS.clickApproach))) {
           return
         }
@@ -248,56 +204,54 @@ export function useBrowserStoryboard(
       cancelled = true
       timeouts.forEach((id) => window.clearTimeout(id))
     }
-  }, [onCycleComplete, reducedMotion])
-  /* oxlint-enable react-doctor/no-adjust-state-on-prop-change */
+  }, [elements, onCycleComplete, reducedMotion])
 
+  const renderedPhase = reducedMotion ? 'verified' : phase
   const isIntroPhase =
-    phase === 'idle' ||
-    phase === 'newtab-approach' ||
-    phase === 'newtab-click' ||
-    phase === 'newtab-row-approach' ||
-    phase === 'newtab-row-click'
+    renderedPhase === 'idle' ||
+    renderedPhase === 'newtab-approach' ||
+    renderedPhase === 'newtab-click' ||
+    renderedPhase === 'newtab-row-approach' ||
+    renderedPhase === 'newtab-row-click'
   return {
-    phase,
-    typedChars,
+    phase: renderedPhase,
+    typedChars: reducedMotion ? BROWSER_STORYBOARD_PROMPT.length : typedChars,
     flashKey,
     clickRingKey,
-    clickRingVisible,
+    clickRingVisible: reducedMotion ? false : clickRingVisible,
     menuOffsetX,
     annotateAnchor,
     cursorPos,
-    browserPageRef,
-    titlebarRef,
-    newtabBtnRef,
-    newtabRowRef,
-    starterCardRef,
-    ctaRef,
-    sendBtnRef,
     browserChromeVisible: !isIntroPhase,
     browserTabVisible: !isIntroPhase,
     terminalTabMinimized: !isIntroPhase,
-    newtabActive: phase === 'newtab-click' || phase === 'newtab-row-approach',
-    newtabRowActive: phase === 'newtab-row-approach',
+    newtabActive: renderedPhase === 'newtab-click' || renderedPhase === 'newtab-row-approach',
+    newtabRowActive: renderedPhase === 'newtab-row-approach',
     dropdownVisible:
-      phase === 'newtab-click' || phase === 'newtab-row-approach' || phase === 'newtab-row-click',
-    cursorVisible: (phase !== 'idle' && phase !== 'navigated') || clickRingVisible,
+      renderedPhase === 'newtab-click' ||
+      renderedPhase === 'newtab-row-approach' ||
+      renderedPhase === 'newtab-row-click',
+    cursorVisible: (renderedPhase !== 'idle' && renderedPhase !== 'navigated') || clickRingVisible,
     ringStarter:
-      phase === 'inspect' ||
-      phase === 'annotate' ||
-      phase === 'send-approach' ||
-      phase === 'send-click' ||
-      phase === 'handoff',
-    annotateOpen: phase === 'annotate' || phase === 'send-approach' || phase === 'send-click',
-    sendPressed: phase === 'send-click',
-    isSplit: isBrowserSplitPhase(phase),
-    ctaHighlighted: browserPhaseAtLeast(phase, 'updated'),
-    ctaPressing: phase === 'click-press',
+      renderedPhase === 'inspect' ||
+      renderedPhase === 'annotate' ||
+      renderedPhase === 'send-approach' ||
+      renderedPhase === 'send-click' ||
+      renderedPhase === 'handoff',
+    annotateOpen:
+      renderedPhase === 'annotate' ||
+      renderedPhase === 'send-approach' ||
+      renderedPhase === 'send-click',
+    sendPressed: renderedPhase === 'send-click',
+    isSplit: isBrowserSplitPhase(renderedPhase),
+    ctaHighlighted: browserPhaseAtLeast(renderedPhase, 'updated'),
+    ctaPressing: renderedPhase === 'click-press',
     showSignup:
-      phase === 'navigated' ||
-      phase === 'screenshot-line' ||
-      phase === 'screenshot-flash' ||
-      phase === 'verified',
-    flashing: phase === 'screenshot-flash',
+      renderedPhase === 'navigated' ||
+      renderedPhase === 'screenshot-line' ||
+      renderedPhase === 'screenshot-flash' ||
+      renderedPhase === 'verified',
+    flashing: renderedPhase === 'screenshot-flash',
     bodyOverflowVisible: isIntroPhase
   }
 }

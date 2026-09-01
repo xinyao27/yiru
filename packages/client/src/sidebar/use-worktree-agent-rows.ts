@@ -2,6 +2,7 @@ import { useShallow } from 'zustand/react/shallow'
 import { migrationUnsupportedToAgentStatusEntry } from '~renderer/agent/unsupported-entry-migration'
 import { applyAgentRowLineage } from '~renderer/dashboard/agent-row-lineage'
 import type { DashboardAgentRow } from '~renderer/dashboard/use-dashboard-data'
+import { useNow } from '~renderer/dashboard/use-now'
 import { useAppStore } from '~renderer/store/state'
 
 import {
@@ -41,6 +42,7 @@ export {
  */
 export function useWorktreeAgentRows(worktreeId: string, active = true): DashboardAgentRow[] {
   const selectAgentFreshness = (() => createWorktreeAgentFreshnessSelector(worktreeId))()
+  const now = useNow(30_000)
   const tabs = useAppStore((s) => (active ? s.tabsByWorktree[worktreeId] : undefined))
   // Why: narrow the subscriptions to only THIS worktree's entries via
   // useShallow. Subscribing to the whole agentStatusByPaneKey map would make
@@ -79,9 +81,6 @@ export function useWorktreeAgentRows(worktreeId: string, active = true): Dashboa
     if (!active) {
       return []
     }
-    // Why: Date.now() is read inside the memo so stale-decay recalculates when
-    // this worktree's freshness signature changes, even without new PTY data.
-    const now = Date.now()
     const entries =
       migrationUnsupported.length > 0
         ? [
@@ -104,6 +103,5 @@ export function useWorktreeAgentRows(worktreeId: string, active = true): Dashboa
         now
       })
     )
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   })()
 }

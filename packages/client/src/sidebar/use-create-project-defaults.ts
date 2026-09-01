@@ -83,58 +83,57 @@ export function useCreateProjectDefaults({
 } {
   const [gitProbeResult, setGitProbeResult] = useState<GitProbeResult | null>(null)
   const [failedRuntimeParentKey, setFailedRuntimeParentKey] = useState<string | null>(null)
-  const createStepAutoFilledRef = useRef(false)
-  const autoFilledCreateParentRef = useRef<AutoFilledCreateParent | null>(null)
-  const createParentProvenanceRef = useRef<CreateParentProvenance | null>(null)
-  const createParentTouchedRef = useRef(false)
+  const [autoFilledCreateParent, setAutoFilledCreateParent] =
+    useState<AutoFilledCreateParent | null>(null)
+  const [createParentProvenance, setCreateParentProvenance] =
+    useState<CreateParentProvenance | null>(null)
+  const [isCreateParentTouched, setIsCreateParentTouched] = useState(false)
   const createParentDefaultGenRef = useRef(0)
   const createGitProbeGenRef = useRef(0)
   const activeCreateParentRuntimeEnvironmentId = activeRuntimeEnvironmentId?.trim() || null
   const activeCreateParentTargetKey = activeCreateParentRuntimeEnvironmentId
     ? `runtime:${activeCreateParentRuntimeEnvironmentId}`
     : 'local'
-  const autoFilledCreateParent = autoFilledCreateParentRef.current
 
   const canReplaceCreateParentDefault = useEventCallback((parent: string): boolean => {
-    if (createParentTouchedRef.current) {
+    if (isCreateParentTouched) {
       return false
     }
     const trimmedParent = parent.trim()
-    return !trimmedParent || autoFilledCreateParentRef.current?.parent === trimmedParent
+    return !trimmedParent || autoFilledCreateParent?.parent === trimmedParent
   })
 
   const resetCreateDefaultState = () => {
     createParentDefaultGenRef.current++
     createGitProbeGenRef.current++
-    createStepAutoFilledRef.current = false
-    autoFilledCreateParentRef.current = null
-    createParentProvenanceRef.current = null
-    createParentTouchedRef.current = false
+    setAutoFilledCreateParent(null)
+    setCreateParentProvenance(null)
+    setIsCreateParentTouched(false)
     setGitProbeResult(null)
     setFailedRuntimeParentKey(null)
   }
 
   // Why: a default must never clobber a parent the user picked themselves.
   const markCreateParentTouched = (value?: string) => {
-    autoFilledCreateParentRef.current = null
-    createParentProvenanceRef.current = {
+    setAutoFilledCreateParent(null)
+    setCreateParentProvenance({
       parent: (value ?? createParent).trim(),
       targetKey: activeCreateParentTargetKey
-    }
-    createParentTouchedRef.current = true
+    })
+    setIsCreateParentTouched(true)
   }
 
   const createParentDefaultPending =
     step === 'create' &&
-    !createParentTouchedRef.current &&
+    !isCreateParentTouched &&
     Boolean(createParent.trim()) &&
     autoFilledCreateParent?.parent === createParent.trim() &&
     autoFilledCreateParent?.targetKey !== activeCreateParentTargetKey
   const createParentTargetPending =
     step === 'create' &&
     Boolean(createParent.trim()) &&
-    createParentProvenanceRef.current?.parent === createParent.trim() &&
-    createParentProvenanceRef.current.targetKey !== activeCreateParentTargetKey
+    createParentProvenance?.parent === createParent.trim() &&
+    createParentProvenance.targetKey !== activeCreateParentTargetKey
   const createParentPending = createParentDefaultPending || createParentTargetPending
 
   // Why: derived from the tagged resolution instead of a stored value, so a
@@ -181,13 +180,13 @@ export function useCreateProjectDefaults({
     }
     if (
       createParent.trim() &&
-      autoFilledCreateParentRef.current?.targetKey !== 'local' &&
-      autoFilledCreateParentRef.current?.parent === createParent.trim()
+      autoFilledCreateParent?.targetKey !== 'local' &&
+      autoFilledCreateParent?.parent === createParent.trim()
     ) {
       setCreateParent('')
       return
     }
-    if (isCreateParentResolved(autoFilledCreateParentRef.current, createParent, 'local')) {
+    if (isCreateParentResolved(autoFilledCreateParent, createParent, 'local')) {
       return
     }
     void workspaceHostClient.repos
@@ -200,9 +199,8 @@ export function useCreateProjectDefaults({
         ) {
           return
         }
-        createStepAutoFilledRef.current = true
-        autoFilledCreateParentRef.current = { parent, targetKey: 'local' }
-        createParentProvenanceRef.current = { parent, targetKey: 'local' }
+        setAutoFilledCreateParent({ parent, targetKey: 'local' })
+        setCreateParentProvenance({ parent, targetKey: 'local' })
         setCreateParent(parent)
       })
       .catch(() => {
@@ -211,6 +209,7 @@ export function useCreateProjectDefaults({
   }, [
     activeRuntimeEnvironmentId,
     activeCreateParentRuntimeEnvironmentId,
+    autoFilledCreateParent,
     canReplaceCreateParentDefault,
     createParent,
     setCreateParent,
@@ -231,13 +230,13 @@ export function useCreateProjectDefaults({
     const targetKey = `runtime:${runtimeEnvironmentId}`
     if (
       createParent.trim() &&
-      autoFilledCreateParentRef.current?.targetKey !== targetKey &&
-      autoFilledCreateParentRef.current?.parent === createParent.trim()
+      autoFilledCreateParent?.targetKey !== targetKey &&
+      autoFilledCreateParent?.parent === createParent.trim()
     ) {
       setCreateParent('')
       return
     }
-    if (isCreateParentResolved(autoFilledCreateParentRef.current, createParent, targetKey)) {
+    if (isCreateParentResolved(autoFilledCreateParent, createParent, targetKey)) {
       return
     }
 
@@ -254,9 +253,8 @@ export function useCreateProjectDefaults({
           return
         }
         const parent = getDefaultCreateProjectParent(result.resolvedPath)
-        createStepAutoFilledRef.current = true
-        autoFilledCreateParentRef.current = { parent, targetKey }
-        createParentProvenanceRef.current = { parent, targetKey }
+        setAutoFilledCreateParent({ parent, targetKey })
+        setCreateParentProvenance({ parent, targetKey })
         setCreateParent(parent)
         setFailedRuntimeParentKey(null)
       })
@@ -269,6 +267,7 @@ export function useCreateProjectDefaults({
   }, [
     activeRuntimeEnvironmentId,
     activeCreateParentRuntimeEnvironmentId,
+    autoFilledCreateParent,
     canReplaceCreateParentDefault,
     createParent,
     setCreateParent,

@@ -133,11 +133,11 @@ export function GitGraphCommitTable({
     })
   })
 
-  const stopResize = useEventCallback((): void => {
+  const stopResize = useEventCallback(function stopResizeHandler(): void {
     resizeSessionRef.current = null
     setIsResizing(false)
     document.removeEventListener('pointermove', handlePointerMove)
-    document.removeEventListener('pointerup', stopResize)
+    document.removeEventListener('pointerup', stopResizeHandler)
   })
 
   const startResize = (

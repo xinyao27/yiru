@@ -3,7 +3,6 @@ import type {
   TopLevelView,
   WorkspaceVisibleTabType
 } from '@yiru/runtime-protocol/workbench/types'
-import type { RefObject } from 'react'
 import React, { Suspense } from 'react'
 import { lazyWithRetry as lazy } from '~renderer/application-shell/lazy-with-retry'
 import { translate } from '~renderer/i18n/i18n'
@@ -21,11 +20,11 @@ type WorkspaceSurface = { id: string; path: string }
 
 type LegacyWorkspaceSurfacesProps = {
   workspaceSurfaces: WorkspaceSurface[]
-  mountedWorktreeIdsRef: RefObject<Set<string>>
-  measurableBackgroundWorktreeIdsRef: RefObject<Set<string>>
+  mountedWorktreeIds: ReadonlySet<string>
+  measurableBackgroundWorktreeIds: ReadonlySet<string>
   parkedTerminalWorktreeIds: ReadonlySet<string>
   forceParkedTerminalWorktreeIds: ReadonlySet<string>
-  backgroundMountTabIdsByWorktreeRef: RefObject<Map<string, ReadonlySet<string>>>
+  backgroundMountTabIdsByWorktree: ReadonlyMap<string, ReadonlySet<string>>
   activeView: TopLevelView
   activeWorktreeId: string | null
   activeTabId: string | null
@@ -44,11 +43,11 @@ type LegacyWorkspaceSurfacesProps = {
 // surface model at a time (see anyMountedWorktreeHasLayout in panel.tsx).
 export function LegacyWorkspaceSurfaces({
   workspaceSurfaces,
-  mountedWorktreeIdsRef,
-  measurableBackgroundWorktreeIdsRef,
+  mountedWorktreeIds,
+  measurableBackgroundWorktreeIds,
   parkedTerminalWorktreeIds,
   forceParkedTerminalWorktreeIds,
-  backgroundMountTabIdsByWorktreeRef,
+  backgroundMountTabIdsByWorktree,
   activeView,
   activeWorktreeId,
   activeTabId,
@@ -70,13 +69,13 @@ export function LegacyWorkspaceSurfaces({
         )}
       >
         {workspaceSurfaces
-          .filter((workspace) => mountedWorktreeIdsRef.current.has(workspace.id))
+          .filter((workspace) => mountedWorktreeIds.has(workspace.id))
           .map((workspace) => {
             // Why: strict equality keeps preserved workspace surfaces hidden
             // behind every non-terminal top-level view.
             const isVisible = activeView === 'terminal' && workspace.id === activeWorktreeId
             const shouldMeasureHiddenWorktree =
-              !isVisible && measurableBackgroundWorktreeIdsRef.current.has(workspace.id)
+              !isVisible && measurableBackgroundWorktreeIds.has(workspace.id)
             const shouldColdParkTerminalPanes =
               !isVisible &&
               !shouldMeasureHiddenWorktree &&
@@ -101,7 +100,7 @@ export function LegacyWorkspaceSurfaces({
                 {terminalTabs
                   .filter((tab) =>
                     shouldMountBackgroundWorktreeTab(
-                      backgroundMountTabIdsByWorktreeRef.current.get(workspace.id) ?? null,
+                      backgroundMountTabIdsByWorktree.get(workspace.id) ?? null,
                       tab.id
                     )
                   )

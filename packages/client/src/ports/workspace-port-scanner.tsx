@@ -1,5 +1,5 @@
 import type { WorkspacePortScanResult } from '@yiru/runtime-protocol/workbench/workspace/ports'
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import {
   installWindowVisibilityInterval,
   isWindowVisible
@@ -52,24 +52,20 @@ export function WorkspacePortScanner({ enabled = true }: { enabled?: boolean }):
   const generationRef = useRef(0)
   const wasEnabledRef = useRef(false)
   const lastRefreshStartedAtByKeyRef = useRef(new Map<string, number>())
-  const scanTargetsRef = useRef<RuntimeClientTarget[]>([])
   const portScanDebounceRef = useRef<PortScanDebounceState>(new Map())
 
   const runtimeTarget = (() => getActiveRuntimeTarget(settings))()
   const scanKey = workspacePortScanKeyForTarget(runtimeTarget)
-  const scanTargets = (() =>
-    buildExecutionHostRegistry({ repos, settings })
-      .map((host) => runtimeTargetForExecutionHostId(host.id))
-      .filter((target): target is NonNullable<typeof target> => target !== null))()
-  const scanTargetsSignature = (() =>
-    scanTargets
-      .map((target) => workspacePortScanKeyForTarget(target))
-      .sort()
-      .join('\n'))()
-  scanTargetsRef.current = scanTargets
+  const scanTargets = useMemo(
+    () =>
+      buildExecutionHostRegistry({ repos, settings })
+        .map((host) => runtimeTargetForExecutionHostId(host.id))
+        .filter((target): target is NonNullable<typeof target> => target !== null),
+    [repos, settings]
+  )
 
   const refresh = useEventCallback((options: WorkspacePortScannerRefreshOptions = {}) => {
-    const allTargets = scanTargetsRef.current
+    const allTargets = scanTargets
     if (!hasWorktrees || allTargets.length === 0) {
       portScanDebounceRef.current.clear()
       lastRefreshStartedAtByKeyRef.current.clear()
@@ -188,9 +184,7 @@ export function WorkspacePortScanner({ enabled = true }: { enabled?: boolean }):
     const wasDisabled = !wasEnabledRef.current
     wasEnabledRef.current = true
     generationRef.current += 1
-    const targetKeys = new Set(
-      scanTargetsRef.current.map((target) => workspacePortScanKeyForTarget(target))
-    )
+    const targetKeys = new Set(scanTargets.map((target) => workspacePortScanKeyForTarget(target)))
     for (const key of lastRefreshStartedAtByKeyRef.current.keys()) {
       if (!targetKeys.has(key)) {
         lastRefreshStartedAtByKeyRef.current.delete(key)
@@ -219,10 +213,8 @@ export function WorkspacePortScanner({ enabled = true }: { enabled?: boolean }):
     // Why: a scanner resumed after being disabled has no trustworthy cadence; a
     // host-set change while it stays enabled only probes the new host.
     const targetsToRefresh = wasDisabled
-      ? scanTargetsRef.current
-      : scanTargetsRef.current.filter(
-          (target) => !retainedScans[workspacePortScanKeyForTarget(target)]
-        )
+      ? scanTargets
+      : scanTargets.filter((target) => !retainedScans[workspacePortScanKeyForTarget(target)])
     // Why: a visible target change should not restart retained hosts; a hidden
     // addition still needs its targeted scan when the window becomes visible.
     let shouldRefreshOnlyNewTargets = isWindowVisible() || targetsToRefresh.length > 0
@@ -255,7 +247,7 @@ export function WorkspacePortScanner({ enabled = true }: { enabled?: boolean }):
     enabled,
     hasWorktrees,
     refresh,
-    scanTargetsSignature,
+    scanTargets,
     setWorkspacePortScan,
     setWorkspacePortScanProjection,
     setWorkspacePortScanRefreshing,

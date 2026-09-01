@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import type React from 'react'
 import { toast } from 'sonner'
 import { renameFileOnDisk } from '~renderer/editor/rename-file'
 import { detectLanguage } from '~renderer/file-presentation/language-detect'
@@ -21,7 +20,7 @@ type UseFileExplorerInlineInputParams = {
   worktreePath: string | null
   expanded: Set<string>
   rowProjection: FileExplorerRowProjection
-  scrollRef: React.RefObject<HTMLDivElement | null>
+  scrollElement: HTMLDivElement | null
   refreshDir: (dirPath: string) => Promise<void>
 }
 
@@ -39,7 +38,7 @@ export function useFileExplorerInlineInput({
   worktreePath,
   expanded,
   rowProjection,
-  scrollRef,
+  scrollElement,
   refreshDir
 }: UseFileExplorerInlineInputParams): UseFileExplorerInlineInputResult {
   const toggleDir = useAppStore((s) => s.toggleDir)
@@ -61,7 +60,7 @@ export function useFileExplorerInlineInput({
     cancelScrollFocusFrame()
     scrollFocusFrameRef.current = requestAnimationFrame(() => {
       scrollFocusFrameRef.current = null
-      scrollRef.current?.focus()
+      scrollElement?.focus()
     })
   }
 

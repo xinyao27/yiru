@@ -6,7 +6,7 @@ import type {
   SourceControlAiSettings,
   SourceControlAiSettingsPatch
 } from '@yiru/runtime-protocol/workbench/source-control/ai-types'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import type { ActionRecipeDraftState } from './ai-action-recipe-draft'
 import {
@@ -30,8 +30,6 @@ export function useSourceControlActionRecipeDraftState({
   const persistedActionRecipeValues = (() => readActionRecipeInputValues(config))()
   const persistedActionRecipeSerialized = (() =>
     serializeActionRecipeInputValues(persistedActionRecipeValues))()
-  const persistedActionRecipeValuesRef = useRef(persistedActionRecipeValues)
-  persistedActionRecipeValuesRef.current = persistedActionRecipeValues
   const [actionRecipeDraftState, setActionRecipeDraftState] = useState<ActionRecipeDraftState>(
     () => ({
       values: persistedActionRecipeValues,
@@ -41,13 +39,18 @@ export function useSourceControlActionRecipeDraftState({
   const [savingActionTemplateIds, setSavingActionTemplateIds] = useState<
     Partial<Record<SourceControlActionId, boolean>>
   >({})
+  const [syncedPersistedSerialized, setSyncedPersistedSerialized] = useState(
+    persistedActionRecipeSerialized
+  )
+  const [consumedDiscardSignal, setConsumedDiscardSignal] = useState(customPromptDiscardSignal)
   const actionRecipeDraftSerialized = (() =>
     serializeActionRecipeInputValues(actionRecipeDraftState.values))()
   const actionRecipeBaseSerialized = (() =>
     serializeActionRecipeInputValues(actionRecipeDraftState.baseValues))()
   const actionTemplateDirty = actionRecipeDraftSerialized !== actionRecipeBaseSerialized
 
-  useEffect(() => {
+  if (syncedPersistedSerialized !== persistedActionRecipeSerialized) {
+    setSyncedPersistedSerialized(persistedActionRecipeSerialized)
     setActionRecipeDraftState((current) => {
       const currentSerialized = serializeActionRecipeInputValues(current.values)
       const baseSerialized = serializeActionRecipeInputValues(current.baseValues)
@@ -65,14 +68,15 @@ export function useSourceControlActionRecipeDraftState({
         baseValues: persistedActionRecipeValues
       }
     })
-  }, [persistedActionRecipeSerialized, persistedActionRecipeValues])
+  }
 
-  useEffect(() => {
+  if (consumedDiscardSignal !== customPromptDiscardSignal) {
+    setConsumedDiscardSignal(customPromptDiscardSignal)
     setActionRecipeDraftState({
-      values: persistedActionRecipeValuesRef.current,
-      baseValues: persistedActionRecipeValuesRef.current
+      values: persistedActionRecipeValues,
+      baseValues: persistedActionRecipeValues
     })
-  }, [customPromptDiscardSignal])
+  }
 
   useEffect(() => {
     onCustomPromptDirtyChange?.(actionTemplateDirty)

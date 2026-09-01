@@ -2,7 +2,7 @@ import { resolveLocalWindowsAgentStartupShell } from '@yiru/runtime-protocol/mod
 import { parseExecutionHostId } from '@yiru/runtime-protocol/model/workspace'
 import { isGitRepoKind } from '@yiru/runtime-protocol/workbench/repo-kind'
 import { isWorkspaceStatusId } from '@yiru/runtime-protocol/workbench/workspace/statuses'
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { getAgentLaunchPlatformForRepo } from '~renderer/agent/launch-platform'
 import { useDetectedAgents } from '~renderer/agent/use-detected'
 import { buildExecutionHostRegistry } from '~renderer/execution-host-registry'
@@ -82,7 +82,9 @@ export function useComposerTarget(options: UseComposerTargetOptions) {
   const [selectedProjectGroupId, setSelectedProjectGroupId] = useState<string | null>(
     initialProjectGroup?.id ?? null
   )
-  const initialProjectGroupAppliedRef = useRef(Boolean(initialProjectGroup))
+  const [hasAppliedInitialProjectGroup, setHasAppliedInitialProjectGroup] = useState(
+    Boolean(initialProjectGroup)
+  )
   const [projectError, setProjectError] = useState<string | null>(null)
   const repoId = options.repoIdOverride ?? internalRepoId
   const selectedProjectGroup = selectedProjectGroupId
@@ -91,23 +93,15 @@ export function useComposerTarget(options: UseComposerTargetOptions) {
       ) ?? null)
     : null
 
-  useEffect(() => {
-    if (selectedProjectGroupId && !selectedProjectGroup) {
-      setSelectedProjectGroupId(null)
-    }
-  }, [selectedProjectGroup, selectedProjectGroupId])
-  useEffect(() => {
-    if (selectedProjectGroupId || !initialProjectGroupId || initialProjectGroupAppliedRef.current) {
-      return
-    }
+  if (!selectedProjectGroupId && initialProjectGroupId && !hasAppliedInitialProjectGroup) {
     const group = projectGroups.find(
       (candidate) => candidate.id === initialProjectGroupId && Boolean(candidate.parentPath?.trim())
     )
     if (group) {
-      initialProjectGroupAppliedRef.current = true
+      setHasAppliedInitialProjectGroup(true)
       setSelectedProjectGroupId(group.id)
     }
-  }, [initialProjectGroupId, projectGroups, selectedProjectGroupId])
+  }
 
   const folderSourceRepos = getFolderSourceRepos(repos, projectGroups, selectedProjectGroup)
   const parsedFolderHost = parseExecutionHostId(selectedProjectGroup?.executionHostId)
@@ -169,6 +163,9 @@ export function useComposerTarget(options: UseComposerTargetOptions) {
       setInternalRepoId(value)
     }
   })
+  const markInitialProjectGroupApplied = (): void => {
+    setHasAppliedInitialProjectGroup(true)
+  }
 
   return {
     agentPlatform,
@@ -177,7 +174,7 @@ export function useComposerTarget(options: UseComposerTargetOptions) {
     folderPathStatus,
     folderRuntimeEnvironmentId,
     folderSourceRepos,
-    initialProjectGroupAppliedRef,
+    markInitialProjectGroupApplied,
     isProjectGroupTarget: selectedProjectGroup !== null,
     newWorkspaceDraft,
     projectError,

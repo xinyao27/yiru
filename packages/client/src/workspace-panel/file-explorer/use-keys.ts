@@ -1,6 +1,5 @@
 import { keybindingMatchesAction } from '@yiru/runtime-protocol/workbench/keybindings'
 import { useEffect, useRef } from 'react'
-import type React from 'react'
 import { toast } from 'sonner'
 import { translate } from '~renderer/i18n/i18n'
 import { isEditableTarget } from '~renderer/keyboard-input/editable-target'
@@ -35,7 +34,7 @@ export function shouldIgnoreFileExplorerKeyTarget(target: EventTarget | null): b
  * the explorer container — they must never intercept the editor or terminal.
  */
 export function useFileExplorerKeys(opts: {
-  containerRef: React.RefObject<HTMLDivElement | null>
+  containerElement: HTMLDivElement | null
   rowProjection: FileExplorerRowProjection
   expandedPaths: Set<string>
   canToggleDirectories: boolean
@@ -58,37 +57,40 @@ export function useFileExplorerKeys(opts: {
   const keybindings = useAppStore((s) => s.keybindings)
 
   const rowProjectionRef = useRef(opts.rowProjection)
-  rowProjectionRef.current = opts.rowProjection
   const expandedPathsRef = useRef(opts.expandedPaths)
-  expandedPathsRef.current = opts.expandedPaths
   const canToggleDirectoriesRef = useRef(opts.canToggleDirectories)
-  canToggleDirectoriesRef.current = opts.canToggleDirectories
   const inlineInputRef = useRef(opts.inlineInput)
-  inlineInputRef.current = opts.inlineInput
   const selectedPathsRef = useRef(opts.selectedPaths)
-  selectedPathsRef.current = opts.selectedPaths
   const selectedNodeRef = useRef(opts.selectedNode)
-  selectedNodeRef.current = opts.selectedNode
   const startRenameRef = useRef(opts.startRename)
-  startRenameRef.current = opts.startRename
   const requestDeleteAllRef = useRef(opts.requestDeleteAll)
-  requestDeleteAllRef.current = opts.requestDeleteAll
   const activateNodeRef = useRef(opts.activateNode)
-  activateNodeRef.current = opts.activateNode
   const moveSelectionRef = useRef(opts.moveSelection)
-  moveSelectionRef.current = opts.moveSelection
   const toggleDirRef = useRef(opts.toggleDir)
-  toggleDirRef.current = opts.toggleDir
   const scrollToIndexRef = useRef(opts.scrollToIndex)
-  scrollToIndexRef.current = opts.scrollToIndex
   const activeWorktreeIdRef = useRef(opts.activeWorktreeId)
-  activeWorktreeIdRef.current = opts.activeWorktreeId
   const worktreePathRef = useRef(opts.worktreePath)
-  worktreePathRef.current = opts.worktreePath
   const refreshDirRef = useRef(opts.refreshDir)
-  refreshDirRef.current = opts.refreshDir
   const setSelectedPathsRef = useRef(opts.setSelectedPaths)
-  setSelectedPathsRef.current = opts.setSelectedPaths
+
+  useEffect(() => {
+    rowProjectionRef.current = opts.rowProjection
+    expandedPathsRef.current = opts.expandedPaths
+    canToggleDirectoriesRef.current = opts.canToggleDirectories
+    inlineInputRef.current = opts.inlineInput
+    selectedPathsRef.current = opts.selectedPaths
+    selectedNodeRef.current = opts.selectedNode
+    startRenameRef.current = opts.startRename
+    requestDeleteAllRef.current = opts.requestDeleteAll
+    activateNodeRef.current = opts.activateNode
+    moveSelectionRef.current = opts.moveSelection
+    toggleDirRef.current = opts.toggleDir
+    scrollToIndexRef.current = opts.scrollToIndex
+    activeWorktreeIdRef.current = opts.activeWorktreeId
+    worktreePathRef.current = opts.worktreePath
+    refreshDirRef.current = opts.refreshDir
+    setSelectedPathsRef.current = opts.setSelectedPaths
+  }, [opts])
 
   useEffect(() => {
     // Find the row index whose button is currently focused. Each virtualized
@@ -96,7 +98,7 @@ export function useFileExplorerKeys(opts: {
     // wrapper without a real TreeNode, so it falls back to the row above.
     const findFocusedIndex = (): number | null => {
       const el = document.activeElement as HTMLElement | null
-      if (!el || !opts.containerRef.current?.contains(el)) {
+      if (!el || !opts.containerElement?.contains(el)) {
         return null
       }
       const wrapper = el.closest<HTMLElement>('[data-index]')
@@ -116,23 +118,20 @@ export function useFileExplorerKeys(opts: {
 
     const focusInExplorer = (): boolean => {
       const el = document.activeElement
-      if (!el || !opts.containerRef.current) {
+      if (!el || !opts.containerElement) {
         return false
       }
-      if (opts.containerRef.current.contains(el)) {
+      if (opts.containerElement.contains(el)) {
         return true
       }
       // Fallback: Radix portaled nodes or timing quirks — shell is marked explicitly.
       return (
-        el instanceof Element &&
-        el.closest('[data-yiru-explorer-shell]') === opts.containerRef.current
+        el instanceof Element && el.closest('[data-yiru-explorer-shell]') === opts.containerElement
       )
     }
 
     const focusRowAtIndex = (index: number): void => {
-      const wrapper = opts.containerRef.current?.querySelector<HTMLElement>(
-        `[data-index="${index}"]`
-      )
+      const wrapper = opts.containerElement?.querySelector<HTMLElement>(`[data-index="${index}"]`)
       const button = wrapper?.querySelector<HTMLButtonElement>('button')
       button?.focus()
     }
@@ -302,5 +301,5 @@ export function useFileExplorerKeys(opts: {
     return () => {
       window.removeEventListener('keydown', onKeyDown, { capture: true })
     }
-  }, [keybindings, opts.containerRef, opts.nativeTreeNavigation, rightSidebarExplorerView])
+  }, [keybindings, opts.containerElement, opts.nativeTreeNavigation, rightSidebarExplorerView])
 }

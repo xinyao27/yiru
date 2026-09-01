@@ -1,5 +1,5 @@
 import type { PRComment } from '@yiru/runtime-protocol/workbench/types'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useEventCallback } from '~renderer/react/use-event-callback'
 import {
   getPRCommentGroupId,
@@ -97,40 +97,41 @@ export function usePRCommentsListSelection(
   selectionContextKey: string | undefined,
   clearRequest?: PRCommentsListSelectionClearRequest | null
 ): PRCommentsListSelection {
-  const lastClearRequestTokenRef = useRef<number | null>(null)
+  const [lastClearRequest, setLastClearRequest] =
+    useState<PRCommentsListSelectionClearRequest | null>(null)
   const [renderedSelectionState, setRenderedSelectionState] =
     useState<PRCommentsListSelectionState>(() => readSelectionState(selectionContextKey))
-  const selectionState =
+  const currentSelectionState =
     renderedSelectionState.contextKey === selectionContextKey
       ? renderedSelectionState
       : readSelectionState(selectionContextKey)
+  const shouldHandleClearRequest = Boolean(
+    clearRequest &&
+    clearRequest.contextKey === selectionContextKey &&
+    (clearRequest.contextKey !== lastClearRequest?.contextKey ||
+      clearRequest.token !== lastClearRequest.token)
+  )
+  const clearedSelectionState: PRCommentsListSelectionState = {
+    contextKey: selectionContextKey,
+    isSelectingForAI: false,
+    selectedGroupIds: new Set<string>()
+  }
+  const selectionState = shouldHandleClearRequest ? clearedSelectionState : currentSelectionState
+  if (shouldHandleClearRequest && clearRequest) {
+    setLastClearRequest(clearRequest)
+    setRenderedSelectionState(clearedSelectionState)
+  }
   const commitSelectionState = useEventCallback((next: PRCommentsListSelectionState): void => {
     persistSelectionState(next)
     setRenderedSelectionState(next)
   })
 
   useEffect(() => {
-    // Why: only a committed context may affect LRU order; render can be
-    // abandoned or replayed by Strict Mode/Suspense.
-    refreshPersistedSelectionContext(selectionContextKey)
-  }, [selectionContextKey])
-
-  useEffect(() => {
-    if (
-      !clearRequest ||
-      clearRequest.contextKey !== selectionContextKey ||
-      clearRequest.token === lastClearRequestTokenRef.current
-    ) {
-      return
-    }
-    lastClearRequestTokenRef.current = clearRequest.token
-    const next = {
-      contextKey: selectionContextKey,
-      isSelectingForAI: false,
-      selectedGroupIds: new Set<string>()
-    }
-    commitSelectionState(next)
-  }, [clearRequest, commitSelectionState, selectionContextKey])
+    // Why: render-time normalization stays local; persistence and LRU order
+    // only follow state that React actually committed.
+    persistSelectionState(renderedSelectionState)
+    refreshPersistedSelectionContext(renderedSelectionState.contextKey)
+  }, [renderedSelectionState])
 
   // Why: selectable groups come from the unfiltered list so switching the
   // audience filter doesn't silently drop already-selected comments.
@@ -159,30 +160,17 @@ export function usePRCommentsListSelection(
     }
     return pruned ? next : candidateSelectedGroupIds
   })()
-
-  useEffect(() => {
-    if (
-      comments.length === 0 ||
-      !isCurrentSelectionContext ||
-      selectedGroupIds === candidateSelectedGroupIds
-    ) {
-      return
-    }
-    const next = {
+  if (
+    comments.length > 0 &&
+    isCurrentSelectionContext &&
+    selectedGroupIds !== candidateSelectedGroupIds
+  ) {
+    setRenderedSelectionState({
       contextKey: selectionContextKey,
       isSelectingForAI: selectionState.isSelectingForAI,
       selectedGroupIds: new Set(selectedGroupIds)
-    }
-    commitSelectionState(next)
-  }, [
-    candidateSelectedGroupIds,
-    commitSelectionState,
-    comments.length,
-    isCurrentSelectionContext,
-    selectedGroupIds,
-    selectionContextKey,
-    selectionState.isSelectingForAI
-  ])
+    })
+  }
 
   const isSelectingForAI =
     isCurrentSelectionContext && selectionState.isSelectingForAI && selectableGroupsById.size > 0

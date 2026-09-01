@@ -51,6 +51,10 @@ const TYPE_INTERVAL_MS = 120
 
 export function CommandPaletteFeatureTipVisual(): JSX.Element {
   const reducedMotion = usePrefersReducedMotion()
+  return <CommandPaletteAnimation key={String(reducedMotion)} reducedMotion={reducedMotion} />
+}
+
+function CommandPaletteAnimation({ reducedMotion }: { reducedMotion: boolean }): JSX.Element {
   // Why: render the live binding so the cue stays correct after a rebind and on
   // platforms where the default Command shortcut has been rebound.
   const shortcut = useShortcutKeyDetails('app.commandPalette')
@@ -61,8 +65,8 @@ export function CommandPaletteFeatureTipVisual(): JSX.Element {
   const displayShortcutKeys = displayShortcut?.keys ?? []
   const displayShortcutDoubleTap = displayShortcut?.doubleTap === true
 
-  const [phase, setPhase] = useState<CyclePhase>('idle')
-  const [typedLength, setTypedLength] = useState(0)
+  const [phase, setPhase] = useState<CyclePhase>(reducedMotion ? 'typing' : 'idle')
+  const [typedLength, setTypedLength] = useState(reducedMotion ? TYPED_QUERY.length : 0)
 
   // Why: for reduced-motion users, jump straight to the fully-populated end
   // state so they see what the feature does without any animation.
@@ -124,9 +128,6 @@ export function CommandPaletteFeatureTipVisual(): JSX.Element {
       setPhase('typing')
       startTyping(0)
     }, PALETTE_OPEN_AT_MS + HOLD_BEFORE_TYPING_MS)
-
-    setPhase('idle')
-    setTypedLength(0)
 
     return () => {
       cancelled = true

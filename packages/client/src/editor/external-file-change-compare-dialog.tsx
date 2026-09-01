@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect, useRef, useState } from 'react'
+import React, { Suspense, useEffect, useState } from 'react'
 import { lazyWithRetry as lazy } from '~renderer/application-shell/lazy-with-retry'
 import type { OpenFile } from '~renderer/editor/state'
 import { detectLanguage } from '~renderer/file-presentation/language-detect'
@@ -26,42 +26,46 @@ type DiskReadState =
   | { kind: 'binary' }
   | { kind: 'ready'; content: string }
 
+type ExternalFileChangeCompareDialogProps = {
+  file: OpenFile
+  currentContent: string
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onReload: () => void
+  onKeepEdits: () => void
+}
+
 // Why: choosing between "Reload from Disk" and "Keep My Edits" blind is the
 // sharpest edge of the changed-on-disk banner — this dialog shows exactly
 // what each choice discards before the user commits (issue #7265 follow-up).
 export function ExternalFileChangeCompareDialog({
+  ...props
+}: ExternalFileChangeCompareDialogProps): React.JSX.Element {
+  const { file, open } = props
+  const dialogKey = [
+    open ? 'open' : 'closed',
+    file.runtimeEnvironmentId ?? '',
+    file.worktreeId,
+    file.filePath
+  ].join('\0')
+  return <ExternalFileChangeCompareDialogContent key={dialogKey} {...props} />
+}
+
+function ExternalFileChangeCompareDialogContent({
   file,
   currentContent,
   open,
   onOpenChange,
   onReload,
   onKeepEdits
-}: {
-  file: OpenFile
-  /** The tab's live buffer — the unsaved edits the user would keep. */
-  currentContent: string
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onReload: () => void
-  onKeepEdits: () => void
-}): React.JSX.Element {
-  // Why: requestIdRef is bumped once per read (including re-opens of the same
-  // file) so a completed/errored result can be tagged with the read it came
-  // from; render derives "loading" whenever the latest known result is for an
-  // older read, instead of an effect setting a loading flag synchronously.
-  const requestIdRef = useRef(0)
-  const [completedRead, setCompletedRead] = useState<{
-    requestId: number
-    state: Exclude<DiskReadState, { kind: 'loading' }>
-  } | null>(null)
+}: ExternalFileChangeCompareDialogProps): React.JSX.Element {
+  const [diskState, setDiskState] = useState<DiskReadState>({ kind: 'loading' })
 
   useEffect(() => {
     if (!open) {
       return
     }
     let cancelled = false
-    requestIdRef.current += 1
-    const requestId = requestIdRef.current
     // Why: read at open time — the banner can be minutes old and the agent
     // may have written again since; the comparison must show current disk.
     void readRuntimeFileContent({
@@ -75,29 +79,23 @@ export function ExternalFileChangeCompareDialog({
         if (cancelled) {
           return
         }
-        setCompletedRead({
-          requestId,
-          state: result.isBinary ? { kind: 'binary' } : { kind: 'ready', content: result.content }
-        })
+        setDiskState(
+          result.isBinary ? { kind: 'binary' } : { kind: 'ready', content: result.content }
+        )
       })
       .catch((err: unknown) => {
         if (cancelled) {
           return
         }
-        setCompletedRead({
-          requestId,
-          state: { kind: 'error', message: err instanceof Error ? err.message : String(err) }
+        setDiskState({
+          kind: 'error',
+          message: err instanceof Error ? err.message : String(err)
         })
       })
     return () => {
       cancelled = true
     }
   }, [open, file.filePath, file.relativePath, file.worktreeId, file.runtimeEnvironmentId])
-
-  const diskState: DiskReadState =
-    completedRead && completedRead.requestId === requestIdRef.current
-      ? completedRead.state
-      : { kind: 'loading' }
 
   const language = detectLanguage(file.relativePath)
 

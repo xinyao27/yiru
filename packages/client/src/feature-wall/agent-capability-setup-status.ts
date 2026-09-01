@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import {
   COMPUTER_USE_SKILL_NAME,
   YIRU_CLI_SKILL_NAME,
@@ -224,57 +224,18 @@ function useComputerUsePermissionStatus(enabled: boolean): {
   checking: boolean
   unavailableReason: string | null
 } {
-  const [status, setStatus] = useState<{
-    ready: boolean
-    checking: boolean
-    unavailableReason: string | null
-  }>({
-    ready: false,
-    checking: enabled,
-    unavailableReason: null
+  const target = getActiveRuntimeTarget(useAppStore((state) => state.settings))
+  const permissions = useQuery({
+    queryKey: ['computer-use-permissions', target],
+    queryFn: () => callRuntimeOrpc(target, (client) => client.computer.permissionsStatus, {}),
+    enabled
   })
-
-  useEffect(() => {
-    if (!enabled) {
-      setStatus({ ready: false, checking: false, unavailableReason: null })
-      return
-    }
-
-    let stale = false
-    const refresh = (): void => {
-      setStatus((current) => ({ ...current, checking: true }))
-      callRuntimeOrpc(
-        getActiveRuntimeTarget(useAppStore.getState().settings),
-        (client) => client.computer.permissionsStatus,
-        {}
-      )
-        .then((next) => {
-          if (stale) {
-            return
-          }
-          setStatus({
-            ready:
-              next.helperUnavailableReason === null &&
-              next.permissions.every((permission) => permission.status !== 'not-granted'),
-            checking: false,
-            unavailableReason: next.helperUnavailableReason
-          })
-        })
-        .catch(() => {
-          if (stale) {
-            return
-          }
-          setStatus({ ready: false, checking: false, unavailableReason: null })
-        })
-    }
-
-    refresh()
-    window.addEventListener('focus', refresh)
-    return () => {
-      stale = true
-      window.removeEventListener('focus', refresh)
-    }
-  }, [enabled])
-
-  return status
+  const result = permissions.data
+  return {
+    ready:
+      result?.helperUnavailableReason === null &&
+      result.permissions.every((permission) => permission.status !== 'not-granted'),
+    checking: enabled && permissions.isPending,
+    unavailableReason: result?.helperUnavailableReason ?? null
+  }
 }

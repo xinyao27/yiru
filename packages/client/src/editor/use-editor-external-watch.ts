@@ -17,15 +17,13 @@ export type { EditorExternalWatchTargetState } from './external-watch-targets'
 export function useEditorExternalWatch(): void {
   const { targets, targetsKey } = useAppStore(getEditorExternalWatchTargets)
   const targetsRef = useRef<WatchedTarget[]>([])
-  const latestTargetsRef = useRef(targets)
-  latestTargetsRef.current = targets
   const unsubscribeByTargetRef = useRef(new Map<string, () => void>())
   const eventHandlerRef = useRef<
     ((payload: FsChangedPayload, runtimeEnvironmentId?: string | null) => void) | null
   >(null)
 
   useEffect(() => {
-    const nextTargets = latestTargetsRef.current
+    const nextTargets = targets
     const previousTargets = targetsRef.current
     const previousKeys = new Set(previousTargets.map(getWatchedTargetKey))
     const nextKeys = new Set(nextTargets.map(getWatchedTargetKey))
@@ -40,7 +38,7 @@ export function useEditorExternalWatch(): void {
       subscribeTarget(target, unsubscribeByTargetRef.current, eventHandlerRef)
     }
     targetsRef.current = nextTargets
-  }, [targetsKey])
+  }, [targets, targetsKey])
 
   useEffect(() => {
     const unsubscribeByTarget = unsubscribeByTargetRef.current

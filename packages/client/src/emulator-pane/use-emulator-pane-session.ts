@@ -41,11 +41,11 @@ export function useEmulatorPaneSession({
   const configuredDefaultUdid = useAppStore(
     (state) => state.settings?.mobileEmulatorDefaultDeviceUdid ?? null
   )
-  const prelaunchedSessionRef = useRef<EmulatorPaneSession['info'] | null>(
+  const [prelaunchedSession] = useState<EmulatorPaneSession['info'] | null>(() =>
     consumePrelaunchedSimulatorSession(worktreeId)
   )
   const prelaunchedState = buildPrelaunchedEmulatorSessionState(
-    prelaunchedSessionRef.current,
+    prelaunchedSession,
     configuredDefaultUdid
   )
   const [selectedUdid, setSelectedUdid] = useState<string | null>(prelaunchedState.selectedUdid)
@@ -238,11 +238,7 @@ export function useEmulatorPaneSession({
     }
   })
 
-  useEffect(() => {
-    if (!selectedUdid && configuredDefaultUdid) {
-      setSelectedUdid(configuredDefaultUdid)
-    }
-  }, [configuredDefaultUdid, selectedUdid])
+  const effectiveSelectedUdid = selectedUdid ?? configuredDefaultUdid
 
   const shutdown = useEmulatorPaneShutdown({
     loading,
@@ -279,11 +275,15 @@ export function useEmulatorPaneSession({
     setError
   })
 
-  const view = buildEmulatorPaneSessionView({ devices, selectedUdid, session })
+  const view = buildEmulatorPaneSessionView({
+    devices,
+    selectedUdid: effectiveSelectedUdid,
+    session
+  })
 
   return {
     devices,
-    selectedUdid,
+    selectedUdid: effectiveSelectedUdid,
     setSelectedUdid,
     session,
     loading,

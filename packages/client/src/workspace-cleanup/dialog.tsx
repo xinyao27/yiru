@@ -78,11 +78,19 @@ export default function WorkspaceCleanupDialog(): React.JSX.Element {
   const [filters, setFilters] = useState<WorkspaceCleanupFilters>(DEFAULT_FILTERS)
   const [sortKey, setSortKey] = useState<WorkspaceCleanupSortKey>('activity')
   const [sortDirection, setSortDirection] = useState<WorkspaceCleanupSortDirection>('asc')
-  const selectedDefaultsScanAtRef = useRef<number | null>(null)
   const autoScanAttemptedForOpenRef = useRef(false)
   const latestReadyToastScanAtRef = useRef<number | null>(null)
   const wasOpenRef = useRef(false)
   const mountedRef = useMountedRef()
+
+  const closeCleanup = (): void => {
+    setActiveView('ready')
+    setFilters(DEFAULT_FILTERS)
+    setSortKey('activity')
+    setSortDirection('asc')
+    setSelectedIds(new Set())
+    closeModal()
+  }
 
   const deselectRemovedIds = useEventCallback((removedIds: readonly string[]) => {
     if (removedIds.length === 0) {
@@ -100,7 +108,7 @@ export default function WorkspaceCleanupDialog(): React.JSX.Element {
     loading,
     onSelectOnly: (worktreeId) => setSelectedIds(new Set([worktreeId])),
     onRemoved: deselectRemovedIds,
-    onClose: closeModal
+    onClose: closeCleanup
   })
 
   useEffect(() => {
@@ -110,6 +118,12 @@ export default function WorkspaceCleanupDialog(): React.JSX.Element {
   const startScan = useEventCallback((options: { notifyWhenReady?: boolean } = {}) => {
     void scanWorkspaceCleanup()
       .then((result) => {
+        if (mountedRef.current) {
+          setSelectedIds(
+            getDefaultSelectedWorkspaceCleanupIds(result.candidates, deletingWorktreeIds)
+          )
+          removal.resetForScan()
+        }
         if (!mountedRef.current || !options.notifyWhenReady || openRef.current) {
           return
         }
@@ -163,11 +177,6 @@ export default function WorkspaceCleanupDialog(): React.JSX.Element {
       wasOpenRef.current = true
       autoScanAttemptedForOpenRef.current = false
       if (!removal.isInFlight()) {
-        setActiveView('ready')
-        setFilters(DEFAULT_FILTERS)
-        setSortKey('activity')
-        setSortDirection('asc')
-        setSelectedIds(new Set())
         removal.resetForOpen()
       }
     }
@@ -196,18 +205,6 @@ export default function WorkspaceCleanupDialog(): React.JSX.Element {
       getWorkspaceCleanupReviewInfo(candidate, reviewStateInputs)
     )
   }
-
-  useEffect(() => {
-    if (loading || !scan || selectedDefaultsScanAtRef.current === scan.scannedAt) {
-      return
-    }
-    selectedDefaultsScanAtRef.current = scan.scannedAt
-    if (removal.isInFlight()) {
-      return
-    }
-    setSelectedIds(getDefaultSelectedWorkspaceCleanupIds(scan.candidates, deletingWorktreeIds))
-    removal.resetForScan()
-  }, [deletingWorktreeIds, loading, removal, scan])
 
   const visibleCandidates = sortWorkspaceCleanupCandidates(
     filteredCandidates.filter((candidate) => !candidate.blockers.includes('dismissed')),
@@ -246,7 +243,7 @@ export default function WorkspaceCleanupDialog(): React.JSX.Element {
       activeBaseRows,
       filters,
       reviewInfoByWorktreeId,
-      scan?.scannedAt ?? Date.now()
+      scan?.scannedAt ?? 0
     ),
     sortKey,
     sortDirection,
@@ -285,7 +282,7 @@ export default function WorkspaceCleanupDialog(): React.JSX.Element {
   }
   const viewCandidate = (candidate: WorkspaceCleanupCandidate): void => {
     markCandidateViewed(candidate)
-    closeModal()
+    closeCleanup()
     activateAndRevealWorktree(candidate.worktreeId)
   }
   const repoNameById = new Map(repos.map((repo) => [repo.id, repo.displayName || repo.path]))
@@ -296,7 +293,7 @@ export default function WorkspaceCleanupDialog(): React.JSX.Element {
   const hasAnyCandidates = candidates.length > 0
 
   return (
-    <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && closeModal()}>
+    <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && closeCleanup()}>
       <DialogContent
         showCloseButton={false}
         className="flex h-[min(820px,90vh)] w-[calc(100vw-3rem)] max-w-[calc(100vw-3rem)] flex-col gap-0 overflow-hidden p-0 sm:max-w-[calc(100vw-3rem)] xl:w-[920px] xl:max-w-[920px]"
@@ -339,7 +336,7 @@ export default function WorkspaceCleanupDialog(): React.JSX.Element {
             deletingWorktreeIds={deletingWorktreeIds}
             selectedIds={selectedIds}
             rowFailures={removal.rowFailures}
-            onClose={closeModal}
+            onClose={closeCleanup}
             onRefresh={() => startScan({ notifyWhenReady: true })}
             onRepoSelectionChange={setRepoSelection}
             onViewChange={setActiveView}

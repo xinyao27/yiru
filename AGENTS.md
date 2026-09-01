@@ -5,7 +5,7 @@ coding agents across many git worktrees on local, WSL, and SSH hosts.
 
 This file is the contract for every agent writing code here: structure, naming, cohesion, code
 quality. For browser visual work, [`docs/style-guide.md`](./docs/style-guide.md) is canonical. For
-mobile visual work, use [`apps/mobile-ios/DESIGN.md`](./apps/mobile-ios/DESIGN.md).
+mobile visual work, use [`apps/mobile/DESIGN.md`](./apps/mobile/DESIGN.md).
 
 **The organizing principle.** Tailwind won because the style lives next to the markup: one place to look, one place to change. Apply that to all code. A feature's directory, filenames, and module boundaries exist so an agent can find the code from the feature name alone and change it without touching the rest of the tree. Optimize for *"where does this live?"* being answerable in one guess.
 
@@ -41,7 +41,7 @@ not treat "no automated check" as "not a rule." No exceptions inside a feature t
 apps/
   daemon/       Bun runtime, CLI, Native Messaging host, host adapters, and authoritative state
   extension/    WXT-managed Chrome MV3 host: background, side panel, DevTools, browser bootstrap
-  mobile-ios/   native SwiftUI app, widgets, and notification service extension
+  mobile/       native SwiftUI app, widgets, and notification service extension
   apns-gateway/ stateless Cloudflare Worker forwarding opaque encrypted pushes to APNs
 packages/
   client/       source-only browser workbench UI consumed through declared exports
@@ -257,7 +257,7 @@ coverage rules currently have no repository-contract script; they still apply an
 `pnpm typecheck`, `pnpm lint`, and `pnpm fmt` run the pieces individually.
 
 **Reach into a package with `vp run <package>#<task>`**, from anywhere in the repo — `vp run
-@yiru/daemon#build:release`, `vp run @yiru/extension#build`, `vp run yiru-mobile-ios#dev`. The root
+@yiru/daemon#build:release`, `vp run @yiru/extension#build`, `vp run yiru-mobile#dev`. The root
 `package.json` holds only what the whole workspace shares. Inside a package, one script calls another
 with `vp run <task>`, never `pnpm run <task>`, so the task graph stays visible to the runner.
 

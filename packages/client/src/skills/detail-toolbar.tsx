@@ -3,9 +3,10 @@ import type {
   SkillDirectoryListing,
   SkillPlacement
 } from '@yiru/runtime-protocol/workbench/skills'
-import { useState } from 'react'
+import { createElement, useState } from 'react'
 import { getFileTypeIcon } from '~renderer/file-presentation/icons'
 import { translate } from '~renderer/i18n/i18n'
+import type { IconProps } from '~renderer/icons/hugeicons'
 import { CaretDown, FolderSimple, Warning } from '~renderer/icons/hugeicons'
 import { Button } from '~renderer/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '~renderer/ui/popover'
@@ -41,14 +42,13 @@ function FilePicker({
   'files' | 'listing' | 'selectedRelativePath' | 'onSelectFile'
 >): React.JSX.Element {
   const [open, setOpen] = useState(false)
-  const FileIcon = getFileTypeIcon(selectedRelativePath)
   const fileName = selectedRelativePath.split('/').at(-1) ?? selectedRelativePath
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
         render={
           <Button type="button" variant="ghost" size="xs" className="max-w-64 min-w-0">
-            <FileIcon className="text-muted-foreground shrink-0" />
+            <FileTypeIcon path={selectedRelativePath} className="text-muted-foreground shrink-0" />
             <span className="truncate font-mono">{fileName}</span>
             <CaretDown className="text-muted-foreground shrink-0" />
           </Button>
@@ -83,6 +83,10 @@ function FilePicker({
       </PopoverContent>
     </Popover>
   )
+}
+
+function FileTypeIcon({ path, ...props }: IconProps & { path: string }): React.JSX.Element {
+  return createElement(getFileTypeIcon(path), props)
 }
 
 function PlacementPicker({ placements }: { placements: readonly SkillPlacement[] }) {

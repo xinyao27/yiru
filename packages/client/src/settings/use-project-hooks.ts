@@ -19,16 +19,6 @@ export function useProjectHooks(repos: readonly Repo[], neededRepos: readonly Re
   const requestSequenceRef = useRef(0)
 
   useEffect(() => {
-    const liveRepoHosts = new Set(repos.map(getRepoHostIdentity))
-    setHooksByRepoHost((previous) => {
-      const next = Object.fromEntries(
-        Object.entries(previous).filter(([identity]) => liveRepoHosts.has(identity))
-      ) as Record<string, ProjectHooksState>
-      return Object.keys(next).length === Object.keys(previous).length ? previous : next
-    })
-  }, [repos])
-
-  useEffect(() => {
     if (neededRepos.length === 0) {
       return
     }
@@ -92,5 +82,8 @@ export function useProjectHooks(repos: readonly Repo[], neededRepos: readonly Re
     }
   }, [neededRepos, repos])
 
-  return hooksByRepoHost
+  const liveRepoHosts = new Set(repos.map(getRepoHostIdentity))
+  return Object.fromEntries(
+    Object.entries(hooksByRepoHost).filter(([identity]) => liveRepoHosts.has(identity))
+  ) as Record<string, ProjectHooksState>
 }

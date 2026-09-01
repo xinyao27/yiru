@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { Button } from '~renderer/ui/button'
 import {
   Dialog,
@@ -48,15 +48,13 @@ export function CustomAddressDialog({
   inputId,
   onConfirm
 }: CustomAddressDialogProps): React.JSX.Element {
-  const [value, setValue] = useState(initialValue ?? '')
-
-  // Why: reseed each time the dialog opens so a prior cancelled edit doesn't
-  // leak into the next open.
-  useEffect(() => {
-    if (open) {
-      setValue(initialValue ?? '')
-    }
-  }, [open, initialValue])
+  const draftIdentity = open ? (initialValue ?? '') : '__closed__'
+  const [draft, setDraft] = useState({ identity: '', value: '' })
+  const value = draft.identity === draftIdentity ? draft.value : (initialValue ?? '')
+  const close = (): void => {
+    setDraft({ identity: '', value: '' })
+    onOpenChange(false)
+  }
 
   const parsed = validate(value)
   // Why: only flag invalid input once the user has typed something — an empty
@@ -68,11 +66,11 @@ export function CustomAddressDialog({
       return
     }
     onConfirm(parsed.value)
-    onOpenChange(false)
+    close()
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(nextOpen) => (nextOpen ? onOpenChange(true) : close())}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{copy.title}</DialogTitle>
@@ -86,7 +84,7 @@ export function CustomAddressDialog({
             value={value}
             aria-invalid={showInvalid}
             placeholder={copy.placeholder}
-            onChange={(e) => setValue(e.target.value)}
+            onChange={(e) => setDraft({ identity: draftIdentity, value: e.target.value })}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 e.preventDefault()
@@ -100,7 +98,7 @@ export function CustomAddressDialog({
           <p className="text-muted-foreground text-xs">{copy.hint}</p>
         </div>
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+          <Button type="button" variant="outline" onClick={close}>
             {copy.cancel}
           </Button>
           <Button type="button" disabled={!parsed.ok} onClick={submit}>

@@ -44,11 +44,7 @@ export function useRichMarkdownSearch({
   const [debouncedQuery, setDebouncedQuery] = useState('')
 
   useEffect(() => {
-    if (!searchQuery) {
-      setDebouncedQuery('')
-      return
-    }
-    const timer = setTimeout(() => setDebouncedQuery(searchQuery), 150)
+    const timer = setTimeout(() => setDebouncedQuery(searchQuery), searchQuery ? 150 : 0)
     return () => clearTimeout(timer)
   }, [searchQuery])
   const searchRequestQuery = isMarkdownPreviewSearchQueryTooLarge(debouncedQuery)

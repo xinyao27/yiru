@@ -104,6 +104,16 @@ export function shouldDeferRemoteFileBrowserPasteResolve(text: string): boolean 
   return isRemoteFileBrowserPathResolveTextTooLarge(text)
 }
 
+function hasAsciiControlCharacter(value: string): boolean {
+  for (const character of value) {
+    const codePoint = character.codePointAt(0)
+    if (codePoint !== undefined && codePoint <= 0x1f) {
+      return true
+    }
+  }
+  return false
+}
+
 export function parsePathInput(raw: string): ParsedInput {
   if (!isPathMode(raw)) {
     // Filter mode preserves the raw text; trimming happens inside
@@ -154,8 +164,7 @@ export function parsePathInput(raw: string): ParsedInput {
   // bytes cause undefined behavior in the shell / C string boundaries. Single-
   // quote shell-escaping protects against injection but not against these
   // structural hazards, so we reject at the parse layer.
-  // eslint-disable-next-line no-control-regex
-  if (/[\x00-\x1F]/.test(remainder)) {
+  if (hasAsciiControlCharacter(remainder)) {
     return {
       mode: 'path',
       base,

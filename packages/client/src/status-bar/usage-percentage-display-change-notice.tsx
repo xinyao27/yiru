@@ -102,7 +102,6 @@ export function UsagePercentageDisplayChangeNotice({
 
   useLayoutEffect(() => {
     if (!open) {
-      setAnchorPosition(null)
       return
     }
     const anchor = anchorRef.current

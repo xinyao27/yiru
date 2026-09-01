@@ -5,7 +5,7 @@ import {
   getFeatureWallSetupSteps,
   type FeatureWallSetupStepId
 } from '@yiru/runtime-protocol/workbench/feature-wall-setup-steps'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   persistEmittedSetupGuideStepId,
   readEmittedSetupGuideStepIds,
@@ -50,11 +50,13 @@ export function useSetupGuideOpenCloseTelemetry(args: {
   const completedCount = countCompletedSetupSteps(args.progress.stepDone)
   const firstIncompleteStepId = getSetupGuideTelemetryFirstIncompleteStepId(args.progress)
 
-  snapshotRef.current = {
-    completedCount,
-    totalSteps: setupSteps.length,
-    activeStepId: args.activeStepId ?? 'none'
-  }
+  useEffect(() => {
+    snapshotRef.current = {
+      completedCount,
+      totalSteps: setupSteps.length,
+      activeStepId: args.activeStepId ?? 'none'
+    }
+  }, [args.activeStepId, completedCount, setupSteps.length])
 
   const closeSession = useEventCallback(
     (outcome: 'completed' | 'dismissed' | 'interrupted'): void => {
@@ -117,18 +119,15 @@ export function useSetupGuideStepCompletionTelemetry(args: {
   progress: FeatureWallSetupProgress
   setupGuideVisible: boolean
 }): void {
-  const stateRef = useRef<SetupGuideStepCompletionTelemetryState | null>(null)
-  if (!stateRef.current) {
-    stateRef.current = createSetupGuideStepCompletionTelemetryState()
-  }
+  const [state] = useState(createSetupGuideStepCompletionTelemetryState)
 
   useEffect(() => {
     recordSetupGuideStepCompletionTelemetry({
-      state: stateRef.current!,
+      state,
       progress: args.progress,
       setupGuideVisible: args.setupGuideVisible
     })
-  }, [args.progress, args.progress.stepDone, args.setupGuideVisible])
+  }, [args.progress, args.progress.stepDone, args.setupGuideVisible, state])
 }
 
 export function createSetupGuideStepCompletionTelemetryState(): SetupGuideStepCompletionTelemetryState {

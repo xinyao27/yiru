@@ -67,7 +67,7 @@ export function useFileDeletion({
     "Couldn't determine which host owns this file. Check the workspace connection and try again."
   )
   // Why: track in-flight deletes per-path so repeated Del presses on the same
-  // node don't issue duplicate IPC calls; the map is a ref to avoid re-renders.
+  // node don't issue duplicate IPC calls without causing render churn.
   const inFlightRef = useRef<Set<string>>(new Set())
 
   const runDelete = async (

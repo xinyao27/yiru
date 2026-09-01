@@ -1,6 +1,6 @@
 import { isGitRepoKind } from '@yiru/runtime-protocol/workbench/repo-kind'
 import type { RightSidebarExplorerView } from '@yiru/runtime-protocol/workbench/types'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { basename } from '~renderer/path'
 import { useRuntimeFileListForWorktree } from '~renderer/quick-open/file-list'
 import { useActiveWorktree, useRepoById } from '~renderer/store/selectors'
@@ -81,11 +81,6 @@ export function useFileExplorerModel({
   const hasNameFilterQuery = nameFilterQuery.trim().length > 0
   const nameFilterQueryTooLarge = (() => isFileExplorerNameFilterQueryTooLarge(nameFilterQuery))()
   const hasNameFilter = isFilesViewActive && hasNameFilterQuery
-  useEffect(() => {
-    if (!hasNameFilter) {
-      setNameFilterCollapsedPaths((current) => (current.size > 0 ? new Set() : current))
-    }
-  }, [hasNameFilter])
   const nameFilterFiles = useRuntimeFileListForWorktree({
     enabled: hasNameFilter && !nameFilterQueryTooLarge,
     worktreeId: activeWorktreeId

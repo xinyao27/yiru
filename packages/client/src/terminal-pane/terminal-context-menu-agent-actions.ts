@@ -1,5 +1,6 @@
 import { isTerminalAgentQuickCommand } from '@yiru/runtime-protocol/workbench/terminal/quick-commands'
 import type { TerminalQuickCommand } from '@yiru/runtime-protocol/workbench/types'
+import { useEventCallback } from '~renderer/react/use-event-callback'
 import type { ManagedPane } from '~renderer/terminal-pane/pane-manager/pane-manager'
 import { runQuickCommandInNewTab } from '~renderer/terminal-quick-commands/run-in-new-tab'
 
@@ -22,7 +23,7 @@ type TerminalContextMenuAgentActions = {
   onRelaunchAgentSession: () => void
 }
 
-export function createTerminalContextMenuAgentActions({
+export function useTerminalContextMenuAgentActions({
   fallbackCwd,
   groupId,
   onAgentSessionContinuationReady,
@@ -43,7 +44,7 @@ export function createTerminalContextMenuAgentActions({
   tabId: string
   worktreeId: string
 }): TerminalContextMenuAgentActions {
-  const prepareContinuation = (requireContext: boolean): void => {
+  const prepareContinuation = useEventCallback((requireContext: boolean): void => {
     const pane = resolveMenuPane()
     if (!pane) {
       return
@@ -60,42 +61,46 @@ export function createTerminalContextMenuAgentActions({
     if (request) {
       onAgentSessionContinuationReady(request)
     }
-  }
+  })
+
+  const onForkAgentSession = useEventCallback(async (): Promise<void> => {
+    const pane = resolveMenuPane()
+    if (!pane) {
+      return
+    }
+    const fork = prepareAgentSessionForkFromPane({ pane, tabId, worktreeId, groupId })
+    if (fork) {
+      onAgentSessionForkReady(fork)
+    }
+  })
+  const onCopyAgentSessionContext = useEventCallback(async (): Promise<void> => {
+    const pane = resolveMenuPane()
+    if (pane) {
+      await copyAgentSessionContextFromPane(pane)
+    }
+  })
+  const onQuickCommand = useEventCallback((command: TerminalQuickCommand): void => {
+    if (isTerminalAgentQuickCommand(command)) {
+      runQuickCommandInNewTab({ command, worktreeId, groupId })
+      return
+    }
+    const pane = resolveMenuPane()
+    if (pane) {
+      sendTerminalQuickCommandToPane({
+        command,
+        pane,
+        tabId,
+        transport: paneTransportsRef.current.get(pane.id)
+      })
+    }
+  })
 
   return {
-    onForkAgentSession: async () => {
-      const pane = resolveMenuPane()
-      if (!pane) {
-        return
-      }
-      const fork = prepareAgentSessionForkFromPane({ pane, tabId, worktreeId, groupId })
-      if (fork) {
-        onAgentSessionForkReady(fork)
-      }
-    },
+    onForkAgentSession,
     onContinueAgentSessionInNewSession: () => prepareContinuation(true),
     // Why: model relaunch is valid before a session has context to hand off.
     onRelaunchAgentSession: () => prepareContinuation(false),
-    onCopyAgentSessionContext: async () => {
-      const pane = resolveMenuPane()
-      if (pane) {
-        await copyAgentSessionContextFromPane(pane)
-      }
-    },
-    onQuickCommand: (command) => {
-      if (isTerminalAgentQuickCommand(command)) {
-        runQuickCommandInNewTab({ command, worktreeId, groupId })
-        return
-      }
-      const pane = resolveMenuPane()
-      if (pane) {
-        sendTerminalQuickCommandToPane({
-          command,
-          pane,
-          tabId,
-          transport: paneTransportsRef.current.get(pane.id)
-        })
-      }
-    }
+    onCopyAgentSessionContext,
+    onQuickCommand
   }
 }

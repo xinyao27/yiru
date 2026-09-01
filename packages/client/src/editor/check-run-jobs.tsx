@@ -55,10 +55,8 @@ function JobCard({ job, index }: { job: PRCheckJob; index: number }): React.JSX.
   const failedStepKey = breakdown.failed
     .map((step) => `${step.name}:${step.status ?? ''}:${step.conclusion ?? ''}`)
     .join('\0')
-  const [showRest, setShowRest] = React.useState(breakdown.failed.length === 0)
-  React.useEffect(() => {
-    setShowRest(breakdown.failed.length === 0)
-  }, [breakdown.failed.length, failedStepKey])
+  const [expandedFailureKey, setExpandedFailureKey] = React.useState<string | null>(null)
+  const showRest = breakdown.failed.length === 0 || expandedFailureKey === failedStepKey
 
   const summaryParts: string[] = []
   if (breakdown.succeeded.length > 0) {
@@ -121,7 +119,7 @@ function JobCard({ job, index }: { job: PRCheckJob; index: number }): React.JSX.
             variant="quiet"
             size="xs"
             type="button"
-            onClick={() => setShowRest((value) => !value)}
+            onClick={() => setExpandedFailureKey(showRest ? null : failedStepKey)}
             className="flex h-auto w-full justify-start gap-1.5 border-0 py-1 font-normal whitespace-normal"
             aria-expanded={showRest}
           >

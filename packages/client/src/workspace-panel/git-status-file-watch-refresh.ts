@@ -7,9 +7,10 @@ import type {
   FsChangedPayload,
   RightSidebarExplorerView
 } from '@yiru/runtime-protocol/workbench/types'
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 import { isWindowVisible } from '~renderer/application-shell/window-visibility-interval'
 import type { OpenFile } from '~renderer/editor/state'
+import { useEventCallback } from '~renderer/react/use-event-callback'
 import { shouldPollActiveGitStatus } from '~renderer/source-control/macos-data-access'
 import { useAppStore } from '~renderer/store/state'
 import {
@@ -74,8 +75,7 @@ export function useGitStatusFileWatchRefresh({
   const activeRuntimeEnvironmentId = useAppStore((state) =>
     getRuntimeEnvironmentIdForWorktree(state, activeWorktreeId)
   )
-  const fetchStatusRef = useRef(fetchStatus)
-  fetchStatusRef.current = fetchStatus
+  const refreshStatus = useEventCallback(fetchStatus)
   const shouldSubscribe =
     enabled &&
     !!activeWorktreeId &&
@@ -113,7 +113,7 @@ export function useGitStatusFileWatchRefresh({
         if (!isWindowVisible()) {
           return
         }
-        fetchStatusRef.current()
+        refreshStatus()
       }, WATCH_REFRESH_DEBOUNCE_MS)
     }
     const handleFsChanged = (event: Event): void => {
@@ -137,5 +137,5 @@ export function useGitStatusFileWatchRefresh({
       }
       window.removeEventListener(YIRU_WORKTREE_FILE_CHANGE_EVENT, handleFsChanged as EventListener)
     }
-  }, [activeRuntimeEnvironmentId, shouldSubscribe, worktreePath])
+  }, [activeRuntimeEnvironmentId, refreshStatus, shouldSubscribe, worktreePath])
 }

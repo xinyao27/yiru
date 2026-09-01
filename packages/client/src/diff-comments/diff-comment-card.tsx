@@ -67,7 +67,9 @@ export function DiffCommentCard({
   // unrelated parent render and yank the caret to the textarea's end while
   // the user is mid-edit.
   const onContentResizeRef = useRef(onContentResize)
-  onContentResizeRef.current = onContentResize
+  useLayoutEffect(() => {
+    onContentResizeRef.current = onContentResize
+  }, [onContentResize])
 
   // Why: focus + auto-grow the textarea on entering edit mode. Layout effect
   // so the height is set before the browser paints — a measurement pass on

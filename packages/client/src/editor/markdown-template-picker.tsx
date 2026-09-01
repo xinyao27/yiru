@@ -19,7 +19,6 @@ import {
 export function MarkdownTemplatePicker(): JSX.Element {
   const [activeRequest, setActiveRequest] = useState<MarkdownTemplatePickerRequest | null>(null)
   const activeRequestRef = useRef<MarkdownTemplatePickerRequest | null>(null)
-  activeRequestRef.current = activeRequest
 
   const resolveRequest = (selection: MarkdownTemplateSelection): void => {
     const request = activeRequestRef.current

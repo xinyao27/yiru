@@ -40,18 +40,19 @@ export function useOnboardingLifecycle(
     'forward'
   )
   const [stepIndex, setStepIndex] = useState(initialStepIndex)
-  const currentStep = STEPS[stepIndex]
   const progressSteps = STEPS.map((step, index) => ({ step, index })).filter(
     ({ index }) => !isSkippedStepIndex(index, skipOptions)
   )
   const displayedStepIndex = resolveOnboardingStepIndex(stepIndex, skipOptions, 'forward')
+  const currentStep = STEPS[displayedStepIndex]
   const progressStepIndex = Math.max(
     0,
     progressSteps.findIndex(({ index }) => index === displayedStepIndex)
   )
-  const startTimeRef = useRef(Date.now())
+  const startTimeRef = useRef(0)
 
   useEffect(() => {
+    startTimeRef.current = Date.now()
     void refreshPreflightStatus()
   }, [refreshPreflightStatus])
 
@@ -65,8 +66,7 @@ export function useOnboardingLifecycle(
     if (currentStep.id !== 'integrations' || !preflightStatusChecked || !skipIntegrations) {
       return
     }
-    const nextIndex = getNextStepIndex(stepIndex)
-    setStepIndex(nextIndex)
+    const nextIndex = getNextStepIndex(displayedStepIndex)
     const skippedThroughStepNumber = Math.max(
       currentStep.stepNumber,
       STEPS[nextIndex].stepNumber - 1
@@ -87,7 +87,7 @@ export function useOnboardingLifecycle(
     onOnboardingChange,
     preflightStatusChecked,
     skipIntegrations,
-    stepIndex
+    displayedStepIndex
   ])
 
   const startedTrackedRef = useRef(false)
@@ -105,7 +105,7 @@ export function useOnboardingLifecycle(
     track('onboarding_started', resumedStep === null ? {} : { resumed_from_step: resumedStep })
   }, [remappedLastCompletedStep])
 
-  const stepStartedAtRef = useRef(Date.now())
+  const stepStartedAtRef = useRef(0)
   useEffect(() => {
     stepStartedAtRef.current = Date.now()
     track('onboarding_step_viewed', {
@@ -115,7 +115,7 @@ export function useOnboardingLifecycle(
   }, [currentStep.id, currentStep.stepNumber, currentStep.valueKind])
 
   return {
-    stepIndex,
+    stepIndex: displayedStepIndex,
     setStepIndex,
     currentStep,
     progressSteps,

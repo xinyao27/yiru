@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useEventCallback } from '~renderer/react/use-event-callback'
 
 import { commitProjectGroupHeaderDragDrop } from './project-group-header-drag-commit'
@@ -29,15 +29,21 @@ export function useProjectGroupHeaderDrag({
   const [state, setState] = useState<ProjectGroupDragState>(INITIAL_PROJECT_GROUP_DRAG_STATE)
   const [sessionArmed, setSessionArmed] = useState(false)
   const latestDropIndexRef = useRef<number | null>(null)
-  latestDropIndexRef.current = state.dropIndex
   const sidebarProjectGroupHeaderIdsByBucketRef = useRef(sidebarProjectGroupHeaderIdsByBucket)
-  sidebarProjectGroupHeaderIdsByBucketRef.current = sidebarProjectGroupHeaderIdsByBucket
   const projectGroupByIdRef = useRef(projectGroupById)
-  projectGroupByIdRef.current = projectGroupById
   const onCommitProjectGroupTabOrderRef = useRef(onCommitProjectGroupTabOrder)
-  onCommitProjectGroupTabOrderRef.current = onCommitProjectGroupTabOrder
   const getContainerRef = useRef(getScrollContainer)
-  getContainerRef.current = getScrollContainer
+  useLayoutEffect(() => {
+    sidebarProjectGroupHeaderIdsByBucketRef.current = sidebarProjectGroupHeaderIdsByBucket
+    projectGroupByIdRef.current = projectGroupById
+    onCommitProjectGroupTabOrderRef.current = onCommitProjectGroupTabOrder
+    getContainerRef.current = getScrollContainer
+  }, [
+    getScrollContainer,
+    onCommitProjectGroupTabOrder,
+    projectGroupById,
+    sidebarProjectGroupHeaderIdsByBucket
+  ])
   const autoscrollLastFrameTimeRef = useRef<number | null>(null)
   const autoscrollFrameIdRef = useRef<number | null>(null)
 

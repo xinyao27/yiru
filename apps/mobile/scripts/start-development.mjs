@@ -55,7 +55,7 @@ Options:
 }
 
 function logStep(message) {
-  console.log(`[mobile-ios] ${message}`)
+  console.log(`[mobile] ${message}`)
 }
 
 function runInherited(command, args) {
@@ -259,6 +259,6 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error(`[mobile-ios] ${error instanceof Error ? error.message : String(error)}`)
+  console.error(`[mobile] ${error instanceof Error ? error.message : String(error)}`)
   process.exit(1)
 })

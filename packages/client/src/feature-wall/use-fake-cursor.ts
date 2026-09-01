@@ -19,43 +19,45 @@ export function useFakeCursor(
   // Why: rect math has to run after layout/commit so refs have measurable
   // boxes. useLayoutEffect avoids a frame of stale position.
   useLayoutEffect(() => {
-    if (reducedMotion) {
-      setPos((p) => ({ ...p, visible: false }))
-      return
-    }
-    const panel = panelRef.current
-    if (!panel) {
-      return
-    }
-    if (target.kind === 'hidden') {
-      setPos((p) => ({ ...p, visible: false }))
-      return
-    }
-    const panelRect = panel.getBoundingClientRect()
-    if (target.kind === 'pane') {
-      const pane = leftPaneRef.current
-      if (!pane) {
+    const frame = window.requestAnimationFrame(() => {
+      if (reducedMotion) {
+        setPos((p) => ({ ...p, visible: false }))
         return
       }
-      const rect = pane.getBoundingClientRect()
-      // Park near the prompt area — same offsets as the HTML mock.
+      const panel = panelRef.current
+      if (!panel) {
+        return
+      }
+      if (target.kind === 'hidden') {
+        setPos((p) => ({ ...p, visible: false }))
+        return
+      }
+      const panelRect = panel.getBoundingClientRect()
+      if (target.kind === 'pane') {
+        const pane = leftPaneRef.current
+        if (!pane) {
+          return
+        }
+        const rect = pane.getBoundingClientRect()
+        setPos({
+          x: rect.left - panelRect.left + 90,
+          y: rect.top - panelRect.top + 110,
+          visible: true
+        })
+        return
+      }
+      const row = splitRowRef.current
+      if (!row) {
+        return
+      }
+      const rect = row.getBoundingClientRect()
       setPos({
-        x: rect.left - panelRect.left + 90,
-        y: rect.top - panelRect.top + 110,
+        x: rect.left - panelRect.left + 12,
+        y: rect.top - panelRect.top + 11,
         visible: true
       })
-      return
-    }
-    const row = splitRowRef.current
-    if (!row) {
-      return
-    }
-    const rect = row.getBoundingClientRect()
-    setPos({
-      x: rect.left - panelRect.left + 12,
-      y: rect.top - panelRect.top + 11,
-      visible: true
     })
+    return () => window.cancelAnimationFrame(frame)
   }, [target, reducedMotion, panelRef, leftPaneRef, splitRowRef])
 
   return pos

@@ -1,8 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 import type { RuntimeWorkspaceEvent } from '@yiru/runtime-protocol/contract'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { translate } from '~renderer/i18n/i18n'
 import { ClockCounterClockwise } from '~renderer/icons/hugeicons'
+import { useEventCallback } from '~renderer/react/use-event-callback'
 import { Button } from '~renderer/ui/button'
 
 import { getExtensionBrowserCapabilities } from '../browser-capabilities'
@@ -46,10 +47,8 @@ export function AwayReplay(): React.JSX.Element | null {
     queryFn: async () => loadAwayReplay(projectIds, cycle)
   })
   const scopes = replay.data ?? []
-  const latestMarkerRef = useRef<AwayReplayMarker>({})
   const latestMarker = latestAwayReplayMarker(scopes)
-  latestMarkerRef.current = latestMarker
-  useAwayReplayVisibility(setCycle, latestMarkerRef)
+  useAwayReplayVisibility(setCycle, latestMarker)
   const projectNames = new Map(
     (projects.data?.repos ?? []).map((project) => [project.id, project.displayName])
   )
@@ -100,10 +99,10 @@ export function AwayReplay(): React.JSX.Element | null {
 
 function useAwayReplayVisibility(
   setCycle: React.Dispatch<React.SetStateAction<ReplayCycle>>,
-  latestMarkerRef: React.RefObject<AwayReplayMarker>
+  latestMarker: AwayReplayMarker
 ): void {
+  const markSeen = useEventCallback((): void => writeMarker(latestMarker))
   useEffect(() => {
-    const markSeen = (): void => writeMarker(latestMarkerRef.current)
     const handleVisibility = (): void => {
       if (document.visibilityState === 'hidden') {
         markSeen()
@@ -117,7 +116,7 @@ function useAwayReplayVisibility(
       document.removeEventListener('visibilitychange', handleVisibility)
       window.removeEventListener('pagehide', markSeen)
     }
-  }, [latestMarkerRef, setCycle])
+  }, [markSeen, setCycle])
 }
 
 async function loadAwayReplay(

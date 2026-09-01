@@ -2,7 +2,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { isGitRepoKind } from '@yiru/runtime-protocol/workbench/repo-kind'
 // Create-project flow hook for AddRepoDialog (yiru#763), split from
 // AddRepoCreateStep so the create-state machine stays scoped and testable.
-import { useRef, useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { translate } from '~renderer/i18n/i18n'
 import { readProjectCatalogMutationRevision } from '~renderer/project-catalog/catalog-snapshot'
@@ -41,7 +41,9 @@ export function useCreateRepo(
   const mountedRef = useMountedRef()
   const hostToken = options.hostId ?? ''
   const hostTokenRef = useRef(hostToken)
-  hostTokenRef.current = hostToken
+  useLayoutEffect(() => {
+    hostTokenRef.current = hostToken
+  }, [hostToken])
 
   // Why: monotonic ID so stale create callbacks can detect they were superseded
   // when the user clicks Back or closes the dialog mid-create. Mirrors the
@@ -84,7 +86,7 @@ export function useCreateRepo(
     if (!name || !parentPath) {
       return
     }
-    const requestHostToken = hostTokenRef.current
+    const requestHostToken = hostToken
     const gen = ++createGenRef.current
     setIsCreating(true)
     setCreateError(null)

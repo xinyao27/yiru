@@ -1,6 +1,6 @@
 import { CONTEXT_MENU_TRIGGER_TYPE } from '@pierre/trees'
 import { FileTree, useFileTree } from '@pierre/trees/react'
-import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useId, useLayoutEffect, useRef, useSyncExternalStore } from 'react'
 import { joinPath } from '~renderer/path'
 import { WORKSPACE_FILE_PATH_MIME } from '~renderer/workspace/file-drag'
 
@@ -98,14 +98,15 @@ function SourceControlPierreTree({
   nested?: boolean
 }): React.JSX.Element {
   const treeHostId = useId()
-  const [visibleRowCount, setVisibleRowCount] = useState(1)
   const callbacksRef = useRef({ controller, data })
-  callbacksRef.current = { controller, data }
   // Why: the path reset must seed Pierre with the current disclosure state
   // without taking it as a dependency, or a collapse toggle would reset paths.
   const expandedPathsRef = useRef(expandedPaths)
-  expandedPathsRef.current = expandedPaths
   const resettingRef = useRef(false)
+  useLayoutEffect(() => {
+    callbacksRef.current = { controller, data }
+    expandedPathsRef.current = expandedPaths
+  }, [controller, data, expandedPaths])
   const selectedCanonicalPaths = (() =>
     [...selectedRowKeys].flatMap((key) => {
       const path = data.canonicalPathByRowKey.get(key)
@@ -150,6 +151,11 @@ function SourceControlPierreTree({
       ? `${SOURCE_CONTROL_PIERRE_TREE_UNSAFE_CSS}${SOURCE_CONTROL_PIERRE_TREE_NESTED_UNSAFE_CSS}`
       : SOURCE_CONTROL_PIERRE_TREE_UNSAFE_CSS
   })
+  const visibleRowCount = useSyncExternalStore(
+    model.subscribe,
+    model.getVisibleCount,
+    model.getVisibleCount
+  )
   // Why: `resetPaths` reparses and resorts every path, drops all item handles
   // and rebuilds the projection, so it must run only when the path set itself
   // changes — never for a disclosure change, which the effect below handles.
@@ -157,7 +163,6 @@ function SourceControlPierreTree({
     resettingRef.current = true
     model.resetPaths(data.paths, { initialExpandedPaths: expandedPathsRef.current })
     resettingRef.current = false
-    setVisibleRowCount(model.getVisibleCount())
   }, [data.paths, model])
 
   useLayoutEffect(() => {
@@ -177,7 +182,6 @@ function SourceControlPierreTree({
       }
     }
     resettingRef.current = false
-    setVisibleRowCount(model.getVisibleCount())
   }, [data.targetByCanonicalPath, expandedPaths, model])
 
   useLayoutEffect(() => {
@@ -201,9 +205,6 @@ function SourceControlPierreTree({
   useEffect(
     () =>
       model.subscribe(() => {
-        // Why: Pierre owns the projected row count (sole-child directory chains
-        // collapse into one row), so the panel height follows its own tally.
-        setVisibleRowCount(model.getVisibleCount())
         if (resettingRef.current) {
           return
         }

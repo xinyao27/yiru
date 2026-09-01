@@ -5,7 +5,7 @@ import type {
   EventProps,
   FeatureWallOpenSourceTelemetry
 } from '@yiru/runtime-protocol/workbench/telemetry-events'
-import { useEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef } from 'react'
 import { useEventCallback } from '~renderer/react/use-event-callback'
 import { track } from '~renderer/telemetry/client'
 
@@ -79,10 +79,10 @@ export function useFeatureWallTourTelemetry(args: {
   const telemetryRef = useRef<FeatureWallTourTelemetryState>(createFeatureWallTourTelemetryState())
   const sourceRef = useRef(source)
   const getDepthSummaryRef = useRef(getDepthSummary)
-  // Why: close telemetry may emit from stable callbacks; keep the payload
-  // inputs current before open/close Effects or unmount cleanup can run.
-  sourceRef.current = source
-  getDepthSummaryRef.current = getDepthSummary
+  useLayoutEffect(() => {
+    sourceRef.current = source
+    getDepthSummaryRef.current = getDepthSummary
+  }, [getDepthSummary, source])
 
   const emitCloseTelemetry = useEventCallback(() => {
     const payload = buildFeatureWallClosedTelemetry(

@@ -49,9 +49,12 @@ export function useAiVaultSessionRefresh(
   const scopePathsKey = (() => scopePaths.join('\n'))()
   const scanScopeKey = `${executionHostScope}\n${scopePathsKey}`
   const scopePathsRef = useRef<readonly string[]>(scopePaths)
-  scopePathsRef.current = scopePaths
   const executionHostScopeRef = useRef<ExecutionHostScope>(executionHostScope)
-  executionHostScopeRef.current = executionHostScope
+
+  useEffect(() => {
+    scopePathsRef.current = scopePaths
+    executionHostScopeRef.current = executionHostScope
+  }, [executionHostScope, scopePaths])
   const currentScanScopeKey = () =>
     `${executionHostScopeRef.current}\n${scopePathsRef.current.join('\n')}`
 

@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import type React from 'react'
 import { shellClient } from '~renderer/runtime/shell-client'
 
@@ -35,11 +35,6 @@ export function useFileExplorerSelection(
   isMac: boolean
 ): UseFileExplorerSelectionResult {
   const [selectionState, setSelectionState] = useState(createEmptyFileExplorerSelection)
-  const selectionStateRef = useRef(selectionState)
-  const rowProjectionRef = useRef(rowProjection)
-  selectionStateRef.current = selectionState
-  rowProjectionRef.current = rowProjection
-
   const setSingleSelectedPath = (value: React.SetStateAction<string | null>) => {
     setSelectionState((prev) => {
       if (typeof value === 'function') {
@@ -68,7 +63,7 @@ export function useFileExplorerSelection(
   }
 
   const moveSelection = (targetPath: string, mode: FileExplorerSelectionMode) => {
-    const orderedPaths = rowProjectionRef.current.getOrderedPaths()
+    const orderedPaths = rowProjection.getOrderedPaths()
     setSelectionState((prev) => updateFileExplorerSelection(prev, orderedPaths, targetPath, mode))
   }
 
@@ -93,7 +88,7 @@ export function useFileExplorerSelection(
 
     // Why: tree refreshes are much more common than range/toggle selections
     // in large repos. Build order only for the modifier path that needs it.
-    const orderedPaths = rowProjectionRef.current.getOrderedPaths()
+    const orderedPaths = rowProjection.getOrderedPaths()
     setSelectionState((prev) =>
       updateFileExplorerSelection(prev, orderedPaths, node.path, selectionMode)
     )
@@ -108,9 +103,9 @@ export function useFileExplorerSelection(
   }
 
   const copyPathsForNode = (node: TreeNode, pathKind: 'absolute' | 'relative') => {
-    const { selectedPaths } = selectionStateRef.current
+    const { selectedPaths } = selectionState
     const selectedNodes = selectedPaths.has(node.path)
-      ? rowProjectionRef.current.getRowsByPaths(selectedPaths)
+      ? rowProjection.getRowsByPaths(selectedPaths)
       : []
     const actionNodes = selectedNodes.length > 0 ? selectedNodes : [node]
     void shellClient.ui.writeClipboardText(

@@ -125,6 +125,7 @@ export function MarkdownTableOfContentsPanel({
   onNavigate
 }: MarkdownTableOfContentsPanelProps): React.JSX.Element {
   const [collapsedIds, setCollapsedIds] = useState<Set<string>>(() => new Set())
+  const renderedCollapsedIds = pruneMarkdownTocCollapsedIds(collapsedIds, items)
   const markdownTocPanelWidth = useAppStore((s) => s.markdownTocPanelWidth)
   const setMarkdownTocPanelWidth = useAppStore((s) => s.setMarkdownTocPanelWidth)
   const [layoutWidth, setLayoutWidth] = useState<number | null>(null)
@@ -143,10 +144,6 @@ export function MarkdownTableOfContentsPanel({
   })
 
   useEffect(() => {
-    setCollapsedIds((current) => pruneMarkdownTocCollapsedIds(current, items))
-  }, [items])
-
-  useEffect(() => {
     const container = containerRef.current
     const layout = container?.parentElement
     if (!layout) {
@@ -157,7 +154,6 @@ export function MarkdownTableOfContentsPanel({
       setLayoutWidth(layout.clientWidth)
     }
 
-    updateMaxWidth()
     const observer = new ResizeObserver(updateMaxWidth)
     observer.observe(layout)
     return () => observer.disconnect()
@@ -259,7 +255,7 @@ export function MarkdownTableOfContentsPanel({
           items.map((item) => (
             <MarkdownTocRow
               key={item.id}
-              collapsedIds={collapsedIds}
+              collapsedIds={renderedCollapsedIds}
               depth={0}
               item={item}
               onNavigate={onNavigate}

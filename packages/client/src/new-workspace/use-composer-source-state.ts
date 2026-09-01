@@ -92,8 +92,11 @@ export function useComposerSourceState(options: UseComposerSourceStateOptions) {
   const lastAutoNoteRef = useRef('')
   const noteRef = useRef(note)
   const startPointSelectionRef = useRef<SmartGitHubPrStartPointSelection | null>(null)
-  nameRef.current = name
-  noteRef.current = note
+
+  useEffect(() => {
+    nameRef.current = name
+    noteRef.current = note
+  }, [name, note])
 
   useEffect(() => {
     const clearAutoManagedName = (): void => {
@@ -111,6 +114,10 @@ export function useComposerSourceState(options: UseComposerSourceStateOptions) {
       )
     }
   }, [])
+
+  const resetAutoManagedName = (): void => {
+    lastAutoNameRef.current = ''
+  }
 
   return {
     agentPrompt,
@@ -131,6 +138,7 @@ export function useComposerSourceState(options: UseComposerSourceStateOptions) {
     note,
     noteRef,
     pushTarget,
+    resetAutoManagedName,
     reuseEligibleBranch,
     reuseSelectedBranch,
     setAgentPrompt,

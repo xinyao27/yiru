@@ -1,5 +1,5 @@
 import type { GlobalSettings } from '@yiru/runtime-protocol/workbench/types'
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { toast } from 'sonner'
 import { translate } from '~renderer/i18n/i18n'
 import { BellRinging as BellRing, FileAudio, Upload } from '~renderer/icons/hugeicons'
@@ -43,7 +43,6 @@ export function NotificationStep({
   updateSettings
 }: NotificationStepProps): React.JSX.Element {
   const notificationSettings = settings?.notifications
-  const notificationSettingsRef = useRef(notificationSettings)
   // Why: undefined settings are still loading — assume enabled (the default)
   // so the fresh-install permission flow starts without waiting.
   const [macPermissionState, setMacPermissionState] = useMacNotificationPermissionState(
@@ -51,15 +50,7 @@ export function NotificationStep({
   )
   const [isPickingSound, setIsPickingSound] = useState(false)
   const [selectPortalRoot, setSelectPortalRoot] = useState<HTMLElement | null>(null)
-  const syncedNotificationSettingsRef = useRef(notificationSettings)
   const mountedRef = useMountedRef()
-
-  if (syncedNotificationSettingsRef.current !== notificationSettings) {
-    syncedNotificationSettingsRef.current = notificationSettings
-    // Why: handlers optimistically update the ref before persisted settings
-    // flow back through props, so local re-renders must not overwrite it.
-    notificationSettingsRef.current = notificationSettings
-  }
 
   const setSelectPortalHost = (node: HTMLDivElement | null) => {
     // Why: onboarding sits above body-level portals, so the select menu must
@@ -70,7 +61,7 @@ export function NotificationStep({
   const updateNotificationSettings = async (
     updates: Partial<GlobalSettings['notifications']>
   ): Promise<void> => {
-    const current = notificationSettingsRef.current
+    const current = notificationSettings
     if (!current) {
       return
     }
@@ -78,14 +69,12 @@ export function NotificationStep({
       ...current,
       ...updates
     }
-    notificationSettingsRef.current = nextNotifications
     await updateSettings({
       notifications: nextNotifications
     })
   }
 
-  const getCustomSoundVolume = (): number =>
-    notificationSettingsRef.current?.customSoundVolume ?? 100
+  const getCustomSoundVolume = (): number => notificationSettings?.customSoundVolume ?? 100
 
   const previewSound = async (
     customSoundId: GlobalSettings['notifications']['customSoundId']

@@ -1,8 +1,9 @@
 import type { PublicKnownRuntimeEnvironment } from '@yiru/runtime-protocol/workbench/runtime-environments'
 import type { OnboardingState, Repo } from '@yiru/runtime-protocol/workbench/types'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { onOnboardingReopened } from '../onboarding/show-onboarding-event'
+import { useEventCallback } from '../react/use-event-callback'
 import { useAppStore } from '../store/state'
 import { hydrateStartupSession, type StartupHydrationAttempt } from './startup-hydration'
 import { recoverStartupSession } from './startup-recovery'
@@ -18,12 +19,12 @@ export function useStartupHydration(
   repos: readonly Repo[],
   runtimeEnvironments: readonly PublicKnownRuntimeEnvironment[]
 ): StartupHydrationState {
-  const reposRef = useRef(repos)
-  reposRef.current = repos
-  const runtimeEnvironmentsRef = useRef(runtimeEnvironments)
-  runtimeEnvironmentsRef.current = runtimeEnvironments
   const [onboarding, setOnboarding] = useState<OnboardingState | null>(null)
   const [onboardingLoaded, setOnboardingLoaded] = useState(false)
+  const hydrate = useEventCallback(
+    (args: Omit<Parameters<typeof hydrateStartupSession>[0], 'repos' | 'runtimeEnvironments'>) =>
+      hydrateStartupSession({ ...args, repos, runtimeEnvironments })
+  )
 
   useEffect(() => onOnboardingReopened(setOnboarding), [])
   useEffect(() => {
@@ -41,12 +42,10 @@ export function useStartupHydration(
 
     void (async () => {
       try {
-        const restoredOnboarding = await hydrateStartupSession({
+        const restoredOnboarding = await hydrate({
           actions,
           attempt,
           isCancelled,
-          repos: reposRef.current,
-          runtimeEnvironments: runtimeEnvironmentsRef.current,
           signal: abortController.signal
         })
         if (!cancelled && restoredOnboarding !== null) {
@@ -70,7 +69,7 @@ export function useStartupHydration(
       cancelled = true
       abortController.abort()
     }
-  }, [isProjectCatalogPending])
+  }, [hydrate, isProjectCatalogPending])
 
   return { onboarding, onboardingLoaded, setOnboarding }
 }

@@ -6,6 +6,7 @@ import { ORPHAN_WORKTREE_ID } from '@yiru/runtime-protocol/workbench/constants'
 import { isFolderRepo } from '@yiru/runtime-protocol/workbench/repo-kind'
 import { isWorkspaceOldForCleanup } from '@yiru/runtime-protocol/workbench/workspace/cleanup'
 import React, { useEffect, useState } from 'react'
+import { useNow } from '~renderer/dashboard/use-now'
 import { useProjectCatalog } from '~renderer/project-catalog/provider'
 import { useEventCallback } from '~renderer/react/use-event-callback'
 import { useMountedRef } from '~renderer/react/use-mounted-ref'
@@ -84,6 +85,7 @@ export function ResourceUsageStatusSegment({
       lastSeenScannedAt: workspaceSpaceScannedAt
     })
   )
+  const cleanupReferenceTime = useNow(60_000)
   // Why: tab titles can update on terminal keystrokes. The resource popover's
   // merged tree needs them only while open, so closed status-bar badges should
   // not subscribe to those high-churn maps.
@@ -215,14 +217,13 @@ export function ResourceUsageStatusSegment({
   const worktreeById = (() => new Map(allWorktrees.map((worktree) => [worktree.id, worktree])))()
 
   const oldWorkspaceCount = (() => {
-    const now = Date.now()
     let count = 0
     for (const worktree of allWorktrees) {
       const repo = repoById.get(worktree.repoId)
       if (!repo || isFolderRepo(repo) || worktree.isMainWorktree) {
         continue
       }
-      if (isWorkspaceOldForCleanup(worktree, now)) {
+      if (isWorkspaceOldForCleanup(worktree, cleanupReferenceTime)) {
         count += 1
       }
     }

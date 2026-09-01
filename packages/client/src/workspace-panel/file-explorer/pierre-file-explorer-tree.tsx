@@ -29,7 +29,7 @@ export function PierreFileExplorerTree({
   inlineInput,
   statusByRelativePath,
   ignoredByRelativePath,
-  scrollElementRef,
+  onScrollElementChange,
   onActivateFile,
   onDoubleClickFile,
   onToggleDirectory,
@@ -52,7 +52,6 @@ export function PierreFileExplorerTree({
         .map(([path]) => normalizeRelativePath(path))
     ))()
   const copiedPathsRef = useRef(copiedPaths)
-  copiedPathsRef.current = copiedPaths
   const expandedCanonicalPaths = (() =>
     [...expandedPaths]
       .map((path) => treeData.canonicalPathByAbsolutePath.get(path))
@@ -76,7 +75,21 @@ export function PierreFileExplorerTree({
     treeData,
     worktreePath
   })
-  callbacksRef.current = {
+  const resettingRef = useRef(false)
+
+  useLayoutEffect(() => {
+    copiedPathsRef.current = copiedPaths
+    callbacksRef.current = {
+      inlineInput,
+      onInlineInputSubmit,
+      onMoveDrop,
+      onRenameNode,
+      onSelectionChange,
+      treeData,
+      worktreePath
+    }
+  }, [
+    copiedPaths,
     inlineInput,
     onInlineInputSubmit,
     onMoveDrop,
@@ -84,8 +97,7 @@ export function PierreFileExplorerTree({
     onSelectionChange,
     treeData,
     worktreePath
-  }
-  const resettingRef = useRef(false)
+  ])
 
   const { model } = useFileTree({
     paths: treeData.paths,
@@ -168,9 +180,12 @@ export function PierreFileExplorerTree({
   const expandedPathsRef = useRef(expandedPaths)
   const treeDataRef = useRef(treeData)
   const onToggleDirectoryRef = useRef(onToggleDirectory)
-  expandedPathsRef.current = expandedPaths
-  treeDataRef.current = treeData
-  onToggleDirectoryRef.current = onToggleDirectory
+
+  useLayoutEffect(() => {
+    expandedPathsRef.current = expandedPaths
+    treeDataRef.current = treeData
+    onToggleDirectoryRef.current = onToggleDirectory
+  }, [expandedPaths, onToggleDirectory, treeData])
 
   useLayoutEffect(() => {
     resettingRef.current = true
@@ -262,11 +277,11 @@ export function PierreFileExplorerTree({
     const scrollElement = container?.shadowRoot?.querySelector<HTMLDivElement>(
       '[data-file-tree-virtualized-scroll="true"]'
     )
-    scrollElementRef.current = scrollElement ?? null
+    onScrollElementChange(scrollElement ?? null)
     return () => {
-      scrollElementRef.current = null
+      onScrollElementChange(null)
     }
-  }, [model, scrollElementRef, treeData.paths])
+  }, [model, onScrollElementChange])
 
   useImperativeHandle(
     ref,

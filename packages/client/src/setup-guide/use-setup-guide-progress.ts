@@ -1,6 +1,5 @@
 import { hasFeatureInteraction } from '@yiru/runtime-protocol/workbench/feature-interactions'
 import { isGitRepoKind } from '@yiru/runtime-protocol/workbench/repo-kind'
-/* oxlint-disable react-doctor/no-adjust-state-on-prop-change -- Why: setup-guide readiness is driven by bounded IPC probes and browser focus events; the state cannot be derived synchronously from render inputs. */
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import {
   COMPUTER_USE_SKILL_NAME,
@@ -78,6 +77,14 @@ export function useSetupGuideProgress(
     discoveryTarget: activeSkillRuntime.discoveryTarget,
     sourceKinds: GLOBAL_AGENT_SKILL_SOURCE_KINDS
   })
+  const permissionCheckActive = shouldRefreshCoreState && computerUseSkillInstalled
+  const [wasPermissionCheckActive, setWasPermissionCheckActive] = useState(permissionCheckActive)
+  if (wasPermissionCheckActive !== permissionCheckActive) {
+    setWasPermissionCheckActive(permissionCheckActive)
+    setComputerUsePermissionStatusChecked(false)
+    setComputerUsePermissionsReady(false)
+    setComputerUseUnavailable(false)
+  }
   const orderedGitRepos = (() => {
     const gitRepos = repos.filter(isGitRepoKind)
     const activeRepo = activeRepoId
@@ -91,7 +98,9 @@ export function useSetupGuideProgress(
   const setupScriptProbeSignature = (() =>
     getSetupScriptProbeSignature(settings, orderedGitRepos))()
   const activeSetupScriptProbeSignatureRef = useRef<string | null>(setupScriptProbeSignature)
-  activeSetupScriptProbeSignatureRef.current = setupScriptProbeSignature
+  useEffect(() => {
+    activeSetupScriptProbeSignatureRef.current = setupScriptProbeSignature
+  }, [setupScriptProbeSignature])
 
   useEffect(() => {
     if (!shouldRefreshCoreState || !settings || setupScriptProbeSignature === null) {
@@ -146,7 +155,6 @@ export function useSetupGuideProgress(
         return
       }
       const permissionState = getComputerUsePermissionSetupState(status)
-      // oxlint-disable-next-line react-doctor/no-adjust-state-on-prop-change -- Why: async permission checks update setup progress after external OS state changes.
       setComputerUsePermissionStatusChecked(true)
       setComputerUsePermissionsReady(permissionState.ready)
       setComputerUseUnavailable(permissionState.unavailable)
@@ -155,18 +163,12 @@ export function useSetupGuideProgress(
 
   useEffect(() => {
     if (!shouldRefreshCoreState || !computerUseSkillInstalled) {
-      // Why: unavailable setup-guide steps must clear stale permission state before
-      // readiness is derived for the visible checklist.
-      setComputerUsePermissionStatusChecked(false)
-      setComputerUsePermissionsReady(false)
-      setComputerUseUnavailable(false)
       return
     }
     let stale = false
     const refreshComputerUsePermissions = (): void => {
       void readComputerUsePermissions(() => stale)
     }
-    // oxlint-disable-next-line react-doctor/no-adjust-state-on-prop-change -- Why: refresh the setup checklist when the permission step becomes active.
     refreshComputerUsePermissions()
     const handleFocus = (): void => {
       void refreshComputerUsePermissions()

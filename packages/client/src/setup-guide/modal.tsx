@@ -5,7 +5,7 @@ import {
 } from '@yiru/runtime-protocol/workbench/feature-wall-setup-steps'
 import type { FeatureWallSetupStepId } from '@yiru/runtime-protocol/workbench/feature-wall-setup-steps'
 import type { JSX } from 'react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { translate } from '~renderer/i18n/i18n'
 import { EyeSlash as EyeOff } from '~renderer/icons/hugeicons'
 import { useAppStore } from '~renderer/store/state'
@@ -31,7 +31,6 @@ export default function SetupGuideModal(): JSX.Element | null {
   const setSetupGuideSidebarDismissed = useAppStore((s) => s.setSetupGuideSidebarDismissed)
   const isOpen = activeModal === 'setup-guide'
   const setupSteps = (() => getFeatureWallSetupSteps())()
-  const [userSelectedStep, setUserSelectedStep] = useState(false)
   const [orchestrationSkillInstalled, setOrchestrationSkillInstalled] = useState(false)
   const [browserUseSkillInstalled, setBrowserUseSkillInstalled] = useState(false)
   const progress = useSetupGuideProgress(
@@ -39,12 +38,48 @@ export default function SetupGuideModal(): JSX.Element | null {
     orchestrationSkillInstalled,
     browserUseSkillInstalled
   )
-  const [activeStepId, setActiveStepId] = useState<FeatureWallSetupStepId>(() =>
-    getFirstIncompleteFeatureWallSetupStepId(progress.stepDone)
-  )
   const requestedStepId = isFeatureWallSetupStepId(modalData.setupStepId)
     ? modalData.setupStepId
     : null
+  const firstIncompleteStepId = getFirstIncompleteFeatureWallSetupStepId(progress.stepDone)
+  const [stepSelection, setStepSelection] = useState<{
+    requestedStepId: FeatureWallSetupStepId | null
+    selectedStepId: FeatureWallSetupStepId
+    isUserSelected: boolean
+    wasOpen: boolean
+  }>(() => ({
+    requestedStepId,
+    selectedStepId: requestedStepId ?? firstIncompleteStepId,
+    isUserSelected: false,
+    wasOpen: isOpen
+  }))
+  if (!isOpen && stepSelection.wasOpen) {
+    setStepSelection({
+      requestedStepId,
+      selectedStepId: requestedStepId ?? firstIncompleteStepId,
+      isUserSelected: false,
+      wasOpen: false
+    })
+  } else if (
+    isOpen &&
+    (!stepSelection.wasOpen || stepSelection.requestedStepId !== requestedStepId)
+  ) {
+    setStepSelection({
+      requestedStepId,
+      selectedStepId: requestedStepId ?? firstIncompleteStepId,
+      isUserSelected: false,
+      wasOpen: true
+    })
+  } else if (isOpen && !stepSelection.isUserSelected) {
+    const requestedStepIsDone = requestedStepId !== null && progress.stepDone[requestedStepId]
+    const automaticStepId = requestedStepIsDone
+      ? firstIncompleteStepId
+      : (requestedStepId ?? firstIncompleteStepId)
+    if (stepSelection.selectedStepId !== automaticStepId) {
+      setStepSelection({ ...stepSelection, selectedStepId: automaticStepId })
+    }
+  }
+  const activeStepId = stepSelection.selectedStepId
   const telemetrySource =
     typeof modalData.setupGuideSource === 'string'
       ? modalData.setupGuideSource
@@ -60,44 +95,12 @@ export default function SetupGuideModal(): JSX.Element | null {
     activeStepId: activeStep?.id ?? null
   })
 
-  useEffect(() => {
-    if (!isOpen) {
-      setUserSelectedStep(false)
-      return
-    }
-    if (requestedStepId === null) {
-      return
-    }
-    setUserSelectedStep(false)
-    setActiveStepId(requestedStepId)
-  }, [isOpen, requestedStepId])
-
-  useEffect(() => {
-    if (!isOpen || userSelectedStep || requestedStepId !== null) {
-      return
-    }
-    setActiveStepId(getFirstIncompleteFeatureWallSetupStepId(progress.stepDone))
-  }, [isOpen, progress.stepDone, requestedStepId, userSelectedStep])
-
-  useEffect(() => {
-    if (
-      !isOpen ||
-      userSelectedStep ||
-      requestedStepId === null ||
-      activeStep?.id !== requestedStepId ||
-      !progress.stepDone[activeStep.id]
-    ) {
-      return
-    }
-    const nextUnfinishedCoreStepId = getFirstIncompleteFeatureWallSetupStepId(progress.stepDone)
-    if (nextUnfinishedCoreStepId !== activeStep.id) {
-      setActiveStepId(nextUnfinishedCoreStepId)
-    }
-  }, [activeStep, isOpen, progress.stepDone, requestedStepId, userSelectedStep])
-
   const handleSelectStep = (id: FeatureWallSetupStepId): void => {
-    setUserSelectedStep(true)
-    setActiveStepId(id)
+    setStepSelection((current) => ({
+      ...current,
+      selectedStepId: id,
+      isUserSelected: true
+    }))
   }
 
   const handleOpenChange = (open: boolean): void => {

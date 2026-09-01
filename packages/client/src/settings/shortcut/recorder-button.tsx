@@ -4,7 +4,7 @@ import {
   type KeybindingActionId,
   type KeybindingInput
 } from '@yiru/runtime-protocol/workbench/keybindings'
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { translate } from '~renderer/i18n/i18n'
 import {
   ModifierDoubleTapDetector,
@@ -59,21 +59,18 @@ export function ShortcutRecorderButton({
   onClearError
 }: ShortcutRecorderButtonProps): React.JSX.Element {
   const recordButtonRef = useRef<HTMLButtonElement | null>(null)
-  const doubleTapDetectorRef = useRef<ModifierDoubleTapDetector | null>(null)
-  if (!doubleTapDetectorRef.current) {
-    doubleTapDetectorRef.current = new ModifierDoubleTapDetector()
-  }
+  const [doubleTapDetector] = useState(() => new ModifierDoubleTapDetector())
 
   useEffect(() => {
     if (recording) {
       recordButtonRef.current?.focus()
     } else {
       // Stale taps mustn't survive into the next recording session.
-      doubleTapDetectorRef.current?.reset()
+      doubleTapDetector.reset()
     }
     // The global recorder-focused flag is owned by ShortcutsPane (one source of
     // truth across rows), so it isn't toggled here.
-  }, [recording])
+  }, [doubleTapDetector, recording])
 
   const handleRecordKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>): void => {
     if (!recording) {
@@ -88,7 +85,7 @@ export function ShortcutRecorderButton({
     event.stopPropagation()
 
     if (event.key === 'Escape') {
-      doubleTapDetectorRef.current?.reset()
+      doubleTapDetector.reset()
       onClearError(actionId)
       onCancelRecording()
       return
@@ -97,7 +94,7 @@ export function ShortcutRecorderButton({
     // A modifier press never captures on its own — the detector decides whether
     // it completes a double-tap, leaving normal chords to capture on their key.
     if (modifierFromKeyEvent(event.code, event.key) !== null) {
-      const detected = doubleTapDetectorRef.current?.process(
+      const detected = doubleTapDetector.process(
         toModifierDoubleTapEvent({
           type: 'keyDown',
           code: event.code,
@@ -113,12 +110,12 @@ export function ShortcutRecorderButton({
       if (detected) {
         onClearError(actionId)
         onCapture(actionId, { doubleTapModifier: detected.modifier })
-        doubleTapDetectorRef.current?.reset()
+        doubleTapDetector.reset()
       }
       return
     }
 
-    doubleTapDetectorRef.current?.reset()
+    doubleTapDetector.reset()
     onClearError(actionId)
     onCapture(actionId, {
       key: event.key,
@@ -136,7 +133,7 @@ export function ShortcutRecorderButton({
     }
     event.preventDefault()
     event.stopPropagation()
-    doubleTapDetectorRef.current?.process(
+    doubleTapDetector.process(
       toModifierDoubleTapEvent({
         type: 'keyUp',
         code: event.code,

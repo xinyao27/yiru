@@ -109,7 +109,6 @@ export function AgentSkillSetupPanel({
 
   useEffect(() => {
     if (!preInstallNotice) {
-      setPreInstallNoticeVisible(false)
       return
     }
 

@@ -82,17 +82,17 @@ function App(): React.JSX.Element {
   const keybindings = useAppStore((s) => s.keybindings)
   const activeContextualTourId = useAppStore((s) => s.activeContextualTourId)
   const statusBarVisible = useAppStore((s) => s.statusBarVisible)
-  const hasMountedTerminalWorkbenchRef = useRef(false)
-  if (activeWorktreeId !== null || backgroundTerminalMountRequested) {
-    hasMountedTerminalWorkbenchRef.current = true
+  const terminalWorkbenchRequested = activeWorktreeId !== null || backgroundTerminalMountRequested
+  const [hasMountedTerminalWorkbench, setHasMountedTerminalWorkbench] = useState(
+    terminalWorkbenchRequested
+  )
+  if (terminalWorkbenchRequested && !hasMountedTerminalWorkbench) {
+    setHasMountedTerminalWorkbench(true)
   }
   // Why: skip the terminal bundle on the no-workspace landing path, but once a
   // workspace has mounted, keep Terminal-owned hidden panes alive through sleep
   // and shutdown transitions where activeWorktreeId can briefly become null.
-  const shouldMountTerminalWorkbench =
-    activeWorktreeId !== null ||
-    backgroundTerminalMountRequested ||
-    hasMountedTerminalWorkbenchRef.current
+  const shouldMountTerminalWorkbench = terminalWorkbenchRequested || hasMountedTerminalWorkbench
   // Why: visible worktree creation owns its faux tab strip from start to finish;
   // the previous workspace must stay mounted for retention without rendering
   // real chrome.
@@ -133,7 +133,17 @@ function App(): React.JSX.Element {
   usePrimarySelectionPaste()
   useLargeTextControlPaste()
   const [mountedLazyModalIds, setMountedLazyModalIds] = useState<Set<LazyModalId>>(() => new Set())
-  const [shouldMountAddRepoDialog, setShouldMountAddRepoDialog] = useState(false)
+  const isAddRepoDialogOpen = activeModal === 'add-repo'
+  const [addRepoMountState, setAddRepoMountState] = useState({
+    wasOpen: isAddRepoDialogOpen,
+    isRetained: false
+  })
+  if (isAddRepoDialogOpen && !addRepoMountState.wasOpen) {
+    setAddRepoMountState({ wasOpen: true, isRetained: false })
+  } else if (!isAddRepoDialogOpen && addRepoMountState.wasOpen) {
+    setAddRepoMountState({ wasOpen: false, isRetained: true })
+  }
+  const shouldMountAddRepoDialog = isAddRepoDialogOpen || addRepoMountState.isRetained
   const { onboarding, onboardingLoaded, setOnboarding } = useStartupHydration(
     projectCatalog.isPending,
     projectCatalog.repos,
@@ -143,19 +153,18 @@ function App(): React.JSX.Element {
   const shouldRenderOnboarding = onboarding !== null && shouldShowOnboarding(onboarding)
 
   useEffect(() => {
-    if (activeModal === 'add-repo') {
+    if (!addRepoMountState.isRetained) {
       if (unmountAddRepoDialogTimerRef.current) {
         clearTimeout(unmountAddRepoDialogTimerRef.current)
         unmountAddRepoDialogTimerRef.current = null
       }
-      setShouldMountAddRepoDialog(true)
       return
     }
-    if (shouldMountAddRepoDialog && !unmountAddRepoDialogTimerRef.current) {
+    if (!unmountAddRepoDialogTimerRef.current) {
       // Why: AddRepoDialog's close effect aborts in-flight clone/nested work.
       // Keep one closed render, then remove hidden SSH/remote subscriptions.
       unmountAddRepoDialogTimerRef.current = setTimeout(() => {
-        setShouldMountAddRepoDialog(false)
+        setAddRepoMountState((current) => ({ ...current, isRetained: false }))
         unmountAddRepoDialogTimerRef.current = null
       }, 0)
     }
@@ -165,7 +174,7 @@ function App(): React.JSX.Element {
         unmountAddRepoDialogTimerRef.current = null
       }
     }
-  }, [activeModal, shouldMountAddRepoDialog])
+  }, [addRepoMountState.isRetained])
 
   // Subscribe to IPC push events
   useIpcEvents()

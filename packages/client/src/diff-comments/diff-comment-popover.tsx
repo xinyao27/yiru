@@ -62,7 +62,6 @@ export function DiffCommentPopover({
   // every keystroke. Used to keep the popover open on outside-click when the
   // user has typed something, so an accidental click never discards a draft.
   const bodyRef = useRef(body)
-  bodyRef.current = body
   // Why: `submitting` prevents duplicate note rows when the user
   // double-clicks the Add note button or hits Enter twice before the
   // IPC round-trip resolves. Iteration 1 made submission async and keeps the
@@ -82,7 +81,6 @@ export function DiffCommentPopover({
   // document listener on every parent render. Mirrors the pattern in
   // use-diff-comment-decorator.tsx.
   const onCancelRef = useRef(onCancel)
-  onCancelRef.current = onCancel
   // Why: stable id per-instance so multiple popovers (should they ever coexist)
   // don't collide on aria-labelledby references. Screen readers announce the
   // "Line N" label as the dialog's accessible name.
@@ -98,9 +96,13 @@ export function DiffCommentPopover({
   // ResizeObserver below can stay mounted once instead of tearing down on every
   // scroll frame, which updates `top` continuously while the popover is open.
   const topRef = useRef(top)
-  topRef.current = top
   const lineHeightRef = useRef(lineHeight)
-  lineHeightRef.current = lineHeight
+  useLayoutEffect(() => {
+    bodyRef.current = body
+    onCancelRef.current = onCancel
+    topRef.current = top
+    lineHeightRef.current = lineHeight
+  }, [body, lineHeight, onCancel, top])
 
   const measureResolvedTop = useEventCallback((): void => {
     const popover = popoverRef.current

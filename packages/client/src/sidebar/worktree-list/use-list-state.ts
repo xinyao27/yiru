@@ -2,6 +2,7 @@ import { getSettingsFocusedExecutionHostId } from '@yiru/runtime-protocol/model/
 import type { ProjectGroup, Worktree } from '@yiru/runtime-protocol/workbench/types'
 import { getActiveSidebarWorkspaceId } from '@yiru/runtime-protocol/workbench/workspace/scope'
 import { useShallow } from 'zustand/react/shallow'
+import { useNow } from '~renderer/dashboard/use-now'
 import { useProjectCatalog } from '~renderer/project-catalog/provider'
 import { projectCatalogRepoBuckets } from '~renderer/project-catalog/repo-buckets'
 import { deriveRunningAgentSendTargets } from '~renderer/sidebar/running-agent-targets'
@@ -108,6 +109,7 @@ export function useListState(projectId?: string) {
   const settings = useAppStore((state) => state.settings)
   const runtimeStatusByEnvironmentId = useAppStore((state) => state.runtimeStatusByEnvironmentId)
   const sortedIds = useSmartWorktreeOrder(repoMap, sortBy)
+  const now = useNow(3_000)
   void agentStatusEpoch
   const visibleIds = computeVisibleWorktreeIds(worktreesByRepo, sortedIds, {
     filterRepoIds,
@@ -120,7 +122,7 @@ export function useListState(projectId?: string) {
       : getWorktreeIdsWithLiveAgent(
           useAppStore.getState().agentStatusByPaneKey,
           tabsByWorktree,
-          Date.now()
+          now
         ),
     hideDefaultBranchWorkspace,
     repoMap,

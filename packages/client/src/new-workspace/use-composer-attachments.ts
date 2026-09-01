@@ -29,8 +29,6 @@ export function useComposerAttachments({
   const [attachmentPaths, setAttachmentPaths] = useState<string[]>(initialPaths)
   const promptTextareaRef = useRef<HTMLTextAreaElement | null>(null)
   const promptCaretFrameRef = useRef<number | null>(null)
-  const agentPromptRef = useRef(agentPrompt)
-  agentPromptRef.current = agentPrompt
 
   const cancelCaretFrame = (): void => {
     if (promptCaretFrameRef.current !== null) {
@@ -56,7 +54,7 @@ export function useComposerAttachments({
         : pathValue
     const insertion = Array.from(new Set(folderPaths)).map(formatPath).join(' ')
     const textarea = promptTextareaRef.current
-    const current = agentPromptRef.current
+    const current = agentPrompt
     const selectionStart = textarea?.selectionStart ?? current.length
     const selectionEnd = textarea?.selectionEnd ?? current.length
     const before = current.slice(0, selectionStart)

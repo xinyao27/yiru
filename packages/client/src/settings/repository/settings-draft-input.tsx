@@ -1,8 +1,35 @@
 import type React from 'react'
 import { useEffect, useRef, useState } from 'react'
+import { useEventCallback } from '~renderer/react/use-event-callback'
 import { Input } from '~renderer/ui/input'
 
-type RepoTextDraft = { repoId: string; text: string }
+type RepoTextDraft = {
+  lastPersisted: string
+  pendingStoreEchoes: string[]
+  repoId: string
+  text: string
+}
+
+function resolveRepoTextDraft(
+  draft: RepoTextDraft,
+  repoId: string,
+  storeValue: string
+): RepoTextDraft {
+  if (draft.repoId !== repoId) {
+    return { repoId, text: storeValue, pendingStoreEchoes: [], lastPersisted: storeValue }
+  }
+  if (storeValue === draft.text) {
+    if (draft.pendingStoreEchoes.length === 0 && draft.lastPersisted === storeValue) {
+      return draft
+    }
+    return { ...draft, pendingStoreEchoes: [], lastPersisted: storeValue }
+  }
+  const pendingEchoIndex = draft.pendingStoreEchoes.indexOf(storeValue)
+  if (pendingEchoIndex !== -1) {
+    return { ...draft, pendingStoreEchoes: draft.pendingStoreEchoes.slice(pendingEchoIndex + 1) }
+  }
+  return { repoId, text: storeValue, pendingStoreEchoes: [], lastPersisted: storeValue }
+}
 
 // Why: updateRepo persists via async IPC before the store value updates, so a
 // store-controlled input resets mid-IME-composition (Hangul decomposes into
@@ -21,8 +48,12 @@ export function RepoSettingsDraftInput({
   storeValue: string
   onTextChange: (text: string) => void
 } & Omit<React.ComponentProps<typeof Input>, 'value' | 'onChange'>): React.JSX.Element {
-  const [draft, setDraft] = useState<RepoTextDraft>({ repoId, text: storeValue })
-  const pendingStoreEchoesRef = useRef<string[]>([])
+  const [draft, setDraft] = useState<RepoTextDraft>({
+    repoId,
+    text: storeValue,
+    pendingStoreEchoes: [],
+    lastPersisted: storeValue
+  })
   // Why: IME composition (e.g. Japanese kana→kanji conversion) fires input
   // events for unconfirmed text. Persisting those mid-composition writes the
   // pre-confirmation value to the store and its async echo can cancel the
@@ -33,67 +64,48 @@ export function RepoSettingsDraftInput({
   // repeats the already-persisted confirmed value; consume that one change so
   // the value is not persisted twice.
   const skipNextChangeRef = useRef<string | null>(null)
-  // Why: blur/unmount must only flush genuinely unpersisted composition text.
-  const lastPersistedRef = useRef(storeValue)
-
-  const persist = (text: string): void => {
-    pendingStoreEchoesRef.current.push(text)
-    lastPersistedRef.current = text
-    onTextChange(text)
+  const resolvedDraft = resolveRepoTextDraft(draft, repoId, storeValue)
+  if (resolvedDraft !== draft) {
+    setDraft(resolvedDraft)
   }
 
   useEffect(() => {
-    setDraft((current) => {
-      if (current.repoId !== repoId) {
-        pendingStoreEchoesRef.current = []
-        composingRef.current = false
-        skipNextChangeRef.current = null
-        lastPersistedRef.current = storeValue
-        return { repoId, text: storeValue }
-      }
-      if (storeValue === current.text) {
-        pendingStoreEchoesRef.current = []
-        skipNextChangeRef.current = null
-        lastPersistedRef.current = storeValue
-        return current
-      }
-      const pendingEchoIndex = pendingStoreEchoesRef.current.indexOf(storeValue)
-      if (pendingEchoIndex !== -1) {
-        // Why: queued updateRepo calls can echo older input text after newer
-        // keystrokes; accepting that echo re-cancels active IME composition.
-        pendingStoreEchoesRef.current.splice(0, pendingEchoIndex + 1)
-        return current
-      }
-      pendingStoreEchoesRef.current = []
-      skipNextChangeRef.current = null
-      lastPersistedRef.current = storeValue
-      return { repoId, text: storeValue }
-    })
-  }, [repoId, storeValue])
+    composingRef.current = false
+    skipNextChangeRef.current = null
+  }, [repoId])
 
-  const text = draft.repoId === repoId ? draft.text : storeValue
-  const flushRef = useRef<() => void>(() => {})
-  // Why: publish only committed draft/callback state; a discarded concurrent
-  // render must never become the authority used by blur or unmount cleanup.
-  useEffect(() => {
-    flushRef.current = (): void => {
-      if (draft.repoId !== repoId || draft.text === lastPersistedRef.current) {
-        return
-      }
-      composingRef.current = false
-      skipNextChangeRef.current = draft.text
-      persist(draft.text)
+  const persist = (text: string): void => {
+    setDraft({
+      ...resolvedDraft,
+      repoId,
+      text,
+      pendingStoreEchoes: [...resolvedDraft.pendingStoreEchoes, text],
+      lastPersisted: text
+    })
+    onTextChange(text)
+  }
+  const flush = useEventCallback((): void => {
+    if (resolvedDraft.repoId !== repoId || resolvedDraft.text === resolvedDraft.lastPersisted) {
+      return
+    }
+    composingRef.current = false
+    skipNextChangeRef.current = resolvedDraft.text
+    persist(resolvedDraft.text)
+  })
+  const flushOnUnmount = useEventCallback((): void => {
+    if (resolvedDraft.repoId === repoId && resolvedDraft.text !== resolvedDraft.lastPersisted) {
+      onTextChange(resolvedDraft.text)
     }
   })
-  useEffect(() => () => flushRef.current(), [])
+  useEffect(() => () => flushOnUnmount(), [flushOnUnmount])
 
   return (
     <Input
       {...inputProps}
-      value={text}
+      value={resolvedDraft.text}
       onChange={(e) => {
         const nextText = e.target.value
-        setDraft({ repoId, text: nextText })
+        setDraft({ ...resolvedDraft, repoId, text: nextText })
         // Why: during composition the input stays live via draft, but the
         // unconfirmed text is not persisted until compositionend.
         if (composingRef.current) {
@@ -112,13 +124,12 @@ export function RepoSettingsDraftInput({
         onCompositionStart?.(e)
       }}
       onBlur={(e) => {
-        flushRef.current()
+        flush()
         onBlur?.(e)
       }}
       onCompositionEnd={(e) => {
         composingRef.current = false
         const nextText = e.currentTarget.value
-        setDraft({ repoId, text: nextText })
         persist(nextText)
         // Why: cover IMEs that fire the final change after compositionend.
         skipNextChangeRef.current = nextText

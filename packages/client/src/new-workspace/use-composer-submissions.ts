@@ -162,7 +162,7 @@ export function useComposerSubmissions({
 
   const resetForNextCreate = (): void => {
     source.setName('')
-    source.lastAutoNameRef.current = ''
+    source.resetAutoManagedName()
     source.setAgentPrompt('')
     source.setNote('')
     attachments.setAttachmentPaths([])

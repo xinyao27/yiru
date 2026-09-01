@@ -28,9 +28,9 @@ jobs:
           bun-version: 1.4.0
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v6
+        uses: pnpm/setup@v2
         with:
-          run_install: false
+          install: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -125,9 +125,9 @@ jobs:
           bun-version: 1.4.0
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v6
+        uses: pnpm/setup@v2
         with:
-          run_install: false
+          install: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -156,7 +156,7 @@ jobs:
         run: pnpm exec vp run @yiru/daemon#build:release
 
       - name: Download computer-use helper
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: yiru-computer-use-macos
           path: apps/daemon/dist

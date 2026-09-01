@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from 'react'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { statRuntimePath } from '~renderer/runtime/file-client'
 
 import { splitPathSegments } from '../path-tree'
@@ -145,8 +145,11 @@ export function useFileExplorerTree(
   const [dirCache, setDirCache] = useState<Record<string, DirCache>>({})
   const [rootError, setRootError] = useState<string | null>(null)
   const dirCacheRef = useRef(dirCache)
-  dirCacheRef.current = dirCache
   const dirLoadTrackerRef = useRef(createFileExplorerDirLoadTracker())
+
+  useEffect(() => {
+    dirCacheRef.current = dirCache
+  }, [dirCache])
 
   const loadDir = async (
     dirPath: string,

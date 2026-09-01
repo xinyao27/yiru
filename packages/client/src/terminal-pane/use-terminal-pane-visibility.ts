@@ -78,7 +78,6 @@ export function useTerminalPaneVisibility({
         bindingWithVisibility.noteVisibilityResume?.()
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- Why: terminal identity changes must refresh existing PTY tracking even though the ref identity is stable.
   }, [cwd, isVisible, isVisibleRef, panePtyBindingsRef, tabId])
 
   useEffect(() => {

@@ -88,7 +88,7 @@ export function usePageNavigation(input: PageNavigationInput) {
   const [hiddenExperimentalUnlocked, setHiddenExperimentalUnlocked] = useState(false)
   const contentScrollRef = useRef<HTMLDivElement | null>(null)
   const searchInputRef = useRef<HTMLInputElement | null>(null)
-  const pendingSectionRef = useRef<string | null>(null)
+  const [pendingSectionId, setPendingSectionId] = useState<string | null>(null)
   const pendingScrollTargetRef = useRef<string | null>(null)
   const pendingScrollFrameRef = useRef<number | null>(null)
   const shortcutsEscapeConfirmUntilRef = useRef(0)
@@ -104,7 +104,7 @@ export function usePageNavigation(input: PageNavigationInput) {
     navSectionIds: sections.map((section) => section.id),
     mountedSectionIds,
     activeSectionId,
-    pendingSectionId: pendingSectionRef.current,
+    pendingSectionId,
     query: searchQuery,
     visibleSectionIds
   })
@@ -204,7 +204,7 @@ export function usePageNavigation(input: PageNavigationInput) {
           .getState()
           .setSettingsProjectHostSelection(hostSelection.projectId, hostSelection.hostId)
       }
-      pendingSectionRef.current = paneSectionId
+      setPendingSectionId(paneSectionId)
       pendingScrollTargetRef.current = target.sectionId ?? paneSectionId
       if (target.pane === 'appearance') {
         const accordion = resolveAppearanceAccordionDeepLink(target.sectionId)
@@ -238,7 +238,6 @@ export function usePageNavigation(input: PageNavigationInput) {
 
   useEffect(() => {
     const scrollTargetId = pendingScrollTargetRef.current
-    const pendingSectionId = pendingSectionRef.current
     if (
       scrollTargetId &&
       pendingSectionId &&
@@ -267,10 +266,17 @@ export function usePageNavigation(input: PageNavigationInput) {
         })
         pendingScrollFrameRef.current = frameId
       }
-      pendingSectionRef.current = null
+      setPendingSectionId(null)
       pendingScrollTargetRef.current = null
     }
-  }, [activeSectionId, pendingRequestTick, searchQuery, setSearchQuery, visibleSectionIds])
+  }, [
+    activeSectionId,
+    pendingRequestTick,
+    pendingSectionId,
+    searchQuery,
+    setSearchQuery,
+    visibleSectionIds
+  ])
 
   const selectSection = async (
     sectionId: string,

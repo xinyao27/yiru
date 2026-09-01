@@ -531,7 +531,7 @@ async function publish(version, args) {
     if (changelog) {
       fields.push(['testflight_changelog', changelog])
     }
-    dispatchWorkflow('mobile-ios-release.yml', 'main', fields)
+    dispatchWorkflow('mobile-release.yml', 'main', fields)
   }
   if (targets.includes('apns')) {
     ensureMainWorkflow('apns-gateway.yml')

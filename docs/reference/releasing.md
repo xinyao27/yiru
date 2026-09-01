@@ -27,7 +27,7 @@ The release workflows require these GitHub repository secrets:
 - `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `APNS_KEY_ID`, `APNS_KEY_P8`,
   `APNS_TEAM_ID`, and `GATEWAY_SHARED_SECRET` only when deploying the optional APNs gateway.
 - The Apple signing, notarization, and App Store Connect values referenced by
-  `daemon-release.yml` and `mobile-ios-release.yml`.
+  `daemon-release.yml` and `mobile-release.yml`.
 
 Create the `chrome-web-store` GitHub environment and store `CWS_CLIENT_ID`, `CWS_CLIENT_SECRET`,
 `CWS_REFRESH_TOKEN`, and `CWS_PUBLISHER_ID` as environment secrets. The OAuth client must enable

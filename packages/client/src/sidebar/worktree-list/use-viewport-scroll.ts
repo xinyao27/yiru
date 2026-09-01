@@ -49,6 +49,7 @@ export function useViewportScroll(args: {
   scrollRef: RefObject<HTMLDivElement | null>
   clearWorktreeDrag: () => void
   markScrollMovement: () => void
+  setScrollRoot: (node: HTMLDivElement | null) => void
 }) {
   const projectGroups = args.props.projectGroups ?? []
   const revealFrames = useRevealFrames()
@@ -125,8 +126,7 @@ export function useViewportScroll(args: {
     }
   }
   const setScrollRootRef = (node: HTMLDivElement | null): void => {
-    if (node === null && args.scrollRef.current !== null) {
-      args.props.scrollOffsetRef.current = args.scrollRef.current.scrollTop
+    if (node === null) {
       revealFrames.cancel()
       revealHighlight.clear()
       args.clearWorktreeDrag()
@@ -134,7 +134,7 @@ export function useViewportScroll(args: {
     if (node) {
       markWorktreeLegendScrollRoot(node)
     }
-    args.scrollRef.current = node
+    args.setScrollRoot(node)
   }
   return {
     highlightedRowKey: revealHighlight.highlightedRowKey,

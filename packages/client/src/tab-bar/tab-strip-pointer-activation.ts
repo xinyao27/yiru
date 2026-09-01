@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef } from 'react'
 
 import { TAB_DRAG_ACTIVATION_DISTANCE_PX } from '../tab-group/use-tab-drag-split'
 import { beginTabStripPointerGesture } from './tab-strip-pointer-gesture'
@@ -31,7 +31,9 @@ export function useTabStripPointerActivation({
   ) => void
 } {
   const onActivateRef = useRef(onActivate)
-  onActivateRef.current = onActivate
+  useLayoutEffect(() => {
+    onActivateRef.current = onActivate
+  }, [onActivate])
   const cleanupRef = useRef<(() => void) | null>(null)
 
   // Why: a press still holding when the tab unmounts (tab closed mid-drag, group

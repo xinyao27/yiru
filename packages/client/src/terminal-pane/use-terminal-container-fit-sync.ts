@@ -75,6 +75,5 @@ export function useTerminalContainerFitSync({
         clearTimeout(timerId)
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isVisible])
+  }, [containerRef, isVisible, managerRef])
 }

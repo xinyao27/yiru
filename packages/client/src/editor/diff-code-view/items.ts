@@ -7,7 +7,7 @@ import {
 } from '@pierre/diffs'
 import type { DiffLineAnnotation } from '@pierre/diffs/react'
 import type { GitFileStatus } from '@yiru/runtime-protocol/model/review'
-import { useRef } from 'react'
+import { useState } from 'react'
 
 import { resolvePierreDiffLanguage } from '../pierre-diff-language'
 import { buildDiffCodeViewNoticeAnnotations, type DiffCodeViewAnnotation } from './annotations'
@@ -158,9 +158,15 @@ function isSameParsedSource(a: DiffCodeViewSource, b: DiffCodeViewSource): boole
 export function useDiffCodeViewItems(
   files: readonly DiffCodeViewFileInput[]
 ): CodeViewItem<DiffCodeViewAnnotation>[] {
-  const cacheRef = useRef(new Map<string, CachedDiffCodeViewItem>())
-  return (() => {
-    const cache = cacheRef.current
+  const [resolveItems] = useState(createDiffCodeViewItemResolver)
+  return resolveItems(files)
+}
+
+function createDiffCodeViewItemResolver(): (
+  files: readonly DiffCodeViewFileInput[]
+) => CodeViewItem<DiffCodeViewAnnotation>[] {
+  let cache = new Map<string, CachedDiffCodeViewItem>()
+  return (files) => {
     const next = new Map<string, CachedDiffCodeViewItem>()
     const items: CodeViewItem<DiffCodeViewAnnotation>[] = []
     for (const file of files) {
@@ -223,7 +229,7 @@ export function useDiffCodeViewItems(
       next.set(id, entry)
       items.push(item)
     }
-    cacheRef.current = next
+    cache = next
     return items
-  })()
+  }
 }

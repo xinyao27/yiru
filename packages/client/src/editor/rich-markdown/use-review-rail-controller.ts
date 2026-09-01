@@ -1,6 +1,6 @@
 import type { Editor } from '@tiptap/react'
 import type { DiffComment } from '@yiru/runtime-protocol/workbench/types'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { MutableRefObject } from 'react'
 import { useEventCallback } from '~renderer/react/use-event-callback'
 
@@ -45,7 +45,9 @@ export function useRichMarkdownReviewRailController({
   const notePositionsFrameRef = useRef<number | null>(null)
   const reviewRailVisible = markdownComments.length > 0 && reviewRailOpen
 
-  notePositionsRef.current = notePositions
+  useLayoutEffect(() => {
+    notePositionsRef.current = notePositions
+  }, [notePositions])
 
   const clearAttentionTimers = (): void => {
     clearWindowTimer(attentionReviewCommentTimeoutRef)

@@ -1,4 +1,3 @@
-import type React from 'react'
 import type { JSX } from 'react'
 import { translate } from '~renderer/i18n/i18n'
 import { cn } from '~renderer/ui/class-names'
@@ -51,10 +50,16 @@ export function CursorIcon(): JSX.Element {
   )
 }
 
-export function ContextMenu(props: {
+export function ContextMenu({
+  shown,
+  splitRowActive,
+  setSplitRow,
+  splitRightShortcutLabel,
+  splitDownShortcutLabel
+}: {
   shown: boolean
   splitRowActive: boolean
-  splitRowRef: React.RefObject<HTMLDivElement | null>
+  setSplitRow: (node: HTMLDivElement | null) => void
   splitRightShortcutLabel: string
   splitDownShortcutLabel: string
 }): JSX.Element {
@@ -62,7 +67,7 @@ export function ContextMenu(props: {
     <div
       className={cn(
         'absolute left-[110px] top-[78px] z-10 min-w-[218px] origin-top-left border border-border bg-card p-1.5 font-sans text-[12px] text-foreground transition-[opacity,transform] duration-[160ms] ease-out',
-        props.shown ? 'opacity-100' : '-translate-y-[3px] scale-[0.985] opacity-0'
+        shown ? 'opacity-100' : '-translate-y-[3px] scale-[0.985] opacity-0'
       )}
       style={{ pointerEvents: 'none' }}
     >
@@ -70,10 +75,10 @@ export function ContextMenu(props: {
       <CtxSkeleton width={56} />
       <CtxSeparator />
       <div
-        ref={props.splitRowRef}
+        ref={setSplitRow}
         className={cn(
           'grid h-[22px] grid-cols-[18px_1fr_auto] items-center gap-2 px-1.5 py-1 pl-1.5',
-          props.splitRowActive ? 'bg-foreground/[0.07]  ' : null
+          splitRowActive ? 'bg-foreground/[0.07]  ' : null
         )}
       >
         <span className="text-muted-foreground inline-flex items-center justify-center">
@@ -86,7 +91,7 @@ export function ContextMenu(props: {
           )}
         </span>
         <span className="text-muted-foreground font-mono text-[11px]">
-          {props.splitRightShortcutLabel}
+          {splitRightShortcutLabel}
         </span>
       </div>
       <div className="grid h-[22px] grid-cols-[18px_1fr_auto] items-center gap-2 px-1.5 py-1 pl-1.5">
@@ -100,7 +105,7 @@ export function ContextMenu(props: {
           )}
         </span>
         <span className="text-muted-foreground font-mono text-[11px]">
-          {props.splitDownShortcutLabel}
+          {splitDownShortcutLabel}
         </span>
       </div>
       <CtxSeparator />

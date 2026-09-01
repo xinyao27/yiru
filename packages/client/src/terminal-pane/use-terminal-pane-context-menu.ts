@@ -19,7 +19,7 @@ import type { PaneCwdMap } from './resolve-split-cwd'
 import { recordCreatedTerminalPaneSplit } from './split-completion'
 import { splitTerminalPaneWithInheritedCwd } from './split-with-inherited-cwd'
 import type { PreparedAgentSessionFork } from './terminal-agent-session-fork'
-import { createTerminalContextMenuAgentActions } from './terminal-context-menu-agent-actions'
+import { useTerminalContextMenuAgentActions } from './terminal-context-menu-agent-actions'
 import { pasteFromTerminalContextMenu } from './terminal-context-menu-paste'
 import { copyTerminalHandleForPane } from './terminal-handle-copy'
 import { useTerminalContextMenuTarget } from './use-terminal-context-menu-target'
@@ -223,7 +223,7 @@ export function useTerminalPaneContextMenu({
       action(pane)
     }
   }
-  const agentActions = createTerminalContextMenuAgentActions({
+  const agentActions = useTerminalContextMenuAgentActions({
     fallbackCwd,
     groupId,
     onAgentSessionContinuationReady,

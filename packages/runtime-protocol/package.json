@@ -583,6 +583,5 @@
     "@types/node": "catalog:",
     "typescript": "catalog:workbench",
     "vite": "catalog:"
-  },
-  "packageManager": "pnpm@11.22.0"
+  }
 }

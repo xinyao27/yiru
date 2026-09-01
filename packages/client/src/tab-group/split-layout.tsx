@@ -250,22 +250,32 @@ export default function TabGroupSplitLayout({
   focusedGroupId?: string
   isWorktreeActive: boolean
 }): React.JSX.Element {
-  const dragSplit = useTabDragSplit({ worktreeId, enabled: isWorktreeActive })
+  const {
+    activeDrag,
+    collisionDetection,
+    hoveredDropTarget,
+    hoveredTabInsertion,
+    isTabDragActiveRef,
+    onDragCancel,
+    onDragEnd,
+    onDragMove,
+    onDragOver,
+    onDragStart,
+    sensors,
+    setDragRootNode
+  } = useTabDragSplit({ worktreeId, enabled: isWorktreeActive })
   const hasSplits = layout.type === 'split'
 
   return (
-    <TabDragProvider
-      isTabDragActive={dragSplit.activeDrag !== null}
-      isTabDragActiveRef={dragSplit.isTabDragActiveRef}
-    >
+    <TabDragProvider isTabDragActive={activeDrag !== null} isTabDragActiveRef={isTabDragActiveRef}>
       <DndContext
-        sensors={dragSplit.sensors}
-        collisionDetection={dragSplit.collisionDetection}
-        onDragStart={dragSplit.onDragStart}
-        onDragMove={dragSplit.onDragMove}
-        onDragOver={dragSplit.onDragOver}
-        onDragEnd={dragSplit.onDragEnd}
-        onDragCancel={dragSplit.onDragCancel}
+        sensors={sensors}
+        collisionDetection={collisionDetection}
+        onDragStart={onDragStart}
+        onDragMove={onDragMove}
+        onDragOver={onDragOver}
+        onDragEnd={onDragEnd}
+        onDragCancel={onDragCancel}
         // Why: dnd-kit auto-scrolls the tab strip when the cursor approaches its
         // edge, which in a multi-group layout creates a feedback loop — scroll
         // shifts tabs under the cursor, `over` re-resolves, scroll runs again.
@@ -275,7 +285,7 @@ export default function TabGroupSplitLayout({
       >
         {/* Why: the wrapper keeps the sidebar edge open while each split pane
           uses its edge flags to paint only internal dividers. */}
-        <div ref={dragSplit.setDragRootNode} className={WORKSPACE_COLUMN_FRAME_CLASS_NAME}>
+        <div ref={setDragRootNode} className={WORKSPACE_COLUMN_FRAME_CLASS_NAME}>
           <div className={WORKSPACE_COLUMN_BODY_CLASS_NAME}>
             <SplitNode
               node={layout}
@@ -291,8 +301,8 @@ export default function TabGroupSplitLayout({
               suppressLeftBorder={false}
               suppressRightBorder={false}
               suppressBottomBorder={false}
-              isTabDragActive={dragSplit.activeDrag !== null}
-              hoveredTabInsertion={dragSplit.hoveredTabInsertion}
+              isTabDragActive={activeDrag !== null}
+              hoveredTabInsertion={hoveredTabInsertion}
             />
           </div>
         </div>
@@ -303,14 +313,12 @@ export default function TabGroupSplitLayout({
           across the whole window — the source tab keeps its spot, the
           ghost follows the cursor. */}
         <DragOverlay dropAnimation={null}>
-          {dragSplit.activeDrag ? <TabDragPreview drag={dragSplit.activeDrag} /> : null}
+          {activeDrag ? <TabDragPreview drag={activeDrag} /> : null}
         </DragOverlay>
-        {dragSplit.hoveredDropTarget &&
-        dragSplit.hoveredDropTarget.zone !== 'center' &&
-        dragSplit.hoveredDropTarget.panelRect ? (
+        {hoveredDropTarget && hoveredDropTarget.zone !== 'center' && hoveredDropTarget.panelRect ? (
           <TabPaneColumnSplitDragOverlay
-            panelRect={dragSplit.hoveredDropTarget.panelRect}
-            zone={dragSplit.hoveredDropTarget.zone}
+            panelRect={hoveredDropTarget.panelRect}
+            zone={hoveredDropTarget.zone}
           />
         ) : null}
       </DndContext>

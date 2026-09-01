@@ -1,5 +1,6 @@
 import type { Repo } from '@yiru/runtime-protocol/workbench/types'
-import { useEffect, useRef, useSyncExternalStore } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
+import { useNow } from '~renderer/dashboard/use-now'
 import { getAllWorktreesFromState, useAllWorktrees } from '~renderer/store/selectors'
 import { useAppStore } from '~renderer/store/state'
 import type { AppState } from '~renderer/store/types'
@@ -72,11 +73,7 @@ export function useSmartWorktreeOrder(
     (count, worktree) => count + (worktree.isArchived ? 0 : 1),
     0
   )
-  const sortEpochStoreRef = useRef<SortEpochStore | null>(null)
-  if (!sortEpochStoreRef.current) {
-    sortEpochStoreRef.current = createSortEpochStore(sortEpoch)
-  }
-  const sortEpochStore = sortEpochStoreRef.current
+  const [sortEpochStore] = useState(() => createSortEpochStore(sortEpoch))
   const previousWorktreeCountRef = useRef(worktreeCount)
 
   useEffect(() => {
@@ -98,89 +95,54 @@ export function useSmartWorktreeOrder(
     sortEpochStore.subscribe,
     sortEpochStore.getSnapshot
   )
+  const now = useNow(SORT_SETTLE_MS)
+  void debouncedSortEpoch
+  const state = useAppStore.getState()
+  const nonArchivedWorktrees = getAllWorktreesFromState(state).filter(
+    (worktree) => !worktree.isArchived
+  )
+  const hasAnyLivePty = Object.values(state.tabsByWorktree)
+    .flat()
+    .some((tab) => tabHasLivePty(state.ptyIdsByTabId, tab.id))
+  const hasLiveSmartSignal =
+    hasAnyLivePty ||
+    hasFreshAttributedAgentStatus(state.agentStatusByPaneKey, now, state.tabsByWorktree)
+  const usesPersistedColdStartOrder = sortBy === 'smart' && !hasLiveSmartSignal
+  let attentionByWorktree: Map<string, WorktreeAttention> | null = null
 
-  const sessionHasHadLiveSmartSignal = useRef(false)
-  const lastAttentionByWorktreeRef = useRef<Map<string, WorktreeAttention> | null>(null)
-  const sortedIdsCacheRef = useRef<{
-    epoch: number
-    repoMap: Map<string, Repo>
-    sortBy: AppState['sortBy']
-    value: string[]
-  } | null>(null)
-  const sortedIdsCache = sortedIdsCacheRef.current
-  let sortedIds: string[]
-
-  if (
-    sortedIdsCache &&
-    sortedIdsCache.epoch === debouncedSortEpoch &&
-    sortedIdsCache.repoMap === repoMap &&
-    sortedIdsCache.sortBy === sortBy
-  ) {
-    sortedIds = sortedIdsCache.value
-  } else {
-    const state = useAppStore.getState()
-    const nonArchivedWorktrees = getAllWorktreesFromState(state).filter(
-      (worktree) => !worktree.isArchived
+  if (usesPersistedColdStartOrder) {
+    // Why: hook-server state hydrates after launch. Persisted order prevents
+    // every workspace collapsing to the comparator fallback during that gap.
+    nonArchivedWorktrees.sort(
+      (left, right) => right.sortOrder - left.sortOrder || compareWorktreeSortLabel(left, right)
     )
-    const now = Date.now()
-    let usesPersistedColdStartOrder = false
-
-    if (sortBy === 'smart' && !sessionHasHadLiveSmartSignal.current) {
-      const hasAnyLivePty = Object.values(state.tabsByWorktree)
-        .flat()
-        .some((tab) => tabHasLivePty(state.ptyIdsByTabId, tab.id))
-      if (
-        hasAnyLivePty ||
-        hasFreshAttributedAgentStatus(state.agentStatusByPaneKey, now, state.tabsByWorktree)
-      ) {
-        sessionHasHadLiveSmartSignal.current = true
-      } else {
-        // Why: hook-server state hydrates after launch. Persisted order prevents
-        // every workspace collapsing to the comparator fallback during that gap.
-        nonArchivedWorktrees.sort(
-          (left, right) => right.sortOrder - left.sortOrder || compareWorktreeSortLabel(left, right)
-        )
-        usesPersistedColdStartOrder = true
-      }
-    }
-
-    if (usesPersistedColdStartOrder) {
-      lastAttentionByWorktreeRef.current = null
-    } else {
-      const attentionByWorktree =
-        sortBy === 'smart'
-          ? buildAttentionByWorktree(
-              nonArchivedWorktrees,
-              state.tabsByWorktree,
-              state.agentStatusByPaneKey,
-              state.runtimePaneTitlesByTabId,
-              state.ptyIdsByTabId,
-              now,
-              state.migrationUnsupportedByPtyId,
-              state.terminalLayoutsByTabId
-            )
-          : new Map<string, WorktreeAttention>()
-      lastAttentionByWorktreeRef.current = sortBy === 'smart' ? attentionByWorktree : null
-      nonArchivedWorktrees.sort(buildWorktreeComparator(sortBy, repoMap, now, attentionByWorktree))
-    }
-    sortedIds = nonArchivedWorktrees.map((worktree) => worktree.id)
-    sortedIdsCacheRef.current = {
-      epoch: debouncedSortEpoch,
-      repoMap,
-      sortBy,
-      value: sortedIds
-    }
+  } else {
+    attentionByWorktree =
+      sortBy === 'smart'
+        ? buildAttentionByWorktree(
+            nonArchivedWorktrees,
+            state.tabsByWorktree,
+            state.agentStatusByPaneKey,
+            state.runtimePaneTitlesByTabId,
+            state.ptyIdsByTabId,
+            now,
+            state.migrationUnsupportedByPtyId,
+            state.terminalLayoutsByTabId
+          )
+        : new Map<string, WorktreeAttention>()
+    nonArchivedWorktrees.sort(buildWorktreeComparator(sortBy, repoMap, now, attentionByWorktree))
   }
+  const sortedIds = nonArchivedWorktrees.map((worktree) => worktree.id)
 
-  useSmartOrderTelemetry(sortBy, sortedIds, lastAttentionByWorktreeRef)
+  useSmartOrderTelemetry(sortBy, sortedIds, attentionByWorktree)
 
   useEffect(() => {
-    if (sortBy !== 'smart' || sortedIds.length === 0 || !sessionHasHadLiveSmartSignal.current) {
+    if (sortBy !== 'smart' || sortedIds.length === 0 || !hasLiveSmartSignal) {
       return
     }
     // Why: sortOrder is host-owned state, so each host persists only its ids.
     persistWorktreeSortOrderByHost(useAppStore.getState(), sortedIds)
-  }, [sortBy, sortedIds])
+  }, [hasLiveSmartSignal, sortBy, sortedIds])
 
   return sortedIds
 }
@@ -188,12 +150,11 @@ export function useSmartWorktreeOrder(
 function useSmartOrderTelemetry(
   sortBy: AppState['sortBy'],
   sortedIds: readonly string[],
-  attentionRef: React.MutableRefObject<Map<string, WorktreeAttention> | null>
+  attention: Map<string, WorktreeAttention> | null
 ): void {
   const previousClassByWorktreeIdRef = useRef<Map<string, SmartClass>>(new Map())
   const hasObservedSmartOnceRef = useRef(false)
   useEffect(() => {
-    const attention = attentionRef.current
     if (sortBy !== 'smart' || !attention) {
       previousClassByWorktreeIdRef.current = new Map()
       hasObservedSmartOnceRef.current = false
@@ -210,7 +171,7 @@ function useSmartOrderTelemetry(
     }
     previousClassByWorktreeIdRef.current = next
     hasObservedSmartOnceRef.current = true
-  }, [attentionRef, sortBy, sortedIds])
+  }, [attention, sortBy, sortedIds])
 
   const hasTrackedDistributionRef = useRef(false)
   useEffect(() => {
@@ -221,7 +182,6 @@ function useSmartOrderTelemetry(
     if (hasTrackedDistributionRef.current) {
       return
     }
-    const attention = attentionRef.current
     if (!attention || attention.size === 0) {
       return
     }
@@ -242,7 +202,7 @@ function useSmartOrderTelemetry(
       total_worktrees: attention.size
     })
     hasTrackedDistributionRef.current = true
-  }, [attentionRef, sortBy, sortedIds])
+  }, [attention, sortBy, sortedIds])
 
   const previousSortByRef = useRef(sortBy)
   useEffect(() => {

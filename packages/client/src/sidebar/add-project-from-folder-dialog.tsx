@@ -34,19 +34,7 @@ const AddProjectFromFolderDialog = function AddProjectFromFolderDialog() {
   const addGenRef = useRef(0)
 
   const isOpen = activeModal === 'confirm-add-project-from-folder'
-  const [previousOpen, setPreviousOpen] = useState(isOpen)
   const folderPath = typeof modalData.folderPath === 'string' ? modalData.folderPath : ''
-
-  if (isOpen !== previousOpen) {
-    setPreviousOpen(isOpen)
-    if (!isOpen) {
-      // Why: closed modal state is fully local; clear it before commit so the
-      // next open never paints stale progress or errors.
-      addGenRef.current++
-      setIsAdding(false)
-      setError(null)
-    }
-  }
 
   const openNonGitConfirmation = () => {
     closeModal()
@@ -101,6 +89,8 @@ const AddProjectFromFolderDialog = function AddProjectFromFolderDialog() {
   const handleOpenChange = (open: boolean) => {
     if (!open) {
       addGenRef.current++
+      setIsAdding(false)
+      setError(null)
       closeModal()
     }
   }

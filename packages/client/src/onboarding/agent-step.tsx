@@ -34,7 +34,6 @@ function useAgentGridScrollMaxHeight(
 
   useLayoutEffect(() => {
     if (!enabled) {
-      setMaxHeight(undefined)
       return
     }
     const scroll = scrollRef.current

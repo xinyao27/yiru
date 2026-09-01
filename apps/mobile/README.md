@@ -23,9 +23,9 @@ xcodebuild -downloadComponent MetalToolchain
 常用命令：
 
 ```sh
-vp run yiru-mobile-ios#project:generate
-vp run yiru-mobile-ios#dev
-vp run yiru-mobile-ios#check
+vp run yiru-mobile#project:generate
+vp run yiru-mobile#dev
+vp run yiru-mobile#check
 ```
 
 代码结构和依赖规则见 [ARCHITECTURE.md](./ARCHITECTURE.md)，视觉规则见

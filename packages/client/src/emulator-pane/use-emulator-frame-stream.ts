@@ -37,7 +37,6 @@ export function useEmulatorFrameStream(
 
   useEffect(() => {
     if (!enabled || !streamUrl) {
-      setState({ error: null, frameUrl: null, streamIdentity })
       return
     }
 
@@ -69,7 +68,11 @@ export function useEmulatorFrameStream(
       }
     }
 
-    setState({ error: null, frameUrl: null, streamIdentity })
+    queueMicrotask(() => {
+      if (!disposed) {
+        setState({ error: null, frameUrl: null, streamIdentity })
+      }
+    })
     const unsubscribe = subscribeEmulatorFrameStream(
       { streamUrl, streamKey },
       {

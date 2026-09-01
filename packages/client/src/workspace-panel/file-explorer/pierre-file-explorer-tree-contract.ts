@@ -19,7 +19,7 @@ export type PierreFileExplorerTreeProps = {
   inlineInput: InlineInput | null
   statusByRelativePath: ReadonlyMap<string, GitFileStatus>
   ignoredByRelativePath: ReadonlySet<string>
-  scrollElementRef: React.MutableRefObject<HTMLDivElement | null>
+  onScrollElementChange: (element: HTMLDivElement | null) => void
   onActivateFile: (node: TreeNode) => void
   onDoubleClickFile: (node: TreeNode) => void
   onToggleDirectory: (node: TreeNode) => void

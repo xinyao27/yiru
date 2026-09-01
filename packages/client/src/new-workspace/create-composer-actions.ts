@@ -67,7 +67,7 @@ export function createComposerActions(form: ReturnType<typeof useComposerForm>) 
     baseBranch: source.baseBranch,
     eligibleRepos: target.eligibleRepos,
     folderSourceRepos: target.folderSourceRepos,
-    initialProjectGroupAppliedRef: target.initialProjectGroupAppliedRef,
+    markInitialProjectGroupApplied: target.markInitialProjectGroupApplied,
     isProjectGroupTarget: target.isProjectGroupTarget,
     linkedWorkItem: source.linkedWorkItem,
     projectGroups: target.projectGroups,

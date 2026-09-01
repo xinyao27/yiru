@@ -3,7 +3,7 @@ import type {
   SourceControlLaunchActionId
 } from '@yiru/runtime-protocol/workbench/source-control/ai-actions'
 import type { PRCheckDetail, PRComment } from '@yiru/runtime-protocol/workbench/types'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { getLocalProjectExecutionRuntimeContext } from '~renderer/preflight/context'
 import { useProjectCatalogRuntimeState } from '~renderer/project-catalog/runtime-state'
 import { useMountedRef } from '~renderer/react/use-mounted-ref'
@@ -120,7 +120,6 @@ export function useChecksPanelStateCore(isVisible: boolean) {
   const prevChecksRef = useRef<string>('')
   const conflictSummaryRefreshKeyRef = useRef<string | null>(null)
   const panelVisibleSinceRef = useRef<number | null>(null)
-  commentsRef.current = comments
   const prGenerationRecords = useAppStore((s) => s.pullRequestGenerationRecords)
   const allocatePullRequestGenerationRequestId = useAppStore(
     (s) => s.allocatePullRequestGenerationRequestId
@@ -200,7 +199,11 @@ export function useChecksPanelStateCore(isVisible: boolean) {
     pushTarget: activeWorktreePushTarget
   })
   const panelContextKeyRef = useRef(panelContextKey)
-  panelContextKeyRef.current = panelContextKey
+
+  useEffect(() => {
+    commentsRef.current = comments
+    panelContextKeyRef.current = panelContextKey
+  }, [comments, panelContextKey])
 
   const clearTitleInputFocusTimer = (): void => {
     if (titleInputFocusTimerRef.current !== null) {

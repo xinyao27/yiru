@@ -5,23 +5,18 @@ import {
   type BackgroundMountTerminalWorktreeDetail
 } from '~renderer/constants/terminal'
 import { useEventCallback } from '~renderer/react/use-event-callback'
-import { hasRegisteredRuntimeTerminalTab } from '~renderer/runtime/sync-runtime-graph'
 import { useAppStore } from '~renderer/store/state'
 
-import { canWatcherCoverParkedTerminalTab } from '../terminal-pane/terminal-parked-tab-watchers'
 import {
   applyBackgroundMountTabRestriction,
-  canDeferColdActivationTabsForHost,
-  planColdActivationTabDeferral,
-  pruneClosedBackgroundMountTabs,
   revealActivationDeferredTabs,
   takeAllPendingBackgroundTerminalWorktreeMounts,
   takePendingBackgroundTerminalWorktreeMount
 } from '../terminal/background-terminal-worktree-mount'
 import { scheduleBackgroundTerminalWorktreeMeasure } from './background-terminal-worktree-visibility'
-import { terminalProviderHasAuthoritativeSnapshot } from './provider-snapshot-capability'
 import { getResolvedExecutionHostIdForWorktree } from './resolved-worktree-execution-host'
 import { anyMountedWorktreeHasLayout as computeAnyMountedWorktreeHasLayout } from './split-group-mount'
+import { useTerminalWorktreeActivation } from './use-terminal-worktree-activation'
 
 type WorkspaceSurface = { id: string; path: string }
 
@@ -30,12 +25,25 @@ type TerminalWorktreeMountingArgs = {
 }
 
 export type TerminalWorktreeMounting = {
+  activationDeferredMountTabIdsByWorktree: ReadonlyMap<string, ReadonlySet<string>>
+  backgroundMountTabIdsByWorktree: ReadonlyMap<string, ReadonlySet<string>>
+  measurableBackgroundWorktreeIds: ReadonlySet<string>
+  mountedWorktreeIds: ReadonlySet<string>
   mountedWorktreeIdsRef: RefObject<Set<string>>
   measurableBackgroundWorktreeIdsRef: RefObject<Set<string>>
   backgroundMountTabIdsByWorktreeRef: RefObject<Map<string, ReadonlySet<string>>>
   activationDeferredMountTabIdsByWorktreeRef: RefObject<Map<string, ReadonlySet<string>>>
   backgroundMountRevision: number
   anyMountedWorktreeHasLayout: boolean
+}
+
+type TerminalWorktreeMountSnapshot = {
+  activationDeferredMountTabIdsByWorktree: ReadonlyMap<string, ReadonlySet<string>>
+  anyMountedWorktreeHasLayout: boolean
+  backgroundMountTabIdsByWorktree: ReadonlyMap<string, ReadonlySet<string>>
+  backgroundMountRevision: number
+  measurableBackgroundWorktreeIds: ReadonlySet<string>
+  mountedWorktreeIds: ReadonlySet<string>
 }
 
 // Why: tracks which worktrees have ever been activated (only visited
@@ -55,9 +63,9 @@ export function useTerminalWorktreeMounting({
   const activeGroupIdByWorktree = useAppStore((s) => s.activeGroupIdByWorktree)
   const activeTabId = useAppStore((s) => s.activeTabId)
   const activeTabIdByWorktree = useAppStore((s) => s.activeTabIdByWorktree)
+  const unifiedTabsByWorktree = useAppStore((s) => s.unifiedTabsByWorktree)
   const workspaceSessionReady = useAppStore((s) => s.workspaceSessionReady)
   const terminalParkingEnabled = useAppStore((s) => s.settings?.terminalHiddenViewParking !== false)
-  const terminalTitleSnapshotAuthorityEnabled = true
   const activeWorktreeDeferralHostId = useAppStore((s) =>
     getResolvedExecutionHostIdForWorktree(s, activeWorktreeId)
   )
@@ -73,10 +81,33 @@ export function useTerminalWorktreeMounting({
   // setTimeout — none of those are prop/state-driven renders, so the counter
   // is modeled as an external store instead of useState to avoid seeding it
   // from a mount effect.
-  const backgroundMountRevisionRef = useRef(0)
+  const mountSnapshotRef = useRef<TerminalWorktreeMountSnapshot>({
+    activationDeferredMountTabIdsByWorktree: new Map(),
+    anyMountedWorktreeHasLayout: false,
+    backgroundMountTabIdsByWorktree: new Map(),
+    backgroundMountRevision: 0,
+    measurableBackgroundWorktreeIds: new Set(),
+    mountedWorktreeIds: new Set()
+  })
   const backgroundMountRevisionListenersRef = useRef(new Set<() => void>())
   const notifyBackgroundMountRevision = useEventCallback((): void => {
-    backgroundMountRevisionRef.current += 1
+    const currentSnapshot = mountSnapshotRef.current
+    mountSnapshotRef.current = {
+      activationDeferredMountTabIdsByWorktree: new Map(
+        activationDeferredMountTabIdsByWorktreeRef.current
+      ),
+      anyMountedWorktreeHasLayout: computeAnyMountedWorktreeHasLayout(
+        workspaceSurfaces.map((workspace) => workspace.id),
+        mountedWorktreeIdsRef.current,
+        layoutByWorktree,
+        groupsByWorktree,
+        activeGroupIdByWorktree
+      ),
+      backgroundMountTabIdsByWorktree: new Map(backgroundMountTabIdsByWorktreeRef.current),
+      backgroundMountRevision: currentSnapshot.backgroundMountRevision + 1,
+      measurableBackgroundWorktreeIds: new Set(measurableBackgroundWorktreeIdsRef.current),
+      mountedWorktreeIds: new Set(mountedWorktreeIdsRef.current)
+    }
     for (const listener of backgroundMountRevisionListenersRef.current) {
       listener()
     }
@@ -87,8 +118,9 @@ export function useTerminalWorktreeMounting({
       backgroundMountRevisionListenersRef.current.delete(listener)
     }
   }
-  const getBackgroundMountRevisionSnapshot = (): number => backgroundMountRevisionRef.current
-  const backgroundMountRevision = useSyncExternalStore(
+  const getBackgroundMountRevisionSnapshot = (): TerminalWorktreeMountSnapshot =>
+    mountSnapshotRef.current
+  const mountSnapshot = useSyncExternalStore(
     subscribeToBackgroundMountRevision,
     getBackgroundMountRevisionSnapshot
   )
@@ -166,152 +198,40 @@ export function useTerminalWorktreeMounting({
     }
   }, [notifyBackgroundMountRevision])
 
-  // Why: gated on workspaceSessionReady to prevent TerminalPane from mounting
-  // before reconnectPersistedTerminals() has finished eagerly spawning PTYs.
-  // Without this gate, Phase 1 (hydrateWorkspaceSession) sets activeWorktreeId
-  // with ptyId: null, and TerminalPane would call connectPanePty → pty:spawn,
-  // creating a duplicate PTY for the same tab.
-  if (activeWorktreeId && workspaceSessionReady) {
-    // A real activation supersedes any targeted background mount, but a cold
-    // activation must not mount every saved tab in one pass: each TerminalPane
-    // mount replays scrollback through xterm, attaches a WebGL renderer, and
-    // issues a sync-IPC snapshot read, so a whole-worktree stampede freezes
-    // the renderer for the entire activation. Hidden tabs defer like
-    // cold-parked tabs from birth and mount on first reveal.
-    const worktreeTabs = tabsByWorktree[activeWorktreeId] ?? []
-    const coldActivationDeferralEnabled =
-      terminalParkingEnabled && terminalTitleSnapshotAuthorityEnabled
-    const immediateTabIds = new Set<string>()
-    if (activeTabId) {
-      immediateTabIds.add(activeTabId)
-    }
-    // Why: on a fresh switch the global activeTabId can still point at the
-    // previous worktree for one pass; the remembered per-worktree tab is the
-    // one about to become visible.
-    const rememberedActiveTabId = activeTabIdByWorktree[activeWorktreeId]
-    if (rememberedActiveTabId) {
-      immediateTabIds.add(rememberedActiveTabId)
-    }
-    // Why groups: split mode shows one tab per group at once, so every
-    // group's active tab is user-visible and must not defer. group.activeTabId
-    // is a unified-tab id — map it to the terminal tab's entity id, keeping
-    // the raw id too in case older persisted groups stored entity ids.
-    const unifiedTabById = new Map(
-      (useAppStore.getState().unifiedTabsByWorktree[activeWorktreeId] ?? []).map((unifiedTab) => [
-        unifiedTab.id,
-        unifiedTab
-      ])
-    )
-    for (const group of groupsByWorktree[activeWorktreeId] ?? []) {
-      if (!group.activeTabId) {
-        continue
-      }
-      immediateTabIds.add(group.activeTabId)
-      const activeUnifiedTab = unifiedTabById.get(group.activeTabId)
-      if (activeUnifiedTab?.contentType === 'terminal') {
-        immediateTabIds.add(activeUnifiedTab.entityId)
-      }
-    }
-    // Why: a queued startup needs a mounted pane to run its command.
-    // pendingActivationSpawn is deliberately NOT immediate: session hydration
-    // blanket-marks every persisted tab with it, and a deferred tab's reveal
-    // consumes it exactly like an activation mount would — just later.
-    for (const tab of worktreeTabs) {
-      if (pendingStartupByTabId[tab.id] !== undefined) {
-        immediateTabIds.add(tab.id)
-      }
-    }
-    const activationHostSupportsDeferral = canDeferColdActivationTabsForHost({
-      executionHostId: activeWorktreeDeferralHostId
-    })
-    if (lastActivationWorktreeIdRef.current !== activeWorktreeId) {
-      lastActivationWorktreeIdRef.current = activeWorktreeId
-      const tabById = new Map(worktreeTabs.map((tab) => [tab.id, tab]))
-      planColdActivationTabDeferral({
-        restrictions: backgroundMountTabIdsByWorktreeRef.current,
-        deferredMountTabIdsByWorktree: activationDeferredMountTabIdsByWorktreeRef.current,
-        worktreeId: activeWorktreeId,
-        allTabIds: worktreeTabs.map((tab) => tab.id),
-        isTabLive: hasRegisteredRuntimeTerminalTab,
-        // Why the coverage gate: an unmounted tab's bells/titles/completions
-        // are owned by parked byte watchers; a tab they cannot cover must
-        // mount immediately, mirroring the cold-park eligibility rule.
-        isTabDeferrable: (tabId) => {
-          const tab = tabById.get(tabId)
-          return (
-            // Why: byte-mode watchers cannot reconstruct output emitted before
-            // registration. Remote or unresolved ownership also mounts eagerly
-            // because only a confirmed local daemon can provide snapshots.
-            coldActivationDeferralEnabled &&
-            activationHostSupportsDeferral &&
-            tab !== undefined &&
-            canWatcherCoverParkedTerminalTab(
-              activeWorktreeId,
-              tab,
-              terminalProviderHasAuthoritativeSnapshot
-            )
-          )
-        },
-        immediateTabIds
-      })
-    } else if (!coldActivationDeferralEnabled || !activationHostSupportsDeferral) {
-      // Why: kill-switch or host-ownership changes while active must restore
-      // eager mounting immediately, not strand an old local-only restriction.
-      backgroundMountTabIdsByWorktreeRef.current.delete(activeWorktreeId)
-      activationDeferredMountTabIdsByWorktreeRef.current.delete(activeWorktreeId)
-    } else {
-      // Why: tabs added after activation never passed the original coverage
-      // gate. Uncoverable/no-PTY tabs must mount now so they can spawn or keep
-      // their non-snapshot-backed live transport.
-      for (const tab of worktreeTabs) {
-        if (
-          !canWatcherCoverParkedTerminalTab(
-            activeWorktreeId,
-            tab,
-            terminalProviderHasAuthoritativeSnapshot
-          )
-        ) {
-          immediateTabIds.add(tab.id)
-        }
-      }
-      revealActivationDeferredTabs({
-        restrictions: backgroundMountTabIdsByWorktreeRef.current,
-        deferredMountTabIdsByWorktree: activationDeferredMountTabIdsByWorktreeRef.current,
-        worktreeId: activeWorktreeId,
-        allTabIds: worktreeTabs.map((tab) => tab.id),
-        immediateTabIds
-      })
-    }
-    mountedWorktreeIdsRef.current.add(activeWorktreeId)
-  } else {
-    // Why: the next ready activation must re-run the deferral decision even
-    // if it re-activates the same worktree the session started on.
-    lastActivationWorktreeIdRef.current = null
-  }
-  pruneClosedBackgroundMountTabs(
-    backgroundMountTabIdsByWorktreeRef.current,
-    mountedWorktreeIdsRef.current,
-    tabsByWorktree,
-    activationDeferredMountTabIdsByWorktreeRef.current
-  )
-  // Prune IDs of worktrees that no longer exist (deleted/removed)
-  const allWorktreeIds = new Set(workspaceSurfaces.map((workspace) => workspace.id))
-  for (const id of mountedWorktreeIdsRef.current) {
-    if (!allWorktreeIds.has(id)) {
-      mountedWorktreeIdsRef.current.delete(id)
-      backgroundMountTabIdsByWorktreeRef.current.delete(id)
-      activationDeferredMountTabIdsByWorktreeRef.current.delete(id)
-    }
-  }
-  const anyMountedWorktreeHasLayout = computeAnyMountedWorktreeHasLayout(
-    workspaceSurfaces.map((workspace) => workspace.id),
-    mountedWorktreeIdsRef.current,
-    layoutByWorktree,
+  useTerminalWorktreeActivation({
+    activationDeferredMountTabIdsByWorktreeRef,
+    activeGroupIdByWorktree,
+    activeTabId,
+    activeTabIdByWorktree,
+    activeWorktreeDeferralHostId,
+    activeWorktreeId,
+    backgroundMountTabIdsByWorktreeRef,
     groupsByWorktree,
-    activeGroupIdByWorktree
-  )
+    lastActivationWorktreeIdRef,
+    mountedWorktreeIdsRef,
+    notifyMountRevision: notifyBackgroundMountRevision,
+    pendingStartupByTabId,
+    tabsByWorktree,
+    terminalParkingEnabled,
+    unifiedTabsByWorktree,
+    workspaceSessionReady,
+    workspaceSurfaces
+  })
+
+  const {
+    activationDeferredMountTabIdsByWorktree,
+    anyMountedWorktreeHasLayout,
+    backgroundMountRevision,
+    backgroundMountTabIdsByWorktree,
+    measurableBackgroundWorktreeIds,
+    mountedWorktreeIds
+  } = mountSnapshot
 
   return {
+    activationDeferredMountTabIdsByWorktree,
+    backgroundMountTabIdsByWorktree,
+    measurableBackgroundWorktreeIds,
+    mountedWorktreeIds,
     mountedWorktreeIdsRef,
     measurableBackgroundWorktreeIdsRef,
     backgroundMountTabIdsByWorktreeRef,
